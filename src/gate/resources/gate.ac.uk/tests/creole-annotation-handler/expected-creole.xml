@@ -33,5 +33,16 @@
       <PARAMETER NAME="secondParameter" OPTIONAL="true" DEFAULT="default" ITEM_CLASS_NAME="java.lang.String" COMMENT="Second parameter">java.util.List</PARAMETER>
       <PARAMETER NAME="fourthParameter">java.lang.Boolean</PARAMETER>
     </RESOURCE>
+
+    <RESOURCE>
+      <CLASS>gate.creole.metadata.test.TestFieldAnnotatedProcessingResource</CLASS>
+      <NAME>Name from Annotation</NAME>
+      <COMMENT>Field annotation comment</COMMENT>
+      <PARAMETER NAME="corpus" RUNTIME="true" OPTIONAL="true" COMMENT="The corpus containing the document to process">gate.Corpus</PARAMETER>
+
+      <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to process">gate.Document</PARAMETER>
+      <PARAMETER NAME="firstParameter" RUNTIME="true" COMMENT="First parameter comment">java.net.URL</PARAMETER>
+      <PARAMETER NAME="secondParameter" OPTIONAL="true" DEFAULT="default" ITEM_CLASS_NAME="java.lang.String" COMMENT="Second parameter">java.util.List</PARAMETER>
+    </RESOURCE>
   </CREOLE>
 </CREOLE-DIRECTORY>

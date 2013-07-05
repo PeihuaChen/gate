@@ -514,7 +514,7 @@ public class TestConstraints extends BaseJapeTests {
    * 
    * @throws Exception
    */
-  public void test813OpGreaterЕqualsPositiveInteger() throws Exception {
+  public void test813OpGreaterEqualsPositiveInteger() throws Exception {
     final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.3-op-ge-int-positive.jape";
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
     

@@ -43,7 +43,7 @@ import java.lang.annotation.Target;
  * in a subclass then you must use <code>&#064;RunTime(false)</code>.
  */
 @Documented
-@Target( {ElementType.METHOD})
+@Target( {ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RunTime {
   /**
@@ -52,3 +52,4 @@ public @interface RunTime {
    */
   boolean value() default true;
 }
+

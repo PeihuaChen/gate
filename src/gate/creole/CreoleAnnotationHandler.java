@@ -33,7 +33,12 @@ import gate.util.GateException;
 import gate.util.ant.ExpandIvy;
 
 import java.io.IOException;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -60,611 +65,683 @@ import org.jdom.Element;
  * declares.
  */
 public class CreoleAnnotationHandler {
-  
-  private static final Logger log = Logger.getLogger(CreoleAnnotationHandler.class);
 
-  private URL creoleFileUrl;
-  
-  /**
-   * Create an annotation handler for the given creole.xml file.
-   *
-   * @param creoleFileUrl location of the creole.xml file.
-   */
-  public CreoleAnnotationHandler(URL creoleFileUrl) {
-    this.creoleFileUrl = creoleFileUrl;
-  }
+	private static final Logger log = Logger.getLogger(CreoleAnnotationHandler.class);
 
-  /**
-   * Extract all JAR elements from the given JDOM document and add the
-   * jars they reference to the GateClassLoader.
-   *
-   * @param jdomDoc JDOM document representing a parsed creole.xml file.
-   */
-  public void addJarsToClassLoader(GateClassLoader gcl, Document jdomDoc)
-          throws IOException {
-    addJarsToClassLoader(gcl, jdomDoc.getRootElement());
-    addIvyDependencies(gcl, jdomDoc);
-  }
-  
-  /**
-   * Extract all the IVY elements from the given JDOM document and then add all
-   * the jars resulting from ivy's dependency resolution to the GateClassLoader.
-   * 
-   * @param creoleDoc
-   *          JDOM document representing a parsed creole.xml file.
-   */
-  private void addIvyDependencies(GateClassLoader gcl, Document creoleDoc) throws IOException {
+	private URL creoleFileUrl;
 
-    try {
-      List<Element> ivyElts = ExpandIvy.getIvyElements(creoleDoc);
+	/**
+	 * Create an annotation handler for the given creole.xml file.
+	 *
+	 * @param creoleFileUrl location of the creole.xml file.
+	 */
+	public CreoleAnnotationHandler(URL creoleFileUrl) {
+		this.creoleFileUrl = creoleFileUrl;
+	}
 
-      if(ivyElts.size() > 0) {
+	/**
+	 * Extract all JAR elements from the given JDOM document and add the
+	 * jars they reference to the GateClassLoader.
+	 *
+	 * @param jdomDoc JDOM document representing a parsed creole.xml file.
+	 */
+	public void addJarsToClassLoader(GateClassLoader gcl, Document jdomDoc)
+			throws IOException {
+		addJarsToClassLoader(gcl, jdomDoc.getRootElement());
+		addIvyDependencies(gcl, jdomDoc);
+	}
 
-        Ivy ivy = ExpandIvy.getIvy(ExpandIvy.getSettingsURL());
+	/**
+	 * Extract all the IVY elements from the given JDOM document and then add all
+	 * the jars resulting from ivy's dependency resolution to the GateClassLoader.
+	 * 
+	 * @param creoleDoc
+	 *          JDOM document representing a parsed creole.xml file.
+	 */
+	private void addIvyDependencies(GateClassLoader gcl, Document creoleDoc) throws IOException {
 
-        ResolveOptions resolveOptions = new ResolveOptions();
-        resolveOptions.setArtifactFilter(FilterHelper
-            .getArtifactTypeFilter(new String[]{"jar"}));
-        resolveOptions.setLog(LogOptions.LOG_QUIET);
+		try {
+			List<Element> ivyElts = ExpandIvy.getIvyElements(creoleDoc);
 
-        for(Element e : ivyElts) {
-          URL url = new URL(creoleFileUrl, ExpandIvy.getIvyPath(e));
+			if(ivyElts.size() > 0) {
 
-          ResolveReport report = ivy.resolve(url, resolveOptions);
-          if(report.getAllProblemMessages().size() > 0)
-            throw new Exception("Unable to resolve all IVY dependencies");
+				Ivy ivy = ExpandIvy.getIvy(ExpandIvy.getSettingsURL());
 
-          for(ArtifactDownloadReport dlReport : report.getAllArtifactsReports()) {
-            gcl.addURL(
-                dlReport.getLocalFile().toURI().toURL());
-          }
+				ResolveOptions resolveOptions = new ResolveOptions();
+				resolveOptions.setArtifactFilter(FilterHelper
+						.getArtifactTypeFilter(new String[]{"jar"}));
+				resolveOptions.setLog(LogOptions.LOG_QUIET);
 
-        }
-      }
-    } catch(Exception ex) {
-      throw new IOException("Error using Ivy to add required dependencies", ex);
-    }
-  }
+				for(Element e : ivyElts) {
+					URL url = new URL(creoleFileUrl, ExpandIvy.getIvyPath(e));
 
-  /**
-   * Recursively search the given element for JAR entries and add these
-   * jars to the GateClassLoader
-   *
-   * @param jdomElt JDOM element representing a creole.xml file
-   */
-  @SuppressWarnings("unchecked")
-  private void addJarsToClassLoader(GateClassLoader gcl, Element jdomElt)
-          throws MalformedURLException {
-    if("JAR".equals(jdomElt.getName())) {
-      URL url = new URL(creoleFileUrl, jdomElt.getTextTrim());
-      try {
-        java.io.InputStream s = url.openStream();
-        s.close();
-        gcl.addURL(url);
-      } catch(IOException e) {
-        log.debug("Unable to add JAR " + url + " specified in creole file " + creoleFileUrl +
-            " to class loader, hopefully the required classes are already on the classpath.");
-      }
-    }
-    else {
-      for(Element child : (List<Element>)jdomElt.getChildren()) {
-        addJarsToClassLoader(gcl, child);
-      }
-    }
-  }
+					ResolveReport report = ivy.resolve(url, resolveOptions);
+					if(report.getAllProblemMessages().size() > 0)
+						throw new Exception("Unable to resolve all IVY dependencies");
 
-  /**
-   * Fetches the directory information for this handler's creole plugin
-   * and adds additional RESOURCE elements to the given JDOM document so
-   * that it contains a RESOURCE for every resource type defined in the
-   * plugin's directory info.
-   *
-   * @param jdomDoc JDOM document which should be the parsed creole.xml
-   *          that this handler was configured for.
-   */
-  public void createResourceElementsForDirInfo(Document jdomDoc)
-          throws MalformedURLException {
-    Element jdomElt = jdomDoc.getRootElement();
-    URL directoryUrl = new URL(creoleFileUrl, ".");
-    DirectoryInfo dirInfo = Gate.getDirectoryInfo(directoryUrl);
-    if(dirInfo != null) {
-      Map<String, Element> resourceElements = new HashMap<String, Element>();
-      findResourceElements(resourceElements, jdomElt);
-      for(ResourceInfo resInfo : (List<ResourceInfo>)dirInfo
-              .getResourceInfoList()) {
-        if(!resourceElements.containsKey(resInfo.getResourceClassName())) {
-          // no existing RESOURCE element for this resource type (so it
-          // was
-          // auto-discovered from a <JAR SCAN="true">), so add a minimal
-          // RESOURCE element which will be filled in by the annotation
-          // processor.
-          jdomElt.addContent(new Element("RESOURCE").addContent(new Element(
-                  "CLASS").setText(resInfo.getResourceClassName())));
-        }
-      }
-    }
+					for(ArtifactDownloadReport dlReport : report.getAllArtifactsReports()) {
+						gcl.addURL(
+								dlReport.getLocalFile().toURI().toURL());
+					}
 
-  }
+				}
+			}
+		} catch(Exception ex) {
+			throw new IOException("Error using Ivy to add required dependencies", ex);
+		}
+	}
 
-  @SuppressWarnings("unchecked")
-  private void findResourceElements(Map<String, Element> map, Element elt) {
-    if(elt.getName().equals("RESOURCE")) {
-      String className = elt.getChildTextTrim("CLASS");
-      if(className != null) {
-        map.put(className, elt);
-      }
-    }
-    else {
-      for(Element child : (List<Element>)elt.getChildren()) {
-        findResourceElements(map, child);
-      }
-    }
-  }
+	/**
+	 * Recursively search the given element for JAR entries and add these
+	 * jars to the GateClassLoader
+	 *
+	 * @param jdomElt JDOM element representing a creole.xml file
+	 */
+	@SuppressWarnings("unchecked")
+	private void addJarsToClassLoader(GateClassLoader gcl, Element jdomElt)
+			throws MalformedURLException {
+		if("JAR".equals(jdomElt.getName())) {
+			URL url = new URL(creoleFileUrl, jdomElt.getTextTrim());
+			try {
+				java.io.InputStream s = url.openStream();
+				s.close();
+				gcl.addURL(url);
+			} catch(IOException e) {
+				log.debug("Unable to add JAR " + url + " specified in creole file " + creoleFileUrl +
+						" to class loader, hopefully the required classes are already on the classpath.");
+			}
+		}
+		else {
+			for(Element child : (List<Element>)jdomElt.getChildren()) {
+				addJarsToClassLoader(gcl, child);
+			}
+		}
+	}
 
-  /**
-   * Processes annotations for resource classes named in the given
-   * creole.xml document, adding the relevant XML elements to the
-   * document as appropriate.
-   *
-   * @param jdomDoc the parsed creole.xml file
-   */
-  public void processAnnotations(Document jdomDoc) throws GateException {
-    processAnnotations(jdomDoc.getRootElement());
-  }
+	/**
+	 * Fetches the directory information for this handler's creole plugin
+	 * and adds additional RESOURCE elements to the given JDOM document so
+	 * that it contains a RESOURCE for every resource type defined in the
+	 * plugin's directory info.
+	 *
+	 * @param jdomDoc JDOM document which should be the parsed creole.xml
+	 *          that this handler was configured for.
+	 */
+	public void createResourceElementsForDirInfo(Document jdomDoc)
+			throws MalformedURLException {
+		Element jdomElt = jdomDoc.getRootElement();
+		URL directoryUrl = new URL(creoleFileUrl, ".");
+		DirectoryInfo dirInfo = Gate.getDirectoryInfo(directoryUrl);
+		if(dirInfo != null) {
+			Map<String, Element> resourceElements = new HashMap<String, Element>();
+			findResourceElements(resourceElements, jdomElt);
+			for(ResourceInfo resInfo : (List<ResourceInfo>)dirInfo
+					.getResourceInfoList()) {
+				if(!resourceElements.containsKey(resInfo.getResourceClassName())) {
+					// no existing RESOURCE element for this resource type (so it
+					// was
+					// auto-discovered from a <JAR SCAN="true">), so add a minimal
+					// RESOURCE element which will be filled in by the annotation
+					// processor.
+					jdomElt.addContent(new Element("RESOURCE").addContent(new Element(
+							"CLASS").setText(resInfo.getResourceClassName())));
+				}
+			}
+		}
 
-  /**
-   * Process annotations for the given element. If the element is a
-   * RESOURCE it is processed, otherwise the method calls itself
-   * recursively for all the children of the given element.
-   *
-   * @param element the element to process.
-   */
-  @SuppressWarnings("unchecked")
-  private void processAnnotations(Element element) throws GateException {
-    if("RESOURCE".equals(element.getName())) {
-      processAnnotationsForResource(element);
-    }
-    else {
-      for(Element child : (List<Element>)element.getChildren()) {
-        processAnnotations(child);
-      }
-    }
-  }
+	}
 
-  /**
-   * Process the given RESOURCE element, adding extra elements to it
-   * based on the annotations on the resource class.
-   *
-   * @param element the RESOURCE element to process.
-   */
-  private void processAnnotationsForResource(Element element)
-          throws GateException {
-    String className = element.getChildTextTrim("CLASS");
-    if(className == null) {
-      throw new GateException("\"CLASS\" element not found for resource in "
-              + creoleFileUrl);
-    }
-    Class<?> resourceClass = null;
-    try {
-      resourceClass = Gate.getClassLoader().loadClass(className);
-    }
-    catch(ClassNotFoundException e) {
-      log.debug("Couldn't load class " + className + " for resource in "
-          + creoleFileUrl, e);
-      throw new GateException("Couldn't load class " + className
-              + " for resource in " + creoleFileUrl);
-    }
+	@SuppressWarnings("unchecked")
+	private void findResourceElements(Map<String, Element> map, Element elt) {
+		if(elt.getName().equals("RESOURCE")) {
+			String className = elt.getChildTextTrim("CLASS");
+			if(className != null) {
+				map.put(className, elt);
+			}
+		}
+		else {
+			for(Element child : (List<Element>)elt.getChildren()) {
+				findResourceElements(map, child);
+			}
+		}
+	}
 
-    processCreoleResourceAnnotations(element, resourceClass);
-  }
+	/**
+	 * Processes annotations for resource classes named in the given
+	 * creole.xml document, adding the relevant XML elements to the
+	 * document as appropriate.
+	 *
+	 * @param jdomDoc the parsed creole.xml file
+	 */
+	public void processAnnotations(Document jdomDoc) throws GateException {
+		processAnnotations(jdomDoc.getRootElement());
+	}
 
-  @SuppressWarnings("unchecked")
-  public void processCreoleResourceAnnotations(Element element,
-          Class<?> resourceClass) throws GateException {
-    CreoleResource creoleResourceAnnot = resourceClass
-            .getAnnotation(CreoleResource.class);
-    if(creoleResourceAnnot != null) {
-      // first process the top-level data and autoinstances
-      processResourceData(resourceClass, element);
+	/**
+	 * Process annotations for the given element. If the element is a
+	 * RESOURCE it is processed, otherwise the method calls itself
+	 * recursively for all the children of the given element.
+	 *
+	 * @param element the element to process.
+	 */
+	@SuppressWarnings("unchecked")
+	private void processAnnotations(Element element) throws GateException {
+		if("RESOURCE".equals(element.getName())) {
+			processAnnotationsForResource(element);
+		}
+		else {
+			for(Element child : (List<Element>)element.getChildren()) {
+				processAnnotations(child);
+			}
+		}
+	}
 
-      // now deal with parameters
-      // build a map holding the element corresponding to each parameter
-      Map<String, Element> parameterMap = new HashMap<String, Element>();
-      Map<String, Element> disjunctionMap = new HashMap<String, Element>();
-      for(Element paramElt : (List<Element>)element.getChildren("PARAMETER")) {
-        parameterMap.put(paramElt.getAttributeValue("NAME"), paramElt);
-      }
-      for(Element disjunctionElt : (List<Element>)element.getChildren("OR")) {
-        String disjunctionId = disjunctionElt.getAttributeValue("ID");
-        if(disjunctionId != null) {
-          disjunctionMap.put(disjunctionId, disjunctionElt);
-        }
-        for(Element paramElt : (List<Element>)disjunctionElt
-                .getChildren("PARAMETER")) {
-          parameterMap.put(paramElt.getAttributeValue("NAME"), paramElt);
-        }
-      }
+	/**
+	 * Process the given RESOURCE element, adding extra elements to it
+	 * based on the annotations on the resource class.
+	 *
+	 * @param element the RESOURCE element to process.
+	 */
+	private void processAnnotationsForResource(Element element)
+			throws GateException {
+		String className = element.getChildTextTrim("CLASS");
+		if(className == null) {
+			throw new GateException("\"CLASS\" element not found for resource in "
+					+ creoleFileUrl);
+		}
+		Class<?> resourceClass = null;
+		try {
+			resourceClass = Gate.getClassLoader().loadClass(className);
+		}
+		catch(ClassNotFoundException e) {
+			log.debug("Couldn't load class " + className + " for resource in "
+					+ creoleFileUrl, e);
+			throw new GateException("Couldn't load class " + className
+					+ " for resource in " + creoleFileUrl);
+		}
 
-      processParameters(resourceClass, element, parameterMap, disjunctionMap);
-    }
-  }
+		processCreoleResourceAnnotations(element, resourceClass);
+	}
 
-  /**
-   * Process the {@link CreoleResource} data for this class. This method
-   * first extracts the non-inheritable data (PRIVATE, MAIN_VIEWER,
-   * NAME and TOOL), then calls {@link #processInheritableResourceData}
-   * to process the inheritable data, then deals with any specified
-   * {@link AutoInstance}s.
-   *
-   * @param resourceClass the resource class to process, which must be
-   *          annotated with {@link CreoleResource}.
-   * @param element the RESOURCE element to which data should be added.
-   */
-  private void processResourceData(Class<?> resourceClass, Element element) {
-    CreoleResource cr = resourceClass.getAnnotation(CreoleResource.class);
-    if(cr.isPrivate() && element.getChild("PRIVATE") == null) {
-      element.addContent(new Element("PRIVATE"));
-    }
-    if(cr.mainViewer() && element.getChild("MAIN_VIEWER") == null) {
-      element.addContent(new Element("MAIN_VIEWER"));
-    }
-    if(cr.tool() && element.getChild("TOOL") == null) {
-      element.addContent(new Element("TOOL"));
-    }
-    // NAME is the name given in the annotation, or the simple name of
-    // the class if omitted
-    addElement(element, ("".equals(cr.name()))
-            ? resourceClass.getSimpleName()
-            : cr.name(), "NAME");
-    processInheritableResourceData(resourceClass, element);
-    processAutoInstances(cr, element);
-  }
+	@SuppressWarnings("unchecked")
+	public void processCreoleResourceAnnotations(Element element,
+			Class<?> resourceClass) throws GateException {
+		CreoleResource creoleResourceAnnot = resourceClass
+				.getAnnotation(CreoleResource.class);
+		if(creoleResourceAnnot != null) {
+			// first process the top-level data and autoinstances
+			processResourceData(resourceClass, element);
 
-  /**
-   * Recursive method to process the {@link CreoleResource} elements
-   * that can be inherited from superclasses and interfaces (everything
-   * except the PRIVATE and MAIN_VIEWER flags, the NAME and the
-   * AUTOINSTANCEs). Once data has been extracted from the current class
-   * the method calls itself recursively for the superclass and any
-   * implemented interfaces. For any given attribute, the first value
-   * specified wins (i.e. the one on the most specific class).
-   *
-   * @param clazz the class to process
-   * @param element the RESOURCE element to which data should be added.
-   */
-  private void processInheritableResourceData(Class<?> clazz, Element element) {
-    CreoleResource cr = clazz.getAnnotation(CreoleResource.class);
-    if(cr != null) {
-      addElement(element, cr.comment(), "COMMENT");
-      addElement(element, cr.helpURL(), "HELPURL");
-      addElement(element, cr.interfaceName(), "INTERFACE");
-      addElement(element, cr.icon(), "ICON");
-      if(cr.guiType() != GuiType.NONE && element.getChild("GUI") == null) {
-        Element guiElement = new Element("GUI").setAttribute("TYPE", cr
-                .guiType().toString());
-        element.addContent(guiElement);
-        addElement(guiElement, cr.resourceDisplayed(), "RESOURCE_DISPLAYED");
-      }
-      addElement(element, cr.annotationTypeDisplayed(),
-              "ANNOTATION_TYPE_DISPLAYED");
-    }
+			// now deal with parameters
+			// build a map holding the element corresponding to each parameter
+			Map<String, Element> parameterMap = new HashMap<String, Element>();
+			Map<String, Element> disjunctionMap = new HashMap<String, Element>();
+			for(Element paramElt : (List<Element>)element.getChildren("PARAMETER")) {
+				parameterMap.put(paramElt.getAttributeValue("NAME"), paramElt);
+			}
+			for(Element disjunctionElt : (List<Element>)element.getChildren("OR")) {
+				String disjunctionId = disjunctionElt.getAttributeValue("ID");
+				if(disjunctionId != null) {
+					disjunctionMap.put(disjunctionId, disjunctionElt);
+				}
+				for(Element paramElt : (List<Element>)disjunctionElt
+						.getChildren("PARAMETER")) {
+					parameterMap.put(paramElt.getAttributeValue("NAME"), paramElt);
+				}
+			}
 
-    Class<?> superclass = clazz.getSuperclass();
-    if(superclass != null) {
-      processInheritableResourceData(superclass, element);
-    }
+			processParameters(resourceClass, element, parameterMap, disjunctionMap);
+		}
+	}
 
-    for(Class<?> intf : clazz.getInterfaces()) {
-      processInheritableResourceData(intf, element);
-    }
-  }
+	/**
+	 * Process the {@link CreoleResource} data for this class. This method
+	 * first extracts the non-inheritable data (PRIVATE, MAIN_VIEWER,
+	 * NAME and TOOL), then calls {@link #processInheritableResourceData}
+	 * to process the inheritable data, then deals with any specified
+	 * {@link AutoInstance}s.
+	 *
+	 * @param resourceClass the resource class to process, which must be
+	 *          annotated with {@link CreoleResource}.
+	 * @param element the RESOURCE element to which data should be added.
+	 */
+	private void processResourceData(Class<?> resourceClass, Element element) {
+		CreoleResource cr = resourceClass.getAnnotation(CreoleResource.class);
+		if(cr.isPrivate() && element.getChild("PRIVATE") == null) {
+			element.addContent(new Element("PRIVATE"));
+		}
+		if(cr.mainViewer() && element.getChild("MAIN_VIEWER") == null) {
+			element.addContent(new Element("MAIN_VIEWER"));
+		}
+		if(cr.tool() && element.getChild("TOOL") == null) {
+			element.addContent(new Element("TOOL"));
+		}
+		// NAME is the name given in the annotation, or the simple name of
+		// the class if omitted
+		addElement(element, ("".equals(cr.name()))
+				? resourceClass.getSimpleName()
+						: cr.name(), "NAME");
+		processInheritableResourceData(resourceClass, element);
+		processAutoInstances(cr, element);
+	}
 
-  /**
-   * Adds an element with the given name and text value to the parent
-   * element, but only if no such child element already exists and the
-   * value is not the empty string.
-   *
-   * @param parent the parent element
-   * @param value the text value for the new child
-   * @param elementName the name of the new child element
-   */
-  private void addElement(Element parent, String value, String elementName) {
-    if(!"".equals(value) && parent.getChild(elementName) == null) {
-      parent.addContent(new Element(elementName).setText(value));
-    }
-  }
+	/**
+	 * Recursive method to process the {@link CreoleResource} elements
+	 * that can be inherited from superclasses and interfaces (everything
+	 * except the PRIVATE and MAIN_VIEWER flags, the NAME and the
+	 * AUTOINSTANCEs). Once data has been extracted from the current class
+	 * the method calls itself recursively for the superclass and any
+	 * implemented interfaces. For any given attribute, the first value
+	 * specified wins (i.e. the one on the most specific class).
+	 *
+	 * @param clazz the class to process
+	 * @param element the RESOURCE element to which data should be added.
+	 */
+	private void processInheritableResourceData(Class<?> clazz, Element element) {
+		CreoleResource cr = clazz.getAnnotation(CreoleResource.class);
+		if(cr != null) {
+			addElement(element, cr.comment(), "COMMENT");
+			addElement(element, cr.helpURL(), "HELPURL");
+			addElement(element, cr.interfaceName(), "INTERFACE");
+			addElement(element, cr.icon(), "ICON");
+			if(cr.guiType() != GuiType.NONE && element.getChild("GUI") == null) {
+				Element guiElement = new Element("GUI").setAttribute("TYPE", cr
+						.guiType().toString());
+				element.addContent(guiElement);
+				addElement(guiElement, cr.resourceDisplayed(), "RESOURCE_DISPLAYED");
+			}
+			addElement(element, cr.annotationTypeDisplayed(),
+					"ANNOTATION_TYPE_DISPLAYED");
+		}
 
-  /**
-   * Process the {@link AutoInstance} annotations contained in the given
-   * {@link CreoleResource} and add the corresponding
-   * AUTOINSTANCE/HIDDEN-AUTOINSTANCE elements to the given parent.
-   *
-   * @param cr the {@link CreoleResource} annotation
-   * @param element the parent element
-   */
-  private void processAutoInstances(CreoleResource cr, Element element) {
-    for(AutoInstance ai : cr.autoinstances()) {
-      Element aiElt = null;
-      if(ai.hidden()) {
-        aiElt = new Element("HIDDEN-AUTOINSTANCE");
-      }
-      else {
-        aiElt = new Element("AUTOINSTANCE");
-      }
-      element.addContent(aiElt);
-      for(AutoInstanceParam param : ai.parameters()) {
-        aiElt.addContent(new Element("PARAM")
-                .setAttribute("NAME", param.name()).setAttribute("VALUE",
-                        param.value()));
-      }
-    }
-  }
+		Class<?> superclass = clazz.getSuperclass();
+		if(superclass != null) {
+			processInheritableResourceData(superclass, element);
+		}
 
-  /**
-   * Process any {@link CreoleParameter} and
-   * {@link HiddenCreoleParameter} annotations on set methods of the
-   * given class and set up the corresponding PARAMETER elements.
-   *
-   * @param resourceClass the resource class to process
-   * @param resourceElement the RESOURCE element to which the PARAMETERs
-   *          are to be added
-   * @param parameterMap a map from parameter names to the PARAMETER
-   *          elements that define them. This is used as we combine
-   *          information from the original creole.xml, the parameter
-   *          annotation on the target method and the annotations on the
-   *          same method of its superclasses and interfaces. Parameter
-   *          names that have been hidden by a
-   *          {@link HiddenCreoleParameter} annotation are explicitly
-   *          mapped to <code>null</code> in this map.
-   * @param disjunctionMap a map from disjunction IDs to the OR elements
-   *          that define them. Disjunctive parameters are handled by
-   *          specifying a disjunction ID on the {@link CreoleParameter}
-   *          annotations - parameters with the same disjunction ID are
-   *          grouped under the same OR element.
-   */
-  private void processParameters(Class<?> resourceClass,
-          Element resourceElement, Map<String, Element> parameterMap,
-          Map<String, Element> disjunctionMap) throws GateException {
-    for(Method method : resourceClass.getDeclaredMethods()) {
-      CreoleParameter paramAnnot = method.getAnnotation(CreoleParameter.class);
-      HiddenCreoleParameter hiddenParamAnnot = method
-              .getAnnotation(HiddenCreoleParameter.class);
-      if(paramAnnot != null || hiddenParamAnnot != null) {
-        if(!method.getName().startsWith("set") || method.getName().length() < 4
-                || method.getParameterTypes().length != 1) {
-          throw new GateException("Creole parameter annotation found on "
-                  + method
-                  + ", but only setter methods may have this annotation.");
-        }
-        // extract the parameter name from the method name
-        String paramName = Character.toLowerCase(method.getName().charAt(3))
-                + method.getName().substring(4);
-        if(hiddenParamAnnot != null && !parameterMap.containsKey(paramName)) {
-          parameterMap.put(paramName, null);
-        }
-        if(paramAnnot != null) {
-          Element paramElt = null;
-          if(parameterMap.containsKey(paramName)) {
-            paramElt = parameterMap.get(paramName);
-          }
-          else {
-            paramElt = new Element("PARAMETER").setAttribute("NAME", paramName);
-            if(!"".equals(paramAnnot.disjunction())) {
-              Element disjunctionElt = disjunctionMap.get(paramAnnot
-                      .disjunction());
-              if(disjunctionElt == null) {
-                disjunctionElt = new Element("OR");
-                resourceElement.addContent(disjunctionElt);
-                disjunctionMap.put(paramAnnot.disjunction(), disjunctionElt);
-              }
-              disjunctionElt.addContent(paramElt);
-            }
-            else {
-              resourceElement.addContent(paramElt);
-            }
-            parameterMap.put(paramName, paramElt);
-          }
+		for(Class<?> intf : clazz.getInterfaces()) {
+			processInheritableResourceData(intf, element);
+		}
+	}
 
-          if(paramElt != null) {
-            // here we have a valid element for the current parameter,
-            // which has not been masked by a @HiddenCreoleParameter
-            if(paramElt.getTextTrim().length() == 0) {
-              // need to determine the type
-              paramElt.setText(method.getParameterTypes()[0].getName());
-              // for collections (but not GATE Resources) we also try to determine
-              // the item type.
-              if((!Resource.class.isAssignableFrom(
-                      method.getParameterTypes()[0])) &&
-                  Collection.class.isAssignableFrom(
-                      method.getParameterTypes()[0])) {
-                determineCollectionElementType(method, paramElt);
-              }
-            }
+	/**
+	 * Adds an element with the given name and text value to the parent
+	 * element, but only if no such child element already exists and the
+	 * value is not the empty string.
+	 *
+	 * @param parent the parent element
+	 * @param value the text value for the new child
+	 * @param elementName the name of the new child element
+	 */
+	private void addElement(Element parent, String value, String elementName) {
+		if(!"".equals(value) && parent.getChild(elementName) == null) {
+			parent.addContent(new Element(elementName).setText(value));
+		}
+	}
 
-            // other attributes
-            addAttribute(paramElt, paramAnnot.comment(), "", "COMMENT");
-            addAttribute(paramElt, paramAnnot.suffixes(), "", "SUFFIXES");
-            addAttribute(paramElt, paramAnnot.defaultValue(),
-                    CreoleParameter.NO_DEFAULT_VALUE, "DEFAULT");
-            addAttribute(paramElt, String.valueOf(paramAnnot.priority()),
-                    String.valueOf(CreoleParameter.DEFAULT_PRIORITY), "PRIORITY");
+	/**
+	 * Process the {@link AutoInstance} annotations contained in the given
+	 * {@link CreoleResource} and add the corresponding
+	 * AUTOINSTANCE/HIDDEN-AUTOINSTANCE elements to the given parent.
+	 *
+	 * @param cr the {@link CreoleResource} annotation
+	 * @param element the parent element
+	 */
+	private void processAutoInstances(CreoleResource cr, Element element) {
+		for(AutoInstance ai : cr.autoinstances()) {
+			Element aiElt = null;
+			if(ai.hidden()) {
+				aiElt = new Element("HIDDEN-AUTOINSTANCE");
+			}
+			else {
+				aiElt = new Element("AUTOINSTANCE");
+			}
+			element.addContent(aiElt);
+			for(AutoInstanceParam param : ai.parameters()) {
+				aiElt.addContent(new Element("PARAM")
+				.setAttribute("NAME", param.name()).setAttribute("VALUE",
+						param.value()));
+			}
+		}
+	}
 
-            // runtime and optional are based on marker annotations
-            String runtimeParam = "";
-            if(method.isAnnotationPresent(RunTime.class)) {
-              runtimeParam = String.valueOf(method.getAnnotation(RunTime.class)
-                      .value());
-            }
-            addAttribute(paramElt, runtimeParam, "", "RUNTIME");
+	/**
+	 * Process any {@link CreoleParameter} and
+	 * {@link HiddenCreoleParameter} annotations on set methods of the
+	 * given class and set up the corresponding PARAMETER elements.
+	 *
+	 * @param resourceClass the resource class to process
+	 * @param resourceElement the RESOURCE element to which the PARAMETERs
+	 *          are to be added
+	 * @param parameterMap a map from parameter names to the PARAMETER
+	 *          elements that define them. This is used as we combine
+	 *          information from the original creole.xml, the parameter
+	 *          annotation on the target method and the annotations on the
+	 *          same method of its superclasses and interfaces. Parameter
+	 *          names that have been hidden by a
+	 *          {@link HiddenCreoleParameter} annotation are explicitly
+	 *          mapped to <code>null</code> in this map.
+	 * @param disjunctionMap a map from disjunction IDs to the OR elements
+	 *          that define them. Disjunctive parameters are handled by
+	 *          specifying a disjunction ID on the {@link CreoleParameter}
+	 *          annotations - parameters with the same disjunction ID are
+	 *          grouped under the same OR element.
+	 */
+	private void processParameters(Class<?> resourceClass,
+			Element resourceElement, Map<String, Element> parameterMap,
+			Map<String, Element> disjunctionMap) throws GateException {
 
-            String optionalParam = "";
-            if(method.isAnnotationPresent(Optional.class)) {
-              optionalParam = String.valueOf(method.getAnnotation(
-                      Optional.class).value());
-            }
-            addAttribute(paramElt, optionalParam, "", "OPTIONAL");
-          }
-        }
-      }
-    }
+		for(Method method : resourceClass.getDeclaredMethods()) {
+			processElement(method, resourceElement, parameterMap, disjunctionMap);
+		}
 
-    // go up the tree
-    Class<?> superclass = resourceClass.getSuperclass();
-    if(superclass != null) {
-      processParameters(superclass, resourceElement, parameterMap,
-              disjunctionMap);
-    }
+		for(Field field : resourceClass.getDeclaredFields()) {
+			processElement(field, resourceElement, parameterMap, disjunctionMap);
+		}
+		
+		// go up the tree
+		Class<?> superclass = resourceClass.getSuperclass();
+		if(superclass != null) {
+			processParameters(superclass, resourceElement, parameterMap,
+					disjunctionMap);
+		}
 
-    for(Class<?> intf : resourceClass.getInterfaces()) {
-      processParameters(intf, resourceElement, parameterMap, disjunctionMap);
-    }
-  }
+		for(Class<?> intf : resourceClass.getInterfaces()) {
+			processParameters(intf, resourceElement, parameterMap, disjunctionMap);
+		}
+	}
+	
+	/**
+	 * Processes parameter annotations on a single element. Can support both Field and 
+	 * 			Method elements.
+	 * @param element The Method of Field from which to discern parameters
+	 * @param resourceElement the RESOURCE element to which the PARAMETERs
+	 *          are to be added
+	 * @param parameterMap a map from parameter names to the PARAMETER
+	 *          elements that define them. This is used as we combine
+	 *          information from the original creole.xml, the parameter
+	 *          annotation on the target method and the annotations on the
+	 *          same method of its superclasses and interfaces. Parameter
+	 *          names that have been hidden by a
+	 *          {@link HiddenCreoleParameter} annotation are explicitly
+	 *          mapped to <code>null</code> in this map.
+	 * @param disjunctionMap a map from disjunction IDs to the OR elements
+	 *          that define them. Disjunctive parameters are handled by
+	 *          specifying a disjunction ID on the {@link CreoleParameter}
+	 *          annotations - parameters with the same disjunction ID are
+	 *          grouped under the same OR element.
+	 */
+	private void processElement(AnnotatedElement element, Element resourceElement, 
+			Map<String, Element> parameterMap,
+			Map<String, Element> disjunctionMap) throws GateException {
+		CreoleParameter paramAnnot = element.getAnnotation(CreoleParameter.class);
+		HiddenCreoleParameter hiddenParamAnnot = element
+				.getAnnotation(HiddenCreoleParameter.class);
+		String paramName; // Extracted name of this parameter
+		Class<?> paramType;
+		Type genericParamType; // The type of this parameter.
+		if(paramAnnot != null || hiddenParamAnnot != null) {
+			// Enforce constraints relevant for this type of element 
+			if (element.getClass().equals(java.lang.reflect.Field.class)) {
+				java.lang.reflect.Field field = (java.lang.reflect.Field) element;
+				try {
+					paramName = field.getName();
+					genericParamType = field.getGenericType();
+					paramType = field.getType();
+					// Create a nicely formatted version of the element field name to find getter and setters
+					String camelName = Character.toUpperCase(paramName.charAt(0)) + paramName.substring(1);
 
-  /**
-   * Given a single-argument method whose parameter is a
-   * {@link Collection}, use the method's generic type information to
-   * determine the collection element type and store it as the
-   * ITEM_CLASS_NAME attribute of the given Element.
-   *
-   * @param method the setter method
-   * @param paramElt the PARAMETER element
-   */
-  private void determineCollectionElementType(Method method, Element paramElt) {
-    if(paramElt.getAttributeValue("ITEM_CLASS_NAME") == null) {
-      Class<?> elementType;
-      CreoleParameter paramAnnot = method.getAnnotation(CreoleParameter.class);
-      if(paramAnnot != null
-              && paramAnnot.collectionElementType() != CreoleParameter.NoElementType.class) {
-        elementType = paramAnnot.collectionElementType();
-      }
-      else {
-        Type paramType = method.getGenericParameterTypes()[0];
-        elementType = findCollectionElementType(paramType);
-      }
-      if(elementType != null) {
-        paramElt.setAttribute("ITEM_CLASS_NAME", elementType.getName());
-      }
-    }
-  }
+					Method get = field.getDeclaringClass().getMethod("get"+camelName);
+					Method set = field.getDeclaringClass().getMethod("set"+camelName, field.getType());
+					
+					if (!Modifier.isPublic(get.getModifiers()) || !Modifier.isPublic(set.getModifiers())) {
+						throw new GateException("Creole Parameter annotation found on "+field
+								+ "but getter or setter is not public");
+					}
+					
+				} catch (NoSuchMethodException e) {
+					throw new GateException("Creole parameter annotation found on "+ field
+							+", but no corresponding setter and getter methods"+
+							"with type " + field.getType().getName()+ " exist", e);
+				}
+			} else if (element.getClass().equals(Method.class)) {
+				Method method = (Method) element;
+				// If it's a method, it best be a setter.
+				if(!method.getName().startsWith("set") || method.getName().length() < 4
+						|| method.getParameterTypes().length != 1) {
+					throw new GateException("Creole parameter annotation found on "
+							+ method
+							+ ", but only setter methods may have this annotation.");
+				}
 
-  /**
-   * Find the collection element type for the given type.
-   *
-   * @param type the type to use. To be able to find the element type,
-   *          this must be a Class that is assignable from Collection or
-   *          a ParameterizedType whose raw type is assignable from
-   *          Collection.
-   * @return the Class representing the collection element type, or
-   *         <code>null</code> if this cannot be determined
-   */
-  private Class<?> findCollectionElementType(Type type) {
-    return findCollectionElementType(type,
-            new HashMap<TypeVariable<?>, Class<?>>());
-  }
+				// Extract the parameter name from the method name
+				paramName = Character.toLowerCase(method.getName().charAt(3))
+						+ method.getName().substring(4);    	
+				// And the type is that of the first argument
+				genericParamType = method.getGenericParameterTypes()[0];			
+				paramType = method.getParameterTypes()[0];
+			} else {
+				throw new GateException("CREOLE parameter annotation found on "+element
+						+"but can only be placed on Method or Field");
+			}
+			
+			// Hidden parameters can be added straight to the map.
+			if(hiddenParamAnnot != null && !parameterMap.containsKey(paramName)) {
+				parameterMap.put(paramName, null);
+			}
+			
+			// Visible parameters need converting to JDOM Elements
+			if(paramAnnot != null) {
+				Element paramElt = null;
+				if(parameterMap.containsKey(paramName)) {
+					// Use existing annotation if there is such a thing.
+					paramElt = parameterMap.get(paramName);
+				} else {
+					// Otherwise create on - type depends on whether it is disjunctive or not.
+					paramElt = new Element("PARAMETER").setAttribute("NAME", paramName);
+					
+					if(!"".equals(paramAnnot.disjunction())) {
+						// Disjunctive parameters (cannot both be set) need special markup.
+						Element disjunctionElt = disjunctionMap.get(paramAnnot
+								.disjunction());
+						if(disjunctionElt == null) {
+							disjunctionElt = new Element("OR");
+							resourceElement.addContent(disjunctionElt);
+							disjunctionMap.put(paramAnnot.disjunction(), disjunctionElt);
+						}
+						disjunctionElt.addContent(paramElt);
+					}
+					else {
+						resourceElement.addContent(paramElt);
+					}
+					parameterMap.put(paramName, paramElt);
+				}
 
-  /**
-   * Recursive method to find the collection element type for the given
-   * type.
-   *
-   * @param type the type to use
-   * @param tvMap map from type variables to the classes they are
-   *          ultimately bound to. The reflection APIs can tell us that
-   *          List&lt;String&gt; is an instantiation of List&lt;X&gt;
-   *          and List&lt;X&gt; implements Collection&lt;X&gt;, but we
-   *          have to keep track of the fact that X maps to String
-   *          ourselves.
-   * @return the collection element type, or <code>null</code> if it
-   *         cannot be determined.
-   */
-  private Class<?> findCollectionElementType(Type type,
-          Map<TypeVariable<?>, Class<?>> tvMap) {
-    Class<?> rawClass = null;
-    if(type instanceof Class) {
-      // we have a non-parameterized type, but it might be a raw class
-      // that extends a parameterized one (e.g. CustomCollection extends
-      // Set<Integer>) so we still need to look up
-      // the class tree
-      rawClass = (Class<?>)type;
-    }
-    else if(type instanceof ParameterizedType) {
-      Type rawType = ((ParameterizedType)type).getRawType();
-      // if we've reached Collection<T>, look at the tvMap to find what
-      // T maps to and return that
-      if(rawType == Collection.class) {
-        Type collectionTypeArgument = ((ParameterizedType)type)
-                .getActualTypeArguments()[0];
-        if(collectionTypeArgument instanceof Class<?>) {
-          // e.g. Collection<String>
-          return (Class<?>)collectionTypeArgument;
-        }
-        else if(collectionTypeArgument instanceof TypeVariable<?>) {
-          // e.g. Collection<X>
-          return tvMap.get(collectionTypeArgument);
-        }
-        else {
-          // e.g. Collection<? extends Widget> or Collection<T[]>- we
-          // can't handle this in creole.xml so give up
-          return null;
-        }
-      }
+				if(paramElt != null) {
+					// paramElt is a valid element for the current parameter,
+					// which has not been masked by a @HiddenCreoleParameter
+					if(paramElt.getTextTrim().length() == 0) {
+						// The text of the element should be the the type
+						paramElt.setText(paramType.getName());
+						// for collections (but not GATE Resources) we also try to determine
+						// the item type.
+						if((!Resource.class.isAssignableFrom(paramType)) &&
+								Collection.class.isAssignableFrom(paramType)) {
+							determineCollectionElementType(element, genericParamType, paramElt);
+						}
+					}
 
-      // we haven't reached Collection here, so add the type variable
-      // mappings to the tvMap before we look up the tree
-      if(rawType instanceof Class) {
-        rawClass = (Class<?>)rawType;
-        Type[] actualTypeParams = ((ParameterizedType)type)
-                .getActualTypeArguments();
-        TypeVariable<?>[] formalTypeParams = ((Class<?>)rawType)
-                .getTypeParameters();
-        for(int i = 0; i < actualTypeParams.length; i++) {
-          if(actualTypeParams[i] instanceof Class) {
-            tvMap.put(formalTypeParams[i], (Class<?>)actualTypeParams[i]);
-          }
-          else if(actualTypeParams[i] instanceof TypeVariable) {
-            tvMap.put(formalTypeParams[i], tvMap.get(actualTypeParams[i]));
-          }
-        }
-      }
-    }
+					// other attributes
+					addAttribute(paramElt, paramAnnot.comment(), "", "COMMENT");
+					addAttribute(paramElt, paramAnnot.suffixes(), "", "SUFFIXES");
+					addAttribute(paramElt, paramAnnot.defaultValue(),
+							CreoleParameter.NO_DEFAULT_VALUE, "DEFAULT");
+					addAttribute(paramElt, String.valueOf(paramAnnot.priority()),
+							String.valueOf(CreoleParameter.DEFAULT_PRIORITY), "PRIORITY");
 
-    // process the superclass, if there is one, and any implemented
-    // interfaces
-    if(rawClass != null) {
-      Type superclass = rawClass.getGenericSuperclass();
-      if(type != null) {
-        Class<?> componentType = findCollectionElementType(superclass, tvMap);
-        if(componentType != null) {
-          return componentType;
-        }
-      }
+					// runtime and optional are based on marker annotations
+					String runtimeParam = "";
+					if(element.isAnnotationPresent(RunTime.class)) {
+						runtimeParam = String.valueOf(element.getAnnotation(RunTime.class)
+								.value());
+					}
+					addAttribute(paramElt, runtimeParam, "", "RUNTIME");
 
-      for(Type intf : rawClass.getGenericInterfaces()) {
-        Class<?> componentType = findCollectionElementType(intf, tvMap);
-        if(componentType != null) {
-          return componentType;
-        }
-      }
-    }
+					String optionalParam = "";
+					if(element.isAnnotationPresent(Optional.class)) {
+						optionalParam = String.valueOf(element.getAnnotation(
+								Optional.class).value());
+					}
+					addAttribute(paramElt, optionalParam, "", "OPTIONAL");
+				}
+			}
+		}
+	}
 
-    return null;
-  }
+	/**
+	 * Given a single-argument method whose parameter is a
+	 * {@link Collection}, use the method's generic type information to
+	 * determine the collection element type and store it as the
+	 * ITEM_CLASS_NAME attribute of the given Element.
+	 *
+	 * @param method the setter method
+	 * @param paramElt the PARAMETER element
+	 */
+	private void determineCollectionElementType(AnnotatedElement method, Type paramType, Element paramElt) {
+		if(paramElt.getAttributeValue("ITEM_CLASS_NAME") == null) {
+			Class<?> elementType;
+			CreoleParameter paramAnnot = method.getAnnotation(CreoleParameter.class);
+			if(paramAnnot != null
+					&& paramAnnot.collectionElementType() != CreoleParameter.NoElementType.class) {
+				elementType = paramAnnot.collectionElementType();
+			}
+			else {
+				elementType = findCollectionElementType(paramType);
+			}
+			if(elementType != null) {
+				paramElt.setAttribute("ITEM_CLASS_NAME", elementType.getName());
+			}
+		}
+	}
 
-  /**
-   * Add an attribute with the given value to the given element, but
-   * only if the element does not already have the attribute, and the
-   * value is not equal to the given default value.
-   *
-   * @param paramElt the element
-   * @param value the attribute value (which will be converted to a
-   *          string)
-   * @param defaultValue if value.equals(defaultValue) we do not add the
-   *          attribute.
-   * @param attrName the name of the attribute to add.
-   */
-  private void addAttribute(Element paramElt, Object value,
-          Object defaultValue, String attrName) {
-    if(!defaultValue.equals(value) && paramElt.getAttribute(attrName) == null) {
-      paramElt.setAttribute(attrName, value.toString());
-    }
-  }
+	/**
+	 * Find the collection element type for the given type.
+	 *
+	 * @param type the type to use. To be able to find the element type,
+	 *          this must be a Class that is assignable from Collection or
+	 *          a ParameterizedType whose raw type is assignable from
+	 *          Collection.
+	 * @return the Class representing the collection element type, or
+	 *         <code>null</code> if this cannot be determined
+	 */
+	private Class<?> findCollectionElementType(Type type) {
+		return findCollectionElementType(type,
+				new HashMap<TypeVariable<?>, Class<?>>());
+	}
+
+	/**
+	 * Recursive method to find the collection element type for the given
+	 * type.
+	 *
+	 * @param type the type to use
+	 * @param tvMap map from type variables to the classes they are
+	 *          ultimately bound to. The reflection APIs can tell us that
+	 *          List&lt;String&gt; is an instantiation of List&lt;X&gt;
+	 *          and List&lt;X&gt; implements Collection&lt;X&gt;, but we
+	 *          have to keep track of the fact that X maps to String
+	 *          ourselves.
+	 * @return the collection element type, or <code>null</code> if it
+	 *         cannot be determined.
+	 */
+	private Class<?> findCollectionElementType(Type type,
+			Map<TypeVariable<?>, Class<?>> tvMap) {
+		Class<?> rawClass = null;
+		if(type instanceof Class) {
+			// we have a non-parameterized type, but it might be a raw class
+			// that extends a parameterized one (e.g. CustomCollection extends
+			// Set<Integer>) so we still need to look up
+			// the class tree
+			rawClass = (Class<?>)type;
+		}
+		else if(type instanceof ParameterizedType) {
+			Type rawType = ((ParameterizedType)type).getRawType();
+			// if we've reached Collection<T>, look at the tvMap to find what
+			// T maps to and return that
+			if(rawType == Collection.class) {
+				Type collectionTypeArgument = ((ParameterizedType)type)
+						.getActualTypeArguments()[0];
+				if(collectionTypeArgument instanceof Class<?>) {
+					// e.g. Collection<String>
+					return (Class<?>)collectionTypeArgument;
+				}
+				else if(collectionTypeArgument instanceof TypeVariable<?>) {
+					// e.g. Collection<X>
+					return tvMap.get(collectionTypeArgument);
+				}
+				else {
+					// e.g. Collection<? extends Widget> or Collection<T[]>- we
+					// can't handle this in creole.xml so give up
+					return null;
+				}
+			}
+
+			// we haven't reached Collection here, so add the type variable
+			// mappings to the tvMap before we look up the tree
+			if(rawType instanceof Class) {
+				rawClass = (Class<?>)rawType;
+				Type[] actualTypeParams = ((ParameterizedType)type)
+						.getActualTypeArguments();
+				TypeVariable<?>[] formalTypeParams = ((Class<?>)rawType)
+						.getTypeParameters();
+				for(int i = 0; i < actualTypeParams.length; i++) {
+					if(actualTypeParams[i] instanceof Class) {
+						tvMap.put(formalTypeParams[i], (Class<?>)actualTypeParams[i]);
+					}
+					else if(actualTypeParams[i] instanceof TypeVariable) {
+						tvMap.put(formalTypeParams[i], tvMap.get(actualTypeParams[i]));
+					}
+				}
+			}
+		}
+
+		// process the superclass, if there is one, and any implemented
+		// interfaces
+		if(rawClass != null) {
+			Type superclass = rawClass.getGenericSuperclass();
+			if(type != null) {
+				Class<?> componentType = findCollectionElementType(superclass, tvMap);
+				if(componentType != null) {
+					return componentType;
+				}
+			}
+
+			for(Type intf : rawClass.getGenericInterfaces()) {
+				Class<?> componentType = findCollectionElementType(intf, tvMap);
+				if(componentType != null) {
+					return componentType;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Add an attribute with the given value to the given element, but
+	 * only if the element does not already have the attribute, and the
+	 * value is not equal to the given default value.
+	 *
+	 * @param paramElt the element
+	 * @param value the attribute value (which will be converted to a
+	 *          string)
+	 * @param defaultValue if value.equals(defaultValue) we do not add the
+	 *          attribute.
+	 * @param attrName the name of the attribute to add.
+	 */
+	private void addAttribute(Element paramElt, Object value,
+			Object defaultValue, String attrName) {
+		if(!defaultValue.equals(value) && paramElt.getAttribute(attrName) == null) {
+			paramElt.setAttribute(attrName, value.toString());
+		}
+	}
 }
