@@ -20,6 +20,8 @@ import java.util.Date;
  */
 public class LogService {
   //-------------------- Verbosity Level --------------------
+  /** Absolutely no logging at all - don't even open the log file. */
+  public static final int NONE        = -1;
   /** The Minimum level, only output the error and warning information. */
   public static final int MINIMUM     = 0;
   /** The normal level, outputing the setting information and results. */
@@ -43,7 +45,10 @@ public class LogService {
   
   /** Open the log service and set the minimum verbosity level. */
   public static void init(File logfile, boolean append, int verboLevel) throws IOException {
-    logFileIn = new PrintWriter(new FileWriter(logfile, append));
+    if(verboLevel > NONE) {
+      // special case - for NONE we don't even want to open the log file
+      logFileIn = new PrintWriter(new FileWriter(logfile, append));
+    }
     minVerbosityLevel = verboLevel;
   }
   
@@ -55,7 +60,7 @@ public class LogService {
   
   /** Writes the message to the output stream if the verbosity level is high enough. */
   public static void logMessage(String message, int verbosityLevel) {
-    if (message == null) return;
+    if (message == null || logFileIn == null) return;
     if (verbosityLevel < minVerbosityLevel) return;
     if (message.equals(lastMessage)) {
       equalMessageCount++;

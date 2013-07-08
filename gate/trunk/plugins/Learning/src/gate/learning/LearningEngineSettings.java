@@ -8,6 +8,8 @@
 package gate.learning;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
@@ -161,7 +163,21 @@ public class LearningEngineSettings {
     if(rootElement.getChild("VERBOSITY") != null) {
       String value = rootElement.getChild("VERBOSITY").getAttribute("level")
         .getValue();
-      learningSettings.verbosityLogService = Integer.parseInt(value);
+      Integer logLevel = null;
+      try {
+        Field f = LogService.class.getField(value);
+        if(Modifier.isStatic(f.getModifiers()) &&
+            Modifier.isFinal(f.getModifiers()) &&
+            Integer.TYPE == f.getType()) {
+          logLevel = (Integer)f.get(null);
+        }
+      } catch(Exception e) {
+        // Do nothing, try treating it as a number instead
+      }
+      if(logLevel == null) {
+        logLevel = Integer.valueOf(value);
+      }
+      learningSettings.verbosityLogService = logLevel.intValue();
     }
     learningSettings.fiteringTrainingData = false;
     learningSettings.filteringRatio = 0.0f;
