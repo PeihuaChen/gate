@@ -98,6 +98,15 @@ public class ConditionalSerialAnalyserController
     // running as a subpipeline of another corpus pipeline.
     if(!runningAsSubPipeline) {
       for(ControllerAwarePR pr : getControllerAwarePRs()) {
+        // If the pr is a nested corpus controller, make sure its corpus is set 
+        // This is necessary because the nested corpus controller will immediately 
+        // notify its own controller aware PRs and those should be able to know about 
+        // the corpus.
+        if(pr instanceof ConditionalSerialAnalyserController) {
+          ((ConditionalSerialAnalyserController)pr).setCorpus(corpus);
+        } else if(pr instanceof SerialAnalyserController) {
+          ((SerialAnalyserController)pr).setCorpus(corpus);
+        }
         pr.controllerExecutionStarted(this);
       }
     }
@@ -119,7 +128,17 @@ public class ConditionalSerialAnalyserController
         // successfully completed
         if(!runningAsSubPipeline) {
           for(ControllerAwarePR pr : getControllerAwarePRs()) {
+            if(pr instanceof ConditionalSerialAnalyserController) {
+              ((ConditionalSerialAnalyserController)pr).setCorpus(corpus);
+            } else if(pr instanceof SerialAnalyserController) {
+              ((SerialAnalyserController)pr).setCorpus(corpus);
+            }
             pr.controllerExecutionFinished(this);
+            if(pr instanceof ConditionalSerialAnalyserController) {
+              ((ConditionalSerialAnalyserController)pr).setCorpus(null);
+            } else if(pr instanceof SerialAnalyserController) {
+              ((SerialAnalyserController)pr).setCorpus(null);
+            }
           }
         }
       }
@@ -127,7 +146,17 @@ public class ConditionalSerialAnalyserController
         // aborted
         if(!runningAsSubPipeline) {
           for(ControllerAwarePR pr : getControllerAwarePRs()) {
+            if(pr instanceof ConditionalSerialAnalyserController) {
+              ((ConditionalSerialAnalyserController)pr).setCorpus(corpus);
+            } else if(pr instanceof SerialAnalyserController) {
+              ((SerialAnalyserController)pr).setCorpus(corpus);
+            }
             pr.controllerExecutionAborted(this, thrown);
+            if(pr instanceof ConditionalSerialAnalyserController) {
+              ((ConditionalSerialAnalyserController)pr).setCorpus(null);
+            } else if(pr instanceof SerialAnalyserController) {
+              ((SerialAnalyserController)pr).setCorpus(null);
+            }
           }
         } 
         // rethrow the aborting exception or error
@@ -426,6 +455,15 @@ public class ConditionalSerialAnalyserController
   public void controllerExecutionStarted(Controller c)
       throws ExecutionException {
     for(ControllerAwarePR pr : getControllerAwarePRs()) {
+      // If the pr is a nested corpus controller, make sure its corpus is set 
+      // This is necessary because the nested corpus controller will immediately 
+      // notify its own controller aware PRs and those should be able to know about 
+      // the corpus.
+      if(pr instanceof ConditionalSerialAnalyserController) {
+        ((ConditionalSerialAnalyserController)pr).setCorpus(corpus);
+      } else if(pr instanceof SerialAnalyserController) {
+        ((SerialAnalyserController)pr).setCorpus(corpus);
+      } 
       pr.controllerExecutionStarted(this);
     }
     
@@ -435,7 +473,22 @@ public class ConditionalSerialAnalyserController
   public void controllerExecutionFinished(Controller c)
       throws ExecutionException {
     for(ControllerAwarePR pr : getControllerAwarePRs()) {
+      // If the pr is a nested corpus controller, make sure its corpus is set 
+      // This is necessary because the nested corpus controller will immediately 
+      // notify its own controller aware PRs and those should be able to know about 
+      // the corpus.
+      if(pr instanceof ConditionalSerialAnalyserController) {
+        ((ConditionalSerialAnalyserController)pr).setCorpus(corpus);
+      } else if(pr instanceof SerialAnalyserController) {
+        ((SerialAnalyserController)pr).setCorpus(corpus);
+      }
       pr.controllerExecutionFinished(this);
+      // after notification, set the corpus back to null
+      if(pr instanceof ConditionalSerialAnalyserController) {
+        ((ConditionalSerialAnalyserController)pr).setCorpus(null);
+      } else if(pr instanceof SerialAnalyserController) {
+        ((SerialAnalyserController)pr).setCorpus(null);
+      }
     }    
   }
 
@@ -443,7 +496,22 @@ public class ConditionalSerialAnalyserController
   public void controllerExecutionAborted(Controller c, Throwable t)
       throws ExecutionException {
     for(ControllerAwarePR pr : getControllerAwarePRs()) {
+      // If the pr is a nested corpus controller, make sure its corpus is set 
+      // This is necessary because the nested corpus controller will immediately 
+      // notify its own controller aware PRs and those should be able to know about 
+      // the corpus.
+      if(pr instanceof ConditionalSerialAnalyserController) {
+        ((ConditionalSerialAnalyserController)pr).setCorpus(corpus);
+      } else if(pr instanceof SerialAnalyserController) {
+        ((SerialAnalyserController)pr).setCorpus(corpus);
+      }
       pr.controllerExecutionAborted(c, t);
+      // after notification, set the corpus back to null
+      if(pr instanceof ConditionalSerialAnalyserController) {
+        ((ConditionalSerialAnalyserController)pr).setCorpus(null);
+      } else if(pr instanceof SerialAnalyserController) {
+        ((SerialAnalyserController)pr).setCorpus(null);
+      }
     }    
   }
 }
