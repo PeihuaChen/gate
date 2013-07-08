@@ -15,6 +15,7 @@
 
 package gate.creole;
 
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.*;
 
 import gate.*;
@@ -35,8 +36,13 @@ import gate.util.*;
  * NOTE: if at the time when execute() is invoked, the document is not null,
  * it is assumed that this controller is invoked from another controller and
  * only this document is processed while the corpus (which must still be
- * non-null) is ignored. If the document is null, all documents in the corpus
- * are processed in sequence. 
+ * non-null) is ignored. Also, if the document is not null, the CorpusAwarePRs
+ * are not notified at the beginning, end, or abnormal termination of the pipeline. 
+ * <p>
+ * If the document is null, all documents in the corpus
+ * are processed in sequence and CorpusAwarePRs are notified
+ * before the processing of the documents and after all documents
+ * have been processed or an abnormal termination occurred.
  * 
  */
 @CreoleResource(name = "Conditional Corpus Pipeline",
@@ -45,7 +51,7 @@ import gate.util.*;
     helpURL = "http://gate.ac.uk/userguide/sec:developer:cond")
 public class ConditionalSerialAnalyserController
        extends ConditionalSerialController
-       implements CorpusController, LanguageAnalyser {
+       implements CorpusController, LanguageAnalyser, ControllerAwarePR {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -75,6 +81,75 @@ public class ConditionalSerialAnalyserController
   public void setCorpus(gate.Corpus corpus) {
     this.corpus = corpus;
   }
+
+  protected boolean runningAsSubPipeline = false;
+  
+  @Override
+  public void execute() throws ExecutionException {
+
+    // Our assumption of if we run as a subpipeline of another corpus pipeline or
+    // not is based on whether or not the document is null or not:
+    if(document != null) {
+      runningAsSubPipeline = true;
+    } else {
+      runningAsSubPipeline = false;
+    }
+    // inform ControllerAware PRs that execution has started, but only if we are not
+    // running as a subpipeline of another corpus pipeline.
+    if(!runningAsSubPipeline) {
+      for(ControllerAwarePR pr : getControllerAwarePRs()) {
+        pr.controllerExecutionStarted(this);
+      }
+    }
+    Throwable thrown = null;
+    try {
+      if(Benchmark.isBenchmarkingEnabled()) {
+        // write a start marker to the benchmark log for this
+        // controller as a whole
+        Benchmark.startPoint(getBenchmarkId());
+      }
+      // do the real work
+      this.executeImpl();
+    }
+    catch(Throwable t) {
+      thrown = t;
+    }
+    finally {
+      if(thrown == null) {
+        // successfully completed
+        if(!runningAsSubPipeline) {
+          for(ControllerAwarePR pr : getControllerAwarePRs()) {
+            pr.controllerExecutionFinished(this);
+          }
+        }
+      }
+      else {
+        // aborted
+        if(!runningAsSubPipeline) {
+          for(ControllerAwarePR pr : getControllerAwarePRs()) {
+            pr.controllerExecutionAborted(this, thrown);
+          }
+        } 
+        // rethrow the aborting exception or error
+        if(thrown instanceof Error) {
+          throw (Error)thrown;
+        }
+        else if(thrown instanceof RuntimeException) {
+          throw (RuntimeException)thrown;
+        }
+        else if(thrown instanceof ExecutionException) {
+          throw (ExecutionException)thrown;
+        }
+        else {
+          // we have a checked exception that isn't one executeImpl can
+          // throw. This shouldn't be possible, but just in case...
+          throw new UndeclaredThrowableException(thrown);
+        }
+      }
+    }
+  }
+  
+  
 
   /** Run the Processing Resources in sequence. */
   protected void executeImpl() throws ExecutionException{
@@ -345,5 +420,30 @@ public class ConditionalSerialAnalyserController
     if(e.getResource() == corpus){
       setCorpus(null);
     }
+  }
+
+  @Override
+  public void controllerExecutionStarted(Controller c)
+      throws ExecutionException {
+    for(ControllerAwarePR pr : getControllerAwarePRs()) {
+      pr.controllerExecutionStarted(this);
+    }
+    
+  }
+
+  @Override
+  public void controllerExecutionFinished(Controller c)
+      throws ExecutionException {
+    for(ControllerAwarePR pr : getControllerAwarePRs()) {
+      pr.controllerExecutionFinished(this);
+    }    
+  }
+
+  @Override
+  public void controllerExecutionAborted(Controller c, Throwable t)
+      throws ExecutionException {
+    for(ControllerAwarePR pr : getControllerAwarePRs()) {
+      pr.controllerExecutionAborted(c, t);
+    }    
   }
 }
