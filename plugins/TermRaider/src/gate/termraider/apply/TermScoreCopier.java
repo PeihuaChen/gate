@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2012, The University of Sheffield. See the file
+ *  Copyright (c) 2012--2013, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -25,6 +25,8 @@ import gate.termraider.util.*;
 import java.text.NumberFormat;
 import java.util.*;
 
+import org.apache.commons.lang.StringUtils;
+
 
 @CreoleResource(name = "Termbank Score Copier",
     icon = "termbank-lr.png",
@@ -38,6 +40,7 @@ public class TermScoreCopier extends AbstractLanguageAnalyser
   /* CREOLE PARAMETERS */
   private AbstractTermbank termbank;
   private String annotationSetName;
+  private String frequencyFeature, docFrequencyFeature;
   
   
   public Resource init() throws ResourceInstantiationException {
@@ -83,6 +86,15 @@ public class TermScoreCopier extends AbstractLanguageAnalyser
       if (rawScore != null) {
         fm.put(rawScoreFeature, rawScore);
       }
+      
+      if (useFeature(frequencyFeature)) {
+        fm.put(frequencyFeature, termbank.getTermFrequency(term));
+      }
+      
+      if (useFeature(docFrequencyFeature)) {
+        fm.put(docFrequencyFeature, termbank.getDocFrequency(term));
+      }
+      
       checkInterruption();
     } // end for candidates loop
     
@@ -99,6 +111,11 @@ public class TermScoreCopier extends AbstractLanguageAnalyser
     if(isInterrupted()) { throw new ExecutionInterruptedException(
         "Execution of " + this.getName() + " has been abruptly interrupted!"); }
   }
+  
+  
+  private boolean useFeature(String feature) {
+    return (StringUtils.stripToEmpty(feature).length() > 0);
+  }
 
   
   /* CREOLE METHODS */
@@ -112,6 +129,31 @@ public class TermScoreCopier extends AbstractLanguageAnalyser
   public AbstractTermbank getTermbank() {
     return this.termbank;
   }
+  
+  
+  @RunTime
+  @CreoleParameter(comment = "annotation feature for term frequency (blank to ignore)",
+      defaultValue = "frequency")
+  public void setFrequencyFeature(String feature) {
+    this.frequencyFeature = feature;
+  }
+  
+  public String getFrequencyFeature() {
+    return this.frequencyFeature;
+  }
+  
+  
+  @RunTime
+  @CreoleParameter(comment = "annotation feature for document frequency (blank to ignore)",
+      defaultValue = "docFrequency")
+  public void setDocFrequencyFeature(String feature) {
+    this.docFrequencyFeature = feature;
+  }
+  
+  public String getDocFrequencyFeature() {
+    return this.docFrequencyFeature;
+  }
+  
   
   @RunTime
   @CreoleParameter(comment = "AnnotationSet name",
