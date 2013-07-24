@@ -55,9 +55,9 @@ GATE papers
 %2* 2013
 
 
-- K. Bontcheva, L. Derczynski, A. Funk, M.A. Greenwood, D. Maynard, N. Aswani. TwitIE: An Open-Source Information Extraction Pipeline for Microblog Text. Proceedings of the International Conference on Recent Advances in Natural Language Processing (RANLP 2013). %(https://gate.ac.uk/sale/ranlp2013/twitie/twitie-ranlp2013.pdf, PDF)
+- K. Bontcheva, L. Derczynski, A. Funk, M.A. Greenwood, D. Maynard, N. Aswani. TwitIE: An Open-Source Information Extraction Pipeline for Microblog Text. Proceedings of the International Conference on Recent Advances in Natural Language Processing (RANLP 2013). %(https://gate.ac.uk/sale/ranlp2013/twitie/twitie-ranlp2013.pdf, PDF), %(https://gate.ac.uk/wiki/twitie.html, Download TwitIE)
 
-- L. Derczynski, A. Ritter, S. Clark, K. Bontcheva. Twitter Part-of-Speech Tagging for All: Overcoming Sparse and Noisy Data. Proceedings of the International Conference on Recent Advances in Natural Language Processing (RANLP 2013). %(https://gate.ac.uk/sale/ranlp2013/twitter_pos/twitter_pos.pdf,PDF)
+- L. Derczynski, A. Ritter, S. Clark, K. Bontcheva. Twitter Part-of-Speech Tagging for All: Overcoming Sparse and Noisy Data. Proceedings of the International Conference on Recent Advances in Natural Language Processing (RANLP 2013). %(https://gate.ac.uk/sale/ranlp2013/twitter_pos/twitter_pos.pdf,PDF), %(https://gate.ac.uk/wiki/twitter-postagger.html, Download the POS tagger)
 
 - L. Derczynski, K. Bontcheva. Mining Social Media with Linked Open Data, Entity Recognition, and Event Extraction. Third Workshop on Data Extraction and Object Search (DEOS 2013). %(http://www.slideshare.net/leonderczynski/mining-social-media-with-linked-open-data-entity-recognition-and-event-extraction,slides)
 
