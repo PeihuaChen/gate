@@ -341,7 +341,7 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
   protected void annotate(Date documentDate, DateParser dp, DateFormat df) throws ExecutionException {
     
     //now we have a parser create a regexp to look for possible dates
-    StringBuilder pattern = new StringBuilder("\\b([0-9]{1,4}");    
+    StringBuilder pattern = new StringBuilder("\\b((([0-9]|[0-9]{2}|[0-9]{4})[^0-9])");    
     for (String word : dp.getWords()) {
       if (word.length() > 0) pattern.append("|(").append(word).append(")");
     }    
