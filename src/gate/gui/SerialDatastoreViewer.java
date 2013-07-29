@@ -542,7 +542,7 @@ public class SerialDatastoreViewer extends JScrollPane implements
     }
     if(!found) {
       // exhausted the children without finding the node -> new type
-      node = new DefaultMutableTreeNode(resType);
+      node = new DefaultMutableTreeNode(new DSType(resType, res.getClass().getName()));
       treeModel.insertNodeInto(node, parent, parent.getChildCount());
     }
     //mainTree.expandPath(new TreePath(new Object[] {parent, node}));
