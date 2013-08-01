@@ -34,7 +34,7 @@
 	<classpathentry kind="src" output="plugins/TermRaider/classes" path="plugins/TermRaider/src"/>
 	<classpathentry kind="src" output="plugins/Format_Twitter/classes" path="plugins/Format_Twitter/src"/>
 	<classpathentry kind="src" output="plugins/Tagger_DateNormalizer/classes" path="plugins/Tagger_DateNormalizer/src"/>
-	<classpathentry kind="src" path="plugins/Format_MediaWiki/src"/>
+	<classpathentry kind="src" output="plugins/Format_MediaWiki/classes" path="plugins/Format_MediaWiki/src"/>
 	<classpathentry kind="lib" path="plugins/Gazetteer_Ontology_Based/lib/oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="plugins/WordNet/lib/jwnl.jar"/>
 	<classpathentry kind="lib" path="plugins/LingPipe/lib/lingpipe-4.0.1.jar"/>
@@ -81,5 +81,5 @@
 	<classpathentry kind="lib" path="plugins/Ontology/lib/owlim-lite-5.3.jar"/>
 	<classpathentry kind="lib" path="plugins/OpenNLP/lib/opennlp-maxent-3.0.2-incubating.jar"/>
 	<classpathentry exported="true" kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=GATE&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
-	<classpathentry kind="output" path="plugins/Format_MediaWiki/classes"/>
+	<classpathentry kind="output" path="classes"/>
 </classpath>
