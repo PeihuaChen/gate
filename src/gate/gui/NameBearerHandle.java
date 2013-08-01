@@ -35,7 +35,6 @@ import gate.creole.AbstractResource;
 import gate.creole.AnnotationSchema;
 import gate.creole.ConditionalController;
 import gate.creole.ConditionalSerialAnalyserController;
-import gate.creole.PackagedController;
 import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.SerialAnalyserController;
@@ -69,8 +68,6 @@ import gate.util.Out;
 import gate.util.ant.packager.PackageGappTask;
 
 import java.awt.Component;
-import java.awt.Dialog;
-import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.io.File;
