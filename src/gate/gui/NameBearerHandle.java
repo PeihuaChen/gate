@@ -35,6 +35,7 @@ import gate.creole.AbstractResource;
 import gate.creole.AnnotationSchema;
 import gate.creole.ConditionalController;
 import gate.creole.ConditionalSerialAnalyserController;
+import gate.creole.PackagedController;
 import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.SerialAnalyserController;
@@ -233,6 +234,27 @@ public class NameBearerHandle implements Handle, StatusListener,
             popup.addSeparator();
           else {
             popup.add(new XJMenuItem(anAction, sListenerProxy));
+          }
+        }
+      }
+    }
+    
+    if (target instanceof Resource) {
+      Set<String> toolTypes = Gate.getCreoleRegister().getToolTypes();
+      for(String type : toolTypes) {
+        List<Resource> instances = Gate.getCreoleRegister()
+                    .get(type).getInstantiations();
+        for(Resource res : instances) {
+          if(res instanceof ResourceHelper) {
+            Iterator<Action> actionIter = ((ResourceHelper)res).getActions((Resource)target).iterator();
+            while(actionIter.hasNext()) {
+              Action anAction = (Action)actionIter.next();
+              if(anAction == null)
+                popup.addSeparator();
+              else {
+                popup.add(new XJMenuItem(anAction, sListenerProxy));
+              }
+            }
           }
         }
       }
