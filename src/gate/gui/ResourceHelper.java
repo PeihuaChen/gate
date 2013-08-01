@@ -34,7 +34,7 @@ public abstract class ResourceHelper extends AbstractResource implements
   // We cache the actions so we don't keep recreating them every time. If you
   // don't want this behaviour (i.e. you want completely dynamic menus) then
   // you'll need to override the getActions method
-  Map<Resource, List<Action>> actions = new HashMap<Resource, List<Action>>();
+  Map<Object, List<Action>> actions = new HashMap<Object, List<Action>>();
 
   @Override
   public Resource init() {
@@ -51,35 +51,35 @@ public abstract class ResourceHelper extends AbstractResource implements
    * resource. Note that this implementation uses a cache so that the same items
    * will be returned each time the menu is displayed. For a fully dynamic
    * approach a subclass should override this method to simply call @{link
-   * {@link #buildActions(Resource)}.
+   * {@link #buildActions(NameBearerHandle)}.
    * 
-   * @param resource
-   *          the {@link gate.Resource} instance we are wanting to add new menu
+   * @param handle
+   *          the {@link gate.gui.NameBearerHandle} instance we are wanting to add new menu
    *          items to
    * @return a list of {@link javax.swing.Action} instances which will be added
-   *         to the right click menu of the resource
+   *         to the right click menu of the specified handle
    */
-  public List<Action> getActions(Resource resource) {
+  public List<Action> getActions(NameBearerHandle handle) {
 
-    if(!actions.containsKey(resource)) {
+    if(!actions.containsKey(handle.getTarget())) {
       // if we haven't seen this resource before then build the actions
-      actions.put(resource, buildActions(resource));
+      actions.put(handle.getTarget(), buildActions(handle));
     }
 
     // return the actions from the cache
-    return actions.get(resource);
+    return actions.get(handle.getTarget());
   }
 
   /**
    * Build the {@link javax.swing.Action} instances that should be used to
-   * enhance the right-click menu of the specified {@link gate.Resource}.
+   * enhance the right-click menu of the specified {@link gate.gui.NameBearerHandle}.
    * 
    * @param resource
-   *          the {@link gate.Resource} instance we are adding to
+   *          the {@link gate.gui.NameBearerHandle} instance we are adding to
    * @return a list of {@link javax.swing.Action} instances that will be added
    *         to the right-click menu of the resource.
    */
-  protected abstract List<Action> buildActions(Resource resource);
+  protected abstract List<Action> buildActions(NameBearerHandle handle);
 
   @Override
   public void cleanup() {
