@@ -18,10 +18,10 @@ import gate.Corpus;
 import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
-import gate.Resource;
 import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.CreoleResource;
 import gate.gui.MainFrame;
+import gate.gui.NameBearerHandle;
 import gate.gui.ResourceHelper;
 import gate.util.ExtensionFileFilter;
 import info.bliki.wiki.dump.IArticleFilter;
@@ -70,10 +70,10 @@ public class MediaWikiPopulater extends ResourceHelper {
   };
 
   @Override
-  protected List<Action> buildActions(final Resource resource) {
+  protected List<Action> buildActions(final NameBearerHandle handle) {
     List<Action> actions = new ArrayList<Action>();
 
-    if(!(resource instanceof Corpus)) return actions;
+    if(!(handle.getTarget() instanceof Corpus)) return actions;
 
     actions.add(new AbstractAction("Populate from MediaWiki XML Dump") {
 
@@ -102,7 +102,7 @@ public class MediaWikiPopulater extends ResourceHelper {
                 "MediaWiki XML Dump Corpus Populater") {
               public void run() {
                 try {
-                  populateCorpus((Corpus)resource, filer.getSelectedFile()
+                  populateCorpus((Corpus)handle.getTarget(), filer.getSelectedFile()
                       .toURI().toURL());
                 } catch(MalformedURLException e) {
                   // this really should not be possible so just dump the
