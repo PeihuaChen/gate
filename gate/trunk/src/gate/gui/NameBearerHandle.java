@@ -243,7 +243,7 @@ public class NameBearerHandle implements Handle, StatusListener,
                     .get(type).getInstantiations();
         for(Resource res : instances) {
           if(res instanceof ResourceHelper) {
-            Iterator<Action> actionIter = ((ResourceHelper)res).getActions((Resource)target).iterator();
+            Iterator<Action> actionIter = ((ResourceHelper)res).getActions(NameBearerHandle.this).iterator();
             while(actionIter.hasNext()) {
               Action anAction = (Action)actionIter.next();
               if(anAction == null)
