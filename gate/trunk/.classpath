@@ -35,6 +35,7 @@
 	<classpathentry kind="src" output="plugins/Format_Twitter/classes" path="plugins/Format_Twitter/src"/>
 	<classpathentry kind="src" output="plugins/Tagger_DateNormalizer/classes" path="plugins/Tagger_DateNormalizer/src"/>
 	<classpathentry kind="src" output="plugins/Format_MediaWiki/classes" path="plugins/Format_MediaWiki/src"/>
+	<classpathentry kind="src" output="plugins/Format_FastInfoset/classes" path="plugins/Format_FastInfoset/src"/>
 	<classpathentry kind="lib" path="plugins/Gazetteer_Ontology_Based/lib/oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="plugins/WordNet/lib/jwnl.jar"/>
 	<classpathentry kind="lib" path="plugins/LingPipe/lib/lingpipe-4.0.1.jar"/>
@@ -48,6 +49,7 @@
 	<classpathentry kind="lib" path="plugins/Format_Twitter/lib/jackson-databind-2.1.1.jar"/>
 	<classpathentry kind="lib" path="plugins/Tagger_DateNormalizer/lib/DateParser.jar"/>
 	<classpathentry kind="lib" path="plugins/Format_MediaWiki/lib/bliki-core-3.0.19.jar"/>
+	<classpathentry kind="lib" path="plugins/Format_FastInfoset/lib/FastInfoset-1.2.13.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="plugins/Learning/lib/weka.jar"/>
 	<classpathentry kind="lib" path="plugins/Web_Crawler_Websphinx/lib/websphinx.jar"/>
