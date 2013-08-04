@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<CREOLE-DIRECTORY>
+  <JAR SCAN="true">format-fastinfoset.jar</JAR>
+  <JAR>lib/FastInfoset-1.2.13.jar</JAR>
+</CREOLE-DIRECTORY>
