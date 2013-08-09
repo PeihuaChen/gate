@@ -31,6 +31,7 @@ import gate.util.InvalidOffsetException;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -330,15 +331,25 @@ public class FastInfosetExporter extends ResourceHelper {
    * @throws Exception
    */
   public static void export(Document doc, File file) throws Exception {
+    FileOutputStream out = null;
+    try {
+      out = new FileOutputStream(file);
+      export (doc, out);
+    }
+    finally {
+      out.close();
+    }
+  }
+  
+  public static void export(Document doc, OutputStream out) throws Exception {
 
     StAXDocumentSerializer xsw =
-        new StAXDocumentSerializer(new FileOutputStream(file));
+        new StAXDocumentSerializer(out);
 
     xsw.writeStartDocument("1.0");
     DocumentStaxUtils.writeDocument(doc, xsw, "");
     xsw.writeEndDocument();
     xsw.flush();
     xsw.close();
-
   }
 }
