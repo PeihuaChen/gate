@@ -2,4 +2,5 @@
 <CREOLE-DIRECTORY>
   <JAR SCAN="true">format-fastinfoset.jar</JAR>
   <JAR>lib/FastInfoset-1.2.13.jar</JAR>
+  <JAR>gcp/fastinfoset4gcp.jar</JAR>
 </CREOLE-DIRECTORY>
