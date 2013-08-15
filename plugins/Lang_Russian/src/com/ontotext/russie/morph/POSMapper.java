@@ -32,6 +32,8 @@ public class POSMapper extends AbstractLanguageAnalyser
     implements RussIEConstants
 {
 
+    private static final long serialVersionUID = 748287388332117288L;
+  
     public Resource init()
         throws ResourceInstantiationException
     {

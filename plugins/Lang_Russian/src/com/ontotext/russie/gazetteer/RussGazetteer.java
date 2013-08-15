@@ -59,7 +59,9 @@ import com.ontotext.russie.RussIEConstants;
 */
 public class RussGazetteer extends AbstractGazetteer implements RussIEConstants {
 
- /** Debug flag
+  private static final long serialVersionUID = -5174914553200046785L;
+
+/** Debug flag
   */
  protected static final boolean DEBUG = false;
 

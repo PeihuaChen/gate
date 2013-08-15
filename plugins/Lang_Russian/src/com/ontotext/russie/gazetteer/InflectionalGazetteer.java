@@ -43,6 +43,8 @@ import com.ontotext.russie.morph.TypePool;
 public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
     implements RussIEConstants {
 
+  private static final long serialVersionUID = -6564083196195936381L;
+
   public InflectionalGazetteer() {
     mapsList = new ArrayList<Map>(10);
   }
