@@ -1,7 +1,7 @@
 <project name="russie" basedir="." default="jar" >
   <property file="build.properties" />
 
-  <property name="gate.home" location="../../gate" />
+  <property name="gate.home" location="../../" />
   <property name="gate.lib" location="${gate.home}/lib" />
   <property name="gate.jar" location="${gate.home}/bin/gate.jar" />
 
