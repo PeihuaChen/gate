@@ -44,7 +44,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
     implements RussIEConstants {
 
   public InflectionalGazetteer() {
-    mapsList = new ArrayList(10);
+    mapsList = new ArrayList<Map>(10);
   }
 
   /** Debug flag
@@ -83,7 +83,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
    *  each map's value might be an ArrayList of TYpe objects specifying categories
    *  tied to this word/phrase.
    */
-  protected ArrayList mapsList ;
+  protected List<Map> mapsList ;
 
   /** size of the mapsList
    */
@@ -91,7 +91,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
 
   /** a list of distinct references to morpho syntactic set.
    */
-  protected Set msTypeSet = null;
+  protected Set<SuffixNest> msTypeSet = null;
 
   /**The path of the config file  */
   private URL config;
@@ -157,7 +157,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
           mapsListSize = mapsList.size();
 
           //allocate the category Map with optimal initial capacity & load factor
-          msTypeSet = new HashSet();
+          msTypeSet = new HashSet<SuffixNest>();
 
           Lemma lemma;
           fireStatusChanged(READING + configLine);
@@ -261,7 +261,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
     String phrase = "";
     int mapIndex = 0;
     FeatureMap fm;
-    HashMap currentMap = new HashMap();
+    Map currentMap = new HashMap();
     // whether the current word is the first in the phrase
     boolean firstWord = true;
     boolean punctuationZone = false;
@@ -442,17 +442,17 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
           } // if mapindex out of bounds
 
           //try to find it in the dark cave ...
-          currentMap = (HashMap) mapsList.get(mapIndex);
+          currentMap = mapsList.get(mapIndex);
 
-          Map lemmaVsFm = this.lookup(phrase,currentMap);
+          Map<String, FeatureMap> lemmaVsFm = this.lookup(phrase,currentMap);
           if (lemmaVsFm != null && lemmaVsFm.size()>0) {
             matchedRegionEnd = iend;
             // generate lookups for the phrase so far
-            Iterator lemmaIter = lemmaVsFm.keySet().iterator();
+            Iterator<String> lemmaIter = lemmaVsFm.keySet().iterator();
             String lemma;
             while(lemmaIter.hasNext()) {
-              lemma = (String)lemmaIter.next();
-              fm = (FeatureMap) lemmaVsFm.get(lemma);
+              lemma = lemmaIter.next();
+              fm = lemmaVsFm.get(lemma);
               try {
                 annotationSet.add(new Long(matchedRegionStart),
                                   new Long(matchedRegionEnd),
@@ -518,7 +518,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
   public Set lookup(String wordForm) {
     Set result  = null;
     for ( int li = 0 ; li < mapsListSize ; li++ ) {
-      HashMap list = (HashMap)mapsList.get(li);
+      Map list = mapsList.get(li);
       if (list.containsKey(wordForm)) {
         ArrayList lookupList = (ArrayList) list.get(wordForm);
         if (lookupList != null && lookupList.size()>0) {
@@ -533,7 +533,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
   public boolean remove(String wordForm) {
     boolean isRemoved = false;
     for (int i = 0 ; i < mapsListSize ; i++) {
-      HashMap map = (HashMap)mapsList.get(i);
+      Map map = mapsList.get(i);
       if (map.containsKey(wordForm)) {
         map.remove(wordForm);
         isRemoved = true;
@@ -567,7 +567,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
 //   } // avoid endless recursion
 
     //category key
-    Set key = new HashSet(1);
+    Set<SuffixNest> key = new HashSet<SuffixNest>(1);
 
     // add the lookup to the current key
     key.add(nest);
@@ -581,8 +581,8 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
     String line = root;
     int mapIndex = -1;
     String word = null;
-    Set oldKey = null;
-    HashMap currentMap = null;
+    Set<SuffixNest> oldKey = null;
+    Map<String, Set> currentMap = null;
     int length = 0;
 
     mapIndex = -1;
@@ -610,7 +610,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
       } // if the map doesn't exist
 
       // get the map and add the word to the map
-      currentMap = (HashMap)(mapsList.get(mapIndex));
+      currentMap = (mapsList.get(mapIndex));
       // try to get the current word
       // if there isn't such a word : add it with null key.
       if (!currentMap.containsKey(word)) {
@@ -629,19 +629,19 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
         mapsList.add(new HashMap());
         mapsListSize++;
       } // if the map doesn't exist
-      currentMap = (HashMap)(mapsList.get(mapIndex));
+      currentMap = (mapsList.get(mapIndex));
     }
 
     try {
       //!!! put the category key in the last map
-      oldKey = (Set) currentMap.get(word);
+      oldKey = currentMap.get(word);
     } catch (Exception x) {
       x.printStackTrace();
       System.out.println("root = " +word);
     }
 
     if (null == oldKey) {
-      oldKey = new HashSet(1);
+      oldKey = new HashSet<SuffixNest>(1);
       oldKey.add(nest);
       currentMap.put(word,oldKey);
       isAdded = true;
@@ -711,7 +711,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
    * @param map
    * @return the map of main form vs matching feature maps  for the current phrase and map
    */
-  private Map lookup(String phrase,Map map){
+  private Map<String, FeatureMap> lookup(String phrase,Map map){
     if (DETAILED_DEBUG) {
       System.out.println("phrase -> "+phrase);
     }
@@ -720,7 +720,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
       phrase = phrase.toLowerCase();
     }
 
-    Map lemmaVsFm = new HashMap();
+    Map<String, FeatureMap> lemmaVsFm = new HashMap<String, FeatureMap>();
     Set nests;
     Iterator ni;
     String suffix = "";
@@ -739,7 +739,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
             fm = nest.getFeatureMap();
             lemma = phrase+nest.getMainFormSuffix();
             fm.put(FEATURE_LEMMA,lemma);
-            oldFm = (FeatureMap)lemmaVsFm.get(lemma);
+            oldFm = lemmaVsFm.get(lemma);
             if ( oldFm != null ) {
               oldFm.putAll(fm);
             } else {

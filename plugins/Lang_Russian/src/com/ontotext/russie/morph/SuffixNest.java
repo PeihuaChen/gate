@@ -36,13 +36,13 @@ public interface SuffixNest {
    * @param suffix the suffix
    * @param typeSet the set of types
    */
-  void add(String suffix, Set typeSet) ;
+  void add(String suffix, Set<String> typeSet) ;
 
   /**
    * Get all suffixes in the nest.
    * @return the suffixes in the nest
    */
-  Set getSuffixes();
+  Set<String> getSuffixes();
 
   /**
    * Get all morpho-syntactic types.

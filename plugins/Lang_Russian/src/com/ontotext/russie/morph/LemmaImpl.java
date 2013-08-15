@@ -41,13 +41,13 @@ public class LemmaImpl implements Lemma{
   private String root;
 
   /** map of types vs word-form suffixes  */
-  private Map typeVsSuffix;
+  private Map<String, String> typeVsSuffix;
 
   /**the nest of suffixes */
   private SuffixNest suffixNest = new SuffixNestImpl();
 
   public LemmaImpl(){
-    typeVsSuffix = new HashMap();
+    typeVsSuffix = new HashMap<String, String>();
   }
 
   /**
@@ -85,8 +85,7 @@ public class LemmaImpl implements Lemma{
    * @param wf word-form
    * @param type the type of the word-form*/
   public void addWordForm(String wf, String type) {
-    Set typeSet;
-
+    
     // fit the new wf to the root and retain wf suffix.
     String suffix = adjustRoot(wf);
 
@@ -115,7 +114,7 @@ public class LemmaImpl implements Lemma{
    * @param type the word-form type
    * @return the suffix that has this type */
   public String getSuffix(String type) {
-    return (String)typeVsSuffix.get(type);
+    return typeVsSuffix.get(type);
   }
 
 
@@ -164,7 +163,7 @@ public class LemmaImpl implements Lemma{
   /**
    * Fetch the set of word-form types in the lemma
    * @return the set of word-form types in the lemma */
-  public Set getTypes() {
+  public Set<String> getTypes() {
     return typeVsSuffix.keySet();
   }
 
@@ -176,12 +175,12 @@ public class LemmaImpl implements Lemma{
   private void add2Suffixes(String prefix) {
     if (prefix == null || prefix.length()==0) return;
 
-    Iterator ki = typeVsSuffix.keySet().iterator();
+    Iterator<String> ki = typeVsSuffix.keySet().iterator();
     String type;
     String suffix;
     while(ki.hasNext()) {
-      type = (String)ki.next();
-      suffix = (String)typeVsSuffix.get(type);
+      type = ki.next();
+      suffix = typeVsSuffix.get(type);
       typeVsSuffix.put(type,prefix+suffix);
     } // while keys
 

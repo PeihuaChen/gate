@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public class TypePool {
 
-  private static Map pool = new HashMap();
+  private static Map<String, String> pool = new HashMap<String, String>();
 
   public TypePool() {
   }
@@ -32,7 +32,7 @@ public class TypePool {
       return newType;
     }
 
-    return (String)pool.get(newType);
+    return pool.get(newType);
   } // getUniqueNestAs(newNest)
 
   public static String getString(){

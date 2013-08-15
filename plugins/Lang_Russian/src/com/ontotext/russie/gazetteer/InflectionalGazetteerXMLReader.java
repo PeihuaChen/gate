@@ -33,9 +33,9 @@ public class InflectionalGazetteerXMLReader
     implements RussIEConstants, ContentHandler
 {
 
-    public InflectionalGazetteerXMLReader(ArrayList importTypes)
+    public InflectionalGazetteerXMLReader(List importTypes)
     {
-        lemmas = new ArrayList();
+        lemmas = new ArrayList<Lemma>();
         listImportTypes = new ArrayList();
         tagContent = new StringBuffer();
         parserValue = "org.apache.xerces.parsers.SAXParser";
@@ -45,7 +45,7 @@ public class InflectionalGazetteerXMLReader
 
     public static String getMajorType4Category(String cat)
     {
-        return (String)catVsMajorType.get(cat);
+        return catVsMajorType.get(cat);
     }
 
     public void load(String fileName)
@@ -147,7 +147,7 @@ public class InflectionalGazetteerXMLReader
         if(localName.equals("cat"))
             try
             {
-                String mtype = (String)catVsMajorType.get(tagContent.toString().trim());
+                String mtype = catVsMajorType.get(tagContent.toString().trim());
                 if(listImportTypes.contains(mtype))
                     lemma.getFeatureMap().put("majorType", mtype);
             }
@@ -203,14 +203,14 @@ public class InflectionalGazetteerXMLReader
     {
     }
 
-    public List getLemmas()
+    public List<Lemma> getLemmas()
     {
-        return new ArrayList(lemmas);
+        return new ArrayList<Lemma>(lemmas);
     }
 
-    private List lemmas;
+    private List<Lemma> lemmas;
     private String wordform;
-    protected ArrayList listImportTypes;
+    protected List listImportTypes;
     private StringBuffer tagContent;
     static final String DEFAULT_PARSER = "org.apache.xerces.parsers.SAXParser";
     public static final String TAG_RUSNAMES = "rusnames";
@@ -227,7 +227,7 @@ public class InflectionalGazetteerXMLReader
     public static final String CAT_PERSON_FAMILY = "PerFamily";
     public static final String CAT_PERSON_FIRST = "PerFirst";
     public static final String CAT_PERSON = "Per";
-    private static Map catVsMajorType;
+    private static Map<String, String> catVsMajorType;
     private String parserValue;
     Locator locator;
     Lemma lemma;
@@ -238,7 +238,7 @@ public class InflectionalGazetteerXMLReader
 
     static 
     {
-        catVsMajorType = new HashMap();
+        catVsMajorType = new HashMap<String, String>();
         catVsMajorType.put("Loc", "location");
         catVsMajorType.put("Per", "person_full");
         catVsMajorType.put("PerFamily", "surname");
