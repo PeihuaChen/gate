@@ -52,6 +52,8 @@ import com.ontotext.russie.RussIEConstants;
 public class POSTagger extends  gate.creole.AbstractLanguageAnalyser
     implements RussIEConstants {
 
+  private static final long serialVersionUID = -1392655786706987563L;
+
   /** Debug flag
    */
   protected static final boolean DEBUG = false;
