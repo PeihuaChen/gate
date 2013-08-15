@@ -31,7 +31,6 @@ public class MorphologyReader implements RussIEConstants {
 
   protected String encoding;
 
-
   private boolean caseSensitive;
 
   private final static String LINE_PREFIX = "le(";
@@ -43,6 +42,7 @@ public class MorphologyReader implements RussIEConstants {
 
   public MorphologyReader(boolean caseSensitive) {
     lemmas = new HashSet<Lemma>();
+    this.caseSensitive = caseSensitive;
   }
 
   /** Loads the morphology files */
