@@ -25,12 +25,12 @@ import java.util.Set;
 public class SuffixNestImpl implements SuffixNest {
 
   /** map of word-form suffixes vs types */
-  private Map suffixVsType;
+  private Map<String, Object> suffixVsType;
   private String mainFormSuffix = "";
   private FeatureMap fm = Factory.newFeatureMap();
 
   public SuffixNestImpl() {
-    suffixVsType = new HashMap();
+    suffixVsType = new HashMap<String, Object>();
   }
 
   /**
@@ -63,7 +63,7 @@ public class SuffixNestImpl implements SuffixNest {
         mainFormSuffix = suffix;
       }
     }
-    Set typeSet = new HashSet();
+    Set<String> typeSet = new HashSet<String>();
     typeSet.add(type);
     add ( suffix, typeSet);
   }
@@ -73,8 +73,8 @@ public class SuffixNestImpl implements SuffixNest {
    * @param suffix the suffix
    * @param typeSet the set of types
    */
-  public void add(String suffix, Set typeSet)  {
-    Set set = (Set)suffixVsType.get(suffix);
+  public void add(String suffix, Set<String> typeSet)  {
+    Set<String> set = (Set<String>)suffixVsType.get(suffix);
     if (set != null) {
       typeSet.addAll(set);
     }
@@ -85,7 +85,7 @@ public class SuffixNestImpl implements SuffixNest {
    * Get all suffixes in the nest.
    * @return the suffixes in the nest
    */
-  public Set getSuffixes() {
+  public Set<String> getSuffixes() {
     return suffixVsType.keySet();
   }
 
@@ -93,9 +93,9 @@ public class SuffixNestImpl implements SuffixNest {
    * Get all morpho-syntactic types.
    * @return all morpho-syntactic types
    */
-  public Set getTypes() {
-    Iterator it = suffixVsType.values().iterator();
-    Set allTypes = new HashSet();
+  public Set<Object> getTypes() {
+    Iterator<Object> it = suffixVsType.values().iterator();
+    Set<Object> allTypes = new HashSet<Object>();
     Object o;
     while (it.hasNext()) {
       o = it.next();
@@ -115,8 +115,8 @@ public class SuffixNestImpl implements SuffixNest {
    * @param suffix
    * @return the set of types associated with the suffix
    */
-  public Set getType(String suffix) {
-    return (Set)suffixVsType.get(suffix);
+  public Set<Object> getType(String suffix) {
+    return (Set<Object>)suffixVsType.get(suffix);
   }
 
   public int hashCode() {
@@ -139,12 +139,12 @@ public class SuffixNestImpl implements SuffixNest {
    * @param prefix
    */
   public void addPrefix2Suffixes(String prefix) {
-    Iterator ki = suffixVsType.keySet().iterator();
+    Iterator<String> ki = suffixVsType.keySet().iterator();
     Object types;
     String suffix;
-    Map suffixVsTypeNew = new HashMap();
+    Map<String, Object> suffixVsTypeNew = new HashMap<String, Object>();
     while(ki.hasNext()) {
-      suffix = (String)ki.next();
+      suffix = ki.next();
       types = suffixVsType.get(suffix);
       suffixVsTypeNew.put(prefix+suffix,types);
     } // while keys
@@ -154,14 +154,14 @@ public class SuffixNestImpl implements SuffixNest {
   public String toString(){
     StringBuffer result = new StringBuffer();
     result.append("\nSUFFIX NEST {");
-    ArrayList sufList = new ArrayList(getSuffixes());
+    ArrayList<String> sufList = new ArrayList<String>(getSuffixes());
 
     Collections.sort(sufList);
 
     String suffix;
     for ( int i = 0 ; i < sufList.size(); i++){
       if (i>0) result.append(",");
-      suffix = (String)sufList.get(i);
+      suffix = sufList.get(i);
       result.append(suffix).append(":");
       result.append(this.getType(suffix));
     }

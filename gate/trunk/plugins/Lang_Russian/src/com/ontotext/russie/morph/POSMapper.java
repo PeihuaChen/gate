@@ -35,7 +35,6 @@ public class POSMapper extends AbstractLanguageAnalyser
     public Resource init()
         throws ResourceInstantiationException
     {
-        gate.util.profile.Profiler profiler = null;
         fireStatusChanged("Init POS Mapper structures ...");
         initMap();
         fireProcessFinished();
@@ -44,7 +43,7 @@ public class POSMapper extends AbstractLanguageAnalyser
 
     private void initMap()
     {
-        categoriesMap = new HashMap();
+        categoriesMap = new HashMap<String, String>();
         String adjTypes = "Au,Aupfpaa,Aupfpai,Aupfpd,Aupfpg,Aupfpi,Aupfpl,Aupfpn,Aupfsfa,Aupfsfd,Aupfsfg,Aupfsfi,Aupfsfl,Aupfsfn,Aupfsmaa,Aupfsmai,Aupfsmd,Aupfsmg,Aupfsmi,Aupfsml,Aupfsmn,Aupfsna,Aupfsnd,Aupfsng,Aupfsni,Aupfsnl,Aupfsnn,Aupsp,Aupssf,Aupssm,Aupssn";
         String type;
         for(StringTokenizer tok = new StringTokenizer(adjTypes, ","); tok.hasMoreElements(); categoriesMap.put(type, "JJ"))
@@ -82,7 +81,6 @@ public class POSMapper extends AbstractLanguageAnalyser
     public void execute()
         throws ExecutionException
     {
-        gate.util.profile.Profiler profiler = null;
         if(super.document == null)
             throw new ExecutionException("No document to process!");
         AnnotationSet annotationSet;
@@ -118,7 +116,7 @@ public class POSMapper extends AbstractLanguageAnalyser
             showMessage("No annotations from type Token");
             return;
         }
-        HashSet mappedTypes = new HashSet();
+        HashSet<String> mappedTypes = new HashSet<String>();
         Annotation list[] = msdSet.toArray(new Annotation[mappedTypes.size()]);
         Arrays.sort(list, new OffsetComparator());
         for(int index = 0; index < list.length;)
@@ -131,14 +129,14 @@ public class POSMapper extends AbstractLanguageAnalyser
                 String msdType = (String)msdAnn.getFeatures().get("type");
                 if(msdType != null)
                 {
-                    tokType = (String)categoriesMap.get(msdType);
+                    tokType = categoriesMap.get(msdType);
                     if(tokType != null)
                         mappedTypes.add(tokType);
                 }
             } while(++index < list.length && msdAnn.compareTo(list[index]) == 0);
             tokType = "";
-            for(Iterator it = mappedTypes.iterator(); it.hasNext();)
-                tokType = tokType + (String)it.next() + " ";
+            for(Iterator<String> it = mappedTypes.iterator(); it.hasNext();)
+                tokType = tokType + it.next() + " ";
 
             tokType = tokType.trim();
             AnnotationSet singleToken = tokenSet.getStrict(msdAnn.getStartNode().getOffset(), msdAnn.getEndNode().getOffset());
@@ -177,5 +175,5 @@ public class POSMapper extends AbstractLanguageAnalyser
     protected static final boolean DEBUG = false;
     protected static final boolean DETAILED_DEBUG = false;
     protected String inputASName;
-    protected Map categoriesMap;
+    protected Map<String, String> categoriesMap;
 }

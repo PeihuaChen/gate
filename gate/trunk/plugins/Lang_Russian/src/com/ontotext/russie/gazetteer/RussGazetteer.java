@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -109,7 +110,7 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
   *  each map's value might be an ArrayList of Lookup objects specifying categories
   *  tied to this word/phrase.
   */
- protected ArrayList mapsList = new ArrayList(10);
+ protected List<Map> mapsList = new ArrayList<Map>(10);
 
  /** size of the mapsList
   */
@@ -117,7 +118,7 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
 
  /** a list of references to Lookup objs representing the categories.
   */
- protected ArrayList categoryList = null;
+ protected ArrayList<Lookup> categoryList = null;
 
  /** Builds a gazetter using the default lists from the GATE resources
   * {see init()}
@@ -151,7 +152,7 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
      mapsListSize = mapsList.size();
 
      //allocate the category Map with optimal initial capacity & load factor
-     categoryList = new ArrayList(linesCnt+1);
+     categoryList = new ArrayList<Lookup>(linesCnt+1);
 
      Iterator inodes = definition.iterator();
      LinearNode node;
@@ -271,8 +272,8 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
    String phrase = EMPTY_STR;
    int mapIndex = 0;
    FeatureMap fm;
-   HashMap currentMap = new HashMap();
-   ArrayList currentLookup = null;
+   Map currentMap = new HashMap();
+   List currentLookup = null;
    // whether the current word is the first in the phrase
    boolean firstWord = true;
    boolean punctuationZone = false;
@@ -451,7 +452,7 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
        } // if mapindex out of bounds
 
        //try to find it in the dark cave ...
-       currentMap = (HashMap) mapsList.get(mapIndex);
+       currentMap = mapsList.get(mapIndex);
        //if found in current map then set matchedRegion
        phrase = trunxSuffixVowelsFromPhrase(phrase);
        if (currentMap.containsKey(phrase)) {
@@ -534,7 +535,7 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
  public Set lookup(String singleItem) {
    Set result  = null;
    for ( int li = 0 ; li < mapsListSize ; li++ ) {
-     HashMap list = (HashMap)mapsList.get(li);
+     Map list = mapsList.get(li);
      if (list.containsKey(singleItem)) {
        ArrayList lookupList = (ArrayList) list.get(singleItem);
        if (lookupList != null && lookupList.size()>0) {
@@ -549,7 +550,7 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
  public boolean remove(String singleItem) {
    boolean isRemoved = false;
    for (int i = 0 ; i < mapsListSize ; i++) {
-     HashMap map = (HashMap)mapsList.get(i);
+     Map map = mapsList.get(i);
      if (map.containsKey(singleItem)) {
        map.remove(singleItem);
        isRemoved = true;
@@ -586,7 +587,7 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
    }
 
    //category key
-   ArrayList key = new ArrayList(1);
+   ArrayList<Lookup> key = new ArrayList<Lookup>(1);
 
    // add the lookup to the current key
    key.add(lookup);
@@ -600,8 +601,8 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
    String line = singleItem;
    int mapIndex = -1;
    String word = null;
-   ArrayList oldKey = null;
-   HashMap currentMap = new HashMap();
+   List<Lookup> oldKey = null;
+   Map<String, List<Lookup>> currentMap = new HashMap<String, List<Lookup>>();
    int length = 0;
 
    line = singleItem;
@@ -625,7 +626,7 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
        } // if the map doesn't exist
 
        // get the map and add the word to the map
-       currentMap = (HashMap)(mapsList.get(mapIndex));
+       currentMap = (mapsList.get(mapIndex));
        // try to get the current word
        // if there isn't such a word : add it with null key.
        if (!currentMap.containsKey(word)) {
@@ -639,17 +640,17 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
 
 
    //!!! put the category key in the last map
-   oldKey = (ArrayList) currentMap.get(word);
+   oldKey = currentMap.get(word);
    if (null == oldKey) {
      currentMap.put(word,key);
    } else {
      // merge the two arraylists
      // and check to avoid duplicity of lookups
      // note that key's length is 1
-     ArrayList mergedKey = new ArrayList(oldKey);
+     ArrayList<Lookup> mergedKey = new ArrayList<Lookup>(oldKey);
      boolean duplicity = false;
      for ( int i = 0; i < oldKey.size(); i++ ) {
-       duplicity = ((Lookup) mergedKey.get(i)).equals((Lookup)key.get(0));
+       duplicity = mergedKey.get(i).equals(key.get(0));
      } //for i
      if (!duplicity)
        mergedKey.add(key.get(0));

@@ -39,10 +39,10 @@ public class MorphologyReader implements RussIEConstants {
       +LINE_PREFIX+"] in the current morphology line.";
 
   /**the set of lemmas*/
-  private Set lemmas;
+  private Set<Lemma> lemmas;
 
   public MorphologyReader(boolean caseSensitive) {
-    lemmas = new HashSet();
+    lemmas = new HashSet<Lemma>();
   }
 
   /** Loads the morphology files */
@@ -71,7 +71,7 @@ public class MorphologyReader implements RussIEConstants {
 
   /**Gets the set of lemmas built from the morphology file.
    * @return the set of lemmas built from the morphology file. */
-  public Set getLemmas() {
+  public Set<Lemma> getLemmas() {
     return lemmas;
   }
 

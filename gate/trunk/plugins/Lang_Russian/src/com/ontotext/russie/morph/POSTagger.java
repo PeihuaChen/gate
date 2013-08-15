@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -83,7 +84,7 @@ public class POSTagger extends  gate.creole.AbstractLanguageAnalyser
   *  each map's value might be an ArrayList of TYpe objects specifying categories
   *  tied to this word/phrase.
   */
- protected ArrayList mapsList ;
+ protected List<Map> mapsList ;
 
  /** size of the mapsList
   */
@@ -91,13 +92,13 @@ public class POSTagger extends  gate.creole.AbstractLanguageAnalyser
 
  /** a list of distinct references to morpho syntactic set.
   */
- protected Set msTypeSet = null;
+ protected Set<SuffixNest> msTypeSet = null;
 
  /**The location of the main configuration file  */
  private URL config;
 
  public POSTagger(){
-   mapsList = new ArrayList(10);
+   mapsList = new ArrayList<Map>(10);
  }
 
  /**
@@ -165,7 +166,7 @@ public class POSTagger extends  gate.creole.AbstractLanguageAnalyser
          //allocate the category Map with optimal initial capacity & load factor
          // IR - no idea what this is for, it gets overwritten every iteration
          // and is written to but not read within add()...
-         msTypeSet = new HashSet();
+         msTypeSet = new HashSet<SuffixNest>();
 
          Lemma lemma;
          fireStatusChanged(READING + configLine);
@@ -269,7 +270,7 @@ public class POSTagger extends  gate.creole.AbstractLanguageAnalyser
    String phrase = "";
    int mapIndex = 0;
    FeatureMap fm;
-   HashMap currentMap = new HashMap();
+   Map currentMap = new HashMap();
    // whether the current word is the first in the phrase
    boolean firstWord = true;
    boolean punctuationZone = false;
@@ -450,21 +451,21 @@ public class POSTagger extends  gate.creole.AbstractLanguageAnalyser
        } // if mapindex out of bounds
 
        //try to find it in the dark cave ...
-       currentMap = (HashMap) mapsList.get(mapIndex);
+       currentMap = mapsList.get(mapIndex);
 
-       Map lemmaVsTypes = this.lookup(phrase,currentMap);
+       Map<String, Set> lemmaVsTypes = this.lookup(phrase,currentMap);
        if (lemmaVsTypes != null && lemmaVsTypes.size()>0) {
          matchedRegionEnd = iend;
          // generate lookups for the phrase so far
          {
-           Iterator lemmaIter = lemmaVsTypes.keySet().iterator();
+           Iterator<String> lemmaIter = lemmaVsTypes.keySet().iterator();
            String lemma;
            Set typeSet;
            String type;
            Iterator typeIter;
            while(lemmaIter.hasNext()) {
-             lemma = (String)lemmaIter.next();
-             typeSet = (Set) lemmaVsTypes.get(lemma);
+             lemma = lemmaIter.next();
+             typeSet = lemmaVsTypes.get(lemma);
              typeIter = typeSet.iterator();
              while (typeIter.hasNext()){
                type = typeIter.next().toString();
@@ -539,7 +540,7 @@ public class POSTagger extends  gate.creole.AbstractLanguageAnalyser
  public Set lookup(String wordForm) {
    Set result  = null;
    for ( int li = 0 ; li < mapsListSize ; li++ ) {
-     HashMap list = (HashMap)mapsList.get(li);
+     Map list = mapsList.get(li);
      if (list.containsKey(wordForm)) {
        ArrayList lookupList = (ArrayList) list.get(wordForm);
        if (lookupList != null && lookupList.size()>0) {
@@ -554,7 +555,7 @@ public class POSTagger extends  gate.creole.AbstractLanguageAnalyser
  public boolean remove(String wordForm) {
    boolean isRemoved = false;
    for (int i = 0 ; i < mapsListSize ; i++) {
-     HashMap map = (HashMap)mapsList.get(i);
+     Map map = mapsList.get(i);
      if (map.containsKey(wordForm)) {
        map.remove(wordForm);
        isRemoved = true;
@@ -589,7 +590,7 @@ public class POSTagger extends  gate.creole.AbstractLanguageAnalyser
 //   } // avoid endless recursion
 
    //category key
-   Set key = new HashSet(1);
+   Set<SuffixNest> key = new HashSet<SuffixNest>(1);
 
    // add the lookup to the current key
    key.add(nest);
@@ -603,8 +604,8 @@ public class POSTagger extends  gate.creole.AbstractLanguageAnalyser
    String line = root;
    int mapIndex = -1;
    String word = null;
-   Set oldKey = null;
-   HashMap currentMap = null;
+   Set<SuffixNest> oldKey = null;
+   Map<String, Set> currentMap = null;
    int length = 0;
 
    mapIndex = -1;
@@ -631,7 +632,7 @@ public class POSTagger extends  gate.creole.AbstractLanguageAnalyser
        } // if the map doesn't exist
 
        // get the map and add the word to the map
-       currentMap = (HashMap)(mapsList.get(mapIndex));
+       currentMap = (mapsList.get(mapIndex));
        // try to get the current word
        // if there isn't such a word : add it with null key.
        if (!currentMap.containsKey(word)) {
@@ -650,19 +651,19 @@ public class POSTagger extends  gate.creole.AbstractLanguageAnalyser
        mapsList.add(new HashMap());
        mapsListSize++;
      } // if the map doesn't exist
-     currentMap = (HashMap)(mapsList.get(mapIndex));
+     currentMap = (mapsList.get(mapIndex));
    }
 
    try {
    //!!! put the category key in the last map
-     oldKey = (Set) currentMap.get(word);
+     oldKey = currentMap.get(word);
    } catch (Exception x) {
      x.printStackTrace();
      System.out.println("root = " +word);
    }
 
    if (null == oldKey) {
-     oldKey = new HashSet(1);
+     oldKey = new HashSet<SuffixNest>(1);
      oldKey.add(nest);
      currentMap.put(word,oldKey);
      isAdded = true;
@@ -722,7 +723,7 @@ public URL getConfig() {
   * @param map
   * @return the map of main form vs matching types for the current phrase and map
   */
- private Map lookup(String phrase,Map map){
+ private Map<String, Set> lookup(String phrase,Map map){
    if (DETAILED_DEBUG) {
      System.out.println("phrase -> "+phrase);
    }
@@ -731,7 +732,7 @@ public URL getConfig() {
      phrase = phrase.toLowerCase();
    }
 
-   Map lemmaVsTypes = new HashMap();
+   Map<String, Set> lemmaVsTypes = new HashMap<String, Set>();
    Set newTypes;
    Set nests;
    Iterator ni;
@@ -751,7 +752,7 @@ public URL getConfig() {
            newTypes = nest.getType(suffix);
            lemma = phrase+nest.getMainFormSuffix();
            if ( newTypes != null) {
-             types = (Set)lemmaVsTypes.get(lemma);
+             types = lemmaVsTypes.get(lemma);
              if (types == null) {
                lemmaVsTypes.put(lemma,newTypes);
              } else {
