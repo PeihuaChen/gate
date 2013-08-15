@@ -50,9 +50,6 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
    * generated annotations*/
   protected String annotationSetName;
 
-  /** A map of the features */
-  protected FeatureMap features  = null;
-
   /** the encoding of the gazetteer */
   protected String encoding;
 
