@@ -1,5 +1,7 @@
 package com.ontotext.russie.morph;
 
+import gate.FeatureMap;
+
 import java.util.Set;
 
 /**SuffixNest.java
@@ -48,21 +50,21 @@ public interface SuffixNest {
    * Get all morpho-syntactic types.
    * @return all morpho-syntactic types
    */
-  Set getTypes();
+  Set<String> getTypes();
 
   /**
    * Gets the set of types associated with a suffix
    * @param suffix
    * @return the set of types associated with the suffix
    */
-  Set getType(String suffix);
+  Set<String> getType(String suffix);
 
   /**Adds a prefix to all suffixes in the nest
    * @param prefix
    */
   void addPrefix2Suffixes(String prefix);
 
-  gate.FeatureMap getFeatureMap () ;
-  void setFeatureMap (gate.FeatureMap fm) ;
+  FeatureMap getFeatureMap () ;
+  void setFeatureMap (FeatureMap fm) ;
 
 } // class SuffixNest

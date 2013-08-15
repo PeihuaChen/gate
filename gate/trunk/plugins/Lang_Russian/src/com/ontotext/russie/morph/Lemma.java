@@ -65,31 +65,31 @@ String getSuffix(String type) ;
 /**
  * Fetch a set of the word-form suffixes in the lemma according to the root.
  * @return the word-form suffixes in this lemma */
-public Set getSuffixes() ;
+public Set<String> getSuffixes() ;
 
 /**
  * Get the set of types relevant to a word-form
  * @param wf the word-form
  * @return the set of types relevant to the word-form
  */
-Set getTypeByWF(String wf) ;
+Set<String> getTypeByWF(String wf) ;
 
 /**
  * Get the set of types relevant to a word-form suffix
  * @param suffix the suffix of the wf
  * @return the set of types relevant to the word-form with this suffix
  */
-Set getTypeBySuffix(String suffix) ;
+Set<String> getTypeBySuffix(String suffix) ;
 
 /**
  * Fetch a set of the word-forms in the lemma.
  * @return the word-forms in this lemma */
-Set getWordForms();
+Set<String> getWordForms();
 
 /**
  * Fetch the set of word-form types in the lemma
  * @return the set of word-form types in the lemma */
-Set getTypes();
+Set<String> getTypes();
 
 /**Get the suffix nest associated with this lemma.
  * @return the nest */

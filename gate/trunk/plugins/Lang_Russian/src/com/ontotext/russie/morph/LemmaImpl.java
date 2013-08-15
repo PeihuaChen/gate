@@ -123,7 +123,7 @@ public class LemmaImpl implements Lemma{
    * @param wf the word-form
    * @return the set of types relevant to the word-form
    */
-  public Set getTypeByWF(String wf) {
+  public Set<String> getTypeByWF(String wf) {
     return suffixNest.getType(wf.substring(root.length()));
   }
 
@@ -132,7 +132,7 @@ public class LemmaImpl implements Lemma{
    * @param suffix the suffix of the wf
    * @return the set of types relevant to the word-form with this suffix
    */
-  public Set getTypeBySuffix(String suffix) {
+  public Set<String> getTypeBySuffix(String suffix) {
     return suffixNest.getType(suffix);
   }
 
@@ -140,11 +140,10 @@ public class LemmaImpl implements Lemma{
   /**
    * Fetch a set of the word-forms in the lemma.
    * @return the word-forms in this lemma */
-  public Set getWordForms() {
-    Set sufs = suffixNest.getSuffixes();
-    Iterator it = sufs.iterator();
-    String suf;
-    Set wfs = new HashSet();
+  public Set<String> getWordForms() {
+    Set<String> sufs = suffixNest.getSuffixes();
+    Iterator<String> it = sufs.iterator();
+    Set<String> wfs = new HashSet<String>();
     while (it.hasNext()) {
       wfs.add(root+ it.next());
     }
@@ -155,7 +154,7 @@ public class LemmaImpl implements Lemma{
   /**
    * Fetch a set of the word-form suffixes in the lemma according to the root.
    * @return the word-form suffixes in this lemma */
-  public Set getSuffixes() {
+  public Set<String> getSuffixes() {
     return suffixNest.getSuffixes();
   } /// getSuffixes()
 
