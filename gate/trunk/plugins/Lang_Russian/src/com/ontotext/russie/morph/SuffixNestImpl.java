@@ -74,7 +74,7 @@ public class SuffixNestImpl implements SuffixNest {
    * @param typeSet the set of types
    */
   public void add(String suffix, Set<String> typeSet)  {
-    Set set = (Set)suffixVsType.get(suffix);
+    Set<String> set = suffixVsType.get(suffix);
     if (set != null) {
       typeSet.addAll(set);
     }
@@ -96,16 +96,16 @@ public class SuffixNestImpl implements SuffixNest {
   public Set<String> getTypes() {
     Iterator<Set<String>> it = suffixVsType.values().iterator();
     Set<String> allTypes = new HashSet<String>();
-    Object o;
+    Set<String> o;
     while (it.hasNext()) {
       o = it.next();
       if ( o == null ) continue;
       if (o instanceof Set) {
         allTypes.addAll((Set<String>)o);
       }
-      if (o instanceof String) {
+      /*if (o instanceof String) {
         allTypes.add((String)o);
-      }
+      }*/
     } // while there are type sets
     return allTypes;
   } // getTypes()
@@ -115,8 +115,8 @@ public class SuffixNestImpl implements SuffixNest {
    * @param suffix
    * @return the set of types associated with the suffix
    */
-  public Set getType(String suffix) {
-    return (Set)suffixVsType.get(suffix);
+  public Set<String> getType(String suffix) {
+    return suffixVsType.get(suffix);
   }
 
   public int hashCode() {
