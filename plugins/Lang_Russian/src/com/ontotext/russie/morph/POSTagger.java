@@ -157,8 +157,8 @@ public class POSTagger extends  gate.creole.AbstractLanguageAnalyser
 
          URL morphURL = new URL(config, configLine);
          MorphologyReader morphRdr = getMorphReader(morphURL);
-         Set lemmaSet = morphRdr.getLemmas();
-         Iterator lemmaIter = lemmaSet.iterator();
+         Set<Lemma> lemmaSet = morphRdr.getLemmas();
+         Iterator<Lemma> lemmaIter = lemmaSet.iterator();
 
          int linesCnt = lemmaSet.size();
          //allocate the hashmap for the first words from the phrases
