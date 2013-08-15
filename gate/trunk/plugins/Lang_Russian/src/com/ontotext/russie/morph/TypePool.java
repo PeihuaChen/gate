@@ -1,6 +1,7 @@
 package com.ontotext.russie.morph;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 /**TypePool.java
  * Represents a pool of distinct morpho-syntactic types.
  * <p>Title: RussIE</p>

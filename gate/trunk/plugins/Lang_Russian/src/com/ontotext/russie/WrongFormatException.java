@@ -10,6 +10,8 @@ package com.ontotext.russie;
  */
 public class WrongFormatException extends Exception {
 
+  private static final long serialVersionUID = -6149480951422115298L;
+
   public WrongFormatException() {
       super();
   }

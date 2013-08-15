@@ -1,6 +1,8 @@
 package com.ontotext.russie;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * RussIEConstants.java
@@ -75,7 +77,7 @@ final static String [] arrVowels = {
   "\u044F","\u042F"
 };
 
-static final Set SET_OF_VOWELS = new HashSet(Arrays.asList(arrVowels));
+static final Set<String> SET_OF_VOWELS = new HashSet<String>(Arrays.asList(arrVowels));
 
 /*Consonant Suffixes*/
 final static String [] arrConsonantSuffixes = {
@@ -101,7 +103,7 @@ final static String [] arrConsonantSuffixes = {
   "\u044F\u0445","\u042F\u0425",
   };
 
-static Set SET_OF_CONSONANT_SUFFIXES = new HashSet(Arrays.asList(arrConsonantSuffixes));
+static Set<String> SET_OF_CONSONANT_SUFFIXES = new HashSet<String>(Arrays.asList(arrConsonantSuffixes));
 
 
 

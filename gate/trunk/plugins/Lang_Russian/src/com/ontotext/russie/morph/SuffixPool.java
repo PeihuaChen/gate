@@ -1,6 +1,7 @@
 package com.ontotext.russie.morph;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**SuffixPool.java
  *

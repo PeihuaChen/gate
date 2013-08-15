@@ -19,18 +19,33 @@
  */
 package com.ontotext.russie.morph;
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
+import gate.AnnotationSet;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Resource;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
+import gate.util.GateRuntimeException;
+import gate.util.InvalidOffsetException;
+import gate.util.LuckyException;
+import gate.util.profile.Profiler;
 
-import gate.util.*;
-import gate.creole.*;
-import gate.creole.gazetteer.*;
-import gate.creole.metadata.*;
-import gate.event.*;
-import gate.*;
-import gate.util.profile.*;
-import com.ontotext.russie.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+import com.ontotext.russie.RussIEConstants;
 
 @CreoleResource(name = "Russian POS Tagger", icon = "pos-tagger")
 public class POSTagger extends  gate.creole.AbstractLanguageAnalyser

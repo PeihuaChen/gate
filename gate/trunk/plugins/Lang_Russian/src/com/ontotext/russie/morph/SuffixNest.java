@@ -1,6 +1,6 @@
 package com.ontotext.russie.morph;
 
-import java.util.*;
+import java.util.Set;
 
 /**SuffixNest.java
  *
