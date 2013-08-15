@@ -11,8 +11,6 @@ import com.ontotext.russie.RussIEConstants;
 import com.ontotext.russie.WrongFormatException;
 
 /**
- * MorphologyReader.java
- *
  * This class reads in the morphology with the word forms and creates lists of
  * Lemmas that present wordforms and varios other morhological and syntactic
  * information for them. It needs the path to the morphology to be set before
@@ -25,9 +23,6 @@ import com.ontotext.russie.WrongFormatException;
  * @version 1.0
  */
 public class MorphologyReader implements RussIEConstants {
-
-  /** the path to the morphology */
-  private String morphPath;
 
   protected String encoding;
 
