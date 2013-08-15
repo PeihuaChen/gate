@@ -2,6 +2,8 @@ package com.ontotext.russie.morph;
 
 import gate.FeatureMap;
 
+import java.util.Set;
+
 /**Lemma.java
  * @todo : make it allow not distinct types and wfs
  * The Lemma consists of alternative word-forms and syntactic and morphological
@@ -63,31 +65,31 @@ String getSuffix(String type) ;
 /**
  * Fetch a set of the word-form suffixes in the lemma according to the root.
  * @return the word-form suffixes in this lemma */
-public java.util.Set getSuffixes() ;
+public Set getSuffixes() ;
 
 /**
  * Get the set of types relevant to a word-form
  * @param wf the word-form
  * @return the set of types relevant to the word-form
  */
-java.util.Set getTypeByWF(String wf) ;
+Set getTypeByWF(String wf) ;
 
 /**
  * Get the set of types relevant to a word-form suffix
  * @param suffix the suffix of the wf
  * @return the set of types relevant to the word-form with this suffix
  */
-java.util.Set getTypeBySuffix(String suffix) ;
+Set getTypeBySuffix(String suffix) ;
 
 /**
  * Fetch a set of the word-forms in the lemma.
  * @return the word-forms in this lemma */
-java.util.Set getWordForms();
+Set getWordForms();
 
 /**
  * Fetch the set of word-form types in the lemma
  * @return the set of word-form types in the lemma */
-java.util.Set getTypes();
+Set getTypes();
 
 /**Get the suffix nest associated with this lemma.
  * @return the nest */
