@@ -5,14 +5,27 @@
 
 package com.ontotext.russie.morph;
 
-import com.ontotext.russie.RussIEConstants;
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Resource;
 import gate.annotation.AnnotationSetImpl;
-import gate.creole.*;
-import gate.creole.metadata.*;
-import gate.util.FeatureBearer;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
 import gate.util.OffsetComparator;
-import java.util.*;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.StringTokenizer;
+
+import com.ontotext.russie.RussIEConstants;
 
 @CreoleResource(name = "POS Mapper")
 public class POSMapper extends AbstractLanguageAnalyser

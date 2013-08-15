@@ -1,8 +1,12 @@
 package com.ontotext.russie.morph;
-import java.util.*;
+import gate.Factory;
+import gate.FeatureMap;
 
-import gate.*;
-import gate.creole.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**LemmaImpl.java
  * Implementation of the Lemma inteface that contains the wordforms of a word

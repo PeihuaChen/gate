@@ -24,17 +24,32 @@
 
 package com.ontotext.russie.gazetteer;
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
+import gate.AnnotationSet;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Resource;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.gazetteer.AbstractGazetteer;
+import gate.creole.gazetteer.GazetteerException;
+import gate.creole.gazetteer.GazetteerList;
+import gate.creole.gazetteer.LinearDefinition;
+import gate.creole.gazetteer.LinearNode;
+import gate.creole.gazetteer.Lookup;
+import gate.creole.gazetteer.MappingNode;
+import gate.util.InvalidOffsetException;
+import gate.util.LuckyException;
 
-import gate.util.*;
-import gate.creole.*;
-import gate.creole.gazetteer.*;
-import gate.event.*;
-import gate.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
-import com.ontotext.russie.*;
+import com.ontotext.russie.RussIEConstants;
 
 /**RussGazetteer.java
 *

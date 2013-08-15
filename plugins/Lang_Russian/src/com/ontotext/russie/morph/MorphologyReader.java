@@ -1,12 +1,14 @@
 package com.ontotext.russie.morph;
 
-import java.util.*;
-
-import java.io.*;
-import java.nio.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
-import com.ontotext.russie.*;
-import gate.util.*;
+import java.util.HashSet;
+import java.util.Set;
+
+import com.ontotext.russie.RussIEConstants;
+import com.ontotext.russie.WrongFormatException;
 
 /**
  * MorphologyReader.java
