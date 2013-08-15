@@ -596,7 +596,7 @@ public class POSTagger extends  gate.creole.AbstractLanguageAnalyser
    int length = 0;
 
    mapIndex = -1;
-   line.trim();
+   line = line.trim();
    length = line.length();
    for (int lineIndex = 0; lineIndex < length ; lineIndex++) {
      if ((lineIndex+1==length)||

@@ -574,7 +574,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
 
     mapIndex = -1;
     if (line == null ) line = "";
-    line.trim();
+    line = line.trim();
     length = line.length();
     for (int lineIndex = 0; lineIndex < length ; lineIndex++) {
       if ((lineIndex+1==length)||
