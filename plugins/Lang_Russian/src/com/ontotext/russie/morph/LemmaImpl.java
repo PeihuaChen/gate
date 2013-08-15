@@ -171,7 +171,6 @@ public class LemmaImpl implements Lemma{
    */
   private void add2Suffixes(String prefix) {
     if (prefix == null || prefix.length()==0) return;
-    Map suffixVsTypeNew =  new HashMap();
 
     Iterator ki = typeVsSuffix.keySet().iterator();
     String type;
@@ -236,6 +235,8 @@ public class LemmaImpl implements Lemma{
     if (!l2.getTypes().equals(this.getTypes())) return false;
     return true;
   } // equals(obj)
+  
+  
 
   /**Get the suffix nest associated with this lemma.
    * @return the nest */
