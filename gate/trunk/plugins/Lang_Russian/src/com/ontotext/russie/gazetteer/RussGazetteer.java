@@ -591,7 +591,7 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
 
    line = singleItem;
    mapIndex = -1;
-   line.trim();
+   line = line.trim();
    length = line.length();
    for (int lineIndex = 0; lineIndex < length ; lineIndex++) {
      if ((lineIndex+1==length)||(Character.isWhitespace(line.charAt(lineIndex)))) {
