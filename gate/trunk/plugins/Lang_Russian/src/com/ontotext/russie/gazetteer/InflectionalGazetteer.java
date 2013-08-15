@@ -60,7 +60,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
   /**
    * parameter list of types to be imported - used for filtering of Location f.e.
    */
-  protected ArrayList importOnlyTheseTypes = new ArrayList();
+  protected List<String> importOnlyTheseTypes = new ArrayList<String>();
 
   public Boolean caseSensitive;
 
@@ -697,14 +697,14 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
     return encoding;
   }
 
-  public ArrayList getImportOnlyTheseTypes(){
+  public List<String> getImportOnlyTheseTypes(){
     return importOnlyTheseTypes;
   }
 
   @CreoleParameter(comment = "major types to be imported",
       defaultValue = "person_first;person_full;surname",
       collectionElementType = String.class)
-  public void setImportOnlyTheseTypes(ArrayList types){
+  public void setImportOnlyTheseTypes(List<String> types){
     importOnlyTheseTypes = types;
   }
 

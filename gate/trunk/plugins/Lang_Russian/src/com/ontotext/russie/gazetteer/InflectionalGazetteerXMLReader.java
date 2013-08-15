@@ -33,10 +33,10 @@ public class InflectionalGazetteerXMLReader
     implements RussIEConstants, ContentHandler
 {
 
-    public InflectionalGazetteerXMLReader(List importTypes)
+    public InflectionalGazetteerXMLReader(List<String> importTypes)
     {
         lemmas = new ArrayList<Lemma>();
-        listImportTypes = new ArrayList();
+        //listImportTypes = new ArrayList<String>();
         tagContent = new StringBuffer();
         parserValue = "org.apache.xerces.parsers.SAXParser";
         locator = null;
@@ -210,7 +210,7 @@ public class InflectionalGazetteerXMLReader
 
     private List<Lemma> lemmas;
     private String wordform;
-    protected List listImportTypes;
+    protected List<String> listImportTypes;
     private StringBuffer tagContent;
     static final String DEFAULT_PARSER = "org.apache.xerces.parsers.SAXParser";
     public static final String TAG_RUSNAMES = "rusnames";
