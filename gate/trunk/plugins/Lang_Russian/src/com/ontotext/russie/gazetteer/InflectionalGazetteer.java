@@ -171,8 +171,8 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
           URL fileURL = new URL(config, configLine);
 
           InflectionalGazetteerXMLReader gazReader = getGazReader(fileURL);
-          List lemmas = gazReader.getLemmas();
-          Iterator lemmaIter = lemmas.iterator();
+          List<Lemma> lemmas = gazReader.getLemmas();
+          Iterator<Lemma> lemmaIter = lemmas.iterator();
 
           int linesCnt = lemmas.size();
           // allocate the hashmap for the first words from the phrases
@@ -186,7 +186,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
           Lemma lemma;
           fireStatusChanged(READING + configLine);
           while(lemmaIter.hasNext()) {
-            lemma = (Lemma)lemmaIter.next();
+            lemma = lemmaIter.next();
             fireProgressChanged(++lemmaIdx * 100 / linesCnt);
             this.add(lemma);
           } // while
@@ -284,7 +284,6 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
     // letter to number or number to letter transition zone
     boolean l2nORn2lZone = false;
     char currentChar = 0;
-    boolean goonFlag = true;
     int typeWeight = 0;
 
     // note that the code within the next cycle is overwhelmed by complexity
@@ -502,14 +501,14 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
 
   } // execute ()
 
-  public Set lookup(String wordForm) {
-    Set result = null;
+  public Set<List> lookup(String wordForm) {
+    Set<List> result = null;
     for(int li = 0; li < mapsListSize; li++) {
-      Map list = mapsList.get(li);
+      Map<String,List> list = mapsList.get(li);
       if(list.containsKey(wordForm)) {
-        ArrayList lookupList = (ArrayList)list.get(wordForm);
+        List<List> lookupList = list.get(wordForm);
         if(lookupList != null && lookupList.size() > 0) {
-          result = new HashSet(lookupList);
+          result = new HashSet<List>(lookupList);
           break;
         }
       }
@@ -520,7 +519,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
   public boolean remove(String wordForm) {
     boolean isRemoved = false;
     for(int i = 0; i < mapsListSize; i++) {
-      Map map = mapsList.get(i);
+      Map<String,List> map = mapsList.get(i);
       if(map.containsKey(wordForm)) {
         map.remove(wordForm);
         isRemoved = true;
@@ -571,7 +570,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
     int mapIndex = -1;
     String word = null;
     Set<SuffixNest> oldKey = null;
-    Map<String, Set> currentMap = null;
+    Map<String, Set<SuffixNest>> currentMap = null;
     int length = 0;
 
     mapIndex = -1;

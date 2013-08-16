@@ -25,9 +25,6 @@ public class TypePool {
 
   private static Map<String, String> pool = new HashMap<String, String>();
 
-  public TypePool() {
-  }
-
   /**
    * Retrieves a distinct/unique morpho-syntactic type instance that equals the
    * new type. If there is no equivalent the new type is returned and also added
@@ -43,7 +40,7 @@ public class TypePool {
     }
 
     return pool.get(newType);
-  } // getUniqueNestAs(newNest)
+  }
 
   public static String getString() {
     return pool.keySet().toString();
@@ -53,4 +50,4 @@ public class TypePool {
     return pool.size();
   }
 
-} // class TypePool
+}
