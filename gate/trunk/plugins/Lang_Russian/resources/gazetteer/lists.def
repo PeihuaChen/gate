@@ -18,13 +18,11 @@ org_base.lst:cdg
 org_spur.lst:spur
 organization.lst:organization
 organization_companies.lst:organization:company
-organization_companies_cap.lst:organization:company
+organization_companies_CAP.lst:organization:company
 organization_government.lst:organization:government
 organization_public_companies (bigger).lst:organization:public
 person_government.lst:person_full:government
 person_ministers.lst:person_full:government
-person.lst:person_full
-person_spur.lst:spurPerson
 person_person_of_the_year_2001_and_2002.lst:person_full:famous
 time_key.lst:time_key
 title_female.lst:title:female
