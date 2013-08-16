@@ -39,6 +39,10 @@ import gate.creole.gazetteer.LinearDefinition;
 import gate.creole.gazetteer.LinearNode;
 import gate.creole.gazetteer.Lookup;
 import gate.creole.gazetteer.MappingNode;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.HiddenCreoleParameter;
+import gate.creole.metadata.RunTime;
 import gate.util.InvalidOffsetException;
 import gate.util.LuckyException;
 
@@ -60,6 +64,7 @@ import com.ontotext.russie.RussIEConstants;
  * @author borislav popov
  * @version 1.0
  */
+@CreoleResource(name = "Russian Gazetteer", icon = "shefGazetteer")
 public class RussGazetteer extends AbstractGazetteer implements RussIEConstants {
 
   private static final long serialVersionUID = -5174914553200046785L;
@@ -173,11 +178,11 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
       // allocate the category Map with optimal initial capacity & load factor
       categoryList = new ArrayList<Lookup>(linesCnt + 1);
 
-      Iterator inodes = definition.iterator();
+      Iterator<LinearNode> inodes = definition.iterator();
       LinearNode node;
       int nodeIdx = 0;
       while(inodes.hasNext()) {
-        node = (LinearNode)inodes.next();
+        node = inodes.next();
         fireStatusChanged(READING + node.toString());
         fireProgressChanged(++nodeIdx * 100 / linesCnt);
         readList(node, true);
@@ -719,5 +724,25 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
 
     return word;
   } // trunxSuffixVowelsFromWord()
+  
+  @HiddenCreoleParameter
+  @CreoleParameter(comment="not supported by this gazetteer", defaultValue="true")
+  public void setCaseSensitive(Boolean newCaseSensitive) {
+    caseSensitive = newCaseSensitive;
+  }
+  
+  @HiddenCreoleParameter
+  @RunTime
+  @CreoleParameter(comment="not supported by this gazetteer", defaultValue="true")
+  public void setLongestMatchOnly(Boolean longestMatchOnly) {
+    this.longestMatchOnly = longestMatchOnly;
+  }
+  
+  @HiddenCreoleParameter
+  @RunTime
+  @CreoleParameter(comment="not supported by this gazetteer", defaultValue="true")
+  public void setWholeWordsOnly(Boolean wholeWordsOnly) {
+    this.wholeWordsOnly = wholeWordsOnly;
+  }
 
 } // class Russ Gazetteer

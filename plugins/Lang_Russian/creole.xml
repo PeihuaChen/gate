@@ -1,45 +1,5 @@
 <?xml version="1.0"?>
 <CREOLE-DIRECTORY>
-
-  <JAR>russie.jar</JAR>
-    
- <!-- Processing Resources -->
-  <CREOLE>
-    <!-- Russ Gazetteer -->
-     <RESOURCE>
-      <NAME>Russ Gazetteer</NAME>
-      <CLASS>com.ontotext.russie.gazetteer.RussGazetteer</CLASS>
-      <PARAMETER NAME="document" RUNTIME="true"
-        COMMENT="The document to be processed">gate.Document</PARAMETER>
-      <PARAMETER NAME="listsURL"
-     DEFAULT="gate:/creole/resources/gazeteer/lists.def" 
-        COMMENT="The URL to the file with list of lists"
-  SUFFIXES="def">java.net.URL</PARAMETER>
-      <PARAMETER DEFAULT="UTF-8"
-        COMMENT="The encoding used for reading the definitions and lists"
-  NAME="encoding">java.lang.String</PARAMETER>
-      <ICON>shefGazetteer.gif</ICON>
-    </RESOURCE>
-
-    <!-- POS Tagger -->
-     <RESOURCE>
-      <CLASS>com.ontotext.russie.morph.POSTagger</CLASS>
-    </RESOURCE>
-
-
-   <!-- Inflectional Gazetteer -->
-     <RESOURCE>
-      <CLASS>com.ontotext.russie.gazetteer.InflectionalGazetteer</CLASS>
-    </RESOURCE>
-
-
-    <!-- POS Mapper -->
-     <RESOURCE>
-      <CLASS>com.ontotext.russie.morph.POSMapper</CLASS>
-    </RESOURCE>
-
-   </CREOLE>
-
-  
+  <JAR SCAN="TRUE">russie.jar</JAR>  
 </CREOLE-DIRECTORY>
 
