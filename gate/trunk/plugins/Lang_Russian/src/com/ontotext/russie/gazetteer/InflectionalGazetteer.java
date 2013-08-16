@@ -22,6 +22,7 @@ package com.ontotext.russie.gazetteer;
 import gate.AnnotationSet;
 import gate.FeatureMap;
 import gate.Resource;
+import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleParameter;
@@ -50,14 +51,10 @@ import com.ontotext.russie.morph.SuffixPool;
 import com.ontotext.russie.morph.TypePool;
 
 @CreoleResource(name = "Inflectional gazetteer")
-public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
-  implements RussIEConstants {
+public class InflectionalGazetteer extends AbstractLanguageAnalyser implements
+  RussIEConstants {
 
   private static final long serialVersionUID = -6564083196195936381L;
-
-  public InflectionalGazetteer() {
-    mapsList = new ArrayList<Map>(10);
-  }
 
   /**
    * Debug flag
@@ -102,7 +99,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
    * etc. each map's value might be an ArrayList of TYpe objects specifying
    * categories tied to this word/phrase.
    */
-  protected List<Map> mapsList;
+  protected List<Map> mapsList = new ArrayList<Map>(10);
 
   /**
    * size of the mapsList
@@ -504,7 +501,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
   public Set<List> lookup(String wordForm) {
     Set<List> result = null;
     for(int li = 0; li < mapsListSize; li++) {
-      Map<String,List> list = mapsList.get(li);
+      Map<String, List> list = mapsList.get(li);
       if(list.containsKey(wordForm)) {
         List<List> lookupList = list.get(wordForm);
         if(lookupList != null && lookupList.size() > 0) {
@@ -519,7 +516,7 @@ public class InflectionalGazetteer extends gate.creole.AbstractLanguageAnalyser
   public boolean remove(String wordForm) {
     boolean isRemoved = false;
     for(int i = 0; i < mapsListSize; i++) {
-      Map<String,List> map = mapsList.get(i);
+      Map<String, List> map = mapsList.get(i);
       if(map.containsKey(wordForm)) {
         map.remove(wordForm);
         isRemoved = true;
