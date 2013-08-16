@@ -16,7 +16,8 @@ import java.util.Map;
  */
 public class SuffixPool {
 
-  private static Map<SuffixNest, SuffixNest> pool = new HashMap<SuffixNest, SuffixNest>();
+  private static Map<SuffixNest, SuffixNest> pool =
+    new HashMap<SuffixNest, SuffixNest>();
 
   public SuffixPool() {
   }
