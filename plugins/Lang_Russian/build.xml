@@ -1,67 +1,60 @@
-<project name="russie" basedir="." default="jar" >
-  <property file="build.properties" />
+<project name="russie" basedir="." default="jar">
+	<property file="build.properties" />
 
-  <property name="gate.home" location="../../" />
-  <property name="gate.lib" location="${gate.home}/lib" />
-  <property name="gate.jar" location="${gate.home}/bin/gate.jar" />
+	<property name="gate.home" location="../../" />
+	<property name="gate.lib" location="${gate.home}/lib" />
+	<property name="gate.jar" location="${gate.home}/bin/gate.jar" />
 
-  <property name="src.dir" location="src" />
-  <property name="classes.dir" location="classes" />
-  <property name="jar.location" location="russie.jar" />
+	<property name="src.dir" location="src" />
+	<property name="classes.dir" location="classes" />
+	<property name="jar.location" location="russie.jar" />
 
-  <!-- Path to compile - includes gate.jar and GATE/lib/*.jar -->
-  <path id="compile.classpath">
-    <pathelement location="${gate.jar}" />
-    <fileset dir="${gate.lib}" includes="*.jar"/>
-  </path>
-  
-  <!-- create build directory structure -->
-  <target name="prepare">
-    <mkdir dir="${classes.dir}" />
-  </target>
+	<!-- Path to compile - includes gate.jar and GATE/lib/*.jar -->
+	<path id="compile.classpath">
+		<pathelement location="${gate.jar}" />
+		<fileset dir="${gate.lib}" includes="*.jar" />
+	</path>
 
-  <!-- compile the source -->
-  <target name="compile" depends="prepare">
-    <javac classpathref="compile.classpath"
-           srcdir="${src.dir}"
-           destdir="${classes.dir}"
-           debug="true"
-           debuglevel="lines,source"
-           source="1.6" target="1.6" />
-  </target>
+	<!-- create build directory structure -->
+	<target name="prepare">
+		<mkdir dir="${classes.dir}" />
+	</target>
 
-  <!-- copy resources (i.e. anything non-.java) from src to classes -->
-  <target name="copy.resources" depends="prepare">
-    <copy todir="${classes.dir}" includeEmptyDirs="true">
-      <fileset dir="${src.dir}" excludes="**/*.java" />
-    </copy>
-  </target>
+	<!-- compile the source -->
+	<target name="compile" depends="prepare">
+		<javac classpathref="compile.classpath" srcdir="${src.dir}" destdir="${classes.dir}" debug="true" debuglevel="lines,source" source="1.6" target="1.6" />
+	</target>
 
-  <!-- create the JAR file -->
-  <target name="jar" depends="compile, copy.resources" >
-    <jar destfile="${jar.location}"
-         update="false"
-         basedir="${classes.dir}" />
-  </target>
+	<!-- copy resources (i.e. anything non-.java) from src to classes -->
+	<target name="copy.resources" depends="prepare">
+		<copy todir="${classes.dir}" includeEmptyDirs="true">
+			<fileset dir="${src.dir}" excludes="**/*.java" />
+		</copy>
+	</target>
 
-  <!-- remove the generated .class files -->
-  <target name="clean.classes" >
-    <delete dir="${classes.dir}" />
-  </target>
+	<!-- create the JAR file -->
+	<target name="jar" depends="compile, copy.resources">
+		<jar destfile="${jar.location}" update="false" basedir="${classes.dir}" />
+	</target>
 
-  <!-- Clean up - remove .class and .jar files -->
-  <target name="clean" depends="clean.classes" >
-    <delete file="${jar.location}" />
-  </target>
+	<!-- remove the generated .class files -->
+	<target name="clean.classes">
+		<delete dir="${classes.dir}" />
+	</target>
 
-  <!-- Targets used by the main GATE build file:
+	<!-- Clean up - remove .class and .jar files -->
+	<target name="clean" depends="clean.classes">
+		<delete file="${jar.location}" />
+	</target>
+
+	<!-- Targets used by the main GATE build file:
          build: build the plugin - just calls "jar" target
          test : run the unit tests - there aren't any
          distro.prepare: remove intermediate files that shouldn't be in the
                          distribution
   -->
-  <target name="build" depends="jar" />
-  <target name="test" />
-  <target name="distro.prepare" depends="clean.classes" />
+	<target name="build" depends="jar" />
+	<target name="test" />
+	<target name="distro.prepare" depends="clean.classes" />
 
 </project>
