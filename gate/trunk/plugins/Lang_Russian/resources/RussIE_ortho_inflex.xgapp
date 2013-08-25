@@ -13,7 +13,7 @@
   </urlList>
   <application class='gate.util.persistence.ConditionalControllerPersistence'>
     <resourceType>gate.creole.ConditionalSerialAnalyserController</resourceType>
-    <resourceName>RussIE app</resourceName>
+    <resourceName>RussIE + Inflectional Gazetteer &amp; OrthoMatcher</resourceName>
     <initParams class='gate.util.persistence.MapPersistence'>
       <mapType>gate.util.SimpleFeatureMapImpl</mapType>
       <localMap />
