@@ -16,7 +16,7 @@
 //note: organization should be included as part of the address ??
 
 Phase:	Final
-Input: Token Lookup Jobtitle TempPerson TempLocation TempOrganization TempDate TempTime TempYear TempZone Street Postcode Email Url Phone Ip TempIdentifier TempSpecs TempFacility Control
+Input: Token Lookup JobTitle TempPerson TempLocation TempOrganization TempDate TempTime TempYear TempZone Street Postcode Email Url Phone Ip TempIdentifier TempSpecs TempFacility Control
 Options: control = appelt
 
 
