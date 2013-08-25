@@ -3,6 +3,7 @@ location.lst:location
 continents.lst:location:continent
 country.lst:location:country
 currency_unit_rus.lst:currency_unit:post_amount
+date_key.lst:date_key
 date_post.lst:date_post
 date_unit.lst:date_unit
 day.lst:date:day
