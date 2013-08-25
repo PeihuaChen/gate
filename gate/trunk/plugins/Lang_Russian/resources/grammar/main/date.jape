@@ -363,15 +363,17 @@ Rule: TimeDigitalContextConj
 
 // Date Rules
 
-Rule: IgnoreDatePerson
-Priority: 500
-(
- {Date}
- {Person}
-)
-:date
--->
-{}
+//MAG: commented out as it requires Date which isn't in the input set
+//     this rule is also commented out in the main ANNIE grammar
+//Rule: IgnoreDatePerson
+//Priority: 500
+//(
+// {Date}
+// {Person}
+//)
+//:date
+//-->
+//{}
 
 
 
