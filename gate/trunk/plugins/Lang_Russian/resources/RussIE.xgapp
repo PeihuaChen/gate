@@ -20,7 +20,12 @@
     </initParams>
     <features class='gate.util.persistence.MapPersistence'>
       <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-      <localMap />
+      <localMap>
+        <entry>
+          <string>gate.gui.icon</string>
+          <string>Russian</string>
+        </entry>
+      </localMap>
     </features>
     <prList class='gate.util.persistence.CollectionPersistence'>
       <localList>
