@@ -15,7 +15,7 @@
 
 Phase:	Clean
 Input: TempPerson TempLocation TempOrganization TempDate TempTime TempYear TempZone Street Postcode Email Url Phone Ip TempIdentifier TempSpecs UrlPre
-Options: control = appelt
+Options: control = all
 
 Rule:CleanTempAnnotations
 (
