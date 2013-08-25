@@ -15,7 +15,7 @@
 
 
 Phase:	Name
-Input: Token Lookup TempPerson TempDate GazLocation Upper Initials Control
+Input: Token Lookup TempPerson TempDate GazLocation Upper Initials Control FirstPerson
 Options: control = appelt debug = false
 
 ///////////////////////////////////////////////////////////////////
@@ -688,7 +688,7 @@ Priority: 130
 // overrides PersonFull
 
 (
- (FIRSTNAME )
+ (FIRSTNAME)
  ({Lookup.majorType == org_key}|
   {Lookup.majorType == org_base})
  (CDG)?
