@@ -254,7 +254,7 @@
               <entry>
                 <string>grammarURL</string>
                 <gate.util.persistence.PersistenceManager_-URLHolder>
-                  <urlString>$relpath$grammar/main/main.jape</urlString>
+                  <urlString>$relpath$grammar/main.jape</urlString>
                 </gate.util.persistence.PersistenceManager_-URLHolder>
               </entry>
             </localMap>
