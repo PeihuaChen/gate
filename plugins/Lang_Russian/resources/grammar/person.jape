@@ -54,11 +54,6 @@ Macro: TITLE
  ({Token.string == "."})?
 )
 
-Macro: INITIALS
-(
-  {Initials}
-)
-
 Macro: INITIALS2
 
 (
@@ -349,7 +344,7 @@ Priority: 35
 
 (
  (TITLE)
-(FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2 | INITIALS )*
+(FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2 | {Initials} )*
  (PREFIX)?
  ({Upper})
  ({Upper})?
@@ -405,7 +400,7 @@ Priority: 55
  ({Title.gender == male} | {Title.gender == female})
 )
 (
- (FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2 | INITIALS)
+ (FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2 | {Initials})
 )
 :person -->
 {
@@ -435,7 +430,7 @@ Priority: 18
 ({Title.gender == male}|
  {Title.gender == female}
 )
- ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2 | INITIALS)
+ ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2 | {Initials})
  )*
  ({Upper})
  (PERSONENDING)?
@@ -473,7 +468,7 @@ Priority: 20
 ):jobtitle
 (
  (TITLE)?
- (FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2 | INITIALS)+
+ (FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2 | {Initials})+
  (PREFIX)*
  ({Upper})
  (PERSONENDING)?
@@ -505,7 +500,7 @@ features);
 Rule: NotFirstPerson
 Priority: 200
 (
- INITIALS
+ {Initials}
 ):notfirstperson
 (
   ({Lookup.majorType == stop}|
@@ -554,7 +549,7 @@ Priority: 50
 // e.g. Will And
 
 (
- INITIALS
+ {Initials}
  (
   {Lookup.majorType == stop}|
   {Token.category == DT}
@@ -752,7 +747,7 @@ Priority: 50
  {Token.category == DT}
 )?
 (
- ((INITIALS)|(INITIALS2))
+ ({Initials}|(INITIALS2))
  ({Lookup.majorType == org_base}|
   {Lookup.majorType == govern_key}|
   {Lookup.majorType == org_key})
@@ -779,7 +774,7 @@ Priority: 60
  {Token.category == DT}
 )
 (
-(FIRSTNAME|INITIALS|INITIALS2)?
+(FIRSTNAME|{Initials}|INITIALS2)?
  ({Upper})
  ({Lookup.majorType == org_base}|
   {Lookup.majorType == govern_key}|
@@ -1005,7 +1000,7 @@ Priority: 5
 (
  {Token.category ==NNP}
  {Token.string == ","}
- (INITIALS )+
+ ({Initials})+
  (PERSONENDING)?
 )
 :person -->
@@ -1064,7 +1059,7 @@ Priority: 40
 // Christian name + Location --> Person's Name
 (
  ({Lookup.majorType == person_first} |
-  (INITIALS
+  ({Initials}
    {Token.string == "."})
  )
   {Lookup.majorType == location}
