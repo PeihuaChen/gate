@@ -786,11 +786,12 @@ public class Utils {
    * @param spanSet an annotation set representing the span of the new annotation
    * @param type the annotation type of the new annotation
    * @param fm the feature map to use for the new annotation
+   * @return Returns the Id of the added annotation
    */
-  public static void addAnn(AnnotationSet outSet, AnnotationSet spanSet,
+  public static Integer addAnn(AnnotationSet outSet, AnnotationSet spanSet,
       String type, FeatureMap fm) {
     try {
-      outSet.add(start(spanSet), end(spanSet), type, fm);
+      return outSet.add(start(spanSet), end(spanSet), type, fm);
     } catch (InvalidOffsetException ex) {
       throw new GateRuntimeException("Offset error when trying to add new annotation: ", ex);
     }
@@ -808,11 +809,12 @@ public class Utils {
    * @param endOffset the end offset of the new annotation
    * @param type the annotation type of the new annotation
    * @param fm the feature map to use for the new annotation
+   * @return Returns the Id of the added annotation
    */
-  public static void addAnn(AnnotationSet outSet, long startOffset, long endOffset,
+  public static Integer addAnn(AnnotationSet outSet, long startOffset, long endOffset,
       String type, FeatureMap fm) {
     try {
-      outSet.add(startOffset, endOffset, type, fm);
+      return outSet.add(startOffset, endOffset, type, fm);
     } catch (InvalidOffsetException ex) {
       throw new GateRuntimeException("Offset error when trying to add new annotation: ", ex);
     }
@@ -829,11 +831,12 @@ public class Utils {
    * @param spanAnn an annotation representing the span of the new annotation
    * @param type the annotation type of the new annotation
    * @param fm the feature map to use for the new annotation
+   * @return Returns the Id of the added annotation
    */
-  public static void addAnn(AnnotationSet outSet, Annotation spanAnn,
+  public static Integer addAnn(AnnotationSet outSet, Annotation spanAnn,
       String type, FeatureMap fm) {
     try {
-      outSet.add(start(spanAnn), end(spanAnn), type, fm);
+      return outSet.add(start(spanAnn), end(spanAnn), type, fm);
     } catch (InvalidOffsetException ex) {
       throw new GateRuntimeException("Offset error adding new annotation: ", ex);
     }
