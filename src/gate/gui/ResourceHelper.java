@@ -74,7 +74,7 @@ public abstract class ResourceHelper extends AbstractResource implements
    * Build the {@link javax.swing.Action} instances that should be used to
    * enhance the right-click menu of the specified {@link gate.gui.NameBearerHandle}.
    * 
-   * @param resource
+   * @param handle
    *          the {@link gate.gui.NameBearerHandle} instance we are adding to
    * @return a list of {@link javax.swing.Action} instances that will be added
    *         to the right-click menu of the resource.
