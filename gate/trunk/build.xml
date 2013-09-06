@@ -364,7 +364,7 @@
   <!-- Learning plugin needs to be before Lang_Chinese -->
   <filelist id="plugins.to.build" dir="plugins" files="
       Alignment Annotation_Merging Copy_Annots_Between_Docs Coref_Tools 
-      Format_MediaWiki Format_PubMed Format_Twitter
+      Format_FastInfoset Format_MediaWiki Format_PubMed Format_Twitter
       Gazetteer_LKB Gazetteer_Ontology_Based GENIA Groovy
       Inter_Annotator_Agreement JAPE_Plus Keyphrase_Extraction_Algorithm
       Lang_Arabic Lang_Cebuano Learning Lang_Chinese Lang_French Lang_German
@@ -374,9 +374,8 @@
       Tagger_Abner Tagger_Boilerpipe Tagger_Chemistry Tagger_DateNormalizer
       Tagger_Framework Tagger_Lupedia Tagger_Measurements Tagger_MetaMap 
       Tagger_MutationFinder Tagger_NormaGene Tagger_NP_Chunking Tagger_Numbers 
-      Tagger_OpenCalais Tagger_PennBio Tagger_Zemanta Teamware_Tools 
-      TermRaider
-      Tools UIMA Web_Crawler_Websphinx WordNet
+      Tagger_OpenCalais Tagger_PennBio Tagger_Stanford Tagger_Zemanta
+      Teamware_Tools TermRaider Tools UIMA Web_Crawler_Websphinx WordNet
     " />
   <target name="plugins.build" depends="jar">
     <for param="plugin">
