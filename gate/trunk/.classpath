@@ -36,7 +36,7 @@
 	<classpathentry kind="src" output="plugins/Tagger_DateNormalizer/classes" path="plugins/Tagger_DateNormalizer/src"/>
 	<classpathentry kind="src" output="plugins/Format_MediaWiki/classes" path="plugins/Format_MediaWiki/src"/>
 	<classpathentry kind="src" output="plugins/Format_FastInfoset/classes" path="plugins/Format_FastInfoset/src"/>
-	<classpathentry kind="src" output="GATE/plugins/Lang_Russian/classes" path="plugins/Lang_Russian/src"/>
+	<classpathentry kind="src" output="plugins/Lang_Russian/classes" path="plugins/Lang_Russian/src"/>
 	<classpathentry kind="src" output="plugins/Tagger_Stanford/classes" path="plugins/Tagger_Stanford/src"/>
 	<classpathentry kind="lib" path="plugins/Gazetteer_Ontology_Based/lib/oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="plugins/WordNet/lib/jwnl.jar"/>
