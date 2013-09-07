@@ -117,19 +117,12 @@ public class Tagger extends AbstractLanguageAnalyser {
     // check the parameters
     if(document == null)
       throw new ExecutionException("No document to process!");
-    if(inputASName != null && inputASName.equals("")) inputASName = null;
-    AnnotationSet inputAS =
-      (inputASName == null) ? document.getAnnotations() : document
-        .getAnnotations(inputASName);
+
+    AnnotationSet inputAS = document.getAnnotations(inputASName);
 
     if(baseTokenAnnotationType == null ||
       baseTokenAnnotationType.trim().length() == 0) { throw new ExecutionException(
       "No base Token Annotation Type provided!"); }
-
-    if(outputASName != null && outputASName.equals("")) outputASName = null;
-    AnnotationSet outputAS =
-      (outputASName == null) ? document.getAnnotations() : document
-        .getAnnotations(outputASName);
 
     if(baseSentenceAnnotationType == null ||
       baseSentenceAnnotationType.trim().length() == 0) { throw new ExecutionException(
@@ -284,9 +277,7 @@ public class Tagger extends AbstractLanguageAnalyser {
       int end = annot.getEndNode().getOffset().intValue();
 
       // get the annotations of type outputAnnotationType
-      AnnotationSet outputAS =
-        (outputASName == null) ? document.getAnnotations() : document
-          .getAnnotations(outputASName);
+      AnnotationSet outputAS = document.getAnnotations(outputASName);
       AnnotationSet annotations = outputAS.get(outputAnnotationType);
       if(annotations == null || annotations.size() == 0) {
         // add new annotation
