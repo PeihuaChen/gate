@@ -381,7 +381,7 @@ public class Tagger extends AbstractLanguageAnalyser {
     this.outputASName = outputASName;
   }
 
-  @CreoleParameter(comment = "Path to the tagger's model file", defaultValue = "resources/english-left3words-distsim.tagger")
+  @CreoleParameter(comment = "Path to the tagger's model file", defaultValue = "resources/english-left3words-distsim.tagger", suffixes="tagger;model")
   public void setModelFile(URL modelFile) {
     this.modelFile = modelFile;
   }
