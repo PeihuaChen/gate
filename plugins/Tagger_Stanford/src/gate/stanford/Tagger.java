@@ -186,6 +186,11 @@ public class Tagger extends AbstractLanguageAnalyser {
           currentToken = (tokensIter.hasNext() ? tokensIter.next() : null);
         }
 
+        // if the sentence doesn't contain any tokens (which is a bit weird but
+        // is possible) then don't try running the POS tagger as you will get an
+        // array index out of bounds exception
+        if(sentenceForTagger.isEmpty()) continue;
+
         // run the POS tagger
         List<ArrayList<TaggedWord>> taggerList =
           tagger.process(sentencesForTagger);
