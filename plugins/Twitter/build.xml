@@ -90,9 +90,12 @@
 
 	<!-- generate javadoc -->
 
-	<target name="doc" depends="javadoc" />
+	<!-- Build JavaDoc documentation -->
+	<target name="doc.prepare">
+		<mkdir dir="${javadoc.dir}" />
+	</target>
 
-	<target name="javadoc" depends="compile" description="Create Javadoc API documentation">
+	<target name="javadoc" depends="doc.prepare" description="Create Javadoc API documentation">
 		<javadoc access="protected" destdir="${javadoc.dir}" classpathref="compile.classpath" Extdirs="${extDir}" Encoding="UTF-8" Use="yes" Windowtitle="GATE Twitter JavaDoc" docencoding="UTF-8" charset="UTF-8" source="1.6" useexternalfile="yes" breakiterator="true" linksource="yes">
 			<fileset dir="${src.dir}" />
 			<link href="http://docs.oracle.com/javase/6/docs/api/" />
