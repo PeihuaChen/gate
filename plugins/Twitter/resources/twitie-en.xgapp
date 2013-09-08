@@ -11,10 +11,10 @@
         <urlString>$gatehome$plugins/Language_Identification/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../Tagger_Stanford</urlString>
+        <urlString>$gatehome$plugins/Tagger_Stanford</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../Twitter</urlString>
+        <urlString>$relpath$..</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
     </localList>
     <collectionType>java.util.ArrayList</collectionType>
