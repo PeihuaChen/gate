@@ -154,6 +154,15 @@ Rule: RecombineEmoticon
    catch (InvalidOffsetException e) {
     e.printStackTrace();
    }
+   
+   FeatureMap params = Factory.newFeatureMap();
+   params.put("normalized", matchAnnots.iterator().next().getFeatures().get("normalized"));
+   try {
+    outputAS.add(start, end, "Emoticon", params);
+   }
+   catch (InvalidOffsetException e) {
+    e.printStackTrace();
+   }
 }
 
 Rule: UserID
