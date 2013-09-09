@@ -43,6 +43,7 @@ import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.HiddenCreoleParameter;
 import gate.creole.metadata.RunTime;
+import gate.creole.metadata.Sharable;
 import gate.util.InvalidOffsetException;
 import gate.util.LuckyException;
 
@@ -132,7 +133,7 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
    * etc. each map's value might be an ArrayList of Lookup objects specifying
    * categories tied to this word/phrase.
    */
-  protected List<Map> mapsList = new ArrayList<Map>(10);
+  protected List<Map> mapsList;
 
   /**
    * size of the mapsList
@@ -159,40 +160,55 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
    * @return returns this resource
    */
   public Resource init() throws ResourceInstantiationException {
-
-    // check if there's a list URL
-    if(listsURL == null) { throw new ResourceInstantiationException(
-      "No URL provided for gazetteer creation!"); } // if
-
-    try {
-      definition = new LinearDefinition();
-      definition.setURL(listsURL);
-      definition.load();
-      int linesCnt = definition.size();
-      listsByNode = definition.loadLists();
-
-      // allocate the hashmap for the first words from the phrases
-      mapsList.add(new HashMap(linesCnt * 10));
+    if(mapsList != null) {
+      // this is a duplicate
       mapsListSize = mapsList.size();
+    } else {
+      mapsList = new ArrayList<Map>(10);
+      // check if there's a list URL
+      if(listsURL == null) { throw new ResourceInstantiationException(
+        "No URL provided for gazetteer creation!"); } // if
 
-      // allocate the category Map with optimal initial capacity & load factor
-      categoryList = new ArrayList<Lookup>(linesCnt + 1);
+      try {
+        definition = new LinearDefinition();
+        definition.setURL(listsURL);
+        definition.load();
+        int linesCnt = definition.size();
+        listsByNode = definition.loadLists();
 
-      Iterator<LinearNode> inodes = definition.iterator();
-      LinearNode node;
-      int nodeIdx = 0;
-      while(inodes.hasNext()) {
-        node = inodes.next();
-        fireStatusChanged(READING + node.toString());
-        fireProgressChanged(++nodeIdx * 100 / linesCnt);
-        readList(node, true);
-      } // while
-      fireProcessFinished();
-    } catch(Exception x) {
-      throw new ResourceInstantiationException(x);
-    } // catch
+        // allocate the hashmap for the first words from the phrases
+        mapsList.add(new HashMap(linesCnt * 10));
+        mapsListSize = mapsList.size();
+
+        // allocate the category Map with optimal initial capacity & load factor
+        categoryList = new ArrayList<Lookup>(linesCnt + 1);
+
+        Iterator<LinearNode> inodes = definition.iterator();
+        LinearNode node;
+        int nodeIdx = 0;
+        while(inodes.hasNext()) {
+          node = inodes.next();
+          fireStatusChanged(READING + node.toString());
+          fireProgressChanged(++nodeIdx * 100 / linesCnt);
+          readList(node, true);
+        } // while
+        fireProcessFinished();
+      } catch(Exception x) {
+        throw new ResourceInstantiationException(x);
+      } // catch
+    }
     return this;
   } // Resource init()throws ResourceInstantiationException
+
+  /**
+   * Re-initialize this gazetteer by re-loading the configuration.
+   */
+  public void reInit() throws ResourceInstantiationException {
+    mapsList = null;
+    categoryList = null;
+    init();
+  }
+
 
   /**
    * gets the phrases/lines of a gazetteer list stores them in the maps opposed
@@ -745,4 +761,33 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
     this.wholeWordsOnly = wholeWordsOnly;
   }
 
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  @Sharable
+  public void setMapsList(List<Map> mapsList) {
+    this.mapsList = mapsList;
+  }
+
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  public List<Map> getMapsList() {
+    return mapsList;
+  }
+
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  @Sharable
+  public void setCategoryList(ArrayList<Lookup> categoryList) {
+    this.categoryList = categoryList;
+  }
+
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  public ArrayList<Lookup> getCategoryList() {
+    return categoryList;
+  }
 } // class Russ Gazetteer
