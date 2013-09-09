@@ -20,6 +20,8 @@ import gate.creole.AbstractResource;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +29,7 @@ import java.util.Map;
 import javax.swing.Action;
 
 public abstract class ResourceHelper extends AbstractResource implements
-                                                             CreoleListener {
+  CreoleListener {
 
   private static final long serialVersionUID = 1657147709821774423L;
 
@@ -54,8 +56,8 @@ public abstract class ResourceHelper extends AbstractResource implements
    * {@link #buildActions(NameBearerHandle)}.
    * 
    * @param handle
-   *          the {@link gate.gui.NameBearerHandle} instance we are wanting to add new menu
-   *          items to
+   *          the {@link gate.gui.NameBearerHandle} instance we are wanting to
+   *          add new menu items to
    * @return a list of {@link javax.swing.Action} instances which will be added
    *         to the right click menu of the specified handle
    */
@@ -72,7 +74,8 @@ public abstract class ResourceHelper extends AbstractResource implements
 
   /**
    * Build the {@link javax.swing.Action} instances that should be used to
-   * enhance the right-click menu of the specified {@link gate.gui.NameBearerHandle}.
+   * enhance the right-click menu of the specified
+   * {@link gate.gui.NameBearerHandle}.
    * 
    * @param handle
    *          the {@link gate.gui.NameBearerHandle} instance we are adding to
@@ -80,6 +83,62 @@ public abstract class ResourceHelper extends AbstractResource implements
    *         to the right-click menu of the resource.
    */
   protected abstract List<Action> buildActions(NameBearerHandle handle);
+
+  /**
+   * Allows for the calling of methods defined within ResourceHelper instances
+   * which aren't part of the core API and so which can only be called via
+   * reflection.
+   * 
+   * @param action
+   *          the name of the method to call (method must take a Resource
+   *          instance as it's first parameter)
+   * @param resource
+   *          the Resource instance that you want to help
+   * @param params
+   *          parameters to the method you are trying to call
+   * @return the return value from the method you are calling, or null if the
+   *         method has a void return type
+   */
+  public Object call(String action, Resource resource, Object... params)
+    throws NoSuchMethodException, IllegalArgumentException,
+    IllegalAccessException, InvocationTargetException {
+
+    // get all the methods defined for this instance of the helper
+    Method[] methods = this.getClass().getMethods();
+
+    for(Method method : methods) {
+      // for each method....
+
+      // if the method name doesn't match then skip onto the next method
+      if(!method.getName().equals(action)) continue;
+
+      // get the types of the methods params
+      Class<?>[] paramTypes = method.getParameterTypes();
+
+      // if the method doesn't have the right number of params then skip to the
+      // next method
+      if(paramTypes.length != params.length + 1) continue;
+
+      //check the param types and skip to the next method if they aren't compatible
+      if(!paramTypes[0].isAssignableFrom((resource.getClass()))) continue;
+      for(int i = 0; i < params.length; ++i) {
+        if(!paramTypes[i + 1].isAssignableFrom(params[i].getClass())) continue;
+      }
+
+      //if we got to here then we have found a method we can call so....
+      
+      //copy the params into a single array
+      Object[] parameters = new Object[params.length + 1];
+      parameters[0] = resource;
+      System.arraycopy(params, 0, parameters, 1, params.length);
+      
+      //and finally call the method
+      return method.invoke(this, parameters);
+
+    }
+
+    throw new NoSuchMethodException("we can't find what you are looking for");
+  }
 
   @Override
   public void cleanup() {
