@@ -33,6 +33,7 @@ import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
+import gate.creole.metadata.Sharable;
 import gate.util.GateRuntimeException;
 import gate.util.InvalidOffsetException;
 import gate.util.LuckyException;
@@ -111,7 +112,6 @@ public class POSTagger extends gate.creole.AbstractLanguageAnalyser implements
   private URL config;
 
   public POSTagger() {
-    mapsList = new ArrayList<Map>(10);
   }
 
   /**
@@ -142,96 +142,112 @@ public class POSTagger extends gate.creole.AbstractLanguageAnalyser implements
    * @return returns this resource
    */
   public Resource init() throws ResourceInstantiationException {
-    Profiler profiler = null;
-    if(DEBUG) {
-      profiler = new Profiler();
-      profiler.enableGCCalling(false);
-      profiler.initRun("POS Tagger init()");
-      profiler.checkPoint("reset");
-    }
-    // check if there's a list URL
-    if(config == null) { throw new ResourceInstantiationException(
-      "No config provided!"); } // if
+    if(mapsList != null) {
+      // this is a duplicate
+      mapsListSize = mapsList.size();
+    } else {
+      Profiler profiler = null;
+      if(DEBUG) {
+        profiler = new Profiler();
+        profiler.enableGCCalling(false);
+        profiler.initRun("POS Tagger init()");
+        profiler.checkPoint("reset");
+      }
+      // check if there's a list URL
+      if(config == null) { throw new ResourceInstantiationException(
+        "No config provided!"); } // if
 
-    try {
-      BufferedReader configReader =
-        new BufferedReader(new InputStreamReader(config.openStream(), encoding));
-      int lemmaIdx = 0;
+      mapsList = new ArrayList<Map>(10);
+
       try {
-        // each line in config is a relative path to a morph file
+        BufferedReader configReader =
+          new BufferedReader(new InputStreamReader(config.openStream(), encoding));
+        int lemmaIdx = 0;
+        try {
+          // each line in config is a relative path to a morph file
 
-        String configLine = null;
-        while((configLine = configReader.readLine()) != null) {
-          configLine = configLine.trim();
-          // ignore blank lines and comments
-          if("".equals(configLine) || configLine.startsWith("#")) continue;
+          String configLine = null;
+          while((configLine = configReader.readLine()) != null) {
+            configLine = configLine.trim();
+            // ignore blank lines and comments
+            if("".equals(configLine) || configLine.startsWith("#")) continue;
 
-          URL morphURL = new URL(config, configLine);
-          MorphologyReader morphRdr = getMorphReader(morphURL);
-          Set<Lemma> lemmaSet = morphRdr.getLemmas();
-          Iterator<Lemma> lemmaIter = lemmaSet.iterator();
+            URL morphURL = new URL(config, configLine);
+            MorphologyReader morphRdr = getMorphReader(morphURL);
+            Set<Lemma> lemmaSet = morphRdr.getLemmas();
+            Iterator<Lemma> lemmaIter = lemmaSet.iterator();
 
-          int linesCnt = lemmaSet.size();
-          // allocate the hashmap for the first words from the phrases
-          mapsList.add(new HashMap(linesCnt));
-          mapsListSize = mapsList.size();
+            int linesCnt = lemmaSet.size();
+            // allocate the hashmap for the first words from the phrases
+            mapsList.add(new HashMap(linesCnt));
+            mapsListSize = mapsList.size();
 
-          // allocate the category Map with optimal initial capacity & load
-          // factor
-          // IR - no idea what this is for, it gets overwritten every iteration
-          // and is written to but not read within add()...
-          msTypeSet = new HashSet<SuffixNest>();
+            // allocate the category Map with optimal initial capacity & load
+            // factor
+            // IR - no idea what this is for, it gets overwritten every iteration
+            // and is written to but not read within add()...
+            msTypeSet = new HashSet<SuffixNest>();
 
-          Lemma lemma;
-          fireStatusChanged(READING + configLine);
-          while(lemmaIter.hasNext()) {
-            lemma = (Lemma)lemmaIter.next();
-            fireProgressChanged(++lemmaIdx * 100 / linesCnt);
-            this.add(lemma);
-          } // while
+            Lemma lemma;
+            fireStatusChanged(READING + configLine);
+            while(lemmaIter.hasNext()) {
+              lemma = (Lemma)lemmaIter.next();
+              fireProgressChanged(++lemmaIdx * 100 / linesCnt);
+              this.add(lemma);
+            } // while
+          }
+
+        } finally {
+          configReader.close();
         }
 
-      } finally {
-        configReader.close();
-      }
+        fireProcessFinished();
 
-      fireProcessFinished();
+        if(DEBUG) {
+          System.out.println("POS Tagger Is GC Enabled ? = " +
+            profiler.isGCCallingEnabled());
+          profiler.checkPoint("POS Tagger init completed.");
+        } // DEBUG
 
-      if(DEBUG) {
-        System.out.println("POS Tagger Is GC Enabled ? = " +
-          profiler.isGCCallingEnabled());
-        profiler.checkPoint("POS Tagger init completed.");
-      } // DEBUG
+        if(DEBUG) {
+          System.out.println("Starting Garbage Collection ...");
+          System.gc();
+          profiler.checkPoint("Garbage Collection finished");
+        }
 
-      if(DEBUG) {
-        System.out.println("Starting Garbage Collection ...");
-        System.gc();
-        profiler.checkPoint("Garbage Collection finished");
-      }
+        if(DEBUG) {
+          System.out.println("\nLEMMAs COUNT -> ");
+          System.out.println(lemmaIdx);
+          System.out.println("\nTYPE POOL SIZE -> ");
+          System.out.println(TypePool.size());
+          System.out.println("\nSUFFIX POOL SIZE -> ");
+          System.out.println(SuffixPool.size());
+        }
+        if(DETAILED_DEBUG) {
+          // dump distinct types
+          System.out.println("\nTYPE POOL ->");
+          System.out.println(TypePool.getString());
+          System.out.println("\nSUFFIX POOL ->");
+          System.out.println(SuffixPool.getString());
 
-      if(DEBUG) {
-        System.out.println("\nLEMMAs COUNT -> ");
-        System.out.println(lemmaIdx);
-        System.out.println("\nTYPE POOL SIZE -> ");
-        System.out.println(TypePool.size());
-        System.out.println("\nSUFFIX POOL SIZE -> ");
-        System.out.println(SuffixPool.size());
-      }
-      if(DETAILED_DEBUG) {
-        // dump distinct types
-        System.out.println("\nTYPE POOL ->");
-        System.out.println(TypePool.getString());
-        System.out.println("\nSUFFIX POOL ->");
-        System.out.println(SuffixPool.getString());
+        }
 
-      }
-
-    } catch(Exception x) {
-      throw new ResourceInstantiationException(x);
-    } // catch
+      } catch(Exception x) {
+        throw new ResourceInstantiationException(x);
+      } // catch
+    }
 
     return this;
   } // Resource init() throws ResourceInstantiationException
+
+  /**
+   * Re-initialize this POS tagger by re-loading the configuration.
+   */
+  public void reInit() throws ResourceInstantiationException {
+    mapsList = null;
+    msTypeSet = null;
+    init();
+  }
 
   /**
    * This method runs the gazetteer. It parses the document and looks-up the
@@ -781,5 +797,35 @@ public class POSTagger extends gate.creole.AbstractLanguageAnalyser implements
     return caseSensitive;
   }
 
+
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  @Sharable
+  public void setMapsList(List<Map> mapsList) {
+    this.mapsList = mapsList;
+  }
+
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  public List<Map> getMapsList() {
+    return mapsList;
+  }
+
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  @Sharable
+  public void setMsTypeSet(Set<SuffixNest> msTypeSet) {
+    this.msTypeSet = msTypeSet;
+  }
+
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  public Set<SuffixNest> getMsTypeSet() {
+    return msTypeSet;
+  }
 } // class POSTagger
 
