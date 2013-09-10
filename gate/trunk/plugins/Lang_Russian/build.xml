@@ -8,6 +8,8 @@
 	<property name="src.dir" location="src" />
 	<property name="classes.dir" location="classes" />
 	<property name="jar.location" location="russie.jar" />
+	<property name="doc.dir" location="doc" />
+	<property name="javadoc.dir" location="${doc.dir}/javadoc" />
 
 	<!-- Path to compile - includes gate.jar and GATE/lib/*.jar -->
 	<path id="compile.classpath">
@@ -45,6 +47,21 @@
 	<!-- Clean up - remove .class and .jar files -->
 	<target name="clean" depends="clean.classes">
 		<delete file="${jar.location}" />
+	</target>
+
+	<!-- Build JavaDoc documentation -->
+	<target name="doc.prepare">
+		<mkdir dir="${javadoc.dir}" />
+	</target>
+
+	<target name="javadoc" depends="doc.prepare">
+		<javadoc destdir="${javadoc.dir}" packagenames="*" classpathref="compile.classpath" encoding="UTF-8" windowtitle="${plugin.name} JavaDoc" source="1.6">
+			<sourcepath>
+				<pathelement location="${src.dir}" />
+			</sourcepath>
+			<link href="http://docs.oracle.com/javase/6/docs/api/" />
+			<link href="http://gate.ac.uk/gate/doc/javadoc/" />
+		</javadoc>
 	</target>
 
 	<!-- Targets used by the main GATE build file:
