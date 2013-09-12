@@ -27,6 +27,8 @@ import org.apache.commons.lang.StringUtils;
 
 /** Document format for handling JSON tweets: either one 
  *  object {...} or a list [{tweet...}, {tweet...}, ...].
+ *  
+ *  This format produces one GATE document from one JSON file.
  */
 @CreoleResource(name = "GATE JSON Tweet Document Format", isPrivate = true,
     autoinstances = {@AutoInstance(hidden = true)})
@@ -35,6 +37,7 @@ public class JSONTweetFormat extends TextualDocumentFormat {
   private static final long serialVersionUID = 6878020036304333918L;
 
   public static final String TEXT_ATTRIBUTE = "text";
+  public static final String TWEET_ANNOTATION_TYPE = "Tweet";
   
   /** Default construction */
   public JSONTweetFormat() { super();}
@@ -95,7 +98,9 @@ public class JSONTweetFormat extends TextualDocumentFormat {
       AnnotationSet originalMarkups = doc.getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
       // Create Original markups annotations for each tweet
       for (Tweet tweet : tweets) {
-        originalMarkups.add(tweet.getStart(), tweet.getEnd(), "Tweet", tweet.getFeatures());
+        FeatureMap features = tweet.getFeatures();
+        features.remove(TEXT_ATTRIBUTE);
+        originalMarkups.add(tweet.getStart(), tweet.getEnd(), TWEET_ANNOTATION_TYPE, features);
       }
     }
     catch (InvalidOffsetException e) {
