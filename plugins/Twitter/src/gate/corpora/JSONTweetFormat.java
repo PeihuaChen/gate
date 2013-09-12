@@ -11,7 +11,7 @@
  *  
  *  $Id$
  */
-package gate.corpora.twitter;
+package gate.corpora;
 
 import gate.*;
 import gate.creole.ResourceInstantiationException;
@@ -19,7 +19,7 @@ import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.CreoleResource;
 import gate.util.DocumentFormatException;
 import gate.util.InvalidOffsetException;
-import gate.corpora.*;
+import gate.corpora.twitter.*;
 import java.io.IOException;
 import java.util.*;
 import org.apache.commons.lang.StringUtils;

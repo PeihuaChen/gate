@@ -16,6 +16,7 @@ package gate.corpora.twitter;
 import gate.*;
 import gate.util.DocumentFormatException;
 import gate.util.InvalidOffsetException;
+import gate.corpora.JSONTweetFormat;
 import java.util.*;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
