@@ -16,6 +16,13 @@ public enum IdfCalculation {
   Logarithmic,
   LogarithmicPlus1;
   
+  /* These calculations are from Manning & Schütze, Foundations of
+   * Statistical NLP, section 15.2 (p.544).
+   * 
+   * TODO: Use (df + 1) normalization methods so we can handle
+   * terms not found in the IDF table (to allow for external 
+   * IDF sources in future use).
+   */
   
   public static double calculate(IdfCalculation mode, int rawDF, int corpusSize) {
     double df = (double) rawDF;
