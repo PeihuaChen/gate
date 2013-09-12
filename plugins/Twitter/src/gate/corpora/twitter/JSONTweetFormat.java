@@ -8,43 +8,22 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
+ *  
+ *  $Id$
  */
-package gate.corpora;
+package gate.corpora.twitter;
 
-import gate.AnnotationSet;
-import gate.DocumentContent;
-import gate.Factory;
-import gate.FeatureMap;
-import gate.GateConstants;
-import gate.Resource;
+import gate.*;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.CreoleResource;
 import gate.util.DocumentFormatException;
 import gate.util.InvalidOffsetException;
-
+import gate.corpora.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang.StringEscapeUtils;
+import java.util.*;
 import org.apache.commons.lang.StringUtils;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-
-
-// JSON API
-// http://json-lib.sourceforge.net/apidocs/jdk15/index.html
-// Jackson API
-// http://wiki.fasterxml.com/JacksonHome
-
-// Standard: RFC 4627
-// https://tools.ietf.org/html/rfc4627
 
 /** Document format for handling JSON tweets: either one 
  *  object {...} or a list [{tweet...}, {tweet...}, ...].
@@ -100,7 +79,7 @@ public class JSONTweetFormat extends TextualDocumentFormat {
     String jsonString = StringUtils.trimToEmpty(doc.getContent().toString());
     try {
       // Parse the String
-      List<Tweet> tweets = readTweets(jsonString);
+      List<Tweet> tweets = TweetUtils.readTweets(jsonString);
       
       // Put them all together to make the unpacked document content
       StringBuilder concatenation = new StringBuilder();
@@ -125,145 +104,6 @@ public class JSONTweetFormat extends TextualDocumentFormat {
     catch(IOException e) {
       throw new DocumentFormatException(e);
     }
-  }
-  
-  
-  
-  private List<Tweet> readTweetList(String string) throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
-    List<Tweet> tweets = new ArrayList<Tweet>();
-    ArrayNode jarray = (ArrayNode) mapper.readTree(string);
-    for (JsonNode jnode : jarray) {
-      tweets.add(new Tweet(jnode));
-    }
-    return tweets;
-  }
-  
-  
-  private List<Tweet> readTweets(String string) throws IOException {
-    if (string.startsWith("[")) {
-      return readTweetList(string);
-    }
-
-    // implied else
-    return readTweetLines(string);
-  }
-  
-  
-  private List<Tweet>readTweetLines(String string) throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
-
-    List<Tweet> tweets = new ArrayList<Tweet>();
-    
-    // just not null, so we can use it in the loop 
-    String[] lines = string.split("[\\n\\r]+");
-    for (String line : lines) {
-      if (line.length() > 0) {
-        JsonNode jnode = mapper.readTree(line);
-        tweets.add(new Tweet(jnode));
-      }
-    }
-    
-    return tweets;
-  }
-
-}
-
-
-class Tweet {
-  private String string;
-  private FeatureMap features;
-  private long start;
-  
-  public int getLength() {
-    return this.string.length();
-  }
-
-  public String getString() {
-    return this.string;
-  }
-  
-  public FeatureMap getFeatures() {
-    return this.features;
-  }
-  
-  public void setStart(long start) {
-    this.start = start;
-  }
-  
-  public long getStart() {
-    return this.start;
-  }
-  
-  public long getEnd() {
-    return this.start + this.string.length();
-  }
-
-  
-  public Tweet(JsonNode json) {
-    string = "";
-    Iterator<String> keys = json.fieldNames();
-    features = Factory.newFeatureMap();
-
-    while (keys.hasNext()) {
-      String key = keys.next();
-      if (key.equals("text")) {
-        string = StringEscapeUtils.unescapeHtml(json.get(key).asText());
-      }
-      else {
-        features.put(key.toString(), process(json.get(key)));
-      }
-    }
-  }
-  
-  
-  public Tweet() {
-    string = "";
-    features = Factory.newFeatureMap();
-  }
-
-  
-  private Object process(JsonNode node) {
-    /* JSON types: number, string, boolean, array, object (dict/map),
-     * null.  All map keys are strings.
-     */
-
-    if (node.isBoolean()) {
-      return node.asBoolean();
-    }
-    if (node.isDouble()) {
-      return node.asDouble();
-    }
-    if (node.isInt()) {
-      return node.asInt();
-    }
-    if (node.isTextual()) {
-      return node.asText();
-    }
-      
-    if (node.isNull()) {
-      return null;
-    }
-    
-    if (node.isArray()) {
-      List<Object> list = new ArrayList<Object>();
-      for (JsonNode item : node) {
-        list.add(process(item));
-      }
-      return list;
-    }
-
-    if (node.isObject()) {
-      Map<String, Object> map = new HashMap<String, Object>();
-      Iterator<String> keys = node.fieldNames();
-      while (keys.hasNext()) {
-        String key = keys.next();
-        map.put(key, process(node.get(key)));
-      }
-      return map;
-    }
-
-    return node.toString();
   }
 
 }
