@@ -14,15 +14,12 @@
 package gate.corpora.twitter;
 
 import gate.*;
-import gate.util.DocumentFormatException;
-import gate.util.InvalidOffsetException;
+import gate.util.*;
+import gate.corpora.*;
 import gate.corpora.JSONTweetFormat;
 import java.util.*;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 
 
 // JSON API
@@ -39,6 +36,9 @@ public class Tweet {
   private FeatureMap features;
   private long start;
   
+  public static String PATH_SEPARATOR = ":";
+  
+  
   public int getLength() {
     return this.string.length();
   }
@@ -49,6 +49,14 @@ public class Tweet {
   
   public FeatureMap getFeatures() {
     return this.features;
+  }
+  
+  public FeatureMap getFlattenedFeatures() {
+    return TweetUtils.flatten(this.features, PATH_SEPARATOR);
+  }
+  
+  public FeatureMap getFilteredFeatures(Collection<String> keepKeys) {
+    return TweetUtils.filterFeatures(this.getFlattenedFeatures(), keepKeys);
   }
   
   public void setStart(long start) {
@@ -71,11 +79,10 @@ public class Tweet {
 
     while (keys.hasNext()) {
       String key = keys.next();
+      features.put(key.toString(), process(json.get(key)));
+
       if (key.equals(JSONTweetFormat.TEXT_ATTRIBUTE)) {
         string = StringEscapeUtils.unescapeHtml(json.get(key).asText());
-      }
-      else {
-        features.put(key.toString(), process(json.get(key)));
       }
     }
   }
@@ -87,7 +94,8 @@ public class Tweet {
   }
 
   
-  private Object process(JsonNode node) {
+  
+  private static Object process(JsonNode node) {
     /* JSON types: number, string, boolean, array, object (dict/map),
      * null.  All map keys are strings.
      */
@@ -131,8 +139,25 @@ public class Tweet {
   }
   
   
-  //public DocumentImpl toDocument(List<String> keepFeatures, FeatureMap contentItems) {
-  //}
+
+//  public Document toDocument(List<String> keepFeatures, FeatureMap contentItems) throws GateException {
+//    FeatureMap parameters = Factory.newFeatureMap();
+//    parameters.put(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME, "");
+//    Document doc = (Document) Factory.createResource(DocumentImpl.class.getName(), parameters);
+//    //doc.setSourceUrl(sourceUrl);
+//    
+//    // this is wrong: we need various strings with content annotations over them
+//    DocumentContent newContent= new DocumentContentImpl(this.getString());
+//    doc.setContent(newContent);
+//    AnnotationSet originalMarkups = doc.getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
+//
+//    originalMarkups.add(0L, newContent.size(), JSONTweetFormat.TWEET_ANNOTATION_TYPE, Factory.newFeatureMap());
+//
+//    // TODO: copy all the keepFeatures
+//    
+//    return doc;
+//  }
+
   
   
 }

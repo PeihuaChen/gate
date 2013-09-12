@@ -14,14 +14,8 @@
 package gate.corpora.twitter;
 
 import gate.*;
-import gate.creole.ResourceInstantiationException;
-import gate.util.DocumentFormatException;
-import gate.util.InvalidOffsetException;
-import gate.corpora.*;
 import java.io.IOException;
 import java.util.*;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -76,6 +70,41 @@ public class TweetUtils  {
     return tweets;
   }
   
+  
+  
+  public static FeatureMap filterFeatures(FeatureMap source, Collection<String> keep) {
+    FeatureMap result = Factory.newFeatureMap();
+    for (Object key : source.keySet()) {
+      if (keep.contains(key.toString())) {
+        result.put(key, source.get(key));
+      }
+    }
+    return result;
+  }
+  
+  
+  public static FeatureMap flatten(FeatureMap features, String separator) {
+    return flatten(features, "", separator);
+  }
+  
+  
+  private static FeatureMap flatten(Map<?, ?> map, String prefix, String separator) {
+    FeatureMap flattened = Factory.newFeatureMap();
+
+    for (Object key : map.keySet()) {
+      String flatKey = prefix + key.toString();
+      Object value = map.keySet();
+      if (value instanceof Map) {
+        flattened.putAll(flatten((Map<?, ?>) value, flatKey + separator, separator));
+      }
+      else {
+        flattened.put(flatKey, value);
+      }
+    }
+    return flattened;
+  }
+  
+
   
 
 }
