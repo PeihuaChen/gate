@@ -26,8 +26,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 
-// JSON API
-// http://json-lib.sourceforge.net/apidocs/jdk15/index.html
 // Jackson API
 // http://wiki.fasterxml.com/JacksonHome
 
@@ -37,8 +35,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 public class TweetUtils  {
   
   public static final String PATH_SEPARATOR = ":";
-  
-  
+  public static final String MIME_TYPE = "text/x-json-twitter";
 
   public static List<Tweet> readTweets(String string) throws IOException {
     if (string.startsWith("[")) {
@@ -61,11 +58,16 @@ public class TweetUtils  {
   
   
   public static List<Tweet>readTweetLines(String string, List<String> contentKeys, List<String> featureKeys) throws IOException {
+    // just not null, so we can use it in the loop 
+    String[] lines = string.split("[\\n\\r]+");
+    return readTweetStrings(lines, contentKeys, featureKeys);
+  }
+  
+
+  public static List<Tweet>readTweetStrings(String[] lines, List<String> contentKeys, List<String> featureKeys) throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     List<Tweet> tweets = new ArrayList<Tweet>();
     
-    // just not null, so we can use it in the loop 
-    String[] lines = string.split("[\\n\\r]+");
     for (String line : lines) {
       if (line.length() > 0) {
         JsonNode jnode = mapper.readTree(line);
@@ -75,8 +77,22 @@ public class TweetUtils  {
     
     return tweets;
   }
+
   
-  
+  public static List<Tweet>readTweetStrings(List<String> lines, List<String> contentKeys, List<String> featureKeys) throws IOException {
+    ObjectMapper mapper = new ObjectMapper();
+    List<Tweet> tweets = new ArrayList<Tweet>();
+    
+    for (String line : lines) {
+      if (line.length() > 0) {
+        JsonNode jnode = mapper.readTree(line);
+        tweets.add(new Tweet(jnode));
+      }
+    }
+    
+    return tweets;
+  }
+
   
   public static List<Tweet> readTweetList(String string, List<String> contentKeys, List<String> featureKeys) throws IOException {
     ObjectMapper mapper = new ObjectMapper();
@@ -89,39 +105,6 @@ public class TweetUtils  {
   }
 
 
-  public static FeatureMap filterFeatures(FeatureMap source, Collection<String> keep) {
-    FeatureMap result = Factory.newFeatureMap();
-    for (Object key : source.keySet()) {
-      if (keep.contains(key.toString())) {
-        result.put(key, source.get(key));
-      }
-    }
-    return result;
-  }
-  
-  
-  public static FeatureMap flatten(FeatureMap features, String separator) {
-    return flatten(features, "", separator);
-  }
-  
-  
-  private static FeatureMap flatten(Map<?, ?> map, String prefix, String separator) {
-    FeatureMap flattened = Factory.newFeatureMap();
-
-    for (Object key : map.keySet()) {
-      String flatKey = prefix + key.toString();
-      Object value = map.keySet();
-      if (value instanceof Map) {
-        flattened.putAll(flatten((Map<?, ?>) value, flatKey + separator, separator));
-      }
-      else {
-        flattened.put(flatKey, value);
-      }
-    }
-    return flattened;
-  }
-  
-  
   public static Object process(JsonNode node) {
     /* JSON types: number, string, boolean, array, object (dict/map),
      * null.  All map keys are strings.
@@ -168,11 +151,10 @@ public class TweetUtils  {
   
 
   public static FeatureMap process(JsonNode node, List<String> keepers) {
-    FeatureMap all = (FeatureMap) process(node);
     FeatureMap found = Factory.newFeatureMap();
     for (String keeper : keepers) {
       String[] keySequence = StringUtils.split(keeper, PATH_SEPARATOR);
-      Object value = explore(all, keySequence);
+      Object value = dig(node, keySequence);
       if (value != null) {
         found.put(keeper, value);
       }
@@ -181,27 +163,35 @@ public class TweetUtils  {
   }
   
   
-  // TODO: carry out the recursion on the JSON object instead of converting it to
-  // a FeatureMap first  
-  
-  private static Object explore(FeatureMap map, String[] keySequence) {
+  /**
+   * Dig through a JSON object, key-by-key (recursively).
+   * @param node
+   * @param keySequence
+   * @return the value held by the last key in the sequence; this will
+   * be a FeatureMap if there is further nesting
+   */
+  public static Object dig(JsonNode node, String[] keySequence) {
     if (keySequence.length < 1) {
       return null;
     }
     
-    if (map.containsKey(keySequence[0])) {
-      Object value = map.get(keySequence[0]); 
+    if (node.has(keySequence[0])) {
+      JsonNode value = node.get(keySequence[0]); 
       if (keySequence.length == 1) {
-        return value;
+        // Found last key in sequence; convert the JsonNode
+        // value to a normal object (possibly FeatureMap)
+        return process(value);
       }
       else if (value instanceof FeatureMap){
+        // Found current key; keep digging for the rest
         String[] remainingKeys = (String[]) ArrayUtils.subarray(keySequence, 1, keySequence.length);
-        return explore((FeatureMap) value, remainingKeys);
+        return dig(value, remainingKeys);
       }
     }
     
     return null;
   }
+
   
 
 }
