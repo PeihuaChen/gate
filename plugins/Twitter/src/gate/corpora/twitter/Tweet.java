@@ -24,8 +24,6 @@ import org.apache.commons.lang.StringEscapeUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 
 
-// JSON API
-// http://json-lib.sourceforge.net/apidocs/jdk15/index.html
 // Jackson API
 // http://wiki.fasterxml.com/JacksonHome
 
