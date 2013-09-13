@@ -32,28 +32,28 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 public class TweetUtils  {
   
 
-  public static List<Tweet> readTweetList(String string) throws IOException {
+  public static List<Tweet> readTweetList(String string, String annotationType) throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     List<Tweet> tweets = new ArrayList<Tweet>();
     ArrayNode jarray = (ArrayNode) mapper.readTree(string);
     for (JsonNode jnode : jarray) {
-      tweets.add(new Tweet(jnode));
+      tweets.add(new Tweet(jnode, annotationType));
     }
     return tweets;
   }
   
   
-  public static List<Tweet> readTweets(String string) throws IOException {
+  public static List<Tweet> readTweets(String string, String annotationType) throws IOException {
     if (string.startsWith("[")) {
-      return readTweetList(string);
+      return readTweetList(string, annotationType);
     }
 
     // implied else
-    return readTweetLines(string);
+    return readTweetLines(string, annotationType);
   }
   
   
-  public static List<Tweet>readTweetLines(String string) throws IOException {
+  public static List<Tweet>readTweetLines(String string, String annotationType) throws IOException {
     ObjectMapper mapper = new ObjectMapper();
 
     List<Tweet> tweets = new ArrayList<Tweet>();
@@ -63,7 +63,7 @@ public class TweetUtils  {
     for (String line : lines) {
       if (line.length() > 0) {
         JsonNode jnode = mapper.readTree(line);
-        tweets.add(new Tweet(jnode));
+        tweets.add(new Tweet(jnode, annotationType));
       }
     }
     
