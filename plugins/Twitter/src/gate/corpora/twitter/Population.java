@@ -15,24 +15,11 @@ import gate.*;
 import gate.corpora.DocumentContentImpl;
 import gate.creole.ResourceInstantiationException;
 import gate.util.InvalidOffsetException;
-import info.bliki.wiki.dump.IArticleFilter;
-import info.bliki.wiki.dump.Siteinfo;
-import info.bliki.wiki.dump.WikiArticle;
-import info.bliki.wiki.dump.WikiXMLParser;
-
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
-
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.xml.sax.SAXException;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.apache.commons.lang.*;
 
 
 public class Population  {
