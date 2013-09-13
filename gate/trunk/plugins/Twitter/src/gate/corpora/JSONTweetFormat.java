@@ -20,8 +20,10 @@ import gate.creole.metadata.CreoleResource;
 import gate.util.DocumentFormatException;
 import gate.util.InvalidOffsetException;
 import gate.corpora.twitter.*;
+
 import java.io.IOException;
 import java.util.*;
+
 import org.apache.commons.lang.StringUtils;
 
 
@@ -82,12 +84,13 @@ public class JSONTweetFormat extends TextualDocumentFormat {
     String jsonString = StringUtils.trimToEmpty(doc.getContent().toString());
     try {
       // Parse the String
-      List<Tweet> tweets = TweetUtils.readTweets(jsonString);
+      List<Tweet> tweets = TweetUtils.readTweets(jsonString, TWEET_ANNOTATION_TYPE);
+      Map<Tweet, Long> tweetStarts = new HashMap<Tweet, Long>();
       
       // Put them all together to make the unpacked document content
       StringBuilder concatenation = new StringBuilder();
       for (Tweet tweet : tweets) {
-        tweet.setStart(concatenation.length());
+        tweetStarts.put(tweet, (long) concatenation.length());
         concatenation.append(tweet.getString()).append("\n\n");
       }
 
@@ -98,9 +101,10 @@ public class JSONTweetFormat extends TextualDocumentFormat {
       AnnotationSet originalMarkups = doc.getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
       // Create Original markups annotations for each tweet
       for (Tweet tweet : tweets) {
-        FeatureMap features = tweet.getFeatures();
-        features.remove(TEXT_ATTRIBUTE);
-        originalMarkups.add(tweet.getStart(), tweet.getEnd(), TWEET_ANNOTATION_TYPE, features);
+        for (PreAnnotation preAnn : tweet.getAnnotations()) {
+          Annotation ann = preAnn.toAnnotation(originalMarkups, tweetStarts.get(tweet));
+          ann.getFeatures().remove(TEXT_ATTRIBUTE);
+        }
       }
     }
     catch (InvalidOffsetException e) {

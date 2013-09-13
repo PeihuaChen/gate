@@ -16,7 +16,6 @@ package gate.corpora.twitter;
 import gate.*;
 import gate.util.*;
 import gate.corpora.*;
-import gate.corpora.JSONTweetFormat;
 import java.util.*;
 import org.apache.commons.lang.StringEscapeUtils;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,11 +32,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class Tweet {
   private String string;
-  private FeatureMap features;
   private long start;
+  private Set<PreAnnotation> annotations;
   
   public static String PATH_SEPARATOR = ":";
   
+  
+  public Set<PreAnnotation> getAnnotations() {
+    return this.annotations;
+  }
   
   public int getLength() {
     return this.string.length();
@@ -45,22 +48,6 @@ public class Tweet {
 
   public String getString() {
     return this.string;
-  }
-  
-  public FeatureMap getFeatures() {
-    return this.features;
-  }
-  
-  public FeatureMap getFlattenedFeatures() {
-    return TweetUtils.flatten(this.features, PATH_SEPARATOR);
-  }
-  
-  public FeatureMap getFilteredFeatures(Collection<String> keepKeys) {
-    return TweetUtils.filterFeatures(this.getFlattenedFeatures(), keepKeys);
-  }
-  
-  public void setStart(long start) {
-    this.start = start;
   }
   
   public long getStart() {
@@ -71,11 +58,16 @@ public class Tweet {
     return this.start + this.string.length();
   }
 
-  
-  public Tweet(JsonNode json) {
+
+  /**
+   * Used by the JSONTWeetFormat; content with only the text, & all the 
+   * JSON stuff in the annotation features.
+   */
+  public Tweet(JsonNode json, String annotationType) {
     string = "";
     Iterator<String> keys = json.fieldNames();
-    features = Factory.newFeatureMap();
+    FeatureMap features = Factory.newFeatureMap();
+    annotations = new HashSet<PreAnnotation>();
 
     while (keys.hasNext()) {
       String key = keys.next();
@@ -85,12 +77,16 @@ public class Tweet {
         string = StringEscapeUtils.unescapeHtml(json.get(key).asText());
       }
     }
+    
+    annotations.add(new PreAnnotation(0L, string.length(), annotationType, features));
   }
   
   
+  /** Empty constructor for an empty result. 
+   */
   public Tweet() {
     string = "";
-    features = Factory.newFeatureMap();
+    annotations = new HashSet<PreAnnotation>();
   }
 
   
@@ -126,7 +122,7 @@ public class Tweet {
     }
 
     if (node.isObject()) {
-      Map<String, Object> map = new HashMap<String, Object>();
+      FeatureMap map = Factory.newFeatureMap();
       Iterator<String> keys = node.fieldNames();
       while (keys.hasNext()) {
         String key = keys.next();
