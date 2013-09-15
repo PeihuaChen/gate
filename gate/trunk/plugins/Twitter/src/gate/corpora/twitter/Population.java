@@ -32,6 +32,9 @@ public class Population  {
       List<String> lines = IOUtils.readLines(input, encoding);
       IOUtils.closeQuietly(input);
       
+      // TODO: sort this out so it processes one at a time instead of reading the
+      // whole hog into memory
+      
       // For now, we assume the streaming API format (concatenated maps, not in a list)
       List<Tweet> tweets = TweetUtils.readTweetStrings(lines, contentKeys, featureKeys);
       
@@ -62,7 +65,6 @@ public class Population  {
       }
       
       if(corpus.getDataStore() != null) {
-        // if this corpus is in a datastore make sure we sync it back
         corpus.getDataStore().sync(corpus);
       }
       
@@ -93,7 +95,10 @@ public class Population  {
     }
     corpus.add(document);
     
-    // TODO: datastore stuff (incl deleteResource)
+    if (corpus.getLRPersistenceId() != null) {
+      corpus.unloadDocument(document);
+      Factory.deleteResource(document);
+    }
   }
 
 
