@@ -56,13 +56,23 @@ public class Tweet {
   public long getEnd() {
     return this.start + this.string.length();
   }
+  
+  
+  public static Tweet readTweet(JsonNode json, List<String> contentKeys, List<String> featureKeys) {
+    if ( (contentKeys == null) || (featureKeys == null) ) {
+      return new Tweet(json);
+    }
+
+    // implied else
+    return new Tweet(null, contentKeys, featureKeys);
+  }
 
 
   /**
-   * Used by the JSONTWeetFormat; the doc content contains only the main text;
-   * the annotation features contains all the other JSON data, recursively.
+   * Used by the JSONTWeetFormat; the DocumentContent contains only the main text;
+   * the annotation feature map contains all the other JSON data, recursively.
    */
-  public Tweet(JsonNode json) {
+  private Tweet(JsonNode json) {
     string = "";
     Iterator<String> keys = json.fieldNames();
     FeatureMap features = Factory.newFeatureMap();
@@ -83,7 +93,13 @@ public class Tweet {
   }
   
 
-  public Tweet(JsonNode json, List<String> contentKeys, List<String> featureKeys) {
+  /** Used by the fancier corpus population system to handle options.
+   * @param contentKeys JSON paths whose values should be converted to String and
+   * added to the DocumentContent
+   * @param featureKeys JSON paths whose values should be stored in the main
+   * annotation's features
+   */
+  private Tweet(JsonNode json, List<String> contentKeys, List<String> featureKeys) {
     StringBuilder content = new StringBuilder();
     List<String> keepers = new ArrayList<String>();
     keepers.addAll(contentKeys);

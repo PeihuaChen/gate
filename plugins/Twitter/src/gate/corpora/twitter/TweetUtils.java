@@ -58,7 +58,8 @@ public class TweetUtils  {
   
   
   public static List<Tweet>readTweetLines(String string, List<String> contentKeys, List<String> featureKeys) throws IOException {
-    // just not null, so we can use it in the loop 
+    // just not null, so we can use it in the loop
+    // What does that mean?
     String[] lines = string.split("[\\n\\r]+");
     return readTweetStrings(lines, contentKeys, featureKeys);
   }
@@ -71,7 +72,7 @@ public class TweetUtils  {
     for (String line : lines) {
       if (line.length() > 0) {
         JsonNode jnode = mapper.readTree(line);
-        tweets.add(new Tweet(jnode));
+        tweets.add(Tweet.readTweet(jnode, contentKeys, featureKeys));
       }
     }
     
@@ -86,7 +87,7 @@ public class TweetUtils  {
     for (String line : lines) {
       if (line.length() > 0) {
         JsonNode jnode = mapper.readTree(line);
-        tweets.add(new Tweet(jnode));
+        tweets.add(Tweet.readTweet(jnode, contentKeys, featureKeys));
       }
     }
     
@@ -99,7 +100,7 @@ public class TweetUtils  {
     List<Tweet> tweets = new ArrayList<Tweet>();
     ArrayNode jarray = (ArrayNode) mapper.readTree(string);
     for (JsonNode jnode : jarray) {
-      tweets.add(new Tweet(jnode));
+      tweets.add(Tweet.readTweet(jnode, contentKeys, featureKeys));
     }
     return tweets;
   }
