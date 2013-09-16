@@ -22,6 +22,7 @@ import gate.event.CreoleListener;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,8 +107,11 @@ public abstract class ResourceHelper extends AbstractResource implements
     // get all the methods defined for this instance of the helper
     Method[] methods = this.getClass().getMethods();
 
-    for(Method method : methods) {
+    outer: for(Method method : methods) {
       // for each method....
+
+      // skip over methods which aren't public
+      if(!Modifier.isPublic(method.getModifiers())) continue;
 
       // if the method name doesn't match then skip onto the next method
       if(!method.getName().equals(action)) continue;
@@ -119,20 +123,21 @@ public abstract class ResourceHelper extends AbstractResource implements
       // next method
       if(paramTypes.length != params.length + 1) continue;
 
-      //check the param types and skip to the next method if they aren't compatible
+      // check the param types and skip to the next method if they aren't
+      // compatible
       if(!paramTypes[0].isAssignableFrom((resource.getClass()))) continue;
       for(int i = 0; i < params.length; ++i) {
-        if(!paramTypes[i + 1].isAssignableFrom(params[i].getClass())) continue;
+        if(!paramTypes[i + 1].isAssignableFrom(params[i].getClass())) continue outer;
       }
 
-      //if we got to here then we have found a method we can call so....
-      
-      //copy the params into a single array
+      // if we got to here then we have found a method we can call so....
+
+      // copy the params into a single array
       Object[] parameters = new Object[params.length + 1];
       parameters[0] = resource;
       System.arraycopy(params, 0, parameters, 1, params.length);
-      
-      //and finally call the method
+
+      // and finally call the method
       return method.invoke(this, parameters);
 
     }
