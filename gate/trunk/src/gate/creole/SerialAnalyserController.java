@@ -399,7 +399,7 @@ public class SerialAnalyserController extends SerialController
       if(pr instanceof LanguageAnalyser) {
         ((LanguageAnalyser)pr).setCorpus(corpus);
       }
-      pr.controllerExecutionFinished(this);
+      pr.controllerExecutionStarted(this);
     }
   }
 
