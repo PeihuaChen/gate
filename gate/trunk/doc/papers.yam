@@ -40,6 +40,10 @@ GATE papers
 
  - M. Dowman, V. Tablan, H. Cunningham and B. Popov. Web-Assisted Annotation, Semantic Indexing and Search of Television and Radio News. 14th International World Wide Web Conference. Chiba, Japan, 2005. %(http://gate.ac.uk/sale/www05/web-assisted-annotation.pdf,PDF). %(bibtex.html#Dowman2005, BibTeX).
 
+%3* I used TwitIE / the social media facilities in GATE:
+
+ - K. Bontcheva, L. Derczynski, A. Funk, M.A. Greenwood, D. Maynard, N. Aswani. TwitIE: An Open-Source Information Extraction Pipeline for Microblog Text. Proceedings of the International Conference on Recent Advances in Natural Language Processing (RANLP 2013). %(https://gate.ac.uk/sale/ranlp2013/twitie/twitie-ranlp2013.pdf, PDF), %(https://gate.ac.uk/wiki/twitie.html, Download TwitIE)
+
 %contents
 
 %1 Book Chapters, Journals and Conference papers
