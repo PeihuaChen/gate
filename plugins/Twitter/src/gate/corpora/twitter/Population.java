@@ -14,21 +14,53 @@ package gate.corpora.twitter;
 import gate.*;
 import gate.corpora.DocumentContentImpl;
 import gate.creole.ResourceInstantiationException;
-import gate.util.InvalidOffsetException;
+import gate.creole.metadata.AutoInstance;
+import gate.creole.metadata.CreoleResource;
+import gate.gui.*;
+import gate.util.*;
+
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.*;
+import java.nio.charset.Charset;
 import java.util.*;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.*;
 
 
-public class Population  {
+@CreoleResource(name = "Twitter Corpus Populator", tool = true, autoinstances = @AutoInstance)
+public class Population extends ResourceHelper  {
+
+  private static final long serialVersionUID = 1443073039199794668L;
 
 
+  /**
+   * 
+   * @param corpus
+   * @param inputUrl
+   * @param encoding
+   * @param contentKeys
+   * @param featureKeys
+   * @param tweetsPerDoc 0 = put them all in one document; otherwise the number per document
+   * @throws ResourceInstantiationException
+   */
   public static void populateCorpus(final Corpus corpus, URL inputUrl, String encoding, List<String> contentKeys,
       List<String> featureKeys, int tweetsPerDoc) throws ResourceInstantiationException {
     try {
       InputStream input = inputUrl.openStream();
+
+      
       List<String> lines = IOUtils.readLines(input, encoding);
       IOUtils.closeQuietly(input);
       
@@ -62,6 +94,9 @@ public class Population  {
       
       if (content.length() > 0) {
         closeDocument(document, content, annotanda, corpus);
+      }
+      else {
+        Factory.deleteResource(document);
       }
       
       if(corpus.getDataStore() != null) {
@@ -101,5 +136,175 @@ public class Population  {
     }
   }
 
+  
+  @Override
+  protected List<Action> buildActions(final NameBearerHandle handle) {
+    List<Action> actions = new ArrayList<Action>();
 
+    if(!(handle.getTarget() instanceof Corpus)) return actions;
+
+    actions.add(new AbstractAction("Populate from Twitter JSON file") {
+      private static final long serialVersionUID = -8511779592856786327L;
+
+      @Override
+      public void actionPerformed(ActionEvent e)  {
+        final PopulationDialogWrapper dialog = new PopulationDialogWrapper();
+
+        // if no file was selected then just stop
+        try {
+          final URL fileUrl = dialog.getFileUrl();
+          if(fileUrl == null)
+            return;
+          
+          // Run the population in a separate thread so we don't lock up the GUI
+          Thread thread =
+              new Thread(Thread.currentThread().getThreadGroup(),
+                  "Twitter JSON Corpus Populator") {
+                public void run() {
+                  try {
+                    populateCorpus((Corpus) handle.getTarget(), fileUrl, dialog.getEncoding(), 
+                        dialog.getContentKeys(), dialog.getFeatureKeys(), dialog.getTweetsPerDoc());
+                  } 
+                  catch(ResourceInstantiationException e) {
+                    e.printStackTrace();
+                  }
+                }
+              };
+          thread.setPriority(Thread.MIN_PRIORITY);
+          thread.start();
+        }
+        catch(MalformedURLException e0) {
+          e0.printStackTrace();
+        }
+      }
+    });
+
+
+    return actions;
+  }
+
+  
+  
+
+}
+
+
+class PopulationDialogWrapper  {
+  private JDialog dialog;
+  private String encoding;
+  private int tweetsPerDoc;
+  private List<String> contentKeys, featureKeys;
+  private JTextField encodingField;
+  private JFileChooser chooser;
+  private URL fileUrl;
+
+  
+  public PopulationDialogWrapper() {
+    this.dialog = new JDialog(MainFrame.getInstance(), "Populate from Twitter JSON", true);
+    MainFrame.getGuiRoots().add(dialog);
+    dialog.setLayout(new BorderLayout());
+    
+    JPanel optionsPanel = new JPanel();
+    
+    JLabel encodingLabel = new JLabel("Encoding:");
+    encodingField = new JTextField(15);
+    optionsPanel.add(encodingLabel);
+    optionsPanel.add(encodingField);
+    
+    dialog.add(optionsPanel);
+    
+
+    chooser = new JFileChooser();
+    chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    chooser.setDialogTitle("Select a Twitter JSON file");
+    chooser.resetChoosableFileFilters();
+    chooser.setAcceptAllFileFilterUsed(false);
+    ExtensionFileFilter filter = new ExtensionFileFilter("Twitter JSON files (*.json)", "json");
+    chooser.addChoosableFileFilter(filter);
+    chooser.setFileFilter(filter);
+    chooser.setApproveButtonText("Populate");
+    chooser.addActionListener(new PopulationDialogListener(this));
+
+    dialog.add(chooser, BorderLayout.SOUTH);
+    dialog.pack();
+    dialog.setLocationRelativeTo(dialog.getOwner());
+    dialog.setVisible(true);
+  }
+  
+  
+  public String getEncoding() {
+    return this.encoding;
+  }
+  
+  public URL getFileUrl() throws MalformedURLException {
+    return this.fileUrl;
+  }
+
+  public int getTweetsPerDoc() {
+    return this.tweetsPerDoc;
+  }
+  
+  public List<String> getContentKeys() {
+    return this.contentKeys;
+  }
+  
+  public List<String> getFeatureKeys() {
+    return this.featureKeys;
+  }
+  
+  protected void load()  {
+    // TODO fix this test-run version
+    this.tweetsPerDoc = 2;
+    this.contentKeys = new ArrayList<String>();
+    this.contentKeys.add("text");
+    this.featureKeys = new ArrayList<String>();
+    this.featureKeys.add("text");
+    
+    this.encoding = this.encodingField.getText();
+    if ( (this.encoding == null) || this.encoding.isEmpty() ) {
+      this.encoding = Charset.defaultCharset().name();
+    }
+
+    try {
+      this.fileUrl = this.chooser.getSelectedFile().toURI().toURL();
+      System.out.println("--> " + this.fileUrl.toString());
+    }
+    catch (MalformedURLException e) {
+      e.printStackTrace();
+    }
+    finally {
+      this.dialog.dispose();
+    }
+  }
+
+  
+  protected void cancel() {
+    this.dialog.dispose();
+  }
+
+}
+
+
+class PopulationDialogListener implements ActionListener {
+
+  private PopulationDialogWrapper dialog;
+  
+  public PopulationDialogListener(PopulationDialogWrapper dialog) {
+    this.dialog = dialog;
+  }
+
+  
+  @Override
+  public void actionPerformed(ActionEvent event) {
+    if (event.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)){
+      this.dialog.load();
+    }
+    else {
+      this.dialog.cancel();
+    }
+  }
+  
+  
+  
+  
 }

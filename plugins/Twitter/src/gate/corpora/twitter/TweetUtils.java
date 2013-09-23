@@ -172,7 +172,7 @@ public class TweetUtils  {
    * be a FeatureMap if there is further nesting
    */
   public static Object dig(JsonNode node, String[] keySequence) {
-    if (keySequence.length < 1) {
+    if ( (keySequence.length < 1) || (node == null) ) {
       return null;
     }
     
