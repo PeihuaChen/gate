@@ -23,7 +23,9 @@ import gate.ProcessingResource;
 import gate.Resource;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
 import gate.util.Err;
+import gate.util.GateException;
 import gate.util.Out;
 import gate.util.profile.Profiler;
 
@@ -91,7 +93,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
       this.document = document;
     }
     
-    public Object call() {
+    public Object call() throws Exception {
       try {
         // save a reference to the executor thread
         currentWorkingThread = Thread.currentThread();
@@ -167,6 +169,13 @@ public class RealtimeCorpusController extends SerialAnalyserController {
         logger.info("Execution on document " + document.getName()
                 + " has caused an error (ignored):\n=========================", cause);
         logger.info("=========================\nError ignored...\n");
+        if(!suppressExceptions) {
+          if(cause instanceof Exception) {
+            throw (Exception)cause;
+          } else {
+            throw new Exception(cause);
+          }        
+        }
       }
       finally {
         // remove the reference to the thread, as we're now done
@@ -182,7 +191,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
         }
       }
       
-      return null;
+      return caught;
     }
     private Document document;
   }
@@ -214,6 +223,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
   @SuppressWarnings("deprecation")
   public void executeImpl() throws ExecutionException{
     interrupted = false;
+    String haveTimeout = null;
     if(corpus == null) throw new ExecutionException(
       "(SerialAnalyserController) \"" + getName() + "\":\n" +
       "The corpus supplied for execution was null!");
@@ -239,7 +249,8 @@ public class RealtimeCorpusController extends SerialAnalyserController {
           // -> interrupt the job (nicely)
           threadDying = true;
           waitSoFar += graceful;
-          logger.info("Execution timeout, attempting to gracefully stop worker thread...");
+          haveTimeout = "Execution timeout, attempting to gracefully stop worker thread...";
+          logger.info(haveTimeout);
           // interrupt the working thread - we can't cancel the future as
           // that would cause future get() calls to fail immediately with
           // a CancellationException
@@ -262,7 +273,8 @@ public class RealtimeCorpusController extends SerialAnalyserController {
             // the mid point has been reached: try nullify
             threadDying = true;
             waitSoFar += waitTime;
-            logger.info("Execution timeout, attempting to induce exception in order to stop worker thread...");
+            haveTimeout = "Execution timeout, attempting to induce exception in order to stop worker thread...";
+            logger.info(haveTimeout);
             for(int j = 0; j < prList.size(); j++){
               ((LanguageAnalyser)prList.get(j)).setDocument(null);
               ((LanguageAnalyser)prList.get(j)).setCorpus(null);
@@ -291,7 +303,8 @@ public class RealtimeCorpusController extends SerialAnalyserController {
           } catch(TimeoutException e) {
             // we're out of time: stop the thread
             threadDying = true;
-            logger.info("Execution timeout, worker thread will be forcibly terminated!");
+            haveTimeout = "Execution timeout, worker thread will be forcibly terminated!";
+            logger.info(haveTimeout);
             // using a volatile variable instead of synchronisation
             Thread theThread = currentWorkingThread;
             if(theThread != null) {
@@ -307,6 +320,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
                   // we have just caused this  
                 } else {
                   logger.error("Real Time Controller Malfunction", ee);
+                  haveTimeout = "Real Time Controller Malfunction: "+ee.getMessage();
                 }
               }
             }
@@ -320,7 +334,8 @@ public class RealtimeCorpusController extends SerialAnalyserController {
         } else {
           // stop now!
           threadDying = true;
-          logger.info("Execution timeout, worker thread will be forcibly terminated!");
+          haveTimeout = "Execution timeout, worker thread will be forcibly terminated!";
+          logger.info(haveTimeout);
           // using a volatile variable instead of synchronisation
           Thread theThread = currentWorkingThread;
           if(theThread != null){
@@ -336,6 +351,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
                 // we have just caused this  
               } else {
                 logger.error("Real Time Controller Malfunction", ee);
+                haveTimeout = "Real Time Controller Malfunction: "+ee.getMessage();
               }
             }
           }
@@ -350,7 +366,9 @@ public class RealtimeCorpusController extends SerialAnalyserController {
         //close the previously unloaded Doc
         Factory.deleteResource(doc);
       }
-
+      if(!suppressExceptions && haveTimeout != null) {
+        throw new ExecutionException("Execution timeout occurred");
+      }
       // global progress bar depends on this status message firing at the end
       // of processing for each document.
       fireStatusChanged("Finished running " + getName() + " on document " +
@@ -415,7 +433,24 @@ public class RealtimeCorpusController extends SerialAnalyserController {
   public void setGracefulTimeout(Long graceful) {
     this.graceful = graceful;
   }
-
+  
+  /**
+   * If true, suppresses all exceptions. If false, passes all exceptions, including
+   * exceptions indicating a timeout, on to the caller.
+   */
+  @Optional
+  @CreoleParameter(defaultValue = "true",           
+    comment = "Should all exceptions be suppressed and just a message be written to standard logger.info?")
+  public void setSuppressExceptions(Boolean yesno) {
+    suppressExceptions = yesno;
+  }
+  
+  public Boolean getSuppressExceptions() {
+    return suppressExceptions;
+  }
+  
+  protected boolean suppressExceptions = true;
+  
   /**
    * Sleep time in milliseconds while waiting for worker thread to finish.
    */
