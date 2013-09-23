@@ -166,10 +166,11 @@ public class RealtimeCorpusController extends SerialAnalyserController {
         throw (td);
       }
       catch(Throwable cause) {
-        logger.info("Execution on document " + document.getName()
-                + " has caused an error (ignored):\n=========================", cause);
-        logger.info("=========================\nError ignored...\n");
-        if(!suppressExceptions) {
+        if(suppressExceptions) {
+          logger.info("Execution on document " + document.getName()
+                  + " has caused an error (ignored):\n=========================", cause);
+          logger.info("=========================\nError ignored...\n");
+        } else  {
           if(cause instanceof Exception) {
             throw (Exception)cause;
           } else {
@@ -190,8 +191,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
           prof.checkPoint("Execute controller [" + getName() + "] finished");
         }
       }
-      
-      return caught;
+      return null;
     }
     private Document document;
   }
