@@ -19,7 +19,6 @@ import gate.creole.metadata.CreoleResource;
 import gate.gui.*;
 import gate.util.*;
 
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.InputStream;
@@ -29,6 +28,8 @@ import java.util.*;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -44,6 +45,9 @@ public class Population extends ResourceHelper  {
 
   private static final long serialVersionUID = 1443073039199794668L;
 
+  public static final String DEFAULT_CONTENT_KEYS = "text;created_at";
+  public static final String DEFAULT_FEATURE_KEYS = "user:screen_name;user:location;id";
+  public static final String KEY_SEPARATOR = ";";
 
   /**
    * 
@@ -75,7 +79,7 @@ public class Population extends ResourceHelper  {
       Map<PreAnnotation, Integer> annotanda = new HashMap<PreAnnotation, Integer>();
       
       for (Tweet tweet : tweets) {
-        if ( (tweetCounter > 0) && (tweetsPerDoc > 0) && ((tweetCounter % tweetsPerDoc) == 0) ) {
+        if ( (tweetsPerDoc > 0) && (tweetCounter > 0) && ((tweetCounter % tweetsPerDoc) == 0) ) {
           closeDocument(document, content, annotanda, corpus);
           document = newDocument(inputUrl, tweetCounter, digits);
           content = new StringBuilder();
@@ -87,8 +91,10 @@ public class Population extends ResourceHelper  {
         for (PreAnnotation preAnn : tweet.getAnnotations()) {
           annotanda.put(preAnn, startOffset);
         }
+
         content.append('\n');
-      }
+        tweetCounter++;
+      } // end of Tweet loop
       
       if (content.length() > 0) {
         closeDocument(document, content, annotanda, corpus);
@@ -192,25 +198,46 @@ class PopulationDialogWrapper  {
   private String encoding;
   private int tweetsPerDoc;
   private List<String> contentKeys, featureKeys;
-  private JTextField encodingField;
+  private JTextField encodingField, contentKeysField, featureKeysField;
+  private JCheckBox checkbox;
   private JFileChooser chooser;
   private URL fileUrl;
 
   
   public PopulationDialogWrapper() {
-    this.dialog = new JDialog(MainFrame.getInstance(), "Populate from Twitter JSON", true);
+    dialog = new JDialog(MainFrame.getInstance(), "Populate from Twitter JSON", true);
     MainFrame.getGuiRoots().add(dialog);
-    dialog.setLayout(new BorderLayout());
+    dialog.getContentPane().setLayout(new BoxLayout(dialog.getContentPane(), BoxLayout.Y_AXIS));
     
-    JPanel optionsPanel = new JPanel();
-    
+    JPanel encodingPanel = new JPanel();
     JLabel encodingLabel = new JLabel("Encoding:");
     encodingField = new JTextField(15);
-    optionsPanel.add(encodingLabel);
-    optionsPanel.add(encodingField);
+    encodingPanel.add(encodingLabel);
+    encodingPanel.add(encodingField);
+    dialog.add(encodingPanel);
+
+    JPanel checkboxPanel = new JPanel();
+    JLabel checkboxLabel = new JLabel("One document per tweet");
+    checkbox = new JCheckBox();
+    checkboxPanel.add(checkboxLabel);
+    checkboxPanel.add(checkbox);
+    dialog.add(checkboxPanel);
     
-    dialog.add(optionsPanel);
+    JPanel contentKeysPanel = new JPanel();
+    JLabel contentKeysLabel = new JLabel("Content keys:");
+    contentKeysField = new JTextField();
+    contentKeysField.setText(Population.DEFAULT_CONTENT_KEYS);
+    contentKeysPanel.add(contentKeysLabel);
+    contentKeysPanel.add(contentKeysField);
+    dialog.add(contentKeysPanel);
     
+    JPanel featureKeysPanel = new JPanel();
+    JLabel featureKeysLabel = new JLabel("Feature keys:");
+    featureKeysField = new JTextField();
+    featureKeysField.setText(Population.DEFAULT_FEATURE_KEYS);
+    featureKeysPanel.add(featureKeysLabel);
+    featureKeysPanel.add(featureKeysField);
+    dialog.add(featureKeysPanel);
 
     chooser = new JFileChooser();
     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -223,7 +250,7 @@ class PopulationDialogWrapper  {
     chooser.setApproveButtonText("Populate");
     chooser.addActionListener(new PopulationDialogListener(this));
 
-    dialog.add(chooser, BorderLayout.SOUTH);
+    dialog.add(chooser);
     dialog.pack();
     dialog.setLocationRelativeTo(dialog.getOwner());
     dialog.setVisible(true);
@@ -251,14 +278,10 @@ class PopulationDialogWrapper  {
   }
   
   protected void load()  {
-    // TODO fix this test-run version
-    this.tweetsPerDoc = 2;
-    this.contentKeys = new ArrayList<String>();
-    this.contentKeys.add("text");
-    this.contentKeys.add("user");
-    this.featureKeys = new ArrayList<String>();
-    this.featureKeys.add("user:location");
-    this.featureKeys.add("user:screen_name");
+    this.tweetsPerDoc = this.checkbox.isSelected() ? 1 : 0;
+
+    this.contentKeys = splitField(contentKeysField);
+    this.featureKeys = splitField(featureKeysField);
     
     this.encoding = this.encodingField.getText();
     if ( (this.encoding == null) || this.encoding.isEmpty() ) {
@@ -279,6 +302,12 @@ class PopulationDialogWrapper  {
   
   protected void cancel() {
     this.dialog.dispose();
+  }
+  
+  
+  private static List<String> splitField(JTextField field) {
+    String [] array = StringUtils.split(field.getText(), Population.KEY_SEPARATOR);
+    return Arrays.asList(array);
   }
 
 }
