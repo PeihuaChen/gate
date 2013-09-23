@@ -64,7 +64,7 @@ public class Tweet {
     }
 
     // implied else
-    return new Tweet(null, contentKeys, featureKeys);
+    return new Tweet(json, contentKeys, featureKeys);
   }
 
 
