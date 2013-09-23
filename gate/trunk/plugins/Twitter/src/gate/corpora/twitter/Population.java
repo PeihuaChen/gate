@@ -59,8 +59,6 @@ public class Population extends ResourceHelper  {
       List<String> featureKeys, int tweetsPerDoc) throws ResourceInstantiationException {
     try {
       InputStream input = inputUrl.openStream();
-
-      
       List<String> lines = IOUtils.readLines(input, encoding);
       IOUtils.closeQuietly(input);
       
@@ -257,8 +255,10 @@ class PopulationDialogWrapper  {
     this.tweetsPerDoc = 2;
     this.contentKeys = new ArrayList<String>();
     this.contentKeys.add("text");
+    this.contentKeys.add("user");
     this.featureKeys = new ArrayList<String>();
-    this.featureKeys.add("text");
+    this.featureKeys.add("user:location");
+    this.featureKeys.add("user:screen_name");
     
     this.encoding = this.encodingField.getText();
     if ( (this.encoding == null) || this.encoding.isEmpty() ) {
@@ -267,7 +267,6 @@ class PopulationDialogWrapper  {
 
     try {
       this.fileUrl = this.chooser.getSelectedFile().toURI().toURL();
-      System.out.println("--> " + this.fileUrl.toString());
     }
     catch (MalformedURLException e) {
       e.printStackTrace();

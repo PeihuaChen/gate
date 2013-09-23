@@ -17,10 +17,7 @@ import gate.*;
 
 import java.io.IOException;
 import java.util.*;
-
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -155,7 +152,7 @@ public class TweetUtils  {
     FeatureMap found = Factory.newFeatureMap();
     for (String keeper : keepers) {
       String[] keySequence = StringUtils.split(keeper, PATH_SEPARATOR);
-      Object value = dig(node, keySequence);
+      Object value = dig(node, keySequence, 0);
       if (value != null) {
         found.put(keeper, value);
       }
@@ -171,22 +168,21 @@ public class TweetUtils  {
    * @return the value held by the last key in the sequence; this will
    * be a FeatureMap if there is further nesting
    */
-  public static Object dig(JsonNode node, String[] keySequence) {
-    if ( (keySequence.length < 1) || (node == null) ) {
+  public static Object dig(JsonNode node, String[] keySequence, int index) {
+    if ( (index >= keySequence.length) || (node == null) ) {
       return null;
     }
     
-    if (node.has(keySequence[0])) {
-      JsonNode value = node.get(keySequence[0]); 
-      if (keySequence.length == 1) {
+    if (node.has(keySequence[index])) {
+      JsonNode value = node.get(keySequence[index]); 
+      if (keySequence.length == (index + 1)) {
         // Found last key in sequence; convert the JsonNode
         // value to a normal object (possibly FeatureMap)
         return process(value);
       }
       else if (value instanceof FeatureMap){
         // Found current key; keep digging for the rest
-        String[] remainingKeys = (String[]) ArrayUtils.subarray(keySequence, 1, keySequence.length);
-        return dig(value, remainingKeys);
+        return dig(value, keySequence, index + 1);
       }
     }
     
