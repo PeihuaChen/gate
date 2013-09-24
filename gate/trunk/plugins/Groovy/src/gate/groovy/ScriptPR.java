@@ -29,6 +29,7 @@ import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
 import gate.util.BomStrippingInputStreamReader;
+import gate.util.GateClassLoader;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.MetaMethod;
@@ -86,6 +87,8 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
    * Name of the input annotation set
    */
   private String inputASName;
+  
+  private GateClassLoader classloader = null;
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
@@ -94,9 +97,15 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
       throw new ResourceInstantiationException(
               "You must specify a Groovy script to load");
 
+    //if we are being re-initialized then forget the class loader we used last
+    if (classloader != null) Gate.getClassLoader().forgetClassLoader(classloader);
+    
+    //create a disposable classloader for the groovy shell to use as its parent
+    classloader = Gate.getClassLoader().getDisposableClassLoader(scriptURL.toExternalForm()+System.currentTimeMillis(), ScriptPR.class.getClassLoader(), true);
+    
     // Create the shell, with the GateClassLoader as its parent (so the script
     // will have access to plugin classes)
-    GroovyShell groovyShell = new GroovyShell(ScriptPR.class.getClassLoader());
+    GroovyShell groovyShell = new GroovyShell(classloader);
     StringBuilder scriptText = new StringBuilder();
 
     char[] buf = new char[4096];
@@ -143,6 +152,16 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
     init();
   }
 
+  @Override
+  public void cleanup() {
+    
+    //do the normal clean up first
+    super.cleanup();
+    
+    //make sure we clean up properly before being destroyed
+    if (classloader != null) Gate.getClassLoader().forgetClassLoader(classloader);
+  }
+  
   // ControllerAwarePR implementation
 
   public void controllerExecutionStarted(Controller c)

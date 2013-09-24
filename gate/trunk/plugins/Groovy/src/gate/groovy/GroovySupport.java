@@ -12,21 +12,6 @@
 
 package gate.groovy;
 
-import java.awt.event.ActionEvent;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
-import org.codehaus.groovy.runtime.DefaultGroovyMethods;
-import org.codehaus.groovy.runtime.InvokerHelper;
-
 import gate.Gate;
 import gate.GateConstants;
 import gate.Resource;
@@ -42,8 +27,21 @@ import gate.util.GateRuntimeException;
 import gate.util.persistence.PersistenceManager;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
-import groovy.lang.GroovySystem;
 import groovy.lang.ReadOnlyPropertyException;
+
+import java.awt.event.ActionEvent;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+
+import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 
 /**
  * Tool resource that sets up Groovy support for GATE.  When the Groovy
@@ -58,14 +56,13 @@ import groovy.lang.ReadOnlyPropertyException;
 public class GroovySupport extends AbstractResource implements ActionsPublisher {
   /**
    * Standard list of import statements that are available to any groovy script
-   * or console in GATE. These are the same imports available by default on the
-   * right-hand-side of JAPE rules.
+   * or console in GATE.
    */
   public static final String STANDARD_IMPORTS =
       "import gate.*;\n" +
-      "import gate.jape.*;\n" +
-      "import gate.creole.ontology.*;\n" +
-      "import gate.annotation.*;\n" +
+      //"import gate.jape.*;\n" +
+      //"import gate.creole.ontology.*;\n" +
+      //"import gate.annotation.*;\n" +
       "import gate.util.*;\n";
 
   public Resource init() throws ResourceInstantiationException {

@@ -42,6 +42,11 @@ public class ScriptableController extends SerialController
   Document document
   
   /**
+   * The classloader that acts as the parent of the groovy shell.
+   */
+  private GateClassLoader classloader
+  
+  /**
    * The PR (if any) currently being executed.
    */
   private transient volatile ProcessingResource currentPR
@@ -95,7 +100,11 @@ eachDocument {
    */
   protected void parseScript() throws ExecutionException {
     try {
-      script = new GroovyShell(ScriptableController.class.getClassLoader()).parse(
+      if (classloader != null) Gate.getClassLoader().forgetClassLoader(classloader)
+      
+      classloader = Gate.getClassLoader().getDisposableClassLoader(getName()+System.currentTimeMillis(), ScriptPR.class.getClassLoader(), true)
+      
+      script = new GroovyShell(classloader).parse(
           controlScript + "\n\n\n" + GroovySupport.STANDARD_IMPORTS)
       // replace the binding with our "active" one that delegates
       // corpus, controller and prs variables through to the controller
@@ -410,6 +419,7 @@ eachDocument {
   public void cleanup() {
     timeLimitExecutor?.shutdownNow()
     super.cleanup()
+    if (classloader != null) Gate.getClassLoader().forgetClassLoader(classloader)
   }
 
   /**
