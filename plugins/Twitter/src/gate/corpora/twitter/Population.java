@@ -48,10 +48,9 @@ import org.apache.commons.lang.*;
 public class Population extends ResourceHelper  {
 
   private static final long serialVersionUID = 1443073039199794668L;
-
-  public static final String DEFAULT_CONTENT_KEYS_STR = "text;created_at;user:name";
-  public static final String DEFAULT_FEATURE_KEYS_STR = "user:screen_name;user:location;id;in_reply_to_status_id;retweeted_status:id";
-  public static final String KEY_SEPARATOR = ";";
+  
+  public static final String[] DEFAULT_CONTENT_KEYS = {"text", "created_at", "user:name"};
+  public static final String[] DEFAULT_FEATURE_KEYS = {"user:screen_name", "user:location", "id", "source", "truncated", "retweeted_status:id"};
 
   /**
    * 
@@ -125,6 +124,7 @@ public class Population extends ResourceHelper  {
     document.setName(name);
     document.setSourceUrl(url);
     document.getFeatures().put(Document.DOCUMENT_MIME_TYPE_PARAMETER_NAME, TweetUtils.MIME_TYPE);
+    document.getFeatures().put("gate.SourceURL", url.toString());
     return document;
   }
   
@@ -216,7 +216,7 @@ class PopulationDialogWrapper  {
     
     Box encodingBox = Box.createHorizontalBox();
     JLabel encodingLabel = new JLabel("Encoding:");
-    encodingField = new JTextField();
+    encodingField = new JTextField(TweetUtils.DEFAULT_ENCODING);
     encodingBox.add(encodingLabel);
     encodingBox.add(encodingField);
     dialog.add(encodingBox);
@@ -229,12 +229,12 @@ class PopulationDialogWrapper  {
     checkboxBox.add(checkbox);
     dialog.add(checkboxBox);
     
-    List<String> defaultContentKeys = splitString(Population.DEFAULT_CONTENT_KEYS_STR);
-    contentKeysEditor = new ListEditor("Content keys:", defaultContentKeys);
+    List<String> defaultContentKeys = Arrays.asList(Population.DEFAULT_CONTENT_KEYS);
+    contentKeysEditor = new ListEditor("Content keys: ", defaultContentKeys);
     dialog.add(contentKeysEditor);
     
-    List<String> defaultFeatureKeys = splitString(Population.DEFAULT_FEATURE_KEYS_STR);
-    featureKeysEditor = new ListEditor("FeatureKeys", defaultFeatureKeys);
+    List<String> defaultFeatureKeys = Arrays.asList(Population.DEFAULT_FEATURE_KEYS);
+    featureKeysEditor = new ListEditor("Feature keys: ", defaultFeatureKeys);
     dialog.add(featureKeysEditor);
     
     chooser = new JFileChooser();
@@ -302,11 +302,6 @@ class PopulationDialogWrapper  {
     this.dialog.dispose();
   }
   
-  private static List<String> splitString(String string) {
-    String [] array = StringUtils.split(string, Population.KEY_SEPARATOR);
-    return Arrays.asList(array);
-  }
-
 }
 
 
