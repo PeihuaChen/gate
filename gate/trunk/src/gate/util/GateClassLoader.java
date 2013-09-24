@@ -27,6 +27,7 @@ import gate.creole.AbstractResource;
 import java.beans.Introspector;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -71,10 +72,23 @@ public class GateClassLoader extends URLClassLoader {
     this.id = name;
   }
 
+  public GateClassLoader(String name, URL[] urls, ClassLoader parent,
+      boolean isolated) {
+    super(urls, parent);
+    this.id = name;
+    this.isolated = isolated;
+  }
+
   private String id = null;
 
   public String getID() {
     return id;
+  }
+
+  private boolean isolated = false;
+
+  public boolean isIsolated() {
+    return isolated;
   }
 
   public String toString() {
@@ -104,10 +118,9 @@ public class GateClassLoader extends URLClassLoader {
 
     Set<GateClassLoader> children;
     synchronized(childClassLoaders) {
-      children =
-        new LinkedHashSet<GateClassLoader>(childClassLoaders.values());
+      children = new LinkedHashSet<GateClassLoader>(childClassLoaders.values());
     }
-    
+
     for(GateClassLoader cl : children) {
       result = cl.getResource(name);
       if(result != null) return result;
@@ -117,9 +130,8 @@ public class GateClassLoader extends URLClassLoader {
   }
 
   @Override
-  public Class<?> loadClass(String name)
-      throws ClassNotFoundException {
-    return loadClass(name, false, false);
+  public Class<?> loadClass(String name) throws ClassNotFoundException {
+    return loadClass(name, false, false, new HashSet<GateClassLoader>());
   }
 
   /**
@@ -128,14 +140,22 @@ public class GateClassLoader extends URLClassLoader {
   @Override
   public Class<?> loadClass(String name, boolean resolve)
       throws ClassNotFoundException {
-    return loadClass(name, resolve, false);
+    return loadClass(name, resolve, false, new HashSet<GateClassLoader>());
   }
 
   /**
    * Delegate loading to the super class (loadClass has protected access there).
    */
-  public Class<?> loadClass(String name, boolean resolve,
-      boolean localOnly) throws ClassNotFoundException {
+  private Class<?> loadClass(String name, boolean resolve, boolean localOnly,
+      Set<GateClassLoader> visited) throws ClassNotFoundException {
+
+    if(DEBUG)
+      System.out.println(name + " -- " + id + ": " + localOnly + "/" + isolated
+          + "/" + getParent());
+
+    // to ensure we don't end up looping through the same classloader twice we
+    // keep a track of which ones we have already visited
+    visited.add(this);
 
     if(!this.equals(Gate.getClassLoader())) {
       try {
@@ -163,6 +183,9 @@ public class GateClassLoader extends URLClassLoader {
       // this can safely be ignored
     }
 
+    if(this.getParent() != null && this.getParent() instanceof GateClassLoader)
+      visited.add((GateClassLoader)this.getParent());
+
     if(!localOnly) {
       // if we aren't just looking locally then...
 
@@ -171,7 +194,7 @@ public class GateClassLoader extends URLClassLoader {
           // if this classloader doesn't have a parent then it must be
           // disposable, but as we haven't found the class we need yet we should
           // now look into the main GATE classloader
-          return Gate.getClassLoader().loadClass(name, resolve);
+          return Gate.getClassLoader().loadClass(name, resolve, false, visited);
         } catch(ClassNotFoundException e) {
           // this can safely be ignored
         }
@@ -180,14 +203,18 @@ public class GateClassLoader extends URLClassLoader {
       Set<GateClassLoader> children;
       synchronized(childClassLoaders) {
         children =
-          new LinkedHashSet<GateClassLoader>(childClassLoaders.values());
+            new LinkedHashSet<GateClassLoader>(childClassLoaders.values());
       }
-      
-      for(GateClassLoader cl : children) {      
+
+      // make sure we don't visit a classloader we've already been through
+      children.removeAll(visited);
+
+      for(GateClassLoader cl : children) {
         // the class isn't to be found in either this classloader or the main
         // GATE classloader so let's check all the other disposable classloaders
         try {
-          return cl.loadClass(name, resolve, true);
+          if(!cl.isIsolated())
+            return cl.loadClass(name, resolve, true, visited);
         } catch(ClassNotFoundException e) {
           // this can safely be ignored
         }
@@ -203,8 +230,7 @@ public class GateClassLoader extends URLClassLoader {
    * Forward a call to super.defineClass, which is protected and final in super.
    * This is used by JAPE and the Jdk compiler class.
    */
-  public Class<?> defineGateClass(String name, byte[] bytes,
-      int offset, int len) {
+  public Class<?> defineGateClass(String name, byte[] bytes, int offset, int len) {
     return super.defineClass(name, bytes, offset, len);
   }
 
@@ -237,14 +263,22 @@ public class GateClassLoader extends URLClassLoader {
    *         classloader
    */
   public GateClassLoader getDisposableClassLoader(String id) {
+    return getDisposableClassLoader(id, null, false);
+  }
 
+  public GateClassLoader getDisposableClassLoader(String id, boolean isolated) {
+    return getDisposableClassLoader(id, null, isolated);
+  }
+
+  public GateClassLoader getDisposableClassLoader(String id,
+      ClassLoader parent, boolean isolated) {
     GateClassLoader gcl = null;
-    
+
     synchronized(childClassLoaders) {
       gcl = childClassLoaders.get(id);
 
       if(gcl == null) {
-        gcl = new GateClassLoader(id, new URL[0], null);
+        gcl = new GateClassLoader(id, new URL[0], parent, isolated);
         childClassLoaders.put(id, gcl);
       }
     }
@@ -264,7 +298,7 @@ public class GateClassLoader extends URLClassLoader {
     AbstractResource.flushBeanInfoCache();
     synchronized(childClassLoaders) {
       childClassLoaders.remove(id);
-    }    
+    }
   }
 
   /**
