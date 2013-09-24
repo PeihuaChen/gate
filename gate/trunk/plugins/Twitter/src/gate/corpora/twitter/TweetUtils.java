@@ -33,7 +33,9 @@ public class TweetUtils  {
   
   public static final String PATH_SEPARATOR = ":";
   public static final String MIME_TYPE = "text/x-json-twitter";
+  public static final String DEFAULT_ENCODING = "UTF-8";
 
+  
   public static List<Tweet> readTweets(String string) throws IOException {
     if (string.startsWith("[")) {
       return readTweetList(string, null, null);
@@ -55,8 +57,6 @@ public class TweetUtils  {
   
   
   public static List<Tweet>readTweetLines(String string, List<String> contentKeys, List<String> featureKeys) throws IOException {
-    // just not null, so we can use it in the loop
-    // What does that mean?
     String[] lines = string.split("[\\n\\r]+");
     return readTweetStrings(lines, contentKeys, featureKeys);
   }
