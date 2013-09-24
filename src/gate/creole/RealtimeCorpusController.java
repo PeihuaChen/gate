@@ -25,7 +25,6 @@ import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.util.Err;
-import gate.util.GateException;
 import gate.util.Out;
 import gate.util.profile.Profiler;
 
@@ -202,8 +201,26 @@ public class RealtimeCorpusController extends SerialAnalyserController {
     super.cleanup();
   }
 
+  Long actualTimeout;
+  Long actualGraceful;
+  
   @Override
   public Resource init() throws ResourceInstantiationException {
+    // the actual time limits used are the ones set as init parameters by default
+    // but if the apropriate property is set the value from the property is 
+    // used instead:
+    String propTimeout = System.getProperty("gate.creole.RealtimeCorpusController.timeout");
+    if(propTimeout != null) {
+      actualTimeout = Long.parseLong(propTimeout);
+    } else {
+      actualTimeout = timeout;  
+    }
+    String propGraceful = System.getProperty("gate.creole.RealtimeCorpusController.graceful");
+    if(propGraceful != null) {
+      actualGraceful = Long.parseLong(propGraceful);
+    } else {
+      actualGraceful = graceful;
+    }
     // we normally require 2 threads: one to execute the PRs and another one to
     // to execute the job stoppers. More threads are created as required.  We
     // use a custom ThreadFactory that returns daemon threads so we don't block
@@ -241,14 +258,14 @@ public class RealtimeCorpusController extends SerialAnalyserController {
       // how long have we already waited 
       long waitSoFar = 0;
       // check if we should use graceful stop first 
-      if (graceful != -1 && (timeout == -1 || graceful < timeout )) {
+      if (actualGraceful != -1 && (actualTimeout == -1 || actualGraceful < actualTimeout )) {
         try {
-          docRunnerFuture.get(graceful, TimeUnit.MILLISECONDS);
+          docRunnerFuture.get(actualGraceful, TimeUnit.MILLISECONDS);
         } catch(TimeoutException e) {
           // we waited the graceful period, and the task did not finish
           // -> interrupt the job (nicely)
           threadDying = true;
-          waitSoFar += graceful;
+          waitSoFar += actualGraceful;
           haveTimeout = "Execution timeout, attempting to gracefully stop worker thread...";
           logger.info(haveTimeout);
           // interrupt the working thread - we can't cancel the future as
@@ -264,9 +281,9 @@ public class RealtimeCorpusController extends SerialAnalyserController {
           // next check scheduled for 
           // - half-time between graceful and timeout, or
           // - graceful-and-a-half (if no timeout)
-          long waitTime = (timeout != -1) ? 
-                          (timeout - graceful) / 2 : 
-                          (graceful / 2);
+          long waitTime = (actualTimeout != -1) ? 
+                          (actualTimeout - actualGraceful) / 2 : 
+                          (actualGraceful / 2);
           try {
             docRunnerFuture.get(waitTime, TimeUnit.MILLISECONDS);
           } catch(TimeoutException e1) {
@@ -295,8 +312,8 @@ public class RealtimeCorpusController extends SerialAnalyserController {
         }
       }
       // wait before we call stop()
-      if(timeout != -1) {
-        long waitTime = timeout - waitSoFar;
+      if(actualTimeout != -1) {
+        long waitTime = actualTimeout - waitSoFar;
         if(waitTime > 0) {
           try {
             docRunnerFuture.get(waitTime, TimeUnit.MILLISECONDS);
