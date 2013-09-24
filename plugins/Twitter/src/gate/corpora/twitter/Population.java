@@ -19,6 +19,7 @@ import gate.creole.metadata.CreoleResource;
 import gate.gui.*;
 import gate.util.*;
 
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.InputStream;
@@ -28,13 +29,16 @@ import java.util.*;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.*;
@@ -45,8 +49,8 @@ public class Population extends ResourceHelper  {
 
   private static final long serialVersionUID = 1443073039199794668L;
 
-  public static final String DEFAULT_CONTENT_KEYS = "text;created_at";
-  public static final String DEFAULT_FEATURE_KEYS = "user:screen_name;user:location;id";
+  public static final String DEFAULT_CONTENT_KEYS_STR = "text;created_at;user:name";
+  public static final String DEFAULT_FEATURE_KEYS_STR = "user:screen_name;user:location;id;in_reply_to_status_id;retweeted_status:id";
   public static final String KEY_SEPARATOR = ";";
 
   /**
@@ -198,10 +202,11 @@ class PopulationDialogWrapper  {
   private String encoding;
   private int tweetsPerDoc;
   private List<String> contentKeys, featureKeys;
-  private JTextField encodingField, contentKeysField, featureKeysField;
+  private JTextField encodingField;
   private JCheckBox checkbox;
   private JFileChooser chooser;
   private URL fileUrl;
+  private ListEditor featureKeysEditor, contentKeysEditor;
 
   
   public PopulationDialogWrapper() {
@@ -209,36 +214,29 @@ class PopulationDialogWrapper  {
     MainFrame.getGuiRoots().add(dialog);
     dialog.getContentPane().setLayout(new BoxLayout(dialog.getContentPane(), BoxLayout.Y_AXIS));
     
-    JPanel encodingPanel = new JPanel();
+    Box encodingBox = Box.createHorizontalBox();
     JLabel encodingLabel = new JLabel("Encoding:");
-    encodingField = new JTextField(15);
-    encodingPanel.add(encodingLabel);
-    encodingPanel.add(encodingField);
-    dialog.add(encodingPanel);
+    encodingField = new JTextField();
+    encodingBox.add(encodingLabel);
+    encodingBox.add(encodingField);
+    dialog.add(encodingBox);
 
-    JPanel checkboxPanel = new JPanel();
+    Box checkboxBox = Box.createHorizontalBox();
     JLabel checkboxLabel = new JLabel("One document per tweet");
     checkbox = new JCheckBox();
-    checkboxPanel.add(checkboxLabel);
-    checkboxPanel.add(checkbox);
-    dialog.add(checkboxPanel);
+    checkboxBox.add(checkboxLabel);
+    checkboxBox.add(Box.createHorizontalGlue());
+    checkboxBox.add(checkbox);
+    dialog.add(checkboxBox);
     
-    JPanel contentKeysPanel = new JPanel();
-    JLabel contentKeysLabel = new JLabel("Content keys:");
-    contentKeysField = new JTextField();
-    contentKeysField.setText(Population.DEFAULT_CONTENT_KEYS);
-    contentKeysPanel.add(contentKeysLabel);
-    contentKeysPanel.add(contentKeysField);
-    dialog.add(contentKeysPanel);
+    List<String> defaultContentKeys = splitString(Population.DEFAULT_CONTENT_KEYS_STR);
+    contentKeysEditor = new ListEditor("Content keys:", defaultContentKeys);
+    dialog.add(contentKeysEditor);
     
-    JPanel featureKeysPanel = new JPanel();
-    JLabel featureKeysLabel = new JLabel("Feature keys:");
-    featureKeysField = new JTextField();
-    featureKeysField.setText(Population.DEFAULT_FEATURE_KEYS);
-    featureKeysPanel.add(featureKeysLabel);
-    featureKeysPanel.add(featureKeysField);
-    dialog.add(featureKeysPanel);
-
+    List<String> defaultFeatureKeys = splitString(Population.DEFAULT_FEATURE_KEYS_STR);
+    featureKeysEditor = new ListEditor("FeatureKeys", defaultFeatureKeys);
+    dialog.add(featureKeysEditor);
+    
     chooser = new JFileChooser();
     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     chooser.setDialogTitle("Select a Twitter JSON file");
@@ -280,8 +278,8 @@ class PopulationDialogWrapper  {
   protected void load()  {
     this.tweetsPerDoc = this.checkbox.isSelected() ? 1 : 0;
 
-    this.contentKeys = splitField(contentKeysField);
-    this.featureKeys = splitField(featureKeysField);
+    this.contentKeys = this.contentKeysEditor.getValues();
+    this.featureKeys = this.featureKeysEditor.getValues();
     
     this.encoding = this.encodingField.getText();
     if ( (this.encoding == null) || this.encoding.isEmpty() ) {
@@ -304,9 +302,8 @@ class PopulationDialogWrapper  {
     this.dialog.dispose();
   }
   
-  
-  private static List<String> splitField(JTextField field) {
-    String [] array = StringUtils.split(field.getText(), Population.KEY_SEPARATOR);
+  private static List<String> splitString(String string) {
+    String [] array = StringUtils.split(string, Population.KEY_SEPARATOR);
     return Arrays.asList(array);
   }
 
@@ -332,7 +329,52 @@ class PopulationDialogListener implements ActionListener {
     }
   }
   
+}
+
+class ListEditor extends JPanel {
+  private static final long serialVersionUID = -1578463259277343578L;
+
+  private JButton listButton;
+  private ListEditorDialog listEditor;
+  private List<String> values;
+  private JLabel label;
+  private JTextField field;
+  
+  public ListEditor(String labelString, List<String> initialValues) {
+    label = new JLabel(labelString);
+    field = new JTextField();
+    values = initialValues;
+    field.setText(Strings.toString(initialValues));
+        
+    listEditor = new ListEditorDialog(SwingUtilities.getAncestorOfClass(
+        Window.class, this), values, List.class, String.class.getName());
+
+    listButton = new JButton(MainFrame.getIcon("edit-list"));
+    listButton.setToolTipText("Edit the list");
+    
+    listButton.addActionListener(new ActionListener() {
+      @SuppressWarnings("unchecked")
+      public void actionPerformed(ActionEvent e) {
+        List<?> returnedList = listEditor.showDialog();
+        if(returnedList != null) {
+          values = (List<String>) returnedList;
+          field.setText(Strings.toString(returnedList));
+        }
+        else {
+          // pass
+        }
+      }
+    });
+    
+    this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+    this.add(label);
+    this.add(field);
+    this.add(listButton);
+  }
   
   
+  public List<String> getValues() {
+    return this.values;
+  }
   
 }
