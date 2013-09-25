@@ -17,6 +17,9 @@ package gate.corpora;
 import gate.Corpus;
 import gate.Document;
 import gate.Factory;
+import gate.Gate;
+import gate.LanguageResource;
+import gate.Resource;
 import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.CreoleResource;
 import gate.gui.MainFrame;
@@ -61,12 +64,13 @@ public class FastInfosetExporter extends ResourceHelper {
         public void actionPerformed(ActionEvent e) {
 
           Runnable runableAction = new Runnable() {
-            
+
             @Override
             public void run() {
               XJFileChooser fileChooser = MainFrame.getFileChooser();
               ExtensionFileFilter filter =
-                  new ExtensionFileFilter("Fast Infoset XML Files (*.finf)", "finf");
+                  new ExtensionFileFilter("Fast Infoset XML Files (*.finf)",
+                      "finf");
               fileChooser.addChoosableFileFilter(filter);
               fileChooser.setMultiSelectionEnabled(false);
               fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -134,18 +138,17 @@ public class FastInfosetExporter extends ResourceHelper {
               } catch(Exception ex) {
                 MainFrame.unlockGUI();
                 JOptionPane.showMessageDialog(MainFrame.getInstance(),
-                    "Could not create write file:" + ex.toString(),
-                    "GATE", JOptionPane.ERROR_MESSAGE);
+                    "Could not create write file:" + ex.toString(), "GATE",
+                    JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace(Err.getPrintWriter());
                 return;
               } finally {
                 MainFrame.unlockGUI();
               }
               long time = System.currentTimeMillis() - start;
-              handle
-                  .statusChanged("Finished saving as Fast Infoset XML into "
-                      + " the file: " + selectedFile.toString() + " in "
-                      + ((double)time) / 1000 + " s");
+              handle.statusChanged("Finished saving as Fast Infoset XML into "
+                  + " the file: " + selectedFile.toString() + " in "
+                  + ((double)time) / 1000 + " s");
             }
           };
           Thread thread = new Thread(runableAction, "Fast Infoset Exporter");
@@ -160,7 +163,7 @@ public class FastInfosetExporter extends ResourceHelper {
         @Override
         public void actionPerformed(ActionEvent e) {
           Runnable runnable = new Runnable() {
-            
+
             @Override
             public void run() {
               try {
@@ -325,31 +328,55 @@ public class FastInfosetExporter extends ResourceHelper {
   }
 
   /**
-   * A static utility method that exports the specified GATE document to a Fast Infoset file.
-   * @param doc the {@link gate.Document} instance to export
-   * @param file the {@link java.io.File}
+   * A static utility method that exports the specified GATE document to a Fast
+   * Infoset file.
+   * 
+   * @param doc
+   *          the {@link gate.Document} instance to export
+   * @param file
+   *          the {@link java.io.File}
    * @throws Exception
    */
   public static void export(Document doc, File file) throws Exception {
     FileOutputStream out = null;
     try {
       out = new FileOutputStream(file);
-      export (doc, out);
-    }
-    finally {
+      export(doc, out);
+    } finally {
       out.close();
     }
   }
-  
+
   public static void export(Document doc, OutputStream out) throws Exception {
 
-    StAXDocumentSerializer xsw =
-        new StAXDocumentSerializer(out);
+    StAXDocumentSerializer xsw = new StAXDocumentSerializer(out);
 
     xsw.writeStartDocument("1.0");
     DocumentStaxUtils.writeDocument(doc, xsw, "");
     xsw.writeEndDocument();
     xsw.flush();
     xsw.close();
+  }
+
+  public static void main(String args[]) throws Exception {
+    // initialise GATE and load the plugin (which creates an autoinstance of
+    // the Resource Helper)
+    Gate.init();
+    Gate.getCreoleRegister().registerDirectories(
+        (new File(Gate.getGateHome(), "plugins/Format_FastInfoset")).toURI()
+            .toURL());
+
+    // get the auto created instance of the Resource Helper
+    ResourceHelper rh =
+        (ResourceHelper)Gate.getCreoleRegister()
+            .getAllInstances("gate.corpora.FastInfosetExporter").iterator()
+            .next();
+
+    // create a simple test document
+    Document doc =
+        Factory.newDocument("A test of the Resource Handler API access");
+
+    // use the Resource Helper to export the document
+    rh.call("export", doc, new File("resource-handler-test.finf"));
   }
 }
