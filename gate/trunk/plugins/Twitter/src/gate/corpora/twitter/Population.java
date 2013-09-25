@@ -340,6 +340,7 @@ class ListEditor extends JPanel {
     field = new JTextField();
     values = initialValues;
     field.setText(Strings.toString(initialValues));
+    field.setEditable(false);
         
     listEditor = new ListEditorDialog(SwingUtilities.getAncestorOfClass(
         Window.class, this), values, List.class, String.class.getName());
