@@ -202,14 +202,11 @@ public class Population extends ResourceHelper  {
     return actions;
   }
 
-  
-  
-
 }
 
 
 class PopulationDialogWrapper  {
-  private JDialog dialog;
+  protected JDialog dialog;
   private PopulationConfig config;
   private JTextField encodingField;
   private JCheckBox checkbox;
@@ -259,10 +256,12 @@ class PopulationDialogWrapper  {
     configPersistenceBox.add(Box.createHorizontalGlue());
     JButton loadConfigButton = new JButton("Load configuration");
     loadConfigButton.setToolTipText("Replace the configuration above with a previously saved one");
+    loadConfigButton.addActionListener(new LoadConfigListener(config, dialog));
     configPersistenceBox.add(loadConfigButton);
     configPersistenceBox.add(Box.createHorizontalGlue());
     JButton saveConfigButton = new JButton("Save configuration");
     saveConfigButton.setToolTipText("Save the configuration above for re-use");
+    saveConfigButton.addActionListener(new SaveConfigListener(config, dialog));
     configPersistenceBox.add(saveConfigButton);
     configPersistenceBox.add(Box.createHorizontalGlue());
     //dialog.add(configPersistenceBox);
