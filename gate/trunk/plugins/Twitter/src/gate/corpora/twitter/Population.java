@@ -22,9 +22,8 @@ import gate.util.*;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.InputStream;
+import java.io.*;
 import java.net.*;
-import java.nio.charset.Charset;
 import java.util.*;
 
 import javax.swing.AbstractAction;
@@ -50,8 +49,16 @@ public class Population extends ResourceHelper  {
   private static final long serialVersionUID = 1443073039199794668L;
   
   public static final String[] DEFAULT_CONTENT_KEYS = {"text", "created_at", "user:name"};
-  public static final String[] DEFAULT_FEATURE_KEYS = {"user:screen_name", "user:location", "id", "source", "truncated", "retweeted_status:id"};
+  public static final String[] DEFAULT_FEATURE_KEYS = {"user:screen_name", "user:location", 
+    "id", "source", "truncated", "retweeted_status:id"};
 
+  
+  public static void populateCorpus(final Corpus corpus, URL inputUrl, PopulationConfig config) 
+      throws ResourceInstantiationException {
+    populateCorpus(corpus, inputUrl, config.getEncoding(), config.getContentKeys(), 
+        config.getFeatureKeys(), config.getTweetsPerDoc());
+  }
+  
   /**
    * 
    * @param corpus
@@ -160,9 +167,10 @@ public class Population extends ResourceHelper  {
 
         // if no file was selected then just stop
         try {
-          final URL fileUrl = dialog.getFileUrl();
-          if(fileUrl == null)
+          final List<URL> fileUrls = dialog.getFileUrls();
+          if ( (fileUrls == null) || fileUrls.isEmpty() ) {
             return;
+          }
           
           // Run the population in a separate thread so we don't lock up the GUI
           Thread thread =
@@ -170,9 +178,11 @@ public class Population extends ResourceHelper  {
                   "Twitter JSON Corpus Populator") {
                 public void run() {
                   try {
-                    populateCorpus((Corpus) handle.getTarget(), fileUrl, dialog.getEncoding(), 
-                        dialog.getContentKeys(), dialog.getFeatureKeys(), dialog.getTweetsPerDoc());
-                  } 
+                    for (URL fileUrl : fileUrls) {
+                      populateCorpus((Corpus) handle.getTarget(), fileUrl, dialog.getEncoding(), 
+                          dialog.getContentKeys(), dialog.getFeatureKeys(), dialog.getTweetsPerDoc());
+                    } 
+                  }
                   catch(ResourceInstantiationException e) {
                     e.printStackTrace();
                   }
@@ -199,24 +209,24 @@ public class Population extends ResourceHelper  {
 
 class PopulationDialogWrapper  {
   private JDialog dialog;
-  private String encoding;
-  private int tweetsPerDoc;
-  private List<String> contentKeys, featureKeys;
+  private PopulationConfig config;
   private JTextField encodingField;
   private JCheckBox checkbox;
   private JFileChooser chooser;
-  private URL fileUrl;
+  private List<URL> fileUrls;
   private ListEditor featureKeysEditor, contentKeysEditor;
 
   
   public PopulationDialogWrapper() {
+    config = new PopulationConfig();
+    
     dialog = new JDialog(MainFrame.getInstance(), "Populate from Twitter JSON", true);
     MainFrame.getGuiRoots().add(dialog);
     dialog.getContentPane().setLayout(new BoxLayout(dialog.getContentPane(), BoxLayout.Y_AXIS));
     
     Box encodingBox = Box.createHorizontalBox();
     JLabel encodingLabel = new JLabel("Encoding:");
-    encodingField = new JTextField(TweetUtils.DEFAULT_ENCODING);
+    encodingField = new JTextField(config.getEncoding());
     encodingBox.add(encodingLabel);
     encodingBox.add(encodingField);
     dialog.add(encodingBox);
@@ -224,21 +234,21 @@ class PopulationDialogWrapper  {
     Box checkboxBox = Box.createHorizontalBox();
     JLabel checkboxLabel = new JLabel("One document per tweet");
     checkbox = new JCheckBox();
+    checkbox.setSelected(config.getOneDocCheckbox());
     checkboxBox.add(checkboxLabel);
     checkboxBox.add(Box.createHorizontalGlue());
     checkboxBox.add(checkbox);
     dialog.add(checkboxBox);
     
-    List<String> defaultContentKeys = Arrays.asList(Population.DEFAULT_CONTENT_KEYS);
-    contentKeysEditor = new ListEditor("Content keys: ", defaultContentKeys);
+    contentKeysEditor = new ListEditor("Content keys: ", config.getContentKeys());
     dialog.add(contentKeysEditor);
     
-    List<String> defaultFeatureKeys = Arrays.asList(Population.DEFAULT_FEATURE_KEYS);
-    featureKeysEditor = new ListEditor("Feature keys: ", defaultFeatureKeys);
+    featureKeysEditor = new ListEditor("Feature keys: ", config.getFeatureKeys());
     dialog.add(featureKeysEditor);
     
     chooser = new JFileChooser();
     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    chooser.setMultiSelectionEnabled(true);
     chooser.setDialogTitle("Select a Twitter JSON file");
     chooser.resetChoosableFileFilters();
     chooser.setAcceptAllFileFilterUsed(false);
@@ -256,38 +266,42 @@ class PopulationDialogWrapper  {
   
   
   public String getEncoding() {
-    return this.encoding;
+    return this.config.getEncoding();
   }
   
-  public URL getFileUrl() throws MalformedURLException {
-    return this.fileUrl;
+  public List<URL> getFileUrls() throws MalformedURLException {
+    return this.fileUrls;
   }
 
   public int getTweetsPerDoc() {
-    return this.tweetsPerDoc;
+    return this.config.getTweetsPerDoc();
   }
   
   public List<String> getContentKeys() {
-    return this.contentKeys;
+    return this.config.getContentKeys();
   }
   
   public List<String> getFeatureKeys() {
-    return this.featureKeys;
+    return this.config.getFeatureKeys();
   }
   
-  protected void load()  {
-    this.tweetsPerDoc = this.checkbox.isSelected() ? 1 : 0;
-
-    this.contentKeys = this.contentKeysEditor.getValues();
-    this.featureKeys = this.featureKeysEditor.getValues();
-    
-    this.encoding = this.encodingField.getText();
-    if ( (this.encoding == null) || this.encoding.isEmpty() ) {
-      this.encoding = Charset.defaultCharset().name();
-    }
+  
+  protected void updateConfig() {
+    this.config.setTweetsPerDoc(this.checkbox.isSelected() ? 1 : 0);
+    this.config.setContentKeys(this.contentKeysEditor.getValues());
+    this.config.setFeatureKeys(this.featureKeysEditor.getValues());
+    this.config.setEncoding(this.encodingField.getText());
+  }
+  
+  
+  protected void loadFile()  {
+    updateConfig();
 
     try {
-      this.fileUrl = this.chooser.getSelectedFile().toURI().toURL();
+      this.fileUrls = new ArrayList<URL>();
+      for (File file : this.chooser.getSelectedFiles()) {
+        this.fileUrls.add(file.toURI().toURL());
+      }
     }
     catch (MalformedURLException e) {
       e.printStackTrace();
@@ -317,7 +331,7 @@ class PopulationDialogListener implements ActionListener {
   @Override
   public void actionPerformed(ActionEvent event) {
     if (event.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)){
-      this.dialog.load();
+      this.dialog.loadFile();
     }
     else {
       this.dialog.cancel();
@@ -325,6 +339,7 @@ class PopulationDialogListener implements ActionListener {
   }
   
 }
+
 
 class ListEditor extends JPanel {
   private static final long serialVersionUID = -1578463259277343578L;
@@ -355,9 +370,6 @@ class ListEditor extends JPanel {
         if(returnedList != null) {
           values = (List<String>) returnedList;
           field.setText(Strings.toString(returnedList));
-        }
-        else {
-          // pass
         }
       }
     });
