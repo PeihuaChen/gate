@@ -15,6 +15,10 @@ package gate.corpora.twitter;
 import java.util.*;
 import java.io.*;
 import java.net.URL;
+import java.awt.event.*;
+import java.awt.Component;
+
+import javax.swing.JFileChooser;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
@@ -71,6 +75,7 @@ public class PopulationConfig   {
     this.contentKeys = Arrays.asList(Population.DEFAULT_CONTENT_KEYS);
     this.featureKeys = Arrays.asList(Population.DEFAULT_FEATURE_KEYS);
   }
+  
 
   /**
    * Constructor with all options.
@@ -84,6 +89,23 @@ public class PopulationConfig   {
     this.encoding = encoding;
     this.contentKeys = cks;
     this.featureKeys = fks;
+  }
+  
+  
+  public void reload(File file) {
+    PopulationConfig source = PopulationConfig.load(file);
+    this.tweetsPerDoc = source.tweetsPerDoc;
+    this.encoding = source.encoding;
+    this.contentKeys = source.contentKeys;
+    this.featureKeys = source.featureKeys;
+  }
+  
+  public void reload(URL url) {
+    PopulationConfig source = PopulationConfig.load(url);
+    this.tweetsPerDoc = source.tweetsPerDoc;
+    this.encoding = source.encoding;
+    this.contentKeys = source.contentKeys;
+    this.featureKeys = source.featureKeys;
   }
   
   
@@ -103,6 +125,57 @@ public class PopulationConfig   {
     xstream.marshal(this, ppw);
     ppw.close();
   }
+  
+}
+
+
+class LoadConfigListener implements ActionListener {
+  PopulationConfig config;
+  Component parentDialog;
+  
+  public LoadConfigListener(PopulationConfig config, Component dialog) {
+    this.config = config;
+    this.parentDialog = dialog;
+  }
+
+  @Override
+  public void actionPerformed(ActionEvent arg0) {
+    JFileChooser chooser = new JFileChooser();
+    chooser.setDialogTitle("Load XML configuration");
+    chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    int chosen = chooser.showOpenDialog(this.parentDialog);
+    if (chosen == JFileChooser.APPROVE_OPTION) {
+      config.reload(chooser.getSelectedFile());
+    }
+  }
+}
+
+
+class SaveConfigListener implements ActionListener {
+  PopulationConfig config;
+  Component parentDialog;
+  
+  public SaveConfigListener(PopulationConfig config, Component dialog) {
+    this.config = config;
+    this.parentDialog = dialog;
+  }
+
+  @Override
+  public void actionPerformed(ActionEvent e) {
+    JFileChooser chooser = new JFileChooser();
+    chooser.setDialogTitle("Save configuration as XML");
+    chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    int chosen = chooser.showSaveDialog(this.parentDialog);
+    if (chosen == JFileChooser.APPROVE_OPTION) {
+      try {
+        config.saveXML(chooser.getSelectedFile());
+      } 
+      catch(IOException e1) {
+        e1.printStackTrace();
+      }
+    }
+  }
+  
   
 }
 
