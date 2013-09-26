@@ -296,17 +296,13 @@ System.out.println("Atribute \"" + newAttribute.name() + "\":" + values.size());
   }
 
   /**
-   * Checks whether the aqttribute at a particular index in the input dataset
+   * Checks whether the attribute at a particular index in the input dataset
    * is string.
    * @param index
    * @return a <tt>boolean</tt> value.
    */
   protected boolean isString(int index){
-    
-    int[] stringIndices = getInputStringIndex();
-    for(int i = 0; i < stringIndices.length; i++)
-      if(stringIndices[i] == index) return true;
-    return false;
+    return getInputFormat().attribute(index).isString();
   }
 
   public Enumeration listOptions() {
