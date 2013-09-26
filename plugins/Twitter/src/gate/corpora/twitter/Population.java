@@ -36,7 +36,9 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.io.IOUtils;
@@ -126,7 +128,7 @@ public class Population extends ResourceHelper  {
 
   private static Document newDocument(URL url, int counter, int digits) throws ResourceInstantiationException {
     Document document = Factory.newDocument("");
-    String code = StringUtils.rightPad(Integer.toString(counter), digits, '0');
+    String code = StringUtils.leftPad(Integer.toString(counter), digits, '0');
     String name = StringUtils.stripToEmpty(StringUtils.substring(url.getPath(), 1)) + "_" + code;
     document.setName(name);
     document.setSourceUrl(url);
@@ -165,7 +167,7 @@ public class Population extends ResourceHelper  {
       public void actionPerformed(ActionEvent e)  {
         final PopulationDialogWrapper dialog = new PopulationDialogWrapper();
 
-        // if no file was selected then just stop
+        // If no files were selected then just stop
         try {
           final List<URL> fileUrls = dialog.getFileUrls();
           if ( (fileUrls == null) || fileUrls.isEmpty() ) {
@@ -197,7 +199,6 @@ public class Population extends ResourceHelper  {
       }
     });
 
-
     return actions;
   }
 
@@ -223,6 +224,7 @@ class PopulationDialogWrapper  {
     dialog = new JDialog(MainFrame.getInstance(), "Populate from Twitter JSON", true);
     MainFrame.getGuiRoots().add(dialog);
     dialog.getContentPane().setLayout(new BoxLayout(dialog.getContentPane(), BoxLayout.Y_AXIS));
+    dialog.add(Box.createVerticalStrut(3));
     
     Box encodingBox = Box.createHorizontalBox();
     JLabel encodingLabel = new JLabel("Encoding:");
@@ -230,8 +232,10 @@ class PopulationDialogWrapper  {
     encodingBox.add(encodingLabel);
     encodingBox.add(encodingField);
     dialog.add(encodingBox);
+    dialog.add(Box.createVerticalStrut(4));
 
     Box checkboxBox = Box.createHorizontalBox();
+    checkboxBox.setToolTipText("If unchecked, one document per file");
     JLabel checkboxLabel = new JLabel("One document per tweet");
     checkbox = new JCheckBox();
     checkbox.setSelected(config.getOneDocCheckbox());
@@ -239,12 +243,33 @@ class PopulationDialogWrapper  {
     checkboxBox.add(Box.createHorizontalGlue());
     checkboxBox.add(checkbox);
     dialog.add(checkboxBox);
+    dialog.add(Box.createVerticalStrut(4));
     
     contentKeysEditor = new ListEditor("Content keys: ", config.getContentKeys());
+    contentKeysEditor.setToolTipText("JSON key paths to be turned into DocumentContent");
     dialog.add(contentKeysEditor);
+    dialog.add(Box.createVerticalStrut(4));
     
     featureKeysEditor = new ListEditor("Feature keys: ", config.getFeatureKeys());
+    featureKeysEditor.setToolTipText("JSON key paths to be turned into Tweet annotation features");
     dialog.add(featureKeysEditor);
+    dialog.add(Box.createVerticalStrut(6));
+    
+    Box configPersistenceBox = Box.createHorizontalBox();
+    configPersistenceBox.add(Box.createHorizontalGlue());
+    JButton loadConfigButton = new JButton("Load configuration");
+    loadConfigButton.setToolTipText("Replace the configuration above with a previously saved one");
+    configPersistenceBox.add(loadConfigButton);
+    configPersistenceBox.add(Box.createHorizontalGlue());
+    JButton saveConfigButton = new JButton("Save configuration");
+    saveConfigButton.setToolTipText("Save the configuration above for re-use");
+    configPersistenceBox.add(saveConfigButton);
+    configPersistenceBox.add(Box.createHorizontalGlue());
+    //dialog.add(configPersistenceBox);
+    //dialog.add(Box.createVerticalStrut(5));
+    
+    dialog.add(new JSeparator(SwingConstants.HORIZONTAL));
+    dialog.add(Box.createVerticalStrut(2));
     
     chooser = new JFileChooser();
     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -349,6 +374,14 @@ class ListEditor extends JPanel {
   private List<String> values;
   private JLabel label;
   private JTextField field;
+  
+  @Override
+  public void setToolTipText(String text) {
+    super.setToolTipText(text);
+    label.setToolTipText(text);
+    field.setToolTipText(text);
+  }
+  
   
   public ListEditor(String labelString, List<String> initialValues) {
     label = new JLabel(labelString);
