@@ -32,7 +32,6 @@ import org.apache.commons.lang.*;
 public class Population extends ResourceHelper  {
 
   private static final long serialVersionUID = 1443073039199794668L;
-  
 
   
   public static void populateCorpus(final Corpus corpus, URL inputUrl, PopulationConfig config) 
@@ -68,20 +67,20 @@ public class Population extends ResourceHelper  {
       int tweetCounter = 0;
       Document document = newDocument(inputUrl, tweetCounter, digits);
       StringBuilder content = new StringBuilder();
-      Map<PreAnnotation, Integer> annotanda = new HashMap<PreAnnotation, Integer>();
+      Map<PreAnnotation, Integer> annotandaOffsets = new HashMap<PreAnnotation, Integer>();
       
       for (Tweet tweet : tweets) {
         if ( (tweetsPerDoc > 0) && (tweetCounter > 0) && ((tweetCounter % tweetsPerDoc) == 0) ) {
-          closeDocument(document, content, annotanda, corpus);
+          closeDocument(document, content, annotandaOffsets, corpus);
           document = newDocument(inputUrl, tweetCounter, digits);
           content = new StringBuilder();
-          annotanda = new HashMap<PreAnnotation, Integer>();
+          annotandaOffsets = new HashMap<PreAnnotation, Integer>();
         }
 
         int startOffset = content.length();
         content.append(tweet.getString());
         for (PreAnnotation preAnn : tweet.getAnnotations()) {
-          annotanda.put(preAnn, startOffset);
+          annotandaOffsets.put(preAnn, startOffset);
         }
 
         content.append('\n');
@@ -89,7 +88,7 @@ public class Population extends ResourceHelper  {
       } // end of Tweet loop
       
       if (content.length() > 0) {
-        closeDocument(document, content, annotanda, corpus);
+        closeDocument(document, content, annotandaOffsets, corpus);
       }
       else {
         Factory.deleteResource(document);
@@ -118,12 +117,12 @@ public class Population extends ResourceHelper  {
   }
   
   
-  private static void closeDocument(Document document, StringBuilder content, Map<PreAnnotation, Integer> annotanda, Corpus corpus) throws InvalidOffsetException {
+  private static void closeDocument(Document document, StringBuilder content, Map<PreAnnotation, Integer> annotandaOffsets, Corpus corpus) throws InvalidOffsetException {
     DocumentContent contentImpl = new DocumentContentImpl(content.toString());
     document.setContent(contentImpl);
     AnnotationSet originalMarkups = document.getAnnotations(Gate.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
-    for (PreAnnotation preAnn : annotanda.keySet()) {
-      preAnn.toAnnotation(originalMarkups, annotanda.get(preAnn));
+    for (PreAnnotation preAnn : annotandaOffsets.keySet()) {
+      preAnn.toAnnotation(originalMarkups, annotandaOffsets.get(preAnn));
     }
     corpus.add(document);
     

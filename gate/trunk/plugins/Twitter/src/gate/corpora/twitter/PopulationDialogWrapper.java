@@ -95,8 +95,8 @@ public class PopulationDialogWrapper  {
     configPersistenceBox.add(Box.createHorizontalGlue());
     
     // TODO keep these commented out on svn until reloading works properly
-    //dialog.add(configPersistenceBox);
-    //dialog.add(Box.createVerticalStrut(5));
+    dialog.add(configPersistenceBox);
+    dialog.add(Box.createVerticalStrut(5));
     
     dialog.add(new JSeparator(SwingConstants.HORIZONTAL));
     dialog.add(Box.createVerticalStrut(2));
@@ -140,6 +140,11 @@ public class PopulationDialogWrapper  {
     return this.config.getFeatureKeys();
   }
   
+  
+  protected void setNewConfig(PopulationConfig newConfig) {
+    this.config = newConfig;
+    this.updateGui();
+  }
   
   protected void updateConfig() {
     this.config.setTweetsPerDoc(this.checkbox.isSelected() ? 1 : 0);
