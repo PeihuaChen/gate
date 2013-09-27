@@ -12,14 +12,12 @@
 package gate.corpora.twitter;
 
 
+import gate.Gate;
 import java.util.*;
 import java.io.*;
 import java.net.URL;
 import java.awt.event.*;
-import java.awt.Component;
-
 import javax.swing.JFileChooser;
-
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
@@ -111,14 +109,17 @@ public class PopulationConfig   {
   
   public static PopulationConfig load(File file) {
     XStream xstream = new XStream(new StaxDriver());
+    xstream.setClassLoader(Gate.getClassLoader());
     return (PopulationConfig) xstream.fromXML(file);
   }
 
   public static PopulationConfig load(URL url) {
     XStream xstream = new XStream(new StaxDriver());
+    xstream.setClassLoader(Gate.getClassLoader());
     return (PopulationConfig) xstream.fromXML(url);
   }
 
+  
   public void saveXML(File file) throws IOException {
     XStream xstream = new XStream(new StaxDriver());
     PrettyPrintWriter ppw = new PrettyPrintWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
@@ -131,11 +132,11 @@ public class PopulationConfig   {
 
 class LoadConfigListener implements ActionListener {
   PopulationConfig config;
-  Component parentDialog;
+  PopulationDialogWrapper wrapper;
   
-  public LoadConfigListener(PopulationConfig config, Component dialog) {
+  public LoadConfigListener(PopulationConfig config, PopulationDialogWrapper wrapper) {
     this.config = config;
-    this.parentDialog = dialog;
+    this.wrapper = wrapper;
   }
 
   @Override
@@ -143,9 +144,10 @@ class LoadConfigListener implements ActionListener {
     JFileChooser chooser = new JFileChooser();
     chooser.setDialogTitle("Load XML configuration");
     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-    int chosen = chooser.showOpenDialog(this.parentDialog);
+    int chosen = chooser.showOpenDialog(this.wrapper.dialog);
     if (chosen == JFileChooser.APPROVE_OPTION) {
       config.reload(chooser.getSelectedFile());
+      wrapper.updateGui();
     }
   }
 }
@@ -153,11 +155,11 @@ class LoadConfigListener implements ActionListener {
 
 class SaveConfigListener implements ActionListener {
   PopulationConfig config;
-  Component parentDialog;
+  PopulationDialogWrapper wrapper;
   
-  public SaveConfigListener(PopulationConfig config, Component dialog) {
+  public SaveConfigListener(PopulationConfig config, PopulationDialogWrapper wrapper) {
     this.config = config;
-    this.parentDialog = dialog;
+    this.wrapper = wrapper;
   }
 
   @Override
@@ -165,7 +167,7 @@ class SaveConfigListener implements ActionListener {
     JFileChooser chooser = new JFileChooser();
     chooser.setDialogTitle("Save configuration as XML");
     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-    int chosen = chooser.showSaveDialog(this.parentDialog);
+    int chosen = chooser.showSaveDialog(this.wrapper.dialog);
     if (chosen == JFileChooser.APPROVE_OPTION) {
       try {
         config.saveXML(chooser.getSelectedFile());
