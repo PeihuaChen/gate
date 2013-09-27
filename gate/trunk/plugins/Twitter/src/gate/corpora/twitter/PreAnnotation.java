@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011--2012, The University of Sheffield.
+ * Copyright (c) 2011--2013, The University of Sheffield.
  *
  * This file is part of GATE (see http://gate.ac.uk/), and is free
  * software, licenced under the GNU Library General Public License,

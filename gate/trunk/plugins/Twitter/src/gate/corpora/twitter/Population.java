@@ -50,9 +50,6 @@ public class Population extends ResourceHelper  {
 
   private static final long serialVersionUID = 1443073039199794668L;
   
-  public static final String[] DEFAULT_CONTENT_KEYS = {"text", "created_at", "user:name"};
-  public static final String[] DEFAULT_FEATURE_KEYS = {"user:screen_name", "user:location", 
-    "id", "source", "truncated", "retweeted_status:id"};
 
   
   public static void populateCorpus(final Corpus corpus, URL inputUrl, PopulationConfig config) 

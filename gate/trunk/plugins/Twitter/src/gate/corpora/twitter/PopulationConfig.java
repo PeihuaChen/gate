@@ -70,8 +70,8 @@ public class PopulationConfig   {
   public PopulationConfig() {
     this.tweetsPerDoc = 0;
     this.encoding = TweetUtils.DEFAULT_ENCODING;
-    this.contentKeys = Arrays.asList(Population.DEFAULT_CONTENT_KEYS);
-    this.featureKeys = Arrays.asList(Population.DEFAULT_FEATURE_KEYS);
+    this.contentKeys = Arrays.asList(TweetUtils.DEFAULT_CONTENT_KEYS);
+    this.featureKeys = Arrays.asList(TweetUtils.DEFAULT_FEATURE_KEYS);
   }
   
 

@@ -1,6 +1,4 @@
 /*
- *  TweetUtils.java
- *
  *  Copyright (c) 1995-2013, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
@@ -17,23 +15,33 @@ import gate.*;
 
 import java.io.IOException;
 import java.util.*;
+
 import org.apache.commons.lang.StringUtils;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
-
-// Jackson API
-// http://wiki.fasterxml.com/JacksonHome
-
-// Standard: RFC 4627
-// https://tools.ietf.org/html/rfc4627
+/* REFERENCES
+ * Jackson API
+ * http://wiki.fasterxml.com/JacksonHome
+ * Standard: RFC 4627
+ * https://tools.ietf.org/html/rfc4627
+ * */
 
 public class TweetUtils  {
   
   public static final String PATH_SEPARATOR = ":";
   public static final String MIME_TYPE = "text/x-json-twitter";
   public static final String DEFAULT_ENCODING = "UTF-8";
+  public static final String TWEET_ANNOTATION_TYPE = "Tweet";
+
+  public static final String DEFAULT_TEXT_ATTRIBUTE = "text";
+
+  public static final String[] DEFAULT_CONTENT_KEYS = {DEFAULT_TEXT_ATTRIBUTE, 
+    "created_at", "user:name"};
+  public static final String[] DEFAULT_FEATURE_KEYS = {"user:screen_name", 
+    "user:location", "id", "source", "truncated", "retweeted_status:id"};
 
   
   public static List<Tweet> readTweets(String string) throws IOException {
