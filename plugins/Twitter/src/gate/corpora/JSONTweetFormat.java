@@ -38,8 +38,6 @@ import org.apache.commons.lang.StringUtils;
 public class JSONTweetFormat extends TextualDocumentFormat {
   private static final long serialVersionUID = 6878020036304333918L;
 
-  public static final String TEXT_ATTRIBUTE = "text";
-  public static final String TWEET_ANNOTATION_TYPE = "Tweet";
   
   /** Default construction */
   public JSONTweetFormat() { super();}

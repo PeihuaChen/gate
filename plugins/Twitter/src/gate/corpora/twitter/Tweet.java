@@ -1,6 +1,4 @@
 /*
- *  Tweet.java
- *
  *  Copyright (c) 1995-2013, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
@@ -15,20 +13,9 @@ package gate.corpora.twitter;
 
 import gate.*;
 import gate.util.*;
-import gate.corpora.*;
-
 import java.util.*;
-
 import org.apache.commons.lang.StringEscapeUtils;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
-
-// Jackson API
-// http://wiki.fasterxml.com/JacksonHome
-
-// Standard: RFC 4627
-// https://tools.ietf.org/html/rfc4627
 
 
 public class Tweet {
@@ -81,7 +68,7 @@ public class Tweet {
     while (keys.hasNext()) {
       String key = keys.next();
 
-      if (key.equals(JSONTweetFormat.TEXT_ATTRIBUTE)) {
+      if (key.equals(TweetUtils.DEFAULT_TEXT_ATTRIBUTE)) {
         string = StringEscapeUtils.unescapeHtml(json.get(key).asText());
       }
       else {
@@ -89,7 +76,7 @@ public class Tweet {
       }
     }
     
-    annotations.add(new PreAnnotation(0L, string.length(), JSONTweetFormat.TWEET_ANNOTATION_TYPE, features));
+    annotations.add(new PreAnnotation(0L, string.length(), TweetUtils.TWEET_ANNOTATION_TYPE, features));
   }
   
 
@@ -128,7 +115,7 @@ public class Tweet {
     }
     
     // Create the main annotation and the content.
-    this.annotations.add(new PreAnnotation(0, content.length(), JSONTweetFormat.TWEET_ANNOTATION_TYPE, annoFeatures));
+    this.annotations.add(new PreAnnotation(0, content.length(), TweetUtils.TWEET_ANNOTATION_TYPE, annoFeatures));
     this.string = content.toString();
   }
 
