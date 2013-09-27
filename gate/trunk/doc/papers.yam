@@ -24,6 +24,10 @@ GATE papers
 
 - K. Bontcheva, H. Cunningham, I. Roberts, A. Roberts, V. Tablan, N. Aswani, G. Gorrell. Teamware: A Web-based, Collaborative Text Annotation Framework.  Language Resources and Evaluation. In Press. %(http://link.springer.com/article/10.1007/s10579-013-9215-6,PDF)
 
+%3* I used TwitIE / the social media components in GATE:
+
+ - K. Bontcheva, L. Derczynski, A. Funk, M.A. Greenwood, D. Maynard, N. Aswani. TwitIE: An Open-Source Information Extraction Pipeline for Microblog Text. Proceedings of the International Conference on Recent Advances in Natural Language Processing (RANLP 2013). %(https://gate.ac.uk/sale/ranlp2013/twitie/twitie-ranlp2013.pdf, PDF), %(https://gate.ac.uk/wiki/twitie.html, Download TwitIE)
+
 %3* I used the machine learning facilities in GATE:
 
  - Y. Li, K. Bontcheva and H. Cunningham. Adapting SVM for Data Sparseness and Imbalance: A Case Study on Information Extraction. Natural Language Engineering, 15(02), 241-271, 2009. %(http://journals.cambridge.org/repo_A45LfkBD,On-line Link). %(../../sale/nle-svm/svm-ie-nle-revision.pdf,Pre-print), %(bibtex.html#Li2009, BibTeX).
@@ -40,9 +44,6 @@ GATE papers
 
  - M. Dowman, V. Tablan, H. Cunningham and B. Popov. Web-Assisted Annotation, Semantic Indexing and Search of Television and Radio News. 14th International World Wide Web Conference. Chiba, Japan, 2005. %(http://gate.ac.uk/sale/www05/web-assisted-annotation.pdf,PDF). %(bibtex.html#Dowman2005, BibTeX).
 
-%3* I used TwitIE / the social media facilities in GATE:
-
- - K. Bontcheva, L. Derczynski, A. Funk, M.A. Greenwood, D. Maynard, N. Aswani. TwitIE: An Open-Source Information Extraction Pipeline for Microblog Text. Proceedings of the International Conference on Recent Advances in Natural Language Processing (RANLP 2013). %(https://gate.ac.uk/sale/ranlp2013/twitie/twitie-ranlp2013.pdf, PDF), %(https://gate.ac.uk/wiki/twitie.html, Download TwitIE)
 
 %contents
 
