@@ -256,14 +256,16 @@ class PopulationDialogWrapper  {
     configPersistenceBox.add(Box.createHorizontalGlue());
     JButton loadConfigButton = new JButton("Load configuration");
     loadConfigButton.setToolTipText("Replace the configuration above with a previously saved one");
-    loadConfigButton.addActionListener(new LoadConfigListener(config, dialog));
+    loadConfigButton.addActionListener(new LoadConfigListener(config, this));
     configPersistenceBox.add(loadConfigButton);
     configPersistenceBox.add(Box.createHorizontalGlue());
     JButton saveConfigButton = new JButton("Save configuration");
     saveConfigButton.setToolTipText("Save the configuration above for re-use");
-    saveConfigButton.addActionListener(new SaveConfigListener(config, dialog));
+    saveConfigButton.addActionListener(new SaveConfigListener(config, this));
     configPersistenceBox.add(saveConfigButton);
     configPersistenceBox.add(Box.createHorizontalGlue());
+    
+    // TODO keep these commented out on svn until reloading works properly
     //dialog.add(configPersistenceBox);
     //dialog.add(Box.createVerticalStrut(5));
     
@@ -315,6 +317,14 @@ class PopulationDialogWrapper  {
     this.config.setContentKeys(this.contentKeysEditor.getValues());
     this.config.setFeatureKeys(this.featureKeysEditor.getValues());
     this.config.setEncoding(this.encodingField.getText());
+  }
+  
+  
+  protected void updateGui() {
+    this.encodingField.setText(config.getEncoding());
+    this.contentKeysEditor.setValues(config.getContentKeys());
+    this.featureKeysEditor.setValues(config.getFeatureKeys());
+    this.checkbox.setSelected(config.getOneDocCheckbox());
   }
   
   
@@ -415,6 +425,11 @@ class ListEditor extends JPanel {
   
   public List<String> getValues() {
     return this.values;
+  }
+  
+  public void setValues(List<String> values) {
+    this.values = values;
+    this.field.setText(Strings.toString(values));
   }
   
 }
