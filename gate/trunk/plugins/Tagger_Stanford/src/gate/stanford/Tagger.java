@@ -48,7 +48,7 @@ import org.apache.log4j.Logger;
 /**
  * This class is a wrapper for the Stanford PoS tagger v3.2.0.
  */
-@CreoleResource(name = "Stanford POS Tagger", comment = "Stanford Part-of-Speech Tagger", icon = "pos-tagger")
+@CreoleResource(name = "Stanford POS Tagger", comment = "Stanford Part-of-Speech Tagger", icon = "pos-tagger", helpURL="http://gate.ac.uk/userguide/sec:misc:creole:stanford")
 public class Tagger extends AbstractLanguageAnalyser {
 
   private static final long serialVersionUID = -6001372186847970081L;
