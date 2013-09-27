@@ -109,12 +109,14 @@ public class PopulationConfig   {
   
   public static PopulationConfig load(File file) {
     XStream xstream = new XStream(new StaxDriver());
+    // setClassLoader needed so XStream finds plugin classes
     xstream.setClassLoader(Gate.getClassLoader());
     return (PopulationConfig) xstream.fromXML(file);
   }
 
   public static PopulationConfig load(URL url) {
     XStream xstream = new XStream(new StaxDriver());
+    // setClassLoader needed so XStream finds plugin classes
     xstream.setClassLoader(Gate.getClassLoader());
     return (PopulationConfig) xstream.fromXML(url);
   }
@@ -122,6 +124,7 @@ public class PopulationConfig   {
   
   public void saveXML(File file) throws IOException {
     XStream xstream = new XStream(new StaxDriver());
+    //TODO slap an XML prolog on the front
     PrettyPrintWriter ppw = new PrettyPrintWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
     xstream.marshal(this, ppw);
     ppw.close();
@@ -131,11 +134,9 @@ public class PopulationConfig   {
 
 
 class LoadConfigListener implements ActionListener {
-  PopulationConfig config;
   PopulationDialogWrapper wrapper;
   
-  public LoadConfigListener(PopulationConfig config, PopulationDialogWrapper wrapper) {
-    this.config = config;
+  public LoadConfigListener(PopulationDialogWrapper wrapper) {
     this.wrapper = wrapper;
   }
 
@@ -146,7 +147,7 @@ class LoadConfigListener implements ActionListener {
     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     int chosen = chooser.showOpenDialog(this.wrapper.dialog);
     if (chosen == JFileChooser.APPROVE_OPTION) {
-      config.reload(chooser.getSelectedFile());
+      wrapper.config = PopulationConfig.load(chooser.getSelectedFile());
       wrapper.updateGui();
     }
   }
@@ -154,11 +155,9 @@ class LoadConfigListener implements ActionListener {
 
 
 class SaveConfigListener implements ActionListener {
-  PopulationConfig config;
   PopulationDialogWrapper wrapper;
   
-  public SaveConfigListener(PopulationConfig config, PopulationDialogWrapper wrapper) {
-    this.config = config;
+  public SaveConfigListener(PopulationDialogWrapper wrapper) {
     this.wrapper = wrapper;
   }
 
@@ -170,7 +169,7 @@ class SaveConfigListener implements ActionListener {
     int chosen = chooser.showSaveDialog(this.wrapper.dialog);
     if (chosen == JFileChooser.APPROVE_OPTION) {
       try {
-        config.saveXML(chooser.getSelectedFile());
+        wrapper.config.saveXML(chooser.getSelectedFile());
       } 
       catch(IOException e1) {
         e1.printStackTrace();
