@@ -147,8 +147,6 @@ class LoadConfigListener implements ActionListener {
     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     int chosen = chooser.showOpenDialog(this.wrapper.dialog);
     if (chosen == JFileChooser.APPROVE_OPTION) {
-      File file = chooser.getSelectedFile();
-      System.out.println("Loading " + file.getAbsolutePath());
       wrapper.setNewConfig(PopulationConfig.load(chooser.getSelectedFile()));
     }
   }
