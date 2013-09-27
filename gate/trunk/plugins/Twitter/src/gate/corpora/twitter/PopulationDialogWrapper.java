@@ -94,7 +94,6 @@ public class PopulationDialogWrapper  {
     configPersistenceBox.add(saveConfigButton);
     configPersistenceBox.add(Box.createHorizontalGlue());
     
-    // TODO keep these commented out on svn until reloading works properly
     dialog.add(configPersistenceBox);
     dialog.add(Box.createVerticalStrut(5));
     
