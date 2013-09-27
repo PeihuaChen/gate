@@ -147,8 +147,9 @@ class LoadConfigListener implements ActionListener {
     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     int chosen = chooser.showOpenDialog(this.wrapper.dialog);
     if (chosen == JFileChooser.APPROVE_OPTION) {
-      wrapper.config = PopulationConfig.load(chooser.getSelectedFile());
-      wrapper.updateGui();
+      File file = chooser.getSelectedFile();
+      System.out.println("Loading " + file.getAbsolutePath());
+      wrapper.setNewConfig(PopulationConfig.load(chooser.getSelectedFile()));
     }
   }
 }
@@ -169,6 +170,7 @@ class SaveConfigListener implements ActionListener {
     int chosen = chooser.showSaveDialog(this.wrapper.dialog);
     if (chosen == JFileChooser.APPROVE_OPTION) {
       try {
+        wrapper.updateConfig();
         wrapper.config.saveXML(chooser.getSelectedFile());
       } 
       catch(IOException e1) {
