@@ -28,7 +28,7 @@ public interface OntologyBooleanQuery  {
   /**
    * Re-assign a query variable to a new value. This will let you
    * query the triple store with the same query but a different value
-   * for the variable. Depending on the implemenation, this might  avoid
+   * for the variable. Depending on the implementation, this might  avoid
    * the necessity to recompile the whole query.
    *
    * @param varName - the name of the variable to be reassigned
@@ -37,6 +37,28 @@ public interface OntologyBooleanQuery  {
    * 
    */
   public void setBinding(String varName, LiteralOrONodeID value);
+  /**
+   * Re-assign a query variable to a new value. This will let you
+   * query the triple store with the same query but a different value
+   * for the variable. Depending on the implementation, this might  avoid
+   * the necessity to recompile the whole query.
+   *
+   * @param varName - the name of the variable to be reassigned
+   * @param value - a ONodeID object (usually a OURI object)
+   * 
+   */
+  public void setBinding(String varName, ONodeID value);
+  /**
+   * Re-assign a query variable to a new value. This will let you
+   * query the triple store with the same query but a different value
+   * for the variable. Depending on the implementation, this might  avoid
+   * the necessity to recompile the whole query.
+   *
+   * @param varName - the name of the variable to be reassigned
+   * @param value - a Literal object 
+   * 
+   */
+  public void setBinding(String varName, Literal value);
   /**
    * Evaluate the boolean query and return whether it evaluates to true
    * or false;
