@@ -14,9 +14,11 @@
 package gate.creole.ontology.impl.sesame;
 
 import gate.creole.ontology.GateOntologyException;
+import gate.creole.ontology.Literal;
 import gate.creole.ontology.LiteralOrONodeID;
 import gate.creole.ontology.OntologyBooleanQuery;
 import gate.creole.ontology.OConstants;
+import gate.creole.ontology.ONodeID;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Value;
 import org.openrdf.query.QueryLanguage;
@@ -108,6 +110,14 @@ import org.openrdf.repository.RepositoryConnection;
       }
       return ret;
     }
+
+  public void setBinding(String string, ONodeID onid) {
+    mBooleanQuery.setBinding(string, mSesameManager.toSesameResource(onid));
+  }
+
+  public void setBinding(String string, Literal ltrl) {
+    mBooleanQuery.setBinding(string, mSesameManager.toSesameLiteral(ltrl));
+  }
 
   }
 
