@@ -121,7 +121,7 @@ import org.openrdf.repository.RepositoryConnection;
       mTupleQuery.setBinding(name, mSesameManager.toSesameLiteral(value));
     }
     public void setBinding(String name, ONodeID value) {
-      mTupleQuery.setBinding(name, mSesameManager.toSesameValue(value));
+      mTupleQuery.setBinding(name, mSesameManager.toSesameResource(value));
     }
 
     /**
