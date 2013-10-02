@@ -414,8 +414,8 @@ extends AbstractLanguageResource implements LanguageResource{
     // change case to cover more variants
     aContent = aContent.toLowerCase();
     while (iterator.hasNext()){
-      magic = iterator.next().toLowerCase();
-      if (aContent.indexOf(magic) != -1)
+      magic = iterator.next();
+      if (aContent.indexOf(magic.toLowerCase()) != -1)
         detectedMimeType = magic2mimeTypeMap.get(magic);
     }// End while
 
