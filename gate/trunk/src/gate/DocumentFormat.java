@@ -16,19 +16,29 @@
 
 package gate;
 
-import java.io.*;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.*;
-
-import org.apache.commons.io.IOUtils;
-
 import gate.corpora.MimeType;
 import gate.corpora.RepositioningInfo;
 import gate.creole.AbstractLanguageResource;
 import gate.event.StatusListener;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.DocumentFormatException;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
+import org.apache.commons.io.IOUtils;
 
 /** The format of Documents. Subclasses of DocumentFormat know about
   * particular MIME types and how to unpack the information in any
@@ -398,30 +408,34 @@ extends AbstractLanguageResource implements LanguageResource{
   }// runMagicNumbers
 
   private static MimeType getTypeFromContent(String aContent){
-    MimeType detectedMimeType = null;
-    // Detect whether or not is a GateXmlDocument
-    // ian_roberts - moved to XmlDocumentFormat where it belongs
-    //if (  aContent.indexOf("<GateDocument") != -1  ||
-    //      aContent.indexOf(" GateDocument") != -1)
-    //  isGateXmlDocument = true;
-    //else
-    //  isGateXmlDocument = false;
 
-    // Run the magic numbers test
-    Set<String> magicSet = magic2mimeTypeMap.keySet();
-    Iterator<String> iterator=magicSet.iterator();
-    String magic;
     // change case to cover more variants
     aContent = aContent.toLowerCase();
-    while (iterator.hasNext()){
-      magic = iterator.next();
-      if (aContent.indexOf(magic.toLowerCase()) != -1)
-        detectedMimeType = magic2mimeTypeMap.get(magic);
-    }// End while
 
-    // If this fails then surrender
+    // the mime type we have detected (null to start with)
+    MimeType detectedMimeType = null;
+
+    // the offset of the first match now we use a "first wins" priority
+    int firstOffset = Integer.MAX_VALUE;
+
+    // Run the magic numbers test
+    for(Map.Entry<String, MimeType> kv : magic2mimeTypeMap.entrySet()) {
+      // the magic code we are looking for
+      String magic = kv.getKey().toLowerCase();
+
+      // the offset of this code in the content
+      int offset = aContent.indexOf(magic.toLowerCase());
+      if(offset != -1 && offset < firstOffset) {
+        // if the magic code exists in the doc and appears before any others
+        // than use that mime type
+        detectedMimeType = kv.getValue();
+        firstOffset = offset;
+      }
+    }
+
+    // return the mime type (null if we failed)
     return detectedMimeType;
-  }// getTypeFromContent
+  }
 
   /**
     * Return the fileSuffix or null if the url doesn't have a file suffix
