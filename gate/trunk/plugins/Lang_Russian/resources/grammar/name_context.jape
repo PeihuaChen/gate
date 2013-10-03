@@ -33,9 +33,9 @@ Priority: 50
 gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule", "JobTitle1");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
+outputAS.add(person.firstNode(), person.lastNode(), "Person",
 features);
-annotations.removeAll(person);
+inputAS.removeAll(person);
 }
 
 Rule: Jobtitle2
@@ -58,9 +58,9 @@ Priority: 50
 gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule", "JobTitle2");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
+outputAS.add(person.firstNode(), person.lastNode(), "Person",
 features);
-annotations.removeAll(person);
+inputAS.removeAll(person);
 }
 
 Rule: PersonJobtitle2
@@ -83,9 +83,9 @@ Priority: 40
 gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule", "PersonJobTitle2");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
+outputAS.add(person.firstNode(), person.lastNode(), "Person",
 features);
-annotations.removeAll(person);
+inputAS.removeAll(person);
 }
 
 Rule:PersonTitle1
@@ -101,9 +101,9 @@ Priority: 40
 gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule", "PersonTitle1");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
+outputAS.add(person.firstNode(), person.lastNode(), "Person",
 features);
-annotations.removeAll(person);
+inputAS.removeAll(person);
 }
 
 Rule:PersonUnknown
@@ -119,9 +119,9 @@ Priority: 30
 gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule", "PersonUnknown");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
+outputAS.add(person.firstNode(), person.lastNode(), "Person",
 features);
-annotations.removeAll(person);
+inputAS.removeAll(person);
 }
 
 
@@ -174,9 +174,9 @@ Priority: 20
 gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule", "PersonConjPerson");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
+outputAS.add(person.firstNode(), person.lastNode(), "Person",
 features);
-annotations.removeAll(person);
+inputAS.removeAll(person);
 }
 
 Rule: PersonConjPerson2
@@ -196,9 +196,9 @@ Priority: 20
 gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule", "PersonConjPerson");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
+outputAS.add(person.firstNode(), person.lastNode(), "Person",
 features);
-annotations.removeAll(person);
+inputAS.removeAll(person);
 }
 
 
@@ -232,9 +232,9 @@ Priority: 20
 gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule", "PersonAge");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
+outputAS.add(person.firstNode(), person.lastNode(), "Person",
 features);
-annotations.removeAll(person);
+inputAS.removeAll(person);
 }
  
 Rule: PersonSays
@@ -254,9 +254,9 @@ Priority: 20
 gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule", "PersonSays");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
+outputAS.add(person.firstNode(), person.lastNode(), "Person",
 features);
-annotations.removeAll(person);
+inputAS.removeAll(person);
 }
 
 Rule: NotSpeaker
@@ -291,9 +291,9 @@ gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
   features.put("kind", "personName");
   features.put("confidence", "20");
   features.put("rule", "SpeakerStop");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
+outputAS.add(person.firstNode(), person.lastNode(), "Person",
 features);
-annotations.removeAll(person);
+inputAS.removeAll(person);
 }
 
 Rule: Speaker
@@ -313,9 +313,9 @@ gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
   features.put("kind", "personName");
   features.put("confidence", "20");
   features.put("rule", "Speaker");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
+outputAS.add(person.firstNode(), person.lastNode(), "Person",
 features);
-annotations.removeAll(person);
+inputAS.removeAll(person);
 }
 
 Rule: Speaker2

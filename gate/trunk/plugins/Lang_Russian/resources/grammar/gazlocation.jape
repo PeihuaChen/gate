@@ -52,9 +52,9 @@ if (loc != null && loc.size()>0)
 // create some new features
    features.put("rule", "GazLocation");
 // create a GazLoc annotation and add the features we've created
-annotations.add(locSet.firstNode(), locSet.lastNode(), "GazLocation",
+outputAS.add(locSet.firstNode(), locSet.lastNode(), "GazLocation",
 features);
-annotations.removeAll(loc);
+inputAS.removeAll(loc);
 }
 
 

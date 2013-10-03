@@ -72,9 +72,9 @@ gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", personAnn.getFeatures().get("rule"));
 features.put("rule2", "PersonDateAmbig");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
+outputAS.add(person.firstNode(), person.lastNode(), "Person",
 features);
-annotations.removeAll(person);
+inputAS.removeAll(person);
 }
 
 

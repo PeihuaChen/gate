@@ -138,7 +138,7 @@ features.put("kind", "personName");
 Double num = new Double((double)50);
 features.put("confidence", num);
 features.put("rule", "GazPerson");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
 }
 
@@ -166,13 +166,13 @@ features.put("kind", "personName");
 Double num = new Double((double)100);
 features.put("confidence", num);
 features.put("rule", "OrganizationThenPerson");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
 
 gate.AnnotationSet loc = (gate.AnnotationSet)bindings.get("loc");
 gate.Annotation locAnn = (gate.Annotation)loc.iterator().next();
 features.put("kind", "locNearPerson");
-annotations.add(loc.firstNode(), loc.lastNode(), "TempLocation",
+outputAS.add(loc.firstNode(), loc.lastNode(), "TempLocation",
 features);
 } // LocationThenPerson
 
@@ -202,13 +202,13 @@ features);
 //Double num = new Double((double)100);
 //features.put("confidence", num);
 //features.put("rule", "OrganizationThenPerson");
-//annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+//outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
 //features);
 //
 //gate.AnnotationSet org = (gate.AnnotationSet)bindings.get("org");
 //gate.Annotation orgAnn = (gate.Annotation)org.iterator().next();
 //features.put("kind", "orgNearPerson");
-//annotations.add(org.firstNode(), org.lastNode(), "TempOrganization",
+//outputAS.add(org.firstNode(), org.lastNode(), "TempOrganization",
 //features);
 //} // OrganizationThenPerson
 
@@ -229,7 +229,7 @@ features.put("kind", "personName");
 Double num = new Double((double)40);
 features.put("confidence", num);
 features.put("rule", "GazPersonSurname");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
 }
 
@@ -274,9 +274,9 @@ features.put("kind", "personName");
 Double num = new Double((double)20);
 features.put("confidence", num);
 features.put("rule", "GazPersonFirst");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
-//annotations.removeAll(person);
+//inputAS.removeAll(person);
 }
 
 
@@ -307,7 +307,7 @@ if (firstPerson != null && firstPerson.size()>0)
   Double num = new Double((double)40);
   features.put("confidence", num);
   features.put("rule", "PersonFirstContext2");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -386,7 +386,7 @@ else
   Double num = new Double((double)35);
   features.put("confidence", num);
   features.put("rule", "PersonTitle");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -416,7 +416,7 @@ if (title != null && title.size()>0)
   Double num = new Double((double)55);
   features.put("confidence", num);
   features.put("rule", "PersonFirstTitleGender");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -454,7 +454,7 @@ if (title != null && title.size()>0)
   features.put("confidence", num);
   features.put("rule", "PersonTitleGender");
 // create a TempPerson annotation and add the features we've created
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -493,7 +493,7 @@ if (title != null && title.size()>0)
   features.put("confidence", num);
   features.put("rule", "PersonJobTitle");
 // create a TempPerson annotation and add the features we've created
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -538,7 +538,7 @@ if (firstPerson != null && firstPerson.size()>0)
   Double num = new Double((double)20);
   features.put("confidence", num);
   features.put("rule", "FirstPersonStop");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -595,7 +595,7 @@ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
  Double num = new Double((double)51);
   features.put("confidence", num);
   features.put("rule", "TheTitlePerson");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -635,7 +635,7 @@ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
   Double num = new Double((double)51);
   features.put("confidence", num);
   features.put("rule", "TheTitlePersonFull");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -674,7 +674,7 @@ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
   Double num = new Double((double)51);
   features.put("confidence", num);
   features.put("rule", "OrgTitlePerson");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -696,9 +696,9 @@ features.put("kind", "personName");
  Double num = new Double((double)30);
   features.put("confidence", num);
 features.put("rule", "LocPersonAmbig1");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
-//annotations.removeAll(person);
+//inputAS.removeAll(person);
 }
 
 Rule: LocPersonAmbig
@@ -736,7 +736,7 @@ if (loc != null && loc.size()>0)
  Double num = new Double((double)30);
   features.put("confidence", num);
 // create a TempLoc annotation and add the features we've created
-annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
+outputAS.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
 features);
 }
 
@@ -857,7 +857,7 @@ Priority: 10
   Double num = new Double((double)10);
   features.put("confidence", num);
   features.put("rule", "PersonFull");
-  annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson", features);
+  outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson", features);
 }
 
 
@@ -899,7 +899,7 @@ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
   Double num = new Double((double)10);
   features.put("confidence", num);
   features.put("rule", "PersonSpeaker");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -944,7 +944,7 @@ Priority: 50
   Double num = new Double((double)20);
   features.put("confidence", num);
   features.put("rule", "PersonFullStop");
-  annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson", features);
+  outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson", features);
 }
 
 
@@ -986,7 +986,7 @@ if (firstPerson != null && firstPerson.size()>0)
   Double num = new Double((double)20);
   features.put("confidence", num);
   features.put("rule", "FirstName");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -1017,7 +1017,7 @@ if (firstPerson != null && firstPerson.size()>0)
   Double num = new Double((double)10);
   features.put("confidence", num);
   features.put("rule", "PersonFullReverse");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -1045,7 +1045,7 @@ if (firstPerson != null && firstPerson.size()>0)
   Double num = new Double((double)100);
   features.put("confidence", num);
   features.put("rule", "PersonSaint");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -1078,7 +1078,7 @@ if (firstPerson != null && firstPerson.size()>0)
   Double num = new Double((double)20);
   features.put("confidence", num);
   features.put("rule", "PersonLocAmbig");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -1120,7 +1120,7 @@ Priority: 10
   Double num = new Double((double)10);
   features.put("confidence", num);
   features.put("rule", "PersonAlias");
-  annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson", features);
+  outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson", features);
 }
 
 
