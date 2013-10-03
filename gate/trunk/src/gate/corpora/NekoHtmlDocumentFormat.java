@@ -29,12 +29,15 @@ import gate.util.DocumentFormatException;
 import gate.util.Out;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.net.URLConnection;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.xerces.xni.parser.XMLInputSource;
 import org.cyberneko.html.HTMLConfiguration;
@@ -166,8 +169,16 @@ public class NekoHtmlDocumentFormat extends TextualDocumentFormat {
         // textual document - load with user specified encoding
         String docEncoding = ((TextualDocument)doc).getEncoding();
         // XML, so no BOM stripping.
+        
+        URLConnection conn = doc.getSourceUrl().openConnection();
+        InputStream uStream = conn.getInputStream();
+                
+        if ("gzip".equals(conn.getContentEncoding())) {
+          uStream = new GZIPInputStream(uStream);
+        }
+        
         Reader docReader =
-                new InputStreamReader(doc.getSourceUrl().openStream(),
+                new InputStreamReader(uStream,
                         docEncoding);
         is =
                 new XMLInputSource(null, doc.getSourceUrl().toString(), doc
