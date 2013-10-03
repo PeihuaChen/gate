@@ -52,9 +52,9 @@ if (firstPerson != null && firstPerson.size()>0)
 }
   features.put("rule1", person1Ann.getFeatures().get("rule"));
   features.put("rule", "PersonFinal");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "Person",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "Person",
 features);
-annotations.removeAll(personSet);
+inputAS.removeAll(personSet);
 }
 
 
@@ -89,9 +89,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("orgType", orgAnn.getFeatures().get("orgType"));
 features.put("rule1", orgAnn.getFeatures().get("rule"));
 features.put("rule2", "OrgCountryFinal");
-annotations.add(org.firstNode(), org.lastNode(), "Organization",
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
-annotations.removeAll(org);
+inputAS.removeAll(org);
 }
  
 
@@ -113,9 +113,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("orgType", orgAnn.getFeatures().get("orgType"));
 features.put("rule1", orgAnn.getFeatures().get("rule"));
 features.put("rule2", "OrgFinal");
-annotations.add(org.firstNode(), org.lastNode(), "Organization",
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
-annotations.removeAll(org);
+inputAS.removeAll(org);
 }
 
 
@@ -138,9 +138,9 @@ gate.Annotation locAnn = (gate.Annotation)loc.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", locAnn.getFeatures().get("rule"));
 features.put("rule2", "PersonLocFinal");
-annotations.add(loc.firstNode(), loc.lastNode(), "Location",
+outputAS.add(loc.firstNode(), loc.lastNode(), "Location",
 features);
-annotations.removeAll(loc);
+inputAS.removeAll(loc);
 }
 
 
@@ -160,9 +160,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("locType",locAnn.getFeatures().get("locType"));
 features.put("rule1", locAnn.getFeatures().get("rule"));
 features.put("rule2", "LocFinal");
-annotations.add(loc.firstNode(), loc.lastNode(), "Location",
+outputAS.add(loc.firstNode(), loc.lastNode(), "Location",
 features);
-annotations.removeAll(loc);
+inputAS.removeAll(loc);
 }
 
 
@@ -194,9 +194,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 //features.put("rule1", dateAnn.getFeatures().get("rule"));
 features.put("rule2", "DateTimeFinal");
 features.put("kind", "dateTime");
-annotations.add(date.firstNode(), date.lastNode(), "Date",
+outputAS.add(date.firstNode(), date.lastNode(), "Date",
 features);
-annotations.removeAll(date);
+inputAS.removeAll(date);
 }
 
 
@@ -217,9 +217,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", dateAnn.getFeatures().get("rule"));
 features.put("rule2", "SeasonYearFinal");
 features.put("kind", "date");
-annotations.add(date.firstNode(), date.lastNode(), "Date",
+outputAS.add(date.firstNode(), date.lastNode(), "Date",
 features);
-annotations.removeAll(date);
+inputAS.removeAll(date);
 }
 
 
@@ -243,9 +243,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", dateAnn.getFeatures().get("rule"));
 features.put("rule2", "DateYearFinal");
 features.put("kind", "date");
-annotations.add(date.firstNode(), date.lastNode(), "Date",
+outputAS.add(date.firstNode(), date.lastNode(), "Date",
 features);
-annotations.removeAll(date);
+inputAS.removeAll(date);
 }
 
 
@@ -270,9 +270,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 //features.put("rule1", dateAnn.getFeatures().get("rule"));
 features.put("rule2", "TimeDateFinal");
 features.put("kind", "dateTime");
-annotations.add(date.firstNode(), date.lastNode(), "Date",
+outputAS.add(date.firstNode(), date.lastNode(), "Date",
 features);
-annotations.removeAll(date);
+inputAS.removeAll(date);
 }
 
 
@@ -296,9 +296,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 //features.put("rule1", dateAnn.getFeatures().get("rule"));
 features.put("rule2", "TimeYearFinal");
 features.put("kind", "dateTime");
-annotations.add(date.firstNode(), date.lastNode(), "Date",
+outputAS.add(date.firstNode(), date.lastNode(), "Date",
 features);
-annotations.removeAll(date);
+inputAS.removeAll(date);
 }
 
 
@@ -320,9 +320,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", dateAnn.getFeatures().get("rule"));
 features.put("rule2", "DateOnlyFinal");
 features.put("kind", "date");
-annotations.add(date.firstNode(), date.lastNode(), "Date",
+outputAS.add(date.firstNode(), date.lastNode(), "Date",
 features);
-annotations.removeAll(date);
+inputAS.removeAll(date);
 }
 
 //fix this later
@@ -347,9 +347,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", dateAnn.getFeatures().get("rule"));
 features.put("rule", "TimeContextFinal");
 features.put("kind", "date");
-annotations.add(date.firstNode(), date.lastNode(), "Date",
+outputAS.add(date.firstNode(), date.lastNode(), "Date",
 features);
-annotations.removeAll(date);
+inputAS.removeAll(date);
 //removes TempTime annotation, gets the rule feature and adds a new Date annotation
 gate.AnnotationSet time = (gate.AnnotationSet)bindings.get("time");
 gate.Annotation timeAnn = (gate.Annotation)time.iterator().next();
@@ -357,9 +357,9 @@ gate.FeatureMap features2 = Factory.newFeatureMap();
 features2.put("rule1", timeAnn.getFeatures().get("rule"));
 features2.put("rule", "TimeContextFinal");
 features2.put("kind", "time");
-annotations.add(time.firstNode(), date.lastNode(), "Date",
+outputAS.add(time.firstNode(), date.lastNode(), "Date",
 features2);
-annotations.removeAll(time);
+inputAS.removeAll(time);
 }
 
 
@@ -382,9 +382,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", dateAnn.getFeatures().get("rule"));
 features.put("rule2", "TimeWordsContextFinal");
 features.put("kind", "time");
-annotations.add(date.firstNode(), date.lastNode(), "Date",
+outputAS.add(date.firstNode(), date.lastNode(), "Date",
 features);
-annotations.removeAll(date);
+inputAS.removeAll(date);
 }
 
 
@@ -403,9 +403,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", dateAnn.getFeatures().get("rule"));
 features.put("rule2", "YearOnlyFinal");
 features.put("kind", "date");
-annotations.add(date.firstNode(), date.lastNode(), "Date",
+outputAS.add(date.firstNode(), date.lastNode(), "Date",
 features);
-annotations.removeAll(date);
+inputAS.removeAll(date);
 }
 
 
@@ -425,9 +425,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", dateAnn.getFeatures().get("rule"));
 features.put("rule2", "TimeOnlyFinal");
 features.put("kind", "time");
-annotations.add(date.firstNode(), date.lastNode(), "Date",
+outputAS.add(date.firstNode(), date.lastNode(), "Date",
 features);
-annotations.removeAll(date);
+inputAS.removeAll(date);
 }
 
 
@@ -454,9 +454,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", addressAnn.getFeatures().get("rule"));
 features.put("rule2", "AddressFull");
 features.put("kind", "complete");
-annotations.add(address.firstNode(), address.lastNode(), "Address",
+outputAS.add(address.firstNode(), address.lastNode(), "Address",
 features);
-annotations.removeAll(address);
+inputAS.removeAll(address);
 }
 
 
@@ -475,9 +475,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", addressAnn.getFeatures().get("rule"));
 features.put("rule2", "EmailFinal");
 features.put("kind", "email");
-annotations.add(address.firstNode(), address.lastNode(), "Address",
+outputAS.add(address.firstNode(), address.lastNode(), "Address",
 features);
-annotations.removeAll(address);
+inputAS.removeAll(address);
 }
 
 
@@ -496,9 +496,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", addressAnn.getFeatures().get("rule"));
 features.put("rule2", "PhoneFinal");
 features.put("kind", "phone");
-annotations.add(address.firstNode(), address.lastNode(), "Address",
+outputAS.add(address.firstNode(), address.lastNode(), "Address",
 features);
-annotations.removeAll(address);
+inputAS.removeAll(address);
 }
 
 
@@ -517,9 +517,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", addressAnn.getFeatures().get("rule"));
 features.put("rule2", "PostcodeFinal");
 features.put("kind", "postcode");
-annotations.add(address.firstNode(), address.lastNode(), "Address",
+outputAS.add(address.firstNode(), address.lastNode(), "Address",
 features);
-annotations.removeAll(address);
+inputAS.removeAll(address);
 }
 
 
@@ -538,9 +538,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", addressAnn.getFeatures().get("rule"));
 features.put("rule2", "IpFinal");
 features.put("kind", "ip");
-annotations.add(address.firstNode(), address.lastNode(), "Address",
+outputAS.add(address.firstNode(), address.lastNode(), "Address",
 features);
-annotations.removeAll(address);
+inputAS.removeAll(address);
 }
 
 
@@ -559,9 +559,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", addressAnn.getFeatures().get("rule"));
 features.put("rule2", "UrlFinal");
 features.put("kind", "url");
-annotations.add(address.firstNode(), address.lastNode(), "Address",
+outputAS.add(address.firstNode(), address.lastNode(), "Address",
 features);
-annotations.removeAll(address);
+inputAS.removeAll(address);
 }
 
 
@@ -580,9 +580,9 @@ gate.Annotation addressAnn = (gate.Annotation)address.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", addressAnn.getFeatures().get("rule"));
 features.put("rule2", "StreetFinal");
-annotations.add(address.firstNode(), address.lastNode(), "Location",
+outputAS.add(address.firstNode(), address.lastNode(), "Location",
 features);
-annotations.removeAll(address);
+inputAS.removeAll(address);
 }
 
 ////////////////////////////////////////////////////////////
@@ -603,9 +603,9 @@ gate.Annotation identAnn = (gate.Annotation)ident.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", identAnn.getFeatures().get("rule"));
 features.put("rule2", "IdentifierFinal");
-annotations.add(ident.firstNode(), ident.lastNode(), "Identifier",
+outputAS.add(ident.firstNode(), ident.lastNode(), "Identifier",
 features);
-annotations.removeAll(ident);
+inputAS.removeAll(ident);
 }
 
 
@@ -623,7 +623,7 @@ Priority: 1000
 //removes TempSpecs annotation
 gate.AnnotationSet spec = (gate.AnnotationSet)bindings.get("spec");
 //gate.FeatureMap features = Factory.newFeatureMap();
-annotations.removeAll(spec);
+inputAS.removeAll(spec);
 }
 
 //////////////////////////////////////////////////////
@@ -653,8 +653,8 @@ annotations.removeAll(spec);
 //features.put("gender", personAnn.getFeatures().get("gender"));
 //features.put("rule1", personAnn.getFeatures().get("rule"));
 //features.put("rule2", "UnknownPerson");
-//annotations.add(person.firstNode(), person.lastNode(), "Person",features);
-//annotations.removeAll(person);
+//outputAS.add(person.firstNode(), person.lastNode(), "Person",features);
+//inputAS.removeAll(person);
 //}
 
 Rule: FacilityFinal
@@ -671,7 +671,7 @@ gate.Annotation facAnn = (gate.Annotation)fac.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", facAnn.getFeatures().get("rule"));
 features.put("rule2", "FacilityFinal");
-annotations.add(fac.firstNode(), fac.lastNode(), "Location",
+outputAS.add(fac.firstNode(), fac.lastNode(), "Location",
 features);
-//annotations.removeAll(fac);
+//inputAS.removeAll(fac);
 }

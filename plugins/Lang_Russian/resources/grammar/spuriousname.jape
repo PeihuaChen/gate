@@ -32,9 +32,9 @@ Priority: 100
 {
 gate.AnnotationSet spur = (gate.AnnotationSet) bindings.get("spur");
 gate.FeatureMap features = Factory.newFeatureMap();
-annotations.add(spur.firstNode(), spur.lastNode(), "Spurious",
+outputAS.add(spur.firstNode(), spur.lastNode(), "Spurious",
 features);
-annotations.removeAll(spur);
+inputAS.removeAll(spur);
 }
 
 Rule: OrgSpurPost
@@ -49,9 +49,9 @@ Priority: 100
 {
 gate.AnnotationSet spur = (gate.AnnotationSet) bindings.get("spur");
 gate.FeatureMap features = Factory.newFeatureMap();
-annotations.add(spur.firstNode(), spur.lastNode(), "Spurious",
+outputAS.add(spur.firstNode(), spur.lastNode(), "Spurious",
 features);
-annotations.removeAll(spur);
+inputAS.removeAll(spur);
 }
 
 

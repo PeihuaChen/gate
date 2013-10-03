@@ -107,9 +107,9 @@ gate.Annotation dateAnn = (gate.Annotation)date.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", dateAnn.getFeatures().get("rule"));
 features.put("rule2", "EarlyDate");
-annotations.add(date.firstNode(), date.lastNode(), "TempDate",
+outputAS.add(date.firstNode(), date.lastNode(), "TempDate",
 features);
-annotations.removeAll(date);
+inputAS.removeAll(date);
 }
  
 Rule:FiscalDate

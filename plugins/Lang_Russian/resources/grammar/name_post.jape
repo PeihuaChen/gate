@@ -42,7 +42,7 @@ gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("FirstPerson"
 
 // get the TempOrganization annotation (previously assigned)
 gate.AnnotationSet orgSet =
-annotations.get("TempOrganization",personSet.firstNode().getOffset(),
+inputAS.get("TempOrganization",personSet.firstNode().getOffset(),
 personSet.lastNode().getOffset());
 // and if it's empty
 if (orgSet.size()==0)
@@ -55,7 +55,7 @@ if (firstPerson != null && firstPerson.size()>0)
 }
   features.put("kind", "personName");
   features.put("rule", "FirstPersonStop");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }}
 

@@ -35,9 +35,9 @@ Priority: 10
 gate.AnnotationSet loc = (gate.AnnotationSet) bindings.get("loc");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "LocConjLoc1");
-annotations.add(loc.firstNode(), loc.lastNode(), "Location",
+outputAS.add(loc.firstNode(), loc.lastNode(), "Location",
 features);
-annotations.removeAll(loc);
+inputAS.removeAll(loc);
 }
 
 
@@ -58,9 +58,9 @@ Priority: 10
 gate.AnnotationSet loc = (gate.AnnotationSet) bindings.get("loc");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "LocConjLoc2");
-annotations.add(loc.firstNode(), loc.lastNode(), "Location",
+outputAS.add(loc.firstNode(), loc.lastNode(), "Location",
 features);
-annotations.removeAll(loc);
+inputAS.removeAll(loc);
 }
 
 
@@ -83,9 +83,9 @@ Priority: 50
 gate.AnnotationSet loc = (gate.AnnotationSet) bindings.get("loc");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "UnknownLocRegion");
-annotations.add(loc.firstNode(), loc.lastNode(), "Location",
+outputAS.add(loc.firstNode(), loc.lastNode(), "Location",
 features);
-annotations.removeAll(loc);
+inputAS.removeAll(loc);
 }
 
 
@@ -105,9 +105,9 @@ Priority: 10
 gate.AnnotationSet loc = (gate.AnnotationSet) bindings.get("loc");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "InLoc");
-annotations.add(loc.firstNode(), loc.lastNode(), "Location",
+outputAS.add(loc.firstNode(), loc.lastNode(), "Location",
 features);
-annotations.removeAll(loc);
+inputAS.removeAll(loc);
 }
 
 
