@@ -24,6 +24,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.IOUtils;
 
@@ -63,7 +65,14 @@ public class DocumentContentImpl implements DocumentContent
     }
 
     try {
-      uStream = u.openStream();
+      URLConnection conn = u.openConnection();
+      uStream = conn.getInputStream();
+      
+      System.out.println(conn.getContentEncoding());
+      
+      if ("gzip".equals(conn.getContentEncoding())) {
+        uStream = new GZIPInputStream(uStream);
+      }
       
       if(encoding != null && !encoding.equalsIgnoreCase("")) {
         uReader = new BomStrippingInputStreamReader(uStream, encoding, INTERNAL_BUFFER_SIZE);
