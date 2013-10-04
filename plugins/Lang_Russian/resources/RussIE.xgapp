@@ -2,12 +2,12 @@
 <gate.util.persistence.GateApplication>
   <urlList class='gate.util.persistence.CollectionPersistence'>
     <localList>
-      <gate.util.persistence.PersistenceManager_-URLHolder>
-        <urlString>$gatehome$plugins/ANNIE/</urlString>
-      </gate.util.persistence.PersistenceManager_-URLHolder>
-      <gate.util.persistence.PersistenceManager_-URLHolder>
-        <urlString>$relpath$../</urlString>
-      </gate.util.persistence.PersistenceManager_-URLHolder>
+      <gate.util.persistence.PersistenceManager-URLHolder>
+        <urlString>$relpath$../../ANNIE</urlString>
+      </gate.util.persistence.PersistenceManager-URLHolder>
+      <gate.util.persistence.PersistenceManager-URLHolder>
+        <urlString>$relpath$..</urlString>
+      </gate.util.persistence.PersistenceManager-URLHolder>
     </localList>
     <collectionType>java.util.ArrayList</collectionType>
   </urlList>
@@ -77,9 +77,9 @@
             <localMap>
               <entry>
                 <string>listsURL</string>
-                <gate.util.persistence.PersistenceManager_-URLHolder>
+                <gate.util.persistence.PersistenceManager-URLHolder>
                   <urlString>$relpath$gazetteer/lists.def</urlString>
-                </gate.util.persistence.PersistenceManager_-URLHolder>
+                </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
               <entry>
                 <string>encoding</string>
@@ -121,9 +121,9 @@
             <localMap>
               <entry>
                 <string>listsURL</string>
-                <gate.util.persistence.PersistenceManager_-URLHolder>
+                <gate.util.persistence.PersistenceManager-URLHolder>
                   <urlString>$relpath$gazetteer/en/lists.def</urlString>
-                </gate.util.persistence.PersistenceManager_-URLHolder>
+                </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
               <entry>
                 <string>encoding</string>
@@ -223,9 +223,9 @@
               </entry>
               <entry>
                 <string>config</string>
-                <gate.util.persistence.PersistenceManager_-URLHolder>
+                <gate.util.persistence.PersistenceManager-URLHolder>
                   <urlString>$relpath$morphology/main.conf</urlString>
-                </gate.util.persistence.PersistenceManager_-URLHolder>
+                </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
               <entry>
                 <string>caseSensitive</string>
@@ -259,9 +259,9 @@
               </entry>
               <entry>
                 <string>grammarURL</string>
-                <gate.util.persistence.PersistenceManager_-URLHolder>
+                <gate.util.persistence.PersistenceManager-URLHolder>
                   <urlString>$relpath$grammar/main.jape</urlString>
-                </gate.util.persistence.PersistenceManager_-URLHolder>
+                </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
             </localMap>
           </initParams>
