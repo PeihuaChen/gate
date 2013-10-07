@@ -20,6 +20,7 @@ import gate.creole.gazetteer.Lookup;
 import gate.creole.gazetteer.MappingNode;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.HiddenCreoleParameter;
+import gate.creole.metadata.Sharable;
 import gate.util.InvalidOffsetException;
 import gate.util.LuckyException;
 
@@ -45,33 +46,46 @@ public class HashGazetteer extends AbstractGazetteer {
 
   @SuppressWarnings("unchecked")
   public Resource init() throws ResourceInstantiationException {
-    if(listsURL == null)
-      throw new ResourceInstantiationException(
-              "No URL provided for gazetteer creation!");
+    if(mapsList != null) {
+      // this is a duplicate - nothing to do
+    } else {
+      if(listsURL == null)
+        throw new ResourceInstantiationException(
+                "No URL provided for gazetteer creation!");
 
-    try {
-      mapsList = new HashMap[1000];
-      definition = new LinearDefinition();
-      definition.setURL(listsURL);
-      definition.load();
-      int i = definition.size();
-      listsByNode = definition.loadLists();
-      categoryList = new ArrayList<Lookup>(i + 1);
-      Iterator<LinearNode> iterator = definition.iterator();
-      int j = 0;
-      LinearNode linearnode;
-      for(; iterator.hasNext(); readList(linearnode)) {
-        linearnode = (LinearNode)iterator.next();
-        fireStatusChanged("Reading " + linearnode.toString());
-        fireProgressChanged((++j * 100) / i);
+      try {
+        mapsList = new HashMap[1000];
+        definition = new LinearDefinition();
+        definition.setURL(listsURL);
+        definition.load();
+        int i = definition.size();
+        listsByNode = definition.loadLists();
+        categoryList = new ArrayList<Lookup>(i + 1);
+        Iterator<LinearNode> iterator = definition.iterator();
+        int j = 0;
+        LinearNode linearnode;
+        for(; iterator.hasNext(); readList(linearnode)) {
+          linearnode = (LinearNode)iterator.next();
+          fireStatusChanged("Reading " + linearnode.toString());
+          fireProgressChanged((++j * 100) / i);
+        }
+
+        fireProcessFinished();
       }
-
-      fireProcessFinished();
-    }
-    catch(Exception exception) {
-      throw new ResourceInstantiationException(exception);
+      catch(Exception exception) {
+        throw new ResourceInstantiationException(exception);
+      }
     }
     return this;
+  }
+
+  /**
+   * Re-initialize this gazetteer by re-loading the configuration.
+   */
+  public void reInit() throws ResourceInstantiationException {
+    mapsList = null;
+    categoryList = null;
+    init();
   }
 
   public void execute() throws ExecutionException {
@@ -455,5 +469,35 @@ public class HashGazetteer extends AbstractGazetteer {
   @HiddenCreoleParameter
   public void setLongestMatchOnly(Boolean longestMatchOnly) {
     super.setLongestMatchOnly(longestMatchOnly);
+  }
+
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  @Sharable
+  public void setMapsList(Map<String, List<Lookup>> mapsList[]) {
+    this.mapsList = mapsList;
+  }
+
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  public Map<String, List<Lookup>>[] getMapsList() {
+    return mapsList;
+  }
+
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  @Sharable
+  public void setCategoryList(ArrayList<Lookup> categoryList) {
+    this.categoryList = categoryList;
+  }
+
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  public ArrayList<Lookup> getCategoryList() {
+    return categoryList;
   }
 }
