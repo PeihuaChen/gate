@@ -31,7 +31,6 @@ import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
 import gate.creole.metadata.Sharable;
-import gate.util.Files;
 import gate.util.GateRuntimeException;
 import gate.util.OffsetComparator;
 
@@ -105,8 +104,7 @@ public class Tagger extends AbstractLanguageAnalyser {
   public Resource init() throws ResourceInstantiationException {
     if(tagger == null) {
       try {
-        String filepath = Files.fileFromURL(modelFile).getAbsolutePath();
-        tagger = new MaxentTagger(filepath);
+        tagger = new MaxentTagger(modelFile.toExternalForm());
       } catch(Exception e) {
         throw new ResourceInstantiationException(e);
       }
