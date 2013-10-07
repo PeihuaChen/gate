@@ -101,7 +101,7 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
     if (classloader != null) Gate.getClassLoader().forgetClassLoader(classloader);
     
     //create a disposable classloader for the groovy shell to use as its parent
-    classloader = Gate.getClassLoader().getDisposableClassLoader(scriptURL.toExternalForm()+System.currentTimeMillis(), ScriptPR.class.getClassLoader(), true);
+    classloader = Gate.getClassLoader().getDisposableClassLoader(scriptURL.toExternalForm()+System.currentTimeMillis(), null, true);
     
     // Create the shell, with the GateClassLoader as its parent (so the script
     // will have access to plugin classes)

@@ -102,7 +102,7 @@ eachDocument {
     try {
       if (classloader != null) Gate.getClassLoader().forgetClassLoader(classloader)
       
-      classloader = Gate.getClassLoader().getDisposableClassLoader(getName()+System.currentTimeMillis(), ScriptPR.class.getClassLoader(), true)
+      classloader = Gate.getClassLoader().getDisposableClassLoader(getName()+System.currentTimeMillis(), null, true)
       
       script = new GroovyShell(classloader).parse(
           controlScript + "\n\n\n" + GroovySupport.STANDARD_IMPORTS)
