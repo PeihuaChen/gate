@@ -30,6 +30,7 @@ import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
+import gate.creole.metadata.Sharable;
 import gate.util.Files;
 import gate.util.GateRuntimeException;
 import gate.util.OffsetComparator;
@@ -102,14 +103,21 @@ public class Tagger extends AbstractLanguageAnalyser {
 
   @Override
   public Resource init() throws ResourceInstantiationException {
-
-    try {
-      String filepath = Files.fileFromURL(modelFile).getAbsolutePath();
-      tagger = new MaxentTagger(filepath);
-    } catch(Exception e) {
-      throw new ResourceInstantiationException(e);
+    if(tagger == null) {
+      try {
+        String filepath = Files.fileFromURL(modelFile).getAbsolutePath();
+        tagger = new MaxentTagger(filepath);
+      } catch(Exception e) {
+        throw new ResourceInstantiationException(e);
+      }
     }
     return this;
+  }
+
+  @Override
+  public void reInit() throws ResourceInstantiationException {
+    tagger = null;
+    init();
   }
 
   @Override
@@ -388,6 +396,21 @@ public class Tagger extends AbstractLanguageAnalyser {
 
   public URL getModelFile() {
     return this.modelFile;
+  }
+
+  /**
+   * For internal use by the duplication mechanism only.
+   */
+  @Sharable
+  public void setTagger(MaxentTagger tagger) {
+    this.tagger = tagger;
+  }
+
+  /**
+   * For internal use by the duplication mechanism only.
+   */
+  public MaxentTagger getTagger() {
+    return this.tagger;
   }
 
   protected MaxentTagger tagger;
