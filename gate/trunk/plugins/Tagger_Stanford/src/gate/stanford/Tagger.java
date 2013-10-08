@@ -98,6 +98,20 @@ public class Tagger extends AbstractLanguageAnalyser {
   // baseSentenceAnnotationType
   protected Boolean posTagAllTokens = true;
 
+  @RunTime
+  @Optional
+  @CreoleParameter(comment = "Should existing " + TOKEN_CATEGORY_FEATURE_NAME +
+     " features on input annotations be respected (true) or ignored (false)?",
+     defaultValue = "false")
+  public void setUseExistingTags(Boolean useTags) {
+    useExistingTags = useTags;
+  }
+
+  public Boolean getUseExistingTags() {
+    return useExistingTags;
+  }
+  private Boolean useExistingTags;
+
   protected Logger logger = Logger.getLogger(this.getClass().getName());
 
   @Override
@@ -147,8 +161,6 @@ public class Tagger extends AbstractLanguageAnalyser {
       fireProgressChanged(0);
       // prepare the input for MaxentTagger
       List<Word> sentenceForTagger = new ArrayList<Word>();
-      List<List<Word>> sentencesForTagger = new ArrayList<List<Word>>();
-      sentencesForTagger.add(sentenceForTagger);
 
       // define a comparator for annotations by start offset
       OffsetComparator offsetComparator = new OffsetComparator();
@@ -179,8 +191,17 @@ public class Tagger extends AbstractLanguageAnalyser {
           if(posTagAllTokens || currentToken.withinSpanOf(currentSentence)) {
             tokensInCurrentSentence.add(currentToken);
 
-            sentenceForTagger.add(new Word((String)currentToken.getFeatures()
-              .get(TOKEN_STRING_FEATURE_NAME)));
+            if(useExistingTags && currentToken.getFeatures().containsKey(
+                  TOKEN_CATEGORY_FEATURE_NAME)) {
+              sentenceForTagger.add(new TaggedWord(
+                    (String)currentToken.getFeatures()
+                      .get(TOKEN_STRING_FEATURE_NAME),
+                    (String)currentToken.getFeatures()
+                      .get(TOKEN_CATEGORY_FEATURE_NAME)));
+            } else {
+              sentenceForTagger.add(new Word((String)currentToken.getFeatures()
+                .get(TOKEN_STRING_FEATURE_NAME)));
+            }
           }
           currentToken = (tokensIter.hasNext() ? tokensIter.next() : null);
         }
@@ -191,25 +212,22 @@ public class Tagger extends AbstractLanguageAnalyser {
         if(sentenceForTagger.isEmpty()) continue;
 
         // run the POS tagger
-        List<ArrayList<TaggedWord>> taggerList =
-          tagger.process(sentencesForTagger);
+        ArrayList<TaggedWord> taggerResults =
+          tagger.tagSentence(sentenceForTagger, useExistingTags);
 
-        if(taggerList != null && taggerList.size() > 0) {
-          List<TaggedWord> taggerResults = (List<TaggedWord>)taggerList.get(0);
-          // add the results
-          // make sure no malfunction occurred
-          if(taggerResults.size() != tokensInCurrentSentence.size())
-            throw new ExecutionException(
-              "POS Tagger malfunction: the output size (" +
-                taggerResults.size() + ") is different from the input size (" +
-                tokensInCurrentSentence.size() + ")!");
-          Iterator<TaggedWord> resIter = taggerResults.iterator();
-          Iterator<Annotation> tokIter = tokensInCurrentSentence.iterator();
-          while(resIter.hasNext()) {
-            Annotation annot = tokIter.next();
-            addFeatures(annot, TOKEN_CATEGORY_FEATURE_NAME, ((String)resIter
-              .next().tag()));
-          }
+        // add the results
+        // make sure no malfunction occurred
+        if(taggerResults.size() != tokensInCurrentSentence.size())
+          throw new ExecutionException(
+            "POS Tagger malfunction: the output size (" +
+              taggerResults.size() + ") is different from the input size (" +
+              tokensInCurrentSentence.size() + ")!");
+        Iterator<TaggedWord> resIter = taggerResults.iterator();
+        Iterator<Annotation> tokIter = tokensInCurrentSentence.iterator();
+        while(resIter.hasNext()) {
+          Annotation annot = tokIter.next();
+          addFeatures(annot, TOKEN_CATEGORY_FEATURE_NAME, ((String)resIter
+            .next().tag()));
         }
         fireProgressChanged(sentIndex++ * 100 / sentCnt);
       }// while(sentencesIter.hasNext())
@@ -223,14 +241,23 @@ public class Tagger extends AbstractLanguageAnalyser {
         sentenceForTagger.clear();
         while(currentToken != null) {
           tokensInCurrentSentence.add(currentToken);
-          sentenceForTagger.add(new Word((String)currentToken.getFeatures()
-            .get(TOKEN_STRING_FEATURE_NAME)));
+          if(useExistingTags && currentToken.getFeatures().containsKey(
+                TOKEN_CATEGORY_FEATURE_NAME)) {
+            sentenceForTagger.add(new TaggedWord(
+                  (String)currentToken.getFeatures()
+                    .get(TOKEN_STRING_FEATURE_NAME),
+                  (String)currentToken.getFeatures()
+                    .get(TOKEN_CATEGORY_FEATURE_NAME)));
+          } else {
+            sentenceForTagger.add(new Word((String)currentToken.getFeatures()
+              .get(TOKEN_STRING_FEATURE_NAME)));
+          }
           currentToken = (tokensIter.hasNext() ? tokensIter.next() : null);
         }
 
         // run the POS tagger on remaining tokens
         List<TaggedWord> taggerResults =
-          tagger.process(sentencesForTagger).get(0);
+          tagger.tagSentence(sentenceForTagger, useExistingTags);
 
         // add the results and make sure no malfunction occurred
         if(taggerResults.size() != tokensInCurrentSentence.size())
