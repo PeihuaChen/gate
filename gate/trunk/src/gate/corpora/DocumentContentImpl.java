@@ -67,9 +67,7 @@ public class DocumentContentImpl implements DocumentContent
     try {
       URLConnection conn = u.openConnection();
       uStream = conn.getInputStream();
-      
-      System.out.println(conn.getContentEncoding());
-      
+            
       if ("gzip".equals(conn.getContentEncoding())) {
         uStream = new GZIPInputStream(uStream);
       }
