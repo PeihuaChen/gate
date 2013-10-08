@@ -102,7 +102,7 @@ public class Tagger extends AbstractLanguageAnalyser {
   @Optional
   @CreoleParameter(comment = "Should existing " + TOKEN_CATEGORY_FEATURE_NAME +
      " features on input annotations be respected (true) or ignored (false)?",
-     defaultValue = "false")
+     defaultValue = "true")
   public void setUseExistingTags(Boolean useTags) {
     useExistingTags = useTags;
   }
