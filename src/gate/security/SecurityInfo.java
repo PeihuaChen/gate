@@ -16,8 +16,6 @@
 
 package gate.security;
 
-import junit.framework.Assert;
-
 public class SecurityInfo {
 
   /** world read/ group write */
@@ -37,7 +35,7 @@ public class SecurityInfo {
   public SecurityInfo(int accessMode,User usr,Group grp) {
 
     //0. preconditions
-    Assert.assertTrue(accessMode == SecurityInfo.ACCESS_GR_GW ||
+    assert (accessMode == SecurityInfo.ACCESS_GR_GW ||
                   accessMode == SecurityInfo.ACCESS_GR_OW ||
                   accessMode == SecurityInfo.ACCESS_OR_OW ||
                   accessMode == SecurityInfo.ACCESS_WR_GW);

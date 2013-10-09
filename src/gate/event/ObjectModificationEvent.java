@@ -16,8 +16,6 @@
 
 package gate.event;
 
-import junit.framework.Assert;
-
 public class ObjectModificationEvent extends GateEvent {
 
   public static final int OBJECT_CREATED  = 1000;
@@ -30,7 +28,7 @@ public class ObjectModificationEvent extends GateEvent {
 
     super(source,type);
 
-    Assert.assertTrue(type == OBJECT_CREATED ||
+    assert (type == OBJECT_CREATED ||
                   type == OBJECT_DELETED ||
                   type == OBJECT_MODIFIED);
 
