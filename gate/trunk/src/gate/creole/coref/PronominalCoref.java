@@ -20,8 +20,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
-import junit.framework.Assert;
-
 import gate.*;
 import gate.annotation.AnnotationSetImpl;
 import gate.creole.*;
@@ -107,7 +105,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   public Resource init() throws ResourceInstantiationException {
 
     //0. preconditions
-    Assert.assertNotNull(this.qtTransducer);
+    assert (null != this.qtTransducer);
 
     //1. initialise quoted text transducer
     URL qtGrammarURL = null;
@@ -163,7 +161,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   public void setDocument(Document newDocument) {
 
     //0. precondition
-//    Assert.assertNotNull(newDocument);
+//    assert (null != newDocument);
 
     //1. set doc for aggregated components
     this.qtTransducer.setDocument(newDocument);
@@ -265,8 +263,8 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       }
 
       Sentence currSentence = this.textSentences[prnSentIndex];
-      Assert.assertTrue(currSentence.getStartOffset().longValue() <= currPronoun.getStartNode().getOffset().longValue());
-      Assert.assertTrue(currSentence.getEndOffset().longValue() >= currPronoun.getEndNode().getOffset().longValue());
+      assert (currSentence.getStartOffset().longValue() <= currPronoun.getStartNode().getOffset().longValue());
+      assert (currSentence.getEndOffset().longValue() >= currPronoun.getEndNode().getOffset().longValue());
 
       //11. find antecedent (if any) for pronoun
       Annotation antc = findAntecedent(currPronoun,prnSentIndex);
@@ -288,16 +286,16 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   private Annotation findAntecedent(Annotation currPronoun,int prnSentIndex) {
 
     //0. preconditions
-    Assert.assertNotNull(currPronoun);
-    Assert.assertTrue(prnSentIndex >= 0);
-    Assert.assertTrue(currPronoun.getType().equals(TOKEN_ANNOTATION_TYPE));
-    Assert.assertTrue(currPronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP_CATEGORY) ||
+    assert (null != currPronoun);
+    assert (prnSentIndex >= 0);
+    assert (currPronoun.getType().equals(TOKEN_ANNOTATION_TYPE));
+    assert (currPronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP_CATEGORY) ||
                       currPronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP$_CATEGORY));
 
     //1.
     String strPronoun = (String)currPronoun.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
 
-    Assert.assertNotNull(strPronoun);
+    assert (null != strPronoun);
 
     //2. delegate processing to the appropriate methods
     if (strPronoun.equalsIgnoreCase("HE") ||
@@ -333,9 +331,9 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   boolean isPleonastic(Annotation pronoun) {
 
     //0. preconditions
-    Assert.assertNotNull(pronoun);
+    assert (null != pronoun);
     String str = (String)pronoun.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-    Assert.assertTrue(str.equalsIgnoreCase("IT"));
+    assert (str.equalsIgnoreCase("IT"));
 
     //1. do we have pleonasms in this text?
     if (this.pleonasticIt.length == 0) {
@@ -375,11 +373,11 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   private Annotation _resolve$HE$HIM$HIS$HIMSELF$(Annotation pronoun, int sentenceIndex) {
 
     //0. preconditions
-    Assert.assertTrue(pronoun.getType().equals(TOKEN_ANNOTATION_TYPE));
-    Assert.assertTrue(pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP_CATEGORY) ||
+    assert (pronoun.getType().equals(TOKEN_ANNOTATION_TYPE));
+    assert (pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP_CATEGORY) ||
                       pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP$_CATEGORY));
     String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-    Assert.assertTrue(pronounString.equalsIgnoreCase("HE") ||
+    assert (pronounString.equalsIgnoreCase("HE") ||
                       pronounString.equalsIgnoreCase("HIM") ||
                       pronounString.equalsIgnoreCase("HIS") ||
                       pronounString.equalsIgnoreCase("HIMSELF"));
@@ -429,11 +427,11 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   private Annotation _resolve$SHE$HER$(Annotation pronoun, int sentenceIndex) {
 
     //0. preconditions
-    Assert.assertTrue(pronoun.getType().equals(TOKEN_ANNOTATION_TYPE));
-    Assert.assertTrue(pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP_CATEGORY) ||
+    assert (pronoun.getType().equals(TOKEN_ANNOTATION_TYPE));
+    assert (pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP_CATEGORY) ||
                       pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP$_CATEGORY));
     String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-    Assert.assertTrue(pronounString.equalsIgnoreCase("SHE") ||
+    assert (pronounString.equalsIgnoreCase("SHE") ||
                       pronounString.equalsIgnoreCase("HER"));
 
     //1.
@@ -482,11 +480,11 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       return null;
 
     //0. preconditions
-    Assert.assertTrue(pronoun.getType().equals(TOKEN_ANNOTATION_TYPE));
-    Assert.assertTrue(pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP_CATEGORY) ||
+    assert (pronoun.getType().equals(TOKEN_ANNOTATION_TYPE));
+    assert (pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP_CATEGORY) ||
                       pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP$_CATEGORY));
     String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-    Assert.assertTrue(pronounString.equalsIgnoreCase("IT") ||
+    assert (pronounString.equalsIgnoreCase("IT") ||
                       pronounString.equalsIgnoreCase("ITS") ||
                       pronounString.equalsIgnoreCase("ITSELF"));
 
@@ -537,11 +535,11 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   private Annotation _resolve$I$ME$MY$MYSELF$(Annotation pronoun, int sentenceIndex) {
 
     //0. preconditions
-    Assert.assertTrue(pronoun.getType().equals(TOKEN_ANNOTATION_TYPE));
-    Assert.assertTrue(pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP_CATEGORY) ||
+    assert (pronoun.getType().equals(TOKEN_ANNOTATION_TYPE));
+    assert (pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP_CATEGORY) ||
                       pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP$_CATEGORY));
     String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-    Assert.assertTrue(pronounString.equalsIgnoreCase("I") ||
+    assert (pronounString.equalsIgnoreCase("I") ||
                       pronounString.equalsIgnoreCase("MY") ||
                       pronounString.equalsIgnoreCase("ME") ||
                       pronounString.equalsIgnoreCase("MYSELF"));
@@ -797,7 +795,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
           Integer correferringID = (Integer)itMatches.next();
           Annotation coreferringEntity = this.defaultAnnotations.get(correferringID);
           if (coreferringEntity != null) {
-            Assert.assertTrue(coreferringEntity.getType().equalsIgnoreCase(PERSON_ANNOTATION_TYPE));
+            assert (coreferringEntity.getType().equalsIgnoreCase(PERSON_ANNOTATION_TYPE));
             String correferringGender = (String)coreferringEntity.getFeatures().get(PERSON_GENDER_FEATURE_NAME);
 
             if (null != correferringGender) {
@@ -838,13 +836,13 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     public int compare(Object o1,Object o2) {
 
       //0. preconditions
-      Assert.assertNotNull(o1);
-      Assert.assertNotNull(o2);
-      Assert.assertTrue(o1 instanceof Annotation ||
+      assert (null != o1);
+      assert (null != o2);
+      assert (o1 instanceof Annotation ||
                         o1 instanceof Sentence ||
                         o1 instanceof Quote ||
                         o1 instanceof Node);
-      Assert.assertTrue(o2 instanceof Annotation ||
+      assert (o2 instanceof Annotation ||
                         o2 instanceof Sentence ||
                         o2 instanceof Quote ||
                         o2 instanceof Node);
@@ -861,13 +859,13 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   private Annotation _chooseAntecedent$HE$HIM$HIS$SHE$HER$HIMSELF$(Annotation ant1, Annotation ant2, Annotation pronoun) {
 
     //0. preconditions
-    Assert.assertNotNull(ant1);
-    Assert.assertNotNull(ant2);
-    Assert.assertNotNull(pronoun);
-    Assert.assertTrue(pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP_CATEGORY) ||
+    assert (null != ant1);
+    assert (null != ant2);
+    assert (null != pronoun);
+    assert (pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP_CATEGORY) ||
                       pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP$_CATEGORY));
     String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-    Assert.assertTrue(pronounString.equalsIgnoreCase("SHE") ||
+    assert (pronounString.equalsIgnoreCase("SHE") ||
                       pronounString.equalsIgnoreCase("HER") ||
                       pronounString.equalsIgnoreCase("HE") ||
                       pronounString.equalsIgnoreCase("HIM") ||
@@ -880,7 +878,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
     long diff1 = offsetPrn.longValue() - offset1.longValue();
     long diff2 = offsetPrn.longValue() - offset2.longValue();
-//    Assert.assertTrue(diff1 != 0 && diff2 != 0);
+//    assert (diff1 != 0 && diff2 != 0);
     //reject candidates that overlap with the pronoun
     if (diff1 == 0) {
       return ant2;
@@ -905,7 +903,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
           return ant2;
     }
     else {
-      Assert.assertTrue(Math.abs(diff1 + diff2) < Math.abs(diff1) + Math.abs(diff2));
+      assert (Math.abs(diff1 + diff2) < Math.abs(diff1) + Math.abs(diff2));
       //we have [antecedentA...pronoun...AntecedentB] ==> choose A
       if (diff1 > 0)
         return ant1;
@@ -918,14 +916,14 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   private Annotation _chooseAntecedent$IT$ITS$ITSELF$(Annotation ant1, Annotation ant2, Annotation pronoun) {
 
     //0. preconditions
-    Assert.assertNotNull(ant1);
-    Assert.assertNotNull(ant2);
-    Assert.assertNotNull(pronoun);
-    Assert.assertTrue(pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP_CATEGORY) ||
+    assert (null != ant1);
+    assert (null != ant2);
+    assert (null != pronoun);
+    assert (pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP_CATEGORY) ||
                       pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP$_CATEGORY));
     String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
 
-    Assert.assertTrue(pronounString.equalsIgnoreCase("IT") ||
+    assert (pronounString.equalsIgnoreCase("IT") ||
                       pronounString.equalsIgnoreCase("ITS") ||
                       pronounString.equalsIgnoreCase("ITSELF"));
 
@@ -934,7 +932,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     Long offsetPrn = pronoun.getStartNode().getOffset();
     long diff1 = offsetPrn.longValue() - offset1.longValue();
     long diff2 = offsetPrn.longValue() - offset2.longValue();
-//    Assert.assertTrue(diff1 != 0 && diff2 != 0);
+//    assert (diff1 != 0 && diff2 != 0);
     //reject candidates that overlap with the pronoun
     if (diff1 == 0) {
       return ant2;
@@ -953,12 +951,12 @@ public class PronominalCoref extends AbstractLanguageAnalyser
         return ant2;
     }
     else if (diff1 > 0){
-      Assert.assertTrue(Math.abs(diff1 + diff2) < Math.abs(diff1) + Math.abs(diff2));
+      assert (Math.abs(diff1 + diff2) < Math.abs(diff1) + Math.abs(diff2));
       //we have [antecedentA...pronoun...AntecedentB] ==> choose A
       return ant1;
     }
     else if (diff2 > 0){
-      Assert.assertTrue(Math.abs(diff1 + diff2) < Math.abs(diff1) + Math.abs(diff2));
+      assert (Math.abs(diff1 + diff2) < Math.abs(diff1) + Math.abs(diff2));
       //we have [antecedentA...pronoun...AntecedentB] ==> choose A
       return ant2;
     }
@@ -1003,7 +1001,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     private void init() {
 
       //0.preconditions
-      Assert.assertNotNull(textSentences);
+      assert (null != textSentences);
 
       //0.5 create a restriction for PRP pos tokens
       FeatureMap prpTokenRestriction = new SimpleFeatureMapImpl();
@@ -1066,9 +1064,9 @@ public class PronominalCoref extends AbstractLanguageAnalyser
                                                         int mode) {
 
       //0. preconditions
-      Assert.assertTrue(sentenceNumber >=0);
-      Assert.assertTrue(quoteNumber >=0);
-      Assert.assertTrue(mode == Quote.ANTEC_AFTER ||
+      assert (sentenceNumber >=0);
+      assert (quoteNumber >=0);
+      assert (mode == Quote.ANTEC_AFTER ||
                         mode == Quote.ANTEC_BEFORE ||
                         mode == Quote.ANTEC_BACK);
 
