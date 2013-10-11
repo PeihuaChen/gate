@@ -32,13 +32,14 @@ import gate.util.GateClassLoader;
 import gate.util.GateException;
 import gate.util.ant.ExpandIvy;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.IOException;
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
-import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -440,12 +441,19 @@ public class CreoleAnnotationHandler {
       Element resourceElement, Map<String, Element> parameterMap,
       Map<String, Element> disjunctionMap) throws GateException {
 
+    BeanInfo bi;
+    try {
+      bi = Introspector.getBeanInfo(resourceClass);
+    } catch(IntrospectionException e) {
+      throw new GateException("Failed to introspect " + resourceClass, e);
+    }
+
     for(Method method : resourceClass.getDeclaredMethods()) {
-      processElement(method, resourceElement, parameterMap, disjunctionMap);
+      processElement(method, bi, resourceElement, parameterMap, disjunctionMap);
     }
 
     for(Field field : resourceClass.getDeclaredFields()) {
-      processElement(field, resourceElement, parameterMap, disjunctionMap);
+      processElement(field, bi, resourceElement, parameterMap, disjunctionMap);
     }
 
     // go up the tree
@@ -466,6 +474,8 @@ public class CreoleAnnotationHandler {
    * 
    * @param element
    *          The Method of Field from which to discern parameters
+   * @param bi
+   *          the BeanInfo for the corresponding class.
    * @param resourceElement
    *          the RESOURCE element to which the PARAMETERs are to be added
    * @param parameterMap
@@ -482,7 +492,7 @@ public class CreoleAnnotationHandler {
    *          on the {@link CreoleParameter} annotations - parameters with the
    *          same disjunction ID are grouped under the same OR element.
    */
-  private void processElement(AnnotatedElement element,
+  private void processElement(AnnotatedElement element, BeanInfo bi,
       Element resourceElement, Map<String, Element> parameterMap,
       Map<String, Element> disjunctionMap) throws GateException {
     CreoleParameter paramAnnot = element.getAnnotation(CreoleParameter.class);
@@ -495,49 +505,47 @@ public class CreoleAnnotationHandler {
       // Enforce constraints relevant for this type of element
       if(element.getClass().equals(java.lang.reflect.Field.class)) {
         java.lang.reflect.Field field = (java.lang.reflect.Field)element;
-        try {
-          paramName = field.getName();
-          genericParamType = field.getGenericType();
-          paramType = field.getType();
-          // Create a nicely formatted version of the element field name to find
-          // getter and setters
-          String camelName =
-              Character.toUpperCase(paramName.charAt(0))
-                  + paramName.substring(1);
-
-          Method get = field.getDeclaringClass().getMethod("get" + camelName);
-          Method set =
-              field.getDeclaringClass().getMethod("set" + camelName,
-                  field.getType());
-
-          if(!Modifier.isPublic(get.getModifiers())
-              || !Modifier.isPublic(set.getModifiers())) { throw new GateException(
-              "Creole Parameter annotation found on " + field
-                  + "but getter or setter is not public"); }
-
-        } catch(NoSuchMethodException e) {
-          throw new GateException("Creole parameter annotation found on "
-              + field + ", but no corresponding setter and getter methods"
-              + "with type " + field.getType().getName() + " exist", e);
+        paramName = field.getName();
+        genericParamType = field.getGenericType();
+        paramType = field.getType();
+        PropertyDescriptor paramDescriptor = null;
+        for(PropertyDescriptor pd : bi.getPropertyDescriptors()) {
+          if(paramName.equals(pd.getName())) {
+            paramDescriptor = pd;
+            break;
+          }
         }
+
+        if(paramDescriptor == null) {
+          throw new GateException("CREOLE parameter annotation found on field "
+              + field
+              + " but no corresponding JavaBean accessor methods exist.");
+        } else if(paramDescriptor.getReadMethod() == null
+            || paramDescriptor.getWriteMethod() == null) { throw new GateException(
+            "CREOLE parameter annotation found on field "
+                + field
+                + " but getter or setter is missing.  CREOLE parameters require both."); }
       } else if(element.getClass().equals(Method.class)) {
         Method method = (Method)element;
-        // If it's a method, it best be a setter.
-        if(!method.getName().startsWith("set") || method.getName().length() < 4
-            || method.getParameterTypes().length != 1) { throw new GateException(
-            "Creole parameter annotation found on " + method
-                + ", but only setter methods may have this annotation."); }
+        // Extract the parameter name from the BeanInfo
+        PropertyDescriptor paramDescriptor = null;
+        for(PropertyDescriptor pd : bi.getPropertyDescriptors()) {
+          if(method.equals(pd.getWriteMethod())) {
+            paramDescriptor = pd;
+            break;
+          }
+        }
 
-        // Extract the parameter name from the method name
-        paramName =
-            Character.toLowerCase(method.getName().charAt(3))
-                + method.getName().substring(4);
+        if(paramDescriptor == null) { throw new GateException(
+            "CREOLE parameter annotation found on " + method
+                + " but this method is not a Java Bean property setter."); }
+        paramName = paramDescriptor.getName();
         // And the type is that of the first argument
         genericParamType = method.getGenericParameterTypes()[0];
         paramType = method.getParameterTypes()[0];
       } else {
         throw new GateException("CREOLE parameter annotation found on "
-            + element + "but can only be placed on Method or Field");
+            + element + " but can only be placed on Method or Field");
       }
 
       // Hidden parameters can be added straight to the map.
