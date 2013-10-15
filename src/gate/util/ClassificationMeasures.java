@@ -188,9 +188,8 @@ public class ClassificationMeasures {
         } else if (coextensiveAnnotations.size() == 1) {
 
           // What are our feature values?
-          String featVal1 = (String) relevantAnn1.getFeatures().get(feature);
-          String featVal2 = (String)
-            coextensiveAnnotations.get(0).getFeatures().get(feature);
+          String featVal1 = String.valueOf(relevantAnn1.getFeatures().get(feature));
+          String featVal2 = String.valueOf(coextensiveAnnotations.get(0).getFeatures().get(feature));
 
           // Make sure both are present in our feature value list
           featureValues.add(featVal1);
