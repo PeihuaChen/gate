@@ -80,6 +80,8 @@ public class PooledProxyBeanDefinitionDecorator implements
   private static final String PROXY_TARGET_CLASS = "proxy-target-class";
 
   private static final String INITIAL_SIZE = "initial-size";
+  
+  private static final String TARGET_SOURCE_CLASS = "target-source-class";
 
   public BeanDefinitionHolder decorate(Node node,
           BeanDefinitionHolder definition, ParserContext parserContext) {
@@ -99,8 +101,14 @@ public class PooledProxyBeanDefinitionDecorator implements
     // target bean name
     RootBeanDefinition targetSourceDefinition = new RootBeanDefinition();
     targetSourceDefinition.setScope(originalScope);
+    String targetSourceClassName = null;
+    if(node instanceof Element && ((Element)node).hasAttribute(TARGET_SOURCE_CLASS)) {
+      targetSourceClassName = ((Element)node).getAttribute(TARGET_SOURCE_CLASS);
+    } else {
+      targetSourceClassName = "org.springframework.aop.target.CommonsPoolTargetSource";
+    }
     targetSourceDefinition
-            .setBeanClassName("org.springframework.aop.target.CommonsPoolTargetSource");
+            .setBeanClassName(targetSourceClassName);
     targetSourceDefinition.getPropertyValues().addPropertyValue(
             "targetBeanName", targetBeanName);
     String targetSourceBeanName = TARGET_SOURCE_PREFIX + originalBeanName;
