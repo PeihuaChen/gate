@@ -294,15 +294,21 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
           } else if(document.getFeatures().containsKey(dateFeature)) {
             // the document date source is actually a document feature so let's
             // parse that instead
-            dd = (String)document.getFeatures().get(dateFeature);
-            Date d = dp.parse(dd, pp.reset(), null);
-            if(d != null
+            /*dd = (String)document.getFeatures().get(dateFeature);
+            Date d = dp.parse(dd, pp.reset(), null);*/
+            Date d = parseDocDate(dp, pp.reset(), document.getFeatures().get(dateFeature));
+            /*if(d != null
                 && pp.getFeatures().get("inferred").equals(DateParser.NONE)) {
               // we have found a fully specified date so let's assume this is
               // the date of the document and stop
               documentDate = d;
               break;
+            }*/
+            if (d != null) {
+              documentDate = d;
+              break;
             }
+           
           }
         } catch(Exception e) {
           // ignore this and try the next feature
@@ -332,6 +338,27 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
         + NumberFormat.getInstance().format(
             (double)(System.currentTimeMillis() - startTime) / 1000)
         + " seconds!");
+  }
+  
+  @SuppressWarnings("deprecation")
+  private Date parseDocDate(DateParser dp, ParsePositionEx pp, Object obj) {
+    if (obj instanceof Integer) {
+      
+      String date = obj.toString();
+      if (date.length() == 8) {
+        return new Date(Integer.parseInt(date.substring(0,4))-1900, Integer.parseInt(date.substring(4,6))-1, Integer.parseInt(date.substring(6))); 
+      }
+    }
+    
+    Date d = dp.parse(obj.toString(), pp.reset(), null);
+    if(d != null
+        && pp.getFeatures().get("inferred").equals(DateParser.NONE)) {
+      // we have found a fully specified date so let's assume this is
+      // the date of the document and stop
+      return d;
+    }
+    
+    return null;
   }
   
   /**
