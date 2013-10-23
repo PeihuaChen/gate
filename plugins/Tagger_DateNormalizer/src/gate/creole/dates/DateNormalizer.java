@@ -343,13 +343,19 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
   @SuppressWarnings("deprecation")
   private Date parseDocDate(DateParser dp, ParsePositionEx pp, Object obj) {
     if (obj instanceof Integer) {
-      
+      //this handles dates which are integers which match the patter yyyymmdd
       String date = obj.toString();
       if (date.length() == 8) {
         return new Date(Integer.parseInt(date.substring(0,4))-1900, Integer.parseInt(date.substring(4,6))-1, Integer.parseInt(date.substring(6))); 
       }
     }
     
+    if (obj instanceof Long) {
+      //if the value is a long then assume it's a Unix time value
+      return new Date((Long)obj);
+    }
+    
+    //we have some other value so treat it as a string to parse
     Date d = dp.parse(obj.toString(), pp.reset(), null);
     if(d != null
         && pp.getFeatures().get("inferred").equals(DateParser.NONE)) {
