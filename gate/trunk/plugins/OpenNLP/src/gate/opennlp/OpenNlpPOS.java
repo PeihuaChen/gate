@@ -21,6 +21,7 @@ import gate.creole.*;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.RunTime;
+import gate.creole.metadata.Sharable;
 import gate.util.InvalidOffsetException;
 import java.io.*;
 import java.net.URL;
@@ -120,23 +121,25 @@ public class OpenNlpPOS extends AbstractLanguageAnalyser {
 	
   @Override
   public Resource init() throws ResourceInstantiationException {
-    InputStream modelInput = null;
-    try {
-      modelInput = modelUrl.openStream();
-      this.model = new POSModel(modelInput);
-      this.tagger = new POSTaggerME(model);
-      logger.info("OpenNLP POS Tagger: " + modelUrl.toString());
-    } catch(IOException e) {
-      throw new ResourceInstantiationException(e);
-    } finally {
-      if(modelInput != null) {
-        try {
-          modelInput.close();
-        } catch(IOException e) {
-          throw new ResourceInstantiationException(e);
+    if(model == null) {
+      InputStream modelInput = null;
+      try {
+        modelInput = modelUrl.openStream();
+        this.model = new POSModel(modelInput);
+        logger.info("OpenNLP POS Tagger: " + modelUrl.toString());
+      } catch(IOException e) {
+        throw new ResourceInstantiationException(e);
+      } finally {
+        if(modelInput != null) {
+          try {
+            modelInput.close();
+          } catch(IOException e) {
+            throw new ResourceInstantiationException(e);
+          }
         }
       }
     }
+    this.tagger = new POSTaggerME(model);
 
     super.init();
     return this;
@@ -145,6 +148,7 @@ public class OpenNlpPOS extends AbstractLanguageAnalyser {
 
   @Override
   public void reInit() throws ResourceInstantiationException {
+    model = null;
     init();
   }
 	
@@ -181,6 +185,21 @@ public class OpenNlpPOS extends AbstractLanguageAnalyser {
 
   public URL getModel() {
     return modelUrl;
+  }
+  
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  @Sharable
+  public void setPosModel(POSModel model) {
+    this.model = model;
+  }
+  
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  public POSModel getPosModel() {
+    return model;
   }
 
 }

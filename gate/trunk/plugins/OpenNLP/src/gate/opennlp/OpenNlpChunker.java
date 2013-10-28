@@ -16,6 +16,7 @@ import gate.creole.*;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.RunTime;
+import gate.creole.metadata.Sharable;
 import gate.util.InvalidOffsetException;
 import java.io.*;
 import java.net.URL;
@@ -114,31 +115,38 @@ public class OpenNlpChunker extends AbstractLanguageAnalyser  {
 
   @Override
   public Resource init() throws ResourceInstantiationException {
-    InputStream modelInput = null;
-    try {
-      modelInput = modelUrl.openStream();
-      this.model = new ChunkerModel(modelInput);
-      this.chunker = new ChunkerME(model);
-      logger.info("OpenNLP POS Chunker: " + modelUrl.toString());
-    }
-    catch(IOException e) {
-      throw new ResourceInstantiationException(e);
-    }
-    finally {
-      if (modelInput != null) {
-        try {
-          modelInput.close();
-        }
-        catch (IOException e) {
-          throw new ResourceInstantiationException(e);
+    if(model == null) {
+      InputStream modelInput = null;
+      try {
+        modelInput = modelUrl.openStream();
+        this.model = new ChunkerModel(modelInput);
+        logger.info("OpenNLP POS Chunker: " + modelUrl.toString());
+      }
+      catch(IOException e) {
+        throw new ResourceInstantiationException(e);
+      }
+      finally {
+        if (modelInput != null) {
+          try {
+            modelInput.close();
+          }
+          catch (IOException e) {
+            throw new ResourceInstantiationException(e);
+          }
         }
       }
     }
+    this.chunker = new ChunkerME(model);
 
     super.init();
     return this;
   }
 
+  @Override
+  public void reInit() throws ResourceInstantiationException {
+    model = null;
+    init();
+  }
 
 
   /* CREOLE PARAMETERS */
@@ -186,6 +194,21 @@ public class OpenNlpChunker extends AbstractLanguageAnalyser  {
 
   public URL getModel() {
     return modelUrl;
+  }
+  
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  @Sharable
+  public void setChunkerModel(ChunkerModel model) {
+    this.model = model;
+  }
+  
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  public ChunkerModel getChunkerModel() {
+    return model;
   }
 
 }

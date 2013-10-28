@@ -25,6 +25,7 @@ import gate.creole.*;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.RunTime;
+import gate.creole.metadata.Sharable;
 import gate.util.InvalidOffsetException;
 
 /**
@@ -118,23 +119,25 @@ public class OpenNlpTokenizer extends AbstractLanguageAnalyser {
 
   
   public Resource init() throws ResourceInstantiationException {
-    InputStream modelInput = null;
-    try {
-      modelInput = modelUrl.openStream();
-      this.model = new TokenizerModel(modelInput);
-      this.tokenizer = new TokenizerME(model);
-      logger.info("OpenNLP Tokenizer: " + modelUrl.toString());
-    } catch(IOException e) {
-      throw new ResourceInstantiationException(e);
-    } finally {
-      if(modelInput != null) {
-        try {
-          modelInput.close();
-        } catch(IOException e) {
-          throw new ResourceInstantiationException(e);
+    if(model == null) {
+      InputStream modelInput = null;
+      try {
+        modelInput = modelUrl.openStream();
+        this.model = new TokenizerModel(modelInput);
+        logger.info("OpenNLP Tokenizer: " + modelUrl.toString());
+      } catch(IOException e) {
+        throw new ResourceInstantiationException(e);
+      } finally {
+        if(modelInput != null) {
+          try {
+            modelInput.close();
+          } catch(IOException e) {
+            throw new ResourceInstantiationException(e);
+          }
         }
       }
     }
+    this.tokenizer = new TokenizerME(model);
 
     super.init();
     return this;
@@ -142,6 +145,7 @@ public class OpenNlpTokenizer extends AbstractLanguageAnalyser {
   
 
   public void reInit() throws ResourceInstantiationException {
+    model = null;
     init();
   }
 
@@ -170,4 +174,18 @@ public class OpenNlpTokenizer extends AbstractLanguageAnalyser {
 		return modelUrl;
 	}
 
+	/**
+	 * For internal use by the duplication mechanism.
+	 */
+	@Sharable
+	public void setTokenizerModel(TokenizerModel model) {
+	  this.model = model;
+	}
+	
+  /**
+   * For internal use by the duplication mechanism.
+   */
+	public TokenizerModel getTokenizerModel() {
+	  return model;
+	}
 }
