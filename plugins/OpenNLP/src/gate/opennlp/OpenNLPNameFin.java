@@ -25,6 +25,7 @@ import gate.creole.*;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.RunTime;
+import gate.creole.metadata.Sharable;
 import gate.util.InvalidOffsetException;
 
 
@@ -44,6 +45,7 @@ public class OpenNLPNameFin extends AbstractLanguageAnalyser {
   private String inputASName, outputASName;
   private URL configUrl;
   private Map<NameFinderME, String> finders;
+  private Map<String, TokenNameFinderModel> models;
 
 
   @Override
@@ -139,18 +141,24 @@ public class OpenNLPNameFin extends AbstractLanguageAnalyser {
 
     // Go through the config entries
     Set<String> modelFiles = properties.stringPropertyNames();
+    if(models == null) {
+      // models will be non-null if we're duplicating
+      models = new HashMap<String, TokenNameFinderModel>();
+    }
     for (String filename : modelFiles) {
       InputStream modelInput = null;
       try {
-        // Initialize a NameFinder with this model
-        URL modelUrl = new URL(configUrl, filename);
         String type = properties.getProperty(filename);
-        modelInput = modelUrl.openStream();
-        TokenNameFinderModel model = new TokenNameFinderModel(modelInput);
-        NameFinderME finder = new NameFinderME(model);
+        if(!models.containsKey(filename)) {
+          // Initialize a NameFinder with this model
+          URL modelUrl = new URL(configUrl, filename);
+          modelInput = modelUrl.openStream();
+          models.put(filename, new TokenNameFinderModel(modelInput));
+          logger.info("OpenNLP NameFinder: " + modelUrl.toString() + " -> " + type);
+        }
+        NameFinderME finder = new NameFinderME(models.get(filename));
         // Add it to the table with its annotation type
         this.finders.put(finder, type);
-        logger.info("OpenNLP NameFinder: " + modelUrl.toString() + " -> " + type);
       }
       finally {
         if (modelInput != null) {
@@ -163,6 +171,7 @@ public class OpenNLPNameFin extends AbstractLanguageAnalyser {
 
   @Override
   public void reInit() throws ResourceInstantiationException {
+    models = null;
     init();
   }
 
@@ -200,6 +209,21 @@ public class OpenNLPNameFin extends AbstractLanguageAnalyser {
 
   public URL getConfig() {
     return configUrl;
+  }
+  
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  @Sharable
+  public void setModelsMap(Map<String, TokenNameFinderModel> models) {
+    this.models = models;
+  }
+  
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  public Map<String, TokenNameFinderModel> getModelsMap() {
+    return models;
   }
 
 }

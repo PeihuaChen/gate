@@ -16,6 +16,7 @@ import gate.creole.*;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.RunTime;
+import gate.creole.metadata.Sharable;
 import gate.util.InvalidOffsetException;
 import java.io.*;
 import java.net.URL;
@@ -127,23 +128,25 @@ public class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
      * end of a Sentence annotation, e.g., ").".     */
     punctEnding = Pattern.compile("\\p{Punct}+$");
 
-    InputStream modelInput = null;
-    try {
-      modelInput = modelUrl.openStream();
-      this.model = new SentenceModel(modelInput);
-      this.splitter = new SentenceDetectorME(model);
-      logger.info("OpenNLP Splitter: " + modelUrl.toString());
-    } catch(IOException e) {
-      throw new ResourceInstantiationException(e);
-    } finally {
-      if(modelInput != null) {
-        try {
-          modelInput.close();
-        } catch(IOException e) {
-          throw new ResourceInstantiationException(e);
+    if(model == null) {
+      InputStream modelInput = null;
+      try {
+        modelInput = modelUrl.openStream();
+        this.model = new SentenceModel(modelInput);
+        logger.info("OpenNLP Splitter: " + modelUrl.toString());
+      } catch(IOException e) {
+        throw new ResourceInstantiationException(e);
+      } finally {
+        if(modelInput != null) {
+          try {
+            modelInput.close();
+          } catch(IOException e) {
+            throw new ResourceInstantiationException(e);
+          }
         }
       }
     }
+    this.splitter = new SentenceDetectorME(model);
 
     super.init();
     return this;
@@ -152,6 +155,7 @@ public class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
   
   @Override
   public void reInit() throws ResourceInstantiationException {
+    model = null;
     init();
   }
 
@@ -183,6 +187,21 @@ public class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 
   public URL getModel() {
     return modelUrl;
+  }
+
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  @Sharable
+  public void setSentenceModel(SentenceModel model) {
+    this.model = model;
+  }
+
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  public SentenceModel getSentenceMode() {
+    return model;
   }
 
 }
