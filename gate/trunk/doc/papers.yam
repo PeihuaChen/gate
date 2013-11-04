@@ -8,7 +8,7 @@ GATE papers
 - H. Cunningham, et al. Text Processing with GATE (Version 6). University of Sheffield Department of Computer Science. 15 April 2011. ISBN 0956599311. %(http://tinyurl.com/gatebook, Available from Amazon). %(bibtex.html#Cunningham2011a, BibTex).
 
 
-%3* I Used ANNIE (for TwitIE (ANNIE for social media see below):
+%3* I Used ANNIE (for TwitIE  -- version of ANNIE for social media -- see below):
 
  - H. Cunningham, D. Maynard, K. Bontcheva, V. Tablan. GATE: A Framework and Graphical Development Environment for Robust NLP Tools and Applications. Proceedings of the 40th Anniversary Meeting of the Association for Computational Linguistics (ACL'02). Philadelphia, July 2002. %(../../sale/acl02/acl-main.pdf,PDF). %(bibtex.html#Cunningham2002, BibTeX).
 
@@ -70,7 +70,7 @@ GATE papers
 
 - L. Derczynski, R. Gaizauskas. Temporal Signals Help Label Temporal Relations. Proceedings of the 51st meeting of the Association for Computational Linguistics (ACL 2013). %(http://derczynski.com/sheffield/papers/siglinks.pdf,PDF)
 
-- N. UzZaman, H. Llorens, L. Derczynski, J.F. Allen, M. Verhagen, J. Pustejovsky. SemEval-2013 Task 1: TempEval-3: Evaluating Events, Time Expressions, and Temporal Relations. In Proceedings of the 7th International Workshop on Semantic Evaluation (SemEval 2013). %(http://derczynski.com/sheffield/papers/tempeval-3.pdf,PDF)
+- N. Uzzaman, H. Llorens, L. Derczynski, J.F. Allen, M. Verhagen, J. Pustejovsky. SemEval-2013 Task 1: TempEval-3: Evaluating Events, Time Expressions, and Temporal Relations. In Proceedings of the 7th International Workshop on Semantic Evaluation (SemEval 2013). %(http://derczynski.com/sheffield/papers/tempeval-3.pdf,PDF)
 
 - B. Pereira Nunes, R. Kawase, B. Fetahu, S. Dietze, M. Casanova, D. Maynard. Interlinking documents based on semantic graphs. 17th International Conference on Knowledge-Based and Intelligent Information & Engineering Systems (KES-2013), 9-12 September 2013, Kitakyushu, Japan.
 
