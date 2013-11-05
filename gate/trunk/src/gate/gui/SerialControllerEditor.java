@@ -685,8 +685,15 @@ public class SerialControllerEditor extends AbstractVisualResource
 
         } else if(e.getID() == MouseEvent.MOUSE_CLICKED) {
           if (e.getClickCount() == 2) {
-            //remove selected modules on double click
-            removePRAction.actionPerformed(null);
+            // open the double-clicked PR in the main view.
+            Component root = SwingUtilities.getRoot(SerialControllerEditor.this);
+            if (!(root instanceof MainFrame)) { return; }
+            final MainFrame mainFrame = (MainFrame) root;
+            if(controller != null) {
+              ProcessingResource res = (ProcessingResource)
+                  ((List)controller.getPRs()).get(row);
+              if(res != null) mainFrame.select(res);
+            }
           }
         }
       }
