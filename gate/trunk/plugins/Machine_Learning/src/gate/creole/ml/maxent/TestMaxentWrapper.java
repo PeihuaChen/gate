@@ -21,6 +21,8 @@ import gate.*;
 import gate.corpora.*;
 import java.io.File;
 import java.net.*;
+
+import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 import gate.gui.MainFrame;
 import gate.util.Files;
 import gate.util.GateRuntimeException;
@@ -38,6 +40,8 @@ public class TestMaxentWrapper extends TestCase {
    */
   private static boolean gateInited = false;
   
+  private static URL pluginURL;
+  
   private static synchronized void initGate() throws Exception {
     if(!gateInited) {
       File gateHome = new File(System.getProperty("gate.home.location"));
@@ -50,6 +54,11 @@ public class TestMaxentWrapper extends TestCase {
       Gate.getCreoleRegister().registerDirectories(mlPlugin.toURI().toURL());
       gateInited = true;
     }
+    
+    URL url = Gate.getClassLoader().getResource(TestMaxentWrapper.class.getCanonicalName().replace(".", "/")+".class");
+    JarURLConnection connection = (JarURLConnection)url.openConnection();
+    pluginURL = connection.getJarFileURL();
+    System.out.println(pluginURL);
   }
   
   /** Fixture set up - init GATE*/
@@ -85,8 +94,9 @@ public class TestMaxentWrapper extends TestCase {
     //get a document - take it from the gate server.
     // tests/doc0.html is a simple html document.
     Document doc = Factory.newDocument(
-      new URL(TestDocument.getTestServerName() + "tests/doc0.html")
-    );
+      //new URL(TestDocument.getTestServerName() + "tests/doc0.html"));
+        new URL(pluginURL,"tests/doc0.html"));
+    
 
     // Get a tokeniser - just use all the default settings.
     LanguageAnalyser tokeniser=
@@ -101,8 +111,8 @@ public class TestMaxentWrapper extends TestCase {
     // Create the Maxent ML Processing resource.
     // First set up the parameters
     FeatureMap maxentParameters = Factory.newFeatureMap();
-    maxentParameters.put("configFileURL", Files.getGateResource( 
-                                 "/gate.ac.uk/tests/TestMaxentConfigFile.xml"));
+    maxentParameters.put("configFileURL", new URL(pluginURL,"tests/TestMaxentConfigFile.xml"));
+        //Files.getGateResource("/gate.ac.uk/tests/TestMaxentConfigFile.xml"));
     // Then actually make the PR
     LanguageAnalyser maxentPR =
         (LanguageAnalyser)
