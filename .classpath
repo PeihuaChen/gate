@@ -85,6 +85,6 @@
 	<classpathentry kind="lib" path="plugins/Ontology/lib/openrdf-sesame-2.6.10-onejar.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology/lib/owlim-lite-5.3.jar"/>
 	<classpathentry kind="lib" path="plugins/OpenNLP/lib/opennlp-maxent-3.0.2-incubating.jar"/>
-	<classpathentry exported="true" kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=GATE+Sawdust&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
+	<classpathentry exported="true" kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=GATE&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
 	<classpathentry kind="output" path="classes/main"/>
 </classpath>
