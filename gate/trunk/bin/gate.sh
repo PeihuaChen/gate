@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Parameters passed to the Java process
-# You can edit the values below (to e.g. change the maximum amount of memory) or
-# add new parameters, as needed.
-
-vmparams=( -Xmx1G )
-
 # Parameters passed to the GATE process
 # This array gets populated from the command line parameters given to the 
 # script. If required, you can set the initial list of parameters here. 
@@ -39,6 +33,13 @@ cd "$GATE_HOME"
 export GATE_HOME="`pwd`"
 export ANT_HOME=$GATE_HOME
 cd "$CURDIR"
+
+# pull in JVM settings from the Launch4J ini file so we have a single place
+# where these things can be set across operarting systems which makes things
+# so much easier to document/explain/teach
+IFS=$'\r\n'
+vmparams=($(cat $GATE_HOME/gate.l4j.ini))
+unset IFS
 
 vmparams=( "${vmparams[@]}" "-splash:$GATE_HOME/bin/splash.png" )
 
