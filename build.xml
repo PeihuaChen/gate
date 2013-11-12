@@ -14,45 +14,21 @@
        *******************************************************************
 
        Make changes to this section of the build file to customise your
-       GATE start-up and build script -->
+       GATE build script -->
 
   <!-- Load user properties from build.properties.  If you need to override
        any of the properties set in this build file, you should create
        build.properties in the same directory.  Property definitions in
        the properties file will override those in the build file.
 
-       Also, if you need to pass specific system properties when you run
-       the GATE GUI, you should set them in build.properties, prefixed with
-       "run.", for example to override the default directory for GATE to
-       create temporary files (java.io.tmpdir), you should put the following
-       line in build.properties:
-
-       run.java.io.tmpdir=${user.home}/tmp
-
        note that Ant properties are expanded in this file, this can be a
        very powerful tool. -->
   <property file="build.properties" />
-
-  <!-- RUNTIME MEMORY -->
-  <property name="runtime.max.memory" value="1200M" />
-  <property name="runtime.start.memory" value="200M" />
-
-  <!-- Should Ant exit as soon as it has started the GUI? -->
-  <property name="runtime.spawn" value="true" />
 
   <!-- if deprecation warnings should be shown -->
   <property name="deprecation" value="false" />
   <property name="gate.compile.maxwarnings" value="10000" />
 
-  <!-- OS specific properties
-       To set a system property for GATE running on a specific platform, define
-       it here:
-
-       <property name="os.Windows XP.prop.name" value="something" />
-
-       will set the system property prop.name to the value "something" when
-       GATE is run on Windows XP.
-  -->
   <!-- If you use a 3D accelerated X server, such as Xgl or Aiglx and
        your windows are not resizing properly, then you need to uncomment
        the following line -->
@@ -68,7 +44,8 @@
   <property name="gate.home" location="${basedir}" />
 
   <!-- Sources -->
-  <property name="srcDir" location="src" />
+  <property name="srcDir" location="src/main" />
+  <property name="tests.srcDir" location="src/test" />
 
   <!-- Files required by the build process -->
   <property name="buildDir" location="build" />
@@ -77,7 +54,8 @@
   <property name="binDir" location="bin" />
 
   <!-- Output directory for the build process -->
-  <property name="outputDir" location="classes" />
+  <property name="outputDir" location="classes/main" />
+  <property name="tests.outputDir" location="classes/test" />
 
   <!-- Libraries directory for the build process -->
   <property name="libDir" location="lib" />
@@ -134,7 +112,8 @@
   <!-- The test CLASSPATH -->
   <path id="test.class.path">
     <pathelement location="${binDir}" />
-    <pathelement location="${outputDir}" />
+  	<pathelement location="${binDir}/gate.jar" />
+    <pathelement location="${tests.outputDir}" />
     <fileset refid="libs" />
   </path>
 
@@ -161,7 +140,6 @@
         -compile: compiles all the .java files
         -resources: copies the resources to the output directory (${outputDir})
         -jar: creates the gate.jar archive
-        -run: starts GATE
         -clean: cleans up the output from all previous builds
 
         -doc: creates the Javadoc and Java2HTML documentation
@@ -442,143 +420,18 @@
   <target name="all" depends="jar, plugins.build">
   </target>
 
-
-  <!-- Run the beast using the default GATE launcher -->
-  <target name="run" depends="run-pre, run-nonmac, run-mac">
+  <target name="run">
+	<echo message="Running GATE via this ANT build file is no longer supported" />
   </target>
-
-  <target name="run-pre">
-    <!-- Find if the platform is MAC -->
-    <condition property="running.on.mac">
-      <os family="mac" />
-    </condition>
-  </target>
-
-  <target name="run-nonmac" unless="running.on.mac">
-    <!-- Call the GATE Launcher -->
-    <java jar="bin/gateLauncher.jar" fork="true" spawn="${runtime.spawn}" dir="." maxmemory="${runtime.max.memory}">
-      <jvmarg value="${server.or.client}" />
-      <jvmarg value="-splash:bin/splash.png" />
-    </java>
-  </target>
-
-  <target name="run-mac" if="running.on.mac">
-    <property name="gate.icon.location" location="GATE.app/Contents/Resources/gate-icon.icns" />
-    <!-- Don't pass a -d32 or -d64 on Tiger (10.4.x) -->
-    <condition property="runtime.arch" value="">
-      <matches pattern="10\.4(?:\..*)?" string="${os.version}" />
-    </condition>
-    <condition property="runtime.arch" value="-d64" else="-d32">
-      <os arch="x86_64" />
-    </condition>
-    <if>
-      <length string="${runtime.arch}" when="greater" length="0" />
-      <then>
-        <echo>Running GATE with ${runtime.arch}</echo>
-      </then>
-    </if>
-
-    <!-- Call the GATE Launcher -->
-    <java jar="bin/gateLauncher.jar" fork="true" spawn="${runtime.spawn}" dir="." maxmemory="${runtime.max.memory}">
-      <jvmarg value="${server.or.client}" />
-      <sysproperty key="sun.java2d.opengl" value="true" />
-      <sysproperty key="apple.laf.useScreenMenuBar" value="true" />
-      <sysproperty key="apple.awt.antialiasing" value="true" />
-      <sysproperty key="com.apple.mrj.application.growbox.intrudes" value="false" />
-      <sysproperty key="com.apple.mrj.application.live-resize" value="true" />
-      <!-- use "line" rather than "value" as runtime.arch may be empty -->
-      <jvmarg line="${runtime.arch}" />
-      <jvmarg value="-Xdock:name=GATE ${gate.version}" />
-      <jvmarg value="-Xdock:icon=${gate.icon.location}" />
-      <jvmarg value="-splash:bin/splash.png" />
-    </java>
-  </target>
-
-  <!-- Run the beast using ANT as a launcher -->
-  <target name="runWithAnt" depends="runWAnt-pre,runWAnt-nonmac,runWAnt-mac">
-    <echo level="info">
-      GATE doesn't start? Consult http://gate.ac.uk/wiki/gate-user-faq.html
-    </echo>
-  </target>
-
-  <!-- Prepares for running GATE -->
-  <target name="runWAnt-pre">
-    <property name="class.path.debug" refid="run.class.path" />
-    <echo>
-      Starting GATE ${gate.version}, build ${gate.build}
-      Using JVM at ${java.home}
-      Initial memory ${runtime.start.memory}
-      Maximum memory ${runtime.max.memory}
-      CLASSPATH=${class.path.debug}
-    </echo>
-    <!-- Prepare any user-specified "run." properties -->
-    <propertyset id="run.properties">
-      <propertyref prefix="run." />
-      <mapper type="glob" from="run.*" to="*" />
-    </propertyset>
-    <!-- gather os-specific properties together -->
-    <propertyset id="os.properties">
-      <propertyref prefix="os.${os.name}." />
-      <mapper type="glob" from="os.${os.name}.*" to="*" />
-    </propertyset>
-    <!-- Find if the platform is MAC -->
-    <condition property="running.on.mac">
-      <os family="mac" />
-    </condition>
-  </target>
-
-  <!-- Starts GATE on non MAC platforms -->
-  <target name="runWAnt-nonmac" unless="running.on.mac">
-    <java classname="gate.Main" classpathref="run.class.path" fork="true" spawn="${runtime.spawn}" dir="." maxmemory="${runtime.max.memory}">
-      <!--       <jvmarg value="-Xms${runtime.start.memory}"/> -->
-      <jvmarg value="${server.or.client}" />
-      <sysproperty key="gate.home" value="${basedir}" />
-      <!--<sysproperty key="awt.toolkit" value="sun.awt.motif.MToolkit"/>-->
-      <!-- <sysproperty key="sun.java2d.opengl" value="true"/>-->
-      <syspropertyset refid="run.properties" />
-      <syspropertyset refid="os.properties" />
-    </java>
-  </target>
-
-  <!-- Starts GATE on MAC platforms -->
-  <target name="runWAnt-mac" if="running.on.mac">
-    <property name="gate.icon.location" location="GATE.app/Contents/Resources/gate-icon.icns" />
-    <!-- Don't pass a -d32 or -d64 on Tiger (10.4.x) -->
-    <condition property="runtime.arch" value="">
-      <matches pattern="10\.4(?:\..*)?" string="${os.version}" />
-    </condition>
-    <condition property="runtime.arch" value="-d64" else="-d32">
-      <os arch="x86_64" />
-    </condition>
-    <if>
-      <length string="${runtime.arch}" when="greater" length="0" />
-      <then>
-        <echo>Running GATE with ${runtime.arch}</echo>
-      </then>
-    </if>
-    <java classname="gate.Main" classpathref="run.class.path" fork="true" spawn="${runtime.spawn}" dir="." maxmemory="${runtime.max.memory}">
-      <!--       <jvmarg value="-Xms${runtime.start.memory}"/> -->
-      <sysproperty key="gate.home" value="${basedir}" />
-      <sysproperty key="sun.java2d.opengl" value="true" />
-      <sysproperty key="apple.laf.useScreenMenuBar" value="true" />
-      <sysproperty key="apple.awt.antialiasing" value="true" />
-      <sysproperty key="com.apple.mrj.application.growbox.intrudes" value="false" />
-      <sysproperty key="com.apple.mrj.application.live-resize" value="true" />
-      <!-- use "line" rather than "value" as runtime.arch may be empty -->
-      <jvmarg line="${runtime.arch}" />
-      <jvmarg value="-Xdock:name=GATE ${gate.version}" />
-      <jvmarg value="-Xdock:icon=${gate.icon.location}" />
-      <syspropertyset refid="run.properties" />
-      <syspropertyset refid="os.properties" />
-    </java>
-  </target>
-
 
   <!-- Clear all build output -->
   <target name="clean.gate">
     <delete includeemptydirs="true">
       <fileset dir="${outputDir}" excludes="**/CVS,**/CVS/**,**/.cvsignore" />
     </delete>
+  	<delete includeemptydirs="true">
+  	  <fileset dir="${tests.outputDir}" excludes="**/CVS,**/CVS/**,**/.cvsignore" />
+  	</delete>
   </target>
 
   <!-- Clean everything (including buildable plugins) -->
@@ -642,8 +495,18 @@
     <move file="${srcDir}/gate/jape/parser/ParseCpsl.html" toFile="${srcDir}/gate/jape/parser/ParseCpslPlain.html" />
   </target>
 
-
-  <target name="test.gate" depends="jar">
+  <target name="prepare.tests" depends="jar">
+  	<mkdir dir="${tests.outputDir}"/>
+  	<javac srcdir="${tests.srcDir}" destdir="${tests.outputDir}" source="1.5" target="1.5" encoding="UTF-8" debug="true" deprecation="${deprecation}" debuglevel="lines,source" classpathref="run.class.path">
+  	    <compilerarg value="-Xmaxwarns" />
+  	    <compilerarg value="${gate.compile.maxwarnings}" />
+  	</javac>
+  	<copy todir="${tests.outputDir}/gate/resources" includeEmptyDirs="true">
+  	    <fileset dir="${tests.srcDir}/gate/resources" excludes="**/CVS,**/CVS/**,**/.cvsignore" />
+  	</copy>
+  </target>
+	
+  <target name="test.gate" depends="prepare.tests">
     <makeurl property="creole.plugins" separator=";">
       <path>
         <pathelement location="${basedir}/plugins/ANNIE/" />

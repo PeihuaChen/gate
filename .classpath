@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src/main"/>
 	<classpathentry kind="src" output="plugins/Tools/classes" path="plugins/Tools/src"/>
 	<classpathentry kind="src" output="plugins/Coref_Tools/classes" path="plugins/Coref_Tools/src"/>
 	<classpathentry kind="src" output="plugins/JAPE_Plus/classes" path="plugins/JAPE_Plus/src"/>
@@ -38,6 +38,7 @@
 	<classpathentry kind="src" output="plugins/Lang_Russian/classes" path="plugins/Lang_Russian/src"/>
 	<classpathentry kind="src" output="plugins/Tagger_Stanford/classes" path="plugins/Tagger_Stanford/src"/>
 	<classpathentry kind="src" output="plugins/Twitter/classes" path="plugins/Twitter/src"/>
+	<classpathentry kind="src" output="classes/test" path="src/test"/>
 	<classpathentry kind="lib" path="plugins/Gazetteer_Ontology_Based/lib/oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="plugins/WordNet/lib/jwnl.jar"/>
 	<classpathentry kind="lib" path="plugins/LingPipe/lib/lingpipe-4.0.1.jar"/>
@@ -81,10 +82,9 @@
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
 	<classpathentry kind="lib" path="plugins/JAPE_Plus/lib/colt-1.2.0-free.jar"/>
-	<classpathentry kind="lib" path="lib/woodstox-core-lgpl.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology/lib/openrdf-sesame-2.6.10-onejar.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology/lib/owlim-lite-5.3.jar"/>
 	<classpathentry kind="lib" path="plugins/OpenNLP/lib/opennlp-maxent-3.0.2-incubating.jar"/>
-	<classpathentry exported="true" kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=GATE&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
-	<classpathentry kind="output" path="classes"/>
+	<classpathentry exported="true" kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=GATE+Sawdust&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
+	<classpathentry kind="output" path="classes/main"/>
 </classpath>
