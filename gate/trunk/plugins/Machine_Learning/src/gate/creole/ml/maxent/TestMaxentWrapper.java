@@ -22,7 +22,6 @@ import gate.corpora.*;
 import java.io.File;
 import java.net.*;
 
-import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 import gate.gui.MainFrame;
 import gate.util.Files;
 import gate.util.GateRuntimeException;
