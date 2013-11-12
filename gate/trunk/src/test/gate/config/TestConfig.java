@@ -75,7 +75,9 @@ public class TestConfig extends TestCase
   } // readConfig
 
   /** Test config loading */
-  public void testConfigReading() throws Exception {
+  // currently disabled as the files have moved on gate.ac.uk due to a change in svn structure
+  // which means the test can't read the files it needs and fails.
+  /*public void testConfigReading() throws Exception {
     System.out.println("Reading GATE config from : " + new URL(TestDocument.getTestServerName()+"tests/gate.xml"));
     readConfig(new URL(TestDocument.getTestServerName()+"tests/gate.xml"));
 
@@ -120,6 +122,7 @@ public class TestConfig extends TestCase
 //    // try running the system
 //    controller.execute();
   } // testConfigReading()
+  */
 
   /** Test config updating */
   public void testConfigUpdating() throws Exception {
