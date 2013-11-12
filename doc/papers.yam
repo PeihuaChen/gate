@@ -57,6 +57,7 @@ GATE papers
 
 %2* 2013
 
+- Valentin Tablan; Kalina Bontcheva; Ian Roberts; Hamish Cunningham; Marin Dimitrov. AnnoMarket: An Open Cloud Platform for NLP. Proceedings of the 51st Annual Meeting of the Association for Computational Linguistics (ACL'2013). %(http://aclweb.org/anthology/P/P13/P13-4004.pdf, PDF)
 
 - K. Bontcheva, L. Derczynski, A. Funk, M.A. Greenwood, D. Maynard, N. Aswani. TwitIE: An Open-Source Information Extraction Pipeline for Microblog Text. Proceedings of the International Conference on Recent Advances in Natural Language Processing (RANLP 2013). %(https://gate.ac.uk/sale/ranlp2013/twitie/twitie-ranlp2013.pdf, PDF), %(https://gate.ac.uk/wiki/twitie.html, Download TwitIE)
 
