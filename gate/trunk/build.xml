@@ -426,12 +426,15 @@
 
   <!-- Clear all build output -->
   <target name="clean.gate">
-    <delete includeemptydirs="true">
+<!--    <delete includeemptydirs="true">
       <fileset dir="${outputDir}" excludes="**/CVS,**/CVS/**,**/.cvsignore" />
     </delete>
-  	<delete includeemptydirs="true">
-  	  <fileset dir="${tests.outputDir}" excludes="**/CVS,**/CVS/**,**/.cvsignore" />
-  	</delete>
+    <delete includeemptydirs="true">
+      <fileset dir="${tests.outputDir}" excludes="**/CVS,**/CVS/**,**/.cvsignore" />
+    </delete>
+-->
+    <delete dir="${outputDir}" />
+    <delete dir="${tests.outputDir}" />
   </target>
 
   <!-- Clean everything (including buildable plugins) -->
