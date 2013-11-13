@@ -1,22 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project basedir="." default="build" name="tools">
+<project basedir="." default="all" name="tools">
   <!-- Prevent Ant from warning about includeantruntime not being set -->
   <property name="build.sysclasspath" value="ignore" />
 
-  <property name="jdk.home" value="${JAVA_HOME}"/>
+  <property file="build.properties" />
+  <property name="plugin.name" value="Tools"/>
+
+  <!-- Make environment variables available -->
+  <property environment="env" />
+
+  <!-- If environment variable GATE_HOME is set, use it for
+       gate.home (unless it was already set in build.properties -->
+  <condition property="gate.home" value="${env.GATE_HOME}">
+    <isset property="env.GATE_HOME"/>
+  </condition>
+
   <property name="dest" value="classes"/>
-  <property name="gatehome" value="../.."/>
+  <property name="gate.home" value="../.."/>
   <property name="src" value="src"/>
   <property name="doc.dir" location="doc" />
   <property name="javadoc.dir" location="${doc.dir}/javadoc" />
 
-  <fileset id="gatelib.classpath" dir="${gatehome}/lib">
+  <fileset id="gatelib.classpath" dir="${gate.home}/lib">
     <include name="*.jar"/>
     <include name="*.zip"/>
   </fileset>
 
-  <fileset id="gate.classpath" dir="${gatehome}/bin">
+  <fileset id="gate.classpath" dir="${gate.home}/bin">
     <include name="*.jar"/>
     <include name="*.zip"/>
   </fileset>
@@ -71,6 +82,9 @@
   <target name="init">
     <mkdir dir="${dest}"/>
   </target>
+
+  <!-- Build everything - the code and JavaDoc -->
+  <target name="all" depends="jar, javadoc" />
 
   <!-- targets required by the top-level build file -->
   <target name="build" depends="jar"/>
