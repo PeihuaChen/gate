@@ -294,8 +294,6 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
 
   /**
    * Generates a file name to export annotation diff results to.
-   * 
-   * @return
    */
   protected File getDiffResultsExportFile(String documentName) {
     // document Name - keyASName - responseASNAme - diff.html
@@ -308,10 +306,6 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
    * Given an instance of Differ and the measure, this method returns
    * the value for the given measure. It returns three values,
    * precision, recall and f-measure
-   * 
-   * @param differ
-   * @param measure
-   * @return
    */
   private double[] getMeasureValue(AnnotationDiffer differ, String measure) {
     double[] vals = new double[3];
@@ -353,11 +347,6 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
 
   /**
    * Calculating stats for each doc in the corpus
-   * 
-   * @param documentNames
-   * @param differsByDocThenType
-   * @return
-   * @throws ExecutionException
    */
   private String calculateDocumentStats(List<String> documentNames,
           List<Map<String, AnnotationDiffer>> differsByDocThenType)
@@ -440,11 +429,6 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
 
   /**
    * Produces the html table with parameters
-   * 
-   * @param firstCol
-   * @param vals
-   * @param columnNames
-   * @return
    */
   private String toHtmlTable(String[] firstCol, String[] anchorsOnFirstCol,
           double[][] vals, String[] columnNames) {
@@ -493,9 +477,6 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
 
   /**
    * Calculating corpus statistics for each type
-   * 
-   * @param differsByDocThenType
-   * @return
    */
   private String calculateCorpusStats(
           List<Map<String, AnnotationDiffer>> differsByDocThenType) {
@@ -577,8 +558,6 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
 
   /**
    * Returns the key annotation set name provided by the user
-   * 
-   * @return
    */
   public String getKeyASName() {
     return keyASName;
@@ -586,8 +565,6 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
 
   /**
    * Sets the key annotation set name
-   * 
-   * @param keyASName
    */
   @RunTime
   @Optional
@@ -598,8 +575,6 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
 
   /**
    * Returns the response annotation set name provided by the user
-   * 
-   * @return
    */
   public String getResponseASName() {
     return responseASName;
@@ -607,8 +582,6 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
 
   /**
    * sets the response annotation set name
-   * 
-   * @param responseASName
    */
   @Optional
   @RunTime
@@ -619,8 +592,6 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
 
   /**
    * Annotation types for which the stats should be calculated
-   * 
-   * @return
    */
   public List<String> getAnnotationTypes() {
     return annotationTypes;
@@ -628,8 +599,6 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
 
   /**
    * Annotation types for which the stats should be calculated
-   * 
-   * @param annotationTypes
    */
   @RunTime
   @CreoleParameter
@@ -639,8 +608,6 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
 
   /**
    * Features names for which the stats should be calculated
-   * 
-   * @return
    */
   public List<String> getFeatureNames() {
     return featureNames;
@@ -648,8 +615,6 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
 
   /**
    * Features names for which the stats should be calculated
-   * 
-   * @param featureNames
    */
   @RunTime
   @Optional
@@ -660,8 +625,6 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
 
   /**
    * Measure to use for stats calculation
-   * 
-   * @return
    */
   public Measure getMeasure() {
     return measure;
@@ -669,8 +632,6 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
 
   /**
    * Measure to use for stats calculation
-   * 
-   * @param measure
    */
   @RunTime
   @CreoleParameter
@@ -680,8 +641,6 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
 
   /**
    * URL of the folder to store output files into
-   * 
-   * @return
    */
   public URL getOutputFolderUrl() {
     return outputFolderUrl;
@@ -689,8 +648,6 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
 
   /**
    * URL of the folder to store output files into
-   * 
-   * @param outputFolderUrl
    */
   @RunTime
   @CreoleParameter(suffixes = "html")
