@@ -333,7 +333,7 @@ build/deploy all paths are relative to the top-level GATE directory -->
       	the InfoPanel.
     -->
     <resources>
-        <res id="splash.png" src="src/gate/resources/img/splash.png" />
+        <res id="splash.png" src="src/main/gate/resources/img/splash.png" />
         <res id="HTMLInfoPanel.info" src="build/deploy/installer-text-0.html"/>        
         <res id="HTMLLicencePanel.licence" src="licence.html"/>
         <res id="Unix_shortcutSpec.xml" src="build/deploy/unix-shortcuts.xml"/>
