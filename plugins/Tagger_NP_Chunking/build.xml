@@ -1,8 +1,18 @@
-<project name="TreeTagger" basedir="." >
+<project name="Tagger_NP_Chunking" basedir="." default="all" >
   <!-- Prevent Ant from warning about includeantruntime not being set -->
   <property name="build.sysclasspath" value="ignore" />
 
   <property file="build.properties" />
+  <property name="plugin.name" value="Tagger_NP_Chunking"/>
+
+  <!-- Make environment variables available -->
+  <property environment="env" />
+
+  <!-- If environment variable GATE_HOME is set, use it for
+       gate.home (unless it was already set in build.properties -->
+  <condition property="gate.home" value="${env.GATE_HOME}">
+    <isset property="env.GATE_HOME"/>
+  </condition>
 
   <property name="gate.home" location="../.." />
   <property name="gate.lib" location="${gate.home}/lib" />
@@ -34,8 +44,8 @@
            destdir="${classes.dir}"
            debug="true"
            debuglevel="lines,source"
-           source="1.5"
-           target="1.5" />
+           source="1.6"
+           target="1.6" />
   </target>
 
   <!-- Build JavaDoc documentation -->
@@ -74,6 +84,9 @@
   <target name="clean" depends="clean.classes" >
     <delete file="${jar.location}" />
   </target>
+
+  <!-- Build everything - the code and JavaDoc -->
+  <target name="all" depends="jar, javadoc" />
 
   <!-- Targets used by the main GATE build file:
          build: build the plugin - just calls "jar" target
