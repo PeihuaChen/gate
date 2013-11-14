@@ -74,6 +74,23 @@ copy_default_files() {
     fi
 }
 
+## function that returns, for a root directory and an absolute or 
+## relative path, the absolute path.
+function abs_path() {
+  rootdir="$1"
+  path="$2"
+  case "$path" in
+  /*)
+    ## this is already an absolute path, use it
+    path="$path"
+    ;;
+  *)
+    path="${rootdir}"/"${path}"
+    ;;
+  esac
+  echo "$path"
+}
+
 while test "$1" != "";
 do
   case "$1" in
@@ -106,8 +123,8 @@ EOF
     ;;
   -ld)
     shift
-    vmparams=( "${vmparams[@]}" "-Dgate.user.config=$CURDIR/.gate.xml" )
-    vmparams=( "${vmparams[@]}" "-Dgate.user.session=$CURDIR/.gate.session" )
+    vmparams=( "${vmparams[@]}" "-Dgate.user.config=$(abs_path $CURDIR .gate.xml)" )
+    vmparams=( "${vmparams[@]}" "-Dgate.user.session=$(abs_path $CURDIR .gate.session)" )
     vmparams=( "${vmparams[@]}" "-Dgate.user.filechooser.defaultdir=$CURDIR" )
     copy_default_files ".gate"
     ;;
@@ -115,8 +132,8 @@ EOF
     shift
     base=$1
     shift
-    vmparams=( "${vmparams[@]}" "-Dgate.user.config=$CURDIR/$base.xml" )
-    vmparams=( "${vmparams[@]}" "-Dgate.user.session=$CURDIR/$base.session" )
+    vmparams=( "${vmparams[@]}" "-Dgate.user.config=$(abs_path $CURDIR $base.xml)" )
+    vmparams=( "${vmparams[@]}" "-Dgate.user.session=$(abs_path $CURDIR $base.session)" )
     vmparams=( "${vmparams[@]}" "-Dgate.user.filechooser.defaultdir=$CURDIR" )
     copy_default_files "$base"
     ;;
