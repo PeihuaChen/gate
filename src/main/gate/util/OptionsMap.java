@@ -15,8 +15,13 @@ package gate.util;
 
 import java.awt.Font;
 import java.awt.font.TextAttribute;
-import java.util.*;
+import java.io.File;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
 
 /**
  * A map that stores values as strings and provides support for converting some
@@ -65,6 +70,21 @@ public class OptionsMap extends TreeMap<Object, Object> {
       return null;
     }
   }
+  
+  public Integer getInt(Object key, Integer defaultValue) {
+    Integer value = getInt(key);
+    
+    return (value != null ? value : defaultValue);
+  }
+  
+  public File getFile(Object key) {
+    try {
+      return new File((String)get(key));
+    }
+    catch (Exception e) {
+      return null;
+    }
+  }
 
   /**
    * If the object stored under key is an Double then returns its value
@@ -92,6 +112,16 @@ public class OptionsMap extends TreeMap<Object, Object> {
     } catch (Exception e) {
       return false;
     }
+  }
+  
+  public Boolean getBoolean(Object key, Boolean defaultValue) {
+    try {
+      if(containsKey(key)) return Boolean.valueOf((String)get(key));
+    } catch(Exception e) {
+
+    }
+
+    return defaultValue;
   }
 
   /**

@@ -75,6 +75,7 @@ import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
@@ -263,8 +264,6 @@ public class MainFrame extends JFrame implements ProgressListener,
   protected PluginUpdateManager pluginManager;
 
   protected LogArea logArea;
-
-  protected JScrollPane logScroll;
 
   protected JToolBar toolbar;
 
@@ -550,11 +549,15 @@ public class MainFrame extends JFrame implements ProgressListener,
   protected void initGuiComponents() {
     this.getContentPane().setLayout(new BorderLayout());
 
-    Integer width = Gate.getUserConfig().getInt(GateConstants.MAIN_FRAME_WIDTH);
+    Integer width =
+        Gate.getUserConfig().getInt(GateConstants.MAIN_FRAME_WIDTH, 1024);
     Integer height =
-      Gate.getUserConfig().getInt(GateConstants.MAIN_FRAME_HEIGHT);
-    this.setSize(new Dimension(width == null ? 800 : width,
-      height == null ? 600 : height));
+        Gate.getUserConfig().getInt(GateConstants.MAIN_FRAME_HEIGHT, 768);
+    Rectangle maxDimensions =
+        GraphicsEnvironment.getLocalGraphicsEnvironment()
+            .getMaximumWindowBounds();
+    this.setSize(new Dimension(Math.min(width, maxDimensions.width), Math.min(
+        height, maxDimensions.height)));
     if (Gate.getUserConfig().getBoolean(GateConstants.MAIN_FRAME_MAXIMIZED))
       setExtendedState(JFrame.MAXIMIZED_BOTH);
     
@@ -662,7 +665,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     // Create a new logArea and redirect the Out and Err output to it.
     logArea = new LogArea();
-    logScroll = new JScrollPane(logArea);
+    
     // Out has been redirected to the logArea
 
     Out.prln("GATE " + Main.version + " build " + Main.build + " started at "
@@ -673,9 +676,9 @@ public class MainFrame extends JFrame implements ProgressListener,
       System.getProperty("os.arch") + " " +
       System.getProperty("os.version") + ".");
     mainTabbedPane = new XJTabbedPane(JTabbedPane.TOP);
-    mainTabbedPane.insertTab("Messages", null, logScroll, "GATE log", 0);
+    mainTabbedPane.insertTab("Messages", null, logArea.getComponentToDisplay(), "GATE log", 0);
 
-    logHighlighter = new TabHighlighter(mainTabbedPane, logScroll, Color.red);
+    logHighlighter = new TabHighlighter(mainTabbedPane, logArea.getComponentToDisplay(), Color.red);
 
     mainSplit =
       new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftSplit, mainTabbedPane);
