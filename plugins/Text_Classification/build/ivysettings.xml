@@ -1,0 +1,10 @@
+<ivysettings>
+  <settings defaultResolver="default"/>
+  <resolvers>
+    <chain name="default" returnFirst="true">
+      <ibiblio name="maven-central" m2compatible="true" />
+      <ibiblio name="gate.ac.uk" m2compatible="true" 
+        root="http://repo.gate.ac.uk/content/groups/public/" />
+    </chain>
+  </resolvers>
+</ivysettings>
