@@ -1,22 +1,19 @@
-/**
- * 
+/*
+ *  TextCategorizationPR.java
+ *
+ *  Copyright (c) 1995-2013, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Valentin Tablan, 19 Nov 2013
+ *
+ *  $Id$
  */
 package gate.ml.categorization;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
 
 import de.bwaldvogel.liblinear.Feature;
 import de.bwaldvogel.liblinear.FeatureNode;
@@ -29,6 +26,8 @@ import edu.ucla.sspace.vector.DenseVector;
 import edu.ucla.sspace.vector.DoubleVector;
 import gate.Annotation;
 import gate.AnnotationSet;
+import gate.Factory;
+import gate.FeatureMap;
 import gate.LanguageAnalyser;
 import gate.Resource;
 import gate.Utils;
@@ -38,6 +37,20 @@ import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.RunTime;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
 
 /**
  * A simple text classification PR, using a <a 
@@ -49,6 +62,8 @@ import gate.creole.metadata.RunTime;
 @CreoleResource
 public class TextCategorizationPR extends AbstractLanguageAnalyser implements
                                                                    LanguageAnalyser {
+  
+  private static Logger logger = Logger.getLogger(TextCategorizationPR.class);
   
   /**
    * Serialisation UID.
@@ -68,21 +83,33 @@ public class TextCategorizationPR extends AbstractLanguageAnalyser implements
    */
   protected Model libLinearModel;
   
+
   /**
    * Thresholds to be used when classifying text annotations. If the model 
    * classifies an input annotation as class &quot;X&quot;, and &quot;X&quot;
    * exists as a key in this map, then the classification is only effected if 
    * the classification probability emitted by the model is greater than or 
    * equal to the value in the map. Values in this map are expected to be
-   * probabilities, i.e. positive values between 0.0 and 1.0.
+   * probabilities, i.e. positive values between 0.0 and 1.0. All negative 
+   * values are ignored and the default will be used instead (the category with 
+   * the highest probability wins, regardless of what the probability actually 
+   * is).
    * 
    * Note that the liblinear model used must be able to produce classification 
    * probabilities. At the time of writing, only Linear Regression models are 
    * able to do so, while SVM-based one are not. Models that cannot supply
    * probabilities will simply return 1.0 as the classification probability, 
    * causing values in this map to have no effect.   
+   */  
+  protected double[] categoryThresholds;
+  
+  
+  /**
+   * The String labels for the categories (the LIBLINEAR classifier simply 
+   * returns integer values for the labels).
    */
-  protected Map<String, Double> customClassThresholds;
+  protected String[] categoryLabels;
+  
   
   /**
    * The set of stop-words to be used. The values in this list are matched
@@ -147,6 +174,10 @@ public class TextCategorizationPR extends AbstractLanguageAnalyser implements
    */
   protected URL modelURL;
 
+  /**
+   * URL to a file defining the categories used by this PR.
+   */
+  protected URL categoriesURL;
   
   @Override
   public Resource init() throws ResourceInstantiationException {
@@ -192,15 +223,16 @@ public class TextCategorizationPR extends AbstractLanguageAnalyser implements
     // load the stop words
     stopWords = null;
     if(stopWordsURL != null) {
+      BufferedReader swReader = null;
       try {
-        BufferedReader swReader = new BufferedReader(
+        swReader = new BufferedReader(
             new InputStreamReader(stopWordsURL.openStream(), "UTF-8"));
         stopWords = new HashSet<String>();
         String line = swReader.readLine();
         while(line != null) {
           line = line.trim();
-          if(line.startsWith("#") || line.startsWith("//")) {
-            //ignore comment
+          if(line.startsWith("#") || line.startsWith("//") || line.length() == 0) {
+            // ignore comment and empty lines
           } else {
             stopWords.add(line);
           }
@@ -209,8 +241,90 @@ public class TextCategorizationPR extends AbstractLanguageAnalyser implements
       } catch(IOException e) {
         throw new ResourceInstantiationException(
             "I/O error while reading the stop words.", e);
+      } finally {
+        if (swReader != null) {
+          try {
+            swReader.close();
+          } catch(IOException e) {
+            throw new ResourceInstantiationException(
+                "I/O error whilke closing the stop words file.", e); 
+          }
+        }
       }
     }
+    
+    // read the categories
+    List<String> categoryNames = new ArrayList<String>();
+    List<Double> categoryProbs = new ArrayList<Double>();
+    boolean customProbs = false;
+    BufferedReader catReader = null;
+    if(categoriesURL != null) {
+      try {
+        catReader = new BufferedReader(
+            new InputStreamReader(categoriesURL.openStream(), "UTF-8"));
+        String line = catReader.readLine();
+        while(line != null) {
+          line = line.trim();
+          if(line.startsWith("#") || line.startsWith("//") || line.length() == 0) {
+            // ignore comment and empty lines
+          } else {
+            String[] elems = line.split(",");
+            if(elems.length == 0) {
+              logger.warn("Ignoring illegal line in categories file: \"" + 
+                line + "\".");
+            } else {
+              categoryNames.add(elems[0]);
+              double prob = -1;
+              if(elems.length > 1) {
+                try {
+                  prob = Double.parseDouble(elems[1]);
+                } catch(NumberFormatException e) {
+                  logger.error(
+                      "Illegal value for probablity in categories file \"" + 
+                      elems[1] + "\" was ignored.");
+                }
+              }
+              categoryProbs.add(prob);
+              if(prob > 0) customProbs = true;
+              if(elems.length > 2) {
+                logger.warn("Line in categories file has more than 2 entries." +
+                " Entries starting with " + elems[2] + " were ignored. " +
+                "Line was:\n" + line);
+              }
+            }
+          }
+          line = catReader.readLine();
+        }
+        categoryLabels = categoryNames.toArray(new String[categoryNames.size()]);
+        if(customProbs) {
+          if(libLinearModel.isProbabilityModel()) {
+            categoryThresholds = new double[categoryProbs.size()];
+            for(int i = 0; i< categoryThresholds.length; i++) {
+              categoryThresholds[i] = categoryProbs.get(i);
+            }            
+          } else {
+            logger.warn("The LIBLINEAR model provided cannot supply " + 
+                "probabilities. Custom probability thresholds will be ignored.");
+            categoryThresholds = null;
+          }
+        }
+      } catch (IOException ioe){
+        throw new ResourceInstantiationException(
+            "I/O error while reading the categories file.", ioe); 
+      } finally {
+        if(catReader != null) try {
+          catReader.close();
+        } catch (IOException ioe) {
+          throw new ResourceInstantiationException(
+              "I/O error while closing the categories file.", ioe); 
+        }
+      }
+    } else {
+      throw new ResourceInstantiationException(
+          "No categories file URL was provided.");
+    }
+    
+    
     return super.init();
   }
 
@@ -239,6 +353,7 @@ public class TextCategorizationPR extends AbstractLanguageAnalyser implements
       throw new ExecutionException("No output feature name provided."); 
     }
     
+    AnnotationSet outputAS = document.getAnnotations(outputASName);
     
     // collect instance annotations
     AnnotationSet inputAS = document.getAnnotations(inputASName);
@@ -273,11 +388,34 @@ public class TextCategorizationPR extends AbstractLanguageAnalyser implements
           features[i] = new FeatureNode(i, instanceVector.get(i));
         }
         double[] probs = new double[libLinearModel.getNrClass()];
-        double label = Linear.predictValues(libLinearModel, features, probs);
+        // the value returned is always an int. Returned as a double because
+        // that's what cool C programmers do, or whatever...
+        // We're uncool Java types, so we bring it back to int.
+        int label = (int) Linear.predictValues(libLinearModel, features, probs);
+        double probability = 1.0;
         // do we need to check probabilities?
-        // TODO
-        if(customClassThresholds != null && customClassThresholds.size() > 0) {
-          
+        if(categoryThresholds != null && categoryThresholds[label] > 0) {
+          // prob[i] is the value of $\theta_T x$ 
+          // Once mapped through the logistic function, this becomes the 
+          // probability of the instance belonging to class i, as opposed to 
+          // all other classes.
+          // LIBLINEAR would normalize this so that all probs sum up to 1,
+          // but we don't want that, as we're only interested in the confidence
+          // the model has in this particular classification.
+          probability = probs[label];
+          // convert to an actual probability, by applying the logistic function
+          probability = 1 / (1 + Math.exp(-probability));
+          if(probability < categoryThresholds[label]) probability = -1;            
+        }
+        if(probability > 0) {
+          // effect the classification
+          if(sameAnnotation) {
+            instAnn.getFeatures().put(outputFeatureName, categoryLabels[label]);
+          } else {
+            FeatureMap fm = Factory.newFeatureMap();
+            fm.put(outputFeatureName, categoryLabels[label]);
+            Utils.addAnn(outputAS, instAnn, outputAnnotationType, fm);
+          }
         }
       }
       
@@ -287,8 +425,9 @@ public class TextCategorizationPR extends AbstractLanguageAnalyser implements
 
   @Override
   public void cleanup() {
-    // TODO Auto-generated method stub
-    super.cleanup();
+    libLinearModel = null;
+    semanticSpace = null;
+    stopWords = null;
   }
 
   public String getInputASName() {
@@ -445,7 +584,19 @@ public class TextCategorizationPR extends AbstractLanguageAnalyser implements
   public void setStopWordsURL(URL stopWordsURL) {
     this.stopWordsURL = stopWordsURL;
   }
-  
-  
+
+  public URL getCategoriesURL() {
+    return categoriesURL;
+  }
+
+  /**
+   * Sets the URL to the file containing the categories.
+   * @param categoriesURL
+   */
+  @CreoleParameter(comment = "A comma-separated file containing the category " + 
+      "name and, optionally, a custom probability threshold for that category.")
+  public void setCategoriesURL(URL categoriesURL) {
+    this.categoriesURL = categoriesURL;
+  }
   
 }
