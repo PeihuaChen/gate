@@ -8,7 +8,7 @@
   <property name="src" location="src"/>
   <property name="build" location="classes"/>
   <property name="dist"  location="dist"/>
-  <property name="jar.location" location="textClassification.jar" />
+  <property name="jar.location" location="textCategorization.jar" />
   <property name="test.jar.location" location="mltests.jar" />
   
   <property name="gate.home" location="../.." />

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package gate.ml.textclass;
+package gate.ml.categorization;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -47,7 +47,7 @@ import gate.creole.metadata.RunTime;
  * model to perform the actual classification.
  */
 @CreoleResource
-public class TextClassificationPR extends AbstractLanguageAnalyser implements
+public class TextCategorizationPR extends AbstractLanguageAnalyser implements
                                                                    LanguageAnalyser {
   
   /**
