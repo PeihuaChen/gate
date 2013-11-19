@@ -413,9 +413,13 @@ public class TextCategorizationPR extends AbstractLanguageAnalyser implements
           // effect the classification
           if(sameAnnotation) {
             instAnn.getFeatures().put(outputFeatureName, categoryLabels[label]);
+            instAnn.getFeatures().put(outputFeatureName + "-confidence", 
+                new Double(probability));
           } else {
             FeatureMap fm = Factory.newFeatureMap();
             fm.put(outputFeatureName, categoryLabels[label]);
+            fm.put(outputFeatureName + "-confidence", 
+                new Double(probability));
             Utils.addAnn(outputAS, instAnn, outputAnnotationType, fm);
           }
         }
@@ -538,7 +542,7 @@ public class TextCategorizationPR extends AbstractLanguageAnalyser implements
    * the class. 
    * @param outputFeatureName
    */
-  @CreoleParameter(defaultValue = "class", comment = 
+  @CreoleParameter(defaultValue = "category", comment = 
         "The name feature of the feature on the output annotations that " + 
         "stores the class. ")
   @RunTime
