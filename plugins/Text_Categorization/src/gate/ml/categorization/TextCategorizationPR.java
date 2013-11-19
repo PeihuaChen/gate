@@ -36,6 +36,7 @@ import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
 
 import java.io.BufferedInputStream;
@@ -385,7 +386,8 @@ public class TextCategorizationPR extends AbstractLanguageAnalyser implements
         // classify the vector
         Feature[] features = new Feature[libLinearModel.getNrFeature()];
         for(int i = 0; i <  features.length; i++) {
-          features[i] = new FeatureNode(i, instanceVector.get(i));
+          // in liblinear, features start from 1, hence the "i + 1" below
+          features[i] = new FeatureNode(i + 1, instanceVector.get(i));
         }
         double[] probs = new double[libLinearModel.getNrClass()];
         // the value returned is always an int. Returned as a double because
@@ -581,6 +583,7 @@ public class TextCategorizationPR extends AbstractLanguageAnalyser implements
    */
   @CreoleParameter(
       comment = "URL to a file containing stop words, one on each line, using UTF-8.")
+  @Optional
   public void setStopWordsURL(URL stopWordsURL) {
     this.stopWordsURL = stopWordsURL;
   }
