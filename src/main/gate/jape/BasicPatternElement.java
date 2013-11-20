@@ -52,9 +52,6 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     */
   //private MutableInteger nextAvailable = new MutableInteger();
 
-  /** The set of annotations we have matched. */
-  private AnnotationSet matchedAnnots;
-
   private final boolean negationCompatMode;
   
   /** Construction. */
@@ -62,8 +59,6 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     constraintsMap = new HashMap<Object, Constraint>();
     constraints1 = new ArrayList<Constraint>();
     lastFailurePoint = -1;
-    //nextAvailable = new MutableInteger();
-    matchedAnnots = new AnnotationSetImpl((Document) null);
     negationCompatMode = spt.isNegationCompatMode();
   } // construction
 

@@ -798,6 +798,7 @@ public class Transducer extends AbstractLanguageAnalyser
         changedTypes.clear();
       }
     } finally {
+      sortedAnnotations.clear();
       inputAs.removeAnnotationSetListener(inputASListener);
       currentSptIndex = -1;
       fireProcessFinished();
