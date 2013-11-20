@@ -654,7 +654,6 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
     } 
   }
   
-
   protected static int binarySearchFromTo(int[] array, int from, int to, IntComparator comp) {
     final int key = 0;
     while (from <= to) {
@@ -1161,6 +1160,7 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
     }// while(currentAnnotation < annotation.length)
     // execution completed -> clean up the internal data structures.
     fireProcessFinished();
+    inputAS = null;
     annotation = null;
     annotationFollowing = null;
     annotationNextOffset = null;
@@ -1170,7 +1170,6 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
     acceptingInstances = null;
     activeInstances = null;
     ontology = null;
-    
 //    System.out.println("Predicate hit rate:" + percentFormat.format(
 //            ((double)predicateHits / (predicateHits + predicateMisses))));
   }
