@@ -24,6 +24,7 @@ public class Utilities implements ANNIEConstants {
   public static final String EXTENSION_CSV = "csv";
 
   private static double log10of2;
+  private static double xScale = 4.8;
   
   static {
     log10of2 = Math.log10(2.0);
@@ -42,9 +43,17 @@ public class Utilities implements ANNIEConstants {
     return total / ((double) list.size());
   }
   
-  
+  /**
+   * The following produces the right half of a sigmoid 
+   * curve adjusted so that
+   * f(0) = 0; f(inf) = 100; f(x>0) > 0
+   * @param score
+   * @return
+   */
   public static double normalizeScore(double score) {
-    double norm = 1.0 - 1.0 / (1.0 + Math.log10(1.0 + score));
+    double norm = 2.0 / (1.0 + Math.exp(-score / xScale)) - 1.0;
+    // The old normalization function was undocumented
+    //double norm = 1.0 - 1.0 / (1.0 + Math.log10(1.0 + score));
     return (double) (100.0F * norm);
   }
 
