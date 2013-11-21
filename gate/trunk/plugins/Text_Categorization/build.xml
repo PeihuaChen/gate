@@ -119,7 +119,7 @@
     </junit>
   </target>
 
-  <target name="javadoc">
+  <target name="javadoc" depends="depend">
     <javadoc access="protected" 
               destdir="${docDir}/javadoc"
               classpathref="compile.classpath"
