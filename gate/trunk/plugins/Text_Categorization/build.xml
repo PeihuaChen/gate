@@ -51,7 +51,7 @@
   <target name="depend">
     <ivy:configure file="${ivy.dir}/ivysettings.xml"/>
     <ivy:resolve file="${ivy.dir}/ivy.xml" log="quiet"/>
-    <ivy:report todir="${ivy.dir}/ivy-report" />
+     <!-- <ivy:report todir="${ivy.dir}/ivy-report" /> -->
     <ivy:cachepath pathid="ivylibs"/>
   </target>
     	
@@ -91,33 +91,7 @@
     <delete file="${test.jar.location}" />
   </target>
 
-  <!-- build a jar containing just the test classes -->
-  <target name="testjar" depends="compile, copy.resources">
-    <jar jarfile="${test.jar.location}">
-      <fileset dir="${build}" includes="**/Test*" />
-    </jar>
-  </target>
-
-  <target name="test" depends="dist, testjar">
-    <!-- note that compiled JAR file and local libs are deliberately NOT
-         included on classpath - they are loaded through the GATE
-         classloader -->
-    <junit fork="true" showoutput="yes" printsummary="yes">
-      <classpath>
-        <pathelement location="${test.jar.location}" />
-        <path refid="gate.classpath" />
-      </classpath>
-      <sysproperty key="gate.home.location" value="${gate.home}" />
-      <sysproperty key="machinelearning.plugin" file="." />
-      <sysproperty key="annie.plugin" file="../ANNIE" />
-      <!-- don't load any plugins automatically -->
-      <sysproperty key="load.plugin.path" value=";" />
-      <!-- run headless -->
-      <sysproperty key="java.awt.headless" value="true" />
-      <formatter type="xml" />
-      <test name="gate.creole.ml.maxent.TestMaxentWrapper" />
-    </junit>
-  </target>
+  <target name="test"  />
 
   <target name="javadoc" depends="depend">
     <javadoc access="protected" 
