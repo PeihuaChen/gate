@@ -606,10 +606,5 @@ public class DefaultGazetteer extends AbstractGazetteer
   public void setGazetteerFeatureSeparator(String gazetteerFeatureSeparator) {
     this.gazetteerFeatureSeparator = gazetteerFeatureSeparator;
   }
-  
-  @Override
-  public String toString() {
-    return getName();
-  }
-  
+   
 } // DefaultGazetteer
