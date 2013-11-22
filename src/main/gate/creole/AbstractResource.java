@@ -493,4 +493,9 @@ extends AbstractFeatureBearer implements Resource, Serializable
   public static void flushBeanInfoCache() {
     beanInfoCache.clear();
   }
+  
+  @Override
+  public String toString() {
+    return getName();
+  }
 }
