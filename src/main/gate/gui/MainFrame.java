@@ -3816,12 +3816,18 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
           else {
             // don't save options on close
-            // save the option not to save the options
+            // save the option not to save the options, but only if it was 
+            // changed in this session             
             OptionsMap originalUserConfig = Gate.getOriginalUserConfig();
-            originalUserConfig.put(GateConstants.SAVE_OPTIONS_ON_EXIT, false);
-            userConfig.clear();
-            userConfig.putAll(originalUserConfig);
-            Gate.writeUserConfig();
+            // if the original value of this was true, it has been changed, so
+            // save the config file, otherwise leave the options file untouched.
+            if(originalUserConfig.getBoolean(GateConstants.SAVE_OPTIONS_ON_EXIT)) {
+              originalUserConfig.put(GateConstants.SAVE_OPTIONS_ON_EXIT, false);
+              // restore the original options, with only the save options value modified
+              userConfig.clear();
+              userConfig.putAll(originalUserConfig);
+              Gate.writeUserConfig();
+            }
           }
           }
           catch(GateException error) {
