@@ -826,6 +826,11 @@ public class PersistenceManager {
 
   public static Object loadObjectFromUrl(URL url) throws PersistenceException,
           IOException, ResourceInstantiationException {
+    
+    if(!Gate.isInitialised())
+      throw new ResourceInstantiationException(
+              "You must call Gate.init() before you can restore resources");
+    
     ProgressListener pListener = (ProgressListener)Gate.getListeners()
             .get("gate.event.ProgressListener");
     StatusListener sListener = (gate.event.StatusListener)Gate
