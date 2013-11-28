@@ -47,10 +47,6 @@
 				VALUE="resources/schema/PercentSchema.xml" />
 		</HIDDEN-AUTOINSTANCE>
 		<HIDDEN-AUTOINSTANCE>
-			<PARAM NAME="xmlFileUrl"
-				VALUE="resources/schema/PersonSchema.xml" />
-		</HIDDEN-AUTOINSTANCE>
-		<HIDDEN-AUTOINSTANCE>
 			<PARAM NAME="xmlFileUrl" VALUE="resources/schema/TokenSchema.xml" />
 		</HIDDEN-AUTOINSTANCE>
 		<HIDDEN-AUTOINSTANCE>
