@@ -15,20 +15,25 @@
  */
 package gate.creole;
 
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Resource;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+
 import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
-
-import gate.Factory;
-import gate.FeatureMap;
-import gate.Gate;
-import gate.Resource;
-import gate.creole.metadata.CreoleParameter;
-import gate.creole.metadata.CreoleResource;
 
 /** This class handles annotation schemas.An annotation schema is a
   * representation of an annotation, together with its types and their
@@ -126,11 +131,16 @@ public class AnnotationSchema extends AbstractLanguageResource{
     // parse the XML file if we have its URL
     if(xmlFileUrl != null) {
       fromXSchema(xmlFileUrl);
-      
-      if (annotationName == null) {
-        Gate.setHiddenAttribute(getFeatures(), true);
+
+      if(annotationName == null) {
+        Factory.deleteResource(this);
+
+        if(lastIncluded != null) return lastIncluded;
+
+        throw new ResourceInstantiationException(
+                "The specified XML Schema doesn't define any annotation types");
       }
-    }    
+    }
 
     return this;
   } // init()
@@ -142,6 +152,8 @@ public class AnnotationSchema extends AbstractLanguageResource{
    * The namepsace used in the xml file
    */
   protected Namespace namespace;
+  
+  private transient AnnotationSchema lastIncluded = null;
 
   /** Set method for the resource xml file URL */
   @CreoleParameter(comment="The url to the definition file", suffixes="xml;xsd")
@@ -201,29 +213,33 @@ public class AnnotationSchema extends AbstractLanguageResource{
     namespace = rootElement.getNamespace();
     
     // get all children elements from the rootElement
-    //TODO if there is more than one throw an exception as they will overwrite each other
-    List rootElementChildrenList = rootElement.getChildren("element", namespace);
+    List rootElementChildrenList =
+            rootElement.getChildren("element", namespace);
+    if(rootElementChildrenList.size() > 1)
+      throw new ResourceInstantiationException(
+              "Each Annotation must be defined in a separate XML Schema file");
     Iterator rootElementChildrenIterator = rootElementChildrenList.iterator();
-    while (rootElementChildrenIterator.hasNext()){
+    while(rootElementChildrenIterator.hasNext()) {
       org.jdom.Element childElement =
-                        (org.jdom.Element) rootElementChildrenIterator.next();
+              (org.jdom.Element)rootElementChildrenIterator.next();
       createAnnotationSchemaObject(childElement);
-    }//end while
+    }// end while
     
     rootElementChildrenList = rootElement.getChildren("include", namespace);
     rootElementChildrenIterator = rootElementChildrenList.iterator();
-    while (rootElementChildrenIterator.hasNext()){
+    while(rootElementChildrenIterator.hasNext()) {
       org.jdom.Element childElement =
-              (org.jdom.Element) rootElementChildrenIterator.next();
-      
+              (org.jdom.Element)rootElementChildrenIterator.next();
+
       try {
-          String url = childElement.getAttributeValue("schemaLocation");
-          FeatureMap params = Factory.newFeatureMap();
-          params.put("xmlFileUrl", new URL(xmlFileUrl,url));
-      
-          Factory.createResource("gate.creole.AnnotationSchema", params);
-      }
-      catch (Exception e) {
+        String url = childElement.getAttributeValue("schemaLocation");
+        FeatureMap params = Factory.newFeatureMap();
+        params.put("xmlFileUrl", new URL(xmlFileUrl, url));
+
+        lastIncluded =
+                (AnnotationSchema)Factory.createResource(
+                        "gate.creole.AnnotationSchema", params);
+      } catch(Exception e) {
         throw new ResourceInstantiationException(e);
       }
     }
