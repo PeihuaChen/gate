@@ -23,6 +23,9 @@ import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
 
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
 import gate.Resource;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
@@ -121,7 +124,13 @@ public class AnnotationSchema extends AbstractLanguageResource{
       setUpStaticData();
 
     // parse the XML file if we have its URL
-    if(xmlFileUrl != null) fromXSchema(xmlFileUrl);
+    if(xmlFileUrl != null) {
+      fromXSchema(xmlFileUrl);
+      
+      if (annotationName == null) {
+        Gate.setHiddenAttribute(getFeatures(), true);
+      }
+    }    
 
     return this;
   } // init()
@@ -186,11 +195,13 @@ public class AnnotationSchema extends AbstractLanguageResource{
     * @param jDom the JDOM structure containing the XSchema document. It must not
     * be <b>null<b>
     */
-  private void workWithJDom(org.jdom.Document jDom){
+  private void workWithJDom(org.jdom.Document jDom) throws ResourceInstantiationException {
     // Use the jDom structure the way we want
     org.jdom.Element rootElement = jDom.getRootElement();
     namespace = rootElement.getNamespace();
+    
     // get all children elements from the rootElement
+    //TODO if there is more than one throw an exception as they will overwrite each other
     List rootElementChildrenList = rootElement.getChildren("element", namespace);
     Iterator rootElementChildrenIterator = rootElementChildrenList.iterator();
     while (rootElementChildrenIterator.hasNext()){
@@ -198,6 +209,24 @@ public class AnnotationSchema extends AbstractLanguageResource{
                         (org.jdom.Element) rootElementChildrenIterator.next();
       createAnnotationSchemaObject(childElement);
     }//end while
+    
+    rootElementChildrenList = rootElement.getChildren("include", namespace);
+    rootElementChildrenIterator = rootElementChildrenList.iterator();
+    while (rootElementChildrenIterator.hasNext()){
+      org.jdom.Element childElement =
+              (org.jdom.Element) rootElementChildrenIterator.next();
+      
+      try {
+          String url = childElement.getAttributeValue("schemaLocation");
+          FeatureMap params = Factory.newFeatureMap();
+          params.put("xmlFileUrl", new URL(xmlFileUrl,url));
+      
+          Factory.createResource("gate.creole.AnnotationSchema", params);
+      }
+      catch (Exception e) {
+        throw new ResourceInstantiationException(e);
+      }
+    }
   } // workWithJdom
 
   /** This method creates an AnnotationSchema object fom an org.jdom.Element
