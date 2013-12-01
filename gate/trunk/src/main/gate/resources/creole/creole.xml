@@ -8,6 +8,12 @@
     <RESOURCE>
       <CLASS>gate.corpora.DocumentImpl</CLASS>
     </RESOURCE>
+    
+    <!-- Schemas -->
+    <RESOURCE>
+      <CLASS>gate.creole.AnnotationSchema</CLASS>
+    </RESOURCE>
+    
     <!-- Corpora -->
     <RESOURCE>
       <CLASS>gate.corpora.CorpusImpl</CLASS>
@@ -15,6 +21,8 @@
     <RESOURCE>
       <CLASS>gate.corpora.SerialCorpusImpl</CLASS>
     </RESOURCE>
+    
+    <!-- Document Formats -->
     <RESOURCE>
       <CLASS>gate.corpora.XmlDocumentFormat</CLASS>
     </RESOURCE>
