@@ -2,47 +2,6 @@
 <!-- $Id$ -->
 <!-- creole.xml directory file for ANNIE Processing resources -->
 <CREOLE-DIRECTORY>
-	<!-- LANGUAGE RESOURCES -->
-
-	<!-- Annotation schema -->
-	<RESOURCE>
-		<CLASS>gate.creole.AnnotationSchema</CLASS>		
-
-		<HIDDEN-AUTOINSTANCE>
-			<PARAM NAME="xmlFileUrl"
-				VALUE="resources/schema/AddressSchema.xml" />
-		</HIDDEN-AUTOINSTANCE>
-		<HIDDEN-AUTOINSTANCE>
-			<PARAM NAME="xmlFileUrl"
-				VALUE="resources/schema/DateSchema.xml" />
-		</HIDDEN-AUTOINSTANCE>
-		<HIDDEN-AUTOINSTANCE>
-			<PARAM NAME="xmlFileUrl"
-				VALUE="resources/schema/IdentifierSchema.xml" />
-		</HIDDEN-AUTOINSTANCE>
-		<HIDDEN-AUTOINSTANCE>
-			<PARAM NAME="xmlFileUrl"
-				VALUE="resources/schema/PersonSchema.xml" />
-		</HIDDEN-AUTOINSTANCE>
-		<HIDDEN-AUTOINSTANCE>
-			<PARAM NAME="xmlFileUrl"
-				VALUE="resources/schema/LocationSchema.xml" />
-		</HIDDEN-AUTOINSTANCE>
-		<HIDDEN-AUTOINSTANCE>
-			<PARAM NAME="xmlFileUrl" VALUE="resources/schema/MoneySchema.xml" />
-		</HIDDEN-AUTOINSTANCE>
-		<HIDDEN-AUTOINSTANCE>
-			<PARAM NAME="xmlFileUrl"
-				VALUE="resources/schema/OrganizationSchema.xml" />
-		</HIDDEN-AUTOINSTANCE>
-		<HIDDEN-AUTOINSTANCE>
-			<PARAM NAME="xmlFileUrl"
-				VALUE="resources/schema/PercentSchema.xml" />
-		</HIDDEN-AUTOINSTANCE>
-		<HIDDEN-AUTOINSTANCE>
-			<PARAM NAME="xmlFileUrl" VALUE="resources/schema/SentenceSchema.xml" />
-		</HIDDEN-AUTOINSTANCE>
-	</RESOURCE>
 
 	<!-- PROCESSING RESOURCES -->
 
