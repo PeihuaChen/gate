@@ -476,11 +476,13 @@ public class AnnotationStackView  extends AbstractDocumentView
         }
         // copy the annotation to the target annotation set
         try {
+          FeatureMap params = Factory.newFeatureMap();
+          params.putAll(annotation.getFeatures());
           document.getAnnotations(targetSetName).add(
             annotation.getStartNode().getOffset(),
             annotation.getEndNode().getOffset(),
             annotation.getType(),
-            annotation.getFeatures());
+            params);
         } catch (InvalidOffsetException e) {
           e.printStackTrace();
         }
