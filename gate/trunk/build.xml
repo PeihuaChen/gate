@@ -345,8 +345,8 @@
       Coref_Tools Format_CSV Format_FastInfoset Format_MediaWiki Format_PubMed
       Gazetteer_LKB Gazetteer_Ontology_Based GENIA Groovy
       Inter_Annotator_Agreement JAPE_Plus Keyphrase_Extraction_Algorithm
-      Lang_Arabic Lang_Cebuano Learning Lang_Chinese Lang_French Lang_German
-      Lang_Hindi Lang_Romanian Lang_Russian Language_Identification LingPipe
+      Lang_Arabic Lang_Bulgarian Lang_Cebuano Learning Lang_Chinese Lang_French
+      Lang_German Lang_Hindi Lang_Romanian Lang_Russian Language_Identification LingPipe
       Machine_Learning Ontology Ontology_BDM_Computation Ontology_Tools OpenNLP
       Parser_Minipar Parser_RASP Parser_Stanford Schema_Tools Stemmer_Snowball
       Tagger_Abner Tagger_Boilerpipe Tagger_Chemistry Tagger_DateNormalizer
