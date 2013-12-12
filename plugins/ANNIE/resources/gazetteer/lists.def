@@ -80,5 +80,7 @@ title_male.lst:title:male
 title_mil.lst:title:military
 title_pol.lst:title:police
 tvcompany.lst:organization:company
+university_uk.lst:organization:university
 water.lst:location:region
 year.lst:year
+city_uk.lst:location:city
