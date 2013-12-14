@@ -926,7 +926,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
           }
           catch(Exception ex) {
             throw new LuckyException("Error calling \"values\" method of an "
-                    + "enum type");
+                    + "enum type", ex);
           }
         }
         else {
