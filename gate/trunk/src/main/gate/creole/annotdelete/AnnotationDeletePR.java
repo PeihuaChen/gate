@@ -122,6 +122,9 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
           } else {
             removeSubSet(document.getAnnotations(), matchesMap);
           }
+          
+          //empty the relation set associated with the annotation set
+          document.getAnnotations().getRelations().clear();
         } else {
           // remove this named set
           if (annotationTypes == null || annotationTypes.isEmpty()) {
@@ -157,6 +160,8 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
         } else {
           removeSubSet(document.getAnnotations(), matchesMap);
         }
+        //empty the relation set associated with the annotation set
+        document.getAnnotations().getRelations().clear();
       }
 
       //get the names of all sets

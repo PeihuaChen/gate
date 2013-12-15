@@ -134,6 +134,10 @@
     <RESOURCE>
       <CLASS>gate.gui.ControllerMetadataViewer</CLASS>
     </RESOURCE>
+    
+    <RESOURCE>
+      <CLASS>gate.gui.docview.RelationSetView</CLASS>
+    </RESOURCE>
 
   </CREOLE>
 </CREOLE-DIRECTORY>

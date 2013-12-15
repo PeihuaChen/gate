@@ -85,7 +85,7 @@ public class LegacyCorefDataWriter extends AbstractLanguageAnalyser {
         (annotationSetName == null || annotationSetName.trim().length() == 0) ?
         document.getAnnotations() : document.getAnnotations(annotationSetName); 
     // get the relations set
-    RelationSet relSet = RelationSet.getRelations(inputAnnSet);
+    RelationSet relSet = inputAnnSet.getRelations();
     
     // now create the annotation and document features from the relations
     Map<String, List<List<Integer>>> docCorefMap;

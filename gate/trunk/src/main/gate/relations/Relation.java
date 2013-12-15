@@ -15,42 +15,48 @@
  */
 package gate.relations;
 
+import gate.util.FeatureBearer;
+import gate.util.IdBearer;
+
 import java.io.Serializable;
 
 /**
  * Interface representing a relation between GATE annotations.
  */
-public interface Relation extends Serializable {
-  
+public interface Relation extends Serializable, IdBearer, FeatureBearer {
+
   /**
    * Get the type of the relation (e.g. {@link #COREF}).
-   * @return the relation type. 
+   * 
+   * @return the relation type.
    */
   public String getType();
-  
+
   /**
-   * Gets the members of the relation. 
+   * Gets the members of the relation.
+   * 
    * @return an array containing annotation IDs.
    */
   public int[] getMembers();
-  
+
   /**
-   * Some relations may have associated arbitrary data; this method can be used 
-   * to retrieve it.
-   * @return the user data that was previously added to this relation.
+   * Gets the arbitrary data associated with this relation
+   * 
+   * @return the arbitrary data associated with this relation
    */
-  public Serializable getUserData();
-  
+  public Object getUserData();
+
   /**
-   * Associates some arbitrary user data to this relation.
-   * @param data the user data value.
+   * Sets the arbitrary data associated with this relation
+   * 
+   * @param data the arbitrary data associated with this
+   *          relation
    */
-  public void setUserData(Serializable data);
-  
-  
+  public void setUserData(Object data);
+
   /**
-   * Relation type for co-reference relations. 
+   * Relation type for co-reference relations.
    */
   public static final String COREF = "coref";
-  
+
 }

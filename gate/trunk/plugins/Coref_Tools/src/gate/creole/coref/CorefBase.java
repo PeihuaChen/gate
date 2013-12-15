@@ -206,9 +206,9 @@ public abstract class CorefBase extends AbstractLanguageAnalyser {
    * @return the {@link RelationSet} used during the {@link #execute()} call.
    */
   public RelationSet getRelationSet() {
-    return RelationSet.getRelations(
-        (annotationSetName == null || annotationSetName.trim().length() == 0) ?
-        document.getAnnotations() : document.getAnnotations(annotationSetName));
+    return (annotationSetName == null || annotationSetName.trim().length() == 0)
+      ? document.getAnnotations().getRelations()
+      : document.getAnnotations(annotationSetName).getRelations();
   }
   
   @Override
