@@ -16,11 +16,12 @@
 
 package gate;
 
+import gate.relations.RelationSet;
+import gate.util.InvalidOffsetException;
+
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Set;
-
-import gate.util.InvalidOffsetException;
 
 /**
  * <p>
@@ -170,5 +171,7 @@ public interface SimpleAnnotationSet extends Set<Annotation>, Cloneable,
    * be attached to a document.
    */
   public Document getDocument();
+  
+  public RelationSet getRelations();
 
 } // interface SimpleAnnotationSet

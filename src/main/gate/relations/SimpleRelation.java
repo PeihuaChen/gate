@@ -15,7 +15,9 @@
  */
 package gate.relations;
 
-import java.io.Serializable;
+import gate.Factory;
+import gate.FeatureMap;
+
 import java.util.Arrays;
 import java.util.regex.Matcher;
 
@@ -23,23 +25,36 @@ import java.util.regex.Matcher;
  * A simple implementation for the {@link Relation} interface.
  */
 public class SimpleRelation implements Relation {
-  
+
   private static final long serialVersionUID = 6866132107461267866L;
 
   protected String type;
-  
+
   protected int[] members;
-  
-  protected Serializable userData;
-  
-  public SimpleRelation(String type, int[] members) {
+
+  protected int id;
+
+  protected FeatureMap features;
+
+  protected Object userData;
+
+  /**
+   * You should never create instances of this class directly, you
+   * should create new relations via the appropriate methods of
+   * {@link RelationSet}. This method is only publicly available to
+   * support persistence.
+   */
+  public SimpleRelation(int id, String type, int[] members) {
     super();
+    this.id = id;
     this.type = type;
     this.members = members;
+    features = Factory.newFeatureMap();
   }
-  
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see gate.relations.Relation#getType()
    */
   @Override
@@ -47,7 +62,9 @@ public class SimpleRelation implements Relation {
     return type;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see gate.relations.Relation#getMembers()
    */
   @Override
@@ -55,65 +72,53 @@ public class SimpleRelation implements Relation {
     return members;
   }
 
-  /* (non-Javadoc)
-   * @see gate.relations.Relation#getUserData()
-   */
-  @Override
-  public Serializable getUserData() {
-    return userData;
-  }
-
-  /* (non-Javadoc)
-   * @see gate.relations.Relation#setUserData(java.io.Serializable)
-   */
-  @Override
-  public void setUserData(Serializable data) {
-    this.userData = data;
-  }
-
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see java.lang.Object#toString()
    */
   @Override
   public String toString() {
     StringBuilder str = new StringBuilder();
-    String typeOut = type.replaceAll("\\(", 
-        Matcher.quoteReplacement("\\(")).replaceAll("\\)", 
-        Matcher.quoteReplacement("\\)"));
+    str.append(id).append(": ");
+    String typeOut =
+            type.replaceAll("\\(", Matcher.quoteReplacement("\\(")).replaceAll(
+                    "\\)", Matcher.quoteReplacement("\\)"));
     str.append(typeOut).append("(");
     for(int i = 0; i < members.length; i++) {
       if(i > 0) str.append(", ");
       str.append(members[i]);
     }
     str.append(")");
+    if(features != null) {
+      str.append("#").append(features.toString());
+    }
     if(userData != null) {
       str.append("#").append(userData.toString());
     }
     return str.toString();
   }
 
-  /* (non-Javadoc)
-   * @see java.lang.Object#hashCode()
-   */
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
+    result = prime * result + ((features == null) ? 0 : features.hashCode());
     result = prime * result + Arrays.hashCode(members);
     result = prime * result + ((type == null) ? 0 : type.hashCode());
     result = prime * result + ((userData == null) ? 0 : userData.hashCode());
     return result;
   }
 
-  /* (non-Javadoc)
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
     if(this == obj) return true;
     if(obj == null) return false;
-    if(!(obj instanceof SimpleRelation)) return false;
+    if(getClass() != obj.getClass()) return false;
     SimpleRelation other = (SimpleRelation)obj;
+    if(features == null) {
+      if(other.features != null) return false;
+    } else if(!features.equals(other.features)) return false;
     if(!Arrays.equals(members, other.members)) return false;
     if(type == null) {
       if(other.type != null) return false;
@@ -123,6 +128,29 @@ public class SimpleRelation implements Relation {
     } else if(!userData.equals(other.userData)) return false;
     return true;
   }
-  
-  
+
+  @Override
+  public Integer getId() {
+    return id;
+  }
+
+  @Override
+  public FeatureMap getFeatures() {
+    return features;
+  }
+
+  @Override
+  public void setFeatures(FeatureMap features) {
+    this.features = features;
+  }
+
+  @Override
+  public Object getUserData() {
+    return userData;
+  }
+
+  @Override
+  public void setUserData(Object data) {
+    userData = data;
+  }
 }

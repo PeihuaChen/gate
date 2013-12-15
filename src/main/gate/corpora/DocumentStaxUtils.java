@@ -15,6 +15,23 @@
  */
 package gate.corpora;
 
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.DocumentContent;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.TextualDocument;
+import gate.event.StatusListener;
+import gate.relations.Relation;
+import gate.relations.RelationSet;
+import gate.relations.SimpleRelation;
+import gate.util.GateException;
+import gate.util.GateRuntimeException;
+import gate.util.InvalidOffsetException;
+import gate.util.Out;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,20 +62,6 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
-
-import gate.Annotation;
-import gate.AnnotationSet;
-import gate.Document;
-import gate.DocumentContent;
-import gate.Factory;
-import gate.FeatureMap;
-import gate.Gate;
-import gate.TextualDocument;
-import gate.event.StatusListener;
-import gate.util.GateException;
-import gate.util.GateRuntimeException;
-import gate.util.InvalidOffsetException;
-import gate.util.Out;
 
 /**
  * This class provides support for reading and writing GATE XML format
@@ -154,7 +157,7 @@ public class DocumentStaxUtils {
       // not
       Boolean requireAnnotationIds = null;
       int eventType = xsr.nextTag();
-      while(eventType == XMLStreamConstants.START_ELEMENT) {
+      while(eventType == XMLStreamConstants.START_ELEMENT && xsr.getLocalName().equals("AnnotationSet")) {
         xsr.require(XMLStreamConstants.START_ELEMENT, null, "AnnotationSet");
         String annotationSetName = xsr.getAttributeValue(null, "Name");
         AnnotationSet annotationSet = null;
@@ -183,10 +186,43 @@ public class DocumentStaxUtils {
         numAnnots += annotIdsInSet.size();
         // readAnnotationSet leaves reader positioned on the
         // </AnnotationSet> tag, so nextTag takes us to either the next
-        // <AnnotationSet> or to the </GateDocument>
+        // <AnnotationSet>, a <RelationSet>, or </GateDocument>
         eventType = xsr.nextTag();
       }
 
+      while(eventType == XMLStreamConstants.START_ELEMENT
+              && xsr.getLocalName().equals("RelationSet")) {
+        xsr.require(XMLStreamConstants.START_ELEMENT, null, "RelationSet");
+        String relationSetName = xsr.getAttributeValue(null, "Name");
+        RelationSet relations = null;
+        if(relationSetName == null) {
+          if(statusListener != null) {
+            statusListener
+                    .statusChanged("Reading relation set for default annotation set");
+          }
+          relations = doc.getAnnotations().getRelations();
+        } else {
+          if(statusListener != null) {
+            statusListener.statusChanged("Reading relation set for \""
+                    + relationSetName + "\" annotation set");
+          }
+          relations = doc.getAnnotations(relationSetName).getRelations();
+        }
+
+        SortedSet<Integer> relIdsInSet = new TreeSet<Integer>();
+        readRelationSet(xsr, relations, relIdsInSet);
+        if(relIdsInSet.size() > 0
+                && (maxAnnotId == null || relIdsInSet.last().intValue() > maxAnnotId
+                        .intValue())) {
+          maxAnnotId = relIdsInSet.last();
+        }
+        numAnnots += relIdsInSet.size();
+        // readAnnotationSet leaves reader positioned on the
+        // </RelationSet> tag, so nextTag takes us to either the next
+        // <RelationSet> or to the </GateDocument>
+        eventType = xsr.nextTag();
+      }
+      
       // check we are on the end document tag
       xsr.require(XMLStreamConstants.END_ELEMENT, null, "GateDocument");
 
@@ -368,6 +404,71 @@ public class DocumentStaxUtils {
       }
     }
     return requireAnnotationIds;
+  }
+  
+  public static void readRelationSet(XMLStreamReader xsr,
+          RelationSet relations, Set<Integer> allAnnotIds)
+          throws XMLStreamException {
+    while(xsr.nextTag() == XMLStreamConstants.START_ELEMENT) {
+      xsr.require(XMLStreamConstants.START_ELEMENT, null, "Relation");
+      String type = xsr.getAttributeValue(null, "Type");
+      String idString = xsr.getAttributeValue(null, "Id");
+      String memberString = xsr.getAttributeValue(null, "Members");
+      
+      if(memberString == null)
+        throw new XMLStreamException("A relation must have members");
+      if (type == null)
+        throw new XMLStreamException("A relation must have a type");
+      if (idString == null)
+        throw new XMLStreamException("A relation must have an id");
+      
+      String[] memberStrings = memberString.split(";");
+      int[] members = new int[memberStrings.length];
+      for(int i = 0; i < members.length; ++i) {
+        members[i] = Integer.parseInt(memberStrings[i]);
+      }
+
+      xsr.nextTag();
+      xsr.require(XMLStreamConstants.START_ELEMENT, null, "UserData");
+
+      // get the string representation of the user data
+      StringBuilder stringRep = new StringBuilder(1024);
+      int eventType;
+      while((eventType = xsr.next()) != XMLStreamConstants.END_ELEMENT) {
+        switch(eventType) {
+          case XMLStreamConstants.CHARACTERS:
+            stringRep.append(xsr.getTextCharacters(), xsr.getTextStart(),
+                    xsr.getTextLength());
+            break;
+
+          case XMLStreamConstants.CDATA:
+            stringRep.append(xsr.getTextCharacters(), xsr.getTextStart(),
+                    xsr.getTextLength());
+            break;
+
+          case XMLStreamConstants.START_ELEMENT:
+            throw new XMLStreamException("Elements not allowed within "
+                    + "user data.", xsr.getLocation());
+
+          default:
+            // do nothing - ignore comments, PIs, etc.
+        }
+      }
+
+      xsr.require(XMLStreamConstants.END_ELEMENT, null, "UserData");
+
+      FeatureMap features = readFeatureMap(xsr);
+
+      Relation r = new SimpleRelation(Integer.valueOf(idString), type, members);
+      r.setFeatures(features);
+
+      if(stringRep.length() > 0) {
+        ObjectWrapper wrapper = new ObjectWrapper(stringRep.toString());
+        r.setUserData(wrapper.getValue());
+      }
+
+      relations.addRelation(r);
+    }
   }
 
   /**
@@ -964,6 +1065,13 @@ public class DocumentStaxUtils {
         newLine(xsw);
       }// End if
     }// End while
+    
+    iter = annotationSets.keySet().iterator();
+    while(iter.hasNext()) {
+      
+      writeRelationSet(doc.getAnnotations(iter.next()).getRelations(), xsw,
+              namespaceURI);
+    }
 
     // close the GateDocument element
     xsw.writeEndElement();
@@ -1043,6 +1151,59 @@ public class DocumentStaxUtils {
       }
     }
     // end AnnotationSet element
+    xsw.writeEndElement();
+    newLine(xsw);
+  }
+  
+  public static void writeRelationSet(RelationSet relations,
+          XMLStreamWriter xsw, String namespaceURI) throws XMLStreamException {
+
+    // if there are no relations then don't write the set, this means
+    // that docs without relations will remain compatible with earlier
+    // versions of GATE
+    if(relations == null || relations.size() == 0) return;
+
+    xsw.writeComment(" Relation Set for "
+            + relations.getAnnotationSet().getName() + " ");
+    newLine(xsw);
+    newLine(xsw);
+
+    xsw.writeStartElement(namespaceURI, "RelationSet");
+
+    if(relations.getAnnotationSet().getName() != null) {
+      xsw.writeAttribute("Name", relations.getAnnotationSet().getName());
+    }
+    newLine(xsw);
+
+    for(Relation relation : relations.get()) {
+
+      StringBuilder str = new StringBuilder();
+      int[] members = relation.getMembers();
+      for(int i = 0; i < members.length; i++) {
+        if(i > 0) str.append(";");
+        str.append(members[i]);
+      }
+      xsw.writeStartElement(namespaceURI, "Relation");
+      xsw.writeAttribute("Id", String.valueOf(relation.getId()));
+      xsw.writeAttribute("Type", relation.getType());
+      xsw.writeAttribute("Members", str.toString());
+      newLine(xsw);
+
+      xsw.writeStartElement(namespaceURI, "UserData");
+      if(relation.getUserData() != null) {
+        ObjectWrapper userData = new ObjectWrapper(relation.getUserData());
+        writeCharactersOrCDATA(xsw,
+                replaceXMLIllegalCharactersInString(userData.toString()));
+      }
+      xsw.writeEndElement();
+      newLine(xsw);
+
+      writeFeatures(relation.getFeatures(), xsw, namespaceURI);
+      xsw.writeEndElement();
+      newLine(xsw);
+    }
+
+    // end RelationSet element
     xsw.writeEndElement();
     newLine(xsw);
   }

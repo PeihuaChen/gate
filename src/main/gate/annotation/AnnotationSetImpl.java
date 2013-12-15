@@ -31,16 +31,40 @@
  */
 package gate.annotation;
 
-import java.io.*;
-import java.util.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.DocumentContent;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.GateConstants;
+import gate.Node;
+import gate.corpora.DocumentImpl;
+import gate.event.AnnotationSetEvent;
+import gate.event.AnnotationSetListener;
+import gate.event.GateEvent;
+import gate.event.GateListener;
+import gate.relations.RelationSet;
+import gate.util.InvalidOffsetException;
+import gate.util.RBTreeMap;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.AbstractSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-
-import gate.*;
-import gate.corpora.DocumentImpl;
-import gate.event.*;
-import gate.util.*;
 
 /**
  * Implementation of AnnotationSet. Has a number of indices, all bar one of
@@ -103,6 +127,8 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * needs to.
    */
   protected transient Long longestAnnot = 0l;
+  
+  protected RelationSet relations = null;
 
   // Empty AnnotationSet to be returned instead of null
    public final static AnnotationSet emptyAnnotationSet;
@@ -1261,5 +1287,12 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       add(annotations[i]);
     }
     annotations = null;
+  }
+  
+  public RelationSet getRelations() {
+    if (relations == null) {
+      relations = new RelationSet(this);
+    }
+    return relations;
   }
 } // AnnotationSetImpl
