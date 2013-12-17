@@ -18,6 +18,10 @@ package gate.relations;
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.corpora.DocumentImpl;
+import gate.event.AnnotationSetEvent;
+import gate.event.AnnotationSetListener;
+import gate.event.RelationSetEvent;
+import gate.event.RelationSetListener;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -26,6 +30,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.regex.Matcher;
 
 import org.apache.log4j.Logger;
@@ -35,7 +40,7 @@ import org.apache.log4j.Logger;
  * annotation set of a document will have one set of associated
  * relations).
  */
-public class RelationSet implements Serializable {
+public class RelationSet implements Serializable, AnnotationSetListener {
 
   private static final long serialVersionUID = 8552798130184595465L;
 
@@ -90,6 +95,10 @@ public class RelationSet implements Serializable {
    */
   protected AnnotationSet annSet;
 
+  private Vector<RelationSetListener> listeners = null;
+
+  private int maxID = 0;
+
   public AnnotationSet getAnnotationSet() {
     return annSet;
   }
@@ -109,8 +118,10 @@ public class RelationSet implements Serializable {
     indexesByMember = new ArrayList<Map<Integer, BitSet>>();
     indexById = new HashMap<Integer, Relation>();
     deleted = new BitSet();
+
+    annSet.addAnnotationSetListener(this);
   }
-  
+
   /**
    * Empties the relation set
    */
@@ -169,20 +180,27 @@ public class RelationSet implements Serializable {
    * @param rel the {@link Relation} to be added.
    */
   public void addRelation(Relation rel) {
+    maxID = Math.max(maxID, rel.getId());
+
     int relIdx = relations.size();
     relations.add(rel);
+
+    /** index by ID **/
     indexById.put(rel.getId(), rel);
+
+    /** index by type **/
     BitSet sameType = indexByType.get(rel.getType());
     if(sameType == null) {
-      sameType = new BitSet(relations.size());
+      sameType = new BitSet(rel.getId());
       indexByType.put(rel.getType(), sameType);
     }
-    sameType.set(relIdx);
+    sameType.set(rel.getId());
 
     // widen the index by member list, if needed
     for(int i = indexesByMember.size(); i < rel.getMembers().length; i++) {
       indexesByMember.add(new HashMap<Integer, BitSet>());
     }
+
     for(int memeberPos = 0; memeberPos < rel.getMembers().length; memeberPos++) {
       int member = rel.getMembers()[memeberPos];
       Map<Integer, BitSet> indexByMember = indexesByMember.get(memeberPos);
@@ -193,6 +211,9 @@ public class RelationSet implements Serializable {
       }
       sameMember.set(relIdx);
     }
+
+    fireRelationAdded(new RelationSetEvent(this,
+            RelationSetEvent.RELATION_ADDED, rel));
   }
 
   /**
@@ -216,9 +237,8 @@ public class RelationSet implements Serializable {
     List<Relation> res = new ArrayList<Relation>();
     BitSet rels = indexByType.get(type);
     if(rels != null) {
-      rels.andNot(deleted);
-      for(int relPos = 0; relPos < relations.size(); relPos++) {
-        if(rels.get(relPos)) res.add(relations.get(relPos));
+      for(int relPos = 0; relPos < maxID; relPos++) {
+        if(rels.get(relPos)) res.add(indexById.get(relPos));
       }
     }
     return res;
@@ -274,9 +294,15 @@ public class RelationSet implements Serializable {
   public boolean deleteRelation(Relation relation) {
     int relIdx = relations.indexOf(relation);
     if(relIdx >= 0) {
+
+      // delete this relation from the type index
+      indexByType.get(relation.getType()).clear(relation.getId());
+
       deleted.set(relIdx);
       relations.set(relIdx, null);
       indexById.remove(relation.getId());
+      fireRelationRemoved(new RelationSetEvent(this,
+              RelationSetEvent.RELATION_REMOVED, relation));
       return true;
     } else {
       return false;
@@ -336,5 +362,61 @@ public class RelationSet implements Serializable {
     }
     str.append("]");
     return str.toString();
+  }
+
+  @Override
+  public void annotationAdded(AnnotationSetEvent e) {
+    // we don't care about annotations being added so we do nothing
+  }
+
+  @Override
+  public void annotationRemoved(AnnotationSetEvent e) {
+
+    Annotation a = e.getAnnotation();
+
+    // find all relations which include the annotation and remove them
+
+    // may need to be an iterative method as we may remove relations
+    // which are themselves in a relation
+  }
+
+  public synchronized void removeRelationSetListener(RelationSetListener l) {
+    if(listeners != null && listeners.contains(l)) {
+      @SuppressWarnings("unchecked")
+      Vector<RelationSetListener> v =
+              (Vector<RelationSetListener>)listeners.clone();
+      v.removeElement(l);
+      listeners = v;
+    }
+  }
+
+  public synchronized void addAnnotationSetListener(RelationSetListener l) {
+    @SuppressWarnings("unchecked")
+    Vector<RelationSetListener> v =
+            listeners == null
+                    ? new Vector<RelationSetListener>(2)
+                    : (Vector<RelationSetListener>)listeners.clone();
+    if(!v.contains(l)) {
+      v.addElement(l);
+      listeners = v;
+    }
+  }
+
+  protected void fireRelationAdded(RelationSetEvent e) {
+    if(listeners != null) {
+      int count = listeners.size();
+      for(int i = 0; i < count; i++) {
+        listeners.elementAt(i).relationAdded(e);
+      }
+    }
+  }
+
+  protected void fireRelationRemoved(RelationSetEvent e) {
+    if(listeners != null) {
+      int count = listeners.size();
+      for(int i = 0; i < count; i++) {
+        listeners.elementAt(i).relationRemoved(e);
+      }
+    }
   }
 }
