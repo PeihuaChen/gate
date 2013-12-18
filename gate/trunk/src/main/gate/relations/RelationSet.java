@@ -29,8 +29,10 @@ import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Matcher;
 
@@ -247,7 +249,7 @@ public class RelationSet implements Serializable, AnnotationSetListener {
    * @return the list of all relations in this {@link RelationSet} that
    *         have the required type.
    */
-  public List<Relation> getRelations(String type) {
+  public Collection<Relation> getRelations(String type) {
     List<Relation> res = new ArrayList<Relation>();
     BitSet rels = indexByType.get(type);
     if(rels != null) {
@@ -271,12 +273,12 @@ public class RelationSet implements Serializable, AnnotationSetListener {
    * @return all the relations that have the given annotation IDs
    *         (members) on the specified positions.
    */
-  public List<Relation> getRelations(int... members) {
+  public Collection<Relation> getRelations(int... members) {
     // get the lists of relations for each member
     return getRelations(null, members);
   }
 
-  public List<Relation> getRelations(String type, int... members) {
+  public Collection<Relation> getRelations(String type, int... members) {
     // get the lists of relations for each member
     BitSet[] postingLists =
             new BitSet[getMaximumArity() + (type != null ? 1 : 0)];
@@ -336,17 +338,18 @@ public class RelationSet implements Serializable, AnnotationSetListener {
   }
 
   /**
-   * Returns a list of all {@link Relation} instances within this set
-   * which include the specified {@link Annotaiton} or {@link Relation}
+   * Returns a collection of all {@link Relation} instances within this
+   * set which include the specified {@link Annotaiton} or
+   * {@link Relation}
    * 
    * @param id the ID of the {@link Annotation} or {@link Relation} to
    *          look for
-   * @return a list of all {@link Relation} instances within this set
+   * @return a set of all {@link Relation} instances within this set
    *         which include the specified id
    */
-  public List<Relation> getReferencing(int id) {
+  public Collection<Relation> getReferencing(int id) {
 
-    List<Relation> relations = new ArrayList<Relation>();
+    Set<Relation> relations = new HashSet<Relation>();
     for(int pos = 0; pos < getMaximumArity(); pos++) {
       int[] constraint = new int[pos + 1];
       for(int i = 0; i < pos; i++)
@@ -366,9 +369,9 @@ public class RelationSet implements Serializable, AnnotationSetListener {
    * @return the list of relations contained in all the supplied index
    *         lists.
    */
-  protected List<Relation> intersection(BitSet... indexLists) {
+  protected Collection<Relation> intersection(BitSet... indexLists) {
 
-    List<Relation> res = new ArrayList<Relation>();
+    Set<Relation> res = new HashSet<Relation>();
 
     BitSet relIds = new BitSet(maxID + 1);
     relIds.set(0, maxID + 1);
