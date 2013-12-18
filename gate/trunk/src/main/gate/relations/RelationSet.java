@@ -124,6 +124,17 @@ public class RelationSet implements Serializable, AnnotationSetListener {
    * Empties the relation set
    */
   public void clear() {
+
+    // clearing the indexes won't fire the events so we fire the events
+    // first and then clear the indexes, hopefully we won't end up with
+    // any weird side effects from this but I can't think of a
+    // safer/better way of doing it other than calling delete on each
+    // relation which would be horribly inefficient
+    for(Relation r : indexById.values()) {
+      fireRelationRemoved(new RelationSetEvent(this,
+              RelationSetEvent.RELATION_REMOVED, r));
+    }
+
     indexByType.clear();
     indexesByMember.clear();
     indexById.clear();
@@ -439,7 +450,7 @@ public class RelationSet implements Serializable, AnnotationSetListener {
     }
   }
 
-  public synchronized void addAnnotationSetListener(RelationSetListener l) {
+  public synchronized void addRelationSetListener(RelationSetListener l) {
     @SuppressWarnings("unchecked")
     Vector<RelationSetListener> v =
             listeners == null

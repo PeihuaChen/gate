@@ -42,7 +42,7 @@ public class RelationSetEvent extends GateEvent{
     super(source, type);
     this.relation = relation;
   }
-
+  
   /**
    * Gets the document that has had an annotation added or removed.
    * @return a {@link gate.Document}
