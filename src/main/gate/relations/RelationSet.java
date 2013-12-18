@@ -313,15 +313,8 @@ public class RelationSet implements Serializable, AnnotationSetListener {
 
       Map<Integer, BitSet> indexByMember = indexesByMember.get(memeberPos);
       BitSet sameMember = indexByMember.get(member);
-      if(sameMember == null) {
-        sameMember = new BitSet(maxID);
-        indexByMember.put(member, sameMember);
-      }
       sameMember.clear(relation.getId());
     }
-
-    // TODO find any other relations that referenced this one and delete
-    // those as well
 
     // notify anyone who cares enough to listen that we have deleted a
     // relation
