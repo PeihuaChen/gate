@@ -64,7 +64,8 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   /**
    * To store canonical lock objects for each LR ID.
    */
-  protected Map<Object, LabelledSoftReference> lockObjects = new HashMap<Object, LabelledSoftReference>();
+  protected Map<Object, LabelledSoftReference> lockObjects =
+          new HashMap<Object, LabelledSoftReference>();
 
   /**
    * Reference queue with which the soft references in the lockObjects
@@ -85,7 +86,8 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   /**
    * Map keeping track of the most recent indexing task for each LR ID.
    */
-  protected ConcurrentMap<Object, IndexingTask> currentTasks = new ConcurrentHashMap<Object, IndexingTask>();
+  protected ConcurrentMap<Object, IndexingTask> currentTasks =
+          new ConcurrentHashMap<Object, IndexingTask>();
 
   /**
    * Number of milliseconds we should wait after a sync before
@@ -139,8 +141,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
     try {
       // allow up to two minutes for indexing to finish
       executor.awaitTermination(120, TimeUnit.SECONDS);
-    }
-    catch(InterruptedException e) {
+    } catch(InterruptedException e) {
       // propagate the interruption
       Thread.currentThread().interrupt();
     }
@@ -152,8 +153,8 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
     // copy the tasks into an array to avoid concurrent
     // modification issues, as IndexingTask.run modifies
     // the currentTasks map
-    IndexingTask[] queuedTasksArray = queuedTasks
-            .toArray(new IndexingTask[queuedTasks.size()]);
+    IndexingTask[] queuedTasksArray =
+            queuedTasks.toArray(new IndexingTask[queuedTasks.size()]);
     for(IndexingTask task : queuedTasksArray) {
       task.run();
     }
@@ -164,7 +165,6 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   /** Open a connection to the data store. */
   public void open() throws PersistenceException {
     super.open();
-
     /*
      * check if the storage directory is a valid serial datastore if we
      * want to support old style: String versionInVersionFile = "1.0";
@@ -185,8 +185,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
         if(!indexDir.exists()) {
           throw new PersistenceException("Index directory "
                   + indexDirRelativePath
-                  + " could not be found for datastore at "
-                  + storageDirURL);
+                  + " could not be found for datastore at " + storageDirURL);
         }
 
         indexURL = theIndexURL;
@@ -195,8 +194,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
         ((LuceneSearcher)this.searcher).setLuceneDatastore(this);
       }
       isr.close();
-    }
-    catch(IOException e) {
+    } catch(IOException e) {
       throw new PersistenceException("Invalid storage directory: " + e);
     }
     if(!isValidProtocolVersion(currentProtocolVersion))
@@ -205,13 +203,14 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
 
     // Lets create a separate indexer thread which keeps running in the
     // background
-    executor = new ScheduledThreadPoolExecutor(1, Executors
-            .defaultThreadFactory());
+    executor =
+            new ScheduledThreadPoolExecutor(1, Executors.defaultThreadFactory());
     // set up the executor so it does not execute delayed indexing tasks
     // that are still waiting when it is shut down. We run these tasks
     // immediately at shutdown time rather than waiting.
     executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
     executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+    
     // start listening to Creole events
     Gate.getCreoleRegister().addCreoleListener(this);
   }
@@ -302,8 +301,8 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
      * documents in index
      */
     try {
-      if(Corpus.class.isAssignableFrom(Class.forName(lrClassName, true, Gate
-              .getClassLoader()))) {
+      if(Corpus.class.isAssignableFrom(Class.forName(lrClassName, true,
+              Gate.getClassLoader()))) {
         /*
          * we would issue a search query to obtain all documents which
          * belong to his corpus and set them as referring to null
@@ -326,14 +325,12 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
             String docID = hits[i].getDocumentID();
             queueForIndexing(docID);
           }
-        }
-        catch(SearchException se) {
+        } catch(SearchException se) {
           throw new PersistenceException(se);
         }
         return;
       }
-    }
-    catch(ClassNotFoundException cnfe) {
+    } catch(ClassNotFoundException cnfe) {
       // don't do anything
     }
 
@@ -344,8 +341,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
       synchronized(indexer) {
         this.indexer.remove(removed);
       }
-    }
-    catch(IndexException ie) {
+    } catch(IndexException ie) {
       throw new PersistenceException(ie);
     }
   }
@@ -369,13 +365,64 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
       // indexer task is reading it
       Object lock = lockObjectForID(lr.getLRPersistenceId());
       synchronized(lock) {
+        
+        // we load the copy of this LR and check if any modification were done
+        // if so, it should be reindexed or else it should not be synced again.
+        LanguageResource copy = null;
+        try {
+          copy =
+                  getLr(lr.getClass().getName(), lr.getLRPersistenceId());
+
+          // we check it only if it is an instance of Document
+          if(copy instanceof Document && lr instanceof Document) {
+            Document cDoc = (Document)copy;
+            Document lrDoc = (Document)lr;
+            boolean sameDocs = false;
+            
+            // we only check content and annotation sets
+            // as that's what matters from the annic perspective
+            if(cDoc.getContent().equals(lrDoc.getContent())) {
+              if(cDoc.getAnnotations().equals(lrDoc.getAnnotations())) {
+                if(cDoc.getNamedAnnotationSets().equals(
+                        lrDoc.getNamedAnnotationSets())) {
+                  boolean allSetsSame = true;
+                  for(String key : cDoc.getNamedAnnotationSets().keySet()) {
+                    if(!cDoc.getAnnotations(key).equals(lrDoc.getAnnotations(key))) {
+                      allSetsSame = false;
+                      break;
+                    }
+                  }
+                  if(allSetsSame) {
+                    sameDocs = true;
+                  }
+                }
+              }
+            }
+
+            
+            if(sameDocs) {
+              lock = null;
+              return;
+            }
+          }
+        } catch(SecurityException e) {
+          e.printStackTrace();
+        } finally {
+          
+          // delete the copy of this LR
+          if(copy != null) {
+            Factory.deleteResource(copy);
+          }
+        }
+        
         super.sync(lr);
       }
       lock = null;
-    }
-    else {
+    } else {
       super.sync(lr);
     }
+
+
 
     if(lr instanceof Document) {
       queueForIndexing(lr.getLRPersistenceId());
@@ -396,15 +443,15 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
     // dump the version file
     try {
       File versionFile = getVersionFile();
-      OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(
-              versionFile));
+      OutputStreamWriter osw =
+              new OutputStreamWriter(new FileOutputStream(versionFile));
       osw.write(versionNumber + Strings.getNl());
-      String indexDirRelativePath = PersistenceManager.getRelativePath(
-              storageDir.toURI().toURL(), indexURL);
+      String indexDirRelativePath =
+              PersistenceManager.getRelativePath(storageDir.toURI().toURL(),
+                      indexURL);
       osw.write(indexDirRelativePath);
       osw.close();
-    }
-    catch(IOException e) {
+    } catch(IOException e) {
       throw new IndexException("couldn't write version file: " + e);
     }
   }
@@ -478,8 +525,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
         synchronized(indexer) {
           indexer.remove(removed);
         }
-      }
-      catch(IndexException ie) {
+      } catch(IndexException ie) {
         throw new GateRuntimeException(ie);
       }
       // queueForIndexing(docLRID);
@@ -585,8 +631,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
         // read the document from datastore
         FeatureMap features = Factory.newFeatureMap();
         features.put(DataStore.LR_ID_FEATURE_NAME, lrID);
-        features
-                .put(DataStore.DATASTORE_FEATURE_NAME, LuceneDataStoreImpl.this);
+        features.put(DataStore.DATASTORE_FEATURE_NAME, LuceneDataStoreImpl.this);
         FeatureMap hidefeatures = Factory.newFeatureMap();
         Gate.setHiddenAttribute(hidefeatures, true);
         try {
@@ -594,12 +639,13 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
           // which is in the process of being written
           Object lock = lockObjectForID(lrID);
           synchronized(lock) {
-            doc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
-                    features, hidefeatures);
+            doc =
+                    (Document)Factory
+                            .createResource("gate.corpora.DocumentImpl",
+                                    features, hidefeatures);
           }
           lock = null;
-        }
-        catch(ResourceInstantiationException rie) {
+        } catch(ResourceInstantiationException rie) {
           // this means the LR ID was null
           doc = null;
         }
@@ -618,8 +664,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
             synchronized(indexer) {
               indexer.remove(removed);
             }
-          }
-          catch(IndexException ie) {
+          } catch(IndexException ie) {
             throw new GateRuntimeException(ie);
           }
 
@@ -635,8 +680,9 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
              * belongs to one easy way is to check all instances of
              * serial corpus loaded in memory
              */
-            List scs = Gate.getCreoleRegister().getLrInstances(
-                    SerialCorpusImpl.class.getName());
+            List scs =
+                    Gate.getCreoleRegister().getLrInstances(
+                            SerialCorpusImpl.class.getName());
             if(scs != null) {
               /*
                * we need to check which corpus the deleted class
@@ -676,9 +722,10 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
                   Gate.setHiddenAttribute(hidefeatures, true);
                   Object lock = lockObjectForID(corpusID);
                   synchronized(lock) {
-                    corpusLR = (SerialCorpusImpl)Factory.createResource(
-                            SerialCorpusImpl.class.getCanonicalName(), params,
-                            hidefeatures);
+                    corpusLR =
+                            (SerialCorpusImpl)Factory.createResource(
+                                    SerialCorpusImpl.class.getCanonicalName(),
+                                    params, hidefeatures);
                   }
                   lock = null;
 
@@ -698,8 +745,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
             }
 
             Factory.deleteResource(doc);
-          }
-          catch(Exception ie) {
+          } catch(Exception ie) {
             ie.printStackTrace();
           }
         }
