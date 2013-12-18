@@ -14,5 +14,4 @@ public interface RelationSetListener extends EventListener {
   /**Called when an {@link gate.relations.Relation} has been removed*/
   public void relationRemoved(RelationSetEvent e);
 
-
 }
