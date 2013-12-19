@@ -16,13 +16,9 @@ GATE papers
 
 - V. Tablan, I. Roberts, H. Cunningham, and K. Bontcheva. GATECloud.net: a Platform for Large-Scale, Open-Source Text Processing on the Cloud. %(http://rsta.royalsocietypublishing.org/, Philosophical Transactions of the Royal Society A), 371(1983), 2013 %(http://dx.doi.org/10.1098/rsta.2012.0071, doi:10.1098/rsta.2012.0071). %(http://gate.ac.uk/sale/ahm11/journal/revised-sumission-preprint.pdf, A pre-print).
 
-%3* I used GATE Mímir:
-
-- H. Cunningham, V. Tablan, I. Roberts, M. A. Greenwood, and N. Aswani. Information Extraction and Semantic Annotation for Multi-Paradigm Information Management. In M. Lupu, K. Mayer, J. Tait, and A. J. Trippe, editors, Current Challenges in Patent Information Retrieval, volume 29 of The Information Retrieval Series. Springer, 2011.  %(bibtex.html#Cunningham2011b, BibTeX).
-
 %3* I used GATE Teamware:
 
-- K. Bontcheva, H. Cunningham, I. Roberts, A. Roberts, V. Tablan, N. Aswani, G. Gorrell. Teamware: A Web-based, Collaborative Text Annotation Framework.  Language Resources and Evaluation. In Press. %(http://link.springer.com/article/10.1007/s10579-013-9215-6,PDF)
+- K. Bontcheva, H. Cunningham, I. Roberts, A. Roberts, V. Tablan, N. Aswani, G. Gorrell. Teamware: A Web-based, Collaborative Text Annotation Framework.  Language Resources and Evaluation. Volume 47, Issue 4, December 2013. %(http://link.springer.com/article/10.1007/s10579-013-9215-6,PDF)
 
 %3* I used TwitIE / the social media components in GATE:
 
@@ -56,6 +52,8 @@ GATE papers
 - D. Maynard, K. Bontcheva. Natural Language Processing. In J. Lehmann and J. Voelker editors, Perspectives of Ontology Learning. IOS Press. 
 
 %2* 2013
+
+-  K. Bontcheva, H. Cunningham, I. Roberts, A. Roberts, V. Tablan, N. Aswani, G. Gorrell. Teamware: A Web-based, Collaborative Text Annotation Framework.  Language Resources and Evaluation. Volume 47, Issue 4, December 2013. %(http://link.springer.com/article/10.1007/s10579-013-9215-6,PDF)
 
 - Leon Derczynski, Robert Gaizauskas. Information Retrieval for Temporal Bounding. Proceedings of the International Conference on the Theory of Information Retrieval (ICTIR 2013). %(http://derczynski.com/sheffield/papers/ir4tempbound.pdf, PDF)
 
