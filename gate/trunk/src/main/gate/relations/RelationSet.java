@@ -347,7 +347,7 @@ public class RelationSet implements Serializable, AnnotationSetListener {
    * @return a set of all {@link Relation} instances within this set
    *         which include the specified id
    */
-  public Collection<Relation> getReferencing(int id) {
+  public Collection<Relation> getReferencing(Integer id) {
 
     Set<Relation> relations = new HashSet<Relation>();
     for(int pos = 0; pos < getMaximumArity(); pos++) {
