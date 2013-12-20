@@ -77,7 +77,7 @@ public class DocumentStaxUtils {
    */
   public static final char INVALID_CHARACTER_REPLACEMENT = ' ';
 
-  public static final String GATE_XML_VERSION = "2";
+  public static final String GATE_XML_VERSION = "3";
   
   /**
    * The number of &lt; signs after which we encode a string using CDATA
