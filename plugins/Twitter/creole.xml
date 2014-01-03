@@ -2,8 +2,5 @@
 <CREOLE-DIRECTORY>  
   <JAR SCAN="true">twitter.jar</JAR>
   <JAR>lib/jaspell.jar</JAR>
-  <JAR>lib/jackson-core-2.2.3.jar</JAR>
-  <JAR>lib/jackson-databind-2.2.3.jar</JAR>
-  <JAR>lib/jackson-annotations-2.2.3.jar</JAR>
   <REQUIRES>../Tagger_Stanford</REQUIRES>
 </CREOLE-DIRECTORY> 
