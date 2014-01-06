@@ -238,6 +238,14 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- required for outputting documents as JSON -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.2.3</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- required for indexing datastores (not used by ANNIC) -->
         <dependency>
             <groupId>org.apache.lucene</groupId>
