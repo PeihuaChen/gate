@@ -15,10 +15,16 @@
  */
 package gate.corpora;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Collection;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,10 +36,60 @@ import gate.util.GateRuntimeException;
 import gate.util.InvalidOffsetException;
 
 /**
+ * <p>
  * This class contains utility methods to output GATE documents in a
  * JSON format which is (deliberately) close to the format used by
  * Twitter to represent entities such as user mentions and hashtags in
  * Tweets.
+ * </p>
+ * 
+ * <pre>
+ * {
+ *   "text":"Text of the document",
+ *   "entities":{
+ *     "Person":[
+ *       {
+ *         "indices":[startOffset, endOffset],
+ *         // other features here
+ *       },
+ *       { ... }
+ *     ],
+ *     "Location":[
+ *       {
+ *         "indices":[startOffset, endOffset],
+ *         // other features here
+ *       },
+ *       { ... }
+ *     ]
+ *   }
+ * }
+ * </pre>
+ * 
+ * <p>
+ * The document is represented as a JSON object with two properties,
+ * "text" holding the text of the document and "entities" representing
+ * the annotations. The "entities" property is an object mapping each
+ * "annotation type" to an array of objects, one per annotation, that
+ * holds the annotation's start and end offsets as a property "indices"
+ * and the other features of the annotation as its remaining properties.
+ * Features are serialized using Jackson's ObjectMapper, so
+ * string-valued features become JSON strings, numeric features become
+ * JSON numbers, Boolean features become JSON booleans, and other types
+ * are serialized according to Jackson's normal rules (e.g. Map values
+ * become nested JSON objects).
+ * </p>
+ * 
+ * <p>
+ * The grouping of annotations into blocks is the responsibility of the
+ * caller - annotations are supplied as a Map&lt;String,
+ * Collection&lt;Annotation&gt;&gt;, the map keys become the property
+ * names within the "entities" object and the corresponding values
+ * become the annotation arrays.  In particular the actual annotation type
+ * of an annotation within one of the collections is ignored - it is allowed
+ * to mix annotations of different types within one collection, the name
+ * of the group of annotations in the "entities" object comes from the
+ * map key.
+ * </p>
  * 
  * @author ian
  * 
@@ -41,6 +97,85 @@ import gate.util.InvalidOffsetException;
 public class DocumentJsonUtils {
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
+
+  private static final JsonFactory JSON_FACTORY = new JsonFactory();
+
+  /**
+   * Write a GATE document to the specified OutputStream. The document
+   * text will be written as a property named "text" and the specified
+   * annotations will be written as "entities".
+   * 
+   * @param doc the document to write
+   * @param annotationsMap annotations to write.
+   * @param out the {@link OutputStream} to write to.
+   * @throws JsonGenerationException if a problem occurs while
+   *           generating the JSON
+   * @throws IOException if an I/O error occurs.
+   */
+  public static void writeDocument(Document doc,
+          Map<String, Collection<Annotation>> annotationsMap, OutputStream out)
+          throws JsonGenerationException, IOException {
+    writeDocument(doc, annotationsMap, JSON_FACTORY.createGenerator(out));
+  }
+
+  /**
+   * Write a GATE document to the specified Writer. The document text
+   * will be written as a property named "text" and the specified
+   * annotations will be written as "entities".
+   * 
+   * @param doc the document to write
+   * @param annotationsMap annotations to write.
+   * @param out the {@link Writer} to write to.
+   * @throws JsonGenerationException if a problem occurs while
+   *           generating the JSON
+   * @throws IOException if an I/O error occurs.
+   */
+  public static void writeDocument(Document doc,
+          Map<String, Collection<Annotation>> annotationsMap, Writer out)
+          throws JsonGenerationException, IOException {
+    writeDocument(doc, annotationsMap, JSON_FACTORY.createGenerator(out));
+  }
+
+  /**
+   * Write a GATE document to the specified File. The document text will
+   * be written as a property named "text" and the specified annotations
+   * will be written as "entities".
+   * 
+   * @param doc the document to write
+   * @param annotationsMap annotations to write.
+   * @param out the {@link File} to write to.
+   * @throws JsonGenerationException if a problem occurs while
+   *           generating the JSON
+   * @throws IOException if an I/O error occurs.
+   */
+  public static void writeDocument(Document doc,
+          Map<String, Collection<Annotation>> annotationsMap, File out)
+          throws JsonGenerationException, IOException {
+    writeDocument(doc, annotationsMap,
+            JSON_FACTORY.createGenerator(out, JsonEncoding.UTF8));
+  }
+
+  /**
+   * Convert a GATE document to JSON representation and return it as a
+   * string. The document text will be written as a property named
+   * "text" and the specified annotations will be written as "entities".
+   * 
+   * @param doc the document to write
+   * @param annotationsMap annotations to write.
+   * @throws JsonGenerationException if a problem occurs while
+   *           generating the JSON
+   * @throws IOException if an I/O error occurs.
+   * @return the JSON as a String
+   */
+  public static String toJson(Document doc,
+          Map<String, Collection<Annotation>> annotationsMap)
+          throws JsonGenerationException, IOException {
+    StringWriter sw = new StringWriter();
+    JsonGenerator gen = JSON_FACTORY.createGenerator(sw);
+    writeDocument(doc, annotationsMap, gen);
+    gen.close();
+    return sw.toString();
+  }
 
   /**
    * Write a GATE document to the specified JsonGenerator. The document
