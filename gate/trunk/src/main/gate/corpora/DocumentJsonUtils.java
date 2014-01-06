@@ -84,11 +84,14 @@ import gate.util.InvalidOffsetException;
  * caller - annotations are supplied as a Map&lt;String,
  * Collection&lt;Annotation&gt;&gt;, the map keys become the property
  * names within the "entities" object and the corresponding values
- * become the annotation arrays.  In particular the actual annotation type
- * of an annotation within one of the collections is ignored - it is allowed
- * to mix annotations of different types within one collection, the name
- * of the group of annotations in the "entities" object comes from the
- * map key.
+ * become the annotation arrays. In particular the actual annotation
+ * type of an annotation within one of the collections is ignored - it
+ * is allowed to mix annotations of different types within one
+ * collection, the name of the group of annotations in the "entities"
+ * object comes from the map key. However some overloadings of
+ * <code>writeDocument</code> provide the option to write the annotation
+ * type as if it were a feature, i.e. as one of the JSON properties of
+ * the annotation object.
  * </p>
  * 
  * @author ian
@@ -221,7 +224,7 @@ public class DocumentJsonUtils {
   public static void writeDocument(Document doc, Long start, Long end,
           Map<String, Collection<Annotation>> annotationsMap, JsonGenerator json)
           throws JsonGenerationException, IOException, InvalidOffsetException {
-    writeDocument(doc, start, end, annotationsMap, null, json);
+    writeDocument(doc, start, end, annotationsMap, null, null, json);
   }
 
   /**
@@ -251,6 +254,39 @@ public class DocumentJsonUtils {
           Map<String, Collection<Annotation>> annotationsMap,
           Map<?, ?> extraFeatures, JsonGenerator json)
           throws JsonGenerationException, IOException, InvalidOffsetException {
+    writeDocument(doc, start, end, annotationsMap, extraFeatures, null, json);
+  }
+
+  /**
+   * Write a substring of a GATE document to the specified
+   * JsonGenerator. The specified window of document text will be
+   * written as a property named "text" and the specified annotations
+   * will be written as "entities", with their offsets adjusted to be
+   * relative to the specified window.
+   * 
+   * @param doc the document to write
+   * @param start the start offset of the segment to write
+   * @param end the end offset of the segment to write
+   * @param extraFeatures additional properties to add to the generated
+   *          JSON. If the map includes a "text" key this will be
+   *          ignored, and if it contains a key "entities" whose value
+   *          is a map then these entities will be merged with the
+   *          generated ones derived from the annotationsMap. This would
+   *          typically be used for documents that were originally
+   *          derived from Twitter data, to re-create the original JSON.
+   * @param annotationTypeProperty if non-null, the annotation type will
+   *          be written as a property under this name, as if it were an
+   *          additional feature of each annotation.
+   * @param json the {@link JsonGenerator} to write to.
+   * @throws JsonGenerationException if a problem occurs while
+   *           generating the JSON
+   * @throws IOException if an I/O error occurs.
+   */
+  public static void writeDocument(Document doc, Long start, Long end,
+          Map<String, Collection<Annotation>> annotationsMap,
+          Map<?, ?> extraFeatures, String annotationTypeProperty,
+          JsonGenerator json) throws JsonGenerationException, IOException,
+          InvalidOffsetException {
 
     ObjectWriter writer = MAPPER.writer();
 
@@ -280,8 +316,17 @@ public class DocumentJsonUtils {
         json.writeNumber(a.getStartNode().getOffset() - start);
         json.writeNumber(a.getEndNode().getOffset() - start);
         json.writeEndArray(); // end of indices
+        if(annotationTypeProperty != null) {
+          json.writeStringField(annotationTypeProperty, annotationType);
+        }
         // other features
         for(Map.Entry<?, ?> feature : a.getFeatures().entrySet()) {
+          if(annotationTypeProperty != null
+                  && annotationTypeProperty.equals(feature.getKey())) {
+            // ignore a feature that has the same name as the
+            // annotationTypeProperty
+            continue;
+          }
           json.writeFieldName(String.valueOf(feature.getKey()));
           writer.writeValue(json, feature.getValue());
         }
