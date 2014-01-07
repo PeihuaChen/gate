@@ -297,7 +297,8 @@ public class DocumentJsonUtils {
     json.writeStartObject();
     // if the extraFeatures already includes entities, merge them with
     // the new ones we create
-    Object entitiesExtraFeature = extraFeatures.get("entities");
+    Object entitiesExtraFeature =
+            (extraFeatures == null) ? null : extraFeatures.get("entities");
     Map<?, ?> entitiesMap = null;
     if(entitiesExtraFeature instanceof Map) {
       entitiesMap = (Map<?, ?>)entitiesExtraFeature;
