@@ -318,7 +318,7 @@ public class DocumentJsonUtils {
         json.writeNumber(a.getEndNode().getOffset() - start);
         json.writeEndArray(); // end of indices
         if(annotationTypeProperty != null) {
-          json.writeStringField(annotationTypeProperty, annotationType);
+          json.writeStringField(annotationTypeProperty, a.getType());
         }
         // other features
         for(Map.Entry<?, ?> feature : a.getFeatures().entrySet()) {
