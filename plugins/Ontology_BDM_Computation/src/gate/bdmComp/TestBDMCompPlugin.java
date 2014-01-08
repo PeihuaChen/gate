@@ -75,9 +75,11 @@ public class TestBDMCompPlugin extends TestCase {
       
       File testOnto = new File(corpusDirName, "protont.owl");
       File bdmFile = new File(corpusDirName, "protont-bdm.txt");
+      File mappings = new File(corpusDirName, "mapping.txt");
      
       FeatureMap fm = Factory.newFeatureMap(); 
       fm.put("rdfXmlURL", testOnto.toURI().toURL());
+      fm.put("mappingsURL", mappings.toURI().toURL());
             
       Ontology ontology = (Ontology)Factory.createResource("gate.creole.ontology.impl.sesame.OWLIMOntology", fm);
              
