@@ -17,19 +17,20 @@ Macro: URL_START
 // flag RT/MT/via @/by @ & via specially? (probably better to handle later)
 
 
-// Syntax of username & hashtag according to
+// Syntax of usernames
 // http://sentiment.christopherpotts.net/tokenizing.html#twitter
 // @+[\w_]+
-// \#+[\w_]+[\w_\-]*[\w_]+
+
+// and hashtags according to
+// https://support.twitter.com/articles/370610-my-hashtags-or-replies-aren-t-working
+// can include numbers but can't be just a number
+// punctuation breaks the tag; apart from underscores appear to be allowed
 
 Rule: Hashtag
-( ({Token.string == "#"})
-  ({Token.kind=="word"} | {Token.string=="_"}| {Token.string=="-"})
-  (
-    ({Token.kind=="word"} | {Token.kind=="number"} | {Token.string=="_"}| {Token.string=="-"})[0,5]
-    ({Token.kind=="word"} | {Token.kind=="number"} | {Token.string=="_"})
-  )?
-
+( {Token.string == "#"}
+  ({Token.kind == "number"})?
+  ({Token.kind=="word"}|{Token.string == "_"})
+  ({Token.kind=="word"}|{Token.kind=="number"}|{Token.string == "_"})[0,10]
 ): match
 -->
 :match {
