@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <metadata xmlns="http://gate.ac.uk/ns/pipeline-metadata">
-  <pipeline-name>Measurement expression annotator</pipeline-name>
+  <pipeline-name>Measurement Expression Annotator</pipeline-name>
   <annotation-selectors>:Measurement</annotation-selectors>
   <tags>
     <tag>English</tag>
