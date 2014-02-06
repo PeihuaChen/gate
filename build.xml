@@ -447,7 +447,7 @@
 	</target>
 
 	<target name="javadoc.core" depends="java2html.taskdef">
-		<javadoc access="protected" destdir="${docDir}/javadoc" classpathref="run.class.path" Encoding="UTF-8" Use="yes" Windowtitle="GATE JavaDoc" docencoding="UTF-8" charset="UTF-8" source="1.6" useexternalfile="yes" breakiterator="true" linksource="yes" maxmemory="${runtime.max.memory}">
+		<javadoc access="protected" destdir="${docDir}/javadoc" classpathref="run.class.path" Encoding="UTF-8" Use="yes" Windowtitle="GATE JavaDoc" docencoding="UTF-8" charset="UTF-8" source="1.6" useexternalfile="yes" breakiterator="true" linksource="yes" >
 			<fileset dir="${srcDir}" includes="**/*.java" excludes="gate/resources/**" />
 			<link href="http://docs.oracle.com/javase/6/docs/api/" />
 		</javadoc>
@@ -458,7 +458,7 @@
 
 	<!-- Make documentation - internal -->
 	<target name="internaljavadoc" depends="java2html.taskdef">
-		<javadoc access="private" destdir="${docDir}/javadoc/internal" classpathref="run.class.path" Encoding="UTF-8" Use="yes" Windowtitle="GATE JavaDoc (including private members)" link="http://docs.oracle.com/javase/6/docs/api/" docencoding="UTF-8" charset="UTF-8" source="1.6" useexternalfile="yes" breakiterator="true" linksource="yes" maxmemory="${runtime.max.memory}">
+		<javadoc access="private" destdir="${docDir}/javadoc/internal" classpathref="run.class.path" Encoding="UTF-8" Use="yes" Windowtitle="GATE JavaDoc (including private members)" link="http://docs.oracle.com/javase/6/docs/api/" docencoding="UTF-8" charset="UTF-8" source="1.6" useexternalfile="yes" breakiterator="true" linksource="yes" >
 			<fileset dir="${srcDir}" includes="**/*.java" excludes="gate/resources/**" />
 		</javadoc>
 		<delete dir="${docDir}/javadoc/internal/src-html" />
