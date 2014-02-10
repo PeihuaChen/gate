@@ -1,6 +1,6 @@
 <ivy-module version="2.0">
 
-  <info organisation="uk.ac.gate" module="gate-core" revision="7.2-SNAPSHOT">
+  <info organisation="uk.ac.gate" module="gate-core" revision="8.0-SNAPSHOT">
     <ivyauthor name="Mark A. Greenwood" />
     <description homepage="http://gate.ac.uk" />
   </info>
