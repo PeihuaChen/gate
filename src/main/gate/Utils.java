@@ -30,6 +30,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -842,4 +844,96 @@ public class Utils {
     }
   }
   
+  static private Pattern nsQNamePattern = Pattern.compile("^(.*:)(.+)$");
+  /**
+   * Expand both namespace prefixes and base-uris, if possible.
+   * This will expand the String toExpand according to the following rules:
+   * <ul>
+   * <li>if toExpand is a qName and does start with a name prefix in the form
+   * "somens:" or ":", then the name prefix is looked up in the prefixes
+   * map and replaced with the URI prefix found there. If the prefix could not
+   * be found a GateRuntimeException is thrown.
+   * <li>if toExpand does not start with a name prefix, the entry with
+   * an empty string as the key is retrieved from the prefixes map and 
+   * used as a baseURI: the result is the baseURI and the toExpand String
+   * concatenated. If no entry with an empty string is found in the map, a 
+   * GateRuntimeException is thrown.   * 
+   * </ul>
+   * 
+   * This method can therefore be used to expand both base uris and namespaces.
+   * <p>
+   * If the map only contains a basename uri (if the only entry is for the
+   * empty string key) then name space prefixes are not checked: in this 
+   * case, the toExpand string may contain an unescaped colon. 
+   * If the map does not contain a basename URI (if there is no entry for the
+   * empty string key) then all toExpand strings are expected to be qNames.
+   * <p>
+   * NOTE: the name prefixes in the prefixes map must include the trailing colon!
+   * 
+   * @param toExpand the URI portion to expand as a String
+   * @param prefixes a map from name prefixes to URI prefixes
+   * @return a String with name prefixes or base URI expanded 
+   */
+  public static String expandUriString(String toExpand, Map<String,String> prefixes ) {
+    String expanded = "";
+    // lets see if we have a basename entry in the map
+    String baseUri = prefixes.get("");
+    // if there is a baseURI and it is the only entry, just prefix toExpand with
+    // it, no matter what
+    if(baseUri != null && prefixes.size() == 1) {
+      return baseUri+toExpand;
+    }
+    
+    // if the toExpand string starts with .*:, interpret this as the name space
+    Matcher m = nsQNamePattern.matcher(toExpand);
+    if (m.matches()) {
+      String prefix = m.group(1);
+      String lname = m.group(2);
+      String uriPrefix = prefixes.get(prefix);
+      if(uriPrefix == null) {
+        throw new GateRuntimeException("name prefix not found in prefix map for  "+toExpand);
+      } else {
+        return uriPrefix+lname;
+      }      
+    } else {
+      // this is not a qName, try to expand with the baseURI
+      if(baseUri == null) {
+        throw new GateRuntimeException("No base Uri in prefix map for "+toExpand);
+      } else {
+        return baseUri + toExpand;
+      }
+    }
+  }
+  /**
+   * Compact an URI String using base URI and namespace prefixes.
+   * The prefixes map, which maps name prefixes of the form "ns:" or the empty
+   * string to URI prefixes is searched for the first URI prefix in the value
+   * set that matches the beginning of the uriString. The corresponding name prefix
+   * is then used to replace that URI prefix.
+   * In order to control which URI prefix is matched first if the map contains
+   * several prefixes which can all match some URIs, a LinkedHashMap can be 
+   * used so that the first matching URI prefix will be deterministic.
+   *  
+   * @param uriString a full URI String that should get shortened using prefix names or a base URI
+   * @param prefixes a map containing name prefixes mapped to URI prefixes (same as for expandUriString)
+   * @return a shortened URI where the URI prefix is replaced with a prefix name or the empty string
+   */
+  public static String shortenUriString(String uriString, Map<String, String> prefixes) {
+    // get the URI prefixes 
+    Set<String> namePrefixes = prefixes.keySet();
+    String uriPrefix = "";
+    String namePrefix = "";
+    for(String np : namePrefixes) {
+      String uri = prefixes.get(np);
+      if(uriString.startsWith(uri)) {
+        uriPrefix = uri;
+        namePrefix = np;
+        break;
+      }
+    }
+    if(uriPrefix.equals("")) {
+      throw new GateRuntimeException("No prefix found in prefixes map for "+uriString);
+    }
+    return namePrefix + uriString.substring(uriPrefix.length());
+  }
 }
