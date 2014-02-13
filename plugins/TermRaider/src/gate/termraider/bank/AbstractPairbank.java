@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008--2013, The University of Sheffield. See the file
+ *  Copyright (c) 2008--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -33,7 +33,6 @@ public abstract class AbstractPairbank extends AbstractBank
   // CREOLE init parameters
   protected boolean debugMode;
   protected String inputASName;
-  protected String namespaceBase;
 
   protected transient List<Action> actionsList;
   
@@ -234,18 +233,6 @@ public abstract class AbstractPairbank extends AbstractBank
 
   public Boolean getDebugMode() {
     return this.debugMode;
-  }
-
-  /* Set this in the application for consistency between termbanks;
-   * otherwise it will be randomly generated. */
-  @CreoleParameter(comment = "Namespace base (including '#') for ontology generation",
-          defaultValue = "")
-  public void setNamespaceBase(String nsb) {
-    this.namespaceBase = nsb;
-  }
-
-  public String getNamespaceBase() {
-    return this.namespaceBase;
   }
 
 }

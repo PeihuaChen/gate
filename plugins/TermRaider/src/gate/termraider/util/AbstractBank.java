@@ -80,7 +80,7 @@ public abstract class AbstractBank extends AbstractLanguageResource {
 
 
   /* Default value is overridden in the implementations   */
-  @CreoleParameter(comment = "name of ontology score property",
+  @CreoleParameter(comment = "name of score property",
           defaultValue = "score")
   public void setScoreProperty(String name) {
     this.scoreProperty = name;
