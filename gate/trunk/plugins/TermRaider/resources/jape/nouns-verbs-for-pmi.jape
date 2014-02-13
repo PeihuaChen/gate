@@ -1,0 +1,23 @@
+Phase: ThingsForPMI
+Input: Token MultiWordTermCandidate
+Options: control = all
+
+
+Rule: Noun
+({Token.kind == "word", Token.category ==~ "N.*", Token.length > 2}):token
+-->
+:token.Entity = { rule = "Noun", canonical = :token.Token.root }
+
+
+Rule: Verb
+({Token.kind == "word", Token.category ==~ "V.*", Token.length > 2}):token
+-->
+:token.Verb = { rule = "Verb", canonical = :token.Token.root }
+
+
+Rule: MultiWord
+({MultiWordTermCandidate}):match
+-->
+:match.Entity = { rule = "MultiWord", canonical = :match.TermCandidate.canonical }
+
+
