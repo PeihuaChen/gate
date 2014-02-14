@@ -15,7 +15,7 @@
 
 
 Phase:	Name
-Input: Token Lookup Title FirstPerson TempDate Split
+Input: Token Lookup Title FirstPerson TempDate Split UserID Hashtag
 Options: control = appelt debug = false
 
 ///////////////////////////////////////////////////////////////
@@ -28,6 +28,7 @@ Macro: TITLE
  {Title}
  ({Token.string == "."})?
 )
+
 Macro: INITIALS
 (
   ({Token.orth == upperInitial, Token.length =="1"}
@@ -44,12 +45,10 @@ Macro: INITIALS2
 
 
 Macro: FIRSTNAME
-(
+
  ({FirstPerson.gender == male} |
   {FirstPerson.gender == female})
- |
- (INITIALS)
-)
+
 
 Macro: FIRSTNAMEAMBIG
 (
@@ -102,7 +101,15 @@ Priority: 1000
 -->
 {}
 
- 
+
+
+Rule:NotPerson
+Priority: 1000
+(
+ {Hashtag}|{UserID}
+)
+-->
+{}
 
 Rule:	GazPerson
 Priority: 50
@@ -367,7 +374,7 @@ Priority: 20
 ):jobtitle
 (
  (TITLE)?
- ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
+ ((FIRSTNAME | FIRSTNAMEAMBIG )
  )
  (PREFIX)* 
  (UPPER)
@@ -441,10 +448,23 @@ Priority: 50
 -->
 {}
 
+//Rule: LocPersonAmbig3
+//Priority: 100
+// What if the first word is a Lookup for both person_first and Location, and the second is an UPPER?
+// Probably a Person not Location
+//
+
+//(
+// {Lookup.majorType == person_first}
+//):loc
+//(
+// (UPPER)
+//):foo
+//-->
+//:loc.TempLocation = {kind = "locName", rule = LocPersonAmbig1}
 
 
-
-Rule: LocPersonAmbig
+Rule: LocPersonAmbig1
 Priority: 50
 // Location + Surname
 (
@@ -453,10 +473,25 @@ Priority: 50
 (
  (PREFIX)* 
  (UPPER)
+ (PERSONENDING)
+):foo
+-->
+:loc.TempLocation = {kind = "locName", rule = LocPersonAmbig1}
+
+Rule: LocPersonAmbig2
+Priority: 50
+// Location + Surname
+(
+ {Lookup.majorType == location}
+):loc
+(
+ (PREFIX)
+ (UPPER)
  (PERSONENDING)?
 ):foo
 -->
-:loc.TempLocation = {kind = "locName", rule = LocPersonAmbig}
+:loc.TempLocation = {kind = "locName", rule = LocPersonAmbig2}
+
 
 
 Rule: 	PersonFull
@@ -523,34 +558,6 @@ Priority: 20
 -->
 {}
 
-Rule: 	PersonFullReverse
-Priority: 5
-// Jones, F.W.
-// don't allow Jones, Fred because too ambiguous
-// Smith, TF
-
-(
- {Token.category ==NNP}
- {Token.string == ","}
- (INITIALS )+ 
- (PERSONENDING)?
-)
-:person -->
-{
- gate.FeatureMap features = Factory.newFeatureMap();
-gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
-gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("FirstPerson");
-if (firstPerson != null && firstPerson.size()>0)
-{
-  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
-  features.put("gender", personAnn.getFeatures().get("gender"));
-}
-  features.put("kind", "personName");
-  features.put("rule", "PersonFullReverse");
-outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
-features);
-}
-
 
 Rule:  PersonSaint
 Priority: 50
@@ -584,10 +591,7 @@ Priority: 40
 
 // Christian name + Location --> Person's Name
 (
- ({Lookup.majorType == person_first} |
-  (INITIALS
-   {Token.string == "."})
- )
+ {Lookup.majorType == person_first}
   {Lookup.majorType == location}
 )
 :person -->
@@ -748,7 +752,7 @@ Priority: 200
 
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "unknown", rule = "OrgXandY"}
+  :orgName.TempOrganization = {orgType = "unknown", rule = "OrgXandY"}
 
 Rule:	OrgXandY
 Priority: 20
@@ -771,7 +775,7 @@ Priority: 20
 
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "unknown", rule = "OrgXandY"}
+  :orgName.TempOrganization = {orgType = "unknown", rule = "OrgXandY"}
 
 
 Rule:OrgUni
@@ -786,7 +790,7 @@ Priority: 25
  {Token.category == NNP})+
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "org", rule = "OrgDept"}
+  :orgName.TempOrganization = {orgType = "other", rule = "OrgDept"}
 
 
 
@@ -807,7 +811,7 @@ Priority: 25
  )?
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "department", rule = "OrgDept"}
+  :orgName.TempOrganization = {orgType = "department", rule = "OrgDept"}
 
 Rule:	TheOrgXKey
 Priority: 500
@@ -827,7 +831,7 @@ Priority: 500
 )
 :org
 -->
-:org.TempOrganization = {kind = "unknown", rule = "TheOrgXKey"}
+:org.TempOrganization = {orgType = "unknown", rule = "TheOrgXKey"}
 
 Rule: NotOrgXKey
 Priority: 150
@@ -845,10 +849,25 @@ Priority: 150
 {}
 
 
+
+Rule: NotTheKey
+Priority: 200
+
+(
+ {Token.category == DT}
+ {Lookup.majorType == org_key}
+ ({Lookup.majorType == org_ending})?
+)
+:org
+-->
+{}
+
+
 Rule:	OrgXKey
 Priority: 125
 
 // Aaaa Ltd.
+({Token.category == DT})?
 (
   (UPPER)
   (UPPER)?
@@ -860,7 +879,7 @@ Priority: 125
 )
 :org
 -->
-:org.TempOrganization = {kind = "unknown", rule = "TheOrgXKey"}
+:org.TempOrganization = {orgType = "unknown", rule = "OrgXKey"}
 
 
 Rule: NotOrgXEnding
@@ -892,7 +911,7 @@ Priority: 500
  {Lookup.majorType == cdg}
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "unknown", rule = "OrgXEnding"}
+  :orgName.TempOrganization = {orgType = "company", rule = "OrgXEnding"}
 
 
 
@@ -907,7 +926,7 @@ Priority: 120
  {Lookup.majorType == cdg}
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "unknown", rule = "OrgXEnding"}
+  :orgName.TempOrganization = {orgType = "unknown", rule = "OrgXEnding"}
 
 Rule:	TheOrgXandYKey
 Priority: 220
@@ -928,7 +947,7 @@ Priority: 220
  ({Lookup.majorType == org_ending})?
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "unknown", rule = "OrgXandYKey"}
+  :orgName.TempOrganization = {orgType = "unknown", rule = "OrgXandYKey"}
 
 
 
@@ -953,7 +972,7 @@ Priority: 120
  ({Lookup.majorType == org_ending})?
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "unknown", rule = "OrgXandYKey"}
+  :orgName.TempOrganization = {orgType = "unknown", rule = "OrgXandYKey"}
 
 
 Rule:	OrgXsKeyBase
@@ -973,7 +992,7 @@ Priority: 120
   {Lookup.majorType == org_base})
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "org", rule = "OrgXsKeybase"}
+  :orgName.TempOrganization = {orgType = "unknown", rule = "OrgXsKeybase"}
 
 
 
@@ -1022,7 +1041,7 @@ Priority: 230
  )?
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "unknown", rule = "TheOrgXBase"}
+  :orgName.TempOrganization = {orgType = "unknown", rule = "TheOrgXBase"}
 
 
 Rule:	OrgXBase
@@ -1051,7 +1070,7 @@ Priority: 130
  )?
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "unknown", rule = "OrgXBase"}
+  :orgName.TempOrganization = {orgType = "unknown", rule = "OrgXBase"}
 
 Rule:	TheBaseofOrg
 Priority: 230
@@ -1072,7 +1091,7 @@ Priority: 230
  (UPPER)?
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "unknown", rule = "BaseofOrg"}
+  :orgName.TempOrganization = {orgType = "unknown", rule = "BaseofOrg"}
 
 
 
@@ -1093,7 +1112,7 @@ Priority: 130
  (UPPER)?
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "unknown", rule = "BaseofOrg"}
+  :orgName.TempOrganization = {orgType = "unknown", rule = "BaseofOrg"}
 
 
 
@@ -1109,7 +1128,7 @@ Priority: 130
  ({Lookup.majorType == org_ending})?
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "unknown", rule = "OrgPreX"}
+  :orgName.TempOrganization = {orgType = "unknown", rule = "OrgPreX"}
 
 
 
@@ -1125,7 +1144,7 @@ Priority: 150
   (CHURCH)
 )
 :orgName -->
-  :orgName.TempOrganization = {kind = "org", rule = "OrgChurch"}
+  :orgName.TempOrganization = {orgType = "other", rule = "OrgChurch"}
 
 
 Rule:OrgPersonAmbig
@@ -1141,7 +1160,7 @@ Priority: 130
 )
 :org 
 -->
- :org.TempOrganization= {kind = "unknown", rule = "OrgPersonAmbig"}
+ :org.TempOrganization= {orgType = "unknown", rule = "OrgPersonAmbig"}
 
  
 
@@ -1333,7 +1352,7 @@ Priority: 1
 )
 :org
 -->
- :org.TempOrganization= {kind = "orgName", rule = "OrgContext1"}
+ :org.TempOrganization= {orgType = "company", rule = "OrgContext1"}
 
 Rule: OrgContext2
 Priority: 5
@@ -1356,7 +1375,7 @@ Priority: 5
  {Token.string == "Laboratories"})
 )
 -->
- :org.TempOrganization= {kind = "orgName", rule = "OrgContext2"}
+ :org.TempOrganization= {orgType = "other", rule = "OrgContext2"}
 
 
 
@@ -1378,7 +1397,7 @@ Priority: 50
 )
 :org
 -->
- :org.TempOrganization= {kind = "orgName", rule = "joinOrg"}
+ :org.TempOrganization= {orgType = "company", rule = "joinOrg"}
 
 
 

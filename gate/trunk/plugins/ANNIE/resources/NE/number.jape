@@ -23,13 +23,17 @@ Options: control = appelt
 
 
 Macro: MILLION_BILLION
+//note: now includes T for trillion
 ({Token.string == "m"}|
 {Token.string == "million"}|
+{Token.string == "Million"}|
 {Token.string == "b"}|
 {Token.string == "billion"}|
+{Token.string == "Billion"}|
 {Token.string == "bn"}|
 {Token.string == "k"}|
-{Token.string == "K"}
+{Token.string == "K"}|
+{Token.string == "T"}
 )
 
 Macro: NUMBER_WORDS
@@ -97,6 +101,22 @@ Rule:	MoneySymbolUnit
 
  -->
   :number.Money = {kind = "number", rule = "MoneySymbolUnit"}
+  
+  Rule:	MoneyUnitSymbol
+ 
+// US $30
+
+(   
+ {Lookup.majorType == currency_unit, Lookup.minorType == pre_amount}
+ ({Token.symbolkind == currency}|
+  {Lookup.majorType == currency_unit, Lookup.minorType == post_amount})
+ (AMOUNT_NUMBER)
+) 
+:number 
+
+ -->
+  :number.Money = {kind = "number", rule = "MoneyUnitSymbol"}
+  
 
 //////////////////////////////////////////////////////////////
 

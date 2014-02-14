@@ -14,7 +14,7 @@
 */
 
 Phase:	Loc_Context
-Input: Unknown Token Location
+Input: Unknown Token Location Lookup
 Options: control = appelt
 
 
@@ -81,5 +81,16 @@ Priority: 50
 -->
  :loc.Location = {rule = "UnknownLocRegion"}
 
+Rule: LocState
+Priority: 100
+(
+ {Location.locType == city}
+ ({Token.string == ","})?
+)
+(
+ {Lookup.majorType == state}
+):tag
+-->
+:tag.Location = {locType = region, rule = "LocState"}
 
 

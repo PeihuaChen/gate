@@ -17,26 +17,26 @@ Phase:	NameContext
 Input: Lookup Unknown Person Token Organization
 Options: control = appelt
 
-Rule: Jobtitle1
-Priority: 50
-(
- {Lookup.majorType == jobtitle}
-)
-(
- {Unknown}
- ({Unknown})?
-)
-:person
--->
-{
+//Rule: Jobtitle1
+//Priority: 50
+//(
+ //{Lookup.majorType == jobtitle}
+//)
+//(
+// {Unknown}
+ //({Unknown})?
+//)
+//:person
+//-->
+//{
 //removes old "Unknown" annotation and adds a "Person" one
-gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("rule", "JobTitle1");
-outputAS.add(person.firstNode(), person.lastNode(), "Person",
-features);
-outputAS.removeAll(person);
-}
+//gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
+//gate.FeatureMap features = Factory.newFeatureMap();
+//features.put("rule", "JobTitle1");
+//outputAS.add(person.firstNode(), person.lastNode(), "Person",
+//features);
+//outputAS.removeAll(person);
+//}
 
 
 Rule:PersonTitle1

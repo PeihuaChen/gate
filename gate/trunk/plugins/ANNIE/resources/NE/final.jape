@@ -16,11 +16,18 @@
 //note: organization should be included as part of the address ??
 
 Phase:	Final
-Input: Token Lookup Jobtitle TempPerson TempLocation TempOrganization TempDate TempTime TempYear TempZone Street Postcode Email Url Phone Ip TempIdentifier TempSpecs Title Split
+Input: Token Lookup Jobtitle TempPerson TempLocation TempOrganization TempDate TempTime TempYear TempZone Street Postcode Email Url Phone Ip TempIdentifier TempSpecs Title Split Money
 Options: control = appelt
 
 
 ///////////////////////////////////////////////////////////////
+Rule: Money
+Priority: 200
+(
+ {Money}
+)
+--> 
+{}
 
 Rule: PersonFinal
 Priority: 30
@@ -40,7 +47,7 @@ gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("TempPerson")
 if (firstPerson != null && firstPerson.size()>0)
 {
   gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
-  if (personAnn.getFeatures().containsKey("gender")) features.put("gender", personAnn.getFeatures().get("gender"));
+  features.put("gender", personAnn.getFeatures().get("gender"));
 }
   features.put("rule1", person1Ann.getFeatures().get("rule"));
   features.put("rule", "PersonFinal");
