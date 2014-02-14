@@ -42,6 +42,7 @@ Priority: 1
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "OrgContext1");
+features.put("orgType ", "company");
 outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
 outputAS.removeAll(org);
@@ -68,6 +69,7 @@ Priority: 5
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "OrgContext2");
+features.put("orgType ", "company");
 outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
 outputAS.removeAll(org);
@@ -88,6 +90,7 @@ Priority: 5
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "OrgContext3");
+features.put("orgType ", "company");
 outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
 outputAS.removeAll(org);
@@ -109,6 +112,7 @@ Priority: 10
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "OrgContext4");
+features.put("orgType ", "company");
 outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
 outputAS.removeAll(org);
@@ -132,6 +136,7 @@ Priority: 10
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "OrgContext5");
+features.put("orgType ", "company");
 outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
 outputAS.removeAll(org);
@@ -160,6 +165,7 @@ Priority: 50
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "JoinOrg");
+features.put("orgType ", "company");
 outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
 outputAS.removeAll(org);
@@ -188,6 +194,7 @@ gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 //create the new annotation
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "OrgPerson");
+features.put("orgType ", "company");
 outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
 
@@ -211,6 +218,7 @@ Priority: 10
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "OrgConjOrg1");
+features.put("orgType ", "unknown");
 outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
 outputAS.removeAll(org);
@@ -232,6 +240,7 @@ Priority: 10
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "OrgConjOrg2");
+features.put("orgType ", "unknown");
 outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
 outputAS.removeAll(org);
@@ -239,41 +248,25 @@ outputAS.removeAll(org);
 
 
 
-Rule: OrgJobtitle
-Priority: 30
-(
- {Unknown.kind == PN}
-):org
-( 
- {Lookup.majorType == jobtitle}
-)
--->
-  {
-gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("rule ", "OrgJobTitle");
-outputAS.add(org.firstNode(), org.lastNode(), "Organization",
-features);
-outputAS.removeAll(org);
-}
+//Rule: OrgJobtitle
+//Priority: 30
+//(
+// {Unknown.kind == PN}
+//):org
+//( 
+// {Lookup.majorType == jobtitle}
+//)
+//-->
+//  {
+//gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
+//gate.FeatureMap features = Factory.newFeatureMap();
+//features.put("rule ", "OrgJobTitle");
+//features.put("orgType ", "company");
+//outputAS.add(org.firstNode(), org.lastNode(), "Organization",
+//features);
+//outputAS.removeAll(org);
+//}
 
 
 
-Rule:LocOrg
-Priority: 20
-// guess that Unknown preceded by Loc is an Org
 
-(
- {Location}
- {Unknown.kind == PN}
-):org
--->
-{
-//removes Unknown annotation, adds a new Org annotation
-gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("rule", "LocOrg");
-outputAS.add(org.firstNode(), org.lastNode(), "Organization",
-features);
-outputAS.removeAll(org);
-}

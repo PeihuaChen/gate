@@ -26,7 +26,7 @@ Priority: 50
  (
   {Token.kind == word}|
   {Token.kind == number}
- )+
+ )[1,9]
  (
   {Token.string == "_"}
  )?
@@ -34,7 +34,7 @@ Priority: 50
   ({Token.kind == word}|
    {Token.kind == number}|
    {Token.string == "_"}
-  )*
+  )[0,9]
  
  {Token.string == "@"}		
  (
@@ -49,7 +49,7 @@ Priority: 50
   {Token.kind == symbol}|
   {Token.kind == punctuation}|
   {Token.kind == number}
- )*
+ )[0,9]
  ({Token.string == "."})?
 (
   {Token.kind == word}|
