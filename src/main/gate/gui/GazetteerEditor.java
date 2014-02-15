@@ -18,7 +18,13 @@ import gate.Factory;
 import gate.Resource;
 import gate.creole.AbstractVisualResource;
 import gate.creole.ResourceInstantiationException;
-import gate.creole.gazetteer.*;
+import gate.creole.gazetteer.Gazetteer;
+import gate.creole.gazetteer.GazetteerEvent;
+import gate.creole.gazetteer.GazetteerList;
+import gate.creole.gazetteer.GazetteerListener;
+import gate.creole.gazetteer.GazetteerNode;
+import gate.creole.gazetteer.LinearDefinition;
+import gate.creole.gazetteer.LinearNode;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.GuiType;
 import gate.swing.XJFileChooser;
@@ -28,30 +34,77 @@ import gate.util.ExtensionFileFilter;
 import gate.util.Files;
 import gate.util.GateRuntimeException;
 
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.JTextComponent;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.Collator;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.JToolTip;
+import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
+import javax.swing.Popup;
+import javax.swing.PopupFactory;
+import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.JTextComponent;
 
 /**
  * Editor for {@link gate.creole.gazetteer.Gazetteer ANNIE Gazetteer}.
@@ -263,6 +316,12 @@ public class GazetteerEditor extends AbstractVisualResource
         // update the gazetteer
         GazetteerNode newGazetteerNode = new GazetteerNode(
           listEntryTextField.getText(), Factory.newFeatureMap());
+        
+        // if you don't set the separator then all features/values
+        // entered before the list is saved and reinitialised are lost
+        newGazetteerNode.setSeparator(listTableModel.gazetteerList
+                .getSeparator());
+        
         listTableModel.addRow(newGazetteerNode);
         listTableModel.setFilterText("");
         listEntryTextField.setText("");
