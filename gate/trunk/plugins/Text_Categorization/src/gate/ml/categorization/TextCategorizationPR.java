@@ -397,13 +397,17 @@ public class TextCategorizationPR extends AbstractLanguageAnalyser implements
         double probability = 1.0;
         // do we need to check probabilities?
         if(categoryThresholds != null && categoryThresholds[label] > 0) {
-          // prob[i] is the value of $\theta_T x$ 
+          // prob[i] is the value of $\theta^T x$ 
           // Once mapped through the logistic function, this becomes the 
           // probability of the instance belonging to class i, as opposed to 
           // all other classes.
-          // LIBLINEAR would normalize this so that all probs sum up to 1,
-          // but we don't want that, as we're only interested in the confidence
-          // the model has in this particular classification.
+          // LIBLINEAR normalizes the values so that all probabilities sum up 
+          // to 1 (i.e. the output is a probability distribution over the set 
+          // of classes). They should really be using softmax for that, but 
+          // anyway... 
+          // However, we don't want that, as we're only interested in the 
+          // confidence the model has in this particular classification, and we 
+          // don't know for sure that the classes are mutually-exclusive 
           probability = probs[label];
           // convert to an actual probability, by applying the logistic function
           probability = 1 / (1 + Math.exp(-probability));
