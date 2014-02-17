@@ -39,7 +39,7 @@ Priority: 100
 Rule:Unknown
 Priority: 50
 ( 
- {Token.category == NNP}
+ {Token.category == NNP, Token.length != "1"}
 ) 
 :unknown
 -->

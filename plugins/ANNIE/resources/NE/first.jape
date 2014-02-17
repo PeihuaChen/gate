@@ -14,11 +14,10 @@
 */
 
 Phase:	First
-Input: Token Lookup
-Options: control = once
+Input: Token 
+Options: control = appelt
 
 // this has to be run first of all 
-// contains any macros etc needed only for standard grammars
 
 //////////////////////////////////////////////////////////////
 Macro: SPACE
@@ -40,9 +39,37 @@ Macro: SPACE
 )
 
 
+
+
 ///////////////////////////////////////////////////////////////
 
-Rule: Silly
-// we have to have a rule here, so we'll just have something silly
+Rule: ClosedClass
+// closed class words should not be part of names generally, so let's identify them
+Priority: 100
 
-{Token} --> {}
+(
+ {Token.category == DT}|
+ {Token.category == PRP}|
+ {Token.category == RB}|
+ {Token.category == IN}
+):tag
+-->
+:tag.ClosedClass = {rule = "ClosedClass"}
+
+
+Rule: Upper
+// define what can be a possible proper noun - cater for the fact that POS tag might not be correct
+(
+ ({Token.category == NNP}| 
+   {Token.orth == upperInitial}|
+   {Token.orth == mixedCaps} 
+  )
+ ({Token.string == "-"}
+  {Token.category == NNP}
+ )?
+):tag
+-->
+:tag.Upper = {rule = "Upper"}
+
+
+
