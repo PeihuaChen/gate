@@ -14,8 +14,8 @@
 */
 
 Phase:	Clean
-Input: TempPerson TempLocation TempOrganization TempDate TempTime TempYear TempZone Street Postcode Email Url Phone Ip TempIdentifier TempSpecs
-Options: control = appelt
+Input: TempPerson TempLocation TempOrganization TempDate TempTime TempYear TempZone Street Postcode Email Url Phone Ip TempIdentifier TempSpecs ClosedClass Initials Upper FirstPerson Jobtitle HashtagToken HashtagLookup
+Options: control = all
 
 Rule:CleanTempAnnotations
 (
@@ -33,7 +33,14 @@ Rule:CleanTempAnnotations
  {Phone}|
  {Ip}|
  {TempIdentifier}|
- {TempSpecs}
+ {TempSpecs}|
+ {ClosedClass}|
+ {Upper}|
+ {Initials}|
+ {FirstPerson}|
+ {Jobtitle}|
+ {HashtagToken}|
+ {HashtagLookup}
 ):temp
 -->
 {

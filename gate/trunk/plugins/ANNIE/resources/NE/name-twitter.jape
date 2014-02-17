@@ -10,12 +10,12 @@
 *
 *  Diana Maynard, 10 Sep 2001
 * 
-*  $Id: name.jape 13147 2010-10-15 08:30:24Z markagreenwood $
+*  $Id: name.jape 17326 2014-02-17 16:38:01Z dgmaynard $
 */
 
 
 Phase:	Name
-Input: Token Lookup Title FirstPerson TempDate Split UserID
+Input: Token Lookup Title FirstPerson Upper ClosedClass Initials Split UserID
 Options: control = appelt debug = false
 
 ///////////////////////////////////////////////////////////////
@@ -29,19 +29,7 @@ Macro: TITLE
  ({Token.string == "."})?
 )
 
-Macro: INITIALS
-(
-  ({Token.orth == upperInitial, Token.length =="1"}
-  ({Token.string == "."})?
-  )+
-)
 
-Macro: INITIALS2
-
-(
- {Token.orth == allCaps, Token.length == "2"} |
- {Token.orth == allCaps, Token.length == "3"}
-)
 
 
 Macro: FIRSTNAME
@@ -57,16 +45,7 @@ Macro: FIRSTNAMEAMBIG
 
 
 
-Macro: UPPER
-(
- ({Token.category == NNP}| 
- {Token.orth == upperInitial}|
- {Token.orth == mixedCaps} 
-)
- ({Token.string == "-"}
-  {Token.category == NNP}
- )?
-)
+
 
 Macro: PERSONENDING
 (
@@ -86,20 +65,13 @@ Macro: PREFIX
 
 
 ///////////////////////////////////////////////////////////
-Rule: NotAnything
-Priority: 1000
 
-(
- {Lookup.majorType == spur}
-)
--->
-{}
 
 // Person Rules
 
 Rule: Pronoun
 Priority: 1000
-//stops personal pronouns being recognised as Initials
+
 (
  {Token.category == PP}|
  {Token.category == PRP}|
@@ -110,34 +82,76 @@ Priority: 1000
 
 
 
+Rule:Reject
+Priority: 1000
+// stops certain things being recognised as People
+(
+ {ClosedClass}
+)
+-->
+{}
 
-Rule:	GazPerson
+
+Rule:    GazPerson
 Priority: 50
 (
  {Lookup.majorType == person_full}
 )
 :person -->
 {
-gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
-gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)personSet.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
-features.put("kind", "personName");
-features.put("rule", "GazPerson");
-outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
-features);
+
+// find the Token annotations
+AnnotationSet tokenSet = gate.Utils.getContainedAnnotations(inputAS, personSet, "Token");
+// put them in order
+List<Annotation> tokenList = gate.Utils.inDocumentOrder(tokenSet);
+
+if (tokenList.size() == 1) {
+ // if there's only one Token, guess it's a surname
+
+  String surnameContent = gate.Utils.stringFor(doc, tokenList.get(0));
+  features.put("surname", surnameContent);
+ }
+
+else if (tokenList.size() > 0) {
+  // the string under the first Token
+   String firstNameContent = gate.Utils.stringFor(doc, tokenList.get(0));
+  features.put("firstName", firstNameContent);
+
+
+  // the string under the remaining Tokens if any
+  if (tokenList.size() > 1) {
+    Long lastNameStart = gate.Utils.start(tokenList.get(1));
+    Long lastNameEnd   = gate.Utils.end(tokenList.get(tokenList.size() - 1));
+    String surnameContent = gate.Utils.stringFor(doc, lastNameStart, lastNameEnd);
+    features.put("surname", surnameContent);
+  }
 }
 
-Rule:	TheGazPersonFirst
+features.put("kind", "fullName");
+features.put("rule", "GazPerson");
+features.put("gender", personAnn.getFeatures().get("gender"));
+
+// this method doesn't require try-catch
+gate.Utils.addAnn(outputAS, personSet, "TempPerson", features);
+}
+
+
+
+
+
+Rule:	GazPersonFirst
 Priority: 200
 (
  {Token.category == DT}|
  {Token.category == PRP}|
  {Token.category == RB}
-)
+)?
 (
- {FirstPerson}
-)
-:person 
+ {FirstPerson.kind != ambig}
+):person 
 ( 
  {Token.orth == upperInitial, Token.length == "1"}
 )?
@@ -147,37 +161,16 @@ gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
 gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("gender", personAnn.getFeatures().get("gender"));
-features.put("kind", "personName");
+features.put("kind", "firstName");
 features.put("rule", "GazPersonFirst");
+
+// get the string of the first name
+String contentFirstName = gate.Utils.stringFor(doc, personAnn);
+features.put("firstName", contentFirstName);
+
 outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
-//outputAS.removeAll(person);
 }
-
-
-Rule:	GazPersonFirst
-Priority: 70
-(
- {FirstPerson}
-)
-:person 
-( 
- {Token.orth == upperInitial, Token.length == "1"}
-)?
--->
-{
-gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
-gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
-gate.FeatureMap features = Factory.newFeatureMap();
-features.put("gender", personAnn.getFeatures().get("gender"));
-features.put("kind", "personName");
-features.put("rule", "GazPersonFirst");
-outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
-features);
-//outputAS.removeAll(person);
-}
-
-
 
 
 
@@ -191,66 +184,43 @@ Priority: 30
 (
  {Token.string == "and"}
 )
-({Token.orth == upperInitial})
+({Token.orth == upperInitial, Token.length != "1"})
 :person2
  -->
 {
 //first deal with person1
  gate.FeatureMap features1 = Factory.newFeatureMap();
-gate.AnnotationSet person1Set = (gate.AnnotationSet)bindings.get("person1");
-gate.AnnotationSet firstPerson = (gate.AnnotationSet)person1Set.get("FirstPerson");
-if (firstPerson != null && firstPerson.size()>0)
-{
-  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
+ gate.AnnotationSet person1Set = (gate.AnnotationSet)bindings.get("person1");
+  gate.Annotation personAnn = (gate.Annotation)person1Set.iterator().next();
+ 
+  String contentFirstName = gate.Utils.stringFor(doc, personAnn);
+  features1.put("firstName", contentFirstName);
   features1.put("gender", personAnn.getFeatures().get("gender"));
-}
-  features1.put("kind", "personName");
+  features1.put("kind", "firstName");
   features1.put("rule", "PersonFirstContext");
 outputAS.add(person1Set.firstNode(), person1Set.lastNode(), "TempPerson",
 features1);
+
 //now deal with person2
 gate.FeatureMap features2 = Factory.newFeatureMap();
 gate.AnnotationSet person2Set = (gate.AnnotationSet)bindings.get("person2");
-  features2.put("kind", "personName");
+gate.Annotation person2Ann = (gate.Annotation)person2Set.iterator().next();
+
+  String content2FirstName = gate.Utils.stringFor(doc, person2Ann);
+  features2.put("firstName", content2FirstName);
+  features2.put("kind", "firstName");
   features2.put("rule", "PersonFirstContext");
 outputAS.add(person2Set.firstNode(), person2Set.lastNode(), "TempPerson",
 features2);
 }
 
 
-Rule: PersonFirstContext2
-Priority: 40
-// Anne and I
-
-(
- {FirstPerson}
-):person
-(
- {Token.string == "and"}
- {Token.length == "1"}
-)
- -->
-{
- gate.FeatureMap features = Factory.newFeatureMap();
-gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
-gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("FirstPerson");
-if (firstPerson != null && firstPerson.size()>0)
-{
-  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
-  features.put("gender", personAnn.getFeatures().get("gender"));
-}
-  features.put("kind", "personName");
-  features.put("rule", "PersonFirstContext2");
-outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
-features);
-}
-
 Rule:	PersonTitle
 Priority: 35
 // Mr. Jones
 // Mr Fred Jones
 // note we only allow one first and surname, 
-// but we can add more in a final phase if we find adjacent unknowns
+// but we add more in a final phase if we find adjacent unknowns
 
 ( 
  {Token.category == DT}|
@@ -258,44 +228,43 @@ Priority: 35
  {Token.category == RB}
 )?
 (
- (TITLE)+
- ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
- )?
+ ({Title.rule == "TitleGender"}):title
+ ({Title})?
+ (
+  (FIRSTNAME | FIRSTNAMEAMBIG )?
+ ):firstName
+ (
   (PREFIX)* 
-  (UPPER)
- (PERSONENDING)?
-)
-:person -->
+  ({Upper})
+  (PERSONENDING)?
+ ):surname
+):person 
+-->
 {
  gate.FeatureMap features = Factory.newFeatureMap();
-gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
-  
- // get all Title annotations that have a gender feature
- HashSet fNames = new HashSet();
-    fNames.add("gender");
-    gate.AnnotationSet personTitle = personSet.get("Title", fNames);
+ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+ 
+ gate.AnnotationSet firstNameSet = (gate.AnnotationSet)bindings.get("firstName");
 
-// if the gender feature exists
- if (personTitle != null && personTitle.size()>0)
-{
-  //Out.prln("Titles found " +  personTitle);
-  gate.Annotation personAnn = (gate.Annotation)personTitle.iterator().next();
-  features.put("gender", personAnn.getFeatures().get("gender"));
-}
-else
-{
-  //get all firstPerson annotations that have a gender feature
-  //  HashSet fNames = new HashSet();
-   // fNames.add("gender");
-    gate.AnnotationSet firstPerson = personSet.get("FirstPerson", fNames);
+ gate.AnnotationSet titleSet = (gate.AnnotationSet)bindings.get("title");
+ gate.Annotation titleAnn = (gate.Annotation)titleSet.iterator().next();
 
-  if (firstPerson != null && firstPerson.size()>0)
+ gate.AnnotationSet surnameSet = (gate.AnnotationSet)bindings.get("surname");
+ gate.Annotation surnameAnn = (gate.Annotation)surnameSet.iterator().next();
+
+  String contentTitle = gate.Utils.stringFor(doc, titleAnn);
+  features.put("title", contentTitle);
+  features.put("gender", titleAnn.getFeatures().get("gender"));
+
+ if (firstNameSet != null && firstNameSet.size()>0)
  {
-    //Out.prln("First persons found " +  firstPerson);
-  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
-  features.put("gender", personAnn.getFeatures().get("gender"));
+  gate.Annotation firstNameAnn = (gate.Annotation)firstNameSet.iterator().next();
+  String firstNameContent = gate.Utils.stringFor(doc, firstNameAnn);
+  features.put("firstName", firstNameContent);
  }
-}
+  String surnameContent = gate.Utils.stringFor(doc, surnameAnn);
+  features.put("surname", surnameContent);
+
   features.put("kind", "personName");
   features.put("rule", "PersonTitle");
 outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
@@ -303,66 +272,106 @@ features);
 }
 
 
-Rule:	PersonFirstTitleGender
+
+
+Rule:	PersonTitleInitials
+Priority: 35
+
+// Mr J. Jones
+
+
+( 
+ {Token.category == DT}|
+ {Token.category == PRP}|
+ {Token.category == RB}
+)?
+(
+ ({Title.rule == "TitleGender"}):title
+ ({Title})?
+ (
+  ({Initials})?
+ ):initials
+ (
+  (PREFIX)* 
+  ({Upper, !Initials})
+  (PERSONENDING)?
+ ):surname
+):person 
+-->
+{
+ gate.FeatureMap features = Factory.newFeatureMap();
+ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+ 
+ gate.AnnotationSet initialsSet = (gate.AnnotationSet)bindings.get("initials");
+
+ gate.AnnotationSet titleSet = (gate.AnnotationSet)bindings.get("title");
+ gate.Annotation titleAnn = (gate.Annotation)titleSet.iterator().next();
+
+ gate.AnnotationSet surnameSet = (gate.AnnotationSet)bindings.get("surname");
+ gate.Annotation surnameAnn = (gate.Annotation)surnameSet.iterator().next();
+
+  String contentTitle = gate.Utils.stringFor(doc, titleAnn);
+  features.put("title", contentTitle);
+  features.put("gender", titleAnn.getFeatures().get("gender"));
+
+ if (initialsSet != null && initialsSet.size()>0)
+ {
+  List<Annotation> initialsList = gate.Utils.inDocumentOrder(initialsSet);
+
+  Long initialsStart = gate.Utils.start(initialsList.get(0));
+  Long initialsEnd   = gate.Utils.end(initialsList.get(initialsList.size() - 1));
+  String initialsContent = gate.Utils.cleanStringFor(doc, initialsStart, initialsEnd); 
+  features.put("initials", initialsContent);
+ }
+  String surnameContent = gate.Utils.stringFor(doc, surnameAnn);
+  features.put("surname", surnameContent);
+
+  features.put("kind", "personName");
+  features.put("rule", "PersonTitleInitials");
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+features);
+}
+
+
+Rule:	TitleFirstName
 Priority: 55
 // use this rule when we know what gender the title indicates
 // Mr Fred
 
 (
- ({Title.gender == male} | {Title.gender == female})
- ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
- )
+ ({Title.gender == male} | {Title.gender == female}):title
+ (FIRSTNAME | FIRSTNAMEAMBIG ):firstname
+
 )
 :person -->
+
 {
  gate.FeatureMap features = Factory.newFeatureMap();
-gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
-gate.AnnotationSet title = (gate.AnnotationSet)personSet.get("Title");
-if (title != null && title.size()>0)
-{
-  gate.Annotation personAnn = (gate.Annotation)title.iterator().next();
-  features.put("gender", personAnn.getFeatures().get("gender"));
-}
-  features.put("kind", "personName");
-  features.put("rule", "PersonFirstTitleGender");
-outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+ 
+ gate.AnnotationSet firstNameSet = (gate.AnnotationSet)bindings.get("firstName");
+
+ gate.AnnotationSet titleSet = (gate.AnnotationSet)bindings.get("title");
+ gate.Annotation titleAnn = (gate.Annotation)titleSet.iterator().next();
+
+  String contentTitle = gate.Utils.stringFor(doc, titleAnn);
+  features.put("title", contentTitle);
+  features.put("gender", titleAnn.getFeatures().get("gender"));
+
+ if (firstNameSet != null && firstNameSet.size()>0)
+ {
+  gate.Annotation firstNameAnn = (gate.Annotation)firstNameSet.iterator().next();
+  String firstNameContent = gate.Utils.stringFor(doc, firstNameAnn);
+  features.put("firstName", firstNameContent);
+ }
+ 
+ features.put("kind", "personName");
+
+ features.put("rule", "TitleFirstName");
+ outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
-
-Rule: PersonTitleGender
-Priority: 18
-// use this rule if the title has a feature gender
-// Miss F Smith
-(
- ({Title.gender == male}|
-  {Title.gender == female}
- ) 
- ((FIRSTNAME | FIRSTNAMEAMBIG | INITIALS2)
- )*
- (UPPER)
- (PERSONENDING)?
-)
-:person -->
-{
- gate.FeatureMap features = Factory.newFeatureMap();
-gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
-gate.AnnotationSet title = (gate.AnnotationSet)personSet.get("Title");
-// if the annotation type title doesn't exist, do nothing
-if (title != null && title.size()>0)
-{
-// if it does exist, take the first element in the set
-  gate.Annotation personAnn = (gate.Annotation)title.iterator().next();
-//propagate gender feature (and value) from title
-  features.put("gender", personAnn.getFeatures().get("gender"));
-}
-// create some new features
-  features.put("kind", "personName");
-  features.put("rule", "PersonTitleGender");
-// create a TempPerson annotation and add the features we've created
-outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
-features);
-}
 
 
 Rule: PersonJobTitle
@@ -377,12 +386,12 @@ Priority: 20
  ((FIRSTNAME | FIRSTNAMEAMBIG )
  )
  (PREFIX)* 
- (UPPER)
+ ({Upper,!Initials})
  (PERSONENDING)?
 )
 :person 
 -->
-    :person.TempPerson = {kind = "personName", rule = "PersonJobTitle"},
+    :person.TempPerson = {kind = "fullName", rule = "PersonJobTitle"},
    :jobtitle.JobTitle = {rule = "PersonJobTitle"} 
 
 
@@ -403,6 +412,8 @@ Priority: 50
 )
 :person -->
   {}
+
+
 Rule: FirstPersonStop
 Priority: 50
 // John And
@@ -422,7 +433,7 @@ gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
 gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("gender", personAnn.getFeatures().get("gender"));
-features.put("kind", "personName");
+features.put("kind", "firstName");
 features.put("rule", "GazPersonFirst");
 outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
@@ -442,7 +453,7 @@ Priority: 50
 )
 (
  (PREFIX)* 
- (UPPER)
+ ({Upper})
  (PERSONENDING)?
 ):foo
 -->
@@ -452,31 +463,89 @@ Priority: 50
 
 Rule: LocPersonAmbig1
 Priority: 50
-// Location + Surname
+// Location + Possible Surname --> Location only (ignore Surname)
+
 (
  {Lookup.majorType == location}
 ):loc
 (
  (PREFIX)* 
- (UPPER)
+ ({Upper,!Initials})
  (PERSONENDING)
 ):foo
 -->
 :loc.TempLocation = {kind = "locName", rule = LocPersonAmbig1}
 
+
 Rule: LocPersonAmbig2
 Priority: 50
-// Location + Surname
+// Location + + Possible Surname --> Location only (ignore Surname)
+
 (
  {Lookup.majorType == location}
 ):loc
 (
  (PREFIX)
- (UPPER)
+ ({Upper,!Initials})
  (PERSONENDING)?
 ):foo
 -->
 :loc.TempLocation = {kind = "locName", rule = LocPersonAmbig2}
+
+
+
+Rule: 	PersonFullInitials
+Priority: 10
+// F.W. Jones
+
+(
+ {Token.category == DT}
+)?
+(
+ 
+  ({Initials}):initials
+  ((FIRSTNAME | FIRSTNAMEAMBIG )?):middleName
+ ((PREFIX)*
+  ({Upper,!Initials})
+  (PERSONENDING)?
+ ):surname
+):person -->
+{
+ gate.FeatureMap features = Factory.newFeatureMap();
+ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+ gate.Annotation personAnn = (gate.Annotation)personSet.iterator().next();
+  
+  gate.AnnotationSet initialsSet = (gate.AnnotationSet)bindings.get("initials");
+  List<Annotation> initialsList = gate.Utils.inDocumentOrder(initialsSet);
+
+  Long initialsStart = gate.Utils.start(initialsList.get(0));
+  Long initialsEnd   = gate.Utils.end(initialsList.get(initialsList.size() - 1));
+  String initialsContent = gate.Utils.cleanStringFor(doc, initialsStart, initialsEnd); 
+  features.put("initials", initialsContent);
+ 
+
+ gate.AnnotationSet middleNameSet = (gate.AnnotationSet)bindings.get("middleName");
+
+ if (middleNameSet != null && middleNameSet.size()>0)
+{
+ gate.Annotation middleNameAnn = (gate.Annotation)middleNameSet.iterator().next();
+ String middleNameContent = gate.Utils.cleanStringFor(doc, middleNameAnn);
+ features.put("middleName", middleNameContent);
+ features.put("gender", middleNameAnn.getFeatures().get("gender"));
+}
+
+ gate.AnnotationSet surnameSet = (gate.AnnotationSet)bindings.get("surname");
+ gate.Annotation surnameAnn = (gate.Annotation)surnameSet.iterator().next();
+
+ String surnameContent = gate.Utils.cleanStringFor(doc, surnameAnn);
+ features.put("surname", surnameContent);
+
+ features.put("kind", "fullName");
+ features.put("rule", "PersonFullInitials");
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+features);
+
+}
 
 
 Rule: 	PersonFull
@@ -487,31 +556,46 @@ Priority: 10
  {Token.category == DT}
 )?
 (
- ((FIRSTNAME | FIRSTNAMEAMBIG) )+
- (PREFIX)*
- (UPPER)
- (PERSONENDING)?
-)
-:person -->
+ 
+  (FIRSTNAME | FIRSTNAMEAMBIG ):firstName
+  ((FIRSTNAME | FIRSTNAMEAMBIG )?):middleName
+ ((PREFIX)*
+  ({Upper,!Initials})
+  (PERSONENDING)?
+ ):surname
+):person -->
 {
  gate.FeatureMap features = Factory.newFeatureMap();
-gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+ gate.Annotation personAnn = (gate.Annotation)personSet.iterator().next();
   
-  //get all firstPerson annotations that have a gender feature
-    HashSet fNames = new HashSet();
-    fNames.add("gender");
-    gate.AnnotationSet firstPerson = personSet.get("FirstPerson", fNames);
+  gate.AnnotationSet firstNameSet = (gate.AnnotationSet)bindings.get("firstName");
+  gate.Annotation firstNameAnn = (gate.Annotation)firstNameSet.iterator().next();
+ 
+ String firstNameContent = gate.Utils.stringFor(doc, firstNameAnn);
+ features.put("firstName", firstNameContent);
+ features.put("gender", firstNameAnn.getFeatures().get("gender"));
 
-  if (firstPerson != null && firstPerson.size()>0)
- {
-    //Out.prln("First persons found " +  firstPerson);
-  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
-  features.put("gender", personAnn.getFeatures().get("gender"));
+ gate.AnnotationSet middleNameSet = (gate.AnnotationSet)bindings.get("middleName");
+
+ if (middleNameSet != null && middleNameSet.size()>0)
+{
+ gate.Annotation middleNameAnn = (gate.Annotation)middleNameSet.iterator().next();
+ String middleNameContent = gate.Utils.stringFor(doc, middleNameAnn);
+ features.put("middleName", middleNameContent);
 }
-  features.put("kind", "personName");
-  features.put("rule", "PersonFull");
+
+ gate.AnnotationSet surnameSet = (gate.AnnotationSet)bindings.get("surname");
+ gate.Annotation surnameAnn = (gate.Annotation)surnameSet.iterator().next();
+
+ String surnameContent = gate.Utils.stringFor(doc, surnameAnn);
+ features.put("surname", surnameContent);
+
+ features.put("kind", "fullName");
+ features.put("rule", "PersonFull");
 outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
+
 }
 
 Rule: PersonFullStop
@@ -521,20 +605,20 @@ Priority: 50
 (
  ((FIRSTNAME | FIRSTNAMEAMBIG) )
  (PREFIX)* 
- (UPPER)
+ ({Upper})
 ):person
 (
  {Lookup.majorType == date}
 )
 -->
- :person.TempPerson = {kind = "personName", rule = "PersonFullStop"}
+ :person.TempPerson = {kind = "fullName", rule = "PersonFullStop"}
 
 
 Rule: NotPersonFullReverse
 Priority: 20
 // XYZ, I
 (
- (UPPER)
+ ({Upper})
  {Token.string == ","}
  {Token.category == PRP}
  (PERSONENDING)?
@@ -562,7 +646,7 @@ if (firstPerson != null && firstPerson.size()>0)
   gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
   features.put("gender", personAnn.getFeatures().get("gender"));
 }
-  features.put("kind", "personName");
+  features.put("kind", "firstName");
   features.put("rule", "PersonSaint");
 outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
@@ -576,24 +660,69 @@ Priority: 40
 
 // Christian name + Location --> Person's Name
 (
- {Lookup.majorType == person_first}
-  {Lookup.majorType == location}
-)
-:person -->
+  ({Lookup.majorType == person_first}):firstName
+  ({Lookup.majorType == location}):surname
+):person -->
 {
  gate.FeatureMap features = Factory.newFeatureMap();
-gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
-gate.AnnotationSet firstPerson = (gate.AnnotationSet)inputAS.get("FirstPerson", personSet.firstNode().getOffset(), personSet.lastNode().getOffset());
-if (firstPerson != null && firstPerson.size()>0)
-{
-  gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
-  features.put("gender", personAnn.getFeatures().get("gender"));
-}
-  features.put("kind", "personName");
+ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person"); 
+ gate.Annotation personAnn = (gate.Annotation)personSet.iterator().next();
+
+ gate.AnnotationSet firstNameSet = (gate.AnnotationSet)bindings.get("firstName"); 
+ gate.Annotation firstNameAnn = (gate.Annotation)firstNameSet.iterator().next();
+
+ gate.AnnotationSet surnameSet = (gate.AnnotationSet)bindings.get("surname"); 
+ gate.Annotation surnameAnn = (gate.Annotation)surnameSet.iterator().next();
+
+ features.put("gender", firstNameAnn.getFeatures().get("minorType"));
+
+ String firstNameContent = gate.Utils.stringFor(doc, firstNameAnn);
+ features.put("firstName", firstNameContent);
+
+ String surnameContent = gate.Utils.stringFor(doc, surnameAnn);
+ features.put("surname", surnameContent);
+
+  features.put("kind", "fullName");
   features.put("rule", "PersonLocAmbig");
 outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
+
+
+Rule: TitlePersonLocAmbig
+Priority: 50
+// Professor London
+// title + Location --> Person's Name
+
+(
+  ({Title}):title
+  ({Lookup.majorType == location}):surname
+):person -->
+{
+ gate.FeatureMap features = Factory.newFeatureMap();
+ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person"); 
+ gate.Annotation personAnn = (gate.Annotation)personSet.iterator().next();
+
+ gate.AnnotationSet titleSet = (gate.AnnotationSet)bindings.get("title"); 
+ gate.Annotation titleAnn = (gate.Annotation)titleSet.iterator().next();
+
+ gate.AnnotationSet surnameSet = (gate.AnnotationSet)bindings.get("surname"); 
+ gate.Annotation surnameAnn = (gate.Annotation)surnameSet.iterator().next();
+
+ features.put("gender", titleAnn.getFeatures().get("gender"));
+
+ String titleContent = gate.Utils.stringFor(doc, titleAnn);
+ features.put("title", titleContent);
+
+ String surnameContent = gate.Utils.stringFor(doc, surnameAnn);
+ features.put("surname", surnameContent);
+
+  features.put("kind", "fullName");
+  features.put("rule", "TitlePersonLocAmbig");
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+features);
+}
+
 
 
 Rule:PersonOrgAmbig
@@ -730,14 +859,14 @@ Priority: 200
  {Token.string == "&"}
 
  (
-  {Token.orth == upperInitial, Token.category != PRP}
+  {Token.orth == upperInitial}
  )+
 
  (CDG)?
 
 )
 :orgName -->
-  :orgName.TempOrganization = {orgType = "unknown", rule = "INOrgXandY"}
+  :orgName.TempOrganization = {orgType = "unknown", rule = "OrgXandY"}
 
 Rule:	OrgXandY
 Priority: 20
@@ -753,10 +882,10 @@ Priority: 20
  {Token.string == "&"}
 
  (
-  {Token.orth == upperInitial, Token.category != PRP }
+  {Token.orth == upperInitial}
  )+
 
- (CDG)
+ (CDG)?
 
 )
 :orgName -->
@@ -806,11 +935,11 @@ Priority: 500
  {Token.category == DT}
 )
 (
-  (UPPER)
-  (UPPER)?
-  (UPPER)?
-  (UPPER)?
-  (UPPER)?
+  ({Upper})
+  ({Upper})?
+  ({Upper})?
+  ({Upper})?
+  ({Upper})?
  {Lookup.majorType == org_key}
  ({Lookup.majorType == org_ending})?
 )
@@ -834,6 +963,7 @@ Priority: 150
 {}
 
 
+
 Rule: NotTheKey
 Priority: 200
 
@@ -846,17 +976,18 @@ Priority: 200
 -->
 {}
 
+
 Rule:	OrgXKey
 Priority: 125
 
 // Aaaa Ltd.
-
+({Token.category == DT})?
 (
-  ((UPPER))
-  (UPPER)?
-  (UPPER)?
-  (UPPER)?
-  (UPPER)?
+  ({Upper})
+  ({Upper})?
+  ({Upper})?
+  ({Upper})?
+  ({Upper})?
  {Lookup.majorType == org_key}
  ({Lookup.majorType == org_ending})?
 )
@@ -889,8 +1020,8 @@ Priority: 500
  {Token.category == DT}
 )
 (
-  (UPPER)
-  (UPPER)?
+  ({Upper})
+  ({Upper})?
  {Lookup.majorType == cdg}
 )
 :orgName -->
@@ -904,8 +1035,8 @@ Priority: 120
 // Coca Cola Co.
 
 (
-  (UPPER)
-  (UPPER)?
+  ({Upper})
+  ({Upper})?
  {Lookup.majorType == cdg}
 )
 :orgName -->
@@ -918,13 +1049,13 @@ Priority: 220
  {Token.category == DT}
 )
 (
- (UPPER)
- (UPPER)?
+ ({Upper})
+ ({Upper})?
   (({Token.string == "and"} | 
     {Token.string == "&"})
-   (UPPER)?
-   (UPPER)?
-   (UPPER)?
+   ({Upper})?
+   ({Upper})?
+   ({Upper})?
   )
  {Lookup.majorType == org_key}
  ({Lookup.majorType == org_ending})?
@@ -943,13 +1074,13 @@ Priority: 120
 // but NOT A XXX Services Ltd.
 
 (
- (UPPER)
- (UPPER)?
+ ({Upper})
+ ({Upper})?
   (({Token.string == "and"} | 
     {Token.string == "&"})
-   (UPPER)?
-   (UPPER)?
-   (UPPER)?
+   ({Upper})?
+   ({Upper})?
+   ({Upper})?
   )
  {Lookup.majorType == org_key}
  ({Lookup.majorType == org_ending})?
@@ -965,8 +1096,8 @@ Priority: 120
 // Queen's Ware
 
 (
-  (UPPER)?
-  (UPPER)?
+  ({Upper})?
+  ({Upper})?
   ({Token.orth == upperInitial}
    {Token.string == "'"}
    ({Token.string == "s"})?
@@ -1008,19 +1139,19 @@ Priority: 230
 )
 (
  (
-  (UPPER)|
+  ({Upper})|
   {Lookup.majorType == organization}
  )
- (UPPER)?
- (UPPER)?
+ ({Upper})?
+ ({Upper})?
  ({Lookup.majorType == org_base}|
   {Lookup.majorType == govern_key}
  )
  (
   {Token.string == "of"}
-  (UPPER)
-  (UPPER)?
-  (UPPER)?
+  ({Upper})
+  ({Upper})?
+  ({Upper})?
  )?
 )
 :orgName -->
@@ -1037,19 +1168,19 @@ Priority: 130
 
 (
  (
-  (UPPER)|
+  ({Upper})|
   {Lookup.majorType == organization}
  )
- (UPPER)?
- (UPPER)?
+ ({Upper})?
+ ({Upper})?
  ({Lookup.majorType == org_base}|
   {Lookup.majorType == govern_key}
  )
  (
   {Token.string == "of"}
-  (UPPER)
-  (UPPER)?
-  (UPPER)?
+  ({Upper})
+  ({Upper})?
+  ({Upper})?
  )?
 )
 :orgName -->
@@ -1070,8 +1201,8 @@ Priority: 230
  ( 
   {Token.category == DT}
  )?
- (UPPER)
- (UPPER)?
+ ({Upper})
+ ({Upper})?
 )
 :orgName -->
   :orgName.TempOrganization = {orgType = "unknown", rule = "BaseofOrg"}
@@ -1091,8 +1222,8 @@ Priority: 130
  ( 
   {Token.category == DT}
  )?
- (UPPER)
- (UPPER)?
+ ({Upper})
+ ({Upper})?
 )
 :orgName -->
   :orgName.TempOrganization = {orgType = "unknown", rule = "BaseofOrg"}
@@ -1112,7 +1243,6 @@ Priority: 130
 )
 :orgName -->
   :orgName.TempOrganization = {orgType = "unknown", rule = "OrgPreX"}
-
 
 
 
@@ -1136,7 +1266,9 @@ Priority: 130
 // overrides PersonFull
 
 (
+ (TITLE)?
  (FIRSTNAME)
+ {Token.string == "'"}({Token.string == "s"})?
  ({Lookup.majorType == org_key}|
   {Lookup.majorType == org_base})
  ({Lookup.majorType == org_ending})?
@@ -1284,7 +1416,7 @@ Rule:LocKey
 (
  ({Lookup.majorType == loc_key, Lookup.minorType == pre}
  )
- (UPPER)
+ ({Upper})
  (
   {Lookup.majorType == loc_key, Lookup.minorType == post})?
 )
@@ -1297,8 +1429,7 @@ Rule:LocKey
 
 Rule:InLoc1
 (
- {Token.string == "in"}|
- {Token.string == "to"}
+ {Token.string == "in"}
 )
 (
  {Lookup.majorType == location}
@@ -1314,7 +1445,7 @@ Priority: 30
  {Token.string == "of"}
 )
 (
- (UPPER)
+ ({Upper})
 )
 :loc
 -->
@@ -1329,9 +1460,9 @@ Priority: 1
  {Token.string == "company"}
 )
 (
- (UPPER)
- (UPPER)?
- (UPPER)? 
+ ({Upper})
+ ({Upper})?
+ ({Upper})? 
 )
 :org
 -->
@@ -1344,9 +1475,9 @@ Priority: 5
 // Medici offices
 
 (
- (UPPER)
- (UPPER)?
- (UPPER)? 
+ ({Upper})
+ ({Upper})?
+ ({Upper})? 
 )
 : org
 (
@@ -1374,9 +1505,9 @@ Priority: 50
  )
 )
 (
- (UPPER)
- (UPPER)?
- (UPPER)?
+ ({Upper})
+ ({Upper})?
+ ({Upper})?
 )
 :org
 -->
