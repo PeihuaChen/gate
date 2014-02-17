@@ -15,7 +15,7 @@
 
 
 Phase:	Name
-Input: Token Lookup Title FirstPerson TempDate Split UserID Hashtag
+Input: Token Lookup Title FirstPerson TempDate Split
 Options: control = appelt debug = false
 
 ///////////////////////////////////////////////////////////////
@@ -98,16 +98,6 @@ Priority: 1000
  {Token.category == PRP}|
  {Token.category == RB}
 ):pro
--->
-{}
-
-
-
-Rule:NotPerson
-Priority: 1000
-(
- {Hashtag}|{UserID}
-)
 -->
 {}
 
