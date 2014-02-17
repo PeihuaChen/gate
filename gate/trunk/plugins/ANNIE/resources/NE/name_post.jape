@@ -53,7 +53,7 @@ if (firstPerson != null && firstPerson.size()>0)
   gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
   features.put("gender", personAnn.getFeatures().get("gender"));
 }
-  features.put("kind", "personName");
+  features.put("kind", "firstName");
   features.put("rule", "FirstPersonStop");
 outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);

@@ -10,7 +10,7 @@
 *
 *  Diana Maynard, 10 Sep 2001
 * 
-*  $Id: name.jape 17311 2014-02-14 18:49:50Z dgmaynard $
+*  $Id: name.jape 13147 2010-10-15 08:30:24Z markagreenwood $
 */
 
 
@@ -107,6 +107,9 @@ Priority: 1000
 ):pro
 -->
 {}
+
+
+
 
 Rule:	GazPerson
 Priority: 50
@@ -445,20 +448,6 @@ Priority: 50
 -->
 {}
 
-//Rule: LocPersonAmbig3
-//Priority: 100
-// What if the first word is a Lookup for both person_first and Location, and the second is an UPPER?
-// Probably a Person not Location
-//
-
-//(
-// {Lookup.majorType == person_first}
-//):loc
-//(
-// (UPPER)
-//):foo
-//-->
-//:loc.TempLocation = {kind = "locName", rule = LocPersonAmbig1}
 
 
 Rule: LocPersonAmbig1
@@ -488,7 +477,6 @@ Priority: 50
 ):foo
 -->
 :loc.TempLocation = {kind = "locName", rule = LocPersonAmbig2}
-
 
 
 Rule: 	PersonFull
@@ -742,14 +730,14 @@ Priority: 200
  {Token.string == "&"}
 
  (
-  {Token.orth == upperInitial}
+  {Token.orth == upperInitial, Token.category != PRP}
  )+
 
  (CDG)?
 
 )
 :orgName -->
-  :orgName.TempOrganization = {orgType = "unknown", rule = "OrgXandY"}
+  :orgName.TempOrganization = {orgType = "unknown", rule = "INOrgXandY"}
 
 Rule:	OrgXandY
 Priority: 20
@@ -765,10 +753,10 @@ Priority: 20
  {Token.string == "&"}
 
  (
-  {Token.orth == upperInitial}
+  {Token.orth == upperInitial, Token.category != PRP }
  )+
 
- (CDG)?
+ (CDG)
 
 )
 :orgName -->
@@ -846,7 +834,6 @@ Priority: 150
 {}
 
 
-
 Rule: NotTheKey
 Priority: 200
 
@@ -859,14 +846,13 @@ Priority: 200
 -->
 {}
 
-
 Rule:	OrgXKey
 Priority: 125
 
 // Aaaa Ltd.
-({Token.category == DT})?
+
 (
-  (UPPER)
+  ((UPPER))
   (UPPER)?
   (UPPER)?
   (UPPER)?
