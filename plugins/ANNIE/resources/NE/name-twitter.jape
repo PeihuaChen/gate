@@ -10,12 +10,12 @@
 *
 *  Diana Maynard, 10 Sep 2001
 * 
-*  $Id$
+*  $Id: name.jape 17311 2014-02-14 18:49:50Z dgmaynard $
 */
 
 
 Phase:	Name
-Input: Token Lookup Title FirstPerson TempDate Split
+Input: Token Lookup Title FirstPerson TempDate Split UserID
 Options: control = appelt debug = false
 
 ///////////////////////////////////////////////////////////////
@@ -86,7 +86,14 @@ Macro: PREFIX
 
 
 ///////////////////////////////////////////////////////////
+Rule: NotAnything
+Priority: 1000
 
+(
+ {Lookup.majorType == spur}
+)
+-->
+{}
 
 // Person Rules
 
