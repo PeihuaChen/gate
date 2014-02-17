@@ -30,18 +30,23 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Matcher;
+
+import org.apache.poi.ss.formula.functions.T;
 
 /**
  * Utility class for managing a set of GATE relations (usually each
  * annotation set of a document will have one set of associated
  * relations).
  */
-public class RelationSet implements Serializable, AnnotationSetListener {
+public class RelationSet implements Serializable, AnnotationSetListener,
+                        Set<Relation> {
 
   private static final long serialVersionUID = 8552798130184595465L;
 
@@ -183,7 +188,7 @@ public class RelationSet implements Serializable, AnnotationSetListener {
                     type, members);
 
     // add the relation to the set
-    addRelation(rel);
+    add(rel);
 
     // return the relation to the calling method
     return rel;
@@ -193,8 +198,10 @@ public class RelationSet implements Serializable, AnnotationSetListener {
    * Adds an externally-created {@link Relation} instance.
    * 
    * @param rel the {@link Relation} to be added.
+   * @return
    */
-  public void addRelation(Relation rel) {
+  @Override
+  public boolean add(Relation rel) {
 
     // keep a track of the max ID we now of to support the index access
     maxID = Math.max(maxID, rel.getId());
@@ -230,6 +237,8 @@ public class RelationSet implements Serializable, AnnotationSetListener {
     // notify anyone who cares that a new relation has been added
     fireRelationAdded(new RelationSetEvent(this,
             RelationSetEvent.RELATION_ADDED, rel));
+
+    return true;
   }
 
   /**
@@ -307,6 +316,7 @@ public class RelationSet implements Serializable, AnnotationSetListener {
    */
   public boolean deleteRelation(Relation relation) {
 
+    // don't do anything if this relation isn't part of this set
     if(!indexById.containsValue(relation)) return false;
 
     // find all relations which include the annotation and remove them
@@ -481,5 +491,141 @@ public class RelationSet implements Serializable, AnnotationSetListener {
         listeners.elementAt(i).relationRemoved(e);
       }
     }
+  }
+
+  @Override
+  public boolean addAll(Collection<? extends Relation> relations) {
+    boolean modified = false;
+
+    for(Relation r : relations) {
+      modified |= add(r);
+    }
+
+    return modified;
+  }
+
+  @Override
+  public boolean contains(Object obj) {
+    return indexById.containsValue(obj);
+  }
+
+  @Override
+  public boolean containsAll(Collection<?> relations) {
+    boolean all = true;
+
+    for(Object r : relations) {
+      all &= contains(r);
+    }
+
+    return all;
+  }
+
+  @Override
+  public boolean isEmpty() {
+    return indexById.isEmpty();
+  }
+
+  @Override
+  public Iterator<Relation> iterator() {
+
+    final Set<Relation> copy = new HashSet<Relation>(indexById.values());
+
+    return new Iterator<Relation>() {
+      private Relation nextElement, currentElement;
+
+      private boolean hasNext;
+
+      private Iterator<Relation> iterator = copy.iterator();
+
+      {
+        nextMatch();
+      }
+
+      @Override
+      public boolean hasNext() {
+        return hasNext;
+      }
+
+      @Override
+      public Relation next() {
+        if(!hasNext) {
+          throw new NoSuchElementException();
+        }
+
+        return (currentElement = nextMatch());
+      }
+
+      private Relation nextMatch() {
+        Relation oldMatch = nextElement;
+
+        while(iterator.hasNext()) {
+          Relation o = iterator.next();
+
+          if(indexById.containsValue(o)) {
+            hasNext = true;
+            nextElement = o;
+
+            return oldMatch;
+          }
+        }
+
+        hasNext = false;
+
+        return oldMatch;
+      }
+
+      @Override
+      public void remove() {
+        if(currentElement != null) deleteRelation(currentElement);
+      }
+
+    };
+  }
+
+  @Override
+  public boolean remove(Object obj) {
+    if(!(obj instanceof Relation)) return false;
+    return deleteRelation((Relation)obj);
+  }
+
+  @Override
+  public boolean removeAll(Collection<?> relations) {
+    boolean modified = false;
+
+    for(Object r : relations) {
+      if(r instanceof Relation) {
+        modified |= deleteRelation((Relation)r);
+      }
+    }
+
+    return modified;
+  }
+
+  @Override
+  public boolean retainAll(Collection<?> relations) {
+    boolean modified = false;
+
+    Iterator<Relation> it = iterator();
+    while(it.hasNext()) {
+      Relation r = it.next();
+
+      if(!relations.contains(r)) {
+        //deleteRelation(r);
+        it.remove();
+        modified = true;
+      }
+    }
+
+    return modified;
+  }
+
+  @Override
+  public Object[] toArray() {
+    return indexById.values().toArray();
+  }
+
+  @Override
+  public <T> T[] toArray(T[] store) {
+    return indexById.values().toArray(store);
   }
 }

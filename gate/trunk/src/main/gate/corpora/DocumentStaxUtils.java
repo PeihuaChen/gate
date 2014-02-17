@@ -467,7 +467,7 @@ public class DocumentStaxUtils {
         r.setUserData(wrapper.getValue());
       }
 
-      relations.addRelation(r);
+      relations.add(r);
     }
   }
 
