@@ -1,12 +1,13 @@
 Phase: ThingsForPMI
-Input: Token MultiWordTermCandidate
+Input: Token MultiWord Person Organization Location
 Options: control = all
 
 
-Rule: Noun
+Rule: SimpleNoun
 ({Token.kind == "word", Token.category ==~ "N.*", Token.length > 2}):token
 -->
-:token.Entity = { rule = "Noun", canonical = :token.Token.root }
+:token.Noun = { rule = "SimpleNoun", canonical = :token.Token.root },
+:token.SimpleNoun =  { rule = "SimpleNoun", canonical = :token.Token.root }
 
 
 Rule: Verb
@@ -16,8 +17,22 @@ Rule: Verb
 
 
 Rule: MultiWord
-({MultiWordTermCandidate}):match
+({MultiWord}):match
 -->
-:match.Entity = { rule = "MultiWord", canonical = :match.TermCandidate.canonical }
+:match.Noun = { rule = "MultiWord", canonical = :match.MultiWord.canonical },
+:match.CompoundNoun =  { rule = "MultiWord", canonical = :match.MultiWord.canonical }
 
 
+Rule: NamedEntity
+({Person}|{Organization}|{Location}):match
+-->
+:match {
+   Annotation match = gate.Utils.getOnlyAnn(matchAnnots);
+   String canonical = gate.Utils.cleanStringFor(doc, match).toLowerCase();
+   
+   FeatureMap fm = Factory.newFeatureMap();	
+   fm.putAll(match.getFeatures());
+   fm.put("canonical", canonical);
+   fm.put("original_type", match.getType());
+   gate.Utils.addAnn(outputAS, match, "NamedEntity", fm);
+}
