@@ -936,4 +936,78 @@ public class Utils {
     }
     return namePrefix + uriString.substring(uriPrefix.length());
   }
+  
+  /**
+   * Get all the annotations from the source annotation set that start and end 
+   * at exactly the same offsets as the given annotation set.
+   * 
+   * @param source the annotation set from which to select
+   * @param coextSet the annotation set from which to take the start and end offsets
+   * @return the AnnotationSet containing all annotations exactly coextensive with coextSet
+   */
+  public static AnnotationSet getCoextensiveAnnotations(AnnotationSet source, AnnotationSet coextSet) {
+    return getCoextensiveAnnotationsWorker(source, null, start(coextSet), end(coextSet));
+  }
+  /**
+   * Get all the annotations from the source annotation set that start and end 
+   * at exactly the same offsets as the given annotation set and are of the 
+   * specified type.
+   * 
+   * @param source the annotation set from which to select
+   * @param coextSet the annotation set from which to take the start and end offsets
+   * @param type the desired annotation type of the annotations to return
+   * @return the AnnotationSet containing all annotations exactly coextensive with coextSet and of the
+   * specified type
+   */
+  public static AnnotationSet getCoextensiveAnnotations(AnnotationSet source, AnnotationSet coextSet, String type) {
+    return getCoextensiveAnnotationsWorker(source, type, start(coextSet), end(coextSet));
+  }
+  /**
+   * Get all the annotations from the source annotation set that start and end 
+   * at exactly the same offsets as the given annotation.
+   * 
+   * @param source the annotation set from which to select
+   * @param coextAnn the annotation from which to take the start and end offsets
+   * @return the AnnotationSet containing all annotations exactly coextensive with coextAnn
+   */
+  public static AnnotationSet getCoextensiveAnnotations(AnnotationSet source, Annotation coextAnn) {
+    return getCoextensiveAnnotationsWorker(source, null, start(coextAnn), end(coextAnn));
+  }
+  /**
+   * Get all the annotations from the source annotation set that start and end 
+   * at exactly the same offsets as the given annotation and have the specified type.
+   * 
+   * @param source the annotation set from which to select
+   * @param coextAnn the annotation from which to take the start and end offsets
+   * @return the AnnotationSet containing all annotations exactly coextensive with coextAnn and 
+   * having the specified type.
+   */
+  public static AnnotationSet getCoextensiveAnnotations(AnnotationSet source, Annotation coextAnn, String type) {
+    return getCoextensiveAnnotationsWorker(source, type, start(coextAnn), end(coextAnn));
+  }
+
+  private static AnnotationSet getCoextensiveAnnotationsWorker(AnnotationSet source,
+      String type, long start, long end) {
+    if (source instanceof gate.annotation.AnnotationSetImpl) {
+      AnnotationSet ret = ((AnnotationSetImpl) source).getStrict((long) start,
+          (long) end);
+      if (type != null) {
+        return ret.get(type);
+      } else {
+        return ret;
+      }
+    } else {
+      AnnotationSet annset = source.getContained((long) start, (long) end);
+      List<Annotation> annotationsToAdd = new ArrayList<Annotation>();
+      for (Annotation ann : annset) {
+        if (start(ann) == start && end(ann) == end) {
+          if (type == null || ann.getType().equals(type)) {
+            annotationsToAdd.add(ann);
+          }
+        }
+      }
+      return Factory.createImmutableAnnotationSet(source.getDocument(), annotationsToAdd);
+    }
+  }
+  
 }
