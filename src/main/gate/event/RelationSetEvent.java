@@ -18,7 +18,7 @@ import gate.relations.Relation;
 import gate.relations.RelationSet;
 
 /**
- * This class models events fired by an {@link gate.relatiosn.RelationSet}.
+ * This class models events fired by an {@link gate.relations.RelationSet}.
  */
 public class RelationSetEvent extends GateEvent{
 

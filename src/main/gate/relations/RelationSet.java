@@ -73,7 +73,7 @@ public class RelationSet implements Serializable, AnnotationSetListener,
    * 
    * The element at position <code>pos</code> is a map from annotation
    * ID (representing a relation member) to a {@link BitSet} indicating
-   * which of the relation indexes (in {@link #relations}) correspond to
+   * which of the relation indexes correspond to
    * relations that contain the given annotation (i.e. member) on the
    * position <code>pos</code>.
    */
@@ -198,7 +198,7 @@ public class RelationSet implements Serializable, AnnotationSetListener,
    * Adds an externally-created {@link Relation} instance.
    * 
    * @param rel the {@link Relation} to be added.
-   * @return
+   * @return true if the {@link Relation} was added to the set, false otherwise
    */
   @Override
   public boolean add(Relation rel) {
@@ -349,7 +349,7 @@ public class RelationSet implements Serializable, AnnotationSetListener,
 
   /**
    * Returns a collection of all {@link Relation} instances within this
-   * set which include the specified {@link Annotaiton} or
+   * set which include the specified {@link Annotation} or
    * {@link Relation}
    * 
    * @param id the ID of the {@link Annotation} or {@link Relation} to
