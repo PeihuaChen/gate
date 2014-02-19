@@ -4,6 +4,7 @@ import gate.AnnotationSet;
 import gate.Document;
 import gate.Factory;
 import gate.Gate;
+import gate.corpora.TestDocument;
 
 import java.util.ArrayList;
 import java.net.URL;
@@ -44,16 +45,11 @@ public class TestClassificationMeasures extends TestCase{
         
     try {
       Gate.init();
-          
-      URI uri1 = new URI("http://gate.ac.uk/tests/iaa/beijing-opera.xml");
-      URI uri2 = new URI("http://gate.ac.uk/tests/iaa/beijing-opera.xml");
-      URI uri3 = new URI("http://gate.ac.uk/tests/iaa/in-outlook-09-aug-2001.xml");
-      URI uri4 = new URI("http://gate.ac.uk/tests/iaa/in-outlook-09-aug-2001.xml");
       
-      doc1 = Factory.newDocument(uri1.toURL());
-      doc2 = Factory.newDocument(uri2.toURL());
-      doc3 = Factory.newDocument(uri3.toURL());
-      doc4 = Factory.newDocument(uri4.toURL());
+      doc1 = Factory.newDocument(new URL(TestDocument.getTestServerName()+"tests/iaa/beijing-opera.xml"));
+      doc2 = Factory.newDocument(new URL(TestDocument.getTestServerName()+"tests/iaa/beijing-opera.xml"));
+      doc3 = Factory.newDocument(new URL(TestDocument.getTestServerName()+"tests/iaa/in-outlook-09-aug-2001.xml"));
+      doc4 = Factory.newDocument(new URL(TestDocument.getTestServerName()+"tests/iaa/in-outlook-09-aug-2001.xml"));
         
     } catch (Exception e) {
       e.printStackTrace();
