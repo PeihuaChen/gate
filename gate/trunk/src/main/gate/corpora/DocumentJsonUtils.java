@@ -237,7 +237,7 @@ public class DocumentJsonUtils {
    * @param doc the document to write
    * @param start the start offset of the segment to write
    * @param end the end offset of the segment to write
-   * @param annotations annotations to write.
+   * @param annotationsMap annotations to write.
    * @param extraFeatures additional properties to add to the generated
    *          JSON. If the map includes a "text" key this will be
    *          ignored, and if it contains a key "entities" whose value
