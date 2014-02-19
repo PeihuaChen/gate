@@ -122,7 +122,7 @@ public class TestFlexibleGazetteer extends TestCase {
       System.out.println("There are this many lookup annotations: "+
                          lookups.size());
     }
-    assertTrue(lookups.size()== 28);
+    assertTrue("found " + lookups.size()+" was expecting 29",lookups.size()== 29);
 
     // Now clean up so we don't get a memory leak.
     Factory.deleteResource(doc);
