@@ -139,7 +139,7 @@ public class Population extends ResourceHelper  {
 
     if(!(handle.getTarget() instanceof Corpus)) return actions;
 
-    actions.add(new AbstractAction("Populate from Twitter JSON file") {
+    actions.add(new AbstractAction("Populate from Twitter JSON files") {
       private static final long serialVersionUID = -8511779592856786327L;
 
       @Override
