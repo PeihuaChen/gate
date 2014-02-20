@@ -38,9 +38,10 @@ Rule:CleanTempAnnotations
  {Upper}|
  {Initials}|
  {FirstPerson}|
- {Jobtitle}|
+ {JobTitle}|
  {HashtagToken}|
- {HashtagLookup}
+ {HashtagLookup}|
+ {Temp}
 ):temp
 -->
 {
