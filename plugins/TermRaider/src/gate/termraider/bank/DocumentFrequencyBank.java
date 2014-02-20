@@ -22,11 +22,15 @@ import gate.Factory;
 import gate.Resource;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
 import gate.gui.ActionsPublisher;
 import gate.termraider.gui.ActionSaveCsv;
 import gate.termraider.util.*;
 import gate.util.GateException;
 
+@CreoleResource(name = "DocumentFrequencyBank",
+icon = "termbank-lr.png",
+comment = "Document frequency counter derived from corpora and other DFBs")
 public class DocumentFrequencyBank extends AbstractBank
 implements ActionsPublisher{
   
@@ -41,6 +45,7 @@ implements ActionsPublisher{
   private int documentTotal;
   private Map<Term, Integer> documentFrequencies;
   private int minFrequency, maxFrequency;
+  private Map<String, Set<Term>> stringLookupTable;
 
   // transient to allow serialization
   protected transient List<Action> actionsList;
@@ -73,6 +78,7 @@ implements ActionsPublisher{
     documentFrequencies = new HashMap<Term, Integer>();
     languages = new HashSet<String>();
     types = new HashSet<String>();
+    stringLookupTable = new HashMap<String, Set<Term>>();
   }
 
   
@@ -96,7 +102,7 @@ implements ActionsPublisher{
     for (DocumentFrequencyBank bank : inputBanks) {
       this.documentTotal += bank.documentTotal;
       for (Term term : bank.getTerms()) {
-        increment(term, bank.getFrequency(term));
+        increment(term, bank.getFrequencyStrict(term));
       }
     }
   }
@@ -106,7 +112,7 @@ implements ActionsPublisher{
     for (int i=0 ; i < corpus.size() ; i++) {
       boolean wasLoaded = corpus.isDocumentLoaded(i);
       Document document = (Document) corpus.get(i);
-      addData(document);
+      processDocument(document);
       // datastore safety
       if (! wasLoaded) {
         corpus.unloadDocument(document);
@@ -116,7 +122,7 @@ implements ActionsPublisher{
   }
 
   
-  protected void addData(Document document) {
+  protected void processDocument(Document document) {
     documentTotal++;
     AnnotationSet candidates = document.getAnnotations(inputASName).get(inputAnnotationTypes);
 
@@ -132,14 +138,20 @@ implements ActionsPublisher{
 
   
   private void churnData() {
-    minFrequency = this.getFrequency(this.getTerms().iterator().next());
+    if (this.getTerms().size() > 0) {
+      minFrequency = this.getFrequencyStrict(this.getTerms().iterator().next());
+    }
+    else {
+      minFrequency = 0;
+    }
     maxFrequency = 0;
     for (Term term : this.getTerms()) {
-      int freq = this.getFrequency(term);
+      int freq = this.getFrequencyStrict(term);
       maxFrequency = Math.max(maxFrequency, freq);
       minFrequency = Math.min(minFrequency, freq);
       this.types.add(term.getType());
       this.languages.add(term.getLanguageCode());
+      storeStringLookup(term);
     }
   }
   
@@ -148,7 +160,7 @@ implements ActionsPublisher{
     return documentFrequencies.keySet();
   }
   
-  public int getFrequency(Term term) {
+  public int getFrequencyStrict(Term term) {
     if (documentFrequencies.containsKey(term)) {
       return documentFrequencies.get(term).intValue();
     }
@@ -156,6 +168,25 @@ implements ActionsPublisher{
     return 0;
   }
   
+  
+  public int getFrequencyLax(Term term) {
+    // Try for an exact match first
+    if (documentFrequencies.containsKey(term)) {
+      return documentFrequencies.get(term).intValue();
+    }
+    
+    // Now see if there's one with a blank language code
+    String termString = term.getTermString();
+    if (stringLookupTable.containsKey(termString)) {
+      for (Term testTerm : stringLookupTable.get(termString)) {
+        if (testTerm.closeMatch(term)) {
+          return documentFrequencies.get(testTerm).intValue();
+        }
+      }
+    }
+    
+    return 0;
+  }
   
   
   
@@ -191,17 +222,25 @@ implements ActionsPublisher{
     return new Double(this.maxFrequency);
   }
 
+  
+  public int getMinFrequency() {
+    return this.minFrequency;
+  }
+  
+  public int getMaxFrequency() {
+    return this.maxFrequency;
+  }
 
   @Override
   public void saveAsCsv(double threshold, File file) throws GateException {
+    System.out.println("CSV output has not yet been implemented.");
     // TODO Auto-generated method stub
-    
   }
 
 
   @Override
   public void saveAsCsv(File file) throws GateException {
-    // TODO Auto-generated method stub
+    saveAsCsv(0.0, file);
   }
 
   
@@ -245,4 +284,26 @@ implements ActionsPublisher{
     documentFrequencies.put(term, count);
   }
   
+  
+  private void storeStringLookup(Term term) {
+    String termString = term.getTermString();
+    Set<Term> terms;
+    if (stringLookupTable.containsKey(termString)) {
+      terms = stringLookupTable.get(termString);
+    }
+    else {
+      terms = new HashSet<Term>();
+    }
+    terms.add(term);
+    stringLookupTable.put(termString, terms);
+  }
+  
+  
+  public Map<Term, Integer> getDocFrequencies() {
+    return this.documentFrequencies;
+  }
+  
+  public int getTotalDocs() {
+    return this.documentTotal;
+  }
 }
