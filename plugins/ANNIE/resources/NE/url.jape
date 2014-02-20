@@ -67,3 +67,18 @@ Priority: 20
 -->
  :urlAddress.Url = {kind = "urlAddress", rule = "UrlContext"}
 
+Rule: UrlGuess
+Priority: 10
+// token(s) + url_ending e.g. gate.ac.uk
+
+(
+ (	{Token}
+	{Token.string == "."})+ 
+  	{Lookup.majorType == url_key}
+	{Token.string == "."}
+        {Lookup.majorType == country_code}
+)
+:urlAddress 
+-->
+ :urlAddress.Url = {kind = "urlAddress", rule = "UrlGuess"}
+
