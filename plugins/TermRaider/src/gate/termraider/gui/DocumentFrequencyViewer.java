@@ -23,6 +23,7 @@ import java.awt.BorderLayout;
 import java.util.*;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -42,9 +43,10 @@ public class DocumentFrequencyViewer
   
   private JScrollPane freqScrollPane;
   private DocumentFrequencyBank dfb;
-  private JTable freqTable;
+  private JTable freqTable, typeTable, langTable;
   private JTabbedPane tabbedPane;
   private DFTableModel freqTableModel;
+  private ListTableModel typeTableModel, langTableModel;
   private JTextField docsField;
   
   @Override
@@ -57,11 +59,11 @@ public class DocumentFrequencyViewer
   private void initGuiComponents() {
     setLayout(new BorderLayout());
     tabbedPane = new JTabbedPane();
-    JPanel tableTab = new JPanel(new BorderLayout());
-    tabbedPane.addTab("Document Frequency", tableTab);
+    JPanel dfTab = new JPanel(new BorderLayout());
+    tabbedPane.addTab("Document frequencies", dfTab);
     
     docsField = new JTextField("...");
-    tableTab.add(docsField, BorderLayout.NORTH);
+    dfTab.add(docsField, BorderLayout.NORTH);
 
     freqTableModel = new DFTableModel();
     freqTable = new JTable(freqTableModel);
@@ -69,16 +71,36 @@ public class DocumentFrequencyViewer
     freqScrollPane = new JScrollPane(freqTable, 
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    tableTab.add(freqScrollPane, BorderLayout.CENTER);
+    dfTab.add(freqScrollPane, BorderLayout.CENTER);
+    
+    JSplitPane listsTab = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+    typeTableModel = new ListTableModel("Term annotation types");
+    typeTable = new JTable(typeTableModel);
+    langTableModel = new ListTableModel("Language codes");
+    langTable = new JTable(langTableModel);
+    listsTab.setLeftComponent(typeTable);
+    listsTab.setRightComponent(langTable);
+    tabbedPane.addTab("Types and languages", listsTab);
+    
+    // TODO
+    // wrap each table in a pane with optional scrolling
+    /*
+         termTable.setAutoCreateRowSorter(true);
+    pairTable.setAutoCreateRowSorter(true);
+    termPane = new JScrollPane(termTable, 
+    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    pairPane = new JScrollPane(pairTable, 
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    splitPane.setLeftComponent(termPane);
+    splitPane.setRightComponent(pairPane);
+
+     */
     
     this.add(tabbedPane, BorderLayout.CENTER);
     tabbedPane.validate();
     tabbedPane.repaint();
-  }
-  
-  
-  private void setDocsField() {
-    docsField.setText("Doc count = " + this.dfb.getTotalDocs());
   }
   
   
@@ -97,14 +119,17 @@ public class DocumentFrequencyViewer
     }
     
     dfb = (DocumentFrequencyBank) target;
-    setDocsField();
+    docsField.setText("Doc count = " + this.dfb.getTotalDocs());
     freqTableModel.setBank(this.dfb);
+    typeTableModel.setList(dfb.getTypes());
+    langTableModel.setList(dfb.getLanguages());
   }
 }
 
 
 class DFTableModel extends AbstractTableModel {
-  private static final long serialVersionUID = -7654670667296912991L;
+  private static final long serialVersionUID = 7536874522584055763L;
+
   private List<Term> terms;
   private String[] columnNames = {"term", "doc frequency"};
   private Map<Term, Integer> docFrequencies; 
@@ -150,6 +175,45 @@ class DFTableModel extends AbstractTableModel {
   
   public String getColumnName(int col) {
     return columnNames[col];
+  }
+
+}
+
+
+
+class ListTableModel extends AbstractTableModel {
+  private static final long serialVersionUID = 8277085631925984080L;
+  
+  private List<String> strings;
+  private String heading;
+
+  public ListTableModel(String heading) {
+    this.heading = heading;
+  }
+  
+  public void setList(Collection<String> strings) {
+    this.strings = new ArrayList<String>(strings);
+    Collections.sort(this.strings);
+  }
+  
+  public int getColumnCount() {
+    return 1;
+  }
+
+  public int getRowCount() {
+    return this.strings.size();
+  }
+
+  public Object getValueAt(int row, int col) {
+    return this.strings.get(row);
+  }
+  
+  public Class<?> getColumnClass(int col) {
+    return String.class;
+  }
+  
+  public String getColumnName(int col) {
+    return heading;
   }
 
 }
