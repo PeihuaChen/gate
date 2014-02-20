@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010--2012, The University of Sheffield. See the file
+ *  Copyright (c) 2010--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -87,6 +87,31 @@ public class Term  implements Comparable<Term>, Serializable {
   public int hashCode() {
     return hashCode;
   }
+  
+
+  /**
+   * To determine whether a match from a DF table is usable.
+   * Type and string must match; language code is ignored if either
+   * is blank, but must match if both are non-blank.
+   * @param other
+   * @return
+   */
+  public boolean closeMatch(Term other) {
+    if (! this.termString.equals(other.termString)) {
+      return false;
+    }
+    
+    if (! this.type.equals(other.type)) {
+      return false;
+    }
+    
+    if ("".equals(this.languageCode) || "".equals(other.languageCode) ) {
+      return true;
+    }
+    
+    return this.languageCode.equals(other.languageCode);
+  }
+  
   
   
   /**
