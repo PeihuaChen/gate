@@ -110,7 +110,7 @@ public abstract class AbstractBank extends AbstractLanguageResource {
     return this.inputAnnotationFeature;
   }
   
-  @CreoleParameter(comment = "Processed corpora to analyse for pairs of terms")
+  @CreoleParameter(comment = "Processed corpora to analyse")
   public void setCorpora(Set<Corpus> corpora) {
     this.corpora = corpora;
   }
