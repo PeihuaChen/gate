@@ -95,3 +95,5 @@ agency.lst:organization:government
 government_base.lst:government_base
 loc_other.lst:location:other
 person_female_ambig.lst:person_first:female
+url_key.lst:url_key
+country_code.lst:country_code
