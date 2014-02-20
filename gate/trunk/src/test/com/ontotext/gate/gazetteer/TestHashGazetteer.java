@@ -68,8 +68,8 @@ public class TestHashGazetteer extends TestCase {
     //check whether the annotations are as expected
     assertTrue("Found in "+ doc.getSourceUrl().getFile()+ " "+
       doc.getAnnotations(GAZ_AS).size() +
-      " Lookup annotations, instead of the expected 71.",
-      doc.getAnnotations(GAZ_AS).size()== 71);
+      " Lookup annotations, instead of the expected 80.",
+      doc.getAnnotations(GAZ_AS).size()== 80);
 
   } // testHashGazetteer();
 
