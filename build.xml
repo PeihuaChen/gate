@@ -250,7 +250,7 @@
 	<!-- This target compiles all the classes -->
 	<target name="compile" depends="prepare, depend, svg2java" description="compile the source ">
 		<!-- Compile the java code from ${srcDir} into ${buildDir} -->
-		<javac srcdir="${srcDir}" destdir="${outputDir}" source="1.5" target="1.5" encoding="UTF-8" debug="true" deprecation="${deprecation}" debuglevel="lines,source" includes="gate/**,com/**,hepple/**" classpathref="build.class.path">
+		<javac srcdir="${srcDir}" destdir="${outputDir}" source="1.6" target="1.6" encoding="UTF-8" debug="true" deprecation="${deprecation}" debuglevel="lines,source" includes="gate/**,com/**,hepple/**" classpathref="build.class.path">
 			<compilerarg value="-Xmaxwarns" />
 			<compilerarg value="${gate.compile.maxwarnings}" />
 		</javac>
@@ -259,7 +259,7 @@
 	<!-- This target compiles all the classes including debug information -->
 	<target name="compile_debug" depends="prepare, depend" description="compile the source ">
 		<!-- Compile the java code from ${srcDir} into ${buildDir} -->
-		<javac srcdir="${srcDir}" destdir="${outputDir}" encoding="UTF-8" source="1.5" target="1.5" debug="true" deprecation="${deprecation}" includes="gate/**,com/**,hepple/**" classpathref="build.class.path" />
+		<javac srcdir="${srcDir}" destdir="${outputDir}" encoding="UTF-8" source="1.6" target="1.6" debug="true" deprecation="${deprecation}" includes="gate/**,com/**,hepple/**" classpathref="build.class.path" />
 	</target>
 
 
