@@ -508,27 +508,11 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * @param encoding the encoding of the trec file.
    * @param numberOfDocumentsToExtract extracts the specified number of
    *          documents from the trecweb file; -1 to indicate all files.
-   * @param documentType type of the document it is (i.e. xml, html etc)
+   * @param mimeType the mime type which determines how the document is handled
    * @return total length of populated documents in the corpus in number
    *         of bytes
    * @throws java.io.IOException
-   */
-  @Deprecated
-  @SuppressWarnings("deprecation")
-  public static long populate(Corpus corpus, URL singleConcatenatedFile,
-      String documentRootElement, String encoding,
-      int numberOfDocumentsToExtract, String documentNamePrefix,
-      DocType documentType) throws IOException {
-    String mimeType = null;
-
-    if(DocType.XML.equals(documentType))
-      mimeType = "text/xml";
-    else if(DocType.HTML.equals(documentType)) mimeType = "text/html";
-
-    return populate(corpus, singleConcatenatedFile, documentRootElement,
-        encoding, numberOfDocumentsToExtract, documentNamePrefix, mimeType, true);
-  }
-  
+   */  
   public static long populate(Corpus corpus, URL singleConcatenatedFile,
       String documentRootElement, String encoding,
       int numberOfDocumentsToExtract, String documentNamePrefix,
@@ -689,20 +673,10 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    *          extract from the trecweb file.
    * @param documentNamePrefix the prefix to use for document names when
    *          creating from
-   * @param documentType type of the document it is (i.e. html, xml)
+   * @param mimeType the mime type which determines how the document is handled
    * @return total length of populated documents in the corpus in number
    *         of bytes
-   */
-  @Deprecated
-  @SuppressWarnings("deprecation")
-  public long populate(URL singleConcatenatedFile, String documentRootElement,
-          String encoding, int numberOfFilesToExtract,
-          String documentNamePrefix, DocType documentType) throws IOException,
-          ResourceInstantiationException {
-    return populate(this, singleConcatenatedFile, documentRootElement,
-            encoding, numberOfFilesToExtract, documentNamePrefix, documentType);
-  }
-  
+   */ 
   public long populate(URL singleConcatenatedFile, String documentRootElement,
       String encoding, int numberOfFilesToExtract,
       String documentNamePrefix, String mimeType, boolean includeRootElement) throws IOException,

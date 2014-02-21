@@ -124,16 +124,11 @@ public interface SimpleCorpus extends LanguageResource, List<Document>, NameBear
    *          files.
    * @param documentNamePrefix the prefix to use for document names when
    *          creating from
-   * @param documentType type of the document (i.e. xml, html  etc.) 
+   * @param mineType the mime type which determines how the document is handled 
    * @return total length of populated documents in the corpus in number
    *         of bytes
    */
-  @Deprecated
-  public long populate(URL singleConcatenatedFile, String documentRootElement,
-          String encoding, int numberOfDocumentsToExtract,
-          String documentNamePrefix, gate.corpora.DocType documentType) throws IOException,
-          ResourceInstantiationException;
-  
+ 
   public long populate(URL singleConcatenatedFile, String documentRootElement,
       String encoding, int numberOfDocumentsToExtract,
       String documentNamePrefix, String mimeType, boolean includeRootElement) throws IOException,
