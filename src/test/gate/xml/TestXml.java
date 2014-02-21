@@ -16,24 +16,35 @@
 
 package gate.xml;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.net.URL;
-import java.util.*;
-import java.text.NumberFormat;
-
-import junit.framework.*;
-
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Corpus;
+import gate.Document;
+import gate.DocumentFormat;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.GateConstants;
 import gate.corpora.DocumentImpl;
 import gate.corpora.TestDocument;
-import gate.creole.SerialAnalyserController;
-import gate.util.Files;
-import gate.util.Err;
-import gate.util.persistence.PersistenceManager;
 import gate.creole.ANNIEConstants;
+import gate.creole.ConditionalSerialAnalyserController;
+import gate.util.Files;
+import gate.util.persistence.PersistenceManager;
+
+import java.io.File;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 //import org.w3c.www.mime.*;
 
@@ -227,7 +238,7 @@ public class TestXml extends TestCase
     verifyAnnotationIDGenerator(origDoc);
 
     // Load ANNIE with defaults and run it on the document
-    SerialAnalyserController annie = (SerialAnalyserController)
+    ConditionalSerialAnalyserController annie = (ConditionalSerialAnalyserController)
       PersistenceManager.loadObjectFromFile(new File(new File(
         Gate.getPluginsHome(), ANNIEConstants.PLUGIN_DIR),
           ANNIEConstants.DEFAULT_FILE));

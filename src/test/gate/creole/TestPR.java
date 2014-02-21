@@ -220,35 +220,35 @@ public class TestPR extends TestCase
     // assertions for doc 1
     assertTrue("Found in "+ doc1.getSourceUrl().getFile()+ " "+
       doc1.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size() +
-      " Sentence annotations, instead of the expected 21.",
-      doc1.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size()== 21);
+      " Sentence annotations, instead of the expected 25.",
+      doc1.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size()== 25);
 
     assertTrue("Found in "+ doc1.getSourceUrl().getFile()+ " "+
       doc1.getAnnotations().get("Split").size() +
-      " Split annotations, instead of the expected 38.",
-      doc1.getAnnotations().get("Split").size()== 38);
+      " Split annotations, instead of the expected 66.",
+      doc1.getAnnotations().get("Split").size()== 66);
 
     // assertions for doc 2
     assertTrue("Found in "+ doc2.getSourceUrl().getFile()+ " "+
       doc2.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size() +
-      " Sentence annotations, instead of the expected 52.",
-      doc2.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size()== 52);
+      " Sentence annotations, instead of the expected 57.",
+      doc2.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size()== 57);
 
     assertTrue("Found in "+ doc2.getSourceUrl().getFile()+ " "+
       doc2.getAnnotations().get("Split").size() +
-      " Split annotations, instead of the expected 75.",
-      doc2.getAnnotations().get("Split").size()== 75);
+      " Split annotations, instead of the expected 110.",
+      doc2.getAnnotations().get("Split").size()== 110);
 
     // assertions for doc 3
     assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size() +
-      " Sentence annotations, instead of the expected 66.",
-      doc3.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size()== 66);
+      " Sentence annotations, instead of the expected 75.",
+      doc3.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size()== 75);
 
     assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().get("Split").size() +
-      " Split annotations, instead of the expected 84.",
-      doc3.getAnnotations().get("Split").size()== 84);
+      " Split annotations, instead of the expected 122.",
+      doc3.getAnnotations().get("Split").size()== 122);
   }//testSplitter
 
   public void testTagger() throws Exception {
