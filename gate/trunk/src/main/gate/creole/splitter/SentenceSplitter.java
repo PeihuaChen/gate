@@ -236,7 +236,7 @@ public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchm
   }
 
   @Optional
-  @CreoleParameter(defaultValue="resources/sentenceSplitter/grammar/main.jape", comment="The URL to the custom Jape grammar file", suffixes="jape")
+  @CreoleParameter(defaultValue="resources/sentenceSplitter/grammar/main-single-nl.jape", comment="The URL to the custom Jape grammar file", suffixes="jape")
   public void setTransducerURL(java.net.URL newTransducerURL) {
     transducerURL = newTransducerURL;
   }
