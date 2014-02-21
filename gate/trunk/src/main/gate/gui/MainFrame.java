@@ -53,7 +53,6 @@ import gate.swing.XJPopupMenu;
 import gate.swing.XJTabbedPane;
 import gate.util.Benchmark;
 import gate.util.CorpusBenchmarkTool;
-import gate.util.Err;
 import gate.util.ExtensionFileFilter;
 import gate.util.Files;
 import gate.util.GateException;
@@ -119,7 +118,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -460,34 +458,16 @@ public class MainFrame extends JFrame implements ProgressListener,
   }// protected void select(ResourceHandle handle)
 
   /**
-   * @deprecated use {@link #getInstance()} instead
-   */
-  @Deprecated
-  public MainFrame() {
-    this(null);
-  }
-  
-  /**
-   * @deprecated use {@link #getInstance(GraphicsConfiguration)} instead
-   */
-  @Deprecated
-  public MainFrame(boolean isSlugGUI, GraphicsConfiguration gc) {
-    this(gc);
-  }
-
-  /**
    * Construct the frame.
    * @param gc graphics configuration used,
    *   see {@link javax.swing.JFrame#JFrame(java.awt.GraphicsConfiguration)}
-   * @deprecated use {@link #getInstance(GraphicsConfiguration)} instead
    */
-  @Deprecated
-  public MainFrame(GraphicsConfiguration gc) {
+  private MainFrame(GraphicsConfiguration gc) {
     super(gc);
-    
-    // TODO we really don't need this here as it is done getInstance() but for
-    // now we need it here in case people are calling the deprecated
-    // constructors instead
+        
+    // I thought this should only be needed if the method was called
+    // from outside the getInstance() method, but if we don't do this
+    // then the GUI never appears. We probably should figure out why.
     instance = this;
     
     // set the WM class
@@ -2071,22 +2051,6 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
     super.processWindowEvent(e);
   }// processWindowEvent(WindowEvent e)
-
-  /**
-   * Returns the listeners map, a map that holds all the listeners that
-   * are singletons (e.g. the status listener that updates the status
-   * bar on the main frame or the progress listener that updates the
-   * progress bar on the main frame). The keys used are the class names
-   * of the listener interface and the values are the actual listeners
-   * (e.g "gate.event.StatusListener" -> this). The returned map is the
-   * actual data member used to store the listeners so any changes in
-   * this map will be visible to everyone.
-   * @return the listeners map
-   * @deprecated Use {@link Gate#getListeners()} instead
-   */
-  public static java.util.Map<String, EventListener> getListeners() {
-    return Gate.getListeners();
-  }
 
   public static java.util.Collection<Component> getGuiRoots() {
     return guiRoots;
