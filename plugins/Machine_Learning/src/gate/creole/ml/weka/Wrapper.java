@@ -22,27 +22,52 @@
  */
 package gate.creole.ml.weka;
 
-import java.io.*;
-import java.util.*;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import org.jdom.Element;
-import weka.classifiers.Classifier;
-import weka.classifiers.UpdateableClassifier;
-import weka.classifiers.meta.FilteredClassifier;
-import weka.core.*;
-import weka.filters.Filter;
+import gate.Gate;
 import gate.ProcessingResource;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
-import gate.creole.ml.DatasetDefintion;
 import gate.creole.ml.AdvancedMLEngine;
+import gate.creole.ml.DatasetDefintion;
 import gate.event.StatusListener;
 import gate.gui.ActionsPublisher;
 import gate.gui.MainFrame;
-import gate.util.*;
+import gate.util.Err;
+import gate.util.GateException;
+import gate.util.GateRuntimeException;
+import gate.util.Out;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
+import org.jdom.Element;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.UpdateableClassifier;
+import weka.classifiers.meta.FilteredClassifier;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.filters.Filter;
 
 /**
  * Wrapper class for the WEKA Machine Learning Engine.
@@ -246,7 +271,7 @@ public class Wrapper implements AdvancedMLEngine, ActionsPublisher {
     onlyAccumulateDataset = false;
     // see if we can shout about what we're doing
     sListener = null;
-    Map listeners = MainFrame.getListeners();
+    Map listeners = Gate.getListeners();
     if(listeners != null){
       sListener = (StatusListener)listeners.get("gate.event.StatusListener");
     }

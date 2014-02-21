@@ -14,15 +14,17 @@
 
 package gate.creole.ml.svmlight;
 
-import gate.creole.ml.*;
-import gate.util.GateException;
+import gate.Gate;
 import gate.creole.ExecutionException;
+import gate.creole.ml.AdvancedMLEngine;
+import gate.creole.ml.Attribute;
+import gate.creole.ml.DatasetDefintion;
 import gate.gui.MainFrame;
-
-import java.util.List;
+import gate.util.GateException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Wrapper class for the SVM Light support vector machine learning algorithm.
@@ -639,7 +641,7 @@ public class SVMLightWrapper
     }
     //see if we can shout about what we're doing
     sListener = null;
-    java.util.Map listeners = gate.gui.MainFrame.getListeners();
+    java.util.Map listeners = Gate.getListeners();
     if (listeners != null) {
       sListener = (gate.event.StatusListener)
                   listeners.get("gate.event.StatusListener");
