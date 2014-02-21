@@ -78,7 +78,7 @@ public class TestMaxentWrapper extends TestCase {
 
     // Display the gui for debugging purposes.
          if (DEBUG) {
-      MainFrame mainFrame = new MainFrame();
+      MainFrame mainFrame = MainFrame.getInstance();
       mainFrame.setVisible(true);
     } else {
       // We don't want the output displayed unless we are debugging, so set the

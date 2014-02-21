@@ -14,13 +14,15 @@
 
 package gate.creole.ml.maxent;
 
-import gate.creole.ml.*;
-import gate.util.GateException;
+import gate.Gate;
 import gate.creole.ExecutionException;
+import gate.creole.ml.AdvancedMLEngine;
+import gate.creole.ml.DatasetDefintion;
 import gate.gui.MainFrame;
+import gate.util.GateException;
 
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Wrapper class for the Maxent machine learning algorithm.
@@ -386,7 +388,7 @@ public class MaxentWrapper
   public void init() throws GateException {
     //see if we can shout about what we're doing
     sListener = null;
-    java.util.Map listeners = gate.gui.MainFrame.getListeners();
+    java.util.Map listeners = Gate.getListeners();
     if (listeners != null) {
       sListener = (gate.event.StatusListener)
                   listeners.get("gate.event.StatusListener");
