@@ -399,22 +399,10 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    *          extract from the trecweb file.
    * @param documentNamePrefix the prefix to use for document names when
    *          creating from
-   * @param documentType type of the document it is (i.e. xml or html
-   *          etc.)
+   * @param mimeType the mime type which determines how the document is handled
    * @return total length of populated documents in the corpus in number
    *         of bytes
-   */
-  @Deprecated
-  @SuppressWarnings("deprecation")
-  public long populate(URL singleConcatenatedFile, String documentRootElement,
-          String encoding, int numberOfFilesToExtract,
-          String documentNamePrefix, DocType documentType) throws IOException,
-          ResourceInstantiationException {
-    return CorpusImpl.populate(this, singleConcatenatedFile,
-            documentRootElement, encoding, numberOfFilesToExtract,
-            documentNamePrefix, documentType);
-  }
-  
+   */  
   public long populate(URL singleConcatenatedFile, String documentRootElement,
           String encoding, int numberOfFilesToExtract,
           String documentNamePrefix, String mimeType, boolean includeRootElement) throws IOException,
