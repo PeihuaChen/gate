@@ -124,7 +124,7 @@ public interface SimpleCorpus extends LanguageResource, List<Document>, NameBear
    *          files.
    * @param documentNamePrefix the prefix to use for document names when
    *          creating from
-   * @param mineType the mime type which determines how the document is handled 
+   * @param mimeType the mime type which determines how the document is handled 
    * @return total length of populated documents in the corpus in number
    *         of bytes
    */
