@@ -19,25 +19,6 @@ package gate.creole;
 /** This interface defines constants used by the ANNIE processing resources. */
 public interface ANNIEConstants {
 
-  /**
-   * This is an array of strings containing all class names for all ANNIE PRs.
-   * @deprecated ANNIE must now be loaded from a gapp application file:
-   * <pre>
-   * SerialAnalyserController annie = (SerialAnalyserController)
-   *   PersistenceManager.loadObjectFromFile(new File(new File(
-   *     Gate.getPluginsHome(), ANNIEConstants.PLUGIN_DIR),
-   *       ANNIEConstants.DEFAULT_FILE));
-   * </pre>
-   */
-  public static final String[] PR_NAMES = {
-    "gate.creole.annotdelete.AnnotationDeletePR",
-    "gate.creole.tokeniser.DefaultTokeniser",
-    "gate.creole.gazetteer.DefaultGazetteer",
-    "gate.creole.splitter.SentenceSplitter",
-    "gate.creole.POSTagger",
-    "gate.creole.ANNIETransducer",
-    "gate.creole.orthomatcher.OrthoMatcher"
-  };
   public static final String PLUGIN_DIR = "ANNIE";
   public static final String DEFAULT_FILE = "ANNIE_with_defaults.gapp";
 
