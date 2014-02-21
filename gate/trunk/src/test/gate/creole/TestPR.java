@@ -329,8 +329,8 @@ public class TestPR extends TestCase
       doc1.getAnnotations().get(ANNIEConstants.ORGANIZATION_ANNOTATION_TYPE).size()== 27);
     assertTrue("Found in "+doc1.getSourceUrl().getFile()+ " "+
       doc1.getAnnotations().get(ANNIEConstants.LOCATION_ANNOTATION_TYPE).size() +
-      " Location annotations, instead of the expected 3",
-      doc1.getAnnotations().get(ANNIEConstants.LOCATION_ANNOTATION_TYPE).size()== 3);
+      " Location annotations, instead of the expected 2",
+      doc1.getAnnotations().get(ANNIEConstants.LOCATION_ANNOTATION_TYPE).size()== 2);
     assertTrue("Found in "+doc1.getSourceUrl().getFile()+ " "+
       doc1.getAnnotations().get(ANNIEConstants.PERSON_ANNOTATION_TYPE).size() +
       " Person annotations, instead of the expected 1",
@@ -351,8 +351,8 @@ public class TestPR extends TestCase
       doc2.getAnnotations().get(ANNIEConstants.ORGANIZATION_ANNOTATION_TYPE).size()== 25);
     assertTrue("Found in "+doc2.getSourceUrl().getFile()+ " "+
       doc2.getAnnotations().get(ANNIEConstants.LOCATION_ANNOTATION_TYPE).size() +
-      " Location annotations, instead of the expected 11",
-      doc2.getAnnotations().get(ANNIEConstants.LOCATION_ANNOTATION_TYPE).size()== 11);
+      " Location annotations, instead of the expected 10",
+      doc2.getAnnotations().get(ANNIEConstants.LOCATION_ANNOTATION_TYPE).size()== 10);
     assertTrue("Found in "+doc2.getSourceUrl().getFile()+ " "+
       doc2.getAnnotations().get(ANNIEConstants.PERSON_ANNOTATION_TYPE).size() +
       " Person annotations, instead of the expected 1",
@@ -369,16 +369,16 @@ public class TestPR extends TestCase
     // assertions for doc 3
     assertTrue("Found in "+doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().get(ANNIEConstants.ORGANIZATION_ANNOTATION_TYPE).size() +
-      " Organization annotations, instead of the expected 32",
-      doc3.getAnnotations().get(ANNIEConstants.ORGANIZATION_ANNOTATION_TYPE).size()== 32);
+      " Organization annotations, instead of the expected 28",
+      doc3.getAnnotations().get(ANNIEConstants.ORGANIZATION_ANNOTATION_TYPE).size()== 28);
     assertTrue("Found in "+doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().get(ANNIEConstants.LOCATION_ANNOTATION_TYPE).size() +
-      " Location annotations, instead of the expected 12",
-      doc3.getAnnotations().get(ANNIEConstants.LOCATION_ANNOTATION_TYPE).size()== 12);
+      " Location annotations, instead of the expected 11",
+      doc3.getAnnotations().get(ANNIEConstants.LOCATION_ANNOTATION_TYPE).size()== 11);
     assertTrue("Found in "+doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().get(ANNIEConstants.PERSON_ANNOTATION_TYPE).size() +
-      " Person annotations, instead of the expected 7",
-      doc3.getAnnotations().get(ANNIEConstants.PERSON_ANNOTATION_TYPE).size()== 7);
+      " Person annotations, instead of the expected 8",
+      doc3.getAnnotations().get(ANNIEConstants.PERSON_ANNOTATION_TYPE).size()== 8);
     assertTrue("Found in "+doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().get(ANNIEConstants.DATE_ANNOTATION_TYPE).size() +
       " Date annotations, instead of the expected 7",
@@ -388,7 +388,7 @@ public class TestPR extends TestCase
       " Money annotations, instead of the expected 4",
       doc3.getAnnotations().get(ANNIEConstants.MONEY_ANNOTATION_TYPE).size()== 4);
 
-    assertEquals("Wrong number of Person annotations in OrthoMatcher test document",21,
+    assertEquals("Wrong number of Person annotations in OrthoMatcher test document",22,
             doc4.getAnnotations().get(ANNIEConstants.PERSON_ANNOTATION_TYPE).size());
   }//testTransducer
 
