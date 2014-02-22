@@ -28,12 +28,6 @@ import java.util.Map;
  */
 public abstract class Javac implements GateConstants {
 
-  @Deprecated
-  public static void loadClasses(Map<String, String> sources)
-      throws GateException {
-    loadClasses(sources, null);
-  }
-
   /**
    * Compiles a set of java sources and loads the compiled classes in the gate
    * class loader.
@@ -113,7 +107,7 @@ public abstract class Javac implements GateConstants {
 
   private static Javac createCompilerInstance(String compilerType)
       throws GateException {
-    Class compilerClass = null;
+    Class<?> compilerClass = null;
     try {
       // first treat the compiler type as a fully qualified class name
       compilerClass = Gate.getClassLoader().loadClass(compilerType, true);
@@ -164,11 +158,6 @@ public abstract class Javac implements GateConstants {
    */
   public abstract void compile(Map<String, String> sources,
       GateClassLoader classLoader) throws GateException;
-
-  @Deprecated
-  public void compile(Map<String, String> sources) throws GateException {
-    compile(sources, Gate.getClassLoader());
-  }
 
   /**
    * The compiler to use.
