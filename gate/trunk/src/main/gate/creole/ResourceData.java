@@ -16,19 +16,24 @@
 
 package gate.creole;
 
+import gate.CreoleRegister;
+import gate.Gate;
+import gate.LanguageResource;
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.creole.metadata.Sharable;
+import gate.util.AbstractFeatureBearer;
+import gate.util.GateClassLoader;
+import gate.util.GateException;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import gate.*;
-import gate.creole.metadata.Sharable;
-import gate.util.*;
 
 /** Models an individual CREOLE resource metadata, plus configuration data,
   * plus the instantiations of the resource current within the system.
@@ -162,15 +167,6 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   protected List<Resource> unmodifiableInstantiationStack =
           Collections.unmodifiableList(instantiationStack);
 
-  /** This list contains all instances loaded from creole.xml with
-   *  AUTOINSTANCE tag.
-   *
-   *  @deprecated No longer necessary as we don't use weak references
-   *  for the instantiations.
-   */
-  @Deprecated
-  protected List<Resource> persistantInstantiationList = new ArrayList<Resource>();
-
   /** Get the list of instantiations of resources */
   public List<Resource> getInstantiations() {
     return unmodifiableInstantiationStack;
@@ -181,18 +177,6 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
     instantiationStack.add(0, resource);
   } // addInstantiation
 
-  /** This method makes a certain resource persistent by adding it into a
-    * persistantInstantiationList. It is used especially with AUTOINSTANCE tag
-    * in creole xml.
-    *
-    * @deprecated No longer needed as we don't use weak references in the
-    * instantiations stack.  Left for compatibility as a no-op.
-    */
-  @Deprecated
-  public void makeInstantiationPersistant(Resource resource) {
-    //persistantInstantiationList.add(resource);
-  } // makeInstantiationPersistant
-
   /**
    * Remove an instantiation of the resource from the register of these.
    * @return true if the given instance was contained in the register,
@@ -202,16 +186,6 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
     return instantiationStack.remove(resource);
     //persistantInstantiationList.remove(resource);
   } // removeInstantiation
-
-  /**
-   * Bump an instantiation to the top of the instantiation stack
-   *
-   * @deprecated This operation is no longer supported, and does nothing.
-   */
-  @Deprecated
-  public void bumpInstantiation(Resource resource) {
-    // do nothing
-  } // bumpInstantiation
 
   /** The class name of the resource */
   protected String className;
