@@ -474,7 +474,7 @@ public class Gate implements GateConstants {
     // register the builtin CREOLE directories
     for(int i = 0; i < builtinCreoleDirectoryUrls.length; i++)
       try {
-        creoleRegister.addDirectory(new URL(builtinCreoleDirectoryUrls[i]));
+        creoleRegister.registerDirectories(new URL(builtinCreoleDirectoryUrls[i]));
       }
       catch(MalformedURLException e) {
         throw new GateException(e);

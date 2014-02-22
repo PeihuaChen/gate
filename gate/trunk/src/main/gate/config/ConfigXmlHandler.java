@@ -177,9 +177,11 @@ public class ConfigXmlHandler extends DefaultHandler {
     } else if(elementName.toUpperCase().equals("CREOLE-DIRECTORY")) {
       String dirUrlName = (String) contentStack.pop();
       try {
-        register.addDirectory(new URL(dirUrlName));
+        register.registerDirectories(new URL(dirUrlName));
       } catch(MalformedURLException e) {
         throw new GateSaxException("bad URL " + dirUrlName + e);
+      } catch(GateException e) {
+        throw new GateSaxException("unable to register directory",e);
       }
 
     //////////////////////////////////////////////////////////////////

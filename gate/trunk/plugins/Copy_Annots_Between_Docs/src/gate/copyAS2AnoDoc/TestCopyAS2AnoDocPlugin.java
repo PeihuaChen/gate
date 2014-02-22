@@ -7,14 +7,12 @@
  */
 package gate.copyAS2AnoDoc;
 
-import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Corpus;
 import gate.Document;
 import gate.Factory;
 import gate.Gate;
 import gate.GateConstants;
-
 import gate.util.ExtensionFileFilter;
 import gate.util.GateException;
 
@@ -22,7 +20,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Vector;
 
 import junit.framework.TestCase;
@@ -45,7 +42,7 @@ public class TestCopyAS2AnoDocPlugin extends TestCase {
       Gate.init();
       learningHome = new File(new File(Gate.getGateHome(), "plugins"),
         "Copy_Annots_Between_Docs");
-      Gate.getCreoleRegister().addDirectory(learningHome.toURI().toURL());
+      Gate.getCreoleRegister().registerDirectories(learningHome.toURI().toURL());
       initialized = true;
     }
   }

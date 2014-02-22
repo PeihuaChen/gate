@@ -77,6 +77,7 @@ import org.xml.sax.helpers.DefaultHandler;
  *
  * @see gate.CreoleRegister
  */
+@SuppressWarnings("serial")
 public class CreoleRegisterImpl extends HashMap<String, ResourceData>
                                                                      implements
                                                                      CreoleRegister,
@@ -146,6 +147,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       URL pluginMappingsFileURL =
         new URL(creoleDirURL, PLUGIN_NAMES_MAPPING_FILE);
       Document document = builder.build(pluginMappingsFileURL);
+      @SuppressWarnings("unchecked")
       List<Element> plugins = document.getRootElement().getChildren("Plugin");
       if(plugins != null) {
         for(Element aPlugin : plugins) {
@@ -164,44 +166,10 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     }
   }
 
-  /**
-   * Add a CREOLE directory URL to the register and to the GATE classloader. The
-   * directory will be automatically registered. This method is equivalent with
-   * #registerDirectories(URL) which it actually calls and it's only kept here
-   * for backwards compatibility reasons.
-   *
-   * @deprecated
-   */
-  public void addDirectory(URL directoryUrl) {
-    try {
-      registerDirectories(directoryUrl);
-    }
-    catch(GateException ge) {
-      throw new GateRuntimeException(ge);
-    }
-  } // addDirectory
-
   /** Get the list of CREOLE directory URLs. */
   public Set<URL> getDirectories() {
     return Collections.unmodifiableSet(directories);
   } // getDirectories
-
-  /**
-   * All CREOLE directories are now automatically registered when they are added
-   * so this method does nothing now. It is only kept here for backwards
-   * compatibility reasons.
-   *
-   * @deprecated
-   */
-  public void registerDirectories() throws GateException {
-    // Iterator iter = directories.iterator();
-    //
-    // while(iter.hasNext()) {
-    // URL directoryUrl = (URL) iter.next();
-    // registerDirectories(directoryUrl);
-    // }
-  } // registerDirectories
-
 
   public void registerComponent(Class<? extends Resource> resourceClass) throws GateException {
     URL creoleFileUrl = resourceClass.getResource("/gate/creole/CreoleRegisterImpl.class");

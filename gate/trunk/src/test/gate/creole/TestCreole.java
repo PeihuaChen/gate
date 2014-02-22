@@ -52,9 +52,7 @@ public class TestCreole extends TestCase
 
     // find a URL for finding test files and add to the directory set
     URL testUrl = new URL(TestDocument.getTestServerName()+"tests/");
-//    reg.registerDirectories(testUrl);
-    reg.addDirectory(testUrl);
-    reg.registerDirectories();
+    reg.registerDirectories(testUrl);
     
     if(DEBUG) {
       Iterator iter = reg.values().iterator();

@@ -67,18 +67,8 @@ import gate.util.GateException;
   */
 public interface CreoleRegister extends Map<String, ResourceData>, Serializable, CreoleListener
 {
-  /** Add a CREOLE directory URL. The directory is <B>not</B> registered. */
-  public void addDirectory(URL directoryUrl);
-
   /** Get the list of CREOLE directory URLs. */
-  public Set getDirectories();
-
-  /** Register all the CREOLE directories that we know of.
-    * The <CODE>creole.xml</CODE> files
-    * at the URLs are parsed, and <CODE>CreoleData</CODE> objects added
-    * to the register.
-    */
-  public void registerDirectories() throws GateException;
+  public Set<URL> getDirectories();
 
   /**
    * Given the class object for a class with {@link CreoleResource}
