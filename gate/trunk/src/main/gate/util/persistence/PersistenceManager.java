@@ -380,7 +380,7 @@ public class PersistenceManager {
     
   }
 
-  public static class ClassComparator implements Comparator {
+  public static class ClassComparator implements Comparator<Class<?>> {
     /**
      * Compares two {@link Class} values in terms of specificity; the
      * more specific class is said to be &quot;smaller&quot; than the
@@ -392,10 +392,8 @@ public class PersistenceManager {
      * {@link ClassCastException} will be thrown.
      *
      */
-    public int compare(Object o1, Object o2) {
-      Class c1 = (Class)o1;
-      Class c2 = (Class)o2;
-
+    public int compare(Class<?> c1, Class<?> c2) {
+      
       if(c1.equals(c2)) return 0;
       if(c1.isAssignableFrom(c2)) return 1;
       if(c2.isAssignableFrom(c1)) return -1;
@@ -407,6 +405,7 @@ public class PersistenceManager {
    * Thrown by a comparator when the values provided for comparison are
    * not comparable.
    */
+  @SuppressWarnings("serial")
   public static class NotComparableException extends RuntimeException {
     public NotComparableException(String message) {
       super(message);
@@ -432,8 +431,8 @@ public class PersistenceManager {
             .get().getFirst().get(new ObjectHolder(target));
     if(res != null) return res;
 
-    Class type = target.getClass();
-    Class newType = getMostSpecificPersistentType(type);
+    Class<? extends Object> type = target.getClass();
+    Class<?> newType = getMostSpecificPersistentType(type);
     if(newType == null) {
       // no special handler
       if(target instanceof Serializable)
@@ -466,7 +465,7 @@ public class PersistenceManager {
 
     if(target == null || target instanceof SlashDevSlashNull) return null;
     if(target instanceof Persistence) {
-      Object resultKey = new ObjectHolder(target);
+      ObjectHolder resultKey = new ObjectHolder(target);
       // check the cached values; maybe we have the result already
       Object result = existingTransientValues.get().getFirst().get(resultKey);
       if(result != null) return result;
@@ -495,13 +494,13 @@ public class PersistenceManager {
    * such a request for a {@link gate.Document} will yield the
    * registered type for {@link gate.LanguageResource}.
    */
-  protected static Class getMostSpecificPersistentType(Class type) {
+  protected static Class<?> getMostSpecificPersistentType(Class<?> type) {
     // this list will contain all the types we need to expand to
     // superclass +
     // implemented interfaces. We start with the provided type and work
     // our way
     // up the ISA hierarchy
-    List expansionSet = new ArrayList();
+    List<Class<?>> expansionSet = new ArrayList<Class<?>>();
     expansionSet.add(type);
 
     // algorithm:
@@ -511,14 +510,14 @@ public class PersistenceManager {
     // at each expansion stage we'll have a class and three lists of
     // interfaces:
     // the user defined ones; the GATE ones and the java ones.
-    List userInterfaces = new ArrayList();
-    List gateInterfaces = new ArrayList();
-    List javaInterfaces = new ArrayList();
+    List<Class<?>> userInterfaces = new ArrayList<Class<?>>();
+    List<Class<?>> gateInterfaces = new ArrayList<Class<?>>();
+    List<Class<?>> javaInterfaces = new ArrayList<Class<?>>();
     while(!expansionSet.isEmpty()) {
       // 1) check the current set
-      Iterator typesIter = expansionSet.iterator();
+      Iterator<Class<?>> typesIter = expansionSet.iterator();
       while(typesIter.hasNext()) {
-        Class result = (Class)persistentReplacementTypes.get(typesIter.next());
+        Class<?> result = persistentReplacementTypes.get(typesIter.next());
         if(result != null) {
           return result;
         }
@@ -538,11 +537,11 @@ public class PersistenceManager {
 
       typesIter = expansionSet.iterator();
       while(typesIter.hasNext()) {
-        Class aType = (Class)typesIter.next();
-        Class[] interfaces = aType.getInterfaces();
+        Class<?> aType = typesIter.next();
+        Class<?>[] interfaces = aType.getInterfaces();
         // distribute them according to their type
         for(int i = 0; i < interfaces.length; i++) {
-          Class anIterf = interfaces[i];
+          Class<?> anIterf = interfaces[i];
           String interfType = anIterf.getName();
           if(interfType.startsWith("java")) {
             javaInterfaces.add(anIterf);
@@ -612,13 +611,13 @@ public class PersistenceManager {
         contextFile = new File(contextFile, "__dummy__");
       }
 
-      List targetPathComponents = new ArrayList();
+      List<File> targetPathComponents = new ArrayList<File>();
       File aFile = targetFile.getParentFile();
       while(aFile != null) {
         targetPathComponents.add(0, aFile);
         aFile = aFile.getParentFile();
       }
-      List contextPathComponents = new ArrayList();
+      List<File> contextPathComponents = new ArrayList<File>();
       aFile = contextFile.getParentFile();
       while(aFile != null) {
         contextPathComponents.add(0, aFile);
@@ -727,7 +726,8 @@ public class PersistenceManager {
       }
 
       // always write the list of creole URLs first
-      List urlList = new ArrayList(Gate.getCreoleRegister().getDirectories());
+      @SuppressWarnings("unchecked")
+      List<URL> urlList = new ArrayList<URL>(Gate.getCreoleRegister().getDirectories());
       Object persistentList = getPersistentRepresentation(urlList);
 
       Object persistentObject = getPersistentRepresentation(obj);
@@ -779,7 +779,7 @@ public class PersistenceManager {
     haveWarnedAboutGateHome.get().addFirst(new BooleanFlag(false));
     haveWarnedAboutResourceshome.get().addFirst(new BooleanFlag(false));
     persistenceFile.get().addFirst(file);
-    existingPersistentReplacements.get().addFirst(new HashMap());
+    existingPersistentReplacements.get().addFirst(new HashMap<ObjectHolder,Persistence>());
   }
 
   /**
@@ -891,8 +891,9 @@ public class PersistenceManager {
       Object res = null;
       try {
         // first read the list of creole URLs.
-        Iterator urlIter =
-          ((Collection)getTransientRepresentation(ois.readObject()))
+        @SuppressWarnings("unchecked")
+        Iterator<URL> urlIter =
+          ((Collection<URL>)getTransientRepresentation(ois.readObject()))
           .iterator();
 
         // and re-register them
@@ -953,7 +954,7 @@ public class PersistenceManager {
    */
   private static void startLoadingFrom(URL url) {
     persistenceURL.get().addFirst(url);
-    existingTransientValues.get().addFirst(new HashMap());
+    existingTransientValues.get().addFirst(new HashMap<ObjectHolder,Object>());
   }
 
   /**
@@ -1028,14 +1029,6 @@ public class PersistenceManager {
       "<gate.util.persistence.GateApplication>", "<?xml", "<!DOCTYPE"};
 
   /**
-   * @deprecated Use {@link #registerPersistentEquivalent(Class,Class)} instead
-   */
-  public static Class registerPersitentEquivalent(Class transientType,
-          Class persistentType) throws PersistenceException {
-            return registerPersistentEquivalent(transientType, persistentType);
-          }
-
-  /**
    * Sets the persistent equivalent type to be used to (re)store a given
    * type of transient objects.
    *
@@ -1047,22 +1040,22 @@ public class PersistenceManager {
    * @return the persitent type that was used before this mapping if
    *         such existed.
    */
-  public static Class registerPersistentEquivalent(Class transientType,
-          Class persistentType) throws PersistenceException {
+  public static Class<?> registerPersistentEquivalent(Class<?> transientType,
+          Class<?> persistentType) throws PersistenceException {
     if(!Persistence.class.isAssignableFrom(persistentType)) {
       throw new PersistenceException(
               "Persistent equivalent types have to implement "
                       + Persistence.class.getName() + "!\n"
                       + persistentType.getName() + " does not!");
     }
-    return (Class)persistentReplacementTypes.put(transientType, persistentType);
+    return persistentReplacementTypes.put(transientType, persistentType);
   }
 
   /**
    * A dictionary mapping from java type (Class) to the type (Class)
    * that can be used to store persistent data for the input type.
    */
-  private static Map persistentReplacementTypes;
+  private static Map<Class<?>,Class<?>> persistentReplacementTypes;
 
   /**
    * Stores the persistent replacements created during a transaction in
@@ -1070,7 +1063,7 @@ public class PersistenceManager {
    * same object. The keys used are {@link ObjectHolder}s that contain
    * the transient values being converted to persistent equivalents.
    */
-  private static ThreadLocal<LinkedList<Map>> existingPersistentReplacements;
+  private static ThreadLocal<LinkedList<Map<ObjectHolder,Persistence>>> existingPersistentReplacements;
 
   /**
    * Stores the transient values obtained from persistent replacements
@@ -1080,9 +1073,9 @@ public class PersistenceManager {
    * values are the transient values created by the persisten
    * equivalents.
    */
-  private static ThreadLocal<LinkedList<Map>> existingTransientValues;
+  private static ThreadLocal<LinkedList<Map<ObjectHolder,Object>>> existingTransientValues;
 
-  private static ClassComparator classComparator = new ClassComparator();
+  //private static ClassComparator classComparator = new ClassComparator();
 
   /**
    * The file currently used to write the persisten representation. Will
@@ -1117,7 +1110,7 @@ public class PersistenceManager {
   
   
   static {
-    persistentReplacementTypes = new HashMap();
+    persistentReplacementTypes = new HashMap<Class<?>, Class<?>>();
     try {
       // VRs don't get saved, ....sorry guys :)
       registerPersistentEquivalent(VisualResource.class, SlashDevSlashNull.class);
@@ -1166,14 +1159,12 @@ public class PersistenceManager {
     class ThreadLocalStack<T> extends ThreadLocal<LinkedList<T>> {
       @Override
       protected LinkedList<T> initialValue() {
-        // TODO Auto-generated method stub
         return new LinkedList<T>();
       }
-
     }
 
-    existingPersistentReplacements = new ThreadLocalStack<Map>();
-    existingTransientValues = new ThreadLocalStack<Map>();
+    existingPersistentReplacements = new ThreadLocalStack<Map<ObjectHolder,Persistence>>();
+    existingTransientValues = new ThreadLocalStack<Map<ObjectHolder,Object>>();
     persistenceFile = new ThreadLocalStack<File>();
     persistenceURL = new ThreadLocalStack<URL>();
     useGateHome = new ThreadLocalStack<Boolean>();
