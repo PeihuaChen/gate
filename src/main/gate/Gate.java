@@ -1094,16 +1094,6 @@ public class Gate implements GateConstants {
   } // writeUserConfig
 
   /**
-   * Get the name of the user's <TT>gate.xml</TT> config file (this doesn't
-   * guarantee that file exists!).
-   *
-   * @deprecated Use {@link #getUserConfigFile} instead.
-   */
-  public static String getUserConfigFileName() {
-    return getDefaultUserConfigFileName();
-  } // getUserConfigFileName
-
-  /**
    * Get the default path to the user's config file, which is used unless an
    * alternative name has been specified via system properties or
    * {@link #setUserConfigFile}.
