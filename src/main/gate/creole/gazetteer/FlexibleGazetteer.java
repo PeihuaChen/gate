@@ -326,32 +326,12 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser
   }
 
   /**
-   * sets the outputAnnotationSetName
-   * 
-   * @param annName
-   */
-  @Deprecated
-  public void setOutputAnnotationSetName(String annName) {
-    setOutputASName(annName);
-  }
-
-  /**
    * Returns the outputAnnotationSetName
    * 
    * @return a {@link String} value.
    */
   public String getOutputASName() {
     return this.outputASName;
-  }
-
-  /**
-   * sets the inputAnnotationSetName
-   * 
-   * @param annName
-   */
-  @Deprecated
-  public void setInputAnnotationSetName(String annName) {
-    setInputASName(annName);
   }
 
   /**
