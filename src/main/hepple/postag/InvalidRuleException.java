@@ -27,6 +27,8 @@ package hepple.postag;
 
 public class InvalidRuleException extends Exception {
 
+  private static final long serialVersionUID = -805406522295075612L;
+
   public InvalidRuleException(){
   }
 

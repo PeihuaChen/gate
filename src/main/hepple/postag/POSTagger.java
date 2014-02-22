@@ -93,7 +93,7 @@ public class POSTagger {
 
 //    static final int MAXTAGS = 200;
 
-    protected Map rules;
+    protected Map<String, List<Rule>> rules;
 //    public Rule[] rules = new Rule[MAXTAGS];
 //    public Rule[] lastRules = new Rule[MAXTAGS];
 
@@ -139,7 +139,7 @@ public class POSTagger {
                                                           IOException{
       this.encoding = encoding;
       this.lexicon = new Lexicon(lexiconURL, encoding);
-      rules = new HashMap();
+      rules = new HashMap<String, List<Rule>>();
       readRules(rulesURL);
     }
 
@@ -150,7 +150,7 @@ public class POSTagger {
   public Rule createNewRule(String ruleId) throws InvalidRuleException{
     try{
       String className = "hepple.postag.rules.Rule_" + ruleId;
-      Class ruleClass = Class.forName(className);
+      Class<?> ruleClass = Class.forName(className);
       return (Rule)ruleClass.newInstance();
     }catch(Exception e){
       throw new InvalidRuleException("Could not create rule " + ruleId + "!\n" +
@@ -168,15 +168,15 @@ public class POSTagger {
    * being itself a list having pairs of strings as elements with
    * the word on the first position and the tag on the second.
    */
-  public List runTagger(List sentences){
-    List output = new ArrayList();
-    List taggedSentence = new ArrayList();
-    Iterator sentencesIter = sentences.iterator();
+  public List<List<String[]>> runTagger(List<List<String>> sentences){
+    List<List<String[]>> output = new ArrayList<List<String[]>>();
+    List<String[]> taggedSentence = new ArrayList<String[]>();
+    Iterator<List<String>> sentencesIter = sentences.iterator();
     while(sentencesIter.hasNext()){
-      List sentence = (List)sentencesIter.next();
-      Iterator wordsIter = sentence.iterator();
+      List<String> sentence = sentencesIter.next();
+      Iterator<String> wordsIter = sentence.iterator();
       while(wordsIter.hasNext()){
-        String newWord = (String)wordsIter.next();
+        String newWord = wordsIter.next();
         oneStep(newWord, taggedSentence);
       }//while(wordsIter.hasNext())
       //finished adding all the words from a sentence, add six more
@@ -186,24 +186,9 @@ public class POSTagger {
       }
       //we have a new finished sentence
       output.add(taggedSentence);
-      taggedSentence = new ArrayList();
+      taggedSentence = new ArrayList<String[]>();
     }//while(sentencesIter.hasNext())
     return output;
-  }
-
-
-  /**
-   * This method sets the encoding that POS tagger uses to read rules and the
-   * lexicons.
-   *
-   * @deprecated The rules and lexicon are read at construction time, so
-   * setting the encoding later will have no effect.
-   */
-  public void setEncoding(String encoding) {
-    throw new IllegalStateException("Cannot change encoding once POS tagger "
-                                  + "has been constructed.  Use the three "
-                                  + "argument constructor to specify "
-                                  + "encoding.");
   }
 
   /**
@@ -218,7 +203,7 @@ public class POSTagger {
    * of tagging the current sentence so far.
    * @return returns true if a full sentence is now tagged, otherwise false.
    */
-  protected boolean oneStep(String word, List taggedSentence){
+  protected boolean oneStep(String word, List<String[]> taggedSentence){
     //add the new word at the end of the text window
     for (int i=1 ; i<7 ; i++) {
       wordBuff[i-1] = wordBuff[i];
@@ -232,11 +217,11 @@ public class POSTagger {
     //apply the rules to the word in the middle of the text window
     //Try to fire a rule for the current lexical entry. It may be the case that
     //no rule applies.
-    List rulesToApply = (List)rules.get(lexBuff[3][0]);
+    List<Rule> rulesToApply = rules.get(lexBuff[3][0]);
     if(rulesToApply != null && rulesToApply.size() > 0){
-      Iterator rulesIter = rulesToApply.iterator();
+      Iterator<Rule> rulesIter = rulesToApply.iterator();
       //find the first rule that applies, fire it and stop.
-      while(rulesIter.hasNext() && !((Rule)rulesIter.next()).apply(this)){}
+      while(rulesIter.hasNext() && !(rulesIter.next()).apply(this)){}
     }
 
     //save the tagged word from the first position
@@ -276,9 +261,9 @@ public class POSTagger {
         while (tokens.hasMoreTokens()) ruleParts.add(tokens.nextToken());
         if (ruleParts.size() < 3) throw new InvalidRuleException(line);
   
-        newRule = createNewRule((String)ruleParts.get(2));
+        newRule = createNewRule(ruleParts.get(2));
         newRule.initialise(ruleParts);
-        List<Rule> existingRules = (List)rules.get(newRule.from);
+        List<Rule> existingRules = rules.get(newRule.from);
         if(existingRules == null){
           existingRules = new ArrayList<Rule>();
           rules.put(newRule.from, existingRules);
@@ -307,7 +292,7 @@ public class POSTagger {
 
     if (staart.equals(wd)) return staartLex;
 
-    List categories = (List)lexicon.get(wd);
+    List<String> categories = lexicon.get(wd);
     if(categories != null){
       result = new String[categories.size()];
       for(int i = 0; i < result.length; i++){
@@ -410,18 +395,18 @@ public class POSTagger {
 
         while(line != null){
           StringTokenizer tokens = new StringTokenizer(line);
-          List sentence = new ArrayList();
+          List<String> sentence = new ArrayList<String>();
           while(tokens.hasMoreTokens()) sentence.add(tokens.nextToken());
-          List sentences = new ArrayList();
+          List<List<String>> sentences = new ArrayList<List<String>>();
           sentences.add(sentence);
-          List result = tagger.runTagger(sentences);
+          List<List<String[]>> result = tagger.runTagger(sentences);
 
-          Iterator iter = result.iterator();
+          Iterator<List<String[]>> iter = result.iterator();
           while(iter.hasNext()){
-            List sentenceFromTagger = (List)iter.next();
-            Iterator sentIter = sentenceFromTagger.iterator();
+            List<String[]> sentenceFromTagger = iter.next();
+            Iterator<String[]> sentIter = sentenceFromTagger.iterator();
             while(sentIter.hasNext()){
-              String[] tag = (String[])sentIter.next();
+              String[] tag = sentIter.next();
               System.out.print(tag[0] + "/" + tag[1]);
               if(sentIter.hasNext()) System.out.print(" ");
               else System.out.println();
@@ -469,13 +454,13 @@ public class POSTagger {
    * Reads one input file and creates the structure needed by the tagger
    * for input.
    */
-  private static List readInput(String file) throws IOException{
+  private static List<List<String>> readInput(String file) throws IOException{
     BufferedReader reader = new BufferedReader(new FileReader(file));
     String line = reader.readLine();
-    List result = new ArrayList();
+    List<List<String>> result = new ArrayList<List<String>>();
     while(line != null){
       StringTokenizer tokens = new StringTokenizer(line);
-      List sentence = new ArrayList();
+      List<String> sentence = new ArrayList<String>();
       while(tokens.hasMoreTokens()) sentence.add(tokens.nextToken());
       result.add(sentence);
       line = reader.readLine();

@@ -27,9 +27,14 @@ package hepple.postag;
 
 import gate.util.BomStrippingInputStreamReader;
 
-import java.util.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.StringTokenizer;
 
 import org.apache.commons.io.IOUtils;
 
@@ -38,22 +43,9 @@ import org.apache.commons.io.IOUtils;
  * ({@link java.lang.String}) to possible POS categories
  * ({@link java.util.List}
  */
-class Lexicon extends HashMap {
+class Lexicon extends HashMap<String,List<String>> {
 
-  private String encoding;
-
-
-  /**
-   * @deprecated The lexicon file is read at construction time, so setting the
-   * encoding later will have no effect.  Use the two argument constructor to
-   * set the encoding.
-   */
-  public void setEncoding(String encoding) {
-    throw new IllegalStateException("Cannot change encoding once POS tagger "
-                                  + "has been constructed.  Use the three "
-                                  + "argument constructor to specify "
-                                  + "encoding.");
-  }
+  private static final long serialVersionUID = -2320126076517881896L;
 
   /**
    * Constructor.
@@ -65,11 +57,10 @@ class Lexicon extends HashMap {
 
   /**
    * Constructor.
-   * @param lexiconURL an URL for the file contianing the lexicon.
+   * @param lexiconURL an URL for the file containing the lexicon.
    * @param encoding the character encoding to use for reading the lexicon.
    */
   public Lexicon(URL lexiconURL, String encoding) throws IOException{
-    this.encoding = encoding;
     String line;
     BufferedReader lexiconReader = null;
     InputStream lexiconStream = null;

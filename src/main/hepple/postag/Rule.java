@@ -26,7 +26,7 @@
 
 package hepple.postag;
 
-import java.util.*;
+import java.util.List;
 
 public abstract class Rule {
 
@@ -35,13 +35,13 @@ public abstract class Rule {
   protected String ruleId;
   protected String[] context;
 
-  public void initialise(List ruleParts) {
-    from = (String)ruleParts.get(0);
-    to = (String)ruleParts.get(1);
-    ruleId = (String)ruleParts.get(2);
+  public void initialise(List<String> ruleParts) {
+    from = ruleParts.get(0);
+    to = ruleParts.get(1);
+    ruleId = ruleParts.get(2);
     int contextSize = ruleParts.size() - 3;
     context = new String[contextSize];
-    for (int i=0 ; i<contextSize ; i++) context[i] = (String)ruleParts.get(i+3);
+    for (int i=0 ; i<contextSize ; i++) context[i] = ruleParts.get(i+3);
   }
 
   abstract public boolean checkContext(POSTagger tagger);
