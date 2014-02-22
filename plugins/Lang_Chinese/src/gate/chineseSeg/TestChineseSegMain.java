@@ -8,28 +8,17 @@
 
 package gate.chineseSeg;
 
-import gate.Corpus;
-import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
 import gate.GateConstants;
 import gate.util.BomStrippingInputStreamReader;
-import gate.util.ExtensionFileFilter;
 import gate.util.GateException;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -50,7 +39,7 @@ public class TestChineseSegMain extends TestCase {
 
       bdmPluginHome = new File(new File(Gate.getGateHome(), "plugins"),
         "Lang_Chinese");
-      Gate.getCreoleRegister().addDirectory(bdmPluginHome.toURI().toURL());
+      Gate.getCreoleRegister().registerDirectories(bdmPluginHome.toURI().toURL());
       initialized = true;
     }
   }

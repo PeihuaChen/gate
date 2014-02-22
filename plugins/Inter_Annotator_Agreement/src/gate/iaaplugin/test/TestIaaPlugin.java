@@ -8,24 +8,23 @@
 
 package gate.iaaplugin.test;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.util.Arrays;
-import java.util.Comparator;
-
 import gate.Corpus;
-import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
 import gate.GateConstants;
+import gate.iaaplugin.IaaMain;
+import gate.iaaplugin.MeasureType;
 import gate.util.ExtensionFileFilter;
 import gate.util.GateException;
+
+import java.io.File;
+import java.net.MalformedURLException;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import gate.iaaplugin.IaaMain;
-import gate.iaaplugin.MeasureType;
+
 /**
  * Test the IAA computation by using the test
  * methods and small dataset.
@@ -44,7 +43,7 @@ public class TestIaaPlugin extends TestCase {
       Gate.init();
       iaaPluginHome = new File(new File(Gate.getGateHome(), "plugins"),
         "Inter_Annotator_Agreement");
-      Gate.getCreoleRegister().addDirectory(iaaPluginHome.toURI().toURL());
+      Gate.getCreoleRegister().registerDirectories(iaaPluginHome.toURI().toURL());
       initialized = true;
     }
   }
