@@ -80,14 +80,4 @@ public interface RunningStrategy{
     ProcessingResource pr;
     boolean shouldRun;
   }
-  
-  /**
-   * @deprecated use {@link UnconditionalRunningStrategy} instead.
-   */
-  @Deprecated
-  public static class RunAlwaysStrategy extends UnconditionalRunningStrategy{
-    public RunAlwaysStrategy(ProcessingResource pr){
-      super(pr, true);
-    }
-  }
 }
