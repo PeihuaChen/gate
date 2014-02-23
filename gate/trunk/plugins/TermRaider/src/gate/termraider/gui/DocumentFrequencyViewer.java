@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008--2012, The University of Sheffield. See the file
+ *  Copyright (c) 2008--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -19,8 +19,10 @@ import gate.creole.metadata.GuiType;
 import gate.event.ProgressListener;
 import gate.termraider.bank.*;
 import gate.termraider.util.*;
+
 import java.awt.BorderLayout;
 import java.util.*;
+
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -49,6 +51,7 @@ public class DocumentFrequencyViewer
   private ListTableModel typeTableModel, langTableModel;
   private JTextField docsField;
   
+  
   @Override
   public Resource init() {
     initGuiComponents();
@@ -74,29 +77,23 @@ public class DocumentFrequencyViewer
     dfTab.add(freqScrollPane, BorderLayout.CENTER);
     
     JSplitPane listsTab = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-    typeTableModel = new ListTableModel("Term annotation types");
+    typeTableModel = new ListTableModel("Annotation types indexed");
     typeTable = new JTable(typeTableModel);
-    langTableModel = new ListTableModel("Language codes");
-    langTable = new JTable(langTableModel);
-    listsTab.setLeftComponent(typeTable);
-    listsTab.setRightComponent(langTable);
-    tabbedPane.addTab("Types and languages", listsTab);
-    
-    // TODO
-    // wrap each table in a pane with optional scrolling
-    /*
-         termTable.setAutoCreateRowSorter(true);
-    pairTable.setAutoCreateRowSorter(true);
-    termPane = new JScrollPane(termTable, 
-    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
-            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    pairPane = new JScrollPane(pairTable, 
+    typeTable.setAutoCreateRowSorter(true);
+    JScrollPane typeScrollPane = new JScrollPane(typeTable, 
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    splitPane.setLeftComponent(termPane);
-    splitPane.setRightComponent(pairPane);
+    
+    langTableModel = new ListTableModel("Language codes indexed");
+    langTable = new JTable(langTableModel);
+    langTable.setAutoCreateRowSorter(true);
+    JScrollPane langScrollPane = new JScrollPane(langTable, 
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-     */
+    listsTab.setLeftComponent(typeScrollPane);
+    listsTab.setRightComponent(langScrollPane);
+    tabbedPane.addTab("Types and languages", listsTab);
     
     this.add(tabbedPane, BorderLayout.CENTER);
     tabbedPane.validate();
@@ -189,6 +186,7 @@ class ListTableModel extends AbstractTableModel {
 
   public ListTableModel(String heading) {
     this.heading = heading;
+    this.strings = new ArrayList<String>();
   }
   
   public void setList(Collection<String> strings) {
