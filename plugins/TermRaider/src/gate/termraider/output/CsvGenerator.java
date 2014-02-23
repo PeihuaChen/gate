@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010--2012, The University of Sheffield. See the file
+ *  Copyright (c) 2010--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -12,71 +12,99 @@
 package gate.termraider.output;
 
 import gate.util.GateException;
+
 import java.io.*;
 import java.util.*;
+
 import org.apache.commons.lang.*;
+
 import gate.termraider.bank.*;
 import gate.termraider.util.*;
 
 public class CsvGenerator {
   
-  private AbstractTermbank termbank;
-  private boolean debugMode;
-  private String scorePropertyName;
-  
-  public void generateAndSaveCsv(AbstractTermbank termbank, 
-          double threshold, File outputFile) throws GateException {
-    this.termbank = termbank;
-    this.debugMode = termbank.getDebugMode();
-    this.scorePropertyName = termbank.getScoreProperty();
+  public static void generateAndSaveCsv(AbstractBank bank, 
+          Number threshold, File outputFile) throws GateException {
     PrintWriter writer = initializeWriter(outputFile);
-    generateCsv(writer, threshold);
+    
+    if (bank instanceof AbstractTermbank) {
+      String scorePropertyName = bank.getScoreProperty();
+      generateTermbankCsv((AbstractTermbank) bank, writer, threshold.doubleValue(), scorePropertyName);
+    }
+    else if (bank instanceof DocumentFrequencyBank) {
+      generateDFCsv((DocumentFrequencyBank) bank, writer, threshold.intValue());
+    }
+    
     writer.flush();
     writer.close();
-    if (debugMode) {
-      System.out.println("Termbank: saved CSV in " + outputFile.getAbsolutePath());
+    if (bank.getDebugMode()) {
+      System.out.println("Saved CSV to " + outputFile.getAbsolutePath() +
+              " from " + bank.getName() + " (" + bank.getClass().getName() + ")");
     }
-
   }
   
   
-  
-  private void generateCsv(PrintWriter writer, double threshold) {
-    Map<Term, Double> termScores = termbank.getTermScores();
-    Map<Term, Set<String>> termDocuments = termbank.getTermDocuments();
+  private static void generateTermbankCsv(AbstractTermbank bank, PrintWriter writer, 
+          double threshold, String scorePropertyName) {
+    Map<Term, Double> termScores = bank.getTermScores();
+    Map<Term, Set<String>> termDocuments = bank.getTermDocuments();
     Map<Term, Integer> termFrequencies = null;
-    termFrequencies = termbank.getTermFrequencies();
-    addComment("threshold = " + threshold);
-    List<Term> sortedTerms = termbank.getTermsByDescendingScore();
+    termFrequencies = bank.getTermFrequencies();
+    addComment(bank, "threshold = " + threshold);
+    List<Term> sortedTerms = bank.getTermsByDescendingScore();
     
-    addComment("Unfiltered nbr of terms = " + sortedTerms.size());
+    addComment(bank, "Unfiltered nbr of terms = " + sortedTerms.size());
     int written = 0;
-    writeHeader(writer);
+    writeTermbankHeader(writer);
     
     for (Term term : sortedTerms) {
       Double score = termScores.get(term);
       if (score >= threshold) {
         Set<String> documents = termDocuments.get(term);
         Integer frequency = termFrequencies.get(term);
-        writeContent(writer, term, score, documents, frequency);
+        writeTermBankContent(writer, term, score, documents, frequency, scorePropertyName);
         written++;
       }
       else {  // the rest must be lower
         break;
       }
     }
-    addComment("Filtered nbr of terms = " + written);
+    addComment(bank, "Filtered nbr of terms = " + written);
   }
+
   
+  private static void generateDFCsv(DocumentFrequencyBank bank, PrintWriter writer, int threshold) {
+    Map<Term, Integer> frequencies = bank.getDocFrequencies();
+    addComment(bank, "threshold = " + threshold);
+    List<Term> sortedTerms = bank.getTermsByDescendingFreq();
+    
+    addComment(bank, "Unfiltered nbr of terms = " + sortedTerms.size());
+    int written = 0;
+    writeDFHeader(writer);
+    writeDFContent(writer, "_TOTAL_DOCS_", bank.getTotalDocs());
+    
+    for (Term term : sortedTerms) {
+      Integer freq = frequencies.get(term);
+      if (freq >= threshold) {
+        writeDFContent(writer, term, freq);
+        written++;
+      }
+      else {  // the rest must be lower
+        break;
+      }
+    }
+    addComment(bank, "Filtered nbr of terms = " + written);
+  }
+
   
-  private void addComment(String commentStr) {
-    if (debugMode) {
-      System.err.println(commentStr);
+  private static void addComment(AbstractBank termbank, String commentStr) {
+    if (termbank.getDebugMode()) {
+      System.out.println(commentStr);
     }
   }
   
   
-  private PrintWriter initializeWriter(File outputFile) throws GateException {
+  private static PrintWriter initializeWriter(File outputFile) throws GateException {
     try {
       return new PrintWriter(outputFile);
     } 
@@ -86,8 +114,8 @@ public class CsvGenerator {
   }
   
   
-  
-  private void writeContent(PrintWriter writer, Term term, Double score, Set<String> documents, Integer frequency) {
+  private static void writeTermBankContent(PrintWriter writer, Term term, Double score,
+          Set<String> documents, Integer frequency, String scorePropertyName) {
     StringBuilder sb = new StringBuilder();
     sb.append(StringEscapeUtils.escapeCsv(term.getTermString()));
     sb.append(',');
@@ -95,16 +123,18 @@ public class CsvGenerator {
     sb.append(',');
     sb.append(StringEscapeUtils.escapeCsv(term.getType()));
     sb.append(',');
-    sb.append(StringEscapeUtils.escapeCsv(this.scorePropertyName));
+    sb.append(StringEscapeUtils.escapeCsv(scorePropertyName));
     sb.append(',');
     sb.append(StringEscapeUtils.escapeCsv(score.toString()));
     sb.append(',');
     sb.append(StringEscapeUtils.escapeCsv(Integer.toString(documents.size())));
-    sb.append(',').append(StringEscapeUtils.escapeCsv(frequency.toString()));
+    sb.append(',');
+    sb.append(StringEscapeUtils.escapeCsv(frequency.toString()));
     writer.println(sb.toString());
   }
   
-  private void writeHeader(PrintWriter writer) {
+  
+  private static void writeTermbankHeader(PrintWriter writer) {
     StringBuilder sb = new StringBuilder();
     sb.append(StringEscapeUtils.escapeCsv("Term"));
     sb.append(',').append(StringEscapeUtils.escapeCsv("Lang"));
@@ -115,6 +145,42 @@ public class CsvGenerator {
     sb.append(',').append(StringEscapeUtils.escapeCsv("Term_Frequency"));
     writer.println(sb.toString());
   }
+
+
+  private static void writeDFContent(PrintWriter writer, Term term, Integer frequency) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(StringEscapeUtils.escapeCsv(term.getTermString()));
+    sb.append(',');
+    sb.append(StringEscapeUtils.escapeCsv(term.getLanguageCode()));
+    sb.append(',');
+    sb.append(StringEscapeUtils.escapeCsv(term.getType()));
+    sb.append(',');
+    sb.append(StringEscapeUtils.escapeCsv(frequency.toString()));
+    writer.println(sb.toString());
+  }
+
   
+
+  private static void writeDFContent(PrintWriter writer, String string, Integer frequency) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(StringEscapeUtils.escapeCsv(string));
+    sb.append(',');
+    sb.append(StringEscapeUtils.escapeCsv(""));
+    sb.append(',');
+    sb.append(StringEscapeUtils.escapeCsv(""));
+    sb.append(',');
+    sb.append(StringEscapeUtils.escapeCsv(frequency.toString()));
+    writer.println(sb.toString());
+  }
+
+
+  private static void writeDFHeader(PrintWriter writer) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(StringEscapeUtils.escapeCsv("Term"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("Lang"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("Type"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("DocFrequency"));
+    writer.println(sb.toString());
+  }
   
 }

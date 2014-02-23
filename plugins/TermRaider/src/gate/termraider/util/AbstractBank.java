@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010--2012, The University of Sheffield. See the file
+ *  Copyright (c) 2010--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -75,6 +75,7 @@ public abstract class AbstractBank extends AbstractLanguageResource {
   protected String languageFeature;
   protected String inputAnnotationFeature;
   protected Set<Corpus> corpora;
+  protected boolean debugMode;
 
 
 
@@ -117,6 +118,16 @@ public abstract class AbstractBank extends AbstractLanguageResource {
 
   public Set<Corpus> getCorpora() {
     return this.corpora;
+  }
+
+  @CreoleParameter(comment = "print debugging information during initialization",
+          defaultValue = "false")
+  public void setDebugMode(Boolean debug) {
+    this.debugMode = debug;
+  }
+
+  public Boolean getDebugMode() {
+    return this.debugMode;
   }
   
 }

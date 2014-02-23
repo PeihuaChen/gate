@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008--2013, The University of Sheffield. See the file
+ *  Copyright (c) 2008--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -31,7 +31,6 @@ public abstract class AbstractTermbank extends AbstractBank
   private static final long serialVersionUID = -2809051430169834059L;
   
   // CREOLE init parameters
-  protected boolean debugMode;
   protected String inputASName;
   protected Set<String> inputAnnotationTypes;
 
@@ -226,8 +225,7 @@ public abstract class AbstractTermbank extends AbstractBank
   /* Methods for saving as CSV */
   
   public void saveAsCsv(double threshold, File outputFile) throws GateException {
-    CsvGenerator generator = new CsvGenerator();
-    generator.generateAndSaveCsv(this, threshold, outputFile);
+    CsvGenerator.generateAndSaveCsv(this, threshold, outputFile);
   }
 
   /**
@@ -236,9 +234,7 @@ public abstract class AbstractTermbank extends AbstractBank
    * @throws GateException
    */
   public void saveAsCsv(File outputFile) throws GateException {
-    double threshold = this.getMinScore();
-    CsvGenerator generator = new CsvGenerator();
-    generator.generateAndSaveCsv(this, threshold, outputFile);
+    saveAsCsv(this.getMinScore(), outputFile);
   }
   
   
@@ -293,16 +289,4 @@ public abstract class AbstractTermbank extends AbstractBank
     return this.inputAnnotationTypes;
   }
   
-  
-  @CreoleParameter(comment = "print debugging information during initialization",
-          defaultValue = "false")
-  public void setDebugMode(Boolean debug) {
-    this.debugMode = debug;
-  }
-
-  public Boolean getDebugMode() {
-    return this.debugMode;
-  }
-  
-
 }

@@ -13,7 +13,9 @@ package gate.termraider.bank;
 
 import java.io.File;
 import java.util.*;
+
 import javax.swing.Action;
+
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Corpus;
@@ -25,6 +27,7 @@ import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.gui.ActionsPublisher;
 import gate.termraider.gui.ActionSaveCsv;
+import gate.termraider.output.CsvGenerator;
 import gate.termraider.util.*;
 import gate.util.GateException;
 
@@ -230,11 +233,19 @@ implements ActionsPublisher{
   public int getMaxFrequency() {
     return this.maxFrequency;
   }
+  
+  
+  public List<Term> getTermsByDescendingFreq() {
+    List<Term> terms = new ArrayList<Term>(this.getTerms());
+    Comparator<Term> comparator = new TermComparatorByDescendingScore(documentFrequencies);
+    Collections.sort(terms, comparator);
+    return terms;
+  }
 
+  
   @Override
   public void saveAsCsv(double threshold, File file) throws GateException {
-    System.out.println("CSV output has not yet been implemented.");
-    // TODO Auto-generated method stub
+    CsvGenerator.generateAndSaveCsv(this, threshold, file);
   }
 
 

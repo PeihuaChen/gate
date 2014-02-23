@@ -31,7 +31,6 @@ public abstract class AbstractPairbank extends AbstractBank
   private static final long serialVersionUID = 424942970862740181L;
 
   // CREOLE init parameters
-  protected boolean debugMode;
   protected String inputASName;
 
   protected transient List<Action> actionsList;
@@ -222,17 +221,6 @@ public abstract class AbstractPairbank extends AbstractBank
   }
   public String getInputASName() {
     return this.inputASName;
-  }
-  
-  
-  @CreoleParameter(comment = "print debugging information during initialization",
-          defaultValue = "false")
-  public void setDebugMode(Boolean debug) {
-    this.debugMode = debug;
-  }
-
-  public Boolean getDebugMode() {
-    return this.debugMode;
   }
 
 }

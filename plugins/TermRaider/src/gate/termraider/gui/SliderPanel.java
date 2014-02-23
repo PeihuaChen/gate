@@ -28,7 +28,9 @@ public class SliderPanel extends JPanel {
   
   
   
-  
+  // TODO
+  // Add another constructor for DocumentFrequencyBank, with more
+  // suitable slider range calculations
   public SliderPanel(AbstractBank scoredbank, String verb, boolean startLeft,
           TermbankViewer viewer) {
     this.scoredbank = scoredbank;
