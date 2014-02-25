@@ -64,10 +64,15 @@ public class TfIdfTermbank extends AbstractTermbank
   }
 
   
+  public int getRefDocFrequency(Term term) {
+    return this.docFreqSource.getDocFrequency(term);
+  }
+  
+  
   protected void calculateScores() {
     for (Term term : termFrequencies.keySet()) {
       int tf = termFrequencies.get(term);
-      int df = docFreqSource.getDocFrequency(term);
+      int df = getRefDocFrequency(term);
       int n = docFreqSource.getTotalDocs();
       double score = TfCalculation.calculate(tfCalculation, tf) * IdfCalculation.calculate(idfCalculation, df, n);
       rawTermScores.put(term, Double.valueOf(score));
@@ -101,7 +106,7 @@ public class TfIdfTermbank extends AbstractTermbank
   }
   
   /***** CREOLE PARAMETERS *****/
-  
+  @Optional
   @CreoleParameter(comment = "document frequency bank (unset = create from these corpora)")
   public void setDocFreqSource(DocumentFrequencyBank dfb) {
     this.docFreqSource = dfb;
