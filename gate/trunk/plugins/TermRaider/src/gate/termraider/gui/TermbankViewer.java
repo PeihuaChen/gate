@@ -143,6 +143,7 @@ public class TermbankViewer
     controlPanel.repaint();
     
     freqTable = new JTable();
+    freqTable.setAutoCreateRowSorter(true);
     // Set the table model later, because the specific type of termbank
     // will determine the number of columns
     freqScrollPane = new JScrollPane(freqTable, 
@@ -303,7 +304,6 @@ public class TermbankViewer
     freqTableModel = new FrequencyTableModel();
     freqTableModel.setTermbank(this.termbank);
     freqTable.setModel(freqTableModel);
-    freqTable.setAutoCreateRowSorter(true);
   }
 
 
