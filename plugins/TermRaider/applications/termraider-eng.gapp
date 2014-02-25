@@ -38,6 +38,7 @@ eachDocument {
 def termbank0 = Factory.createResource(&quot;gate.termraider.bank.TfIdfTermbank&quot;, [
   corpora:[corpus],
   inputAnnotationTypes:&apos;SingleWord;MultiWord&apos;,
+  docFreqSource:null,
   debugMode:true,
 ].toFeatureMap())
 
