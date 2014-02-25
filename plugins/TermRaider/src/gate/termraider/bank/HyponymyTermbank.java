@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008--2012, The University of Sheffield. See the file
+ *  Copyright (c) 2008--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -15,6 +15,7 @@ import gate.creole.metadata.*;
 import gate.gui.ActionsPublisher;
 import gate.*;
 import gate.termraider.util.*;
+import org.apache.commons.lang.StringEscapeUtils;
 import java.util.*;
 
 
@@ -56,7 +57,7 @@ public class HyponymyTermbank extends AbstractTermbank
   }
 
   
-  protected void addData(Document document) {
+  protected void processDocument(Document document) {
     String documentSource = Utilities.sourceOrName(document);
     AnnotationSet candidates = document.getAnnotations(inputASName).get(inputAnnotationTypes);
     
@@ -167,6 +168,36 @@ public class HyponymyTermbank extends AbstractTermbank
   }
 
   
+  public String getCsvHeader() {
+    StringBuilder sb = new StringBuilder();
+    sb.append(StringEscapeUtils.escapeCsv("Term"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("Lang"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("Type"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("ScoreType"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("Score"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("Document_Count"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("Term_Frequency"));
+    return sb.toString();
+  }
+
+  public String getCsvLine(Term term) {
+      StringBuilder sb = new StringBuilder();
+      sb.append(StringEscapeUtils.escapeCsv(term.getTermString()));
+      sb.append(',');
+      sb.append(StringEscapeUtils.escapeCsv(term.getLanguageCode()));
+      sb.append(',');
+      sb.append(StringEscapeUtils.escapeCsv(term.getType()));
+      sb.append(',');
+      sb.append(StringEscapeUtils.escapeCsv(this.getScoreProperty()));
+      sb.append(',');
+      sb.append(StringEscapeUtils.escapeCsv(this.getScore(term).toString()));
+      sb.append(',');
+      sb.append(StringEscapeUtils.escapeCsv(Integer.toString(this.getDocFrequency(term))));
+      sb.append(',');
+      sb.append(StringEscapeUtils.escapeCsv(Integer.toString(this.getTermFrequency(term))));
+      return sb.toString();
+  }
+
   /***** CREOLE PARAMETERS *****/
 
   @CreoleParameter(comment = "Annotation features (in order) to be scanned as terms' heads")

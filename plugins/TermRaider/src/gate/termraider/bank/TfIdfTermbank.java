@@ -11,13 +11,17 @@
  */
 package gate.termraider.bank;
 
+import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.*;
 import gate.gui.ActionsPublisher;
 import gate.*;
 import gate.termraider.bank.modes.IdfCalculation;
 import gate.termraider.bank.modes.TfCalculation;
 import gate.termraider.util.*;
+
 import java.util.*;
+
+import org.apache.commons.lang.StringEscapeUtils;
 
 
 
@@ -33,12 +37,13 @@ public class TfIdfTermbank extends AbstractTermbank
   /* EXTRA CREOLE PARAMETERS */
   private TfCalculation tfCalculation;
   private IdfCalculation idfCalculation;
+  private DocumentFrequencyBank docFreqSource;
   
   /* EXTRA DATA */
   private int documentCount;
   
   
-  protected void addData(Document document) {
+  protected void processDocument(Document document) {
     documentCount++;
     String documentSource = Utilities.sourceOrName(document);
     AnnotationSet candidates = document.getAnnotations(inputASName).get(inputAnnotationTypes);
@@ -62,8 +67,9 @@ public class TfIdfTermbank extends AbstractTermbank
   protected void calculateScores() {
     for (Term term : termFrequencies.keySet()) {
       int tf = termFrequencies.get(term);
-      int df = termDocuments.get(term).size();
-      double score = TfCalculation.calculate(tfCalculation, tf) * IdfCalculation.calculate(idfCalculation, df, documentCount);
+      int df = docFreqSource.getDocFrequency(term);
+      int n = docFreqSource.getTotalDocs();
+      double score = TfCalculation.calculate(tfCalculation, tf) * IdfCalculation.calculate(idfCalculation, df, n);
       rawTermScores.put(term, Double.valueOf(score));
       termScores.put(term, Utilities.normalizeScore(score));
     }
@@ -90,8 +96,21 @@ public class TfIdfTermbank extends AbstractTermbank
   }
 
 
+  public int getDocCount() {
+    return this.documentCount;
+  }
   
   /***** CREOLE PARAMETERS *****/
+  
+  @CreoleParameter(comment = "document frequency bank (unset = create from these corpora)")
+  public void setDocFreqSource(DocumentFrequencyBank dfb) {
+    this.docFreqSource = dfb;
+  }
+  
+  public DocumentFrequencyBank getDocFreqSource() {
+    return this.docFreqSource;
+  }
+  
 
   @CreoleParameter(comment = "term frequency calculation",
           defaultValue = "Logarithmic")
@@ -120,6 +139,61 @@ public class TfIdfTermbank extends AbstractTermbank
   @CreoleParameter(defaultValue = "tfIdf")
   public void setScoreProperty(String name) {
     super.setScoreProperty(name);
+  }
+
+
+  public String getCsvHeader() {
+    StringBuilder sb = new StringBuilder();
+    sb.append(StringEscapeUtils.escapeCsv("Term"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("Lang"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("Type"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("ScoreType"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("Score"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("Document_Count"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("Ref_Doc_Frequency"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("Term_Frequency"));
+    return sb.toString();
+  }
+
+
+  public String getCsvLine(Term term) {
+      StringBuilder sb = new StringBuilder();
+      sb.append(StringEscapeUtils.escapeCsv(term.getTermString()));
+      sb.append(',');
+      sb.append(StringEscapeUtils.escapeCsv(term.getLanguageCode()));
+      sb.append(',');
+      sb.append(StringEscapeUtils.escapeCsv(term.getType()));
+      sb.append(',');
+      sb.append(StringEscapeUtils.escapeCsv(this.getScoreProperty()));
+      sb.append(',');
+      sb.append(StringEscapeUtils.escapeCsv(this.getScore(term).toString()));
+      sb.append(',');
+      sb.append(StringEscapeUtils.escapeCsv(Integer.toString(this.getDocFrequency(term))));
+      sb.append(',');
+      sb.append(StringEscapeUtils.escapeCsv(Integer.toString(this.docFreqSource.getDocFrequency(term))));
+      sb.append(',');
+      sb.append(StringEscapeUtils.escapeCsv(Integer.toString(this.getTermFrequency(term))));
+      return sb.toString();
+  }
+
+
+  protected void prepare() throws ResourceInstantiationException {
+    if ( (corpora == null) || (corpora.size() == 0) ) {
+      throw new ResourceInstantiationException("No corpora given");
+    }
+    
+    // If no DFB is specified, we create one from the given corpora
+    if (this.docFreqSource == null) {
+      FeatureMap dfbParameters = Factory.newFeatureMap();
+      dfbParameters.put("inputASName", this.inputASName);
+      dfbParameters.put("languageFeature", this.languageFeature);
+      dfbParameters.put("inputAnnotationFeature", this.inputAnnotationFeature);
+      dfbParameters.put("corpora", this.corpora);
+      dfbParameters.put("debugMode", this.debugMode);
+
+      DocumentFrequencyBank dfb = (DocumentFrequencyBank) Factory.createResource(DocumentFrequencyBank.class.getName(), dfbParameters);
+      this.setDocFreqSource(dfb);
+    }
   }
 
 }
