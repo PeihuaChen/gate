@@ -313,7 +313,8 @@ public class TermbankViewer
   }  
 
   public void setTarget(Object target) {
-    if(target == null || ! (target instanceof AbstractTermbank)) {
+    if(target == null || ! (target instanceof AbstractTermbank)
+            || (target instanceof DocumentFrequencyBank) ) {
       throw new IllegalArgumentException("This Viewer cannot show a "
               + (target == null ? "null" : target.getClass().toString()));
     }

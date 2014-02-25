@@ -16,6 +16,8 @@ import java.util.*;
 
 import javax.swing.Action;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Corpus;
@@ -34,7 +36,7 @@ import gate.util.GateException;
 @CreoleResource(name = "DocumentFrequencyBank",
 icon = "termbank-lr.png",
 comment = "Document frequency counter derived from corpora and other DFBs")
-public class DocumentFrequencyBank extends AbstractBank
+public class DocumentFrequencyBank extends AbstractTermbank
 implements ActionsPublisher{
   
   private static final long serialVersionUID = 5149075094060830331L;
@@ -56,9 +58,11 @@ implements ActionsPublisher{
 
   public Resource init() throws ResourceInstantiationException {
     prepare();
+    resetScores();
     processInputBanks();
     processCorpora();
-    churnData();
+    scanTypesLanguagesDocFreq();
+    calculateScores();
     return this;
   }
   
@@ -76,9 +80,12 @@ implements ActionsPublisher{
     if (inputBanks == null) {
       inputBanks = new HashSet<DocumentFrequencyBank>();
     }
-    
+  }
+  
+  protected void resetScores() {
     documentTotal = 0;
     documentFrequencies = new HashMap<Term, Integer>();
+    termFrequencies = new HashMap<Term, Integer>();
     languages = new HashSet<String>();
     types = new HashSet<String>();
     stringLookupTable = new HashMap<String, Set<Term>>();
@@ -140,7 +147,7 @@ implements ActionsPublisher{
   }
 
   
-  private void churnData() {
+  protected void calculateScores() {
     if (this.getTerms().size() > 0) {
       minFrequency = this.getFrequencyStrict(this.getTerms().iterator().next());
     }
@@ -189,6 +196,12 @@ implements ActionsPublisher{
     }
     
     return 0;
+  }
+  
+  
+  @Override
+  public int getDocFrequency(Term term) {
+    return getFrequencyLax(term);
   }
   
   
@@ -287,6 +300,8 @@ implements ActionsPublisher{
   }
   
   
+  
+  
   private void increment(Term term, int i) {
     int count = i;
     if (documentFrequencies.containsKey(term)) {
@@ -316,5 +331,33 @@ implements ActionsPublisher{
   
   public int getTotalDocs() {
     return this.documentTotal;
+  }
+
+
+  public String getCsvLine(Term term) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(StringEscapeUtils.escapeCsv(term.getTermString()));
+    sb.append(',');
+    sb.append(StringEscapeUtils.escapeCsv(term.getLanguageCode()));
+    sb.append(',');
+    sb.append(StringEscapeUtils.escapeCsv(term.getType()));
+    sb.append(',');
+    sb.append(StringEscapeUtils.escapeCsv(Integer.toString(this.getDocFrequency(term))));
+    return sb.toString();
+  }
+
+
+  public String getCsvHeader() {
+    StringBuilder sb = new StringBuilder();
+    sb.append(StringEscapeUtils.escapeCsv("Term"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("Lang"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("Type"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("DocFrequency"));
+    sb.append('\n');
+    sb.append(',').append(StringEscapeUtils.escapeCsv("_TOTAL_DOCS_"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv(""));
+    sb.append(',').append(StringEscapeUtils.escapeCsv(""));
+    sb.append(',').append(StringEscapeUtils.escapeCsv(Integer.toString(this.getTotalDocs())));
+    return sb.toString();
   }
 }

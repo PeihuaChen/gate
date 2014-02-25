@@ -13,15 +13,10 @@ package gate.termraider.bank.modes;
 
 public enum IdfCalculation {
   Natural,
-  Logarithmic,
-  LogarithmicPlus1;
+  Logarithmic;
   
   /* These calculations are from Manning & Schütze, Foundations of
    * Statistical NLP, section 15.2 (p.544).
-   * 
-   * TODO: Use (df + 1) normalization methods so we can handle
-   * terms not found in the IDF table (to allow for external 
-   * IDF sources in future use).
    */
   
   public static double calculate(IdfCalculation mode, int rawDF, int corpusSize) {
@@ -29,15 +24,14 @@ public enum IdfCalculation {
     double n = (double) corpusSize;
     
     if (mode == Logarithmic) {
-      return logarithm(n / df);
+      return 1.0 + logarithm(n / (df + 1.0));
     }
     
-    if (mode == LogarithmicPlus1) {
-      return 1.0 + logarithm(n / df);
-    }
+    // TODO: review the df calculation modes; they must always return 
+    // something > 0.
     
     // must be Natural
-    return 1.0 / df;
+    return 1.0 / (df + 1.0);
   }
 
   public static final double logBase = 2.0;

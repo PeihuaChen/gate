@@ -149,7 +149,7 @@ public abstract class AbstractTermbank extends AbstractBank
       boolean wasLoaded = corpus.isDocumentLoaded(i);
       Document document = (Document) corpus.get(i);
       
-      addData(document);
+      processDocument(document);
 
       // datastore safety
       if (! wasLoaded) {
@@ -160,7 +160,7 @@ public abstract class AbstractTermbank extends AbstractBank
   }
   
   
-  private void scanTypesLanguagesDocFreq() {
+  protected void scanTypesLanguagesDocFreq() {
     this.types = new TreeSet<String>();
     this.languages = new TreeSet<String>();
     for (Term term : this.termFrequencies.keySet()) {
@@ -171,12 +171,12 @@ public abstract class AbstractTermbank extends AbstractBank
   }
   
 
-  /* BEHOLD THE GUBBINS to distinguish the various types of Termbanks*/
+  /* BEHOLD THE GUBBINS to distinguish the various types of Termbanks */
 
   /**
    * This method needs to call incrementTermFreq(...)!
    */
-  protected abstract void addData(Document document);
+  protected abstract void processDocument(Document document);
   
   protected abstract void calculateScores(); 
   
@@ -288,5 +288,11 @@ public abstract class AbstractTermbank extends AbstractBank
   public Set<String> getInputAnnotationTypes() {
     return this.inputAnnotationTypes;
   }
+
+
+  public abstract String getCsvHeader();
+
+
+  public abstract String getCsvLine(Term term);
   
 }
