@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008--2012, The University of Sheffield. See the file
+ *  Copyright (c) 2008--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -301,6 +301,7 @@ public class TermbankViewer
     controlPanel.add(sliderPanel, BorderLayout.CENTER);
     sliderPanel.reformat();
     freqTableModel.setTermbank(this.termbank);
+    freqTable.repaint();
   }
 
 
@@ -430,8 +431,9 @@ public class TermbankViewer
 class FrequencyTableModel extends AbstractTableModel {
   private static final long serialVersionUID = -7654670667296912991L;
   private List<Term> terms;
-  private String[] columnNames = {"term", "term frequency", "doc frequency"};
-  private Map<Term, Integer> termFrequencies, docFrequencies; 
+  private String[] columnNames = {"term", "term frequency", "doc frequency", "ref doc frequency"};
+  private Map<Term, Integer> termFrequencies, docFrequencies;
+  private AbstractTermbank termbank;
 
   public FrequencyTableModel() {
     this.termFrequencies = new HashMap<Term, Integer>();
@@ -443,10 +445,14 @@ class FrequencyTableModel extends AbstractTableModel {
     this.termFrequencies = termbank.getTermFrequencies();
     this.docFrequencies = termbank.getDocFrequencies();
     this.terms = new ArrayList<Term>(termFrequencies.keySet());
+    this.termbank = termbank;
     Collections.sort(this.terms, new TermComparator());
   }
   
   public int getColumnCount() {
+    if (this.termbank instanceof TfIdfTermbank) {
+      return 4;
+    }
     return 3;
   }
 
@@ -467,11 +473,19 @@ class FrequencyTableModel extends AbstractTableModel {
       return 0;
     }
     // implied else
-    if (this.docFrequencies.containsKey(term)) {
-      return this.docFrequencies.get(term);
+    if (col == 2) {
+      if (this.docFrequencies.containsKey(term)) {
+        return this.docFrequencies.get(term);
+      }
+      return 0;
+    }
+    // implied else
+    if (col == 3) {
+      return ((TfIdfTermbank) this.termbank).getRefDocFrequency(term);
     }
     return 0;
   }
+  
   
   public Class<?> getColumnClass(int col) {
     if (col == 0) {
