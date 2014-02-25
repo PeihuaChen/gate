@@ -142,9 +142,9 @@ public class TermbankViewer
     controlPanel.validate();
     controlPanel.repaint();
     
-    freqTableModel = new FrequencyTableModel();
-    freqTable = new JTable(freqTableModel);
-    freqTable.setAutoCreateRowSorter(true);
+    freqTable = new JTable();
+    // Set the table model later, because the specific type of termbank
+    // will determine the number of columns
     freqScrollPane = new JScrollPane(freqTable, 
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -300,8 +300,10 @@ public class TermbankViewer
     sliderPanel = new SliderPanel(termbank, "display", false, this);
     controlPanel.add(sliderPanel, BorderLayout.CENTER);
     sliderPanel.reformat();
+    freqTableModel = new FrequencyTableModel();
     freqTableModel.setTermbank(this.termbank);
-    freqTable.repaint();
+    freqTable.setModel(freqTableModel);
+    freqTable.setAutoCreateRowSorter(true);
   }
 
 
