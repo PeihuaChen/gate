@@ -27,7 +27,6 @@ import java.util.List;
 /**
  * Corpora are lists of Document. TIPSTER equivalent: Collection.
  */
-@SuppressWarnings("deprecation")
 public interface SimpleCorpus extends LanguageResource, List<Document>, NameBearer {
 
   public static final String CORPUS_NAME_PARAMETER_NAME = "name";
