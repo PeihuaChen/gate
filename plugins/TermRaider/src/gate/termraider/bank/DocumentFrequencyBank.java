@@ -296,7 +296,7 @@ implements ActionsPublisher{
   
   protected void initializeScoreTypes() {
     // Whatever this is called, it must be the reference
-    // document frequency, so we will only meed
+    // document frequency, so we will only need
     // getDefaultScoreType()
     this.scoreTypes = new ArrayList<ScoreType>();
     this.scoreTypes.add(new ScoreType(scoreProperty));

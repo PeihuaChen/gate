@@ -29,14 +29,15 @@ public abstract class AbstractTermbank extends AbstractBank
     implements ActionsPublisher  {
   private static final long serialVersionUID = -2809051430169834059L;
   
-  // CREOLE init parameters
-  protected String inputASName;
+  // additional CREOLE init parameters
   protected Set<String> inputAnnotationTypes;
 
   // transient to allow serialization
   protected transient List<Action> actionsList;
   
+  protected Map<ScoreType, Map<Term, Number>> scores;
   protected Map<Term, Set<String>>  termDocuments;
+  
   protected Map<Term, Double>       termScores;
   protected Map<Term, Double>       rawTermScores;
   protected List<Term> termsByDescendingScore, termsByDescendingFrequency,
@@ -51,6 +52,8 @@ public abstract class AbstractTermbank extends AbstractBank
   public Resource init() throws ResourceInstantiationException {
     prepare();
     initializeScoreTypes();
+    // Above method must be set in each subclass;
+    // now we check it has been done.
     if (this.scoreTypes.size() == 0) {
       throw new ResourceInstantiationException("No score types found in " + this.toString());
     }
@@ -305,16 +308,6 @@ public abstract class AbstractTermbank extends AbstractBank
 
   /***** CREOLE PARAMETERS *****/
 
-  @CreoleParameter(comment = "input AS name",
-          defaultValue = "")
-  public void setInputASName(String name) {
-    this.inputASName = name;
-  }
-  public String getInputASName() {
-    return this.inputASName;
-  }
-  
-  
   @CreoleParameter(comment = "input annotation types",
           defaultValue = "SingleWord;MultiWord")
   public void setInputAnnotationTypes(Set<String> names) {
