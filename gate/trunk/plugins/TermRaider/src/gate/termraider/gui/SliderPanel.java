@@ -26,32 +26,41 @@ public class SliderPanel extends JPanel {
   private AbstractBank scoredbank;
   private JSlider slider;
   
-  
-  
-  // TODO
-  // Add another constructor for DocumentFrequencyBank, with more
-  // suitable slider range calculations
   public SliderPanel(AbstractBank scoredbank, String verb, boolean startLeft,
           TermbankViewer viewer) {
     this.scoredbank = scoredbank;
     this.setLayout(new FlowLayout());
-    
     JLabel typeLabel = new JLabel("Score cut-off");
-    double min = Math.floor(this.scoredbank.getMinScore());
-    double max = Math.ceil(this.scoredbank.getMaxScore());
+
+    int imin, imax, middle;
+    Number minScore = this.scoredbank.getMinScore();
     
-    if (max - min < 1.0) {
-      max = max + 1.0;
-      min = min - 1.0;
+    // This one is for DocumentFrequencyBank, which has int quasi-scores
+    if (minScore instanceof Integer) {
+      imin = minScore.intValue();
+      imax = this.scoredbank.getMaxScore().intValue();
+      middle = (int) ( (imin + imax) / 2);
     }
-    else if (max - min < 2.0) {
-      min = min - 1.0;
+
+    // This is for everything else
+    else {
+      double min = Math.floor(minScore.doubleValue());
+      double max = Math.ceil(this.scoredbank.getMaxScore().doubleValue());
+      
+      if (max - min < 1.0) {
+        max = max + 1.0;
+        min = min - 1.0;
+      }
+      else if (max - min < 2.0) {
+        min = min - 1.0;
+      }
+      
+      imin = (int) min;
+      imax = (int) max - 1;
+      middle = (int) Math.floor((min + max) / 2);
     }
     
-    int imin = (int) min;
-    int imax = (int) max - 1;
     
-    int middle = (int) Math.floor((min + max) / 2);
     slider = new JSlider(imin, imax);
     slider.setToolTipText("minimum value to " + verb);
     slider.setPaintTicks(false);

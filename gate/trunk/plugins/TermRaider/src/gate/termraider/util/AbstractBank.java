@@ -17,7 +17,6 @@ import gate.creole.AbstractLanguageResource;
 import gate.creole.metadata.CreoleParameter;
 import gate.util.GateException;
 import java.io.File;
-import org.apache.commons.lang.StringUtils;
 import java.util.*;
 
 
@@ -31,9 +30,9 @@ public abstract class AbstractBank extends AbstractLanguageResource {
 
   protected Set<String> languages, types;
   
-  public abstract Double getMinScore();
+  public abstract Number getMinScore();
   
-  public abstract Double getMaxScore();
+  public abstract Number getMaxScore();
   
   public abstract void saveAsCsv(double threshold, File file)
     throws GateException;
@@ -48,20 +47,6 @@ public abstract class AbstractBank extends AbstractLanguageResource {
   public Set<String> getTypes() {
     return this.types;
   }
-
-  
-  public String shortScoreDescription() {
-    String result = "";
-    if (this.scoreProperty != null) {
-      result = this.scoreProperty;
-      if (result.endsWith("Score")) {
-        result = StringUtils.substring(result, 0, -5);
-      }
-    }
-    return result;
-  }
-  
-  
   
   public Term makeTerm(Annotation annotation, Document document) {
     return new Term(annotation, document, 
@@ -139,6 +124,5 @@ public abstract class AbstractBank extends AbstractLanguageResource {
   public String getInputASName() {
     return this.inputASName;
   }
-
   
 }

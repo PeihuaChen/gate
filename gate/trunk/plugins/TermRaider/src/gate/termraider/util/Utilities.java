@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008--2013, The University of Sheffield. See the file
+ *  Copyright (c) 2008--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -16,7 +16,8 @@ import gate.creole.ANNIEConstants;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import gate.termraider.bank.*;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
 
 
 public class Utilities implements ANNIEConstants {
@@ -47,13 +48,11 @@ public class Utilities implements ANNIEConstants {
    * The following produces the right half of a sigmoid 
    * curve adjusted so that
    * f(0) = 0; f(inf) = 100; f(x>0) > 0
-   * @param score
-   * @return
+   * @param score from 0 to inf 
+   * @return score from 0 to 100
    */
   public static double normalizeScore(double score) {
     double norm = 2.0 / (1.0 + Math.exp(-score / xScale)) - 1.0;
-    // The old normalization function was undocumented
-    //double norm = 1.0 - 1.0 / (1.0 + Math.log10(1.0 + score));
     return (double) (100.0F * norm);
   }
 
@@ -67,50 +66,15 @@ public class Utilities implements ANNIEConstants {
     return Double.parseDouble(x.toString()) ;
   }
 
+
+  public static String cleanAndCamelCase(String input) {
+    // remove leading & trailing whitespace then camelCase
+    return WordUtils.capitalize(StringUtils.trimToEmpty(input)).replaceAll("\\s+", "");
+  }
   
-  /**
-   * Suitable for embedding in URIs.
+  /* The following methods are NOT cruft but are used in some JAPEs,
+   * so don't delete them.
    */
-  public static String veryCleanString(String input) {
-    String clean = input.trim();
-    return clean.replaceAll("[^\\p{Alnum}\\p{Lu}\\p{Ll}]+", "_");
-  }
-
-  
-  
-  public static String generateID(String prefix, String suffix) {
-    return prefix + java.util.UUID.randomUUID().toString() + suffix;
-  }
-
-  
-  public static URL getUrlInJar(AbstractTermbank termbank, String filename) {
-    ClassLoader cl = termbank.getClass().getClassLoader();
-    return cl.getResource(filename);
-  }
-  
-  public static List<String> keysAsStrings(FeatureMap fm) {
-    List<String> result = new ArrayList<String>();
-    if (fm != null) {
-      Set<?> keys = fm.keySet();
-      for (Object key : keys) {
-        result.add(key.toString());
-      }
-    }
-    return result;
-  }
-
-
-  public static List<String> valuesAsStrings(FeatureMap fm) {
-    List<String> result = new ArrayList<String>();
-    if (fm != null) {
-      for (Object key : fm.keySet()) {
-        result.add(fm.get(key).toString());
-      }
-    }
-    return result;
-  }
-  
-  
   public static void setCanonicalFromLemma(Annotation token, Document doc, String lemmaFeatureName) {
     String canonical = getCanonicalFromLemma(token, doc, lemmaFeatureName);
     token.getFeatures().put("canonical", canonical);

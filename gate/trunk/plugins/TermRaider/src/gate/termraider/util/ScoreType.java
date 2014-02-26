@@ -11,8 +11,6 @@
  */
 package gate.termraider.util;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.WordUtils;
 
 public class ScoreType implements Comparable<ScoreType> {
 
@@ -37,7 +35,7 @@ public class ScoreType implements Comparable<ScoreType> {
     this.string = string;
     
     // Normalize = remove leading & trailing whitespace then camelCase
-    this.normalizedString = WordUtils.capitalize(StringUtils.trimToEmpty(string)).replaceAll("\\s+", "");
+    this.normalizedString = Utilities.cleanAndCamelCase(string);
     
     if (this.normalizedString.length() == 0) {
       throw new IllegalArgumentException("ScoreType must contain some non-whitespace characters.");
