@@ -62,20 +62,6 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
     }
   } // Construction from annot type and attribute sequence
 
-  /**
-   * Construction from annot type and array of JdmAttributes.
-   *
-   * @deprecated JdmAttributes are no longer used. Use
-   *             {@link ConstraintPredicate}s instead.
-   */
-  @Deprecated
-  public Constraint(String annotType, List<JdmAttribute> attrsArray) {
-    this(annotType);
-    for(JdmAttribute attr : attrsArray) {
-      addAttribute(attr.getName(), attr.getValue());
-    }
-  }
-
   /** The type of annotation we're looking for. */
   private String annotType;
 
@@ -156,15 +142,6 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
 
     return ontFeatureMap;
   }
-
-  /**
-   * Legacy support for adding an attribute using a jdm attribute.
-   *
-   * @deprecated
-   */
-  public void addAttribute(JdmAttribute attr) {
-    addAttribute(attr.getName(), attr.getValue());
-  } // addAttribute
 
   /** Create and add an attribute. */
   public void addAttribute(String name, Object value) {

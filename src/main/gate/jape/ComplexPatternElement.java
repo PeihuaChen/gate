@@ -49,18 +49,6 @@ implements JapeConstants, java.io.Serializable
   /** The recursive definition of what pattern elements make up this one. */
   private ConstraintGroup constraintGroup;
 
-  /** Construction from ConstraintGroup, Kleene operator type and binding
-    * name. Kleene types are defined in JapeConstants.
-    * @deprecated Use {@link #ComplexPatternElement(ConstraintGroup, KleeneOperator.Type, String)} instead.
-    */
-  public ComplexPatternElement(
-    ConstraintGroup constraintGroup,
-    int kleeneOp,
-    String bindingName
-  ) {
-    this(constraintGroup, KleeneOperator.Type.getFromJapeConstant(kleeneOp), bindingName);
-  }
-
   public ComplexPatternElement(
     ConstraintGroup constraintGroup,
     KleeneOperator.Type kleeneType,
