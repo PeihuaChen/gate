@@ -15,6 +15,11 @@
  */
 package gate.creole.gazetteer;
 
+import gate.creole.ResourceInstantiationException;
+import gate.util.BomStrippingInputStreamReader;
+import gate.util.Files;
+import gate.util.GateRuntimeException;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -31,11 +36,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
-
-import gate.creole.ResourceInstantiationException;
-import gate.util.BomStrippingInputStreamReader;
-import gate.util.Files;
-import gate.util.GateRuntimeException;
 
 
 /** Represents a Linear Definition [lists.def] file <br>
@@ -151,20 +151,13 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     GazetteerList list = new GazetteerList();
     list.setSeparator(separator);
     try {
-      URL turl = url;
-      if (-1 != url.getProtocol().indexOf("gate")) {
-        turl = gate.util.protocols.gate.Handler.class.getResource(
-                      gate.util.Files.getResourcePath() + url.getPath()
-                    );
-      } // if gate:path url
-
-
+      
       try {
         URL lurl = new URL(url,listName);
         list.setURL(lurl);
         list.load(isOrdered);
       } catch (Exception x) {
-        String path = turl.getPath();
+        String path = url.getPath();
         int slash = path.lastIndexOf("/");
         if (-1 != slash ) {
           path = path.substring(0,slash+1);
@@ -272,14 +265,9 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
       throw new ResourceInstantiationException("URL not set.(null)");
     }
     try {
-      URL tempUrl = url;
-      if (-1 != url.getProtocol().indexOf("gate")) {
-        tempUrl = gate.util.protocols.gate.Handler.class.getResource(
-                      gate.util.Files.getResourcePath() + url.getPath()
-                    );
-      } // if gate:path url
+      
 
-      File fileo = Files.fileFromURL(tempUrl);
+      File fileo = Files.fileFromURL(url);
       fileo.delete();
       BufferedWriter defWriter = new BufferedWriter(new FileWriter(fileo));
       Iterator inodes = nodes.iterator();
