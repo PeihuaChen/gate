@@ -32,15 +32,12 @@ public interface RhsAction extends Serializable {
    * @param doc the document the RHS action will be run on
    * @param bindings A map containing the matching results from the LHS in 
    * the form label(String) -> matched annotations (AnnotationSet)
-   * @param annotations copy of the outputAS value provided for backward
-   * compatibility
    * @param inputAS the input annotation set
    * @param outputAS the output annotation set
    * @param ontology
    * @throws JapeException
    */
   public void doit(Document doc, Map<String, AnnotationSet> bindings,
-                   AnnotationSet annotations,
                    AnnotationSet inputAS, AnnotationSet outputAS,
                    Ontology ontology)
               throws JapeException;

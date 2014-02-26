@@ -139,7 +139,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       "  public ActionContext getActionContext() { return ctx; }"+nl+
       "  public void doit(gate.Document doc, " + nl +
       "                   java.util.Map<java.lang.String, gate.AnnotationSet> bindings, " + nl +
-      "                   gate.AnnotationSet annotations, " + nl +
+      //"                   gate.AnnotationSet annotations, " + nl +
       "                   gate.AnnotationSet inputAS, gate.AnnotationSet outputAS, " + nl +
       "                   gate.creole.ontology.Ontology ontology) throws gate.jape.JapeException {" + nl
     );
@@ -304,70 +304,11 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     if(theActionObject == null) {
       instantiateActionClass();
     }
-
-    // the 'annotations' parameter of the RhSAction.doIt method has been
-    // deprecated. As there is no way in Java to deprecate a parameter
-    // we will have to be a little clever/sneaky! We will create a proxy
-    // around the outputAS and pass the proxy to the Jape RHS. If the RHS
-    // code calls any method on the annotations proxy the following
-    // handler will be called instead so we can warn about the
-    // deprecation and then forward the method onwards to the outputAS
-    // so that the JAPE code will still work.
-    AnnotationSet annotations = (AnnotationSet)Proxy.newProxyInstance(
-            getClass().getClassLoader(), new Class[] {AnnotationSet.class},
-            new InvocationHandler() {
-
-              public Object invoke(Object proxy, Method method, Object[] args)
-                      throws Throwable {
-
-                StackTraceElement japeSTE = null;
-                int lineNumber = -1;
-
-                // find the stack trace element corresponding to the
-                // call on the annotations proxy. This should always be
-                // the third element but just to be on the safe side we
-                // will find it by looping
-                for(StackTraceElement ste : (new Throwable()).getStackTrace()) {
-                  if(ste.getClassName().equals(actionClassQualifiedName)) {
-
-                    if(ste.getLineNumber() >= 0 && sourceInfo != null) {
-                      japeSTE = sourceInfo.getStackTraceElement(ste.getLineNumber());
-                      lineNumber = ste.getLineNumber();
-                    }
-                    else {
-                      // this will happen if we are running from a
-                      // serialised jape grammar as we don't keep the
-                      // source info
-                      japeSTE = new StackTraceElement(getPhaseName(),
-                              getRuleName(), null, -1);
-                    }
-
-                    break;
-                  }
-                }                
-
-                if(!warnings.contains(japeSTE)) {
-                  // we only want to warn about each use once per
-                  // invocation of GATE so we keep a cache of the stack
-                  // trace elements we have already warned about
-                  Err.println(nl + "WARNING: the JAPE 'annotations' parameter has been deprecated. Please use 'inputAS' or 'outputAS' instead.");
-                  Err.println(japeSTE);
-                  if(lineNumber >= 0)
-                    Err.println("\t" + sourceInfo.getSource(getActionClassString(), lineNumber).trim());
-
-                  warnings.add(japeSTE);
-                }
-
-                //pass the method on so that the JAPE code still works
-                return method.invoke(outputAS, args);
-              }
-            });
-    
+        
     // run the action class
     try {
       ((RhsAction) theActionObject).setActionContext(actionContext);
-      ((RhsAction) theActionObject).doit(doc, bindings, annotations,
-                                         inputAS, outputAS, ontology);
+      ((RhsAction) theActionObject).doit(doc, bindings, inputAS, outputAS, ontology);
     } catch (NonFatalJapeException e) {
       // if the action class throws a non-fatal exception then respond by
       // dumping a whole bunch of useful debug information but then allow
