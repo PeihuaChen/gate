@@ -174,15 +174,8 @@ implements List {
       if (null == url) {
         throw new ResourceInstantiationException("URL not specified (null)");
       }
-
-      URL tempUrl = url;
-      if (-1 != url.getProtocol().indexOf("gate")) {
-        tempUrl = gate.util.protocols.gate.Handler.class.getResource(
-                      gate.util.Files.getResourcePath() + url.getPath()
-                    );
-      } // if gate:path url
-
-      File fileo = Files.fileFromURL(tempUrl);
+      
+      File fileo = Files.fileFromURL(url);
 
       fileo.delete();
       OutputStreamWriter listWriter  = new OutputStreamWriter(
