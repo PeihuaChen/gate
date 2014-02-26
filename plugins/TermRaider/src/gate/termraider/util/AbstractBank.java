@@ -81,7 +81,7 @@ public abstract class AbstractBank extends AbstractLanguageResource {
 
 
   /* Default value is overridden in the implementations   */
-  @CreoleParameter(comment = "name of score property",
+  @CreoleParameter(comment = "name of main score",
           defaultValue = "score")
   public void setScoreProperty(String name) {
     this.scoreProperty = name;

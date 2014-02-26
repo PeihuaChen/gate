@@ -13,11 +13,8 @@ package gate.termraider.bank;
 
 import java.io.File;
 import java.util.*;
-
 import javax.swing.Action;
-
 import org.apache.commons.lang.StringEscapeUtils;
-
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Corpus;
@@ -43,9 +40,7 @@ implements ActionsPublisher{
   
   
   private Set<DocumentFrequencyBank> inputBanks;
-  private boolean debugMode;
-  protected String inputASName;
-  protected Set<String> inputAnnotationTypes;
+  // note: corpora inherited from AbstractBank
   
   private int documentTotal;
   private Map<Term, Integer> documentFrequencies;
@@ -268,40 +263,6 @@ implements ActionsPublisher{
   }
 
   
-  @CreoleParameter(comment = "print debugging information during initialization",
-          defaultValue = "false")
-  public void setDebugMode(Boolean debug) {
-    this.debugMode = debug;
-  }
-
-  public Boolean getDebugMode() {
-    return this.debugMode;
-  }
-
-  
-  @CreoleParameter(comment = "input AS name",
-          defaultValue = "")
-  public void setInputASName(String name) {
-    this.inputASName = name;
-  }
-  public String getInputASName() {
-    return this.inputASName;
-  }
-  
-  
-  @CreoleParameter(comment = "input annotation types",
-          defaultValue = "SingleWord;MultiWord")
-  public void setInputAnnotationTypes(Set<String> names) {
-    this.inputAnnotationTypes = names;
-  }
-  
-  public Set<String> getInputAnnotationTypes() {
-    return this.inputAnnotationTypes;
-  }
-  
-  
-  
-  
   private void increment(Term term, int i) {
     int count = i;
     if (documentFrequencies.containsKey(term)) {
@@ -331,6 +292,21 @@ implements ActionsPublisher{
   
   public int getTotalDocs() {
     return this.documentTotal;
+  }
+  
+  protected void initializeScoreTypes() {
+    // Whatever this is called, it must be the reference
+    // document frequency, so we will only meed
+    // getDefaultScoreType()
+    this.scoreTypes = new ArrayList<ScoreType>();
+    this.scoreTypes.add(new ScoreType(scoreProperty));
+  }
+
+  
+  @CreoleParameter(comment = "name of main score",
+          defaultValue = "documentFrequency")
+  public void setScoreProperty(String name) {
+    this.scoreProperty = name;
   }
 
 

@@ -168,6 +168,20 @@ public class HyponymyTermbank extends AbstractTermbank
   }
 
   
+  protected void initializeScoreTypes() {
+    this.scoreTypes = new ArrayList<ScoreType>();
+    this.scoreTypes.add(new ScoreType(scoreProperty));
+    // TODO this TB needs a whole different kettle of fish
+    //this.termFrequencyST = new ScoreType("termFrequency");
+    //this.scoreTypes.add(termFrequencyST);
+    //this.localDocFrequencyST = new ScoreType("localDocFrequency");
+    //this.scoreTypes.add(localDocFrequencyST);
+    //this.refDocFrequencyST = new ScoreType("refDocFrequency");
+    //this.scoreTypes.add(refDocFrequencyST);
+  }
+
+  
+  
   public String getCsvHeader() {
     StringBuilder sb = new StringBuilder();
     sb.append(StringEscapeUtils.escapeCsv("Term"));
