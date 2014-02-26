@@ -18,9 +18,7 @@ import gate.*;
 import gate.termraider.bank.modes.IdfCalculation;
 import gate.termraider.bank.modes.TfCalculation;
 import gate.termraider.util.*;
-
 import java.util.*;
-
 import org.apache.commons.lang.StringEscapeUtils;
 
 
@@ -41,6 +39,7 @@ public class TfIdfTermbank extends AbstractTermbank
   
   /* EXTRA DATA */
   private int documentCount;
+  private ScoreType termFrequencyST, localDocFrequencyST, refDocFrequencyST;
   
   
   protected void processDocument(Document document) {
@@ -61,6 +60,18 @@ public class TfIdfTermbank extends AbstractTermbank
         termDocuments.put(term, docNames);
       }
     }
+  }
+
+  
+  protected void initializeScoreTypes() {
+    this.scoreTypes = new ArrayList<ScoreType>();
+    this.scoreTypes.add(new ScoreType(scoreProperty));
+    this.termFrequencyST = new ScoreType("termFrequency");
+    this.scoreTypes.add(termFrequencyST);
+    this.localDocFrequencyST = new ScoreType("localDocFrequency");
+    this.scoreTypes.add(localDocFrequencyST);
+    this.refDocFrequencyST = new ScoreType("refDocFrequency");
+    this.scoreTypes.add(refDocFrequencyST);
   }
 
   

@@ -139,6 +139,17 @@ public class AnnotationTermbank extends AbstractTermbank
   }
   
   
+  protected void initializeScoreTypes() {
+    this.scoreTypes = new ArrayList<ScoreType>();
+    this.scoreTypes.add(new ScoreType(scoreProperty));
+    // TODO Do we need any of this stuff here?
+    //this.termFrequencyST = new ScoreType("termFrequency");
+    //this.scoreTypes.add(termFrequencyST);
+    //this.localDocFrequencyST = new ScoreType("localDocFrequency");
+    //this.scoreTypes.add(localDocFrequencyST);
+  }
+
+  
   /***** CREOLE PARAMETERS *****/
 
   @CreoleParameter(comment = "annotation feature containing the score to index",

@@ -18,7 +18,6 @@ import gate.util.*;
 import gate.*;
 import java.io.*;
 import java.util.*;
-
 import gate.termraider.output.*;
 import gate.termraider.util.*;
 import gate.termraider.gui.*;
@@ -46,9 +45,15 @@ public abstract class AbstractTermbank extends AbstractBank
 
   public static final String freqProperty = "frequency";
 
+  protected List<ScoreType> scoreTypes;
+
 
   public Resource init() throws ResourceInstantiationException {
     prepare();
+    initializeScoreTypes();
+    if (this.scoreTypes.size() == 0) {
+      throw new ResourceInstantiationException("No score types found in " + this.toString());
+    }
     resetScores();
     processCorpora();
     scanTypesLanguagesDocFreq();
@@ -60,6 +65,30 @@ public abstract class AbstractTermbank extends AbstractBank
   public void cleanup() {
     super.cleanup();
   }
+  
+  
+  public List<ScoreType> getScoreTypes() {
+    return this.scoreTypes;
+  }
+  
+  // TODO : make this abstract and implement it
+  // everywhere as part of the overhaul
+  public Number getScore(ScoreType type, Term term) {
+    return 0.0;
+  }
+
+  // TODO : make this abstract and implement it
+  // everywhere as part of the overhaul
+  public Collection<Term> getTerms() {
+    return new HashSet<Term>();
+  }
+  
+  
+  public ScoreType getDefaultScoreType() {
+    return this.scoreTypes.get(0);
+  }
+  
+  protected abstract void initializeScoreTypes();
   
   
   public List<Term> getTermsByDescendingScore() {
@@ -267,6 +296,13 @@ public abstract class AbstractTermbank extends AbstractBank
   }
   
   
+  public abstract String getCsvHeader();
+
+
+  public abstract String getCsvLine(Term term);
+  
+  
+
   /***** CREOLE PARAMETERS *****/
 
   @CreoleParameter(comment = "input AS name",
@@ -288,11 +324,5 @@ public abstract class AbstractTermbank extends AbstractBank
   public Set<String> getInputAnnotationTypes() {
     return this.inputAnnotationTypes;
   }
-
-
-  public abstract String getCsvHeader();
-
-
-  public abstract String getCsvLine(Term term);
   
 }
