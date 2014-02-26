@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010--2012, The University of Sheffield. See the file
+ *  Copyright (c) 2010--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -18,6 +18,9 @@ import java.util.*;
  */
 public class TermComparatorByDescendingScore implements Comparator<Term> {
 
+  // TODO: may be able to change this to Map<Term, Number>
+  // in future after regularization of all the scoring
+  // maps in one Map<ScoreType, Map<Term, Number>> ?!?
   private Map<Term, ? extends Number> termScores;
   
   public TermComparatorByDescendingScore(Map<Term, ? extends Number> termScores) {

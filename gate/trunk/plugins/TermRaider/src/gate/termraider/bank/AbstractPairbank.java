@@ -31,7 +31,6 @@ public abstract class AbstractPairbank extends AbstractBank
   private static final long serialVersionUID = 424942970862740181L;
 
   // CREOLE init parameters
-  protected String inputASName;
 
   protected transient List<Action> actionsList;
   
@@ -214,14 +213,6 @@ public abstract class AbstractPairbank extends AbstractBank
   /***** CREOLE PARAMETERS *****/
 
   
-  @CreoleParameter(comment = "input AS name",
-          defaultValue = "")
-  public void setInputASName(String name) {
-    this.inputASName = name;
-  }
-  public String getInputASName() {
-    return this.inputASName;
-  }
 
 }
 

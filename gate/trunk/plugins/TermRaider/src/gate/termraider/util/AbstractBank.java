@@ -76,6 +76,7 @@ public abstract class AbstractBank extends AbstractLanguageResource {
   protected String inputAnnotationFeature;
   protected Set<Corpus> corpora;
   protected boolean debugMode;
+  protected String inputASName;
 
 
 
@@ -129,5 +130,15 @@ public abstract class AbstractBank extends AbstractLanguageResource {
   public Boolean getDebugMode() {
     return this.debugMode;
   }
+  
+  @CreoleParameter(comment = "input AS name",
+          defaultValue = "")
+  public void setInputASName(String name) {
+    this.inputASName = name;
+  }
+  public String getInputASName() {
+    return this.inputASName;
+  }
+
   
 }
