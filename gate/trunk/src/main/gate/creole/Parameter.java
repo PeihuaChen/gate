@@ -24,6 +24,7 @@ import java.util.*;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
+import gate.Resource;
 import gate.util.*;
 
 
@@ -111,7 +112,7 @@ public class Parameter implements Serializable
     Object value = null;
 
     // get the Class for the parameter via Class.forName or CREOLE register
-    Class paramClass = getParameterClass();
+    Class<?> paramClass = getParameterClass();
     if(substituteClasses.containsKey(paramClass)) {
       paramClass = substituteClasses.get(paramClass);
     }
@@ -125,9 +126,9 @@ public class Parameter implements Serializable
     if (Collection.class.isAssignableFrom(paramClass) &&
             !paramClass.isInterface()){
       // Create an collection object belonging to paramClass
-      Collection colection = null;
+      Collection<?> colection = null;
       try{
-        colection = (Collection)paramClass.getConstructor(new Class[]{}).
+        colection = paramClass.asSubclass(Collection.class).getConstructor(new Class[]{}).
                                   newInstance(new Object[]{});
       } catch(Exception ex){
           throw new ParameterException("Could not construct an object of type "
@@ -144,10 +145,10 @@ public class Parameter implements Serializable
                                                       stringValue,";");
         while(strTokenizer.hasMoreTokens()){
           String itemStringValue = strTokenizer.nextToken();
-          colection.add(itemStringValue);
+          ((Collection<String>)colection).add(itemStringValue);
         }// End while
       }else{
-        Class itemClass = null;
+        Class<?> itemClass = null;
         try{
           itemClass = Gate.getClassLoader().loadClass(itemClassName);
         }catch(ClassNotFoundException e){
@@ -173,7 +174,7 @@ public class Parameter implements Serializable
             typeName);
           }// End try
           // Add the item value object to the collection
-          colection.add(itemValue);
+          ((Collection<Object>)colection).add(itemValue);
         }// End while
       }// End if(itemClassName == null)
       return colection;
@@ -190,7 +191,7 @@ public class Parameter implements Serializable
       }
       else {
         try{
-          fm = (FeatureMap)paramClass.getConstructor(new Class[]{}).
+          fm = paramClass.asSubclass(FeatureMap.class).getConstructor(new Class[]{}).
                                     newInstance(new Object[]{});
         } catch(Exception ex){
             throw new ParameterException("Could not construct an object of type "
@@ -227,7 +228,7 @@ public class Parameter implements Serializable
       }
       else {
         try {
-          value = Enum.valueOf(paramClass, stringValue);
+          value = Enum.valueOf(paramClass.asSubclass(Enum.class), stringValue);
         }
         catch(IllegalArgumentException e) {
           throw new ParameterException("Invalid enum constant name "
@@ -284,15 +285,19 @@ public class Parameter implements Serializable
       }
     } else {
       // non java types
-      if(resData == null)
-        resData = (ResourceData) Gate.getCreoleRegister().get(typeName);
-      if(resData == null){
-        //unknown type
-        return null;
+      // null string value means null target value
+      if(stringValue != null) {
+        // otherwise, if it's a GATE resource type pick the first registered instance 
+        if(resData == null)
+          resData = (ResourceData) Gate.getCreoleRegister().get(typeName);
+        if(resData == null){
+          //unknown type
+          return null;
+        }
+  
+        List<Resource> instantiations = resData.getInstantiations();
+        if(! instantiations.isEmpty()) value = instantiations.get(0);
       }
-
-      List instantiations = resData.getInstantiations();
-      if(! instantiations.isEmpty()) value = instantiations.get(0);
     }
 
     return value;
