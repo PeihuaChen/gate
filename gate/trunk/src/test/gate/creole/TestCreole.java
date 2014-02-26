@@ -462,10 +462,9 @@ public class TestCreole extends TestCase
               param.getName().equals("document")
             );
             Object defaultValue = param.calculateDefaultValue();
-            assertTrue(
-              "POT param 0 default should be Document but is " +
-              defaultValue.getClass().getName(),
-              defaultValue instanceof Document
+            assertNull(
+              "POT param 0 default should be null",
+              defaultValue
             );
             break;
           default:
