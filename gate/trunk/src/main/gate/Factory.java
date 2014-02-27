@@ -215,7 +215,7 @@ public abstract class Factory {
       throw new ResourceInstantiationException(msg.toString());
     }
     // get the default implementation class
-    Class resClass = null;
+    Class<? extends Resource> resClass = null;
     try {
       resClass = resData.getResourceClass();
     } catch(ClassNotFoundException e) {
