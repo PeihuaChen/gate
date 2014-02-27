@@ -16,11 +16,10 @@
 
 package gate;
 
-import java.io.Serializable;
-import java.util.Set;
-
 import gate.util.FeatureBearer;
 import gate.util.IdBearer;
+
+import java.io.Serializable;
 
 /** An Annotation is an arc in an AnnotationSet. It is immutable, to avoid
   * the situation where each annotation has to point to its parent graph in

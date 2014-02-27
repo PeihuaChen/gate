@@ -17,10 +17,7 @@
 package gate;
 
 import java.net.URL;
-import java.util.Map;
 import java.util.Set;
-
-import gate.util.InvalidOffsetException;
 
 
 /** Represents the commonalities between all sorts of documents.
