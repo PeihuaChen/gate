@@ -16,13 +16,12 @@
 
 package gate;
 
-import java.net.URL;
-import java.util.Map;
-import java.util.Set;
-
 import gate.corpora.DocumentStaxUtils;
 import gate.event.DocumentListener;
 import gate.util.InvalidOffsetException;
+
+import java.util.Map;
+import java.util.Set;
 
 
 /** Represents the commonalities between all sorts of documents.
