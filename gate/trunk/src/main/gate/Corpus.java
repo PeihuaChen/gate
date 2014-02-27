@@ -15,7 +15,6 @@
  */
 
 package gate;
-import java.util.List;
 
 import gate.event.CorpusListener;
 
