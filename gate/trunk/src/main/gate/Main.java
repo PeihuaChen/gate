@@ -44,18 +44,16 @@ import java.lang.management.ThreadInfo;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.JOptionPane;
 import javax.swing.RepaintManager;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-
 
 /** Top-level entry point for the GATE command-line and GUI interfaces.
   * <P>
@@ -82,13 +80,10 @@ public class Main {
     * <B>-i file</B> additional initialisation file (probably called
     *   <TT>gate.xml</TT>). Used for site-wide initialisation by the
     *   start-up scripts
-    * <LI>
-    * <B>-a</B> run the DB administration tool
     * </UL>
     */
   public static void main(String[] args) throws GateException {
     
-    Main.annotatorArgsMap = null;
     // check we have a useable JDK
     if(
       System.getProperty("java.version").compareTo(Gate.getMinJdkVersion())
@@ -159,7 +154,7 @@ public class Main {
   /** Run the user interface. */
   protected static void runGui() throws GateException {
     try {
-      Class rmClass =  Gate.class.getClassLoader().loadClass(
+      Class<?> rmClass =  Gate.class.getClassLoader().loadClass(
           "org.jdesktop.swinghelper.debug.CheckThreadViolationRepaintManager");
       RepaintManager.setCurrentManager((RepaintManager)rmClass.getConstructor()
               .newInstance());
@@ -354,16 +349,20 @@ public class Main {
     // it to the static final variable
     String temp;
     
+    BufferedReader reader = null;
+    
     // find out the version number    
     try {
       InputStream ver = Files.getGateResourceAsStream("version.txt");
       if (ver==null) {
         throw new IOException();
       }
-      BufferedReader reader = new BomStrippingInputStreamReader(ver, "UTF-8");
+      reader = new BomStrippingInputStreamReader(ver, "UTF-8");
       temp = reader.readLine();
     } catch(IOException ioe) {
-      temp = "7.0";
+      temp = "8.0";
+    } finally {
+      IOUtils.closeQuietly(reader);
     }
     
     version = temp;
@@ -374,10 +373,12 @@ public class Main {
       if (build==null) {
         throw new IOException();
       }
-      BufferedReader reader = new BomStrippingInputStreamReader(build, "UTF-8");
+      reader = new BomStrippingInputStreamReader(build, "UTF-8");
       temp = reader.readLine();
     } catch(IOException ioe) {
       temp = "0000";
+    } finally {
+      IOUtils.closeQuietly(reader);
     }
     
     build = temp;
@@ -469,34 +470,6 @@ public class Main {
 </TABLE>
 
 */
-  /** Name of the collection we were asked to process. */
-  private static String collName;
-
-  /** Search path for CREOLE modules. */
-  private static String creolePath;
-
-  /** List of files we were asked to build a collection from. */
-  private static List fileNames = new ArrayList();
-
-  /** List of annotators we were asked to run on the collection. */
-  private static List annotatorNames = new ArrayList();
-
-  /** Map of annotator arguments. */
-  protected static Map annotatorArgsMap = new HashMap();
-
-  /** List of classes we were asked to debug. */
-  private static List debugNames = new ArrayList();
-
-  /** Are we in batch mode? */
-  public static boolean batchMode = false;
-
-  /** Don't save collection after batch? */
-  private static boolean destroyColl = false;
-
-  /** Verbose? */
-  private static boolean verbose = false;
-
-  private static boolean runCorpusBenchmarkTool = false;
 
   public static final String name = "GATE Developer";
   public static final String version;
@@ -540,6 +513,7 @@ public class Main {
         // -i gate.xml site-wide init file
         case 'i':
           String optionString = g.getOptarg();
+          @SuppressWarnings("unused")
           URL u2 = null;
           File f = new File(optionString);
           try {
@@ -573,9 +547,10 @@ public class Main {
   /** Display a usage message */
   public static void usage() {
     Out.prln(
-      "Usage: java gate.Main " +
-      "[ -h [-d CREOLE-URL]" +
-      ""
+      "Usage: java gate.Main\n" +
+      "-h -- show this help file\n" +
+      "-d CREOLE-URL -- a creole directory to load\n" +
+      "-i SITE_CONFIG_FILE -- the site config file to use"
     );
   } // usage()
 
@@ -590,6 +565,6 @@ public class Main {
   } // help()
 
   /** The list of pending URLs to add to the CREOLE register */
-  protected static List<URL> pendingCreoleUrls = new ArrayList<URL>();
+  private static final List<URL> pendingCreoleUrls = new ArrayList<URL>();
 
 } // class Main
