@@ -390,30 +390,38 @@ public class POSTagger {
 
       for(int i = 0; i < fileNames.length; i++){
         String file = fileNames[i];
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        String line = reader.readLine();
-
-        while(line != null){
-          StringTokenizer tokens = new StringTokenizer(line);
-          List<String> sentence = new ArrayList<String>();
-          while(tokens.hasMoreTokens()) sentence.add(tokens.nextToken());
-          List<List<String>> sentences = new ArrayList<List<String>>();
-          sentences.add(sentence);
-          List<List<String[]>> result = tagger.runTagger(sentences);
-
-          Iterator<List<String[]>> iter = result.iterator();
-          while(iter.hasNext()){
-            List<String[]> sentenceFromTagger = iter.next();
-            Iterator<String[]> sentIter = sentenceFromTagger.iterator();
-            while(sentIter.hasNext()){
-              String[] tag = sentIter.next();
-              System.out.print(tag[0] + "/" + tag[1]);
-              if(sentIter.hasNext()) System.out.print(" ");
-              else System.out.println();
-            }//while(sentIter.hasNext())
-          }//while(iter.hasNext())
-          line = reader.readLine();
-        }//while(line != null)
+        BufferedReader reader = null;
+        
+        try {
+          reader = new BufferedReader(new FileReader(file));
+        
+          String line = reader.readLine();
+  
+          while(line != null){
+            StringTokenizer tokens = new StringTokenizer(line);
+            List<String> sentence = new ArrayList<String>();
+            while(tokens.hasMoreTokens()) sentence.add(tokens.nextToken());
+            List<List<String>> sentences = new ArrayList<List<String>>();
+            sentences.add(sentence);
+            List<List<String[]>> result = tagger.runTagger(sentences);
+  
+            Iterator<List<String[]>> iter = result.iterator();
+            while(iter.hasNext()){
+              List<String[]> sentenceFromTagger = iter.next();
+              Iterator<String[]> sentIter = sentenceFromTagger.iterator();
+              while(sentIter.hasNext()){
+                String[] tag = sentIter.next();
+                System.out.print(tag[0] + "/" + tag[1]);
+                if(sentIter.hasNext()) System.out.print(" ");
+                else System.out.println();
+              }//while(sentIter.hasNext())
+            }//while(iter.hasNext())
+            line = reader.readLine();
+          }//while(line != null)
+        }
+        finally {
+          IOUtils.closeQuietly(reader);
+        }
 //
 //
 //
@@ -455,17 +463,25 @@ public class POSTagger {
    * for input.
    */
   private static List<List<String>> readInput(String file) throws IOException{
-    BufferedReader reader = new BufferedReader(new FileReader(file));
-    String line = reader.readLine();
-    List<List<String>> result = new ArrayList<List<String>>();
-    while(line != null){
-      StringTokenizer tokens = new StringTokenizer(line);
-      List<String> sentence = new ArrayList<String>();
-      while(tokens.hasMoreTokens()) sentence.add(tokens.nextToken());
-      result.add(sentence);
-      line = reader.readLine();
-    }//while(line != null)
-    return result;
+    BufferedReader reader = null;
+    
+    try {
+      reader = new BufferedReader(new FileReader(file));
+    
+      String line = reader.readLine();
+      List<List<String>> result = new ArrayList<List<String>>();
+      while(line != null){
+        StringTokenizer tokens = new StringTokenizer(line);
+        List<String> sentence = new ArrayList<String>();
+        while(tokens.hasMoreTokens()) sentence.add(tokens.nextToken());
+        result.add(sentence);
+        line = reader.readLine();
+      }//while(line != null)
+      return result;
+    }
+    finally {
+      IOUtils.closeQuietly(reader);
+    }
   }//private static List readInput(File file) throws IOException
 
 }//public class POSTagger
