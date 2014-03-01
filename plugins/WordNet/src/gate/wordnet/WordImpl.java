@@ -16,7 +16,6 @@
 
 package gate.wordnet;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -29,7 +28,7 @@ public class WordImpl implements Word {
 
   private String lemma;
   private int senseCount;
-  private ArrayList wordSenses;
+  private List<WordSense> wordSenses;
   private Dictionary wnDictionary;
 
   public WordImpl(String _lemma, int _senseCount, Dictionary _wnDictionary) {
@@ -46,7 +45,7 @@ public class WordImpl implements Word {
 
 
   /** returns the senses of this word */
-  public List getWordSenses() throws WordNetException{
+  public List<WordSense> getWordSenses() throws WordNetException{
 
     //do we have the list already?
     if (null == this.wordSenses) {
@@ -69,6 +68,8 @@ public class WordImpl implements Word {
         net.didion.jwnl.data.Synset[] synsets = iWord.getSenses();
         for (int j=0; j< synsets.length; j++) {
           net.didion.jwnl.data.Synset currSynset = synsets[j];
+          
+          //TODO it seems that we need to actually finish this method
         }
       }
 

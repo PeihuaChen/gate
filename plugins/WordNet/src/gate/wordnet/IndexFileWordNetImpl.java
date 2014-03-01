@@ -23,6 +23,8 @@ import java.net.URL;
 
 public class IndexFileWordNetImpl extends AbstractLanguageResource {
 
+  private static final long serialVersionUID = 3188799675277115628L;
+
   public void setPropertyUrl(URL u) {
     // ignore this
   }

@@ -31,7 +31,7 @@ public class WordSenseImpl implements WordSense {
   private int senseNumber;
   private int orderInSynset;
   private boolean isSemcor;
-  private List lexRelations;
+  private List<LexicalRelation> lexRelations;
   private Dictionary wnDictionary;
 
   public WordSenseImpl(Word _word,
@@ -87,7 +87,7 @@ public class WordSenseImpl implements WordSense {
 
 
   /** return the Lex relations this sense participates in */
-  public List getLexicalRelations() throws WordNetException {
+  public List<LexicalRelation> getLexicalRelations() throws WordNetException {
 
     if (null == this.lexRelations) {
       _loadLexicalRelations();
@@ -98,15 +98,15 @@ public class WordSenseImpl implements WordSense {
 
 
   /** return the Lex relations (of the specified type) this sense participates in */
-  public List getLexicalRelations(int type) throws WordNetException {
+  public List<LexicalRelation> getLexicalRelations(int type) throws WordNetException {
 
-    List result = new ArrayList(1);
+    List<LexicalRelation> result = new ArrayList<LexicalRelation>(1);
 
     if (null == this.lexRelations) {
       _loadLexicalRelations();
     }
 
-    Iterator it = this.lexRelations.iterator();
+    Iterator<LexicalRelation> it = this.lexRelations.iterator();
     while (it.hasNext()) {
       LexicalRelation lRel = (LexicalRelation)it.next();
       Assert.assertNotNull(lRel);
@@ -139,7 +139,7 @@ public class WordSenseImpl implements WordSense {
         }
       }
 
-      this.lexRelations = new ArrayList(jwPointers.length);
+      this.lexRelations = new ArrayList<LexicalRelation>(jwPointers.length);
 
       for (int i= 0; i< jwPointers.length; i++) {
 
