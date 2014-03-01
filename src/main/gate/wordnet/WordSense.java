@@ -42,10 +42,10 @@ public interface WordSense {
   public boolean isSemcor();
 
   /** return the Lex relations this sense participates in */
-  public List getLexicalRelations() throws WordNetException ;
+  public List<LexicalRelation> getLexicalRelations() throws WordNetException ;
 
   /** return the Lex relations (of the specified type) this sense participates in */
-  public List getLexicalRelations(int type) throws WordNetException ;
+  public List <LexicalRelation> getLexicalRelations(int type) throws WordNetException ;
 
 }
 

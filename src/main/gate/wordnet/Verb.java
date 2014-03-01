@@ -24,7 +24,7 @@ import java.util.List;
 public interface Verb extends WordSense {
 
   /** returns the verb frames associated with this synset */
-  public List getVerbFrames();
+  public List<VerbFrame> getVerbFrames();
 
 }
 

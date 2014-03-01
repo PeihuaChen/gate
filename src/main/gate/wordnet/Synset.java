@@ -36,16 +36,16 @@ public interface Synset {
   public long getOffset();
 
   /** WordSenses contained in this synset */
-  public List getWordSenses();
+  public List<WordSense> getWordSenses();
 
   /** get specific WordSense according to its order in the synset - most important senses come first  */
   public WordSense getWordSense(int offset);
 
   /** get the SemanticRelation-s of this synset */
-  public List getSemanticRelations() throws WordNetException;
+  public List<SemanticRelation> getSemanticRelations() throws WordNetException;
 
   /** get the SemanticRelation-s of specific type (HYPERNYm) for this synset */
-  public List getSemanticRelations(int type) throws WordNetException;
+  public List<SemanticRelation> getSemanticRelations(int type) throws WordNetException;
 
 }
 

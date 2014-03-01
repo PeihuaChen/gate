@@ -24,7 +24,7 @@ import java.util.List;
 public interface Word {
 
   /** returns the senses of this word */
-  public List getWordSenses() throws WordNetException;
+  public List<WordSense> getWordSenses() throws WordNetException;
 
   /** returns the lemma of this word */
   public String getLemma();
