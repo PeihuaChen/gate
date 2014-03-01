@@ -18,7 +18,6 @@ package gate.wordnet;
 
 import java.util.List;
 
-
 /** Represents WordNet synset.
  */
 public interface Synset {

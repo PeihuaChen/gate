@@ -16,26 +16,32 @@
 
 package gate.wordnet;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import junit.framework.Assert;
 import net.didion.jwnl.JWNLException;
-import net.didion.jwnl.data.*;
+import net.didion.jwnl.data.IndexWord;
+import net.didion.jwnl.data.POS;
+import net.didion.jwnl.data.Pointer;
+import net.didion.jwnl.data.PointerTarget;
+import net.didion.jwnl.data.PointerType;
 import net.didion.jwnl.dictionary.Dictionary;
 
 
 public class WordSenseImpl implements WordSense {
 
-  private Word word;
-  private Synset  synset;
+  private WordImpl word;
+  private SynsetImpl  synset;
   private int senseNumber;
   private int orderInSynset;
   private boolean isSemcor;
   private List<LexicalRelation> lexRelations;
   private Dictionary wnDictionary;
 
-  public WordSenseImpl(Word _word,
-                      Synset _synset,
+  public WordSenseImpl(WordImpl _word,
+                      SynsetImpl _synset,
                       int _senseNumber,
                       int _orderInSynset,
                       boolean _isSemcor,
@@ -160,13 +166,13 @@ public class WordSenseImpl implements WordSense {
         IndexWord jwTargetIndexWord = this.wnDictionary.lookupIndexWord(jwTargetWord.getPOS(),
                                                                       jwTargetWord.getLemma());
 
-        Synset gateSynset = new SynsetImpl(jwTargetSynset,this.wnDictionary);
+        SynsetImpl gateSynset = new SynsetImpl(jwTargetSynset,this.wnDictionary);
 
-        Word gateWord = new WordImpl(jwTargetWord.getLemma(),
+        WordImpl gateWord = new WordImpl(jwTargetWord.getLemma(),
                                       jwTargetIndexWord.getSenseCount(),
                                       this.wnDictionary);
 
-        WordSense gateTargetWordSense = new WordSenseImpl(gateWord,
+        WordSenseImpl gateTargetWordSense = new WordSenseImpl(gateWord,
                                                           gateSynset,
                                                           0,
                                                           jwTargetWord.getIndex(),
@@ -187,5 +193,29 @@ public class WordSenseImpl implements WordSense {
     catch(JWNLException e) {
       throw new WordNetException(e);
     }
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((synset == null) ? 0 : synset.hashCode());
+    result = prime * result + ((word == null) ? 0 : word.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if(this == obj) return true;
+    if(obj == null) return false;
+    if(getClass() != obj.getClass()) return false;
+    WordSenseImpl other = (WordSenseImpl)obj;
+    if(synset == null) {
+      if(other.synset != null) return false;
+    } else if(!synset.equals(other.synset)) return false;
+    if(word == null) {
+      if(other.word != null) return false;
+    } else if(!word.equals(other.word)) return false;
+    return true;
   }
 }

@@ -1,17 +1,17 @@
 /*
- *  Relation.java
- *
- *  Copyright (c) 1995-2012, The University of Sheffield. See the file
- *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
- *
- *  This file is part of GATE (see http://gate.ac.uk/), and is free
- *  software, licenced under the GNU Library General Public License,
- *  Version 2, June 1991 (in the distribution as file licence.html,
- *  and also available at http://gate.ac.uk/gate/licence.html).
- *
- *  Marin Dimitrov, 16/May/2002
- *
- *  $Id$
+ * Relation.java
+ * 
+ * Copyright (c) 1995-2012, The University of Sheffield. See the file
+ * COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ * 
+ * This file is part of GATE (see http://gate.ac.uk/), and is free software,
+ * licenced under the GNU Library General Public License, Version 2, June 1991
+ * (in the distribution as file licence.html, and also available at
+ * http://gate.ac.uk/gate/licence.html).
+ * 
+ * Marin Dimitrov, 16/May/2002
+ * 
+ * $Id$
  */
 
 package gate.wordnet;
@@ -25,92 +25,87 @@ import net.didion.jwnl.dictionary.Dictionary;
 
 import gate.util.GateRuntimeException;
 
-
 public class SynsetImpl implements Synset {
 
   private List<WordSense> wordSenses;
+
   private List<SemanticRelation> semRelations;
+
   private String gloss;
+
   private int synsetPOS;
+
   Dictionary wnDictionary;
+
   private long synsetOffset;
 
-  public SynsetImpl(net.didion.jwnl.data.Synset jwSynset, Dictionary _wnDictionary) throws GateRuntimeException {
+  public SynsetImpl(net.didion.jwnl.data.Synset jwSynset,
+                    Dictionary _wnDictionary) throws GateRuntimeException {
 
-    //0.
+    // 0.
     Assert.assertNotNull(jwSynset);
 
-    //dictionary
+    // dictionary
     this.wnDictionary = _wnDictionary;
 
-    //offset
+    // offset
     this.synsetOffset = jwSynset.getOffset();
 
-    //pos
+    // pos
     this.synsetPOS = WNHelper.POS2int(jwSynset.getPOS());
 
-    //gloss
+    // gloss
     this.gloss = jwSynset.getGloss();
 
-    //word senses
+    // word senses
     net.didion.jwnl.data.Word[] synsetWords = jwSynset.getWords();
     this.wordSenses = new ArrayList<WordSense>(synsetWords.length);
 
-    for (int i= 0; i< synsetWords.length; i++) {
+    for(int i = 0; i < synsetWords.length; i++) {
 
       net.didion.jwnl.data.Word jwWord = synsetWords[i];
       IndexWord jwIndexWord = null;
 
       try {
-        jwIndexWord = this.wnDictionary.lookupIndexWord(jwWord.getPOS(),jwWord.getLemma());
-      }
-      catch(JWNLException jwe) {
+        jwIndexWord =
+          this.wnDictionary.lookupIndexWord(jwWord.getPOS(), jwWord.getLemma());
+      } catch(JWNLException jwe) {
         throw new GateRuntimeException(jwe.getMessage());
       }
 
-      Word gateWord = new WordImpl(jwWord.getLemma(),
-                                   jwIndexWord.getSenseCount(),
-                                   this.wnDictionary);
+      WordImpl gateWord =
+        new WordImpl(jwWord.getLemma(), jwIndexWord.getSenseCount(),
+          this.wnDictionary);
 
-      //construct the proper word form
+      // construct the proper word form
       WordSense gateWordSense = null;
 
-     /* if (this.synsetPOS == WordNet.POS_ADJECTIVE) {
-
-        //Assert.assertTrue(jwWord instanceof net.didion.jwnl.data.Adjective);
-        net.didion.jwnl.data.Adjective jwAdjective = (net.didion.jwnl.data.Adjective)jwWord;
-
-        gateWordSense = new AdjectiveImpl(gateWord,
-                                          this,
-                                          0,
-                                          jwWord.getIndex(),
-                                          false,
-                                          WNHelper.AdjPosition2int(jwAdjective),
-                                          this.wnDictionary);
-      }
-
-      else*/ 
-        if (this.synsetPOS == WordNet.POS_VERB) {
+      /*
+       * if (this.synsetPOS == WordNet.POS_ADJECTIVE) {
+       * 
+       * //Assert.assertTrue(jwWord instanceof net.didion.jwnl.data.Adjective);
+       * net.didion.jwnl.data.Adjective jwAdjective =
+       * (net.didion.jwnl.data.Adjective)jwWord;
+       * 
+       * gateWordSense = new AdjectiveImpl(gateWord, this, 0, jwWord.getIndex(),
+       * false, WNHelper.AdjPosition2int(jwAdjective), this.wnDictionary); }
+       * 
+       * else
+       */
+      if(this.synsetPOS == WordNet.POS_VERB) {
 
         Assert.assertTrue(jwWord instanceof net.didion.jwnl.data.Verb);
         net.didion.jwnl.data.Verb jwVerb = (net.didion.jwnl.data.Verb)jwWord;
 
-        gateWordSense = new VerbImpl(gateWord,
-                                      this,
-                                      0,
-                                      jwWord.getIndex(),
-                                      false,
-                                      jwVerb,
-                                      this.wnDictionary);
+        gateWordSense =
+          new VerbImpl(gateWord, this, 0, jwWord.getIndex(), false, jwVerb,
+            this.wnDictionary);
       }
 
       else {
-        gateWordSense = new WordSenseImpl(gateWord,
-                                          this,
-                                          0,
-                                          jwWord.getIndex(),
-                                          false,
-                                          this.wnDictionary);
+        gateWordSense =
+          new WordSenseImpl(gateWord, this, 0, jwWord.getIndex(), false,
+            this.wnDictionary);
       }
 
       this.wordSenses.add(gateWordSense);
@@ -118,40 +113,40 @@ public class SynsetImpl implements Synset {
 
   }
 
-
   /** returns the part-of-speech for this synset, see WordNet::POS_XXX constants */
-  public int getPOS(){
+  public int getPOS() {
     return this.synsetPOS;
   }
 
   /** is this synset a UB - i.e. has no hypernym */
   public boolean isUniqueBeginner() throws WordNetException {
-    List<SemanticRelation> parents = getSemanticRelations(Relation.REL_HYPERNYM);
+    List<SemanticRelation> parents =
+      getSemanticRelations(Relation.REL_HYPERNYM);
     return parents.isEmpty();
   }
 
   /** textual description of the synset */
-  public String getGloss(){
+  public String getGloss() {
     return this.gloss;
   }
 
-
   /** WordSenses contained in this synset */
-  public List<WordSense> getWordSenses(){
+  public List<WordSense> getWordSenses() {
     return this.wordSenses;
   }
 
-
-  /** get specific WordSense according to its order in the synset - most important senses come first  */
-  public WordSense getWordSense(int offset){
+  /**
+   * get specific WordSense according to its order in the synset - most
+   * important senses come first
+   */
+  public WordSense getWordSense(int offset) {
     return (WordSense)this.wordSenses.get(offset);
   }
 
-
   /** get the SemanticRelation-s of this synset */
-  public List<SemanticRelation> getSemanticRelations() throws WordNetException{
+  public List<SemanticRelation> getSemanticRelations() throws WordNetException {
 
-    if (null == this.semRelations) {
+    if(null == this.semRelations) {
       _loadSemanticRelations();
     }
 
@@ -159,19 +154,20 @@ public class SynsetImpl implements Synset {
   }
 
   /** get the SemanticRelation-s of specific type (HYPERNYm) for this synset */
-  public List<SemanticRelation> getSemanticRelations(int type) throws WordNetException{
+  public List<SemanticRelation> getSemanticRelations(int type)
+    throws WordNetException {
 
     List<SemanticRelation> result = new ArrayList<SemanticRelation>(1);
 
-    if (null == this.semRelations) {
+    if(null == this.semRelations) {
       _loadSemanticRelations();
     }
 
     Iterator<SemanticRelation> it = this.semRelations.iterator();
-    while (it.hasNext()) {
+    while(it.hasNext()) {
       SemanticRelation sRel = (SemanticRelation)it.next();
       Assert.assertNotNull(sRel);
-      if (type == sRel.getType()) {
+      if(type == sRel.getType()) {
         result.add(sRel);
       }
     }
@@ -179,47 +175,47 @@ public class SynsetImpl implements Synset {
     return result;
   }
 
-
-  private void _loadSemanticRelations() throws WordNetException{
+  private void _loadSemanticRelations() throws WordNetException {
 
     POS jwPOS = null;
     jwPOS = WNHelper.int2POS(this.synsetPOS);
 
     try {
-      net.didion.jwnl.data.Synset jwSynset = this.wnDictionary.getSynsetAt(jwPOS,this.synsetOffset);
+      net.didion.jwnl.data.Synset jwSynset =
+        this.wnDictionary.getSynsetAt(jwPOS, this.synsetOffset);
       Assert.assertNotNull(jwSynset);
       Pointer[] jwPointers = jwSynset.getPointers();
 
       this.semRelations = new ArrayList<SemanticRelation>(jwPointers.length);
 
-      for (int i= 0; i< jwPointers.length; i++) {
+      for(int i = 0; i < jwPointers.length; i++) {
         Pointer currPointer = jwPointers[i];
 
-        //skip lexical relations
-        if (true == currPointer.isLexical()) {
+        // skip lexical relations
+        if(true == currPointer.isLexical()) {
           continue;
         }
         PointerType currType = currPointer.getType();
         try {
-        
-//        PointerTarget ptrSource = currPointer.getSource();
-        PointerTarget ptrTarget = currPointer.getTarget();
-        Assert.assertTrue(ptrTarget instanceof net.didion.jwnl.data.Synset);
-        net.didion.jwnl.data.Synset jwTargetSynset = (net.didion.jwnl.data.Synset)ptrTarget;
 
-        Synset gateTargetSynset = new SynsetImpl(jwTargetSynset,this.wnDictionary);
-        SemanticRelation currSemRel = new SemanticRelationImpl(WNHelper.PointerType2int(currType),
-                                                            this,
-                                                            gateTargetSynset);
-        //add to list of sem relations for this synset
-        this.semRelations.add(currSemRel);
-        }
-        catch (IllegalArgumentException e){
-          //System.err.println("Unknown PointerType:" + currType);
+          // PointerTarget ptrSource = currPointer.getSource();
+          PointerTarget ptrTarget = currPointer.getTarget();
+          Assert.assertTrue(ptrTarget instanceof net.didion.jwnl.data.Synset);
+          net.didion.jwnl.data.Synset jwTargetSynset =
+            (net.didion.jwnl.data.Synset)ptrTarget;
+
+          SynsetImpl gateTargetSynset =
+            new SynsetImpl(jwTargetSynset, this.wnDictionary);
+          SemanticRelation currSemRel =
+            new SemanticRelationImpl(WNHelper.PointerType2int(currType), this,
+              gateTargetSynset);
+          // add to list of sem relations for this synset
+          this.semRelations.add(currSemRel);
+        } catch(IllegalArgumentException e) {
+          // System.err.println("Unknown PointerType:" + currType);
         }
       }
-    }
-    catch(JWNLException e) {
+    } catch(JWNLException e) {
       throw new WordNetException(e);
     }
   }
@@ -228,5 +224,25 @@ public class SynsetImpl implements Synset {
   public long getOffset() {
 
     return this.synsetOffset;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (int)(synsetOffset ^ (synsetOffset >>> 32));
+    result = prime * result + synsetPOS;
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if(this == obj) return true;
+    if(obj == null) return false;
+    if(getClass() != obj.getClass()) return false;
+    SynsetImpl other = (SynsetImpl)obj;
+    if(synsetOffset != other.synsetOffset) return false;
+    if(synsetPOS != other.synsetPOS) return false;
+    return true;
   }
 }
