@@ -16,16 +16,22 @@
 
 package gate.wordnet.test;
 
-import java.io.File;
-import java.util.Iterator;
-import java.util.List;
-
-import junit.framework.*;
-
 import gate.Gate;
 import gate.GateConstants;
 import gate.util.Err;
-import gate.wordnet.*;
+import gate.wordnet.JWNLWordNetImpl;
+import gate.wordnet.SemanticRelation;
+import gate.wordnet.Synset;
+import gate.wordnet.WordNet;
+import gate.wordnet.WordSense;
+
+import java.io.File;
+import java.util.List;
+
+import junit.framework.Assert;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 public class TestWordNet extends TestCase {
 
@@ -66,14 +72,12 @@ public class TestWordNet extends TestCase {
     //WN16 index files
 
     //get all synsets for "cup"
-    List senseList = wnMain.lookupWord("cup",WordNet.POS_NOUN);
+    List<WordSense> senseList = wnMain.lookupWord("cup",WordNet.POS_NOUN);
     Assert.assertTrue(senseList.size() == 8);
-
-    Iterator itSenses = senseList.iterator();
 
     for (int i=0; i< senseList.size(); i++) {
 
-      WordSense currSense = (WordSense)senseList.get(i);
+      WordSense currSense = senseList.get(i);
       Synset currSynset = currSense.getSynset();
       Assert.assertNotNull(currSynset);
 
@@ -144,10 +148,8 @@ public class TestWordNet extends TestCase {
     //compare the result with the WN16 index files
     //get all synsets for "cup"
 
-    List senseList = wnMain.lookupWord("cup",WordNet.POS_NOUN);
+    List<WordSense> senseList = wnMain.lookupWord("cup",WordNet.POS_NOUN);
     Assert.assertTrue(senseList.size() == 8);
-
-    Iterator itSenses = senseList.iterator();
 
     for (int i=0; i< senseList.size(); i++) {
 
@@ -159,7 +161,7 @@ public class TestWordNet extends TestCase {
         continue;
       }
 
-      List semRelations = currSynset.getSemanticRelations(SemanticRelation.REL_HYPERNYM);
+      List<SemanticRelation> semRelations = currSynset.getSemanticRelations(SemanticRelation.REL_HYPERNYM);
       Assert.assertNotNull(semRelations);
       Assert.assertTrue(2 == semRelations.size());
 
@@ -231,10 +233,8 @@ public class TestWordNet extends TestCase {
     //test hyponymy - check all direct hyponyms of a word
     //compare the result with the WN16 index files
 
-    List senseList = wnMain.lookupWord("cup",WordNet.POS_NOUN);
+    List<WordSense> senseList = wnMain.lookupWord("cup",WordNet.POS_NOUN);
     Assert.assertTrue(senseList.size() == 8);
-
-    Iterator itSenses = senseList.iterator();
 
     for (int i=0; i< senseList.size(); i++) {
 
@@ -246,7 +246,7 @@ public class TestWordNet extends TestCase {
         continue;
       }
 
-      List semRelations = currSynset.getSemanticRelations(SemanticRelation.REL_HYPONYM);
+      List<SemanticRelation> semRelations = currSynset.getSemanticRelations(SemanticRelation.REL_HYPONYM);
       Assert.assertNotNull(semRelations);
       Assert.assertTrue(9 == semRelations.size());
 
@@ -325,7 +325,7 @@ public class TestWordNet extends TestCase {
 
     Assert.assertEquals(s.getGloss(),gloss);
 
-    List wordSenses = s.getWordSenses();
+    List<WordSense> wordSenses = s.getWordSenses();
     Assert.assertTrue(wordSenses.size() == numWords);
   }
 

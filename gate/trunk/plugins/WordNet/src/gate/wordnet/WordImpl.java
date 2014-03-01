@@ -93,4 +93,24 @@ public class WordImpl implements Word {
   public int getSenseCount(){
     return this.senseCount;
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((lemma == null) ? 0 : lemma.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if(this == obj) return true;
+    if(obj == null) return false;
+    if(getClass() != obj.getClass()) return false;
+    WordImpl other = (WordImpl)obj;
+    if(lemma == null) {
+      if(other.lemma != null) return false;
+    } else if(!lemma.equals(other.lemma)) return false;
+    return true;
+  }   
 }
