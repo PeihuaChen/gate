@@ -47,13 +47,11 @@
 
   <target name="compile" depends="init">
     <if>
-      <available file="${gatehome}/plugins/Tools/tools.jar"/>
+      <not><available file="${gatehome}/plugins/Tools/tools.jar"/></not>
       <then>
-      </then>
-      <else>
         <echo message="this plugin requires the tools.jar from the Tools plugin which is missing and therefore first trying to build it" />
-        <ant dir="${gatehome}/plugins/Tools"/>
-      </else>
+        <ant dir="${gatehome}/plugins/Tools" target="jar" />
+      	</then>
     </if>
     <javac classpathref="compile.classpath" debug="true" deprecation="true" destdir="${dest}" nowarn="false" source="1.6" target="1.6">
       <src path="${src}"/>
