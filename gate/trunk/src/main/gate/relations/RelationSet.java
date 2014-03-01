@@ -38,8 +38,6 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Matcher;
 
-import org.apache.poi.ss.formula.functions.T;
-
 /**
  * Utility class for managing a set of GATE relations (usually each
  * annotation set of a document will have one set of associated
