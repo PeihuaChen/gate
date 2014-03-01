@@ -54,6 +54,8 @@ public class JapeViewer extends AbstractVisualResource implements
                                                       ANNIEConstants,
                                                       ProgressListener {
 
+  private static final long serialVersionUID = -6026605466406110590L;
+
   /**
    * The text area where the JAPE source will be displayed
    */

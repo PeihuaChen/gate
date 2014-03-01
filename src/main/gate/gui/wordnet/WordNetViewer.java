@@ -14,20 +14,37 @@
  */
 package gate.gui.wordnet;
 
-import java.awt.*;
+import gate.creole.AbstractVisualResource;
+import gate.wordnet.LexicalRelation;
+import gate.wordnet.Relation;
+import gate.wordnet.SemanticRelation;
+import gate.wordnet.Synset;
+import gate.wordnet.Verb;
+import gate.wordnet.VerbFrame;
+import gate.wordnet.WordNet;
+import gate.wordnet.WordNetException;
+import gate.wordnet.WordSense;
+
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.URL;
+import java.util.List;
 
-import javax.swing.*;
-
-import gate.Gate;
-import gate.creole.AbstractVisualResource;
-import gate.wordnet.*;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
 
 public class WordNetViewer extends AbstractVisualResource
                            implements ActionListener{
 
+  private static final long serialVersionUID = -3934904786556278822L;
+  
   protected JLabel searchLabel = new JLabel();
   protected JTextField searchWordTextField = new JTextField();
   protected JButton searchButton = new JButton();
@@ -45,7 +62,6 @@ public class WordNetViewer extends AbstractVisualResource
   protected JPopupMenu adjectivePopup;
   protected JPopupMenu adverbPopup;
 
-  private static final String propertiesFile = "file://D:/Gate/temp/file_properties.xml";
   private WordNet wnMain = null;
 
   private boolean sentenceFrames = false;
@@ -154,7 +170,7 @@ public class WordNetViewer extends AbstractVisualResource
   }
 
   private void addToResult(StringBuffer display,  String text, int wordType) {
-    java.util.List senses = null;
+    List<WordSense> senses = null;
     try {
       wnMain.cleanup();
       senses = wnMain.lookupWord(text, wordType);
@@ -197,7 +213,7 @@ public class WordNetViewer extends AbstractVisualResource
         WordSense currSense = (WordSense) senses.get(i);
         Synset currSynset = currSense.getSynset();
         addToPopupMenu(currSense, currSynset, wordType, senses);
-        java.util.List words = currSynset.getWordSenses();
+        List<WordSense> words = currSynset.getWordSenses();
         String wordsString = getWords(words);
 
         display.append(" " + (i+1) + ". " + wordsString + " -- " + currSynset.getGloss());
@@ -206,15 +222,15 @@ public class WordNetViewer extends AbstractVisualResource
     }
   }
 
-  private void addToPopupMenu(WordSense wordSense, Synset synset, int wordType, java.util.List senses){
-    java.util.List semRelations = null;
+  private void addToPopupMenu(WordSense wordSense, Synset synset, int wordType, List<WordSense> senses){
+    List<SemanticRelation> semRelations = null;
     try {
       semRelations = synset.getSemanticRelations();
     } catch (Exception e){
       e.printStackTrace();
     }
 
-    java.util.List lexRelations = null;
+    List<LexicalRelation> lexRelations = null;
     try {
       lexRelations = wordSense.getLexicalRelations();
     } catch (Exception e){
@@ -351,7 +367,7 @@ public class WordNetViewer extends AbstractVisualResource
     }
   }
 
-  private void relHypernym(java.util.List senses){
+  private void relHypernym(List<WordSense> senses){
     StringBuffer display = new StringBuffer("");
     for (int i = 0; i<senses.size(); i++){
       //display.append(getDescription(Relation.REL_HYPERNYM));
@@ -360,7 +376,7 @@ public class WordNetViewer extends AbstractVisualResource
       display.append(i+1);
       display.append("\n");
 
-      WordSense currSense = (WordSense) senses.get(i);
+      WordSense currSense = senses.get(i);
       Synset currSynset = currSense.getSynset();
       recursiveHypernym(currSynset, display, "  =>");
     }
@@ -369,7 +385,7 @@ public class WordNetViewer extends AbstractVisualResource
   }
 
   private void recursiveHypernym(Synset synset, StringBuffer display, String prefix){
-    java.util.List words = synset.getWordSenses();
+    List<WordSense> words = synset.getWordSenses();
     String wordsString = getWords(words);
 
     display.append(prefix);
@@ -379,7 +395,7 @@ public class WordNetViewer extends AbstractVisualResource
     display.append(synset.getGloss());
     display.append("\n");
 
-    java.util.List  hList = null;
+    List<SemanticRelation>  hList = null;
     try {
       hList = synset.getSemanticRelations(Relation.REL_HYPERNYM);
     } catch (Exception e){
@@ -393,7 +409,7 @@ public class WordNetViewer extends AbstractVisualResource
   }
 
 
-  private void relHoloMeroHypo(java.util.List senses, int relationType,
+  private void relHoloMeroHypo(List<WordSense> senses, int relationType,
                                String relRefString){
     StringBuffer display = new StringBuffer("");
     for (int i = 0; i<senses.size(); i++){
@@ -421,7 +437,7 @@ public class WordNetViewer extends AbstractVisualResource
                                 String prefix, boolean symbPrefix,
                                 int relationType, String relRefString){
 
-    java.util.List words = synset.getWordSenses();
+    List<WordSense> words = synset.getWordSenses();
     String wordsString = getWords(words);
 
     display.append(prefix);
@@ -433,7 +449,7 @@ public class WordNetViewer extends AbstractVisualResource
     display.append(synset.getGloss());
     display.append("\n");
 
-    java.util.List  holoList = null;
+    List<SemanticRelation>  holoList = null;
     try {
       holoList = synset.getSemanticRelations(relationType);
     } catch (Exception e){
@@ -450,7 +466,7 @@ public class WordNetViewer extends AbstractVisualResource
     }
   }
 
-  private void relAntonymSeeAlso(java.util.List senses,
+  private void relAntonymSeeAlso(List<WordSense> senses,
                                  int relType, String relRefString){
     StringBuffer display = new StringBuffer("");
     boolean semantic_see_also = true;
@@ -458,7 +474,7 @@ public class WordNetViewer extends AbstractVisualResource
       WordSense currSense = (WordSense) senses.get(i);
       Synset currSynset = currSense.getSynset();
       try {
-        java.util.List antonyms = currSense.getLexicalRelations(relType);
+        List<LexicalRelation> antonyms = currSense.getLexicalRelations(relType);
         if (antonyms!=null && antonyms.size()>0){
           semantic_see_also = false;
           //display.append(getDescription(relType));
@@ -493,14 +509,14 @@ public class WordNetViewer extends AbstractVisualResource
     }
   }
 
-  private void relAtributeSimilarTo(java.util.List senses, int releationType,
+  private void relAtributeSimilarTo(List<WordSense> senses, int releationType,
                                      String relRefString){
     StringBuffer display = new StringBuffer("");
     for (int i = 0; i<senses.size(); i++){
       WordSense currSense = (WordSense) senses.get(i);
       Synset currSynset = currSense.getSynset();
       try {
-        java.util.List atributes = currSynset.getSemanticRelations(releationType);
+        List<SemanticRelation> atributes = currSynset.getSemanticRelations(releationType);
         if (atributes!=null && atributes.size()>0){
           //display.append(getDescription(releationType));
           display.append("\n");
@@ -533,10 +549,10 @@ public class WordNetViewer extends AbstractVisualResource
   }
 
 
-  private String getWords(java.util.List words){
+  private String getWords(List<WordSense> words){
     StringBuffer wordsString = new StringBuffer("");
     for (int j = 0; j<words.size(); j++){
-      WordSense word = (WordSense) words.get(j);
+      WordSense word = words.get(j);
       wordsString.append(word.getWord().getLemma().replace('_',' '));
       if (j<(words.size()-1)){
         wordsString.append(", ");
@@ -545,13 +561,13 @@ public class WordNetViewer extends AbstractVisualResource
     return wordsString.toString();
   }
 
-  private void sentenceFrames(java.util.List senses){
+  private void sentenceFrames(List<WordSense> senses){
     StringBuffer display = new StringBuffer("");
     for (int i=0; i<senses.size(); i++) {
       WordSense currSense = (WordSense) senses.get(i);
       Synset currSynset = currSense.getSynset();
       Verb currVerb = (Verb) currSense;
-      java.util.List frames = currVerb.getVerbFrames();
+      List<VerbFrame> frames = currVerb.getVerbFrames();
 
       display.append("\nSense ");
       display.append(i+1);
@@ -713,10 +729,12 @@ public class WordNetViewer extends AbstractVisualResource
 
   private class RelationItem extends JMenuItem{
 
+    private static final long serialVersionUID = -4096509078870160667L;
+    
     int relType;
-    java.util.List senses;
+    List<WordSense> senses;
 
-    public RelationItem(String name, int type, java.util.List sen) {
+    public RelationItem(String name, int type, List<WordSense> sen) {
       super(name);
       this.addActionListener(WordNetViewer.this);
       relType = type;
@@ -728,10 +746,9 @@ public class WordNetViewer extends AbstractVisualResource
       return relType;
     }
 
-    public java.util.List getSenses(){
+    public List<WordSense> getSenses(){
       return senses;
     }
-
   }
 
 }
