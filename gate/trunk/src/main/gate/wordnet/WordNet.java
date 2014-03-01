@@ -38,20 +38,19 @@ public interface WordNet extends LanguageResource {
 /*  public Iterator getSynsets(); */
 
   /** returns all synsets for specific POS */
-  public Iterator getSynsets(int pos)
+  public Iterator<Synset> getSynsets(int pos)
     throws WordNetException;
 
   /** returns all unique beginners */
-  public Iterator getUniqueBeginners();
+  public Iterator<Synset> getUniqueBeginners();
 
   /** returns list of WordSense-s for specific lemma */
-  public List lookupWord(String lemma) throws WordNetException;
+  public List<Word> lookupWord(String lemma) throws WordNetException;
 
   /** returns list of WordSense-s for specific lemma of the specified POS */
-  public List lookupWord(String lemma, int pos) throws WordNetException;
+  public List<Word> lookupWord(String lemma, int pos) throws WordNetException;
 
   public void setPropertyUrl(URL _propertiesUrl);
   public URL getPropertyUrl();
-
 }
 
