@@ -16,6 +16,7 @@
 
 package gate.wordnet;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -58,6 +59,8 @@ public class WordImpl implements Word {
   private void _loadWordSenses() throws WordNetException {
 
 //    Dictionary dict = this.wnMain.getJWNLDictionary();
+    
+    wordSenses = new ArrayList<WordSense>();
 
     try {
       IndexWordSet iwSet = this.wnDictionary.lookupAllIndexWords(this.lemma);
@@ -67,13 +70,11 @@ public class WordImpl implements Word {
         IndexWord iWord = arrIndexWords[i];
         net.didion.jwnl.data.Synset[] synsets = iWord.getSenses();
         for (int j=0; j< synsets.length; j++) {
-          net.didion.jwnl.data.Synset currSynset = synsets[j];
-          
-          //TODO it seems that we need to actually finish this method
+                    
+          Synset synset = new SynsetImpl(synsets[j], wnDictionary);
+          wordSenses.addAll(synset.getWordSenses());
         }
       }
-
-//      this.
     }
     catch(JWNLException jwne) {
       throw new WordNetException(jwne);
