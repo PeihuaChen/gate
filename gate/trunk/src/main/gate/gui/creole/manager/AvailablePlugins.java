@@ -33,7 +33,6 @@ import gate.swing.CheckBoxTableCellRenderer;
 import gate.swing.IconTableCellRenderer;
 import gate.swing.XJFileChooser;
 import gate.swing.XJTable;
-import gate.util.GateException;
 import gate.util.GateRuntimeException;
 
 import java.awt.BorderLayout;
@@ -105,7 +104,7 @@ public class AvailablePlugins extends JPanel {
 
   private ResourcesListModel resourcesListModel;
 
-  private JList resourcesList;
+  private JList<ResourceInfo> resourcesList;
 
   private JTextField filterTextField;
 
@@ -177,7 +176,7 @@ public class AvailablePlugins extends JPanel {
             .setCellRenderer(cbCellRenderer);
 
     resourcesListModel = new ResourcesListModel();
-    resourcesList = new JList(resourcesListModel);
+    resourcesList = new JList<ResourceInfo>(resourcesListModel);
     resourcesList.setCellRenderer(new ResourcesListCellRenderer());
 
     // this is needed because otherwise the list gets really narrow most of the
@@ -494,10 +493,10 @@ public class AvailablePlugins extends JPanel {
     }
   }
 
-  private class ResourcesListModel extends AbstractListModel {
+  private class ResourcesListModel extends AbstractListModel<ResourceInfo> {
 
     @Override
-    public Object getElementAt(int index) {
+    public ResourceInfo getElementAt(int index) {
       int row = mainTable.getSelectedRow();
       if(row == -1) return null;
       row = mainTable.rowViewToModel(row);
@@ -523,7 +522,7 @@ public class AvailablePlugins extends JPanel {
   private class ResourcesListCellRenderer extends DefaultListCellRenderer {
 
     @Override
-    public Component getListCellRendererComponent(JList list, Object value,
+    public Component getListCellRendererComponent(JList<?> list, Object value,
             int index, boolean isSelected, boolean cellHasFocus) {
       Gate.ResourceInfo rInfo = (Gate.ResourceInfo)value;
       // prepare the renderer
@@ -542,7 +541,6 @@ public class AvailablePlugins extends JPanel {
 
   protected boolean unsavedChanges() {
 
-    @SuppressWarnings("unchecked")
     Set<URL> creoleDirectories = Gate.getCreoleRegister().getDirectories();
 
     Iterator<URL> pluginIter = loadNowByURL.keySet().iterator();
@@ -568,7 +566,6 @@ public class AvailablePlugins extends JPanel {
 
   protected Set<URL> updateAvailablePlugins() {
 
-    @SuppressWarnings("unchecked")
     Set<URL> creoleDirectories = Gate.getCreoleRegister().getDirectories();
 
     // update the data structures to reflect the user's choices

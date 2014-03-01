@@ -28,7 +28,6 @@ import gate.resources.img.svg.RefreshIcon;
 import gate.resources.img.svg.RemoveIcon;
 import gate.resources.img.svg.UpdateSiteIcon;
 import gate.resources.img.svg.UpdatesIcon;
-import gate.resources.img.svg.UserPluginIcon;
 import gate.swing.CheckBoxTableCellRenderer;
 import gate.swing.IconTableCellRenderer;
 import gate.swing.SpringUtilities;
@@ -134,8 +133,6 @@ public class PluginUpdateManager extends JDialog {
   private static final String GATE_USER_PLUGINS = "gate.user.plugins";
 
   private static final String GATE_UPDATE_SITES = "gate.update.sites";
-
-  private static final String SUPPRESS_USER_PLUGINS = "suppress.user.plugins";
 
   private static final String SUPPRESS_UPDATE_INSTALLED =
       "suppress.update.install";
@@ -493,7 +490,7 @@ public class PluginUpdateManager extends JDialog {
     if(defaultUpdateSites.length % 2 == 0) {
       // TODO the problem here is that we want to make sure new sites show up in
       // the list, but this means that if a user deletes a site it will respawn
-      // next time they start GATE, not sure if ther is a better solution.
+      // next time they start GATE, not sure if there is a better solution.
 
       for(int i = 0; i < defaultUpdateSites.length; ++i) {
         try {
