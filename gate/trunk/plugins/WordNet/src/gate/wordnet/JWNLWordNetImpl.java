@@ -29,10 +29,10 @@ import gate.persist.PersistenceException;
 import gate.util.GateRuntimeException;
 import gate.util.MethodNotImplementedException;
 
-
 public class JWNLWordNetImpl extends AbstractLanguageResource
                                   implements WordNet {
 
+  private static final long serialVersionUID = 6093935311124581444L;
 
   /** JWNL dictionary */
   private Dictionary wnDictionary;
@@ -97,15 +97,14 @@ public class JWNLWordNetImpl extends AbstractLanguageResource
   }
 
   /** returns all synsets for specific POS */
-  public Iterator getSynsets(int _pos)
+  public Iterator<Synset> getSynsets(int _pos)
     throws WordNetException {
 
     net.didion.jwnl.data.POS pos = WNHelper.int2POS(_pos);
 
     try {
-      net.didion.jwnl.data.Synset jwnSynset = null;
-
-      Iterator itSynsets = this.wnDictionary.getSynsetIterator(pos);
+      @SuppressWarnings("unchecked")
+      Iterator<net.didion.jwnl.data.Synset> itSynsets = this.wnDictionary.getSynsetIterator(pos);
       return new SynsetIterator(itSynsets);
     }
     catch(JWNLException jwne) {
@@ -115,7 +114,7 @@ public class JWNLWordNetImpl extends AbstractLanguageResource
   }
 
   /** returns all unique beginners */
-  public Iterator getUniqueBeginners() {
+  public Iterator<Synset> getUniqueBeginners() {
     throw new MethodNotImplementedException();
   }
 
@@ -180,7 +179,7 @@ public class JWNLWordNetImpl extends AbstractLanguageResource
 
 
   /** returns list of WordSense-s for specific lemma */
-  public List lookupWord(String lemma) throws WordNetException {
+  public List<WordSense> lookupWord(String lemma) throws WordNetException {
 
     try {
       IndexWord[] jwIndexWordArr = this.wnDictionary.lookupAllIndexWords(lemma).getIndexWordArray();
@@ -192,7 +191,7 @@ public class JWNLWordNetImpl extends AbstractLanguageResource
   }
 
   /** returns list of WordSense-s for specific lemma of the specified POS */
-  public List lookupWord(String lemma, int pos) throws WordNetException {
+  public List<WordSense> lookupWord(String lemma, int pos) throws WordNetException {
 
     try {
       IndexWord jwIndexWord = this.wnDictionary.lookupIndexWord(WNHelper.int2POS(pos), lemma);
@@ -200,7 +199,7 @@ public class JWNLWordNetImpl extends AbstractLanguageResource
       //do we have a word with this POS?
       if (null == jwIndexWord) {
         //return dummy
-        return new ArrayList();
+        return new ArrayList<WordSense>();
       }
 
       IndexWord[] jwIndexWordArr = new IndexWord[1];
@@ -214,9 +213,9 @@ public class JWNLWordNetImpl extends AbstractLanguageResource
   }
 
   /** helper method */
-  private List _lookupWord(String lemma, IndexWord[] jwIndexWords) throws WordNetException{
+  private List<WordSense> _lookupWord(String lemma, IndexWord[] jwIndexWords) throws WordNetException{
 
-    List result = new ArrayList();
+    List<WordSense> result = new ArrayList<WordSense>();
 
     try {
       for (int i=0; i< jwIndexWords.length; i++) {
@@ -227,9 +226,9 @@ public class JWNLWordNetImpl extends AbstractLanguageResource
           net.didion.jwnl.data.Synset jwSynset = jwSynsetArr[j];
           Synset gateSynset = new SynsetImpl(jwSynset,this.wnDictionary);
           //find the word of interest
-          List wordSenses = gateSynset.getWordSenses();
+          List<WordSense> wordSenses = gateSynset.getWordSenses();
 
-          Iterator itSenses = wordSenses.iterator();
+          Iterator<WordSense> itSenses = wordSenses.iterator();
           while (itSenses.hasNext()) {
             WordSense currSynsetMember = (WordSense)itSenses.next();
             if (currSynsetMember.getWord().getLemma().equalsIgnoreCase(lemma)) {
@@ -249,11 +248,11 @@ public class JWNLWordNetImpl extends AbstractLanguageResource
   }
 
   /** iterator for synsets - may load synsets when necessary, not all at once */
-  class SynsetIterator implements java.util.Iterator {
+  class SynsetIterator implements java.util.Iterator<Synset> {
 
-    private Iterator it;
+    private Iterator<net.didion.jwnl.data.Synset> it;
 
-    public SynsetIterator(Iterator _it) {
+    public SynsetIterator(Iterator<net.didion.jwnl.data.Synset> _it) {
 
       Assert.assertNotNull(_it);
       this.it = _it;
@@ -267,9 +266,9 @@ public class JWNLWordNetImpl extends AbstractLanguageResource
       throw new UnsupportedOperationException();
     }
 
-    public Object next() {
+    public Synset next() {
 
-      net.didion.jwnl.data.Synset jwnlSynset = (net.didion.jwnl.data.Synset)this.it.next();
+      net.didion.jwnl.data.Synset jwnlSynset = this.it.next();
       Synset gateSynset = new SynsetImpl(jwnlSynset, wnDictionary);
       return gateSynset;
     }

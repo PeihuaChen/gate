@@ -28,8 +28,8 @@ import gate.util.GateRuntimeException;
 
 public class SynsetImpl implements Synset {
 
-  private ArrayList wordSenses;
-  private ArrayList semRelations;
+  private List<WordSense> wordSenses;
+  private List<SemanticRelation> semRelations;
   private String gloss;
   private int synsetPOS;
   Dictionary wnDictionary;
@@ -54,7 +54,7 @@ public class SynsetImpl implements Synset {
 
     //word senses
     net.didion.jwnl.data.Word[] synsetWords = jwSynset.getWords();
-    this.wordSenses = new ArrayList(synsetWords.length);
+    this.wordSenses = new ArrayList<WordSense>(synsetWords.length);
 
     for (int i= 0; i< synsetWords.length; i++) {
 
@@ -126,7 +126,7 @@ public class SynsetImpl implements Synset {
 
   /** is this synset a UB - i.e. has no hypernym */
   public boolean isUniqueBeginner() throws WordNetException {
-    List parents = getSemanticRelations(Relation.REL_HYPERNYM);
+    List<SemanticRelation> parents = getSemanticRelations(Relation.REL_HYPERNYM);
     return parents.isEmpty();
   }
 
@@ -137,7 +137,7 @@ public class SynsetImpl implements Synset {
 
 
   /** WordSenses contained in this synset */
-  public List getWordSenses(){
+  public List<WordSense> getWordSenses(){
     return this.wordSenses;
   }
 
@@ -149,7 +149,7 @@ public class SynsetImpl implements Synset {
 
 
   /** get the SemanticRelation-s of this synset */
-  public List getSemanticRelations() throws WordNetException{
+  public List<SemanticRelation> getSemanticRelations() throws WordNetException{
 
     if (null == this.semRelations) {
       _loadSemanticRelations();
@@ -159,15 +159,15 @@ public class SynsetImpl implements Synset {
   }
 
   /** get the SemanticRelation-s of specific type (HYPERNYm) for this synset */
-  public List getSemanticRelations(int type) throws WordNetException{
+  public List<SemanticRelation> getSemanticRelations(int type) throws WordNetException{
 
-    List result = new ArrayList(1);
+    List<SemanticRelation> result = new ArrayList<SemanticRelation>(1);
 
     if (null == this.semRelations) {
       _loadSemanticRelations();
     }
 
-    Iterator it = this.semRelations.iterator();
+    Iterator<SemanticRelation> it = this.semRelations.iterator();
     while (it.hasNext()) {
       SemanticRelation sRel = (SemanticRelation)it.next();
       Assert.assertNotNull(sRel);
@@ -190,7 +190,7 @@ public class SynsetImpl implements Synset {
       Assert.assertNotNull(jwSynset);
       Pointer[] jwPointers = jwSynset.getPointers();
 
-      this.semRelations = new ArrayList(jwPointers.length);
+      this.semRelations = new ArrayList<SemanticRelation>(jwPointers.length);
 
       for (int i= 0; i< jwPointers.length; i++) {
         Pointer currPointer = jwPointers[i];

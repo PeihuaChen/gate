@@ -27,7 +27,7 @@ import net.didion.jwnl.dictionary.Dictionary;
 public class VerbImpl extends WordSenseImpl
                       implements Verb {
 
-  private ArrayList verbFrames;
+  private List<VerbFrame> verbFrames;
 
   public VerbImpl(Word _word,
                   Synset _synset,
@@ -42,7 +42,7 @@ public class VerbImpl extends WordSenseImpl
     Assert.assertNotNull(_jwVerb);
 
     String[] jwFrames = _jwVerb.getVerbFrames();
-    this.verbFrames = new ArrayList(jwFrames.length);
+    this.verbFrames = new ArrayList<VerbFrame>(jwFrames.length);
 
     for (int i= 0; i< jwFrames.length; i++) {
       this.verbFrames.add(new VerbFrameImpl(jwFrames[i]));
@@ -50,7 +50,7 @@ public class VerbImpl extends WordSenseImpl
   }
 
   /** returns the verb frames associated with this synset */
-  public List getVerbFrames() {
+  public List<VerbFrame> getVerbFrames() {
     return this.verbFrames;
   }
 }

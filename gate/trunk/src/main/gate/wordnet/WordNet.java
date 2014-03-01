@@ -45,10 +45,10 @@ public interface WordNet extends LanguageResource {
   public Iterator<Synset> getUniqueBeginners();
 
   /** returns list of WordSense-s for specific lemma */
-  public List<Word> lookupWord(String lemma) throws WordNetException;
+  public List<WordSense> lookupWord(String lemma) throws WordNetException;
 
   /** returns list of WordSense-s for specific lemma of the specified POS */
-  public List<Word> lookupWord(String lemma, int pos) throws WordNetException;
+  public List<WordSense> lookupWord(String lemma, int pos) throws WordNetException;
 
   public void setPropertyUrl(URL _propertiesUrl);
   public URL getPropertyUrl();
