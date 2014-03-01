@@ -104,7 +104,7 @@ public class AvailablePlugins extends JPanel {
 
   private ResourcesListModel resourcesListModel;
 
-  private JList<ResourceInfo> resourcesList;
+  private JList resourcesList;
 
   private JTextField filterTextField;
 
@@ -176,7 +176,7 @@ public class AvailablePlugins extends JPanel {
             .setCellRenderer(cbCellRenderer);
 
     resourcesListModel = new ResourcesListModel();
-    resourcesList = new JList<ResourceInfo>(resourcesListModel);
+    resourcesList = new JList(resourcesListModel);
     resourcesList.setCellRenderer(new ResourcesListCellRenderer());
 
     // this is needed because otherwise the list gets really narrow most of the
@@ -493,10 +493,10 @@ public class AvailablePlugins extends JPanel {
     }
   }
 
-  private class ResourcesListModel extends AbstractListModel<ResourceInfo> {
+  private class ResourcesListModel extends AbstractListModel {
 
     @Override
-    public ResourceInfo getElementAt(int index) {
+    public Object getElementAt(int index) {
       int row = mainTable.getSelectedRow();
       if(row == -1) return null;
       row = mainTable.rowViewToModel(row);
@@ -522,7 +522,7 @@ public class AvailablePlugins extends JPanel {
   private class ResourcesListCellRenderer extends DefaultListCellRenderer {
 
     @Override
-    public Component getListCellRendererComponent(JList<?> list, Object value,
+    public Component getListCellRendererComponent(JList list, Object value,
             int index, boolean isSelected, boolean cellHasFocus) {
       Gate.ResourceInfo rInfo = (Gate.ResourceInfo)value;
       // prepare the renderer
