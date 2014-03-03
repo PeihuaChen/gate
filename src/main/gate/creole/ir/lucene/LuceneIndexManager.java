@@ -31,6 +31,8 @@ import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
@@ -81,12 +83,18 @@ public class LuceneIndexManager implements IndexManager{
       corpus.getFeatures().put(CORPUS_INDEX_FEATURE, CORPUS_INDEX_FEATURE_VALUE);
       /* End */
 
-      IndexWriter writer = new IndexWriter(
+      IndexWriter writer =
+              new IndexWriter(FSDirectory.open(new File(location)),
+                      new IndexWriterConfig(Version.LUCENE_31,
+                              new SimpleAnalyzer(Version.LUCENE_30))
+                              .setOpenMode(OpenMode.CREATE));
+      
+      /*IndexWriter writer = new IndexWriter(
               FSDirectory.open(new File(location)),
               new SimpleAnalyzer(Version.LUCENE_30), 
               true,
               new IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH)
-              );
+              );*/
 
       for(int i = 0; i<corpus.size(); i++) {
         boolean isLoaded = corpus.isDocumentLoaded(i);
@@ -115,12 +123,22 @@ public class LuceneIndexManager implements IndexManager{
     if(indexDefinition == null)
       throw new GateRuntimeException("Index definition is null!");
     try {
-      IndexWriter writer = new IndexWriter(
+
+      IndexWriter writer =
+              new IndexWriter(FSDirectory.open(new File(indexDefinition.getIndexLocation())),
+                      new IndexWriterConfig(Version.LUCENE_31,
+                              new SimpleAnalyzer(Version.LUCENE_30))
+                              .setOpenMode(OpenMode.APPEND));
+      
+      /*IndexWriter writer = new IndexWriter(
               FSDirectory.open(new File(indexDefinition.getIndexLocation())),
               new SimpleAnalyzer(Version.LUCENE_30), 
               false,
-              new IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH));
-      writer.optimize();
+              new IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH));*/
+      
+      //writer.optimize();
+      writer.forceMerge(1, true);
+      
       writer.commit();
       writer.close();
     } catch (java.io.IOException ioe){
@@ -173,12 +191,17 @@ public class LuceneIndexManager implements IndexManager{
 
       reader.close();
 
-      IndexWriter writer = new IndexWriter(
+      /*IndexWriter writer = new IndexWriter(
               FSDirectory.open(new File(location)),
               new SimpleAnalyzer(Version.LUCENE_30), 
               false,
               new IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH)
-              );
+              );*/
+      IndexWriter writer =
+              new IndexWriter(FSDirectory.open(new File(location)),
+                      new IndexWriterConfig(Version.LUCENE_31,
+                              new SimpleAnalyzer(Version.LUCENE_30))
+                              .setOpenMode(OpenMode.APPEND));      
 
       for(int i = 0; i<added.size(); i++) {
         gate.Document gateDoc = (gate.Document) added.get(i);
