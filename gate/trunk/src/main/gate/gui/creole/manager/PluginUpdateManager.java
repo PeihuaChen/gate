@@ -191,9 +191,18 @@ public class PluginUpdateManager extends JDialog {
     if(getUserPluginsHome() == null) {
       // if the user plugin directory is not set then there is no point trying
       // to load any of the data, just disable the update/install tabs
-      tabs.setEnabledAt(1, false);
-      tabs.setEnabledAt(2, false);
-      showProgressPanel(false);
+      SwingUtilities.invokeLater(new Runnable() {
+
+        @Override
+        public void run() {
+          // TODO Auto-generated method stub
+          tabs.setEnabledAt(1, false);
+          tabs.setEnabledAt(2, false);
+          showProgressPanel(false);
+        }
+        
+      });
+      
       return;
     }
 
