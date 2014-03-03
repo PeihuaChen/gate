@@ -44,6 +44,7 @@ public class SubClassAction extends AbstractAction implements
     mainPanel.add(className = new JTextField(30), gbc);
   }
 
+  @SuppressWarnings("deprecation")
   public void actionPerformed(ActionEvent actionevent) {
     OResource selectedNode = ((OResourceNode)selectedNodes.get(0)
       .getUserObject()).getResource();

@@ -188,6 +188,7 @@ public class PropertyDetailsTableCellRenderer extends DefaultTableCellRenderer {
             s = ((DatatypeProperty)prop).getDataType().getXmlSchemaURIString();
           }
           else if(prop instanceof ObjectProperty) {
+            @SuppressWarnings("deprecation")
             Set<OResource> set = prop.getRange();
             if(set == null || set.isEmpty()) {
               s = "[ALL CLASSES]";

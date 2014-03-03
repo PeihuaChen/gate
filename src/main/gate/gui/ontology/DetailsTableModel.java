@@ -235,6 +235,7 @@ public class DetailsTableModel extends AbstractTableModel {
             return ((DatatypeProperty)property).getDataType()
               .getXmlSchemaURIString();
           } else if (!(property instanceof AnnotationProperty)) {
+            @SuppressWarnings("deprecation")
             Set<OResource> set = property.getRange();
             if (set == null || set.isEmpty()) {
               return "[ALL CLASSES]";
