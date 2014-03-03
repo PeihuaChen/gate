@@ -342,7 +342,7 @@
   <!-- Learning plugin needs to be before Lang_Chinese -->
   <filelist id="plugins.to.build" dir="plugins" files="
       AlchemyAPI Alignment Annotation_Merging Copy_Annots_Between_Docs
-      Coref_Tools Crowd_Sourcing DocumentNormalizer Format_CSV
+      Coref_Tools Crowd_Sourcing Developer_Tools DocumentNormalizer Format_CSV
       Format_FastInfoset Format_MediaWiki Format_PubMed Gazetteer_LKB
       Gazetteer_Ontology_Based GENIA Groovy Inter_Annotator_Agreement JAPE_Plus
       Keyphrase_Extraction_Algorithm Lang_Arabic Lang_Bulgarian Lang_Cebuano
