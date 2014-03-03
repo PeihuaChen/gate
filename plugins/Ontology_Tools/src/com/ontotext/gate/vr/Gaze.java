@@ -398,6 +398,7 @@ public class Gaze extends AbstractVisualResource
     /* add list selection listener to the mapping definition list component*/
     mappingList.addListSelectionListener(
       new ListSelectionListener () {
+        @SuppressWarnings("deprecation")
         public void valueChanged(ListSelectionEvent e) {
           if (0 < mappingList.getModel().getSize()) {
             Object obj = mappingList.getModel().getElementAt(
