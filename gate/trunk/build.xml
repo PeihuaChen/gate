@@ -253,6 +253,12 @@
     <javac srcdir="${srcDir}" destdir="${outputDir}" source="1.6" target="1.6" encoding="UTF-8" debug="true" deprecation="${deprecation}" debuglevel="lines,source" includes="gate/**,com/**,hepple/**" classpathref="build.class.path">
       <compilerarg value="-Xmaxwarns" />
       <compilerarg value="${gate.compile.maxwarnings}" />
+      <compilerarg value="-Xlint:divzero" />
+      <compilerarg value="-Xlint:empty" />
+      <compilerarg value="-Xlint:fallthrough" />
+      <compilerarg value="-Xlint:path" />
+      <compilerarg value="-Xlint:finally" />
+      <compilerarg value="-Xlint:overrides" />
     </javac>
   </target>
 
