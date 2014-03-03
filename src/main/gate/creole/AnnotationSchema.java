@@ -41,10 +41,10 @@ import org.jdom.input.SAXBuilder;
   */
 @CreoleResource(name="Annotation Schema", comment="An annotation type and its features.", helpURL="http://gate.ac.uk/userguide/sec:corpora:schemas")
 public class AnnotationSchema extends AbstractLanguageResource{
-  public static final String FILE_URL_PARAM_NAME = "xmlFileUrl";
+  
+  private static final long serialVersionUID = 3499202938128514949L;
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  public static final String FILE_URL_PARAM_NAME = "xmlFileUrl";
 
   /** A map between XSchema types and Java Types */
   private static Map<String, Class<?>> xSchema2JavaMap;
@@ -147,11 +147,6 @@ public class AnnotationSchema extends AbstractLanguageResource{
 
   /** The xml file URL of the resource */
   protected URL xmlFileUrl;
-
-  /**
-   * The namepsace used in the xml file
-   */
-  protected Namespace namespace;
   
   private transient AnnotationSchema lastIncluded = null;
 
@@ -210,19 +205,19 @@ public class AnnotationSchema extends AbstractLanguageResource{
   private void workWithJDom(org.jdom.Document jDom) throws ResourceInstantiationException {
     // Use the jDom structure the way we want
     org.jdom.Element rootElement = jDom.getRootElement();
-    namespace = rootElement.getNamespace();
+    Namespace namespace = rootElement.getNamespace();
     
     // get all children elements from the rootElement
-    List rootElementChildrenList =
+    List<?> rootElementChildrenList =
             rootElement.getChildren("element", namespace);
     if(rootElementChildrenList.size() > 1)
       throw new ResourceInstantiationException(
               "Each Annotation must be defined in a separate XML Schema file");
-    Iterator rootElementChildrenIterator = rootElementChildrenList.iterator();
+    Iterator<?> rootElementChildrenIterator = rootElementChildrenList.iterator();
     while(rootElementChildrenIterator.hasNext()) {
       org.jdom.Element childElement =
               (org.jdom.Element)rootElementChildrenIterator.next();
-      createAnnotationSchemaObject(childElement);
+      createAnnotationSchemaObject(childElement, namespace);
     }// end while
     
     rootElementChildrenList = rootElement.getChildren("include", namespace);
@@ -248,7 +243,7 @@ public class AnnotationSchema extends AbstractLanguageResource{
   /** This method creates an AnnotationSchema object fom an org.jdom.Element
     * @param anElement is an XSchema element element
     */
-  private void createAnnotationSchemaObject(org.jdom.Element anElement){
+  private void createAnnotationSchemaObject(org.jdom.Element anElement, Namespace namespace){
     // Get the value of the name attribute. If this attribute doesn't exists
     // then it will receive a default one.
     annotationName = anElement.getAttributeValue("name");
@@ -258,15 +253,15 @@ public class AnnotationSchema extends AbstractLanguageResource{
     org.jdom.Element complexTypeElement = anElement.getChild("complexType",
                                                              namespace);
     if (complexTypeElement != null){
-      List complexTypeCildrenList = complexTypeElement.getChildren("attribute",
+      List<?> complexTypeCildrenList = complexTypeElement.getChildren("attribute",
                                                                    namespace);
-      Iterator complexTypeCildrenIterator = complexTypeCildrenList.iterator();
+      Iterator<?> complexTypeCildrenIterator = complexTypeCildrenList.iterator();
       if (complexTypeCildrenIterator.hasNext())
         featureSchemaSet = new LinkedHashSet<FeatureSchema>();
       while (complexTypeCildrenIterator.hasNext()) {
         org.jdom.Element childElement =
                     (org.jdom.Element) complexTypeCildrenIterator.next();
-        createAndAddFeatureSchemaObject(childElement);
+        createAndAddFeatureSchemaObject(childElement, namespace);
       }// end while
     }// end if
   } // createAnnoatationSchemaObject
@@ -276,12 +271,12 @@ public class AnnotationSchema extends AbstractLanguageResource{
     * @param anAttributeElement is an XSchema attribute element
     */
   public void createAndAddFeatureSchemaObject(org.jdom.Element
-                                                          anAttributeElement) {
+                                                          anAttributeElement, Namespace namespace) {
     String featureName = null;
     Class<?> featureType = null;
     String featureUse  = null;
     String featureValue = null;
-    Set    featurePermittedValuesSet = null;
+    Set<String> featurePermittedValuesSet = null;
 
     // Get the value of the name attribute. If this attribute doesn't exists
     // then it will receive a default one.
@@ -324,15 +319,15 @@ public class AnnotationSchema extends AbstractLanguageResource{
         featureType =  xSchema2JavaMap.get(featureTypeName);
 
         // Check to see if there are any enumeration elements inside
-        List enumerationElementChildrenList =
+        List<?> enumerationElementChildrenList =
                                  restrictionElement.getChildren("enumeration",
                                                                 namespace);
-        Iterator enumerationChildrenIterator =
+        Iterator<?> enumerationChildrenIterator =
                                 enumerationElementChildrenList.iterator();
 
         // Check if there is any enumeration element in the list
         if (enumerationChildrenIterator.hasNext())
-            featurePermittedValuesSet = new HashSet();
+            featurePermittedValuesSet = new HashSet<String>();
         while (enumerationChildrenIterator.hasNext()) {
           org.jdom.Element enumerationElement =
                         (org.jdom.Element) enumerationChildrenIterator.next();
