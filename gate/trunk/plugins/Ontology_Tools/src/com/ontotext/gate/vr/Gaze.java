@@ -1912,7 +1912,8 @@ public class Gaze extends AbstractVisualResource
   /** Reacts on all Load Ontology actions performed either
    *  through the menu, wither through the load buton. */
   class OntologyLoadListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
+    @SuppressWarnings("deprecation")    
+    public void actionPerformed(ActionEvent e) {
           JFileChooser chooser = MainFrame.getFileChooser();
           chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
