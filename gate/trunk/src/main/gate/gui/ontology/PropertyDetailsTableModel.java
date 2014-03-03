@@ -207,6 +207,7 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
       Collections.sort(equivalentProps.getValues(), itemComparator);
     }
 
+    @SuppressWarnings("deprecation")
     Set set1 = property.getDomain();
     if(set1 != null) {
       domain.getValues().addAll(set1);
@@ -228,6 +229,7 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
       return;
     }
 
+    @SuppressWarnings("deprecation")
     Set set2 = property.getRange();
     if(set2 != null) {
       range.getValues().addAll(set2);

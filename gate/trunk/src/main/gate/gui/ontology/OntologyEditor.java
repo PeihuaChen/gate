@@ -371,6 +371,7 @@ public class OntologyEditor extends AbstractVisualResource
     });
 
     tree.addMouseListener(new MouseAdapter() {
+      @SuppressWarnings("deprecation")
       public void mouseClicked(MouseEvent me) {
         if(SwingUtilities.isRightMouseButton(me)) {
           if(selectedNodes == null || selectedNodes.size() != 1) return;

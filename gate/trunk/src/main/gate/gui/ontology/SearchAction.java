@@ -86,6 +86,7 @@ public class SearchAction extends AbstractAction {
                               .getSelectedItem();
                       List<OResource> toAdd = new ArrayList<OResource>();
                       if(aProp instanceof ObjectProperty) {
+                        @SuppressWarnings("deprecation")
                         OResource res = ontologyEditor.ontology
                                 .getOResourceByName(s);
                         if(res != null) {
@@ -171,6 +172,7 @@ public class SearchAction extends AbstractAction {
    * the ontology editor and invokes the search dialog.
    */
   public void actionPerformed(ActionEvent ae) {
+    @SuppressWarnings("deprecation")
     List<OResource> resources = ontologyEditor.ontology.getAllResources();
     Collections.sort(resources, new OntologyItemComparator());
 

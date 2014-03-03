@@ -95,6 +95,7 @@ public class RestrictionAction extends AbstractAction {
     hasValChoice.setEnabled(false);
   }
 
+  @SuppressWarnings("deprecation")
   public void actionPerformed(ActionEvent actionevent) {
 
     ArrayList<RDFProperty> props = new ArrayList<RDFProperty>();
