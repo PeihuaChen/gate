@@ -7,12 +7,11 @@
  */
 package gate.creole.ontology.ocat;
 
-import javax.swing.*;
-import javax.swing.tree.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
 import gate.creole.ontology.AnnotationProperty;
 import gate.creole.ontology.InvalidURIException;
 import gate.creole.ontology.Literal;
@@ -22,15 +21,36 @@ import gate.creole.ontology.OInstance;
 import gate.creole.ontology.OResource;
 import gate.creole.ontology.OURI;
 import gate.creole.ontology.Ontology;
-import gate.creole.ontology.OntologyUtilities;
-import gate.creole.ontology.URI;
 import gate.gui.MainFrame;
 import gate.util.GateRuntimeException;
 
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import javax.swing.JColorChooser;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.JTree;
+import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Highlighter;
+import javax.swing.tree.TreePath;
+
 import com.ontotext.gate.vr.ClassNode;
 import com.ontotext.gate.vr.IFolder;
-import javax.swing.text.Highlighter;
-import javax.swing.text.DefaultHighlighter;
 
 /**
  * Description: This class listens events on tree selection
@@ -593,7 +613,7 @@ public class OntologyTreeListener extends MouseAdapter {
 
     }
     else {
-      URI uri = null;
+      gate.creole.ontology.URI uri = null;
       String classFeature = null;
       OInstance instance = null;
 
@@ -607,7 +627,7 @@ public class OntologyTreeListener extends MouseAdapter {
         classFeature = ((OClass)node.getSource()).getURI().toString();
         if(aResource == null) {
           uri =
-            OntologyUtilities.createURI(ontologyTreePanel.getCurrentOntology(),
+              gate.creole.ontology.OntologyUtilities.createURI(ontologyTreePanel.getCurrentOntology(),
               instanceName, false);
 
           instance =
@@ -622,7 +642,7 @@ public class OntologyTreeListener extends MouseAdapter {
                 instanceName + index);
             if(tempResource == null) {
               uri =
-                OntologyUtilities.createURI(ontologyTreePanel
+                  gate.creole.ontology.OntologyUtilities.createURI(ontologyTreePanel
                   .getCurrentOntology(), instanceName + index, false);
 
               instance =

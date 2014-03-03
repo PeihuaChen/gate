@@ -13,7 +13,6 @@ import gate.creole.ontology.OClass;
 import gate.creole.ontology.OInstance;
 import gate.creole.ontology.OResource;
 import gate.creole.ontology.ObjectProperty;
-import gate.creole.ontology.OntologyUtilities;
 import gate.creole.ontology.RDFProperty;
 import gate.gui.MainFrame;
 import gate.util.GateRuntimeException;
@@ -509,7 +508,7 @@ public class AnnotationEditor extends AbstractAction {
                 .getSelectedClassURIFeatureName());
         }
 
-        aValue = OntologyUtilities.getResourceName(aValue);
+        aValue = gate.creole.ontology.OntologyUtilities.getResourceName(aValue);
         ClassNode aNode = ontologyTreePanel.getFirstNode(aValue);
         OResource resource = (OResource)aNode.getSource();
         explicitCall = true;
