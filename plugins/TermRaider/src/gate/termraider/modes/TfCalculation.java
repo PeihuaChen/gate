@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2012, The University of Sheffield. See the file
+ *  Copyright (c) 2012--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -9,10 +9,13 @@
  *
  *  $Id$
  */
-package gate.termraider.bank.modes;
+package gate.termraider.modes;
+
+import gate.termraider.util.Utilities;
 
 public enum TfCalculation {
   Natural,
+  Sqrt,
   Logarithmic;
   
   
@@ -20,7 +23,11 @@ public enum TfCalculation {
     double tf = (double) rawTF;
     
     if (mode == Logarithmic) {
-      return 1.0 + IdfCalculation.logarithm(tf);
+      return 1.0 + Utilities.log2(tf);
+    }
+    
+    else if (mode == Sqrt) {
+      return Math.sqrt(tf);
     }
     
     // must be Natural

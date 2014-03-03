@@ -11,24 +11,24 @@
  */
 package gate.termraider.bank;
 
-import java.io.File;
 import java.util.*;
+
 import javax.swing.Action;
+
 import org.apache.commons.lang.StringEscapeUtils;
+
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Corpus;
 import gate.Document;
-import gate.Factory;
 import gate.Resource;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.gui.ActionsPublisher;
 import gate.termraider.gui.ActionSaveCsv;
-import gate.termraider.output.CsvGenerator;
 import gate.termraider.util.*;
-import gate.util.GateException;
+
 
 @CreoleResource(name = "DocumentFrequencyBank",
 icon = "termbank-lr.png",
@@ -38,13 +38,9 @@ implements ActionsPublisher{
   
   private static final long serialVersionUID = 5149075094060830331L;
   
-  
+  // Note: corpora parameter inherited from AbstractBank
   private Set<DocumentFrequencyBank> inputBanks;
-  // note: corpora inherited from AbstractBank
   
-  private int documentTotal;
-  private Map<Term, Integer> documentFrequencies;
-  private int minFrequency, maxFrequency;
   private Map<String, Set<Term>> stringLookupTable;
 
   // transient to allow serialization
@@ -53,10 +49,10 @@ implements ActionsPublisher{
 
   public Resource init() throws ResourceInstantiationException {
     prepare();
+    initializeScoreTypes();
     resetScores();
     processInputBanks();
     processCorpora();
-    scanTypesLanguagesDocFreq();
     calculateScores();
     return this;
   }
@@ -76,14 +72,19 @@ implements ActionsPublisher{
       inputBanks = new HashSet<DocumentFrequencyBank>();
     }
   }
+
   
   protected void resetScores() {
-    documentTotal = 0;
-    documentFrequencies = new HashMap<Term, Integer>();
-    termFrequencies = new HashMap<Term, Integer>();
+    scores = new HashMap<ScoreType, Map<Term,Number>>();
+    for (ScoreType st : scoreTypes) {
+      scores.put(st, new HashMap<Term, Number>());
+    }
+    
+    documentCount = 0;
     languages = new HashSet<String>();
     types = new HashSet<String>();
     stringLookupTable = new HashMap<String, Set<Term>>();
+    termDocuments = new HashMap<Term, Set<String>>();
   }
 
   
@@ -105,30 +106,17 @@ implements ActionsPublisher{
   
   protected void processInputBanks() {
     for (DocumentFrequencyBank bank : inputBanks) {
-      this.documentTotal += bank.documentTotal;
+      this.documentCount += bank.documentCount;
       for (Term term : bank.getTerms()) {
-        increment(term, bank.getFrequencyStrict(term));
+        Utilities.incrementMap(getDefaultScores(), term, bank.getFrequencyStrict(term));
       }
     }
   }
   
-  
-  protected void processCorpus(Corpus corpus) {
-    for (int i=0 ; i < corpus.size() ; i++) {
-      boolean wasLoaded = corpus.isDocumentLoaded(i);
-      Document document = (Document) corpus.get(i);
-      processDocument(document);
-      // datastore safety
-      if (! wasLoaded) {
-        corpus.unloadDocument(document);
-        Factory.deleteResource(document);
-      }
-    }
-  }
-
   
   protected void processDocument(Document document) {
-    documentTotal++;
+    documentCount++;
+    String documentSource = Utilities.sourceOrName(document);
     AnnotationSet candidates = document.getAnnotations(inputASName).get(inputAnnotationTypes);
 
     Set<Term> documentTerms = new HashSet<Term>();
@@ -137,37 +125,29 @@ implements ActionsPublisher{
     }
     
     for (Term term : documentTerms) {
-      increment(term, 1);
+      Utilities.addToMapSet(termDocuments, term, documentSource);
     }
   }
 
   
   protected void calculateScores() {
-    if (this.getTerms().size() > 0) {
-      minFrequency = this.getFrequencyStrict(this.getTerms().iterator().next());
-    }
-    else {
-      minFrequency = 0;
-    }
-    maxFrequency = 0;
-    for (Term term : this.getTerms()) {
-      int freq = this.getFrequencyStrict(term);
-      maxFrequency = Math.max(maxFrequency, freq);
-      minFrequency = Math.min(minFrequency, freq);
+    for (Term term : termDocuments.keySet()) {
       this.types.add(term.getType());
       this.languages.add(term.getLanguageCode());
+      int df = termDocuments.get(term).size();
+      Utilities.setScoreTermValue(scores, getDefaultScoreType(), term, df);
       storeStringLookup(term);
+    }
+
+    if (debugMode) {
+      System.out.println("Termbank: nbr of terms = " + this.getTerms().size());
     }
   }
   
   
-  public Set<Term> getTerms() {
-    return documentFrequencies.keySet();
-  }
-  
   public int getFrequencyStrict(Term term) {
-    if (documentFrequencies.containsKey(term)) {
-      return documentFrequencies.get(term).intValue();
+    if (getDefaultScores().containsKey(term)) {
+      return getDefaultScores().get(term).intValue();
     }
     
     return 0;
@@ -176,8 +156,8 @@ implements ActionsPublisher{
   
   public int getFrequencyLax(Term term) {
     // Try for an exact match first
-    if (documentFrequencies.containsKey(term)) {
-      return documentFrequencies.get(term).intValue();
+    if (getDefaultScores().containsKey(term)) {
+      return getDefaultScores().get(term).intValue();
     }
     
     // Now see if there's one with a blank language code
@@ -185,20 +165,13 @@ implements ActionsPublisher{
     if (stringLookupTable.containsKey(termString)) {
       for (Term testTerm : stringLookupTable.get(termString)) {
         if (testTerm.closeMatch(term)) {
-          return documentFrequencies.get(testTerm).intValue();
+          return getDefaultScores().get(testTerm).intValue();
         }
       }
     }
     
     return 0;
   }
-  
-  
-  @Override
-  public int getDocFrequency(Term term) {
-    return getFrequencyLax(term);
-  }
-  
   
   
   @CreoleParameter(comment = "Other DFBs to compile into the new one")
@@ -222,56 +195,6 @@ implements ActionsPublisher{
   }
 
 
-  @Override
-  public Double getMinScore() {
-    return new Double(this.minFrequency);
-  }
-
-
-  @Override
-  public Double getMaxScore() {
-    return new Double(this.maxFrequency);
-  }
-
-  
-  public int getMinFrequency() {
-    return this.minFrequency;
-  }
-  
-  public int getMaxFrequency() {
-    return this.maxFrequency;
-  }
-  
-  
-  public List<Term> getTermsByDescendingFreq() {
-    List<Term> terms = new ArrayList<Term>(this.getTerms());
-    Comparator<Term> comparator = new TermComparatorByDescendingScore(documentFrequencies);
-    Collections.sort(terms, comparator);
-    return terms;
-  }
-
-  
-  @Override
-  public void saveAsCsv(double threshold, File file) throws GateException {
-    CsvGenerator.generateAndSaveCsv(this, threshold, file);
-  }
-
-
-  @Override
-  public void saveAsCsv(File file) throws GateException {
-    saveAsCsv(0.0, file);
-  }
-
-  
-  private void increment(Term term, int i) {
-    int count = i;
-    if (documentFrequencies.containsKey(term)) {
-      count += documentFrequencies.get(term).intValue();
-    }
-    documentFrequencies.put(term, count);
-  }
-  
-  
   private void storeStringLookup(Term term) {
     String termString = term.getTermString();
     Set<Term> terms;
@@ -285,19 +208,11 @@ implements ActionsPublisher{
     stringLookupTable.put(termString, terms);
   }
   
-  
-  public Map<Term, Integer> getDocFrequencies() {
-    return this.documentFrequencies;
-  }
-  
-  public int getTotalDocs() {
-    return this.documentTotal;
-  }
-  
+
   protected void initializeScoreTypes() {
     // Whatever this is called, it must be the reference
     // document frequency, so we will only need
-    // getDefaultScoreType()
+    // to use getDefaultScoreType() later
     this.scoreTypes = new ArrayList<ScoreType>();
     this.scoreTypes.add(new ScoreType(scoreProperty));
   }
@@ -309,31 +224,23 @@ implements ActionsPublisher{
     this.scoreProperty = name;
   }
 
-
-  public String getCsvLine(Term term) {
-    StringBuilder sb = new StringBuilder();
-    sb.append(StringEscapeUtils.escapeCsv(term.getTermString()));
-    sb.append(',');
-    sb.append(StringEscapeUtils.escapeCsv(term.getLanguageCode()));
-    sb.append(',');
-    sb.append(StringEscapeUtils.escapeCsv(term.getType()));
-    sb.append(',');
-    sb.append(StringEscapeUtils.escapeCsv(Integer.toString(this.getDocFrequency(term))));
-    return sb.toString();
+  @Override
+  public Map<String, String> getMiscDataForGui() {
+    Map<String, String> result = new HashMap<String, String>();
+    result.put("nbr of documents", String.valueOf(this.documentCount));
+    result.put("nbr of terms", String.valueOf(this.getDefaultScores().size()));
+    result.put("nbr of distinct term strings", String.valueOf(this.stringLookupTable.size()));
+    return result;
   }
 
 
-  public String getCsvHeader() {
+  public String getCsvSubheader() {
     StringBuilder sb = new StringBuilder();
-    sb.append(StringEscapeUtils.escapeCsv("Term"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Lang"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Type"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("DocFrequency"));
     sb.append('\n');
     sb.append(',').append(StringEscapeUtils.escapeCsv("_TOTAL_DOCS_"));
     sb.append(',').append(StringEscapeUtils.escapeCsv(""));
     sb.append(',').append(StringEscapeUtils.escapeCsv(""));
-    sb.append(',').append(StringEscapeUtils.escapeCsv(Integer.toString(this.getTotalDocs())));
+    sb.append(',').append(StringEscapeUtils.escapeCsv(Integer.toString(this.getDocumentCount())));
     return sb.toString();
   }
 }

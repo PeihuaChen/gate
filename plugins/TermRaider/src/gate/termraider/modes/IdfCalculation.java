@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2012, The University of Sheffield. See the file
+ *  Copyright (c) 2012--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -9,14 +9,17 @@
  *
  *  $Id$
  */
-package gate.termraider.bank.modes;
+package gate.termraider.modes;
+
+import gate.termraider.util.Utilities;
 
 public enum IdfCalculation {
-  Natural,
-  Logarithmic;
+  Logarithmic,
+  Scaled,
+  Natural;
   
-  /* These calculations are from Manning & Schütze, Foundations of
-   * Statistical NLP, section 15.2 (p.544).
+  /* These calculations are partly based on Manning & Schütze, 
+   * Foundations of Statistical NLP, section 15.2 (p.544).
    */
   
   public static double calculate(IdfCalculation mode, int rawDF, int corpusSize) {
@@ -24,25 +27,15 @@ public enum IdfCalculation {
     double n = (double) corpusSize;
     
     if (mode == Logarithmic) {
-      return 1.0 + logarithm(n / (df + 1.0));
+      return 1.0 + Utilities.log2(n / (df + 1.0));
     }
-    
-    // TODO: review the df calculation modes; they must always return 
-    // something > 0.
+
+    if (mode == Scaled) {
+      return (1.0 + n )/ (df + 1.0);
+    }
     
     // must be Natural
     return 1.0 / (df + 1.0);
   }
 
-  public static final double logBase = 2.0;
-  private static double conversion;
-  
-  static {
-    conversion = Math.log10(logBase);
-  }
-  
-  public static double logarithm(double input) {
-    return Math.log10(input) / conversion;
-  }
-  
 }

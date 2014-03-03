@@ -15,10 +15,9 @@ import gate.creole.metadata.*;
 import gate.gui.ActionsPublisher;
 import gate.*;
 import gate.termraider.util.*;
-import gate.termraider.bank.modes.*;
-import java.util.*;
-import org.apache.commons.lang.StringEscapeUtils;
+import gate.termraider.modes.*;
 
+import java.util.*;
 
 
 @CreoleResource(name = "AnnotationTermbank",
@@ -34,10 +33,11 @@ public class AnnotationTermbank extends AbstractTermbank
 
   /* EXTRA DATA FOR ANALYSIS */
   private Map<Term, List<Double>>  termIndividualScores;
-
+  private ScoreType termFrequencyST, localDocFrequencyST;
   
   
   protected void processDocument(Document document) {
+    documentCount++;
     String documentSource = Utilities.sourceOrName(document);
     AnnotationSet candidates = document.getAnnotations(inputASName).get(inputAnnotationTypes);
 
@@ -45,20 +45,18 @@ public class AnnotationTermbank extends AbstractTermbank
       Term term = makeTerm(candidate, document);
       FeatureMap fm = candidate.getFeatures();
       if (fm.containsKey(inputScoreFeature)) {
-        incrementTermFreq(term, 1);
+        Utilities.incrementScoreTermValue(scores, termFrequencyST, term, 1);
         
         double score = ((Number) fm.get(inputScoreFeature)).doubleValue();
+        Utilities.addToMapSet(termDocuments, term, documentSource);
+        
         if (termIndividualScores.containsKey(term)) {
           List<Double> scoreList = termIndividualScores.get(term);
           scoreList.add(score);
-          termDocuments.get(term).add(documentSource);
         }
         else {
           List<Double> scoreList = new ArrayList<Double>();
           scoreList.add(score);
-          Set<String> docNames = new HashSet<String>();
-          docNames.add(documentSource);
-          termDocuments.put(term, docNames);
           termIndividualScores.put(term, scoreList);
         }
       }
@@ -67,86 +65,41 @@ public class AnnotationTermbank extends AbstractTermbank
 
 
   public void calculateScores() {
-      double score;
-        
-      for (Term term : termIndividualScores.keySet()) {
-        if (mergingMode == MergingMode.MAXIMUM) {
-          score = Collections.max(termIndividualScores.get(term));
-        }
-        else if (mergingMode == MergingMode.MINIMUM) {
-          score = Collections.min(termIndividualScores.get(term));
-        }
-        else { // must be MEAN
-          score = Utilities.meanDoubleList(termIndividualScores.get(term));
-        }
-
-        rawTermScores.put(term, score);
-        termScores.put(term, Utilities.normalizeScore(score));
-      }
+    for (Term term : termDocuments.keySet()) {
+      languages.add(term.getLanguageCode());
+      types.add(term.getType());
       
-      termsByDescendingScore = new ArrayList<Term>(termScores.keySet());
-      Collections.sort(termsByDescendingScore, new TermComparatorByDescendingScore(termScores));
-
+      Double score = MergingMode.calculate(mergingMode, termIndividualScores.get(term));
+      Utilities.setScoreTermValue(scores, getDefaultScoreType(), term, score);
+      int localDF = termDocuments.get(term).size();
+      Utilities.setScoreTermValue(scores, localDocFrequencyST, term, localDF);
+    }
+    
     if (debugMode) {
-      System.out.println("Termbank: nbr of terms = " + termsByDescendingScore.size());
+      System.out.println("Termbank: nbr of terms = " + termDocuments.size());
     }
   }
 
   
   protected void resetScores() {
+    scores = new HashMap<ScoreType, Map<Term,Number>>();
+    for (ScoreType st : scoreTypes) {
+      scores.put(st, new HashMap<Term, Number>());
+    }
     termIndividualScores = new HashMap<Term, List<Double>>();
-    termDocuments    = new HashMap<Term, Set<String>>();
-    termScores       = new HashMap<Term, Double>();
-    rawTermScores = new HashMap<Term, Double>();
-    termsByDescendingScore      = new ArrayList<Term>();
-    termsByDescendingScore     = new ArrayList<Term>();
-    termsByDescendingFrequency = new ArrayList<Term>();
-    termsByDescendingDocFrequency = new ArrayList<Term>();
-    termFrequencies = new HashMap<Term, Integer>();
-    docFrequencies = new HashMap<Term, Integer>();
+    termDocuments        = new HashMap<Term, Set<String>>();
+    languages = new HashSet<String>();
+    types = new HashSet<String>();
   }
 
-  
-  public String getCsvHeader() {
-    StringBuilder sb = new StringBuilder();
-    sb.append(StringEscapeUtils.escapeCsv("Term"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Lang"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Type"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("ScoreType"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Score"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Document_Count"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Term_Frequency"));
-    return sb.toString();
-  }
-
-  
-  public String getCsvLine(Term term) {
-      StringBuilder sb = new StringBuilder();
-      sb.append(StringEscapeUtils.escapeCsv(term.getTermString()));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(term.getLanguageCode()));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(term.getType()));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(this.getScoreProperty()));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(this.getScore(term).toString()));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(Integer.toString(this.getDocFrequency(term))));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(Integer.toString(this.getTermFrequency(term))));
-      return sb.toString();
-  }
-  
   
   protected void initializeScoreTypes() {
     this.scoreTypes = new ArrayList<ScoreType>();
     this.scoreTypes.add(new ScoreType(scoreProperty));
-    // TODO Do we need any of this stuff here?
-    //this.termFrequencyST = new ScoreType("termFrequency");
-    //this.scoreTypes.add(termFrequencyST);
-    //this.localDocFrequencyST = new ScoreType("localDocFrequency");
-    //this.scoreTypes.add(localDocFrequencyST);
+    this.termFrequencyST = new ScoreType("termFrequency");
+    this.scoreTypes.add(termFrequencyST);
+    this.localDocFrequencyST = new ScoreType("localDocFrequency");
+    this.scoreTypes.add(localDocFrequencyST);
   }
 
   
@@ -178,5 +131,13 @@ public class AnnotationTermbank extends AbstractTermbank
     super.setScoreProperty(name);
   }
 
+
+  @Override
+  public Map<String, String> getMiscDataForGui() {
+    Map<String, String> result = new HashMap<String, String>();
+    result.put("nbr of local documents", String.valueOf(this.documentCount));
+    result.put("nbr of terms", String.valueOf(this.getDefaultScores().size()));
+    return result;
+  }
 
 }

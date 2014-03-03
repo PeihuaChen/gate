@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2012--2013, The University of Sheffield. See the file
+ *  Copyright (c) 2012--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -21,11 +21,9 @@ import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.RunTime;
 import gate.termraider.bank.AbstractTermbank;
 import gate.termraider.util.*;
-
 import java.text.NumberFormat;
 import java.util.*;
 
-import org.apache.commons.lang.StringUtils;
 
 
 @CreoleResource(name = "Termbank Score Copier",
@@ -68,8 +66,6 @@ public class TermScoreCopier extends AbstractLanguageAnalyser
     Set<String> annotationTypes = termbank.getInputAnnotationTypes();
     String termFeature = termbank.getInputAnnotationFeature();
     String languageFeature = termbank.getLanguageFeature();
-    String scoreFeature = termbank.getScoreProperty();
-    String rawScoreFeature = scoreFeature + ".raw";
     
     AnnotationSet candidates = document.getAnnotations(annotationSetName).get(annotationTypes);
     checkInterruption();
@@ -77,22 +73,12 @@ public class TermScoreCopier extends AbstractLanguageAnalyser
     for (Annotation candidate : candidates) {
       Term term = new Term(candidate, document, languageFeature, termFeature);
       FeatureMap fm = candidate.getFeatures();
-      Double score = termbank.getScore(term);
-      if (score != null) {
-        fm.put(scoreFeature, score);
-      }
-      
-      Double rawScore = termbank.getRawScore(term);
-      if (rawScore != null) {
-        fm.put(rawScoreFeature, rawScore);
-      }
-      
-      if (useFeature(frequencyFeature)) {
-        fm.put(frequencyFeature, termbank.getTermFrequency(term));
-      }
-      
-      if (useFeature(docFrequencyFeature)) {
-        fm.put(docFrequencyFeature, termbank.getDocFrequency(term));
+
+      // What the heck, slap them all on the annotation features.
+      // You can't put too many features in a nuclear reactor.
+      Map<ScoreType, Number> scoreMap = termbank.getScoreMap(term);
+      for (ScoreType st : scoreMap.keySet()) {
+        fm.put(st.toString(), scoreMap.get(st));
       }
       
       checkInterruption();
@@ -112,11 +98,6 @@ public class TermScoreCopier extends AbstractLanguageAnalyser
         "Execution of " + this.getName() + " has been abruptly interrupted!"); }
   }
   
-  
-  private boolean useFeature(String feature) {
-    return (StringUtils.stripToEmpty(feature).length() > 0);
-  }
-
   
   /* CREOLE METHODS */
   

@@ -16,6 +16,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
 import gate.termraider.util.*;
+import gate.termraider.bank.*;
 import java.io.*;
 
 
@@ -44,7 +45,7 @@ public class CsvFileSelectionActionListener implements ActionListener {
               Utilities.EXTENSION_CSV);
       try {
         if (mode == Mode.SAVE) {
-          termbank.saveAsCsv(sliderPanel.getValues(), file);
+          termbank.saveAsCsv(sliderPanel.getValue(), file);
         }
         else { // must be LOAD
           System.err.println("LOAD mode is no longer supported.");

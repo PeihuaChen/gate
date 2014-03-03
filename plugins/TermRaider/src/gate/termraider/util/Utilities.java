@@ -13,9 +13,11 @@ package gate.termraider.util;
 
 import gate.*;
 import gate.creole.ANNIEConstants;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 
@@ -25,10 +27,27 @@ public class Utilities implements ANNIEConstants {
   public static final String EXTENSION_CSV = "csv";
 
   private static double log10of2;
-  private static double xScale = 4.8;
   
   static {
     log10of2 = Math.log10(2.0);
+  }
+
+  
+  /** This is a little dodgy because it forces the new value 
+   * to be Integer; to be used carefully.
+   * @param map
+   * @param key
+   * @param increment
+   * @return
+   */
+  public static int incrementMap(Map<Term, Number> map, Term key, int increment) {
+    int count = 0;
+    if (map.containsKey(key)) {
+      count = map.get(key).intValue();
+    }
+    count += increment;
+    map.put(key, Integer.valueOf(count));
+    return count;
   }
 
 
@@ -43,19 +62,6 @@ public class Utilities implements ANNIEConstants {
     }
     return total / ((double) list.size());
   }
-  
-  /**
-   * The following produces the right half of a sigmoid 
-   * curve adjusted so that
-   * f(0) = 0; f(inf) = 100; f(x>0) > 0
-   * @param score from 0 to inf 
-   * @return score from 0 to 100
-   */
-  public static double normalizeScore(double score) {
-    double norm = 2.0 / (1.0 + Math.exp(-score / xScale)) - 1.0;
-    return (double) (100.0F * norm);
-  }
-
   
 
   public static Double convertToDouble(Object x) {
@@ -131,10 +137,7 @@ public class Utilities implements ANNIEConstants {
     return url.toString();
   }
   
-  
-  
-  
-  
+
   public static File addExtensionIfNotExtended(File file, String extension) {
     String name = file.getName();
     if (name.contains(".")) {
@@ -171,5 +174,71 @@ public class Utilities implements ANNIEConstants {
     return Math.log10(input) / log10of2;
   }
 
+  
+  public static void addToMapSet(Map<Term, Set<String>> map, Term key, String value) {
+    Set<String> valueSet;
+    if (map.containsKey(key)) {
+      valueSet = map.get(key);
+    }
+    else {
+      valueSet = new HashSet<String>();
+    }
+    
+    valueSet.add(value);
+    map.put(key, valueSet);
+  }
+  
+  
+  public static void setScoreTermValue(Map<ScoreType, Map<Term, Number>> map, ScoreType type, Term term, Number value) {
+    Map<Term, Number> submap;
+    if (map.containsKey(type)) {
+      submap = map.get(type);
+    }
+    else {
+      submap = new HashMap<Term, Number>();
+    }
+    
+    submap.put(term, value);
+    map.put(type, submap);
+  }
+  
+  
+  /**
+   * Forces the ultimate value to be Integer. 
+   */
+  public static void incrementScoreTermValue(Map<ScoreType, Map<Term, Number>> map, 
+          ScoreType type, Term term, Integer increment) {
+    Map<Term, Number> submap;
+    if (map.containsKey(type)) {
+      submap = map.get(type);
+    }
+    else {
+      submap = new HashMap<Term, Number>();
+    }
+    
+    int count;
+    if (submap.containsKey(term)) {
+      count = submap.get(term).intValue();
+    }
+    else {
+      count = 0;
+    }
+    
+    count += increment.intValue();
+    submap.put(term, count);
+    map.put(type, submap);
+  }
+
+  
+  public static Set<String> getStringSetFromMap(Map<Term, Set<String>> map, Term key) {
+    if (map.containsKey(key)) {
+      return map.get(key);
+    }
+    
+    //implied else
+    Set<String> valueSet = new HashSet<String>();
+    map.put(key, valueSet);
+    return valueSet;
+  }
 
 }

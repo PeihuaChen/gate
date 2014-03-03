@@ -10,7 +10,7 @@
  *  $Id$
  */
 
-package gate.termraider.util;
+package gate.termraider.bank;
 
 import gate.*;
 import gate.creole.AbstractLanguageResource;
@@ -18,6 +18,7 @@ import gate.creole.metadata.CreoleParameter;
 import gate.util.GateException;
 import java.io.File;
 import java.util.*;
+import gate.termraider.util.*;
 
 
 /**
@@ -29,12 +30,17 @@ public abstract class AbstractBank extends AbstractLanguageResource {
   private static final long serialVersionUID = -9168657973312733783L;
 
   protected Set<String> languages, types;
+  protected int documentCount;
   
   public abstract Number getMinScore();
   
   public abstract Number getMaxScore();
   
-  public abstract void saveAsCsv(double threshold, File file)
+  public int getDocumentCount() {
+    return this.documentCount;
+  }
+  
+  public abstract void saveAsCsv(Number threshold, File file)
     throws GateException;
 
   public abstract void saveAsCsv(File file)
