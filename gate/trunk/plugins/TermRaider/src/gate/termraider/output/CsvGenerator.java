@@ -24,7 +24,6 @@ public class CsvGenerator {
   public static void generateAndSaveCsv(AbstractTermbank bank, 
           Number threshold, File outputFile) throws GateException {
     PrintWriter writer = initializeWriter(outputFile);
-    Map<Term, Double> termScores = bank.getTermScores();
     addComment(bank, "threshold = " + threshold);
     List<Term> sortedTerms = bank.getTermsByDescendingScore();
     
@@ -33,8 +32,8 @@ public class CsvGenerator {
     writer.println(bank.getCsvHeader());
     
     for (Term term : sortedTerms) {
-      Double score = termScores.get(term);
-      if (score >= threshold.doubleValue()) {
+      Number score = bank.getDefaultScores().get(term);
+      if (score.doubleValue() >= threshold.doubleValue()) {
         writer.println(bank.getCsvLine(term));
         written++;
       }

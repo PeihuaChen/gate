@@ -14,8 +14,9 @@ package gate.termraider.bank;
 import gate.creole.metadata.*;
 import gate.gui.ActionsPublisher;
 import gate.*;
+import gate.termraider.modes.*;
 import gate.termraider.util.*;
-import org.apache.commons.lang.StringEscapeUtils;
+
 import java.util.*;
 
 
@@ -32,11 +33,13 @@ public class HyponymyTermbank extends AbstractTermbank
   
   /* EXTRA CREOLE PARAMETERS */
   protected List<String> inputHeadFeatures;
+  private Normalization normalization;
 
   
   /* EXTRA DATA FOR ANALYSIS */
   private Map<Term, Set<String>> termHeads;
   private Map<Term, Set<String>> termHyponyms;
+  private ScoreType termFrequencyST, hyponymsST, localDocFrequencyST, rawScoreST;
 
   
   /* Methods for the debugging GUI to get the data   */
@@ -51,13 +54,15 @@ public class HyponymyTermbank extends AbstractTermbank
   
   
   private double calculateOneRawScore(Term term) {
-    double docFreq = (double) getSetFromMap(termDocuments, term).size();
-    double hyponyms = (double) getSetFromMap(termHyponyms, term).size();
-    return docFreq * (1.0F + hyponyms);
+    Integer hyponyms = Utilities.getStringSetFromMap(termHyponyms, term).size();
+    Integer docFreq = Utilities.getStringSetFromMap(termDocuments, term).size();
+    Utilities.setScoreTermValue(scores, hyponymsST, term, hyponyms);
+    return docFreq.doubleValue() * (1.0F + hyponyms.doubleValue());
   }
 
   
   protected void processDocument(Document document) {
+    documentCount++;
     String documentSource = Utilities.sourceOrName(document);
     AnnotationSet candidates = document.getAnnotations(inputASName).get(inputAnnotationTypes);
     
@@ -74,39 +79,14 @@ public class HyponymyTermbank extends AbstractTermbank
         }
       }
       
-      addToMapSet(termDocuments, term, documentSource);
-      addToMapSet(termHeads, term, head);
-      incrementTermFreq(term, 1);
+      Utilities.addToMapSet(termDocuments, term, documentSource);
+      Utilities.addToMapSet(termHeads, term, head);
+      Utilities.incrementScoreTermValue(scores, termFrequencyST, term, 1);
     }
   }
 
   
-  private void addToMapSet(Map<Term, Set<String>> map, Term key, String value) {
-    Set<String> valueSet;
-    if (map.containsKey(key)) {
-      valueSet = map.get(key);
-    }
-    else {
-      valueSet = new HashSet<String>();
-    }
-    
-    valueSet.add(value);
-    map.put(key, valueSet);
-  }
   
-  private Set<String> getSetFromMap(Map<Term, Set<String>> map, Term key) {
-    if (map.containsKey(key)) {
-      return map.get(key);
-    }
-    
-    //implied else
-    Set<String> valueSet = new HashSet<String>();
-    map.put(key, valueSet);
-    return valueSet;
-  }
-  
-  
-
   public void calculateScores() {
     Set<Term> terms = termHeads.keySet();
     Set<String> headsI, headsJ;
@@ -123,7 +103,7 @@ public class HyponymyTermbank extends AbstractTermbank
             for (String headI : headsI) {
               for (String headJ : headsJ) {
                 if (headI.endsWith(headJ)) {
-                  addToMapSet(termHyponyms, termI, termJ.getTermString());
+                  Utilities.addToMapSet(termHyponyms, termI, termJ.getTermString());
                   break hyponymLoop;
                 }
               }
@@ -133,85 +113,51 @@ public class HyponymyTermbank extends AbstractTermbank
     }
     
     for (Term term : terms) {
+      this.languages.add(term.getLanguageCode());
+      this.types.add(term.getType());
+      
       double rawScore = calculateOneRawScore(term);
-      rawTermScores.put(term, rawScore);
-      double score = Utilities.normalizeScore(rawScore);
-      termScores.put(term, score);
+      double normalized = Normalization.calculate(normalization, rawScore);
+      Utilities.setScoreTermValue(scores, rawScoreST, term, rawScore);
+      Utilities.setScoreTermValue(scores, getDefaultScoreType(), term, normalized);
+      int localDF = this.termDocuments.get(term).size();
+      Utilities.setScoreTermValue(scores, localDocFrequencyST, term, localDF);
     }
     
-    termsByDescendingScore = new ArrayList<Term>(termScores.keySet());
-    Collections.sort(termsByDescendingScore, new TermComparatorByDescendingScore(termScores));
-    
-    termsByDescendingFrequency = new ArrayList<Term>(termScores.keySet());
-    Collections.sort(termsByDescendingFrequency, new TermComparatorByDescendingScore(termFrequencies));
-    
-    termsByDescendingDocFrequency = new ArrayList<Term>(termScores.keySet());
-    Collections.sort(termsByDescendingFrequency, new TermComparatorByDescendingScore(docFrequencies));
-    
     if (debugMode) {
-      System.out.println("Termbank: nbr of terms = " + termsByDescendingScore.size());
+      System.out.println("Termbank: nbr of terms = " + termDocuments.size());
     }
   }
   
   
   protected void resetScores() {
+    scores = new HashMap<ScoreType, Map<Term,Number>>();
+    for (ScoreType st : scoreTypes) {
+      scores.put(st, new HashMap<Term, Number>());
+    }
     termHeads       = new HashMap<Term, Set<String>>();
     termHyponyms    = new HashMap<Term, Set<String>>();
     termDocuments   = new HashMap<Term, Set<String>>();
-    termScores      = new HashMap<Term, Double>();
-    rawTermScores   = new HashMap<Term, Double>();
-    termsByDescendingScore     = new ArrayList<Term>();
-    termsByDescendingFrequency = new ArrayList<Term>();
-    termsByDescendingDocFrequency = new ArrayList<Term>();
-    termFrequencies = new HashMap<Term, Integer>();
-    docFrequencies = new HashMap<Term, Integer>();
+    languages = new HashSet<String>();
+    types = new HashSet<String>();
   }
 
   
   protected void initializeScoreTypes() {
     this.scoreTypes = new ArrayList<ScoreType>();
     this.scoreTypes.add(new ScoreType(scoreProperty));
-    // TODO this TB needs a whole different kettle of fish
-    //this.termFrequencyST = new ScoreType("termFrequency");
-    //this.scoreTypes.add(termFrequencyST);
-    //this.localDocFrequencyST = new ScoreType("localDocFrequency");
-    //this.scoreTypes.add(localDocFrequencyST);
-    //this.refDocFrequencyST = new ScoreType("refDocFrequency");
-    //this.scoreTypes.add(refDocFrequencyST);
+    this.rawScoreST = new ScoreType(scoreProperty + RAW_SUFFIX);
+    this.scoreTypes.add(rawScoreST);
+    this.termFrequencyST = new ScoreType("termFrequency");
+    this.scoreTypes.add(termFrequencyST);
+    this.hyponymsST = new ScoreType("hyponymCount");
+    this.scoreTypes.add(hyponymsST);
+    this.localDocFrequencyST = new ScoreType("localDocFrequency");
+    this.scoreTypes.add(localDocFrequencyST);
   }
 
   
   
-  public String getCsvHeader() {
-    StringBuilder sb = new StringBuilder();
-    sb.append(StringEscapeUtils.escapeCsv("Term"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Lang"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Type"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("ScoreType"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Score"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Document_Count"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Term_Frequency"));
-    return sb.toString();
-  }
-
-  public String getCsvLine(Term term) {
-      StringBuilder sb = new StringBuilder();
-      sb.append(StringEscapeUtils.escapeCsv(term.getTermString()));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(term.getLanguageCode()));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(term.getType()));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(this.getScoreProperty()));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(this.getScore(term).toString()));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(Integer.toString(this.getDocFrequency(term))));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(Integer.toString(this.getTermFrequency(term))));
-      return sb.toString();
-  }
-
   /***** CREOLE PARAMETERS *****/
 
   @CreoleParameter(comment = "Annotation features (in order) to be scanned as terms' heads")
@@ -230,5 +176,24 @@ public class HyponymyTermbank extends AbstractTermbank
     super.setScoreProperty(name);
   }
 
+  
+  @CreoleParameter(comment = "score normalization",
+          defaultValue = "Sigmoid")
+  public void setNormalization(Normalization mode) {
+    this.normalization = mode;
+  }
+  
+  public Normalization getNormalization() {
+    return this.normalization;
+  }
+
+
+  @Override
+  public Map<String, String> getMiscDataForGui() {
+    Map<String, String> result = new HashMap<String, String>();
+    result.put("nbr of local documents", String.valueOf(this.documentCount));
+    result.put("nbr of terms", String.valueOf(this.getDefaultScores().size()));
+    return result;
+  }
 
 }

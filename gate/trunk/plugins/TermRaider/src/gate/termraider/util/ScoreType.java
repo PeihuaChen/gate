@@ -11,9 +11,14 @@
  */
 package gate.termraider.util;
 
+import java.io.Serializable;
 
-public class ScoreType implements Comparable<ScoreType> {
 
+public class ScoreType 
+implements Comparable<ScoreType>, Serializable {
+
+  private static final long serialVersionUID = 2475508487229559804L;
+  
   private String string;
   private String normalizedString;
   

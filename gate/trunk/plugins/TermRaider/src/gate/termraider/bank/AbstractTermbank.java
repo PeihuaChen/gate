@@ -22,6 +22,7 @@ import gate.termraider.output.*;
 import gate.termraider.util.*;
 import gate.termraider.gui.*;
 import javax.swing.Action;
+import org.apache.commons.lang.StringEscapeUtils;
 
 
 
@@ -37,16 +38,13 @@ public abstract class AbstractTermbank extends AbstractBank
   
   protected Map<ScoreType, Map<Term, Number>> scores;
   protected Map<Term, Set<String>>  termDocuments;
+  public static final String RAW_SUFFIX = ".raw";
   
-  protected Map<Term, Double>       termScores;
-  protected Map<Term, Double>       rawTermScores;
-  protected List<Term> termsByDescendingScore, termsByDescendingFrequency,
-    termsByDescendingDocFrequency;
-  protected Map<Term, Integer>      termFrequencies, docFrequencies;
-
-  public static final String freqProperty = "frequency";
-
+  private List<Term> termsByDescendingScore;
+  protected boolean  descendingScoresDone = false;
+  
   protected List<ScoreType> scoreTypes;
+  private Number minDefaultScore, maxDefaultScore;
 
 
   public Resource init() throws ResourceInstantiationException {
@@ -59,7 +57,6 @@ public abstract class AbstractTermbank extends AbstractBank
     }
     resetScores();
     processCorpora();
-    scanTypesLanguagesDocFreq();
     calculateScores();
     return this;
   }
@@ -74,16 +71,20 @@ public abstract class AbstractTermbank extends AbstractBank
     return this.scoreTypes;
   }
   
-  // TODO : make this abstract and implement it
-  // everywhere as part of the overhaul
+
   public Number getScore(ScoreType type, Term term) {
-    return 0.0;
+    Map<Term, Number> ss = this.getScores(type);
+    if (ss.containsKey(term)) {
+      return ss.get(term);
+    }
+    
+    // implied else
+    return 0;
   }
 
-  // TODO : make this abstract and implement it
-  // everywhere as part of the overhaul
+
   public Collection<Term> getTerms() {
-    return new HashSet<Term>();
+    return this.getDefaultScores().keySet();
   }
   
   
@@ -91,27 +92,42 @@ public abstract class AbstractTermbank extends AbstractBank
     return this.scoreTypes.get(0);
   }
   
+  
+  public Map<Term, Number> getDefaultScores() {
+    return this.scores.get(getDefaultScoreType());
+  }
+  
+  
   protected abstract void initializeScoreTypes();
   
   
   public List<Term> getTermsByDescendingScore() {
+    // lazy computation
+    if (! descendingScoresDone) {
+      termsByDescendingScore = new ArrayList<Term>(this.getTerms());
+      Collections.sort(termsByDescendingScore, new TermComparatorByDescendingScore(scores.get(this.getDefaultScoreType())));
+      descendingScoresDone = true;
+    }
     return this.termsByDescendingScore;
   }
   
-  public List<Term> getTermsByDescendingFrequency() {
-    return this.termsByDescendingFrequency;
-  }
-  
-  public List<Term> getTermsByDescendingDocFrequency() {
-    return this.termsByDescendingDocFrequency;
-  }
-  
-  public Map<Term, Double> getTermScores() {
-    return this.termScores;
-  }
-  
+
   public Map<Term, Set<String>> getTermDocuments() {
     return this.termDocuments;
+  }
+  
+  
+  public Map<ScoreType, Number> getScoreMap(Term term) {
+    Map<ScoreType, Number> result = new HashMap<ScoreType, Number>();
+    for (ScoreType st : this.scoreTypes) {
+      result.put(st, this.scores.get(st).get(term));
+    }
+    return result;
+  }
+  
+  
+  public Map<Term, Number> getScores(ScoreType st) {
+    return this.scores.get(st);
   }
   
   
@@ -125,32 +141,43 @@ public abstract class AbstractTermbank extends AbstractBank
   }
   
   
-  public Map<Term, Integer> getTermFrequencies() {
-    return this.termFrequencies;
+  private void findMinAndMaxDefaultScores() {
+    Collection<Number> values = this.getDefaultScores().values();
+    if (values.isEmpty()) {
+      minDefaultScore = new Integer(0);
+      maxDefaultScore = new Integer(1);
+    }
+    else {
+      minDefaultScore = values.iterator().next();
+      maxDefaultScore = values.iterator().next();
+      for (Number n : values) {
+        if (n.doubleValue() < minDefaultScore.doubleValue()) {
+          minDefaultScore = n;
+        }
+        
+        if (n.doubleValue() > maxDefaultScore.doubleValue()) {
+          maxDefaultScore = n;
+        }
+      }
+    }
   }
   
-  public Map<Term, Integer> getDocFrequencies() {
-    return this.docFrequencies;
-  }
   
-  public String getFreqProperty() {
-    return freqProperty;
+  public Number getMinScore() {
+    // lazy calculation
+    if (minDefaultScore == null) {
+      findMinAndMaxDefaultScores();
+    }
+    return minDefaultScore;
   }
 
-  public Double getMinScore() {
-    if (this.termScores.isEmpty()) {
-      return 1.0;
-    }
-    // implied else
-    return Collections.min(this.termScores.values());
-  }
   
-  public Double getMaxScore() {
-    if (this.termScores.isEmpty()) {
-      return 1.0;
+  public Number getMaxScore() {
+    // lazy calculation
+    if (maxDefaultScore == null) {
+      findMinAndMaxDefaultScores();
     }
-    // implied else
-    return Collections.max(this.termScores.values());
+    return maxDefaultScore;
   }
   
   
@@ -158,6 +185,9 @@ public abstract class AbstractTermbank extends AbstractBank
     if ( (corpora == null) || (corpora.size() == 0) ) {
       throw new ResourceInstantiationException("No corpora given");
     }
+    
+    this.types = new TreeSet<String>();
+    this.languages = new TreeSet<String>();
   }
   
   protected void createActions() {
@@ -192,71 +222,24 @@ public abstract class AbstractTermbank extends AbstractBank
   }
   
   
-  protected void scanTypesLanguagesDocFreq() {
-    this.types = new TreeSet<String>();
-    this.languages = new TreeSet<String>();
-    for (Term term : this.termFrequencies.keySet()) {
-      this.languages.add(term.getLanguageCode());
-      this.types.add(term.getType());
-      this.docFrequencies.put(term, termDocuments.get(term).size());
-    }
-  }
-  
 
   /* BEHOLD THE GUBBINS to distinguish the various types of Termbanks */
 
-  /**
-   * This method needs to call incrementTermFreq(...)!
-   */
+  protected abstract void resetScores();
+
   protected abstract void processDocument(Document document);
   
-  protected abstract void calculateScores(); 
+  /**
+   * This also needs to fill types and languages
+   */
+  protected abstract void calculateScores();
   
-  protected abstract void resetScores();
-  
-
-  
-  
-  protected int incrementTermFreq(Term term, int increment) {
-    return incrementMap(termFrequencies, term, increment);
-  }
-  
-  
-  protected int incrementMap(Map<Term, Integer> map, Term key, int increment) {
-    int count = 0;
-    if (map.containsKey(key)) {
-      count = map.get(key).intValue();
-    }
-    count += increment;
-    map.put(key, Integer.valueOf(count));
-    return count;
-  }
-  
-  
-  public Double getScore(Term term) {
-    if (termScores.containsKey(term)) {
-      return termScores.get(term).doubleValue();
-    }
-    
-    // error code
-    return null;
-  }
-
-  
-  public Double getRawScore(Term term) {
-    if (rawTermScores.containsKey(term)) {
-      return rawTermScores.get(term).doubleValue();
-    }
-    
-    // error code
-    return null;
-  }
-
+  public abstract Map<String, String> getMiscDataForGui();
   
   
   /* Methods for saving as CSV */
   
-  public void saveAsCsv(double threshold, File outputFile) throws GateException {
+  public void saveAsCsv(Number threshold, File outputFile) throws GateException {
     CsvGenerator.generateAndSaveCsv(this, threshold, outputFile);
   }
 
@@ -281,29 +264,46 @@ public abstract class AbstractTermbank extends AbstractBank
   }
 
   
-  public int getTermFrequency(Term term) {
-    if (termFrequencies.containsKey(term)) {
-      return termFrequencies.get(term);
+  public String getCsvHeader() {
+    StringBuilder sb = new StringBuilder();
+    sb.append(StringEscapeUtils.escapeCsv("Term"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("Lang"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv("Type"));
+    for (ScoreType type : this.scoreTypes) {
+      sb.append(',').append(StringEscapeUtils.escapeCsv(type.toString()));
     }
-    // implied else
-    return 0;
+    sb.append(getCsvSubheader());
+    return sb.toString();
   }
   
   
-  public int getDocFrequency(Term term) {
-    if (docFrequencies.containsKey(term)) {
-      return docFrequencies.get(term);
-    }
-    // implied else
-    return 0;
+  /**
+   * TODO: This is not right (columns).
+   * Should be overridden as necessary, for totals etc.
+   * Must start with a newline.
+   * @return
+   */
+  protected String getCsvSubheader() {
+    StringBuilder sb = new StringBuilder();
+    sb.append('\n');
+    sb.append(',').append(StringEscapeUtils.escapeCsv("_TOTAL_DOCS_"));
+    sb.append(',').append(StringEscapeUtils.escapeCsv(""));
+    sb.append(',').append(StringEscapeUtils.escapeCsv(""));
+    sb.append(',').append(StringEscapeUtils.escapeCsv(Integer.toString(this.getDocumentCount())));
+    return sb.toString();
   }
-  
-  
-  public abstract String getCsvHeader();
 
 
-  public abstract String getCsvLine(Term term);
-  
+  public String getCsvLine(Term term) {
+      StringBuilder sb = new StringBuilder();
+      sb.append(StringEscapeUtils.escapeCsv(term.getTermString()));
+      sb.append(',').append(StringEscapeUtils.escapeCsv(term.getLanguageCode()));
+      sb.append(',').append(StringEscapeUtils.escapeCsv(term.getType()));
+      for (ScoreType type : this.scoreTypes) {
+        sb.append(',').append(StringEscapeUtils.escapeCsv(this.getScore(type, term).toString()));
+      }
+      return sb.toString();
+  }
   
 
   /***** CREOLE PARAMETERS *****/

@@ -16,7 +16,7 @@ import java.util.Hashtable;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
-import gate.termraider.util.*;
+import gate.termraider.bank.*;
 
 
 public class SliderPanel extends JPanel {
@@ -98,8 +98,8 @@ public class SliderPanel extends JPanel {
   }
   
   
-  public Double getValues() {
-    return Double.valueOf(slider.getValue());
+  public int getValue() {
+    return slider.getValue();
   }
   
   public static JLabel intLabel(int i) {

@@ -24,6 +24,7 @@ import gate.termraider.bank.*;
 import gate.termraider.gui.ColorMenu.Callback;
 import gate.termraider.output.CloudGenerator;
 import gate.termraider.util.*;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -32,6 +33,7 @@ import java.io.ByteArrayInputStream;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.*;
+
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -51,6 +53,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+
 import org.xhtmlrenderer.simple.XHTMLPanel;
 
 
@@ -67,16 +70,17 @@ public class TermbankViewer
   
   private JPanel controlPanel;
   private SliderPanel sliderPanel;
-  private JScrollPane treeScrollPane, freqScrollPane;
+  private JScrollPane treeScrollPane, freqScrollPane, miscScrollPane;
   private AbstractTermbank termbank;
   private JTree tree;
-  private JTable freqTable;
+  private JTable termbankTable, miscTable;
   private JTabbedPane tabbedPane;
-  private FrequencyTableModel freqTableModel;
+  private TermbankTableModel termbankTableModel;
   
   private XHTMLPanel termCloud = new XHTMLPanel();
-  private JComboBox cloudType = new JComboBox(new String[]{"Term Score", "Term Frequency", "Document Frequency"});
+  private JComboBox cloudType;
   private JSlider cloudSize = new JSlider();
+  private List<ScoreType> scoreTypes;
   
   private CloudGenerator cloudGenerator = null;
   private ColorMenu fontColorMenu, backgroundColorMenu;
@@ -96,15 +100,15 @@ public class TermbankViewer
 
   protected void populateTree(DefaultMutableTreeNode root, AbstractTermbank termbank) {
     List<Term> typeSortedTerms = termbank.getTermsByDescendingScore();
-    Map<Term, Double> typeTermScores = termbank.getTermScores();
+    Map<Term, Number> typeTermScores = termbank.getDefaultScores();
     Map<Term, Set<String>> typeTermDocuments = termbank.getTermDocuments();
     
     DefaultMutableTreeNode node1, node2;
-    Double minScore = sliderPanel.getValues();
+    int minScore = sliderPanel.getValue();
     
     for (Term term : typeSortedTerms) {
-      Double score = typeTermScores.get(term);
-      if (score >= minScore) {
+      Number score = typeTermScores.get(term);
+      if (score.intValue() >= minScore) {
         node1 = new DefaultMutableTreeNode(term + "  " + score.toString());
         root.add(node1);
         
@@ -128,7 +132,9 @@ public class TermbankViewer
     JPanel treeTab = new JPanel(new BorderLayout());
     tabbedPane.addTab("Tree", treeTab);
     JPanel tableTab = new JPanel(new BorderLayout());
-    tabbedPane.addTab("Frequency", tableTab);
+    tabbedPane.addTab("Details", tableTab);
+    JPanel miscTab = new JPanel(new BorderLayout());
+    tabbedPane.addTab("Miscellaneous", miscTab);
 
     JPanel cloudTab = new JPanel(new BorderLayout());
     tabbedPane.addTab("Term Cloud", cloudTab);
@@ -142,14 +148,21 @@ public class TermbankViewer
     controlPanel.validate();
     controlPanel.repaint();
     
-    freqTable = new JTable();
-    freqTable.setAutoCreateRowSorter(true);
+    termbankTable = new JTable();
+    termbankTable.setAutoCreateRowSorter(true);
     // Set the table model later, because the specific type of termbank
     // will determine the number of columns
-    freqScrollPane = new JScrollPane(freqTable, 
+    freqScrollPane = new JScrollPane(termbankTable, 
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     tableTab.add(freqScrollPane, BorderLayout.CENTER);
+    
+    miscTable = new JTable();
+    miscTable.setAutoCreateRowSorter(true);
+    miscScrollPane = new JScrollPane(miscTable, 
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    miscTab.add(miscScrollPane, BorderLayout.CENTER);
 
     
     JScrollPane cloudScrollPane = new JScrollPane(termCloud,
@@ -159,35 +172,7 @@ public class TermbankViewer
     cloudBar.setFloatable(false);
     JButton btnExport = new JButton(MainFrame.getIcon("Download"));
     
-    cloudType.addActionListener(new ActionListener() {      
-      @Override
-      public void actionPerformed(ActionEvent arg0) {
-        Map<Term, ? extends Number> freq = null;
-        switch (cloudType.getSelectedIndex()) {
-          case 0:
-            freq = termbank.getTermScores();
-            break;
-          case 1:
-            freq = termbank.getTermFrequencies();
-            break;
-          case 2:
-            freq = termbank.getDocFrequencies();
-        }
-        
-        cloudGenerator.setTerms(freq);
-        displayCloud();        
-      }
-    });
-    
-    cloudSize.addChangeListener(new ChangeListener() {
-      
-      @Override
-      public void stateChanged(ChangeEvent ce) {
-        if (!cloudSize.getValueIsAdjusting()) {
-          displayCloud();
-        }
-      }
-    });
+    cloudType = new JComboBox();
     
     Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer,JLabel>();
     labelTable.put(0, new JLabel(MainFrame.getIcon("Sunny")));
@@ -301,9 +286,9 @@ public class TermbankViewer
     sliderPanel = new SliderPanel(termbank, "display", false, this);
     controlPanel.add(sliderPanel, BorderLayout.CENTER);
     sliderPanel.reformat();
-    freqTableModel = new FrequencyTableModel();
-    freqTableModel.setTermbank(this.termbank);
-    freqTable.setModel(freqTableModel);
+    termbankTableModel = new TermbankTableModel(this.termbank);
+    termbankTable.setModel(termbankTableModel);
+    miscTable.setModel(new MiscTableModel(termbank.getMiscDataForGui()));
   }
 
 
@@ -316,8 +301,7 @@ public class TermbankViewer
   }  
 
   public void setTarget(Object target) {
-    if(target == null || ! (target instanceof AbstractTermbank)
-            || (target instanceof DocumentFrequencyBank) ) {
+    if(target == null || ! (target instanceof AbstractTermbank)) {
       throw new IllegalArgumentException("This Viewer cannot show a "
               + (target == null ? "null" : target.getClass().toString()));
     }
@@ -330,28 +314,40 @@ public class TermbankViewer
     }
     
     Map<Term, ? extends Number> freq = null;
-    switch (cloudType.getSelectedIndex()) {
-      case 0:
-        freq = termbank.getTermScores();
-        break;
-      case 1:
-        freq = termbank.getTermFrequencies();
-        break;
-      case 2:
-        freq = termbank.getDocFrequencies();
+    scoreTypes = termbank.getScoreTypes();
+    menuLanguageButton.setEnabled(termbank.getLanguages().size() > 1);
+    
+    for (ScoreType st : scoreTypes) {
+      cloudType.addItem(st);
     }
     
-    menuLanguageButton.setEnabled(termbank.getLanguages().size() > 1);
+    cloudType.setSelectedIndex(0);
+    freq = termbank.getScores(scoreTypes.get(cloudType.getSelectedIndex()));
+    
+    cloudType.addActionListener(new ActionListener() {      
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+        Map<Term, ? extends Number> freq = null;
+        freq = termbank.getScores(scoreTypes.get(cloudType.getSelectedIndex()));
+        cloudGenerator.setTerms(freq);
+        displayCloud();        
+      }
+    });
+    
+    cloudSize.addChangeListener(new ChangeListener() {
+      @Override
+      public void stateChanged(ChangeEvent ce) {
+        if (!cloudSize.getValueIsAdjusting()) {
+          displayCloud();
+        }
+      }
+    });
         
     ActionListener languageChanger = new ActionListener() {
-      
       @Override
       public void actionPerformed(ActionEvent e) {
-        
         JCheckBoxMenuItem cb = (JCheckBoxMenuItem)e.getSource();
-        
         cloudGenerator.includeLanguage(cb.getText(), cb.isSelected());
-        
         displayCloud();
       }
     };
@@ -369,14 +365,10 @@ public class TermbankViewer
     menuTypesButton.setEnabled(termbank.getTypes().size() > 1);
     
     ActionListener typesChanger = new ActionListener() {
-      
       @Override
       public void actionPerformed(ActionEvent e) {
-        
         JCheckBoxMenuItem cb = (JCheckBoxMenuItem)e.getSource();
-        
         cloudGenerator.includeTermType(cb.getText(), cb.isSelected());
-        
         displayCloud();
       }
     };
@@ -430,75 +422,36 @@ public class TermbankViewer
 }
 
 
-class FrequencyTableModel extends AbstractTableModel {
-  private static final long serialVersionUID = -7654670667296912991L;
-  private List<Term> terms;
-  private String[] columnNames = {"term", "term frequency", "doc frequency", "ref doc frequency"};
-  private Map<Term, Integer> termFrequencies, docFrequencies;
-  private AbstractTermbank termbank;
-
-  public FrequencyTableModel() {
-    this.termFrequencies = new HashMap<Term, Integer>();
-    this.docFrequencies = new HashMap<Term, Integer>();
-    this.terms = new ArrayList<Term>();
+class MiscTableModel extends AbstractTableModel {
+  private static final long serialVersionUID = -1610308603693793731L;
+  
+  private Map<String, String> contents;
+  private List<String> keys;
+  
+  public MiscTableModel(Map<String, String> map) {
+    this.contents = map;
+    this.keys = new ArrayList<String>(map.keySet());
+    Collections.sort(keys);
   }
   
-  public void setTermbank(AbstractTermbank termbank) {
-    this.termFrequencies = termbank.getTermFrequencies();
-    this.docFrequencies = termbank.getDocFrequencies();
-    this.terms = new ArrayList<Term>(termFrequencies.keySet());
-    this.termbank = termbank;
-    Collections.sort(this.terms, new TermComparator());
-  }
-  
-  public int getColumnCount() {
-    if (this.termbank instanceof TfIdfTermbank) {
-      return 4;
-    }
-    return 3;
-  }
-
+  @Override
   public int getRowCount() {
-    return this.terms.size();
+    return contents.size();
   }
 
-  public Object getValueAt(int row, int col) {
-    Term term = this.terms.get(row); 
-    if (col == 0) {
-      return term.toString();
-    }
-    // implied else
-    if (col == 1) {
-      if (this.termFrequencies.containsKey(term)) {
-        return this.termFrequencies.get(term);
-      }
-      return 0;
-    }
-    // implied else
-    if (col == 2) {
-      if (this.docFrequencies.containsKey(term)) {
-        return this.docFrequencies.get(term);
-      }
-      return 0;
-    }
-    // implied else
-    if (col == 3) {
-      return ((TfIdfTermbank) this.termbank).getRefDocFrequency(term);
-    }
-    return 0;
-  }
-  
-  
-  public Class<?> getColumnClass(int col) {
-    if (col == 0) {
-      return String.class;
-    }
-    // implied else
-    return Integer.class;
-  }
-  
-  public String getColumnName(int col) {
-    return columnNames[col];
+  @Override
+  public int getColumnCount() {
+    return 2;
   }
 
+  @Override
+  public Object getValueAt(int rowIndex, int columnIndex) {
+    if (columnIndex == 0) {
+      return keys.get(rowIndex);
+    }
+    else {
+      return contents.get(keys.get(rowIndex));
+    }
+  }
+  
 }

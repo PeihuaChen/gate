@@ -12,7 +12,6 @@
 package gate.termraider.bank;
 
 import gate.creole.*;
-import gate.creole.metadata.*;
 import gate.gui.ActionsPublisher;
 import gate.util.*;
 import gate.*;
@@ -182,7 +181,7 @@ public abstract class AbstractPairbank extends AbstractBank
   
   /* Methods for saving as CSV */
   
-  public void saveAsCsv(double threshold, File outputFile) throws GateException {
+  public void saveAsCsv(Number threshold, File outputFile) throws GateException {
     PairCsvGenerator generator = new PairCsvGenerator();
     generator.generateAndSaveCsv(this, threshold, outputFile);
   }

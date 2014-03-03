@@ -80,7 +80,7 @@ public class HyponymyDebugger
 
 class HDTableModel extends AbstractTableModel {
   private static final long serialVersionUID = -1124137938074923640L;
-  private String[] columnNames = {"term", "raw score", "docs", "docs", "hyponyms", "hyponyms", "heads"};
+  private String[] columnNames = {"term", "score", "docs", "docs", "hyponyms", "hyponyms", "heads"};
   private Map<Term, Set<String>> termDocuments, termHyponyms, termHeads;
   private List<Term> terms;
   private HyponymyTermbank termbank;
@@ -126,7 +126,7 @@ class HDTableModel extends AbstractTableModel {
         result = term.toString();
         break;
       case 1:
-        result = Double.toString(termbank.getRawScore(term));
+        result = termbank.getDefaultScores().get(term).toString();
         break;
       case 2: 
         result = Integer.toString(termDocuments.get(term).size());

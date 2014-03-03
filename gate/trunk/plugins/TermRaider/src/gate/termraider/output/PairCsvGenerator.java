@@ -26,7 +26,7 @@ public class PairCsvGenerator {
   private String scorePropertyName;
   
   public void generateAndSaveCsv(AbstractPairbank pairbank, 
-          double threshold, File outputFile) throws GateException {
+          Number threshold, File outputFile) throws GateException {
     this.pairbank = pairbank;
     this.debugMode = pairbank.getDebugMode();
     this.scorePropertyName = pairbank.getScoreProperty();
@@ -41,7 +41,7 @@ public class PairCsvGenerator {
   }
   
   
-  private void generateCsv(PrintWriter writer, double threshold) {
+  private void generateCsv(PrintWriter writer, Number threshold) {
     Map<UnorderedTermPair, Double> scores = pairbank.getScores();
     List<UnorderedTermPair> pairs = new ArrayList<UnorderedTermPair>(scores.keySet());
     Collections.sort(pairs, new TermPairComparatorByDescendingScore(scores));
@@ -51,7 +51,7 @@ public class PairCsvGenerator {
     writeHeader(writer);    
     for (UnorderedTermPair pair: pairs) {
       double score = scores.get(pair);
-      if (score < threshold) {
+      if (score < threshold.doubleValue()) {
         break;
       }
       

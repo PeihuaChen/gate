@@ -15,12 +15,9 @@ import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.*;
 import gate.gui.ActionsPublisher;
 import gate.*;
-import gate.termraider.bank.modes.IdfCalculation;
-import gate.termraider.bank.modes.TfCalculation;
+import gate.termraider.modes.*;
 import gate.termraider.util.*;
 import java.util.*;
-import org.apache.commons.lang.StringEscapeUtils;
-
 
 
 @CreoleResource(name = "TfIdfTermbank",
@@ -35,11 +32,12 @@ public class TfIdfTermbank extends AbstractTermbank
   /* EXTRA CREOLE PARAMETERS */
   private TfCalculation tfCalculation;
   private IdfCalculation idfCalculation;
+  private Normalization normalization;
   private DocumentFrequencyBank docFreqSource;
   
   /* EXTRA DATA */
-  private int documentCount;
-  private ScoreType termFrequencyST, localDocFrequencyST, refDocFrequencyST;
+  private ScoreType rawScoreST, termFrequencyST, localDocFrequencyST, refDocFrequencyST;
+  
   
   
   protected void processDocument(Document document) {
@@ -49,16 +47,8 @@ public class TfIdfTermbank extends AbstractTermbank
 
     for (Annotation candidate : candidates) {
       Term term = makeTerm(candidate, document);
-      incrementTermFreq(term, 1);
-      
-      if (termDocuments.containsKey(term)) {
-        termDocuments.get(term).add(documentSource);
-      }
-      else {
-        Set<String> docNames = new HashSet<String>();
-        docNames.add(documentSource);
-        termDocuments.put(term, docNames);
-      }
+      Utilities.incrementScoreTermValue(scores, termFrequencyST, term, 1);
+      Utilities.addToMapSet(termDocuments, term, documentSource);
     }
   }
 
@@ -66,6 +56,8 @@ public class TfIdfTermbank extends AbstractTermbank
   protected void initializeScoreTypes() {
     this.scoreTypes = new ArrayList<ScoreType>();
     this.scoreTypes.add(new ScoreType(scoreProperty));
+    this.rawScoreST = new ScoreType(scoreProperty + AbstractTermbank.RAW_SUFFIX);
+    this.scoreTypes.add(rawScoreST);
     this.termFrequencyST = new ScoreType("termFrequency");
     this.scoreTypes.add(termFrequencyST);
     this.localDocFrequencyST = new ScoreType("localDocFrequency");
@@ -75,40 +67,38 @@ public class TfIdfTermbank extends AbstractTermbank
   }
 
   
-  public int getRefDocFrequency(Term term) {
-    return this.docFreqSource.getDocFrequency(term);
-  }
-  
-  
   protected void calculateScores() {
-    for (Term term : termFrequencies.keySet()) {
-      int tf = termFrequencies.get(term);
-      int df = getRefDocFrequency(term);
-      int n = docFreqSource.getTotalDocs();
-      double score = TfCalculation.calculate(tfCalculation, tf) * IdfCalculation.calculate(idfCalculation, df, n);
-      rawTermScores.put(term, Double.valueOf(score));
-      termScores.put(term, Utilities.normalizeScore(score));
+    for (Term term : scores.get(termFrequencyST).keySet()) {
+      this.languages.add(term.getLanguageCode());
+      this.types.add(term.getType());
+      
+      int tf = scores.get(termFrequencyST).get(term).intValue();
+      int df = docFreqSource.getFrequencyLax(term);
+      Utilities.setScoreTermValue(scores, refDocFrequencyST, term, df);
+      int localDF = this.termDocuments.get(term).size();
+      Utilities.setScoreTermValue(scores, localDocFrequencyST, term, localDF);
+      int n = docFreqSource.getDocumentCount();
+      double rawScore = TfCalculation.calculate(tfCalculation, tf) * IdfCalculation.calculate(idfCalculation, df, n);
+      Utilities.setScoreTermValue(scores, rawScoreST, term, rawScore);
+      double normalized = Normalization.calculate(normalization, rawScore);
+      Utilities.setScoreTermValue(scores, getDefaultScoreType(), term, normalized);
     }
-    
-    termsByDescendingScore = new ArrayList<Term>(termScores.keySet());
-    Collections.sort(termsByDescendingScore, new TermComparatorByDescendingScore(termScores));
-    
+
     if (debugMode) {
-      System.out.println("Termbank: nbr of terms = " + termsByDescendingScore.size());
+      System.out.println("Termbank: nbr of terms = " + this.getTerms().size());
     }
   }
   
   
   protected void resetScores() {
-    termDocuments    = new HashMap<Term, Set<String>>();
-    termScores       = new HashMap<Term, Double>();
-    rawTermScores    = new HashMap<Term, Double>();
-    termsByDescendingScore      = new ArrayList<Term>();
-    termsByDescendingFrequency = new ArrayList<Term>();
-    termsByDescendingDocFrequency = new ArrayList<Term>();
-    termFrequencies = new HashMap<Term, Integer>();
-    docFrequencies = new HashMap<Term, Integer>();
+    termDocuments = new HashMap<Term, Set<String>>();
     documentCount = 0;
+    scores = new HashMap<ScoreType, Map<Term,Number>>();
+    for (ScoreType st : scoreTypes) {
+      scores.put(st, new HashMap<Term, Number>());
+    }
+    types = new HashSet<String>();
+    languages = new HashSet<String>();
   }
 
 
@@ -125,6 +115,16 @@ public class TfIdfTermbank extends AbstractTermbank
   
   public DocumentFrequencyBank getDocFreqSource() {
     return this.docFreqSource;
+  }
+  
+  @CreoleParameter(comment = "score normalization",
+          defaultValue = "Sigmoid")
+  public void setNormalization(Normalization mode) {
+    this.normalization = mode;
+  }
+  
+  public Normalization getNormalization() {
+    return this.normalization;
   }
   
 
@@ -158,41 +158,6 @@ public class TfIdfTermbank extends AbstractTermbank
   }
 
 
-  public String getCsvHeader() {
-    StringBuilder sb = new StringBuilder();
-    sb.append(StringEscapeUtils.escapeCsv("Term"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Lang"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Type"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("ScoreType"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Score"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Document_Count"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Ref_Doc_Frequency"));
-    sb.append(',').append(StringEscapeUtils.escapeCsv("Term_Frequency"));
-    return sb.toString();
-  }
-
-
-  public String getCsvLine(Term term) {
-      StringBuilder sb = new StringBuilder();
-      sb.append(StringEscapeUtils.escapeCsv(term.getTermString()));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(term.getLanguageCode()));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(term.getType()));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(this.getScoreProperty()));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(this.getScore(term).toString()));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(Integer.toString(this.getDocFrequency(term))));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(Integer.toString(this.docFreqSource.getDocFrequency(term))));
-      sb.append(',');
-      sb.append(StringEscapeUtils.escapeCsv(Integer.toString(this.getTermFrequency(term))));
-      return sb.toString();
-  }
-
-
   protected void prepare() throws ResourceInstantiationException {
     if ( (corpora == null) || (corpora.size() == 0) ) {
       throw new ResourceInstantiationException("No corpora given");
@@ -210,6 +175,16 @@ public class TfIdfTermbank extends AbstractTermbank
       DocumentFrequencyBank dfb = (DocumentFrequencyBank) Factory.createResource(DocumentFrequencyBank.class.getName(), dfbParameters);
       this.setDocFreqSource(dfb);
     }
+  }
+
+
+  @Override
+  public Map<String, String> getMiscDataForGui() {
+    Map<String, String> result = new HashMap<String, String>();
+    result.put("nbr of local documents", String.valueOf(this.documentCount));
+    result.put("nbr of reference documents", String.valueOf(this.docFreqSource.getDocumentCount()));
+    result.put("nbr of terms", String.valueOf(this.getDefaultScores().size()));
+    return result;
   }
 
 }
