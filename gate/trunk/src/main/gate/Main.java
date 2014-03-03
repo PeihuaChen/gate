@@ -153,14 +153,6 @@ public class Main {
 
   /** Run the user interface. */
   protected static void runGui() throws GateException {
-    try {
-      Class<?> rmClass =  Gate.class.getClassLoader().loadClass(
-          "org.jdesktop.swinghelper.debug.CheckThreadViolationRepaintManager");
-      RepaintManager.setCurrentManager((RepaintManager)rmClass.getConstructor()
-              .newInstance());
-    } catch(Exception e) {
-      // the debug classes from SwingHelper are not available
-    }
 
     Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
