@@ -82,7 +82,7 @@ public class StatsCalculator {
         corpusHits = searcher.search(tq);
       }
 
-      ArrayList[] firstTermPositions = searcher.getFirstTermPositions();
+      List<?>[] firstTermPositions = searcher.getFirstTermPositions();
 
       // if no result available, set null to our scores
       if(firstTermPositions[0].size() == 0) {

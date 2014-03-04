@@ -21,23 +21,6 @@ import gate.creole.annic.apache.lucene.analysis.*;
  */
 public class PatternValidator {
 
-  /**
-   * AND operator
-   */
-  private final int AND = 0;
-
-  /**
-   * OR operator
-   */
-  private final int OR = 1;
-
-  /**
-   * Negation operator
-   */
-  private final int NOT = 2;
-
-  private int index = 0;
-
   private int patLen = 0;
 
   /**
@@ -67,9 +50,14 @@ public class PatternValidator {
 
     for(int i = 0; i < queryTokens.size(); i++) {
       queryParser.position = 0;
-      ArrayList[] termpositions = queryParser.createTerms(queryTokens.get(i));
-      ArrayList terms = termpositions[0];
-      ArrayList consider = termpositions[2];
+      List<?>[] termpositions = queryParser.createTerms(queryTokens.get(i));
+      
+      @SuppressWarnings("unchecked")
+      List<Term> terms = (List<Term>)termpositions[0];
+      
+      @SuppressWarnings("unchecked")
+      List<Boolean> consider = (List<Boolean>)termpositions[2];
+      
       // process each term individually
       for(int k = 0; k < terms.size(); k++) {
         // when consider is true, that means we should change the start

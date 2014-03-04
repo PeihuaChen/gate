@@ -26,7 +26,7 @@ public class QueryParser {
   /**
    * Queries generated as a result of normalizing the submitted query.
    */
-  private ArrayList queries = new ArrayList();
+  private List<String> queries = new ArrayList<String>();
 
   /**
    * Name of the field that contains the index data.
@@ -198,8 +198,11 @@ public class QueryParser {
 
     // and then convert each token into separate terms
     if(tokens.size() == 1) {
-      ArrayList[] termsPos = (createTerms(tokens.get(0)));
-      ArrayList terms = termsPos[0];
+      List<?>[] termsPos = createTerms(tokens.get(0));
+      
+      @SuppressWarnings("unchecked")
+      List<Term> terms = (List<Term>)termsPos[0];
+      
       if(terms.size() == 1) {
         if(areAllTermsTokens)
           needValidation = false;
@@ -218,10 +221,16 @@ public class QueryParser {
 
     // and now for each token we need to create Term(s)
     outer: for(int i = 0; i < tokens.size(); i++) {
-      ArrayList[] termpositions = createTerms((String)tokens.get(i));
-      ArrayList terms = termpositions[0];
-      ArrayList pos = termpositions[1];
-      ArrayList consider = termpositions[2];
+      List<?>[] termpositions = createTerms(tokens.get(i));
+      
+      @SuppressWarnings("unchecked")
+      List<Term> terms = (List<Term>)termpositions[0];
+      
+      @SuppressWarnings("unchecked")
+      List<Integer> pos = (List<Integer>)termpositions[1];
+      
+      @SuppressWarnings("unchecked")
+      List<Boolean> consider = (List<Boolean>)termpositions[2];
 
       boolean allTermsTokens = true;
       // lets first find out if there's any token in this terms
@@ -362,10 +371,10 @@ public class QueryParser {
     return false;
   }
 
-  private ArrayList splitString(String string, char with, boolean normalize) {
+  private ArrayList<String> splitString(String string, char with, boolean normalize) {
     // here we want to split the string
     // but also make sure the with character is not escaped
-    ArrayList strings = new ArrayList();
+    ArrayList<String> strings = new ArrayList<String>();
     StringBuffer newString = new StringBuffer();
     for(int i = 0; i < string.length(); i++) {
       if(i == 0) {
@@ -431,12 +440,12 @@ public class QueryParser {
     return sb.toString();
   }
 
-  public ArrayList[] createTerms(String elem)
+  public List<?>[] createTerms(String elem)
           throws gate.creole.ir.SearchException {
     areAllTermsTokens = true;
-    ArrayList terms = new ArrayList();
-    ArrayList pos = new ArrayList();
-    ArrayList consider = new ArrayList();
+    List<Term> terms = new ArrayList<Term>();
+    List<Integer> pos = new ArrayList<Integer>();
+    List<Boolean> consider = new ArrayList<Boolean>();
 
     elem = elem.trim();
     if(elem.charAt(0) == '{' && elem.charAt(elem.length() - 1) == '}') {
@@ -448,14 +457,14 @@ public class QueryParser {
       if(index == -1 && index1 == -1) {
         // 3. {AnnotationType}
         // this can be {AnnotationType, AnnotationType...}
-        ArrayList fields = splitString(elem, ',', true);
+        ArrayList<String> fields = splitString(elem, ',', true);
 
         for(int p = 0; p < fields.size(); p++) {
           if(areAllTermsTokens
-                  && !((String)fields.get(p)).equals(baseTokenAnnotationType))
+                  && !fields.get(p).equals(baseTokenAnnotationType))
             areAllTermsTokens = false;
 
-          terms.add(new Term(field, norm(((String)fields.get(p))), "*"));
+          terms.add(new Term(field, norm(fields.get(p)), "*"));
           pos.add(new Integer(position));
           if(p == 0)
             consider.add(new Boolean(true));
@@ -468,16 +477,16 @@ public class QueryParser {
         // 4. {AnnotationType==String}
         // 5. {AnnotationType=="String"}
 
-        ArrayList fields = splitString(elem, ',', false);
+        ArrayList<String> fields = splitString(elem, ',', false);
         for(int p = 0; p < fields.size(); p++) {
-          index = ((String)fields.get(p)).indexOf("==");
+          index = fields.get(p).indexOf("==");
           // here this is also posible
           // {AnnotationType, AnnotationType=="String"}
           if(index != -1) {
-            String annotType = norm(((String)fields.get(p)).substring(0, index)
+            String annotType = norm(fields.get(p).substring(0, index)
                     .trim());
-            String annotText = norm(((String)fields.get(p)).substring(
-                    index + 2, ((String)fields.get(p)).length()).trim());
+            String annotText = norm(fields.get(p).substring(
+                    index + 2, fields.get(p).length()).trim());
             if(annotText.length() > 2 && annotText.charAt(0) == '\"'
                     && annotText.charAt(annotText.length() - 1) == '\"') {
               annotText = annotText.substring(1, annotText.length() - 1);
@@ -493,10 +502,10 @@ public class QueryParser {
 
           }
           else {
-            if(!(norm((String)fields.get(p))).equals(baseTokenAnnotationType))
+            if(!(norm(fields.get(p))).equals(baseTokenAnnotationType))
               areAllTermsTokens = false;
             
-            terms.add(new Term(field, norm(((String)fields.get(p))), "*"));
+            terms.add(new Term(field, norm(fields.get(p)), "*"));
             pos.add(new Integer(position));
             if(p == 0)
               consider.add(new Boolean(true));
@@ -522,10 +531,10 @@ public class QueryParser {
           subElems = new String[] {elem};
         }
         else {
-          ArrayList list = splitString(elem, ',', false);
+          ArrayList<String> list = splitString(elem, ',', false);
           subElems = new String[list.size()];
           for(int k = 0; k < list.size(); k++) {
-            subElems[k] = (String)list.get(k);
+            subElems[k] = list.get(k);
           }
         }
 
@@ -622,7 +631,7 @@ public class QueryParser {
         }
       }
     }
-    return new ArrayList[] {terms, pos, consider};
+    return new List<?>[] {terms, pos, consider};
   }
 
   public boolean needValidation() {
