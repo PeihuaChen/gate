@@ -15,6 +15,7 @@ import gate.termraider.util.Utilities;
 
 public enum IdfCalculation {
   Logarithmic,
+  LogarithmicScaled,
   Scaled,
   Natural;
   
@@ -26,8 +27,12 @@ public enum IdfCalculation {
     double df = (double) rawDF;
     double n = (double) corpusSize;
     
-    if (mode == Logarithmic) {
+    if (mode == LogarithmicScaled) {
       return 1.0 + Utilities.log2(n / (df + 1.0));
+    }
+
+    if (mode == Logarithmic) {
+      return 1.0 + Utilities.log2(1.0 / (df + 1.0));
     }
 
     if (mode == Scaled) {

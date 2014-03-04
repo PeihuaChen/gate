@@ -141,7 +141,7 @@ public class TfIdfTermbank extends AbstractTermbank
 
           
   @CreoleParameter(comment = "inverted document frequency calculation",
-          defaultValue = "Logarithmic")
+          defaultValue = "LogarithmicScaled")
   public void setIdfCalculation(IdfCalculation mode) {
     this.idfCalculation = mode;
   }
