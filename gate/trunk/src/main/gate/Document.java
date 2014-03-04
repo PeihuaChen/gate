@@ -157,12 +157,12 @@ public interface Document extends SimpleDocument {
     * @return a string representing an XML document containing the original
     * markup + dumped annotations form the aSourceAnnotationSet
     */
-  public String toXml(Set aSourceAnnotationSet, boolean includeFeatures);
+  public String toXml(Set<Annotation> aSourceAnnotationSet, boolean includeFeatures);
 
   /**
    * Equivalent to toXml(aSourceAnnotationSet, true).
    */
-  public String toXml(Set aSourceAnnotationSet);
+  public String toXml(Set<Annotation> aSourceAnnotationSet);
 
   /** Make changes to the content.
    */
