@@ -844,6 +844,7 @@ public class AnnotationSetsView extends AbstractDocumentView
             return new Boolean(((SetHandler)value).isExpanded());
           if(value instanceof TypeHandler) 
             return new Boolean(((TypeHandler)value).isSelected());
+          return null;
         default:
           return null;
       }

@@ -100,14 +100,15 @@ public class OUtils {
    * @param uriRef The uri, in characters specified by RFC 2396 + '#'
    * @return The corresponding Unicode String
    */ 
+  @SuppressWarnings("fallthrough")
   public static String uriEncode(String uriRef) {
     try {
       byte utf8[] = uriRef.getBytes("UTF-8");
       byte rsltAscii[] = new byte[utf8.length*6];
       int in = 0;
       int out = 0;
-      while ( in < utf8.length ) {
-          switch ( utf8[in] ) {
+      while ( in < utf8.length ) {  
+        switch ( utf8[in] ) {
               case (byte)'a': case (byte)'b': case (byte)'c': case (byte)'d': case (byte)'e': case (byte)'f': case (byte)'g': case (byte)'h': case (byte)'i': case (byte)'j': case (byte)'k': case (byte)'l': case (byte)'m': case (byte)'n': case (byte)'o': case (byte)'p': case (byte)'q': case (byte)'r': case (byte)'s': case (byte)'t': case (byte)'u': case (byte)'v': case (byte)'w': case (byte)'x': case (byte)'y': case (byte)'z':
               case (byte)'A': case (byte)'B': case (byte)'C': case (byte)'D': case (byte)'E': case (byte)'F': case (byte)'G': case (byte)'H': case (byte)'I': case (byte)'J': case (byte)'K': case (byte)'L': case (byte)'M': case (byte)'N': case (byte)'O': case (byte)'P': case (byte)'Q': case (byte)'R': case (byte)'S': case (byte)'T': case (byte)'U': case (byte)'V': case (byte)'W': case (byte)'X': case (byte)'Y': case (byte)'Z':
               case (byte)'0': case (byte)'1': case (byte)'2': case (byte)'3': case (byte)'4': case (byte)'5': case (byte)'6': case (byte)'7': case (byte)'8': case (byte)'9':
