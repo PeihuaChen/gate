@@ -290,7 +290,7 @@ public class TestCreole extends TestCase
     assertNotNull("PR1 features are null", pr1features);
     assertTrue(
       "PR2 got wrong features: " + pr2features,
-      pr2features != null || pr2features.size() != 1
+      pr2features != null && pr2features.size() != 1
     );
     pr1.execute();
     pr2.execute();
