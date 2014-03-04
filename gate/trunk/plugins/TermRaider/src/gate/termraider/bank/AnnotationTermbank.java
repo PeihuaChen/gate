@@ -30,10 +30,11 @@ public class AnnotationTermbank extends AbstractTermbank
   /* EXTRA CREOLE PARAMETERS */
   protected String inputScoreFeature;
   private MergingMode mergingMode;
+  private Normalization normalization;
 
   /* EXTRA DATA FOR ANALYSIS */
   private Map<Term, List<Double>>  termIndividualScores;
-  private ScoreType termFrequencyST, localDocFrequencyST;
+  private ScoreType rawScoreST, termFrequencyST, localDocFrequencyST;
   
   
   protected void processDocument(Document document) {
@@ -69,10 +70,12 @@ public class AnnotationTermbank extends AbstractTermbank
       languages.add(term.getLanguageCode());
       types.add(term.getType());
       
-      Double score = MergingMode.calculate(mergingMode, termIndividualScores.get(term));
-      Utilities.setScoreTermValue(scores, getDefaultScoreType(), term, score);
+      Double rawScore = MergingMode.calculate(mergingMode, termIndividualScores.get(term));
+      Utilities.setScoreTermValue(scores, rawScoreST, term, rawScore);
       int localDF = termDocuments.get(term).size();
       Utilities.setScoreTermValue(scores, localDocFrequencyST, term, localDF);
+      double normalized = Normalization.calculate(normalization, rawScore);
+      Utilities.setScoreTermValue(scores, getDefaultScoreType(), term, normalized);
     }
     
     if (debugMode) {
@@ -96,6 +99,8 @@ public class AnnotationTermbank extends AbstractTermbank
   protected void initializeScoreTypes() {
     this.scoreTypes = new ArrayList<ScoreType>();
     this.scoreTypes.add(new ScoreType(scoreProperty));
+    this.rawScoreST = new ScoreType(scoreProperty + AbstractTermbank.RAW_SUFFIX);
+    this.scoreTypes.add(rawScoreST);
     this.termFrequencyST = new ScoreType("termFrequency");
     this.scoreTypes.add(termFrequencyST);
     this.localDocFrequencyST = new ScoreType("localDocFrequency");
@@ -123,6 +128,16 @@ public class AnnotationTermbank extends AbstractTermbank
   
   public MergingMode getMergingMode() {
     return this.mergingMode;
+  }
+  
+  @CreoleParameter(comment = "score normalization",
+          defaultValue = "Sigmoid")
+  public void setNormalization(Normalization mode) {
+    this.normalization = mode;
+  }
+  
+  public Normalization getNormalization() {
+    return this.normalization;
   }
   
   /* override default value from AbstractTermbank   */
