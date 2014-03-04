@@ -120,6 +120,7 @@ public class DocumentContentImpl implements DocumentContent
     content = newContent.toString();
   } // edit(start,end,replacement)
 
+  @Override
   public DocumentContent getContent(Long start, Long end)
     throws InvalidOffsetException
   {
@@ -135,6 +136,7 @@ public class DocumentContentImpl implements DocumentContent
   /** Returns the String representing the content in case of a textual document.
     * NOTE: this is a temporary solution until we have a more generic one.
     */
+  @Override
   public String toString(){
     return content;
   }
@@ -142,6 +144,7 @@ public class DocumentContentImpl implements DocumentContent
   /** The size of this content (e.g. character length for textual
     * content).
     */
+  @Override
   public Long size() {
     return new Long(content.length());
   } // size()
@@ -170,6 +173,7 @@ public class DocumentContentImpl implements DocumentContent
 
   /** Two documents are the same if their contents is the same
    */
+  @Override
   public boolean equals(Object other) {
     if (!(other instanceof DocumentContentImpl)) return false;
 
@@ -178,6 +182,7 @@ public class DocumentContentImpl implements DocumentContent
   } // equals
 
   /** Calculate the hash value for the object. */
+  @Override
   public int hashCode(){ return toString().hashCode(); }
 
   /** Just for now - later we have to cater for different types of

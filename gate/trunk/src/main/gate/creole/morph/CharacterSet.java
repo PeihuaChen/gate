@@ -25,6 +25,7 @@ public class CharacterSet extends Variable {
    * Tells if any value available which can be retrieved
    * @return true if value available, false otherwise
    */
+  @Override
   public boolean hasNext() {
     if(pointer<varChars.length) {
       return true;
@@ -37,6 +38,7 @@ public class CharacterSet extends Variable {
    * Returns the next available value for this variable
    * @return value of the variable in the String format
    */
+  @Override
   public String next() {
     if(pointer<varChars.length) {
       pointer++;
@@ -52,6 +54,7 @@ public class CharacterSet extends Variable {
    * @param varValue String that contains possible different values
    * @return true if successfully stored, false otherwise
    */
+  @Override
   public boolean set(String varName, String varValue) {
     this.varName = varName;
     this.varValue = varValue;
@@ -72,6 +75,7 @@ public class CharacterSet extends Variable {
    * @return true if all characters of value string are from the
    * specified characterSet, false otherwise
    */
+  @Override
   public boolean contains(String value) {
     for(int i=0;i<value.length();i++) {
       if(Arrays.binarySearch(this.varChars,value.charAt(i))<0) {

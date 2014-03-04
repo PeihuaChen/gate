@@ -72,11 +72,13 @@ public class WordNetViewer extends AbstractVisualResource
         this.setLayout(gridBagLayout1);
         searchButton.setText("Search");
         searchButton.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 searchButton_actionPerformed(e);
             }
         });
         searchWordTextField.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 searchWordTextField_actionPerformed(e);
             }
@@ -88,21 +90,25 @@ public class WordNetViewer extends AbstractVisualResource
         adverbButton.setText("Adverb");
 
         nounButton.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 nounButton_actionPerformed(e);
             }
         });
         verbButton.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 verbButton_actionPerformed(e);
             }
         });
         adjectiveButton.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 adjectiveButton_actionPerformed(e);
             }
         });
         adverbButton.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 adverbButton_actionPerformed(e);
             }
@@ -210,7 +216,7 @@ public class WordNetViewer extends AbstractVisualResource
       display.append(" senses:");
       display.append("\n\n");
       for (int i=0; i< senses.size(); i++) {
-        WordSense currSense = (WordSense) senses.get(i);
+        WordSense currSense = senses.get(i);
         Synset currSynset = currSense.getSynset();
         addToPopupMenu(currSense, currSynset, wordType, senses);
         List<WordSense> words = currSynset.getWordSenses();
@@ -240,9 +246,9 @@ public class WordNetViewer extends AbstractVisualResource
     for (int i=0; i<(semRelations.size()+lexRelations.size()); i++) {
       Relation relation;
       if (i<semRelations.size()){
-        relation = (SemanticRelation) semRelations.get(i);
+        relation = semRelations.get(i);
       } else {
-        relation = (LexicalRelation) lexRelations.get(i-semRelations.size());
+        relation = lexRelations.get(i-semRelations.size());
       }
 
       switch (wordType) {
@@ -304,6 +310,7 @@ public class WordNetViewer extends AbstractVisualResource
     }
   }
 
+  @Override
   public void actionPerformed(ActionEvent e){
     RelationItem ri = (RelationItem) e.getSource();
     switch (ri.getRelationType()){
@@ -402,7 +409,7 @@ public class WordNetViewer extends AbstractVisualResource
       e.printStackTrace();
     }
     if (hList!=null && hList.size()>0){
-      SemanticRelation rel = (SemanticRelation) hList.get(0);
+      SemanticRelation rel = hList.get(0);
       prefix = "    " + prefix;
       recursiveHypernym(rel.getTarget(), display, prefix);
     }
@@ -413,7 +420,7 @@ public class WordNetViewer extends AbstractVisualResource
                                String relRefString){
     StringBuffer display = new StringBuffer("");
     for (int i = 0; i<senses.size(); i++){
-      WordSense currSense = (WordSense) senses.get(i);
+      WordSense currSense = senses.get(i);
       Synset currSynset = currSense.getSynset();
       try {
         if (currSynset.getSemanticRelations(relationType).size()>0){
@@ -457,7 +464,7 @@ public class WordNetViewer extends AbstractVisualResource
     }
     if (holoList!=null && holoList.size()>0){
       for (int i = 0; i<holoList.size(); i++){
-        SemanticRelation rel = (SemanticRelation) holoList.get(i);
+        SemanticRelation rel = holoList.get(i);
         prefix = "    " + prefix;
         recursiveHoloMeroHypo(rel.getTarget(), display, prefix, true,
                               relationType, relRefString);
@@ -471,7 +478,7 @@ public class WordNetViewer extends AbstractVisualResource
     StringBuffer display = new StringBuffer("");
     boolean semantic_see_also = true;
     for (int i = 0; i<senses.size(); i++){
-      WordSense currSense = (WordSense) senses.get(i);
+      WordSense currSense = senses.get(i);
       Synset currSynset = currSense.getSynset();
       try {
         List<LexicalRelation> antonyms = currSense.getLexicalRelations(relType);
@@ -487,7 +494,7 @@ public class WordNetViewer extends AbstractVisualResource
           display.append(currSynset.getGloss());
           display.append("\n");
           for (int j=0; j<antonyms.size(); j++){
-            LexicalRelation rel = (LexicalRelation) antonyms.get(j);
+            LexicalRelation rel = antonyms.get(j);
             WordSense word = rel.getTarget();
             display.append("      ");
             display.append(relRefString);
@@ -513,7 +520,7 @@ public class WordNetViewer extends AbstractVisualResource
                                      String relRefString){
     StringBuffer display = new StringBuffer("");
     for (int i = 0; i<senses.size(); i++){
-      WordSense currSense = (WordSense) senses.get(i);
+      WordSense currSense = senses.get(i);
       Synset currSynset = currSense.getSynset();
       try {
         List<SemanticRelation> atributes = currSynset.getSemanticRelations(releationType);
@@ -528,7 +535,7 @@ public class WordNetViewer extends AbstractVisualResource
           display.append(currSynset.getGloss());
           display.append("\n");
           for (int j=0; j<atributes.size(); j++){
-            SemanticRelation rel = (SemanticRelation) atributes.get(j);
+            SemanticRelation rel = atributes.get(j);
             Synset synset = rel.getTarget();
             display.append("     ");
             display.append(relRefString);
@@ -564,7 +571,7 @@ public class WordNetViewer extends AbstractVisualResource
   private void sentenceFrames(List<WordSense> senses){
     StringBuffer display = new StringBuffer("");
     for (int i=0; i<senses.size(); i++) {
-      WordSense currSense = (WordSense) senses.get(i);
+      WordSense currSense = senses.get(i);
       Synset currSynset = currSense.getSynset();
       Verb currVerb = (Verb) currSense;
       List<VerbFrame> frames = currVerb.getVerbFrames();
@@ -579,7 +586,7 @@ public class WordNetViewer extends AbstractVisualResource
 
         for (int j=0; j<frames.size(); j++){
           display.append("        *> ");
-          display.append(((VerbFrame) frames.get(j)).getFrame());
+          display.append(frames.get(j).getFrame());
           display.append("\n");
         }
     }
@@ -718,6 +725,7 @@ public class WordNetViewer extends AbstractVisualResource
    * @param target the object (be it a {@link gate.Resource},
    * {@link gate.DataStore} or whatever) this viewer has to display
    */
+  @Override
   public void setTarget(Object target){
 
     if (false == target instanceof WordNet) {

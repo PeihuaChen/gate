@@ -23,6 +23,7 @@ public class StandardTokenizer extends gate.creole.annic.apache.lucene.analysis.
  * <p>The returned token's type is set to an element of {@link
  * StandardTokenizerConstants#tokenImage}.
  */
+  @Override
   final public gate.creole.annic.apache.lucene.analysis.Token next() throws ParseException, IOException {
   Token token = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {

@@ -31,6 +31,7 @@ public class Rule_WDAND2TAGBFR extends Rule {
 
   public Rule_WDAND2TAGBFR() {
   }
+  @Override
   public boolean checkContext(POSTagger tagger) {
     return (tagger.lexBuff[1][0].equals(context[0]) &&
             tagger.wordBuff[3].equals(context[1]));

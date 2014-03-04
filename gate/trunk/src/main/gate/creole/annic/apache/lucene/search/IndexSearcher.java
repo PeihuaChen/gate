@@ -62,28 +62,33 @@ public class IndexSearcher extends Searcher {
 	 * supplied implicitly by specifying a directory, then the IndexReader gets
 	 * closed.
 	 */
-	public void close() throws IOException {
+	@Override
+  public void close() throws IOException {
 		if (closeReader)
 			reader.close();
 	}
 
 	// inherit javadoc
-	public int docFreq(Term term) throws IOException {
+	@Override
+  public int docFreq(Term term) throws IOException {
 		return reader.docFreq(term);
 	}
 
 	// inherit javadoc
-	public Document doc(int i) throws IOException {
+	@Override
+  public Document doc(int i) throws IOException {
 		return reader.document(i);
 	}
 
 	// inherit javadoc
-	public int maxDoc() throws IOException {
+	@Override
+  public int maxDoc() throws IOException {
 		return reader.maxDoc();
 	}
 
 	// inherit javadoc
-	public TopDocs search(Query query, Filter filter, final int nDocs)
+	@Override
+  public TopDocs search(Query query, Filter filter, final int nDocs)
 			throws IOException {
 	  initializeTermPositions();
 		Scorer scorer = query.weight(this)
@@ -94,7 +99,8 @@ public class IndexSearcher extends Searcher {
 		final HitQueue hq = new HitQueue(nDocs);
 		final int[] totalHits = new int[1];
 		scorer.score(new HitCollector() {
-			public final void collect(int doc, float score) {
+			@Override
+      public final void collect(int doc, float score) {
 				if (score > 0.0f && // ignore zeroed buckets
 						(bits == null || bits.get(doc))) { // skip docs not in
 															// bits
@@ -113,7 +119,8 @@ public class IndexSearcher extends Searcher {
 	}
 
 	// inherit javadoc
-	public TopFieldDocs search(Query query, Filter filter, final int nDocs,
+	@Override
+  public TopFieldDocs search(Query query, Filter filter, final int nDocs,
 			Sort sort) throws IOException {
 	  initializeTermPositions();
 		Scorer scorer = query.weight(this).scorer(reader, this);
@@ -125,7 +132,8 @@ public class IndexSearcher extends Searcher {
 				sort.fields, nDocs);
 		final int[] totalHits = new int[1];
 		scorer.score(new HitCollector() {
-			public final void collect(int doc, float score) {
+			@Override
+      public final void collect(int doc, float score) {
 				if (score > 0.0f && // ignore zeroed buckets
 						(bits == null || bits.get(doc))) { // skip docs not in
 															// bits
@@ -144,14 +152,16 @@ public class IndexSearcher extends Searcher {
 	}
 
 	// inherit javadoc
-	public void search(Query query, Filter filter, final HitCollector results)
+	@Override
+  public void search(Query query, Filter filter, final HitCollector results)
 			throws IOException {
 	  initializeTermPositions();
 		HitCollector collector = results;
 		if (filter != null) {
 			final BitSet bits = filter.bits(reader);
 			collector = new HitCollector() {
-				public final void collect(int doc, float score) {
+				@Override
+        public final void collect(int doc, float score) {
 					if (bits.get(doc)) { // skip docs not in bits
 						results.collect(doc, score);
 					}
@@ -165,7 +175,8 @@ public class IndexSearcher extends Searcher {
 		scorer.score(collector, this);
 	}
 
-	public Query rewrite(Query original) throws IOException {
+	@Override
+  public Query rewrite(Query original) throws IOException {
 		Query query = original;
 		for (Query rewrittenQuery = query.rewrite(reader); rewrittenQuery != query; rewrittenQuery = query
 				.rewrite(reader)) {
@@ -174,7 +185,8 @@ public class IndexSearcher extends Searcher {
 		return query;
 	}
 
-	public Explanation explain(Query query, int doc) throws IOException {
+	@Override
+  public Explanation explain(Query query, int doc) throws IOException {
 		return query.weight(this).explain(reader, doc);
 	}
 	

@@ -31,12 +31,14 @@ public class AnnotationDataImpl implements AnnotationData {
   /**
    * @return the ann
    */
+  @Override
   public Annotation getAnnotation() {
     return ann;
   }
   /**
    * @return the set
    */
+  @Override
   public AnnotationSet getAnnotationSet() {
     return set;
   }

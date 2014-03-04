@@ -75,6 +75,7 @@ public class Eclipse extends gate.util.Javac {
    * In the case of warnings the compiled classes are loaded before the error is
    * raised.
    */
+  @Override
   public void compile(Map<String,String> sources, final GateClassLoader classLoader) throws GateException {
     
     final Map<String, String> sourcesFiltered = new HashMap<String, String>(sources);
@@ -105,18 +106,21 @@ public class Eclipse extends gate.util.Javac {
         this.className = className;
       }
 
+      @Override
       public char[] getFileName() {
         return className.toCharArray();
       }
       
+      @Override
       public char[] getContents() {
-        return ((String)sourcesFiltered.get(className)).toCharArray();
+        return sourcesFiltered.get(className).toCharArray();
       }
       
       /**
        * Returns the unqualified name of the class defined by this
        * compilation unit.
        */
+      @Override
       public char[] getMainTypeName() {
         int dot = className.lastIndexOf('.');
         if (dot > 0) {
@@ -130,6 +134,7 @@ public class Eclipse extends gate.util.Javac {
        * unit.  For example, if this unit defines java.lang.String,
        * ["java".toCharArray(), "lang".toCharArray()] would be returned.
        */
+      @Override
       public char[][] getPackageName() {
         StringTokenizer izer = 
           new StringTokenizer(className, ".");
@@ -154,6 +159,7 @@ public class Eclipse extends gate.util.Javac {
        * name.  We construct a string from the compound name (e.g. ["java",
        * "lang", "String"] becomes "java.lang.String") and search using that.
        */
+      @Override
       public NameEnvironmentAnswer findType(char[][] compoundTypeName) {
         String result = "";
         String sep = "";
@@ -170,6 +176,7 @@ public class Eclipse extends gate.util.Javac {
        * name.  We construct a string from the compound name (e.g. "String",
        * ["java", "lang"] becomes "java.lang.String") and search using that.
        */
+      @Override
       public NameEnvironmentAnswer findType(char[] typeName, 
                                             char[][] packageName) {
         String result = "";
@@ -269,6 +276,7 @@ public class Eclipse extends gate.util.Javac {
        * Checks whether the given name refers to a package rather than a
        * class.
        */
+      @Override
       public boolean isPackage(char[][] parentPackageName, 
                                char[] packageName) {
         String result = "";
@@ -292,6 +300,7 @@ public class Eclipse extends gate.util.Javac {
         return isPackage(result);
       }
 
+      @Override
       public void cleanup() {
       }
 
@@ -334,6 +343,7 @@ public class Eclipse extends gate.util.Javac {
 
     // CompilerRequestor defines what to do with the result of a compilation.
     final ICompilerRequestor requestor = new ICompilerRequestor() {
+      @Override
       public void acceptResult(CompilationResult result) {
         boolean errors = false;
         if (result.hasProblems()) {
@@ -421,7 +431,7 @@ public class Eclipse extends gate.util.Javac {
         }
         // print the source for this class, to help the user debug.
         Err.prln("\nThe offending input was:\n");
-        Err.prln(Strings.addLineNumbers((String)sourcesFiltered.get(name)));
+        Err.prln(Strings.addLineNumbers(sourcesFiltered.get(name)));
       }
       if(errors) {
         throw new GateException(

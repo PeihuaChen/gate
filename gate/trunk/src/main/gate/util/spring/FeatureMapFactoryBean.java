@@ -53,6 +53,7 @@ public class FeatureMapFactoryBean extends GateAwareObject implements
     this.sourceMap = sourceMap;
   }
 
+  @Override
   public Object getObject() throws IOException {
     ensureGateInit();
     FeatureMap fm = Factory.newFeatureMap();
@@ -73,10 +74,12 @@ public class FeatureMapFactoryBean extends GateAwareObject implements
     return fm;
   }
 
+  @Override
   public Class getObjectType() {
     return gate.FeatureMap.class;
   }
 
+  @Override
   public boolean isSingleton() {
     return false;
   }

@@ -23,6 +23,7 @@ public interface DatatypeProperty extends RDFProperty {
   /**
    * Returns the set of domain restrictions for this property.
    */
+  @Override
   public Set<OResource> getDomain();
 
     

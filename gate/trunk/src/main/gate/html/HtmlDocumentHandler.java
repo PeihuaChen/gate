@@ -126,6 +126,7 @@ public class HtmlDocumentHandler extends ParserCallback {
     * of a tag that means that the tag is paired by an end tag and it's
     * not an empty one.
     */
+  @Override
   public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos) {
     // Fire the status listener if the elements processed exceded the rate
     if (0 == (++elements % ELEMENTS_RATE))
@@ -177,6 +178,7 @@ public class HtmlDocumentHandler extends ParserCallback {
    /** This method is called when the HTML parser encounts the end of a tag
      * that means that the tag is paired by a beginning tag
      */
+  @Override
   public void handleEndTag(HTML.Tag t, int pos){
     // obj is for internal use
     CustomObject obj = null;
@@ -258,6 +260,7 @@ public class HtmlDocumentHandler extends ParserCallback {
 
   /** This method is called when the HTML parser encounts an empty tag
     */
+  @Override
   public void handleSimpleTag(HTML.Tag t, MutableAttributeSet a, int pos){
     // fire the status listener if the elements processed exceded the rate
     if ((++elements % ELEMENTS_RATE) == 0)
@@ -299,6 +302,7 @@ public class HtmlDocumentHandler extends ParserCallback {
 
   /** This method is called when the HTML parser encounts text (PCDATA)
     */
+  @Override
   public void handleText(char[] text, int pos){
 
     // Skip the STYLE tag content
@@ -503,6 +507,7 @@ public class HtmlDocumentHandler extends ParserCallback {
     * This method is called when the HTML parser encounts an error
     * it depends on the programmer if he wants to deal with that error
     */
+  @Override
   public void handleError(String errorMsg, int pos) {
     //Out.println ("ERROR CALLED : " + errorMsg);
   }
@@ -511,11 +516,13 @@ public class HtmlDocumentHandler extends ParserCallback {
     * of its input streamin order to notify the parserCallback that there
     * is nothing more to parse.
     */
+  @Override
   public void flush() throws BadLocationException{
   }// flush
 
   /** This method is called when the HTML parser encounts a comment
     */
+  @Override
   public void handleComment(char[] text, int pos) {
   }
 
@@ -607,6 +614,7 @@ public class HtmlDocumentHandler extends ParserCallback {
     }// End CustomObject()
 
     // Methos implemented as required by Comparable interface
+    @Override
     public int compareTo(Object o){
       CustomObject obj = (CustomObject) o;
       return this.id.compareTo(obj.getId());

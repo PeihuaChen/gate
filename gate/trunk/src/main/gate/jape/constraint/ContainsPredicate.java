@@ -27,6 +27,7 @@ public class ContainsPredicate extends EmbeddedConstraintPredicate {
 
   public static final String OPERATOR = "contains";
 
+  @Override
   public String getOperator() {
     return OPERATOR;
   }
@@ -35,6 +36,7 @@ public class ContainsPredicate extends EmbeddedConstraintPredicate {
    * Get all the annots of the right type that are within the span of
    * this annot.
    */
+  @Override
   public AnnotationSet doMatch(Annotation annot, AnnotationSet as) {
     return as.getContained(annot.getStartNode().getOffset(),
             annot.getEndNode().getOffset()).get(annotType);

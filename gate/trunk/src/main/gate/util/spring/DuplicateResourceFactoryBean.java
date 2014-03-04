@@ -96,6 +96,7 @@ public class DuplicateResourceFactoryBean extends GateAwareObject implements
 
   private Class<?> typeClass = null;
 
+  @Override
   public Object getObject() throws Exception {
     ensureGateInit();
     Resource toReturn = null;
@@ -146,6 +147,7 @@ public class DuplicateResourceFactoryBean extends GateAwareObject implements
    * {@link Factory#duplicate(Resource)} for the list of interfaces that
    * will be considered.
    */
+  @Override
   public Class<?> getObjectType() {
     if(templateResource != null && typeClass == null) {
       List<Class<?>> interfaces = new ArrayList<Class<?>>();
@@ -190,6 +192,7 @@ public class DuplicateResourceFactoryBean extends GateAwareObject implements
    * This factory is not a singleton - it produces a new object each
    * time {@link #getObject()} is called.
    */
+  @Override
   public boolean isSingleton() {
     return false;
   }
@@ -198,6 +201,7 @@ public class DuplicateResourceFactoryBean extends GateAwareObject implements
    * Delete the duplicates we have returned, unless they have already
    * been freed.
    */
+  @Override
   public void destroy() {
     for(WeakReference<Resource> res : resourcesReturned) {
       Resource r = res.get();

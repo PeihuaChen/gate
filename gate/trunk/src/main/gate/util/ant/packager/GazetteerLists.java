@@ -56,6 +56,7 @@ public class GazetteerLists extends DataType implements ResourceCollection {
    * ResourceCollection interface: returns an iterator over the list
    * files.
    */
+  @Override
   public Iterator iterator() {
     load();
 
@@ -71,6 +72,7 @@ public class GazetteerLists extends DataType implements ResourceCollection {
    * ResourceCollection interface: returns true (this collection always
    * exposes only filesystem resources).
    */
+  @Override
   public boolean isFilesystemOnly() {
     return true;
   }
@@ -79,6 +81,7 @@ public class GazetteerLists extends DataType implements ResourceCollection {
    * ResourceCollection interface: returns the number of list files
    * referenced by this definition.
    */
+  @Override
   public int size() {
     load();
     return listNames.length;

@@ -155,6 +155,7 @@ public class InputOutputAnnotationSetsDialog {
         putValue(SHORT_DESCRIPTION, "Add the edited value to the list");
       }
 
+      @Override
       public void actionPerformed(ActionEvent e) {
         String selected = (String)combo.getSelectedItem();
         // find where to insert
@@ -187,6 +188,7 @@ public class InputOutputAnnotationSetsDialog {
                 "Remove the selected value(s) from the list");
       }
 
+      @Override
       public void actionPerformed(ActionEvent e) {
         int[] indices = annotationSetsList.getSelectedIndices();
         Arrays.sort(indices);
@@ -257,6 +259,7 @@ public class InputOutputAnnotationSetsDialog {
    * <code>null</code> as less than anything non-<code>null</code>.
    */
   protected static class NaturalComparator implements Comparator<String> {
+    @Override
     public int compare(String a, String b) {
       if(a == null) {
         if(b == null) {

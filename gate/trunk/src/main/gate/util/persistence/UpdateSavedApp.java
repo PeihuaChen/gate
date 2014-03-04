@@ -13,7 +13,6 @@
  */
 package gate.util.persistence;
 
-import gate.util.persistence.*;
 import java.io.*;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.StaxDriver;

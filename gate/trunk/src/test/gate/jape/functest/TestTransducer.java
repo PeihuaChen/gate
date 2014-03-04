@@ -23,11 +23,13 @@ public class TestTransducer extends TestCase {
 	tests.addTest(TestConstraints.suite());
 	
 	Test suite = new TestSetup(tests) {
-	    protected void setUp() {
+	    @Override
+      protected void setUp() {
 		executionTime = Calendar.getInstance();
 	    }
 	    
-	    protected void tearDown() {
+	    @Override
+      protected void tearDown() {
 		long executedIn = Calendar.getInstance().getTimeInMillis() - executionTime.getTimeInMillis();
 		logger.info("Test suite executed in: " + executedIn/1000  + " second(s).");
 	    }

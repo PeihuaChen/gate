@@ -42,6 +42,7 @@ public class TestCreole extends TestCase
   private CreoleRegister reg;
 
   /** Fixture set up */
+  @Override
   public void setUp() throws Exception {
     // Initialise the GATE library and creole register
     Gate.init();
@@ -63,6 +64,7 @@ public class TestCreole extends TestCase
   /** Put things back as they should be after running tests
     * (reinitialise the CREOLE register).
     */
+  @Override
   public void tearDown() throws Exception {
     reg.clear();
     Gate.init();
@@ -177,7 +179,7 @@ public class TestCreole extends TestCase
       while(iter.hasNext()) {
         res = (Resource) iter.next();
         if(DEBUG) Out.prln(res);
-        resData = (ResourceData) cr.get(res.getClass().getName());
+        resData = cr.get(res.getClass().getName());
         if(DEBUG) Out.prln(resData);
         if(! resData.isAutoLoading())
           return false;
@@ -196,13 +198,12 @@ public class TestCreole extends TestCase
       while(iter.hasNext()) Out.println(iter.next());
     }
 
-    ResourceData rd = (ResourceData)
-      reg.get("gate.creole.tokeniser.DefaultTokeniser");
+    ResourceData rd = reg.get("gate.creole.tokeniser.DefaultTokeniser");
     assertNotNull("couldn't find unicode tok in register of resources", rd);
     assertTrue(rd.getName().equals("ANNIE Unicode Tokeniser"));
 
     String docFormatName = "gate.corpora.XmlDocumentFormat";
-    ResourceData xmlDocFormatRD = (ResourceData) reg.get(docFormatName);
+    ResourceData xmlDocFormatRD = reg.get(docFormatName);
     assertTrue(xmlDocFormatRD.getName().equals("Sheffield XML Document Format"));
     assertTrue(xmlDocFormatRD.isAutoLoading());
     
@@ -214,8 +215,8 @@ public class TestCreole extends TestCase
   public void testMetadata() throws Exception {
 
     // get some res data from the register
-    ResourceData pr1rd = (ResourceData) reg.get("testpkg.TestPR1");
-    ResourceData pr2rd = (ResourceData) reg.get("testpkg.TestPR2");
+    ResourceData pr1rd = reg.get("testpkg.TestPR1");
+    ResourceData pr2rd = reg.get("testpkg.TestPR2");
     assertTrue(pr1rd != null & pr2rd != null);
     assertTrue(pr2rd.getName().equals("Sheffield Test PR 2"));
 
@@ -247,13 +248,13 @@ public class TestCreole extends TestCase
 
   /** Test TOOLS and PRIVATE attributes */
   public void testToolsAndPrivate() throws Exception {
-    ResourceData pr3rd = (ResourceData) reg.get("testpkg.PrintOutTokens");
+    ResourceData pr3rd = reg.get("testpkg.PrintOutTokens");
     assertTrue("couldn't get PR3", pr3rd != null);
     assertTrue("PR3 not a tool", pr3rd.isTool());
     if(DEBUG) Out.prln(pr3rd.getFeatures());
 
     String docFormatName = "gate.corpora.XmlDocumentFormat";
-    ResourceData xmlDocFormatRD = (ResourceData) reg.get(docFormatName);
+    ResourceData xmlDocFormatRD = reg.get(docFormatName);
     assertTrue("Xml doc format not PRIVATE", xmlDocFormatRD.isPrivate());
     if(DEBUG) Out.prln(xmlDocFormatRD.getFeatures());
     
@@ -272,8 +273,8 @@ public class TestCreole extends TestCase
       "wrong number of resources in the register: " + reg.size(),
       reg.size() == 11
     );
-    ResourceData pr1rd = (ResourceData) reg.get("testpkg.TestPR1");
-    ResourceData pr2rd = (ResourceData) reg.get("testpkg.TestPR2");
+    ResourceData pr1rd = reg.get("testpkg.TestPR1");
+    ResourceData pr2rd = reg.get("testpkg.TestPR2");
     assertTrue("couldn't find PR1/PR2 res data", pr1rd != null && pr2rd != null);
     assertTrue("wrong name on PR1", pr1rd.getName().equals("Sheffield Test PR 1"));
 
@@ -308,7 +309,7 @@ public class TestCreole extends TestCase
   /** Test resource indexing by class */
   public void testClassIndex() throws Exception {
 
-    ResourceData docRd = (ResourceData) reg.get("gate.corpora.DocumentImpl");
+    ResourceData docRd = reg.get("gate.corpora.DocumentImpl");
     assertNotNull("couldn't find document res data", docRd);
     assertTrue(
       "doc res data has wrong class name",
@@ -324,7 +325,6 @@ public class TestCreole extends TestCase
     LanguageResource docRes = (LanguageResource) docClass.newInstance();
     assertTrue(
       "instance of doc is wrong type",
-      docRes instanceof LanguageResource &&
       docRes instanceof gate.Document
     );
 
@@ -345,7 +345,7 @@ public class TestCreole extends TestCase
   /** Test comments on resources */
   public void testComments() throws Exception {
 
-    ResourceData docRd = (ResourceData) reg.get("gate.corpora.DocumentImpl");
+    ResourceData docRd = reg.get("gate.corpora.DocumentImpl");
     assertNotNull("testComments: couldn't find document res data", docRd);
     String comment = docRd.getComment();
     assertTrue(
@@ -357,7 +357,7 @@ public class TestCreole extends TestCase
   /** Test parameter defaults */
   public void testParameterDefaults1() throws Exception {
 
-    ResourceData docRd = (ResourceData) reg.get("gate.corpora.DocumentImpl");
+    ResourceData docRd = reg.get("gate.corpora.DocumentImpl");
     assertNotNull("Couldn: couldn't find document res data", docRd);
     if(DEBUG) Out.prln(docRd.getParameterList().getInitimeParameters());
     ParameterList paramList = docRd.getParameterList();
@@ -426,7 +426,7 @@ public class TestCreole extends TestCase
   /** Test parameter defaults (2) */
   public void testParameterDefaults2() throws Exception {
 
-    ResourceData rd = (ResourceData) reg.get("testpkg.PrintOutTokens");
+    ResourceData rd = reg.get("testpkg.PrintOutTokens");
     assertNotNull("Couldn't find testpkg.POT res data", rd);
 
     // create a document, so that the parameter default will pick it up
@@ -477,7 +477,7 @@ public class TestCreole extends TestCase
 
   /** Test param as lists*/
   public void testParamAsLists() throws Exception{
-    ResourceData rd = (ResourceData) reg.get("testpkg.TestPR3");
+    ResourceData rd = reg.get("testpkg.TestPR3");
     assertNotNull("Couldn: couldn't find testPR3 res data", rd);
 
     ParameterList paramList = rd.getParameterList();
@@ -489,7 +489,7 @@ public class TestCreole extends TestCase
   /** Test parameters */
   public void testParameters() throws Exception {
 
-    ResourceData docRd = (ResourceData) reg.get("gate.corpora.DocumentImpl");
+    ResourceData docRd = reg.get("gate.corpora.DocumentImpl");
     assertNotNull("Couldn: couldn't find document res data", docRd);
 
     ParameterList paramList = docRd.getParameterList();
@@ -579,7 +579,7 @@ public class TestCreole extends TestCase
   /** Test arbitrary metadata elements on resources */
   public void testArbitraryMetadata() throws Exception {
 
-    ResourceData docRd = (ResourceData) reg.get("gate.corpora.DocumentImpl");
+    ResourceData docRd = reg.get("gate.corpora.DocumentImpl");
     assertNotNull("testArbitraryMetadata: couldn't find doc res data", docRd);
     FeatureMap features = docRd.getFeatures();
     String comment = (String) features.get("FUNKY-METADATA-THAING");
@@ -592,7 +592,7 @@ public class TestCreole extends TestCase
   /** Test resource introspection */
   public void testIntrospection() throws Exception {
     // get the gate.Document resource and its class
-    ResourceData docRd = (ResourceData) reg.get("gate.corpora.DocumentImpl");
+    ResourceData docRd = reg.get("gate.corpora.DocumentImpl");
     assertNotNull("couldn't find document res data (2)", docRd);
     Class resClass = docRd.getResourceClass();
 
@@ -675,6 +675,7 @@ public class TestCreole extends TestCase
       * array of properties; this will be passed on by the Introspector,
       * the effect being to block info on the properties of the bean.
       */
+    @Override
     public PropertyDescriptor[] getPropertyDescriptors() {
       return new PropertyDescriptor[0];
     } // getPropertyDescriptors

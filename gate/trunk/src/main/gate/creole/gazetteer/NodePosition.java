@@ -93,24 +93,25 @@ public class NodePosition {
 
 class NodePositionComparator implements Comparator<NodePosition> {
 
+  @Override
   public int compare(NodePosition arg0, NodePosition arg1) {
     long diff = arg0.getTempStartOffset() - arg1.getTempStartOffset();
     if (diff != 0L) {
-      return (int) Long.signum(diff);
+      return Long.signum(diff);
     }
     // implied else
     diff = arg0.getTempEndOffset() - arg1.getTempEndOffset();
     if (diff != 0L) {
-      return (int) Long.signum(diff);
+      return Long.signum(diff);
     }
     // implied else
     diff = arg0.getOriginalStartOffset() - arg1.getOriginalStartOffset();
     if (diff != 0L) {
-      return (int) Long.signum(diff);
+      return Long.signum(diff);
     }
     // implied else
     diff = arg0.getOriginalEndOffset() - arg1.getOriginalEndOffset();
-    return (int) Long.signum(diff);
+    return Long.signum(diff);
   }
   
   

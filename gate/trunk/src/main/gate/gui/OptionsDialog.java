@@ -283,6 +283,7 @@ public class OptionsDialog extends JDialog {
 
   protected void initListeners(){
     lnfCombo.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         if(!lookAndFeelClassName.equals(
            ((LNFData)lnfCombo.getSelectedItem()).className)
@@ -295,6 +296,7 @@ public class OptionsDialog extends JDialog {
     });
 
     fontChooser.addPropertyChangeListener(new PropertyChangeListener() {
+      @Override
       public void propertyChange(PropertyChangeEvent e) {
         if(e.getPropertyName().equals("fontValue")){
           String selectedFont = fontBG.getSelection().getActionCommand();
@@ -313,6 +315,7 @@ public class OptionsDialog extends JDialog {
     });
 
     textBtn.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         if(textBtn.isSelected()) selectedFontChanged();
         selectedFontBtn = "text";
@@ -321,6 +324,7 @@ public class OptionsDialog extends JDialog {
     });
 
     menuBtn.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         if(menuBtn.isSelected()) selectedFontChanged();
         selectedFontBtn = "menu";
@@ -329,6 +333,7 @@ public class OptionsDialog extends JDialog {
     });
 
     otherCompsBtn.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         if(otherCompsBtn.isSelected()) selectedFontChanged();
         selectedFontBtn = "other";
@@ -339,6 +344,7 @@ public class OptionsDialog extends JDialog {
     textBtn.setSelected(true);
 
     browserComboBox.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         if(browserComboBox.getSelectedItem() == null) {
           return;
@@ -403,6 +409,7 @@ public class OptionsDialog extends JDialog {
     frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     JButton btn = new JButton("Show dialog");
     btn.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         OptionsDialog dialog = new OptionsDialog(frame);
         dialog.pack();
@@ -454,6 +461,7 @@ public class OptionsDialog extends JDialog {
       super("OK");
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
       if(dirtyGUI){
         setMenuComponentsFont(menusFont);
@@ -499,6 +507,7 @@ public class OptionsDialog extends JDialog {
     public CancelAction(){
       super("Cancel");
     }
+    @Override
     public void actionPerformed(ActionEvent evt){
       setVisible(false);
     }
@@ -510,6 +519,7 @@ public class OptionsDialog extends JDialog {
       this.name = name;
     }
 
+    @Override
     public String toString(){
       return name;
     }

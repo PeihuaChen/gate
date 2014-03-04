@@ -18,7 +18,8 @@ public class MatchRule11 implements OrthoMatcherRule {
 			this.orthomatcher=orthmatcher;
 	}
 	
-	public boolean value(String s1, String s2) {
+	@Override
+  public boolean value(String s1, String s2) {
 	    // first do the easy case e.g. "Pan American" == "Pan Am"
       boolean result =false;
 	    
@@ -32,17 +33,17 @@ public class MatchRule11 implements OrthoMatcherRule {
 	    else {
     	    // 1st get the first two tokens of s1
     	    token11 = (String)
-    	    ((Annotation) orthomatcher.tokensLongAnnot.get(0)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+    	    orthomatcher.tokensLongAnnot.get(0).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
     	    token12 = (String)
-    	    ((Annotation) orthomatcher.tokensLongAnnot.get(1)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+    	    orthomatcher.tokensLongAnnot.get(1).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
     
     	    // now check for the first case i.e. "Pan American" == "Pan Am"
     	    if (orthomatcher.tokensShortAnnot.size() == 2)  {
     
     	      token21 = (String)
-    	      ((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+    	      orthomatcher.tokensShortAnnot.get(0).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
     	      token22 = (String)
-    	      ((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+    	      orthomatcher.tokensShortAnnot.get(0).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
     
     	      if (token11.startsWith(token21)
     	              && token12.startsWith(token22))
@@ -70,6 +71,7 @@ public class MatchRule11 implements OrthoMatcherRule {
 	    return result;
 	}
 	
+  @Override
   public String getId(){
     return "MatchRule11";
   }

@@ -178,7 +178,7 @@ public class SubQueryParser {
 
     for(int index = 0; index < queries.size(); index++) {
       // get the query to be parsed
-      String query = (String)queries.get(index);
+      String query = queries.get(index);
 
       // current character and the previous character
       char ch = ' ', pre = ' ';
@@ -238,7 +238,7 @@ public class SubQueryParser {
                 text = "";
               }
               else {
-                text = (String)queries.get(queries.size() - 1);
+                text = queries.get(queries.size() - 1);
               }
             }
 
@@ -394,7 +394,7 @@ public class SubQueryParser {
         if(token.trim().equals("{__o__}")) {
           token = " ";
         }
-        String s = (String)queries
+        String s = queries
                 .get(queries.size() - (j * tokens.size() + i));
         qToRemove.add(s);
         s += token;
@@ -541,7 +541,7 @@ public class SubQueryParser {
    */
   private static List<String> writeStringInAll(String c, int no, List<String> queries) {
     for(int i = 0; i < no; i++) {
-      String s = (String)queries.get(queries.size() - (i + 1));
+      String s = queries.get(queries.size() - (i + 1));
       s += "" + c;
       queries.set(queries.size() - (i + 1), s);
     }

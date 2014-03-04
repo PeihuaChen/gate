@@ -66,6 +66,7 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser
    * Does the actual loading and parsing of the lists. This method must be
    * called before the gazetteer can be used
    */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     if(gazetteerInst == null) { throw new ResourceInstantiationException(
         "No Gazetteer Provided!"); }
@@ -76,6 +77,7 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser
    * This method runs the gazetteer. It assumes that all the needed parameters
    * are set. If they are not, an exception will be fired.
    */
+  @Override
   public void execute() throws ExecutionException {
     fireProgressChanged(0);
     fireStatusChanged("Checking Document...");
@@ -302,6 +304,7 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser
    * 
    * @param doc
    */
+  @Override
   public void setDocument(gate.Document doc) {
     this.document = doc;
   }
@@ -311,6 +314,7 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser
    * 
    * @return a {@link Document}
    */
+  @Override
   public gate.Document getDocument() {
     return this.document;
   }

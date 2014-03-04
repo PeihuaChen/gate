@@ -23,7 +23,8 @@ public class MatchRule5 implements OrthoMatcherRule {
 		this.orthomatcher=orthmatcher;
 	}
 	
-	public boolean value(String s1, String s2) {
+	@Override
+  public boolean value(String s1, String s2) {
 	  
 		boolean allTokensMatch = true;
 //	    if (s1.equals("wilson")) {
@@ -37,7 +38,7 @@ public class MatchRule5 implements OrthoMatcherRule {
 	    Iterator<Annotation> tokensLongAnnotIter = orthomatcher.tokensLongAnnot.iterator();
 	    Iterator<Annotation> tokensShortAnnotIter = orthomatcher.tokensShortAnnot.iterator();
 	    while (tokensLongAnnotIter.hasNext() && tokensShortAnnotIter.hasNext()) {
-	      Annotation token = (Annotation) tokensLongAnnotIter.next();
+	      Annotation token = tokensLongAnnotIter.next();
 	      if (((String)token.getFeatures().get(TOKEN_KIND_FEATURE_NAME)).equals(PUNCTUATION_VALUE))
 	        continue;
 	      if (! orthomatcher.getOrthography().fuzzyMatch((String)(tokensShortAnnotIter.next().
@@ -57,6 +58,7 @@ public class MatchRule5 implements OrthoMatcherRule {
 	    return allTokensMatch;
 	}
 	
+  @Override
   public String getId(){
     return "MatchRule5";
   }

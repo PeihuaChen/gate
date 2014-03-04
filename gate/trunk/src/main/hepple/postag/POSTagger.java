@@ -296,7 +296,7 @@ public class POSTagger {
     if(categories != null){
       result = new String[categories.size()];
       for(int i = 0; i < result.length; i++){
-        result[i] = (String)categories.get(i);
+        result[i] = categories.get(i);
       }
       return result;
     }

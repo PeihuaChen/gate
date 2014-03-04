@@ -65,6 +65,7 @@ implements FieldCache {
     }
 
     /** Two of these are equal iff they reference the same reader, field and type. */
+    @Override
     public boolean equals (Object o) {
       if (o instanceof Entry) {
         Entry other = (Entry) o;
@@ -80,6 +81,7 @@ implements FieldCache {
     }
 
     /** Composes a hashcode based on the referenced reader, field and type. */
+    @Override
     public int hashCode() {
       return hashcode;
     }
@@ -122,6 +124,7 @@ implements FieldCache {
   }
 
   // inherit javadocs
+  @Override
   public int[] getInts (IndexReader reader, String field)
   throws IOException {
     field = field.intern();
@@ -156,6 +159,7 @@ implements FieldCache {
   }
 
   // inherit javadocs
+  @Override
   public float[] getFloats (IndexReader reader, String field)
   throws IOException {
     field = field.intern();
@@ -190,6 +194,7 @@ implements FieldCache {
   }
 
   // inherit javadocs
+  @Override
   public String[] getStrings (IndexReader reader, String field)
   throws IOException {
     field = field.intern();
@@ -224,6 +229,7 @@ implements FieldCache {
   }
 
   // inherit javadocs
+  @Override
   public StringIndex getStringIndex (IndexReader reader, String field)
   throws IOException {
     field = field.intern();
@@ -298,6 +304,7 @@ implements FieldCache {
    */
 
   // inherit javadocs
+  @Override
   public Object getAuto (IndexReader reader, String field)
   throws IOException {
     field = field.intern();
@@ -349,6 +356,7 @@ implements FieldCache {
   }
 
   // inherit javadocs
+  @Override
   public Comparable[] getCustom (IndexReader reader, String field, SortComparator comparator)
   throws IOException {
     field = field.intern();

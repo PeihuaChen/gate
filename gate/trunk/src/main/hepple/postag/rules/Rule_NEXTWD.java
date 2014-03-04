@@ -32,6 +32,7 @@ public class Rule_NEXTWD extends Rule {
   public Rule_NEXTWD() {
   }
 
+  @Override
   public boolean checkContext(POSTagger tagger) {
     return (tagger.wordBuff[4].equals(context[0]));
   }

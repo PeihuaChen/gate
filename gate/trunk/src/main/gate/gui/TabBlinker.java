@@ -32,6 +32,7 @@ public class TabBlinker implements Runnable{
       thread.setPriority(Thread.MIN_PRIORITY);
     }// TabBlinker(JTabbedPane pane, Component comp, Color blinkColor)
 
+    @Override
     public void run(){
       oldColor = tPane.getBackgroundAt(tab);
       synchronized(this){
@@ -46,6 +47,7 @@ public class TabBlinker implements Runnable{
           }
         }
         SwingUtilities.invokeLater(new Runnable(){
+          @Override
           public void run(){
             if(tPane.getBackgroundAt(tab).equals(oldColor)){
               tPane.setBackgroundAt(tab, blinkColor);

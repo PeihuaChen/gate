@@ -61,6 +61,7 @@ public class CorpusBenchmarkTool {
     execute(startDir);
     if (application != null) {
       javax.swing.SwingUtilities.invokeLater(new Runnable() {
+        @Override
         public void run() {
 
           Iterator iter = new ArrayList(application.getPRs()).iterator();
@@ -376,7 +377,7 @@ public class CorpusBenchmarkTool {
    * the precision will be the average precision on those two sets of documents.
    */
   public double getPrecisionAverage() {
-    return (double) precisionSum / docNumber;
+    return precisionSum / docNumber;
   }
 
   /**
@@ -390,24 +391,24 @@ public class CorpusBenchmarkTool {
    * the recall will be the average recall on those two sets of documents.
    */
   public double getRecallAverage() {
-    return (double) recallSum / docNumber;
+    return recallSum / docNumber;
   }
 
   public double getFMeasureAverage() {
-    return (double) fMeasureSum / docNumber;
+    return fMeasureSum / docNumber;
   }
 
   /** For processed documents */
   public double getPrecisionAverageProc() {
-    return (double) proc_precisionSum / docNumber;
+    return proc_precisionSum / docNumber;
   }
 
   public double getRecallAverageProc() {
-    return (double) proc_recallSum / docNumber;
+    return proc_recallSum / docNumber;
   }
 
   public double getFMeasureAverageProc() {
-    return (double) proc_fMeasureSum / docNumber;
+    return proc_fMeasureSum / docNumber;
   }
 
   public boolean isGenerateMode() {
@@ -477,6 +478,7 @@ public class CorpusBenchmarkTool {
         final LanguageResource lr = sds.adopt(doc, null);
         sds.sync(lr);
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
+          @Override
           public void run() {
             Factory.deleteResource(doc);
             Factory.deleteResource(lr);
@@ -673,6 +675,7 @@ public class CorpusBenchmarkTool {
         if (persDoc != null) {
           final gate.Document pd = persDoc;
           javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
               Factory.deleteResource(pd);
             }
@@ -681,6 +684,7 @@ public class CorpusBenchmarkTool {
         if (cleanDoc != null) {
           final gate.Document cd = cleanDoc;
           javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
               Factory.deleteResource(cd);
             }
@@ -689,6 +693,7 @@ public class CorpusBenchmarkTool {
         if (markedDoc != null) {
           final gate.Document md = markedDoc;
           javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
               Factory.deleteResource(md);
             }
@@ -831,6 +836,7 @@ public class CorpusBenchmarkTool {
         if (persDoc != null) {
           final gate.Document pd = persDoc;
           javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
               Factory.deleteResource(pd);
             }
@@ -839,6 +845,7 @@ public class CorpusBenchmarkTool {
         if (markedDoc != null) {
           final gate.Document md = markedDoc;
           javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
               Factory.deleteResource(md);
             }
@@ -1011,6 +1018,7 @@ public class CorpusBenchmarkTool {
       if (persDoc != null) {
         final gate.Document pd = persDoc;
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
+          @Override
           public void run() {
             Factory.deleteResource(pd);
           }
@@ -1019,6 +1027,7 @@ public class CorpusBenchmarkTool {
       if (cleanDoc != null) {
         final gate.Document cd = cleanDoc;
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
+          @Override
           public void run() {
             Factory.deleteResource(cd);
           }
@@ -1027,6 +1036,7 @@ public class CorpusBenchmarkTool {
       if (markedDoc != null) {
         final gate.Document md = markedDoc;
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
+          @Override
           public void run() {
             Factory.deleteResource(md);
           }
@@ -1224,7 +1234,7 @@ public class CorpusBenchmarkTool {
           Out.prln(" </Font></P>");
         }
         else
-          Out.prln("<P> " + (double) annotDiffer.getPrecisionAverage() +
+          Out.prln("<P> " + annotDiffer.getPrecisionAverage() +
                    " </P>");
       }
       else
@@ -1464,22 +1474,22 @@ public class CorpusBenchmarkTool {
 
   protected void updateStatistics(AnnotationDiffer annotDiffer,
                                   String annotType) {
-    double precisionAverage = ( (double) ( (double) annotDiffer.
+    double precisionAverage = ( ( annotDiffer.
                                           getPrecisionLenient() +
                                           annotDiffer.getPrecisionStrict()) /
-                               (double) (2.0));
+                               (2.0));
     if (Double.isNaN(precisionAverage)) precisionAverage = 0.0;
     precisionSum += precisionAverage;
 
-    double recallAverage = ( (double) (annotDiffer.getRecallLenient() +
+    double recallAverage = ( (annotDiffer.getRecallLenient() +
                                        annotDiffer.getRecallStrict()) /
-                            (double) (2.0));
+                            (2.0));
     if (Double.isNaN(recallAverage)) recallAverage = 0.0;
     recallSum += recallAverage;
 
-    double fMeasureAverage = ( (double) (annotDiffer.getFMeasureLenient(1.0) +
+    double fMeasureAverage = ( (annotDiffer.getFMeasureLenient(1.0) +
                                          annotDiffer.getFMeasureStrict(1.0)) /
-                              (double) (2.0));
+                              (2.0));
     if (Double.isNaN(fMeasureAverage)) fMeasureAverage = 0.0;
     fMeasureSum += fMeasureAverage;
 
@@ -1564,21 +1574,21 @@ public class CorpusBenchmarkTool {
   protected void updateStatisticsProc(AnnotationDiffer annotDiffer,
                                       String annotType) {
     hasProcessed = true;
-    double precisionAverage = ( (double) (annotDiffer.getPrecisionLenient() +
+    double precisionAverage = ( (annotDiffer.getPrecisionLenient() +
                                           annotDiffer.getPrecisionStrict()) /
-                               (double) (2.0));
+                               (2.0));
     if (Double.isNaN(precisionAverage)) precisionAverage = 0.0;
     proc_precisionSum += precisionAverage;
 
-    double recallAverage = ( (double) (annotDiffer.getRecallLenient() +
+    double recallAverage = ( (annotDiffer.getRecallLenient() +
                                        annotDiffer.getRecallStrict()) /
-                            (double) (2.0));
+                            (2.0));
     if (Double.isNaN(recallAverage)) recallAverage = 0.0;
     proc_recallSum += recallAverage;
 
-    double fMeasureAverage = ( (double) (annotDiffer.getFMeasureLenient(1.0) +
+    double fMeasureAverage = ( (annotDiffer.getFMeasureLenient(1.0) +
                                          annotDiffer.getFMeasureStrict(1.0)) /
-                              (double) (2.0));
+                              (2.0));
     if (Double.isNaN(fMeasureAverage)) fMeasureAverage = 0.0;
     proc_fMeasureSum += fMeasureAverage;
 

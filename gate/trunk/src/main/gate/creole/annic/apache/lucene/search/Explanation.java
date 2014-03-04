@@ -58,6 +58,7 @@ public class Explanation implements java.io.Serializable {
   }
 
   /** Render an explanation as text. */
+  @Override
   public String toString() {
     return toString(0);
   }

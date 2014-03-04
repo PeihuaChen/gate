@@ -62,6 +62,7 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
     * @param doc The gate document you want to parse.
     *
     */
+  @Override
   public void unpackMarkup(Document doc) throws DocumentFormatException{
     if ( (doc == null) ||
          (doc.getSourceUrl() == null && doc.getContent() == null)){
@@ -71,6 +72,7 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
     }// End if
     // Create a status listener
     StatusListener statusListener = new StatusListener(){
+            @Override
             public void statusChanged(String text){
               fireStatusChanged(text);
             }
@@ -138,6 +140,7 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
   }// sgml2Xml()
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException{
     // Register SGML mime type
     MimeType mime = new MimeType("text","sgml");

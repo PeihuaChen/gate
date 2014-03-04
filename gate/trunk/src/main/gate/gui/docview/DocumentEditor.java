@@ -213,6 +213,7 @@ public class DocumentEditor extends AbstractVisualResource implements
    * The document view is just an empty shell. This method publishes the actions
    * from the contained views.
    */
+  @Override
   public List getActions() {
     List actions = new ArrayList();
     Iterator<DocumentView> viewIter;
@@ -242,19 +243,24 @@ public class DocumentEditor extends AbstractVisualResource implements
    * 
    * @see gate.Resource#init()
    */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     addComponentListener(new ComponentAdapter() {
+      @Override
       public void componentHidden(ComponentEvent e) {
       }
 
+      @Override
       public void componentMoved(ComponentEvent e) {
       }
 
+      @Override
       public void componentResized(ComponentEvent e) {
         if(!viewsInited) initViews();
       }
 
       // lazily build the GUI only when needed
+      @Override
       public void componentShown(ComponentEvent e) {
         if(!viewsInited) initViews();
       }
@@ -262,6 +268,7 @@ public class DocumentEditor extends AbstractVisualResource implements
     return this;
   }
 
+  @Override
   public void cleanup() {
     Iterator<DocumentView> viewsIter;
     if(centralViews != null) {
@@ -332,6 +339,7 @@ public class DocumentEditor extends AbstractVisualResource implements
     }
     // sort view types by label
     Collections.sort(viewTypes, new Comparator<ResourceData>() {
+      @Override
       public int compare(ResourceData rd1, ResourceData rd2) {
         return rd1.getName().compareTo(rd2.getName());
       }
@@ -368,6 +376,7 @@ public class DocumentEditor extends AbstractVisualResource implements
     final JPopupMenu optionsMenu = new JPopupMenu("Options menu");
     final JMenuItem saveCurrentLayoutMenuItem =
         new JMenuItem(new AbstractAction("Save Current Layout") {
+          @Override
           public void actionPerformed(ActionEvent evt) {
             saveSettings();
           }
@@ -379,6 +388,7 @@ public class DocumentEditor extends AbstractVisualResource implements
         .getBoolean(
             DocumentEditor.class.getName() + ".restoreLayoutAutomatically"));
     restoreLayoutAutomaticallyMenuItem.addItemListener(new ItemListener() {
+      @Override
       public void itemStateChanged(ItemEvent e) {
         // whenever the user checks/unchecks, update the config
         config.put(DocumentEditor.class.getName()
@@ -389,6 +399,7 @@ public class DocumentEditor extends AbstractVisualResource implements
     optionsMenu.add(restoreLayoutAutomaticallyMenuItem);
     final JCheckBoxMenuItem readOnly = new JCheckBoxMenuItem("Read-only");
     readOnly.addItemListener(new ItemListener() {
+      @Override
       public void itemStateChanged(ItemEvent e) {
         config.put(GateConstants.DOCEDIT_READ_ONLY, readOnly.isSelected());
         setEditable(!readOnly.isSelected());
@@ -401,6 +412,7 @@ public class DocumentEditor extends AbstractVisualResource implements
     final JCheckBoxMenuItem rightToLeftOrientation =
         new JCheckBoxMenuItem("Right To Left Orientation");
     rightToLeftOrientation.addItemListener(new ItemListener() {
+      @Override
       public void itemStateChanged(ItemEvent e) {
         config.put(GateConstants.DOC_RTOL_ORIENTATION,
             rightToLeftOrientation.isSelected());
@@ -416,6 +428,7 @@ public class DocumentEditor extends AbstractVisualResource implements
     insertAppend.setSelected(config
         .getBoolean(GateConstants.DOCEDIT_INSERT_APPEND));
     insertAppend.addItemListener(new ItemListener() {
+      @Override
       public void itemStateChanged(ItemEvent e) {
         config.put(GateConstants.DOCEDIT_INSERT_APPEND,
             insertAppend.isSelected());
@@ -429,6 +442,7 @@ public class DocumentEditor extends AbstractVisualResource implements
     insertPrepend.setSelected(config
         .getBoolean(GateConstants.DOCEDIT_INSERT_PREPEND));
     insertPrepend.addItemListener(new ItemListener() {
+      @Override
       public void itemStateChanged(ItemEvent e) {
         config.put(GateConstants.DOCEDIT_INSERT_PREPEND,
             insertPrepend.isSelected());
@@ -447,6 +461,7 @@ public class DocumentEditor extends AbstractVisualResource implements
     topBar.add(menuButton);
     // when the editor is shown restore views if layout saving is enable
     SwingUtilities.invokeLater(new Runnable() {
+      @Override
       public void run() {
         if(Gate.getUserConfig().getBoolean(
             DocumentEditor.class.getName() + ".restoreLayoutAutomatically")) {
@@ -513,6 +528,7 @@ public class DocumentEditor extends AbstractVisualResource implements
         KeyStroke.getKeyStroke("F" + (fKeyNumber + 1)),
         "Shows view " + fKeyNumber + 1);
     getActionMap().put("Shows view " + fKeyNumber + 1, new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent evt) {
         viewButton.doClick();
       }
@@ -811,6 +827,7 @@ public class DocumentEditor extends AbstractVisualResource implements
    * 
    * @see gate.VisualResource#setTarget(java.lang.Object)
    */
+  @Override
   public void setTarget(Object target) {
     this.document = (Document)target;
   }
@@ -891,6 +908,7 @@ public class DocumentEditor extends AbstractVisualResource implements
       putValue(SMALL_ICON, MainFrame.getIcon("search"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
       if(searchDialog == null) {
         Window parent = SwingUtilities.getWindowAncestor(DocumentEditor.this);
@@ -948,6 +966,7 @@ public class DocumentEditor extends AbstractVisualResource implements
           putValue(MNEMONIC_KEY, KeyEvent.VK_F);
         }
 
+        @Override
         public void actionPerformed(ActionEvent evt) {
           refresh();
           if(!isValidRegularExpression()) return;
@@ -1000,6 +1019,7 @@ public class DocumentEditor extends AbstractVisualResource implements
           putValue(MNEMONIC_KEY, KeyEvent.VK_N);
         }
 
+        @Override
         public void actionPerformed(ActionEvent evt) {
           refresh();
           if(!isValidRegularExpression()) return;
@@ -1055,6 +1075,7 @@ public class DocumentEditor extends AbstractVisualResource implements
           putValue(SHORT_DESCRIPTION, "Cancel");
         }
 
+        @Override
         public void actionPerformed(ActionEvent evt) {
           searchDialog.setVisible(false);
         }
@@ -1114,6 +1135,7 @@ public class DocumentEditor extends AbstractVisualResource implements
 
     protected void initListeners() {
       addComponentListener(new ComponentAdapter() {
+        @Override
         public void componentShown(ComponentEvent e) {
           refresh();
         }
@@ -1126,14 +1148,17 @@ public class DocumentEditor extends AbstractVisualResource implements
 
             private TimerTask timerTask;
 
+            @Override
             public void insertUpdate(javax.swing.event.DocumentEvent e) {
               update();
             }
 
+            @Override
             public void removeUpdate(javax.swing.event.DocumentEvent e) {
               update();
             }
 
+            @Override
             public void changedUpdate(javax.swing.event.DocumentEvent e) {
               refresh();
             }
@@ -1145,6 +1170,7 @@ public class DocumentEditor extends AbstractVisualResource implements
               refresh();
               Date timeToRun = new Date(System.currentTimeMillis() + 250);
               timerTask = new TimerTask() {
+                @Override
                 public void run() {
                   findNextAction.actionPerformed(null);
                 }
@@ -1154,21 +1180,25 @@ public class DocumentEditor extends AbstractVisualResource implements
             }
           });
       wholeWordsChk.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           refresh();
         }
       });
       ignoreCaseChk.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           refresh();
         }
       });
       regularExpressionChk.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           refresh();
         }
       });
       highlightsChk.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           refresh();
         }
@@ -1266,6 +1296,7 @@ public class DocumentEditor extends AbstractVisualResource implements
       // VerticalTextIcon.ROTATE_RIGHT));
       // }
       addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent evt) {
           if(isSelected()) {
             // show this new view

@@ -123,6 +123,7 @@ public class AnnotationSchema extends AbstractLanguageResource{
   /** Initialise this resource, and return it. If the schema XML source file
     * URL has been set, it will construct itself from that file.
     */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     // set up the static data if it's not there already
     if(xSchema2JavaMap == null || java2xSchemaMap == null)

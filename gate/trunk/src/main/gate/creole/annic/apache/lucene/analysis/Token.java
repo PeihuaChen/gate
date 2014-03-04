@@ -16,7 +16,7 @@ package gate.creole.annic.apache.lucene.analysis;
  * limitations under the License.
  */
 
-import java.util.*;
+
 
 /** A Token is an occurence of a term from the text of a field.  It consists of
   a term's text, the start and end offset of the term in the text of the field,

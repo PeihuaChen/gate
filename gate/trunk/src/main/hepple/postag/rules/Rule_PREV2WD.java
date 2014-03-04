@@ -32,6 +32,7 @@ public class Rule_PREV2WD extends Rule {
   public Rule_PREV2WD() {
   }
 
+  @Override
   public boolean checkContext(POSTagger tagger) {
     return (tagger.wordBuff[1].equals(context[0]));
   }

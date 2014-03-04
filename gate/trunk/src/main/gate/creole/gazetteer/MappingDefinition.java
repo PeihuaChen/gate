@@ -144,26 +144,32 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
 
   /*---implementation of interface java.util.List---*/
 
+  @Override
   public int size() {
     return nodes.size();
   }
 
+  @Override
   public boolean isEmpty() {
     return nodes.isEmpty();
   }
 
+  @Override
   public boolean contains(Object o) {
     return nodes.contains(o);
   }
 
+  @Override
   public Iterator iterator() {
     return new SafeIterator();
   }
 
+  @Override
   public Object[] toArray() {
     return nodes.toArray();
   }
 
+  @Override
   public Object[] toArray(Object[] a) {
     return nodes.toArray(a);
   }
@@ -173,16 +179,17 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
    * @param o a node
    * @return true if the list of node is not already mapped with another node.
    */
+  @Override
   public boolean add(MappingNode o) {
     boolean result = false;
-    if (o instanceof MappingNode) {
-      String list = ((MappingNode)o).getList();
-      if (!nodesByList.containsKey(list)) {
-        result = nodes.add((MappingNode)o);
-        nodesByList.put(list,(MappingNode)o);
-        lists.add(list);
-      } // if unique
-    } // if a linear node
+
+    String list = o.getList();
+    if(!nodesByList.containsKey(list)) {
+      result = nodes.add(o);
+      nodesByList.put(list, o);
+      lists.add(list);
+    } // if unique
+
     return result;
   } // add()
 
@@ -191,25 +198,27 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
    * @param o a node
    * @param index position in the list
    */
-  public void add(int index,MappingNode o) {
-    if (o instanceof MappingNode) {
-      String list = ((MappingNode)o).getList();
-      if (!nodesByList.containsKey(list)) {
-        nodes.add(index,(MappingNode)o);
-        nodesByList.put(list,(MappingNode)o);
-        lists.add(list);
-      } // if unique
-    } // if a linear node
+  @Override
+  public void add(int index, MappingNode o) {
+    String list = o.getList();
+    if(!nodesByList.containsKey(list)) {
+      nodes.add(index, o);
+      nodesByList.put(list, o);
+      lists.add(list);
+    } // if unique
   } // add()
 
+  @Override
   public MappingNode set(int index, MappingNode o) {
     throw new UnsupportedOperationException("this method has not been implemented");
   }
 
+  @Override
   public MappingNode get(int index){
     return nodes.get(index);
   }
 
+  @Override
   public boolean remove(Object o) {
     boolean result = false;
     if (o instanceof MappingNode) {
@@ -221,21 +230,24 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     return result;
   }// remove
 
+  @Override
   public MappingNode remove(int index) {
     MappingNode result = null;
     result = nodes.remove(index);
     if (null!=result) {
-      String list = ((MappingNode)result).getList();
+      String list = result.getList();
       lists.remove(list);
       nodesByList.remove(list);
     }
     return result;
   }
 
+  @Override
   public boolean containsAll(Collection c) {
     return nodes.containsAll(c);
   }
 
+  @Override
   public boolean addAll(Collection c) {
     boolean result = false;
     Iterator iter = c.iterator();
@@ -249,6 +261,7 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     return result;
   } // addAll(Collection)
 
+  @Override
   public boolean addAll(int index,Collection c) {
     int size = nodes.size();
     Iterator iter = c.iterator();
@@ -262,6 +275,7 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     return (size!=nodes.size());
   }//addAll(int,Collection)
 
+  @Override
   public boolean removeAll(Collection c) {
     boolean result = false;
     Iterator iter = c.iterator();
@@ -274,13 +288,14 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
   }// removeAll()
 
 
+  @Override
   public boolean retainAll(Collection c) {
     int aprioriSize = nodes.size();
     List scrap = new ArrayList();
 
     MappingNode node;
     for (int index = 0; index < nodes.size(); index++) {
-      node = (MappingNode) nodes.get(index);
+      node = nodes.get(index);
       if (c.contains(node)) {
         scrap.add(node);
       }
@@ -292,6 +307,7 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
   }
 
 
+  @Override
   public void clear() {
     nodes.clear();
     lists.clear();
@@ -328,21 +344,26 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     return true;
   }
   
+  @Override
   public List subList(int i1, int i2) {
     return nodes.subList(i1,i2);
   }
 
+  @Override
   public ListIterator listIterator(int index) {
     throw new UnsupportedOperationException("this method is not implemented");
   }
+  @Override
   public ListIterator listIterator() {
     throw new UnsupportedOperationException("this method is not implemented");
   }
 
+  @Override
   public int lastIndexOf(Object o) {
     return nodes.lastIndexOf(o);
   }
 
+  @Override
   public int indexOf(Object o) {
     return nodes.indexOf(o);
   }
@@ -357,15 +378,18 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     private int index = 0;
     private boolean removeCalled = false;
 
+    @Override
     public boolean hasNext() {
       return (index < nodes.size());
     }
 
+    @Override
     public Object next() {
       removeCalled = false;
       return nodes.get(index++);
     }
 
+    @Override
     public void remove() {
       if (!removeCalled && index > 0  ) {
         index--;

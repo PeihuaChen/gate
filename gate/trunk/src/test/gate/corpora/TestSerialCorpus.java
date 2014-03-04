@@ -35,6 +35,7 @@ public class TestSerialCorpus extends TestCase
   public TestSerialCorpus(String name) { super(name); }
 
   /** Fixture set up */
+  @Override
   public void setUp() {
   } // setUp
 
@@ -66,8 +67,8 @@ public class TestSerialCorpus extends TestCase
     assertEquals(2, c.size());
 
     Corpus c1 = new SerialCorpusImpl(c);
-    Document d1_1 = (Document) c1.get(0);
-    Document d2_1 = (Document) c1.get(1);
+    Document d1_1 = c1.get(0);
+    Document d2_1 = c1.get(1);
     assertEquals(d1, d1_1);
     assertEquals(d2, d2_1);
 

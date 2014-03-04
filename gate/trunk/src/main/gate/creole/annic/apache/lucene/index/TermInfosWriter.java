@@ -20,7 +20,6 @@ package gate.creole.annic.apache.lucene.index;
 import java.io.IOException;
 import gate.creole.annic.apache.lucene.store.OutputStream;
 import gate.creole.annic.apache.lucene.store.Directory;
-import gate.creole.annic.apache.lucene.util.StringHelper;
 
 /** This stores a monotonically increasing set of <Term, TermInfo> pairs in a
   Directory.  A TermInfos can be written once, in order.  */

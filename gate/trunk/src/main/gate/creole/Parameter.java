@@ -289,7 +289,7 @@ public class Parameter implements Serializable
       if(stringValue != null) {
         // otherwise, if it's a GATE resource type pick the first registered instance 
         if(resData == null)
-          resData = (ResourceData) Gate.getCreoleRegister().get(typeName);
+          resData = Gate.getCreoleRegister().get(typeName);
         if(resData == null){
           //unknown type
           return null;
@@ -387,8 +387,7 @@ public class Parameter implements Serializable
   {
     // get java builtin classes via class; else look in the register
     try {
-      ResourceData resData = (ResourceData)
-                             Gate.getCreoleRegister().get(typeName);
+      ResourceData resData = Gate.getCreoleRegister().get(typeName);
       if(resData == null){
         paramClass = Gate.getClassLoader().loadClass(typeName);
       }else{
@@ -419,6 +418,7 @@ public class Parameter implements Serializable
   } // getParameterClass
 
   /** String representation */
+  @Override
   public String toString() {
     try{
       return "Parameter: name="+ name+ "; valueString=" + typeName +

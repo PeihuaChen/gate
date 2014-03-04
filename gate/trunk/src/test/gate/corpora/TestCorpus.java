@@ -35,6 +35,7 @@ public class TestCorpus extends TestCase
   public TestCorpus(String name) { super(name); }
 
   /** Fixture set up */
+  @Override
   public void setUp() {
   } // setUp
 

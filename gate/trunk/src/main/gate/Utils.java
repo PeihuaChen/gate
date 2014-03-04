@@ -989,15 +989,15 @@ public class Utils {
   private static AnnotationSet getCoextensiveAnnotationsWorker(AnnotationSet source,
       String type, long start, long end) {
     if (source instanceof gate.annotation.AnnotationSetImpl) {
-      AnnotationSet ret = ((AnnotationSetImpl) source).getStrict((long) start,
-          (long) end);
+      AnnotationSet ret = ((AnnotationSetImpl) source).getStrict(start,
+          end);
       if (type != null) {
         return ret.get(type);
       } else {
         return ret;
       }
     } else {
-      AnnotationSet annset = source.getContained((long) start, (long) end);
+      AnnotationSet annset = source.getContained(start, end);
       List<Annotation> annotationsToAdd = new ArrayList<Annotation>();
       for (Annotation ann : annset) {
         if (start(ann) == start && end(ann) == end) {

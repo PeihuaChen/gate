@@ -71,6 +71,7 @@ public class TestConstraints extends BaseJapeTests {
     int[] expectedEndOffsets = {3, 11, 15, 32, 47};
 
     AnnotationCreator annocreator = new BaseAnnotationCreator() {
+      @Override
       public AnnotationSet createAnnots(Document doc)
               throws InvalidOffsetException {
         FeatureMap feat = Factory.newFeatureMap();
@@ -279,6 +280,7 @@ public class TestConstraints extends BaseJapeTests {
     int[] expectedEndOffsets = {5, 43};
     
     AnnotationCreator operatorsAnnoCreator = new BaseAnnotationCreator() {
+      @Override
       public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
         FeatureMap feat = Factory.newFeatureMap();
         feat.put("string", "");
@@ -718,6 +720,7 @@ public class TestConstraints extends BaseJapeTests {
     int[] expectedEndOffsets = {44, 57};
     
     AnnotationCreator annoCreator816Macros = new BaseAnnotationCreator() {
+      @Override
       public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
         final String token = "Token";
         FeatureMap feats = Factory.newFeatureMap();
@@ -835,6 +838,7 @@ public class TestConstraints extends BaseJapeTests {
         "CleanStringAccessorEqual"};
 
     AnnotationCreator ac = new BaseAnnotationCreator() {
+      @Override
       public AnnotationSet createAnnots(Document doc)
               throws InvalidOffsetException {
         FeatureMap feat = Factory.newFeatureMap();
@@ -861,6 +865,7 @@ public class TestConstraints extends BaseJapeTests {
         "IsContained"};
 
     AnnotationCreator ac = new BaseAnnotationCreator() {
+      @Override
       public AnnotationSet createAnnots(Document doc)
               throws InvalidOffsetException {
         add(4, 7, "A");
@@ -905,6 +910,7 @@ public class TestConstraints extends BaseJapeTests {
         "ContainsWithMetaProperty"};
 
     AnnotationCreator ac = new BaseAnnotationCreator() {
+      @Override
       public AnnotationSet createAnnots(Document doc)
               throws InvalidOffsetException {
         FeatureMap cFeat = Factory.newFeatureMap();
@@ -946,6 +952,7 @@ public class TestConstraints extends BaseJapeTests {
         "ZeroToThreeC"};
 
     AnnotationCreator ac = new BaseAnnotationCreator() {
+      @Override
       public AnnotationSet createAnnots(Document doc)
               throws InvalidOffsetException {
 
@@ -1026,6 +1033,7 @@ public class TestConstraints extends BaseJapeTests {
         "StarC", "StarC", "StarC"};
 
     AnnotationCreator ac = new BaseAnnotationCreator() {
+      @Override
       public AnnotationSet createAnnots(Document doc)
               throws InvalidOffsetException { // OptionalB check
         // addInc("C");
@@ -1085,12 +1093,14 @@ public void doCommonTest(String japeFilePath, String docFilePath,
 }
   
 private final   AnnotationCreator annoCreatorEmpty = new BaseAnnotationCreator() {
+  @Override
   public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
     return as;
   }
 };
 
 private final AnnotationCreator annoCreator81LocOrgDateJob = new BaseAnnotationCreator() {
+  @Override
   public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
     /* line 1 */
     add(1, 6, "Location");
@@ -1129,6 +1139,7 @@ private final AnnotationCreator annoCreator81LocOrgDateJob = new BaseAnnotationC
 };
   
 private final AnnotationCreator annoCreator813Operators = new BaseAnnotationCreator() {
+  @Override
   public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
     FeatureMap feat = Factory.newFeatureMap();
     feat.put("string", "room");
@@ -1162,6 +1173,7 @@ private final AnnotationCreator annoCreator813Operators = new BaseAnnotationCrea
 };
 
 private final  AnnotationCreator annoCreator814MetaProps = new BaseAnnotationCreator() {
+  @Override
   public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
     add(1, 61, "Span");
     return as;
@@ -1169,6 +1181,7 @@ private final  AnnotationCreator annoCreator814MetaProps = new BaseAnnotationCre
 };
 
 private final AnnotationCreator annoCreator815MultipleActions = new BaseAnnotationCreator() {
+  @Override
   public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
     final String tp = "TempPerson";
     add(1, 5, tp);
@@ -1186,6 +1199,7 @@ private final AnnotationCreator annoCreator815MultipleActions = new BaseAnnotati
 };
 
 private final AnnotationCreator annoCreator817Contexts = new BaseAnnotationCreator() {
+  @Override
   public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
     final String tok = "Token";
     final String str = "string";
@@ -1232,6 +1246,7 @@ private final AnnotationCreator annoCreator817Contexts = new BaseAnnotationCreat
    * 0-------------1--------------2 12345678901234567890
    */
   protected AnnotationCreator basicAnnotCreator = new BaseAnnotationCreator() {
+    @Override
     public AnnotationSet createAnnots(Document doc)
             throws InvalidOffsetException {
       FeatureMap feat = Factory.newFeatureMap();
@@ -1300,6 +1315,7 @@ private final AnnotationCreator annoCreator817Contexts = new BaseAnnotationCreat
 
   public static Test suite() {
     Test suite = new TestSetup(new TestSuite(TestConstraints.class)) {
+      @Override
       protected void setUp() {
         setUpGate();
         logger.info("GATE initialized and fixure set up.");

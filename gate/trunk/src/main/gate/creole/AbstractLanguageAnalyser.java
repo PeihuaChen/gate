@@ -26,11 +26,13 @@ abstract public class AbstractLanguageAnalyser
                       implements LanguageAnalyser
 {
   /** Set the document property for this analyser. */
+  @Override
   public void setDocument(Document document) {
     this.document = document;
   } // setDocument()
 
   /** Get the document property for this analyser. */
+  @Override
   public Document getDocument() {
     return document;
   } // getDocument()
@@ -39,11 +41,13 @@ abstract public class AbstractLanguageAnalyser
   protected Document document;
 
   /** Set the corpus property for this analyser. */
+  @Override
   public void setCorpus(Corpus corpus) {
     this.corpus = corpus;
   } // setCorpus()
 
   /** Get the corpus property for this analyser. */
+  @Override
   public Corpus getCorpus() {
     return corpus;
   } // getCorpus()

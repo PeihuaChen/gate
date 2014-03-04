@@ -127,6 +127,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   protected Map searchParameters;
 
   /** Close the data store. */
+  @Override
   public void close() throws PersistenceException {
     // stop listening to Creole events
     Gate.getCreoleRegister().removeCreoleListener(this);
@@ -134,6 +135,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
     // as a zero-delay task rather than calling shutdown directly,
     // in order to interrupt any timed wait currently in progress.
     executor.execute(new Runnable() {
+      @Override
       public void run() {
         executor.shutdown();
       }
@@ -163,6 +165,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   } // close()
 
   /** Open a connection to the data store. */
+  @Override
   public void open() throws PersistenceException {
     super.open();
     /*
@@ -276,6 +279,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   /**
    * Delete a resource from the data store.
    */
+  @Override
   public void delete(String lrClassName, Object lrPersistenceId)
           throws PersistenceException {
 
@@ -346,6 +350,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
     }
   }
 
+  @Override
   public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
           throws PersistenceException, SecurityException {
     LanguageResource lr = super.getLr(lrClassName, lrPersistenceId);
@@ -359,6 +364,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    * Save: synchonise the in-memory image of the LR with the persistent
    * image.
    */
+  @Override
   public void sync(LanguageResource lr) throws PersistenceException {
     if(lr.getLRPersistenceId() != null) {
       // lock the LR ID so we don't write to the file while an
@@ -432,6 +438,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   /**
    * Sets the Indexer to be used for indexing Datastore
    */
+  @Override
   public void setIndexer(Indexer indexer, Map indexParameters)
           throws IndexException {
 
@@ -456,10 +463,12 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
     }
   }
 
+  @Override
   public Indexer getIndexer() {
     return this.indexer;
   }
 
+  @Override
   public void setSearcher(Searcher searcher) throws SearchException {
     this.searcher = searcher;
     if(this.searcher instanceof LuceneSearcher) {
@@ -467,6 +476,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
     }
   }
 
+  @Override
   public Searcher getSearcher() {
     return this.searcher;
   }
@@ -493,6 +503,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   /**
    * Search the datastore
    */
+  @Override
   public boolean search(String query, Map searchParameters)
           throws SearchException {
     return this.searcher.search(query, searchParameters);
@@ -504,6 +515,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    * @param numberOfPatterns
    * @return null if no patterns found
    */
+  @Override
   public Hit[] next(int numberOfPatterns) throws SearchException {
     return this.searcher.next(numberOfPatterns);
   }
@@ -512,6 +524,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   /**
    * This method is invoked whenever a document is removed from a corpus
    */
+  @Override
   public void documentRemoved(CorpusEvent ce) {
     Object docLRID = ce.getDocumentLRID();
 
@@ -536,6 +549,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    * This method is invoked whenever a document is added to a particular
    * corpus
    */
+  @Override
   public void documentAdded(CorpusEvent ce) {
     /*
      * we don't want to do anything here, because the sync is
@@ -550,6 +564,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    * @see
    * gate.event.CreoleListener#datastoreClosed(gate.event.CreoleEvent)
    */
+  @Override
   public void datastoreClosed(CreoleEvent e) {
   }
 
@@ -559,6 +574,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    * @see
    * gate.event.CreoleListener#datastoreCreated(gate.event.CreoleEvent)
    */
+  @Override
   public void datastoreCreated(CreoleEvent e) {
   }
 
@@ -568,6 +584,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    * @see
    * gate.event.CreoleListener#datastoreOpened(gate.event.CreoleEvent)
    */
+  @Override
   public void datastoreOpened(CreoleEvent e) {
   }
 
@@ -577,6 +594,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    * @see
    * gate.event.CreoleListener#resourceLoaded(gate.event.CreoleEvent)
    */
+  @Override
   public void resourceLoaded(CreoleEvent e) {
   }
 
@@ -586,6 +604,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    * @see gate.event.CreoleListener#resourceRenamed(gate.Resource,
    * java.lang.String, java.lang.String)
    */
+  @Override
   public void resourceRenamed(Resource resource, String oldName, String newName) {
   }
 
@@ -595,6 +614,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    * @see
    * gate.event.CreoleListener#resourceUnloaded(gate.event.CreoleEvent)
    */
+  @Override
   public void resourceUnloaded(CreoleEvent e) {
     // if the resource being close is one of our corpora. we need to
     // remove
@@ -618,6 +638,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
       disabled.set(true);
     }
 
+    @Override
     public void run() {
       // remove this task from the currentTasks map if it has not been
       // superseded by a later task

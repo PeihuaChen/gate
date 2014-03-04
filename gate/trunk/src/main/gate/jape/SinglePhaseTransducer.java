@@ -142,6 +142,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
    * Finish: replace dynamic data structures with Java arrays; called
    * after parsing.
    */
+  @Override
   public void finish(GateClassLoader classLoader) {
     // both MPT and SPT have finish called on them by the parser...
     if(finishedAlready) return;
@@ -210,6 +211,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
    * Transduce a document using the annotation set provided and the
    * current rule application style.
    */
+  @Override
   public void transduce(Document doc, AnnotationSet inputAS,
           AnnotationSet outputAS) throws JapeException, ExecutionException {
     interrupted = false;
@@ -297,7 +299,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
                   + "\" Jape transducer has been abruptly interrupted!");
 
         // take the first active FSM instance
-        FSMInstance currentFSM = (FSMInstance)activeFSMInstances.remove(0);
+        FSMInstance currentFSM = activeFSMInstances.remove(0);
         // process the current FSM instance
 //        if(currentFSM.getFSMPosition().isFinal()) {
 //          // the current FSM is in a final state
@@ -377,7 +379,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         newAcceptingInstances = new ArrayList<FSMInstance>();
       }
 //        newAcceptingInstances.add((FSMInstance)currentInstance.clone());
-      newAcceptingInstances.add((FSMInstance)currentClone);
+      newAcceptingInstances.add(currentClone);
       // if we're only looking for the shortest stop here
       if(ruleApplicationStyle == FIRST_STYLE ||
          ruleApplicationStyle == ONCE_STYLE ) {
@@ -832,17 +834,20 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   } // fireRule
 
   /** Clean up (delete action class files, for e.g.). */
+  @Override
   public void cleanUp() {
     // for(DListIterator i = rules.begin(); ! i.atEnd(); i.advance())
     // ((Rule) i.get()).cleanUp();
   } // cleanUp
 
   /** A string representation of this object. */
+  @Override
   public String toString() {
     return toString("");
   } // toString()
 
   /** A string representation of this object. */
+  @Override
   public String toString(String pad) {
     String newline = Strings.getNl();
     String newPad = Strings.addPadding(pad, INDENT_PADDING);
@@ -912,6 +917,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     return !input.isEmpty();
   }
 
+  @Override
   public synchronized void removeProgressListener(ProgressListener l) {
     if(progressListeners != null && progressListeners.contains(l)) {
       Vector v = (Vector)progressListeners.clone();
@@ -920,6 +926,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     }
   }
 
+  @Override
   public synchronized void addProgressListener(ProgressListener l) {
     Vector v = progressListeners == null
             ? new Vector(2)
@@ -943,6 +950,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   // by Shafirin Andrey end
   private transient Vector progressListeners;
 
+  @Override
   protected void fireProgressChanged(int e) {
     if(progressListeners != null) {
       Vector listeners = progressListeners;
@@ -953,6 +961,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     }
   }
 
+  @Override
   protected void fireProcessFinished() {
     if(progressListeners != null) {
       Vector listeners = progressListeners;

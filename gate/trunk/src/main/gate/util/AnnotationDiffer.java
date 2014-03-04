@@ -160,8 +160,8 @@ public class AnnotationDiffer {
     //1) try all possible pairings
     for(int i = 0; i < keyList.size(); i++){
       for(int j =0; j < responseList.size(); j++){
-        Annotation keyAnn = (Annotation)keyList.get(i);
-        Annotation resAnn = (Annotation)responseList.get(j);
+        Annotation keyAnn = keyList.get(i);
+        Annotation resAnn = responseList.get(j);
         PairingImpl choice = null;
         if(keyAnn.coextensive(resAnn)){
           //we have full overlap -> CORRECT or WRONG
@@ -256,7 +256,7 @@ public class AnnotationDiffer {
       List<Pairing> aList = keyChoices.get(i);
       if(aList == null || aList.isEmpty()){
         if(missingAnnotations == null) missingAnnotations = new HashSet<Annotation>();
-        missingAnnotations.add((Annotation)(keyList.get(i)));
+        missingAnnotations.add((keyList.get(i)));
         Pairing choice = new PairingImpl(i, -1, WRONG_VALUE);
         choice.setType(MISSING_TYPE);
         finalChoices.add(choice);
@@ -269,7 +269,7 @@ public class AnnotationDiffer {
       List<Pairing> aList = responseChoices.get(i);
       if(aList == null || aList.isEmpty()){
         if(spuriousAnnotations == null) spuriousAnnotations = new HashSet<Annotation>();
-        spuriousAnnotations.add((Annotation)(responseList.get(i)));
+        spuriousAnnotations.add((responseList.get(i)));
         PairingImpl choice = new PairingImpl(-1, i, WRONG_VALUE);
         choice.setType(SPURIOUS_TYPE);
         finalChoices.add(choice);
@@ -313,7 +313,7 @@ public class AnnotationDiffer {
     if(responseList.size() == 0) {
       return 1.0;
     }
-    return ((double)correctMatches + partiallyCorrectMatches) / (double)responseList.size();
+    return ((double)correctMatches + partiallyCorrectMatches) / responseList.size();
   }
 
   /**
@@ -321,7 +321,7 @@ public class AnnotationDiffer {
    * @return a <tt>double</tt> value.
    */
   public double getPrecisionAverage() {
-    return ((double)getPrecisionLenient() + getPrecisionStrict()) / (double)(2.0);
+    return (getPrecisionLenient() + getPrecisionStrict()) / (2.0);
   }
 
   /**
@@ -333,7 +333,7 @@ public class AnnotationDiffer {
     if(keyList.size() == 0) {
       return 1.0;
     }
-    return ((double)correctMatches + partiallyCorrectMatches) / (double)keyList.size();
+    return ((double)correctMatches + partiallyCorrectMatches) / keyList.size();
   }
 
   /**
@@ -341,7 +341,7 @@ public class AnnotationDiffer {
    * @return a <tt>double</tt> value.
    */
   public double getRecallAverage() {
-    return ((double) getRecallLenient() + getRecallStrict()) / (double)(2.0);
+    return (getRecallLenient() + getRecallStrict()) / (2.0);
   }
 
   /**
@@ -357,7 +357,7 @@ public class AnnotationDiffer {
     double precision = getPrecisionStrict();
     double recall = getRecallStrict();
     double betaSq = beta * beta;
-    double answer = (double)(((double)(betaSq + 1) * precision * recall ) / (double)(betaSq * precision + recall));
+    double answer = (((betaSq + 1) * precision * recall ) / (betaSq * precision + recall));
     if(Double.isNaN(answer)) answer = 0.0;
     return answer;
   }
@@ -374,7 +374,7 @@ public class AnnotationDiffer {
     double precision = getPrecisionLenient();
     double recall = getRecallLenient();
     double betaSq = beta * beta;
-    double answer = (double)(((double)(betaSq + 1) * precision * recall) / ((double)betaSq * precision + recall));
+    double answer = (((betaSq + 1) * precision * recall) / (betaSq * precision + recall));
     if(Double.isNaN(answer)) answer = 0.0;
     return answer;
   }
@@ -387,7 +387,7 @@ public class AnnotationDiffer {
    * @return a <tt>double</tt>value.
    */  
   public double getFMeasureAverage(double beta) {
-    double answer = ((double)getFMeasureLenient(beta) + (double)getFMeasureStrict(beta)) / (double)(2.0);
+    double answer = (getFMeasureLenient(beta) + getFMeasureStrict(beta)) / (2.0);
     return answer;
   }
 
@@ -507,7 +507,7 @@ public class AnnotationDiffer {
           //size must be 1
           Pairing aChoice = choices.get(0);
           //the SAME choice should be found for the associated response
-          List<?> otherChoices = (List<?>) responseChoices.get(aChoice.getResponseIndex());
+          List<?> otherChoices = responseChoices.get(aChoice.getResponseIndex());
           if(otherChoices == null ||
              otherChoices.size() != 1 ||
              otherChoices.get(0) != aChoice){
@@ -526,7 +526,7 @@ public class AnnotationDiffer {
           //size must be 1
           Pairing aChoice = choices.get(0);
           //the SAME choice should be found for the associated response
-          List<?> otherChoices = (List<?>) keyChoices.get(aChoice.getKeyIndex());
+          List<?> otherChoices = keyChoices.get(aChoice.getKeyIndex());
           if(otherChoices == null){
             throw new Exception("Reciprocity error : null!");
           }else if(otherChoices.size() != 1){
@@ -587,6 +587,7 @@ public class AnnotationDiffer {
       scoreCalculated = false;
 	    }
 
+    @Override
     public int getScore(){
       if(scoreCalculated) return score;
       else{
@@ -595,32 +596,39 @@ public class AnnotationDiffer {
       }
     }
 
+    @Override
     public int getKeyIndex() {
       return this.keyIndex;
     }
     
+    @Override
     public int getResponseIndex() {
       return this.responseIndex;
     }
     
+    @Override
     public int getValue() {
       return this.value;
     }
     
+    @Override
     public Annotation getKey(){
-      return keyIndex == -1 ? null : (Annotation)keyList.get(keyIndex);
+      return keyIndex == -1 ? null : keyList.get(keyIndex);
     }
 
+    @Override
     public Annotation getResponse(){
       return responseIndex == -1 ? null :
-        (Annotation)responseList.get(responseIndex);
+        responseList.get(responseIndex);
     }
 
+    @Override
     public int getType(){
       return type;
     }
     
 
+    @Override
     public void setType(int type) {
       this.type = type;
     }
@@ -653,6 +661,7 @@ public class AnnotationDiffer {
     /**
      * Removes this choice from the two lists it belongs to
      */
+    @Override
     public void remove(){
       List<Pairing> fromKey = keyChoices.get(keyIndex);
       fromKey.remove(this);
@@ -724,7 +733,8 @@ public class AnnotationDiffer {
      * zero if they score the same or negative otherwise.
      */
 
-	  public int compare(Pairing first, Pairing second){
+	  @Override
+    public int compare(Pairing first, Pairing second){
       //compare by score
       int res = first.getScore() - second.getScore();
       //compare by type
@@ -750,7 +760,8 @@ public class AnnotationDiffer {
      * Compares two choices based on start offset of key (or response
      * if key not present) and type if offsets are equal.
      */
-	  public int compare(Pairing first, Pairing second){
+	  @Override
+    public int compare(Pairing first, Pairing second){
 	    Annotation key1 = first.getKey();
 	    Annotation key2 = second.getKey();
 	    Annotation res1 = first.getResponse();
@@ -830,9 +841,9 @@ public class AnnotationDiffer {
    */
   public String getAnnotationType() {
     if (!keyList.isEmpty()) {
-      return ((Annotation) keyList.iterator().next()).getType();
+      return keyList.iterator().next().getType();
     } else if (!responseList.isEmpty()) {
-      return ((Annotation) responseList.iterator().next()).getType();
+      return responseList.iterator().next().getType();
     } else {
       return "";
     }

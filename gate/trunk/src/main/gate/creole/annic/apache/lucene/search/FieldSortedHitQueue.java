@@ -79,6 +79,7 @@ extends PriorityQueue {
    * @param b ScoreDoc
    * @return <code>true</code> if document <code>a</code> should be sorted after document <code>b</code>.
    */
+  @Override
   protected final boolean lessThan (final Object a, final Object b) {
     final ScoreDoc docA = (ScoreDoc) a;
     final ScoreDoc docB = (ScoreDoc) b;
@@ -191,6 +192,7 @@ extends PriorityQueue {
 
       final int[] fieldOrder = FieldCache.DEFAULT.getInts (reader, field);
 
+      @Override
       public final int compare (final ScoreDoc i, final ScoreDoc j) {
         final int fi = fieldOrder[i.doc];
         final int fj = fieldOrder[j.doc];
@@ -199,10 +201,12 @@ extends PriorityQueue {
         return 0;
       }
 
+      @Override
       public Comparable sortValue (final ScoreDoc i) {
         return new Integer (fieldOrder[i.doc]);
       }
 
+      @Override
       public int sortType() {
         return SortField.INT;
       }
@@ -223,6 +227,7 @@ extends PriorityQueue {
 
       protected final float[] fieldOrder = FieldCache.DEFAULT.getFloats (reader, field);
 
+      @Override
       public final int compare (final ScoreDoc i, final ScoreDoc j) {
         final float fi = fieldOrder[i.doc];
         final float fj = fieldOrder[j.doc];
@@ -231,10 +236,12 @@ extends PriorityQueue {
         return 0;
       }
 
+      @Override
       public Comparable sortValue (final ScoreDoc i) {
         return new Float (fieldOrder[i.doc]);
       }
 
+      @Override
       public int sortType() {
         return SortField.FLOAT;
       }
@@ -254,6 +261,7 @@ extends PriorityQueue {
     return new ScoreDocComparator () {
       final FieldCache.StringIndex index = FieldCache.DEFAULT.getStringIndex (reader, field);
 
+      @Override
       public final int compare (final ScoreDoc i, final ScoreDoc j) {
         final int fi = index.order[i.doc];
         final int fj = index.order[j.doc];
@@ -262,10 +270,12 @@ extends PriorityQueue {
         return 0;
       }
 
+      @Override
       public Comparable sortValue (final ScoreDoc i) {
         return index.lookup[index.order[i.doc]];
       }
 
+      @Override
       public int sortType() {
         return SortField.STRING;
       }
@@ -286,14 +296,17 @@ extends PriorityQueue {
     return new ScoreDocComparator() {
       final String[] index = FieldCache.DEFAULT.getStrings (reader, field);
 
+      @Override
       public final int compare (final ScoreDoc i, final ScoreDoc j) {
         return collator.compare (index[i.doc], index[j.doc]);
       }
 
+      @Override
       public Comparable sortValue (final ScoreDoc i) {
         return index[i.doc];
       }
 
+      @Override
       public int sortType() {
         return SortField.STRING;
       }

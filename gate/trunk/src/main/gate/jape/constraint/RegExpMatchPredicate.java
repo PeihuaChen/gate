@@ -29,6 +29,7 @@ public class RegExpMatchPredicate extends AbstractRegExpPredicate {
     return m.matches();
   }
 
+  @Override
   public String getOperator() {
     return REGEXP_MATCH;
   }

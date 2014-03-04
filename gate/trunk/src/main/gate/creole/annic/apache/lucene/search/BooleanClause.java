@@ -36,6 +36,7 @@ public class BooleanClause implements java.io.Serializable {
   }
 
   /** Returns true iff <code>o</code> is equal to this. */
+  @Override
   public boolean equals(Object o) {
     if (!(o instanceof BooleanClause))
       return false;
@@ -46,6 +47,7 @@ public class BooleanClause implements java.io.Serializable {
   }
 
   /** Returns a hash code value for this object.*/
+  @Override
   public int hashCode() {
     return query.hashCode() ^ (this.required?1:0) ^ (this.prohibited?2:0);
   }

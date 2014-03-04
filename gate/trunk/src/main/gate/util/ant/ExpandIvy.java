@@ -233,7 +233,7 @@ public class ExpandIvy extends Task {
               .entrySet()) {
             // for each artifact a retrieve would copy....
             ArtifactDownloadReport dlReport =
-                (ArtifactDownloadReport)entry.getKey();
+                entry.getKey();
 
             for(String destPath : entry.getValue()) {
               // find out where it should end up

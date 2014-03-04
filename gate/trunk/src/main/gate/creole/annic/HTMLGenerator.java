@@ -37,9 +37,10 @@ public class HTMLGenerator {
     // find out the number of columns
     List<String> colPositions = getColsPositions(patternAnnotations);
     Collections.sort(colPositions, new Comparator<String>() {
+      @Override
       public int compare(String a, String b) {
-        int aVal = Integer.parseInt((String)a);
-        int bVal = Integer.parseInt((String)b);
+        int aVal = Integer.parseInt(a);
+        int bVal = Integer.parseInt(b);
         return aVal - bVal;
       }
     });
@@ -75,7 +76,7 @@ public class HTMLGenerator {
       int columnsDrawn = 0;
       for(int k = 0; k < rowAnnotations.size(); k++) {
         // for each annotation we will create a column
-        PatternAnnotation annot = (PatternAnnotation)rowAnnotations.get(k);
+        PatternAnnotation annot = rowAnnotations.get(k);
 
         // we may need to draw few columns before this annotations
         html += "\n"
@@ -184,11 +185,11 @@ public class HTMLGenerator {
     // this is the first annotation in this row
     int startPoint = 0;
     if(currentPos == 0) {
-      startPoint = ((PatternAnnotation)currentTableAnnotations[0])
+      startPoint = currentTableAnnotations[0]
               .getStartOffset();
     }
     else {
-      startPoint = ((PatternAnnotation)rowAnnotations.get(currentPos - 1))
+      startPoint = rowAnnotations.get(currentPos - 1)
               .getEndOffset();
     }
 

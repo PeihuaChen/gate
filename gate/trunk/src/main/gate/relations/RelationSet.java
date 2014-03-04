@@ -128,6 +128,7 @@ public class RelationSet implements Serializable, AnnotationSetListener,
   /**
    * Empties the relation set
    */
+  @Override
   public void clear() {
 
     // clearing the indexes won't fire the events so we fire the events
@@ -150,6 +151,7 @@ public class RelationSet implements Serializable, AnnotationSetListener,
    * 
    * @return the number of relations in this set.
    */
+  @Override
   public int size() {
     return indexById.size();
   }

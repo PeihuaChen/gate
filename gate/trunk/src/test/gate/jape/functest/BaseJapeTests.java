@@ -300,7 +300,8 @@ public abstract class BaseJapeTests extends TestCase {
 
 	public BaseAnnotationCreator() {}
 
-	public final void annotate(Document doc) throws InvalidOffsetException {
+	@Override
+  public final void annotate(Document doc) throws InvalidOffsetException {
 	    as = doc.getAnnotations();
 	    createAnnots(doc);
 	}

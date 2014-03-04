@@ -62,6 +62,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   /* (non-Javadoc)
    * @see gate.gui.annedit.AnnotationEditorOwner#annotationTypeChanged(gate.Annotation, java.lang.String, java.lang.String)
    */
+  @Override
   public void annotationChanged(Annotation ann, AnnotationSet set, 
           String oldType) {
     lastAnnotationType = ann.getType();
@@ -87,8 +88,10 @@ public class AnnotationSetsView extends AbstractDocumentView
   /**
    * Queues an an action for selecting the provided annotation
    */
+  @Override
   public void selectAnnotation(final AnnotationData aData) {
     Runnable action = new Runnable(){
+      @Override
       public void run(){
         List<AnnotationData> selAnns = Collections.singletonList(aData);
         owner.setSelectedAnnotations(selAnns);
@@ -103,6 +106,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   /* (non-Javadoc)
    * @see gate.gui.annedit.AnnotationEditorOwner#getNextAnnotation()
    */
+  @Override
   public Annotation getNextAnnotation() {
     return null;
   }
@@ -110,6 +114,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   /* (non-Javadoc)
    * @see gate.gui.annedit.AnnotationEditorOwner#getPreviousAnnotation()
    */
+  @Override
   public Annotation getPreviousAnnotation() {
     return null;
   }
@@ -117,6 +122,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   /* (non-Javadoc)
    * @see gate.gui.annedit.AnnotationEditorOwner#getTextComponent()
    */
+  @Override
   public JTextComponent getTextComponent() {
     return textPane;
   }
@@ -143,6 +149,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     eventMinder.setCoalesce(true);    
   }
   
+  @Override
   public List getActions() {
     return actions;
   }  
@@ -150,10 +157,12 @@ public class AnnotationSetsView extends AbstractDocumentView
   /* (non-Javadoc)
    * @see gate.gui.docview.DocumentView#getType()
    */
+  @Override
   public int getType() {
     return VERTICAL;
   }
   
+  @Override
   protected void initGUI(){
     //get a pointer to the textual view used for highlights
     Iterator centralViewsIter = owner.getCentralViews().iterator();
@@ -262,7 +271,7 @@ public class AnnotationSetsView extends AbstractDocumentView
             .getPublicVrTypes());
     Collections.reverse(vrTypes);
     for(String aVrType : vrTypes) {
-      ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(aVrType);
+      ResourceData rData = Gate.getCreoleRegister().get(aVrType);
       try {
         Class resClass = rData.getResourceClass();
         if(OwnedAnnotationEditor.class.isAssignableFrom(resClass)) {
@@ -307,6 +316,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     tableRows.addAll(setHandlers);
   }
   
+  @Override
   public Component getGUI(){
     return mainPanel;
   }
@@ -410,6 +420,7 @@ public class AnnotationSetsView extends AbstractDocumentView
    * should use this to add hooks (such as mouse listeners) to the other views
    * as required by their functionality. 
    */
+  @Override
   protected void registerHooks(){
     textPane.addMouseListener(textMouseListener);
     textPane.addMouseMotionListener(textMouseListener);
@@ -424,6 +435,7 @@ public class AnnotationSetsView extends AbstractDocumentView
    * in {@link #registerHooks()}.
    *
    */
+  @Override
   protected void unregisterHooks(){
     textPane.removeMouseListener(textMouseListener);
     textPane.removeMouseMotionListener(textMouseListener);
@@ -473,9 +485,11 @@ public class AnnotationSetsView extends AbstractDocumentView
     // popup menu to change the color, select, unselect
     // and delete annotation types
     mainTable.addMouseListener(new MouseAdapter(){
+      @Override
       public void mouseClicked(MouseEvent evt){
         processMouseEvent(evt);
       }
+      @Override
       public void mousePressed(MouseEvent evt){
         int row =  mainTable.rowAtPoint(evt.getPoint());
         if(evt.isPopupTrigger()
@@ -485,6 +499,7 @@ public class AnnotationSetsView extends AbstractDocumentView
         }
         processMouseEvent(evt);
       }
+      @Override
       public void mouseReleased(MouseEvent evt){
         processMouseEvent(evt);
       }
@@ -526,6 +541,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     // Space key to select/unselect annotation type
     // Left/Right keys to close/open an annotation set
     mainTable.addKeyListener(new KeyAdapter(){
+      @Override
       public void keyPressed(KeyEvent e) {
         int row = mainTable.getSelectedRow();
         int col = mainTable.getSelectedColumn();
@@ -583,6 +599,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     mouseMovementTimer.setRepeats(false);
     textMouseListener = new TextMouseListener();
     textChangeListener = new PropertyChangeListener(){
+      @Override
       public void propertyChange(PropertyChangeEvent evt) {
         if(evt.getNewValue() != null){
           //we have a new highlighter
@@ -610,12 +627,14 @@ public class AnnotationSetsView extends AbstractDocumentView
     textPane.getInputMap()
       .put(KeyStroke.getKeyStroke("control E"), "edit annotation");
     textPane.getActionMap().put("edit annotation", new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         // use the same action as when the mouse stop over a selection
         // or annotation but this time for a keyboard shortcut
         mouseStoppedMovingAction.setTextLocation(textPane.getCaretPosition());
         mouseStoppedMovingAction.actionPerformed(null);
-        SwingUtilities.invokeLater(new Runnable() { public void run() {
+        SwingUtilities.invokeLater(new Runnable() { @Override
+        public void run() {
           annotationEditor.setPinnedMode(true);
         }});
       }});
@@ -626,6 +645,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     KeyStroke tab = KeyStroke.getKeyStroke("TAB");
     final Action oldTabAction = mainTable.getActionMap().get(im.get(tab));
     Action tabAction = new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         oldTabAction.actionPerformed(e);
         JTable table = (JTable) e.getSource();
@@ -639,6 +659,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     final Action oldShiftTabAction =
       mainTable.getActionMap().get(im.get(shiftTab));
     Action shiftTabAction = new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         oldShiftTabAction.actionPerformed(e);
         JTable table = (JTable) e.getSource();
@@ -654,6 +675,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   /* (non-Javadoc)
    * @see gate.Resource#cleanup()
    */
+  @Override
   public void cleanup() {
     document.removeDocumentListener(this);
     for(SetHandler sHandler : setHandlers){
@@ -665,11 +687,13 @@ public class AnnotationSetsView extends AbstractDocumentView
     document = null;
   }
   
+  @Override
   public void annotationSetAdded(final DocumentEvent e) {
     pendingEvents.offer(e);
     eventMinder.restart();
   }//public void annotationSetAdded(DocumentEvent e) 
   
+  @Override
   public void annotationSetRemoved(final DocumentEvent e) {
     pendingEvents.offer(e);
     eventMinder.restart();
@@ -678,6 +702,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   /**Called when the content of the document has changed through an edit 
    * operation.
    */
+  @Override
   public void contentEdited(DocumentEvent e){
     //go through all the type handlers and propagate the event
     Iterator setIter = setHandlers.iterator();
@@ -694,11 +719,13 @@ public class AnnotationSetsView extends AbstractDocumentView
   }
   
   
+  @Override
   public void annotationAdded(final AnnotationSetEvent e) {
     pendingEvents.offer(e);
     eventMinder.restart();
   }
   
+  @Override
   public void annotationRemoved(final AnnotationSetEvent e) {
     pendingEvents.offer(e);
     eventMinder.restart();
@@ -748,6 +775,7 @@ public class AnnotationSetsView extends AbstractDocumentView
                               final String typeName, 
                               final boolean selected){
     SwingUtilities.invokeLater(new Runnable(){
+      @Override
       public void run(){
         TypeHandler tHandler = getTypeHandler(setName, typeName);
         if(tHandler != null){
@@ -779,6 +807,7 @@ public class AnnotationSetsView extends AbstractDocumentView
         final AnnotationData aData = selectedAnnots.get(0);
         //queue the select action to the events minder
         actionEvent = new PerformActionEvent(new Runnable(){
+          @Override
           public void run(){
             //select the annotation for editing, if editing enabled
             if(annotationEditor.getAnnotationSetCurrentlyEdited() != 
@@ -792,6 +821,7 @@ public class AnnotationSetsView extends AbstractDocumentView
         });
       } else {
         actionEvent = new PerformActionEvent(new Runnable(){
+          @Override
           public void run(){
             // un-select the edited annotation
             annotationEditor.editAnnotation(null, 
@@ -818,6 +848,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   }
   
   protected class SetsTableModel extends AbstractTableModel{
+    @Override
     public int getRowCount(){
       return tableRows.size();
 //      //we have at least one row per set
@@ -830,10 +861,12 @@ public class AnnotationSetsView extends AbstractDocumentView
 //      return rows;
     }
     
+    @Override
     public int getColumnCount(){
       return 2;
     }
     
+    @Override
     public Object getValueAt(int row, int column){
       Object value = tableRows.get(row);
       switch(column){
@@ -874,6 +907,7 @@ public class AnnotationSetsView extends AbstractDocumentView
 //      return null;
     }
     
+    @Override
     public boolean isCellEditable(int rowIndex, int columnIndex){
       Object value = tableRows.get(rowIndex);
       switch(columnIndex){
@@ -886,6 +920,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       return columnIndex == SELECTED_COL;
     }
 
+    @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex){
       Object receiver = tableRows.get(rowIndex);
       switch(columnIndex){
@@ -906,10 +941,15 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected class SetsTableCellRenderer implements TableCellRenderer{
     public SetsTableCellRenderer(){
       typeLabel = new JLabel(){
+        @Override
         public void repaint(long tm, int x, int y, int width, int height){}
+        @Override
         public void repaint(Rectangle r){}
+        @Override
         public void validate(){}
+        @Override
         public void revalidate(){}
+        @Override
         protected void firePropertyChange(String propertyName,
                 													Object oldValue,
                 													Object newValue){}
@@ -923,10 +963,15 @@ public class AnnotationSetsView extends AbstractDocumentView
 
       
       setLabel = new JLabel(){
+        @Override
         public void repaint(long tm, int x, int y, int width, int height){}
+        @Override
         public void repaint(Rectangle r){}
+        @Override
         public void validate(){}
+        @Override
         public void revalidate(){}
+        @Override
         protected void firePropertyChange(String propertyName,
                 													Object oldValue,
                 													Object newValue){}
@@ -937,10 +982,15 @@ public class AnnotationSetsView extends AbstractDocumentView
       
 
       typeChk = new JCheckBox(){
+        @Override
         public void repaint(long tm, int x, int y, int width, int height){}
+        @Override
         public void repaint(Rectangle r){}
+        @Override
         public void validate(){}
+        @Override
         public void revalidate(){}
+        @Override
         protected void firePropertyChange(String propertyName,
                 													Object oldValue,
                 													Object newValue){}
@@ -949,10 +999,15 @@ public class AnnotationSetsView extends AbstractDocumentView
 //      typeChk.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
 
       setChk = new JCheckBox(){
+        @Override
         public void repaint(long tm, int x, int y, int width, int height){}
+        @Override
         public void repaint(Rectangle r){}
+        @Override
         public void validate(){}
+        @Override
         public void revalidate(){}
+        @Override
         protected void firePropertyChange(String propertyName,
                 													Object oldValue,
                 													Object newValue){}
@@ -968,6 +1023,7 @@ public class AnnotationSetsView extends AbstractDocumentView
               mainTable.getSelectionBackground(), 2);
     }
     
+    @Override
     public Component getTableCellRendererComponent(JTable table,
 																		               Object value,
 																			             boolean isSelected,
@@ -1031,6 +1087,7 @@ public class AnnotationSetsView extends AbstractDocumentView
 //      setChk.setMaximumSize(setChk.getMinimumSize());
       setChk.setOpaque(true);
       setChk.addActionListener(new ActionListener(){
+        @Override
         public void actionPerformed(ActionEvent evt){
           fireEditingStopped();
         }
@@ -1039,12 +1096,14 @@ public class AnnotationSetsView extends AbstractDocumentView
       typeChk.setOpaque(false);
 //      typeChk.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
       typeChk.addActionListener(new ActionListener(){
+        @Override
         public void actionPerformed(ActionEvent evt){
           fireEditingStopped();
         }
       });
     }
     
+    @Override
     public Component getTableCellEditorComponent(JTable table,
                                                  Object value,
                                                  boolean isSelected,
@@ -1078,18 +1137,22 @@ public class AnnotationSetsView extends AbstractDocumentView
       return null;
     }
     
+    @Override
     public boolean stopCellEditing(){
       return true;
     }
     
+    @Override
     public Object getCellEditorValue(){
       return new Boolean(currentChk.isSelected());
     }
     
+    @Override
     public boolean shouldSelectCell(EventObject anEvent){
       return false;
     }
     
+    @Override
     public boolean isCellEditable(EventObject anEvent){
       return true;
     }
@@ -1138,7 +1201,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       int pos = 0;
       for(;
           pos < typeHandlers.size() &&
-          ((TypeHandler)typeHandlers.get(pos)).name.compareTo(type) <= 0;
+          typeHandlers.get(pos).name.compareTo(type) <= 0;
           pos++);
       typeHandlers.add(pos, tHandler);
       typeHandlersByType.put(type, tHandler);
@@ -1395,6 +1458,7 @@ public class AnnotationSetsView extends AbstractDocumentView
         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("ENTER"));
       }
       
+      @Override
       public void actionPerformed(ActionEvent evt){
         Color col = JColorChooser.showDialog(mainTable, 
                 "Select colour for \"" + name + "\"",
@@ -1474,11 +1538,13 @@ public class AnnotationSetsView extends AbstractDocumentView
    * A mouse listener used for events in the text view. 
    */
   protected class TextMouseListener implements MouseInputListener{    
+    @Override
     public void mouseDragged(MouseEvent e){
       //do not create annotations while dragging
       mouseMovementTimer.stop();
     }
     
+    @Override
     public void mouseMoved(MouseEvent e){
       //this triggers select annotation leading to edit annotation or new 
       //annotation actions
@@ -1517,20 +1583,25 @@ public class AnnotationSetsView extends AbstractDocumentView
       }
     }
     
+    @Override
     public void mouseClicked(MouseEvent e){
     }
     
+    @Override
     public void mousePressed(MouseEvent e){
       
     }
+    @Override
     public void mouseReleased(MouseEvent e){
       
     }
     
+    @Override
     public void mouseEntered(MouseEvent e){
       
     }
     
+    @Override
     public void mouseExited(MouseEvent e){
       mouseMovementTimer.stop();
     }
@@ -1544,6 +1615,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       putValue(SHORT_DESCRIPTION, "Creates a new annotation set");
     }
     
+    @Override
     public void actionPerformed(ActionEvent evt){
       String name = newSetNameTextField.getText();
       newSetNameTextField.setText("");
@@ -1567,6 +1639,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       putValue(SHORT_DESCRIPTION, "Creates a new annotation from the" +
         " selection: [" + Strings.crop(selection, 30) + "]");
     }
+    @Override
     public void actionPerformed(ActionEvent evt){
       if(annotationEditor == null) return;
       int start = textPane.getSelectionStart();
@@ -1613,8 +1686,10 @@ public class AnnotationSetsView extends AbstractDocumentView
         "Saves original markups and highlighted annotations");
     }
     
+    @Override
     public void actionPerformed(ActionEvent evt){
       Runnable runableAction = new Runnable(){
+        @Override
         public void run(){
           XJFileChooser fileChooser = MainFrame.getFileChooser();
           ExtensionFileFilter filter =
@@ -1757,6 +1832,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   
   protected class HandleDocumentEventsAction extends AbstractAction{
 
+    @Override
     public void actionPerformed(ActionEvent ev) {
       //see if we need to try again to rebuild from scratch
       if(uiDirty){
@@ -1784,7 +1860,7 @@ public class AnnotationSetsView extends AbstractDocumentView
               if(newSetName != null){
                 for(i = 1;
                     i < setHandlers.size() && 
-                    ((SetHandler)setHandlers.get(i)).set.
+                    setHandlers.get(i).set.
                     getName().compareTo(newSetName) <= 0;
                     i++);
               }
@@ -1792,7 +1868,7 @@ public class AnnotationSetsView extends AbstractDocumentView
               //update the tableRows list
               int j = 0;
               if(i > 0){
-                SetHandler previousHandler = (SetHandler)setHandlers.get(i -1);
+                SetHandler previousHandler = setHandlers.get(i -1);
                 //find the index for the previous handler - which is guaranteed to exist
                 for(; tableRows.get(j) != previousHandler; j++);
                 if(previousHandler.isExpanded()){
@@ -1932,6 +2008,7 @@ public class AnnotationSetsView extends AbstractDocumentView
    */
   protected class MouseStoppedMovingAction extends AbstractAction{
     
+    @Override
     public void actionPerformed(ActionEvent evt){
       if(annotationEditor == null) return;
       //this action either creates a new annotation or starts editing an 
@@ -2006,21 +2083,26 @@ public class AnnotationSetsView extends AbstractDocumentView
       this.start = startOffset;
       this.end = endOffset;
       this.addMouseListener(new MouseAdapter() {
+        @Override
         public void mouseEntered(MouseEvent e) {
           showHighlight();
         }
 
+        @Override
         public void mouseExited(MouseEvent e) {
           removeHighlight();
         }
       });
       popup.addPopupMenuListener(new PopupMenuListener(){
+        @Override
         public void popupMenuWillBecomeVisible(PopupMenuEvent e){
           
         }
+        @Override
         public void popupMenuCanceled(PopupMenuEvent e){
           removeHighlight();
         }
+        @Override
         public void popupMenuWillBecomeInvisible(PopupMenuEvent e){
           removeHighlight();
         }
@@ -2065,6 +2147,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       this.aData = aData;
     }
     
+    @Override
     public void actionPerformed(ActionEvent evt){
       if(annotationEditor == null) return;
       //if the editor is done with the current annotation, we can move to the 
@@ -2074,6 +2157,7 @@ public class AnnotationSetsView extends AbstractDocumentView
         selectAnnotation(aData);
         //queue an event to show the annotation editor
         Runnable action = new Runnable() {
+          @Override
           public void run() {
             annotationEditor.editAnnotation(aData.getAnnotation(), 
                     aData.getAnnotationSet());
@@ -2094,6 +2178,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("SPACE"));
       this.selected = selected;
     }
+    @Override
     public void actionPerformed(ActionEvent evt){
       List<Object> handlersToSelect = new ArrayList<Object>();
       int[] selectedRows = mainTable.getSelectedRows();
@@ -2131,6 +2216,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       putValue(NAME, name);
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("DELETE"));
     }
+    @Override
     public void actionPerformed(ActionEvent event){
       // builds the list of type and set handlers to delete
       Vector<String> resourcesToDelete = new Vector<String>(); 

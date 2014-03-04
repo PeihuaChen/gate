@@ -43,6 +43,7 @@ public class JMenuButton extends JToggleButton {
     
     addActionListener(new ActionListener() {
 
+      @Override
       public void actionPerformed(ActionEvent e) {
         if(menu != null) menu.setSelected(isSelected());
         if(isSelected()) {
@@ -59,16 +60,19 @@ public class JMenuButton extends JToggleButton {
     
     popup.addPopupMenuListener(new PopupMenuListener(){
 
+      @Override
       public void popupMenuCanceled(PopupMenuEvent e) {
         setSelected(false);
         if(menu != null) menu.setSelected(false);
       }
 
+      @Override
       public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
         setSelected(false);
         if(menu != null) menu.setSelected(false);
       }
 
+      @Override
       public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
       }
     });

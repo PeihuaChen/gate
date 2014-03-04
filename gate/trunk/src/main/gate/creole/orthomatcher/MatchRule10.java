@@ -19,7 +19,8 @@ public class MatchRule10 implements OrthoMatcherRule {
 			this.orthomatcher=orthmatcher;
 	}
 	
-	public boolean value(String s1, String s2) {
+	@Override
+  public boolean value(String s1, String s2) {
 		
 	    boolean result=false;
 	  
@@ -35,7 +36,7 @@ public class MatchRule10 implements OrthoMatcherRule {
 	      int i = 0;
 	      for (; i< orthomatcher.tokensLongAnnot.size(); i++) {
 	        token = (String)
-	        ((Annotation) orthomatcher.tokensLongAnnot.get(i)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+	        orthomatcher.tokensLongAnnot.get(i).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
 	        if (orthomatcher.prepos.containsKey(token)) {
 	          invoke_rule=true;
 	          break;
@@ -49,14 +50,14 @@ public class MatchRule10 implements OrthoMatcherRule {
     	      if (i < orthomatcher.tokensLongAnnot.size()
     	              && previous_token != null) {
     	        next_token= (String)
-    	        ((Annotation) orthomatcher.tokensLongAnnot.get(i++)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+    	        orthomatcher.tokensLongAnnot.get(i++).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
     	        
     	        String s21 = (String)
-              ((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+              orthomatcher.tokensShortAnnot.get(0).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
               String s22 = (String)
-              ((Annotation) orthomatcher.tokensShortAnnot.get(1)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+              orthomatcher.tokensShortAnnot.get(1).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
               // then compare (in reverse) with the first two tokens of s2
-              if (OrthoMatcherHelper.straightCompare(next_token,(String) s21,orthomatcher.caseSensitive)
+              if (OrthoMatcherHelper.straightCompare(next_token,s21,orthomatcher.caseSensitive)
                       && OrthoMatcherHelper.straightCompare(previous_token, s22,orthomatcher.caseSensitive))
                 result = true ;
     	        }
@@ -68,6 +69,7 @@ public class MatchRule10 implements OrthoMatcherRule {
 	    return result;
 	}
 	
+  @Override
   public String getId(){
     return "MatchRule10";
   }

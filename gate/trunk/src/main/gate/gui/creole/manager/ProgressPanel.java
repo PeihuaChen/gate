@@ -35,6 +35,7 @@ import javax.swing.UIManager;
 @SuppressWarnings("serial")
 public class ProgressPanel extends JPanel implements ComponentListener {
   private static class SafeJProgressBar extends JProgressBar {
+    @Override
     public void setIndeterminate(boolean indeterminate) {
       // workaround for bug in some versions of Aqua L&F that prevents GATE
       // from exiting if indeterminate progress bars are used

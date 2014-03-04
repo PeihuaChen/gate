@@ -38,6 +38,7 @@ public class TestRepositioningInfo
   /**
    * This method sets up the parameters for the files to be tested
    */
+  @Override
   protected void setUp() {
 
     testFile = TestDocument.getTestServerName() + "tests/test-inline.xml";
@@ -59,6 +60,7 @@ public class TestRepositioningInfo
   }
 
   /** Fixture tear down - removes the document resource */
+  @Override
   public void tearDown() throws Exception {
     Factory.deleteResource(doc);
   } // tearDown
@@ -81,7 +83,7 @@ public class TestRepositioningInfo
       String encoding = ((DocumentImpl)doc).getEncoding();
       File outputFile = File.createTempFile("test-inline1","xml");
       OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(outputFile),encoding);
-      writer.write(((gate.Document)doc).toXml(null, true));
+      writer.write(doc.toXml(null, true));
       writer.flush();
       writer.close();
       Reader readerForSource = new BomStrippingInputStreamReader(new URL(testFile).openStream(),encoding);

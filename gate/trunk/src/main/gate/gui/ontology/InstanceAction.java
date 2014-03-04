@@ -44,6 +44,7 @@ public class InstanceAction extends AbstractAction implements
     mainPanel.add(instanceName = new JTextField(30), gbc);
   }
 
+  @Override
   @SuppressWarnings("deprecation")
   public void actionPerformed(ActionEvent actionevent) {
     OResource selectedNode = ((OResourceNode)selectedNodes.get(0)
@@ -59,6 +60,7 @@ public class InstanceAction extends AbstractAction implements
       "http://gate.ac.uk/example#" : ontology.getDefaultNameSpace());
     JOptionPane pane = new JOptionPane(mainPanel, JOptionPane.QUESTION_MESSAGE,
       JOptionPane.OK_CANCEL_OPTION, MainFrame.getIcon("ontology-instance")) {
+      @Override
       public void selectInitialValue() {
         instanceName.requestFocusInWindow();
         instanceName.selectAll();
@@ -105,6 +107,7 @@ public class InstanceAction extends AbstractAction implements
     this.ontology = ontology;
   }
 
+  @Override
   public void selectionChanged(ArrayList<DefaultMutableTreeNode> arraylist) {
     selectedNodes = arraylist;
   }

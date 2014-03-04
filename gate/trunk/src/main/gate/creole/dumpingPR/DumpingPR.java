@@ -108,6 +108,7 @@ public class DumpingPR extends AbstractLanguageAnalyser
   private static final String DUMPING_PR_SET = "DumpingPRTempSet";
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException
   {
     return super.init();
@@ -121,12 +122,14 @@ public class DumpingPR extends AbstractLanguageAnalyser
   * the resource has changed since the resource has been created then the
   * resource will change too after calling reInit().
   */
+  @Override
   public void reInit() throws ResourceInstantiationException
   {
     init();
   } // reInit()
 
   /** Run the resource. */
+  @Override
   public void execute() throws ExecutionException {
     if(document == null)
       throw new GateRuntimeException("No document to process!");

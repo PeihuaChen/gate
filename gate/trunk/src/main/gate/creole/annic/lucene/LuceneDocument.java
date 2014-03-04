@@ -755,7 +755,7 @@ public class LuceneDocument {
           Object tempText = features.get(type1);
           if(tempText == null) continue;
 
-          String text1 = (String)tempText.toString();
+          String text1 = tempText.toString();
           // we need to qualify the type names
           // for each annotation type feature we add AT.Feature=="**" to be able
           // to search for it

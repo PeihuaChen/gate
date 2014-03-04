@@ -76,7 +76,7 @@ public abstract class Factory {
   throws ResourceInstantiationException
   {
     // get the resource metadata
-    ResourceData resData = (ResourceData) Gate.getCreoleRegister().get(resourceClassName);
+    ResourceData resData = Gate.getCreoleRegister().get(resourceClassName);
     if(resData == null) {
       Set<DirectoryInfo> plugins = Gate.getDirectoryInfo(resourceClassName);
       
@@ -184,7 +184,7 @@ public abstract class Factory {
   ) throws ResourceInstantiationException
    {
     // get the resource metadata
-    ResourceData resData = (ResourceData) Gate.getCreoleRegister().get(resourceClassName);
+    ResourceData resData = Gate.getCreoleRegister().get(resourceClassName);
     if(resData == null) {
       Set<DirectoryInfo> plugins = Gate.getDirectoryInfo(resourceClassName);
       
@@ -282,7 +282,7 @@ public abstract class Factory {
     // create an object using the resource's default constructor
     try {
       if(DEBUG) Out.prln("Creating resource " + resClass.getName());
-      res = (Resource) resClass.newInstance();
+      res = resClass.newInstance();
     } catch(IllegalAccessException e) {
       throw new ResourceInstantiationException(
         "Couldn't create resource instance, access denied: " + e
@@ -463,7 +463,7 @@ public abstract class Factory {
     */
   public static void deleteResource(Resource resource) {
     ResourceData rd =
-      (ResourceData) Gate.getCreoleRegister().get(resource.getClass().getName());
+      Gate.getCreoleRegister().get(resource.getClass().getName());
     if(rd!= null && rd.removeInstantiation(resource)) {
       creoleProxy.fireResourceUnloaded(
         new CreoleEvent(resource, CreoleEvent.RESOURCE_UNLOADED)
@@ -828,7 +828,7 @@ public abstract class Factory {
       try {
           Constructor<ParseCpsl> c = japeParserClass.getConstructor
               (new Class[] {java.io.Reader.class, existingMacros.getClass()});
-          return (ParseCpsl) c.newInstance(new Object[] {stream, existingMacros});
+          return c.newInstance(new Object[] {stream, existingMacros});
       } catch (NoSuchMethodException e) { // Shouldn't happen
           throw new RuntimeException(e);
       } catch (IllegalArgumentException e) { // Shouldn't happen

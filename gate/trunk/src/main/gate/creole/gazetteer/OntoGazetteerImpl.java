@@ -28,12 +28,14 @@ public class OntoGazetteerImpl extends AbstractOntoGazetteer {
   public OntoGazetteerImpl() {
   }
 
+  @Override
   public java.util.Set lookup(String singleItem) {
     return gaz.lookup(singleItem);
   }
 
   /** Initialize this onto gazetteer
    *  @return .*/
+  @Override
   public Resource init() throws ResourceInstantiationException {
     try {
       checkParameters();
@@ -63,6 +65,7 @@ public class OntoGazetteerImpl extends AbstractOntoGazetteer {
 
   /** Executes this onto gazetteer over a pre-set document
    *  @throws ExecutionException if something goes wrong with the execution */
+  @Override
   public void execute()throws ExecutionException {
     if (null == gaz) {
       throw new ExecutionException("gazetteer not initialized (null).");
@@ -95,6 +98,7 @@ public class OntoGazetteerImpl extends AbstractOntoGazetteer {
    * @param singleItem removes a string item from the gazetteer model
    * @return true if the string is removed from the model, otherwise - false
    */
+  @Override
   public boolean remove(String singleItem) {
     return gaz.remove(singleItem);
   }
@@ -105,6 +109,7 @@ public class OntoGazetteerImpl extends AbstractOntoGazetteer {
    * @param lookup the lookup to be associated with the string item
    * @return true if the item has been added, otherwise - false.
    */
+  @Override
   public boolean add(String singleItem, Lookup lookup) {
     return gaz.add(singleItem,lookup);
   }

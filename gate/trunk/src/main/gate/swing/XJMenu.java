@@ -74,6 +74,7 @@ public class XJMenu extends JMenu {
    * to the default JMenu layout manager.
    * @param aFlag true if the popupmenu is visible
    */
+  @Override
   public void setPopupMenuVisible(boolean aFlag) {
     super.setPopupMenuVisible(aFlag);
     if (!aFlag) { return; }
@@ -94,25 +95,30 @@ public class XJMenu extends JMenu {
 
   protected void initListeners(){
     this.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseExited(MouseEvent e) {
         // clear the status
         listener.statusChanged("");
       }
     });
     this.addChangeListener(new ChangeListener() {
+      @Override
       public void stateChanged(ChangeEvent e) {
         // display the menu description in the status
         listener.statusChanged(description);
       }
     });
     this.addMenuListener(new MenuListener() {
+      @Override
       public void menuCanceled(MenuEvent e) {
         // do nothing
       }
+      @Override
       public void menuDeselected(MenuEvent e) {
         // clear the status
         listener.statusChanged("");
       }
+      @Override
       public void menuSelected(MenuEvent e) {
         // do nothing
       }

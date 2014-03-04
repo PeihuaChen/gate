@@ -54,6 +54,7 @@ public class TestPersist extends TestCase {
   }
 
   /** Fixture set up */
+  @Override
   public void setUp() throws Exception {
   } // setUp
 
@@ -61,6 +62,7 @@ public class TestPersist extends TestCase {
    * Put things back as they should be after running tests (reinitialise the
    * CREOLE register).
    */
+  @Override
   public void tearDown() throws Exception {
   } // tearDown
 
@@ -245,7 +247,7 @@ public class TestPersist extends TestCase {
     // check that the versions we read back match the originals
     Corpus diskCorp = (Corpus)lrsFromDisk.get(0);
 
-    Document diskDoc = (Document)diskCorp.get(0);
+    Document diskDoc = diskCorp.get(0);
 
     if(DEBUG) Out.prln("Documents in corpus: " + corp.getDocumentNames());
     assertTrue("corp name != mem name",

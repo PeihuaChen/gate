@@ -21,7 +21,6 @@ import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.FileSet;
 import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.filter.AbstractFilter;
 import org.jdom.filter.ElementFilter;
 import org.jdom.filter.Filter;
 import org.jdom.input.SAXBuilder;
@@ -120,6 +119,7 @@ public class ExpandCreoleXmls extends Task {
           
           // strip out SCAN="true" attributes as scanning has now been done
           Iterator scannedJars = creoleDoc.getDescendants(new ElementFilter("JAR").and(new Filter() {
+            @Override
             public boolean matches(Object o) {
               return "true".equalsIgnoreCase(((Element)o).getAttributeValue("SCAN"));
             }

@@ -35,9 +35,10 @@ public class LuceneTokenizer extends TokenStream {
   /**
    * Returns the next token in the token stream.
    */
-	public Token next() throws IOException {
+	@Override
+  public Token next() throws IOException {
 		while (pointer < tokens.size()) {
-			Token token = (Token) tokens.get(pointer);
+			Token token = tokens.get(pointer);
 			pointer++;
 			if (token == null)
 				continue;

@@ -41,6 +41,7 @@ public class ConditionalSerialController extends SerialController
     strategiesList = new ArrayList();
   }
 
+  @Override
   public Collection getRunningStrategies(){
     return Collections.unmodifiableList(strategiesList);
   }
@@ -51,6 +52,7 @@ public class ConditionalSerialController extends SerialController
    * @param index the position for the PR
    * @param pr the PR to be set.
    */
+  @Override
   public void add(int index, ProcessingResource pr){
     if(pr instanceof LanguageAnalyser){
       strategiesList.add(index,
@@ -67,6 +69,7 @@ public class ConditionalSerialController extends SerialController
    * Add a PR to the end of the execution list.
    * @param pr the PR to be added.
    */
+  @Override
   public void add(ProcessingResource pr){
     if(pr instanceof LanguageAnalyser){
       strategiesList.add(new AnalyserRunningStrategy((LanguageAnalyser)pr,
@@ -78,6 +81,7 @@ public class ConditionalSerialController extends SerialController
     super.add(pr);
   }
 
+  @Override
   public ProcessingResource remove(int index){
     ProcessingResource aPr = super.remove (index);
     strategiesList.remove(index);
@@ -86,6 +90,7 @@ public class ConditionalSerialController extends SerialController
     return aPr;
   }
 
+  @Override
   public boolean remove(ProcessingResource pr){
     int index = prList.indexOf(pr);
     if(index != -1){
@@ -112,6 +117,7 @@ public class ConditionalSerialController extends SerialController
    * @throws UnsupportedOperationException if the <tt>setPRs</tt> method
    * 	       is not supported by this controller.
    */
+  @Override
   public void setRunningStrategies(Collection strategies){
     strategiesList.clear();
     Iterator stratIter = strategies.iterator();
@@ -121,6 +127,7 @@ public class ConditionalSerialController extends SerialController
   /**
    * Executes a {@link ProcessingResource}.
    */
+  @Override
   protected void runComponent(int componentIndex) throws ExecutionException{
     ProcessingResource currentPR = (ProcessingResource)
                                    prList.get(componentIndex);
@@ -182,6 +189,7 @@ public class ConditionalSerialController extends SerialController
   /**
    * Cleans the internal data and prepares this object to be collected
    */
+  @Override
   public void cleanup(){
     super.cleanup();
     strategiesList.clear();
@@ -191,6 +199,7 @@ public class ConditionalSerialController extends SerialController
    * Custom duplication method for conditional controllers to handle
    * duplicating the running strategies.
    */
+  @Override
   public Resource duplicate(Factory.DuplicationContext ctx)
           throws ResourceInstantiationException {
     ConditionalController c = (ConditionalController)super.duplicate(ctx);

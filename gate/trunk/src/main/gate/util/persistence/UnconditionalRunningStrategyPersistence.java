@@ -13,6 +13,7 @@ import java.io.Serializable;
 
 public class UnconditionalRunningStrategyPersistence implements Persistence {
 
+  @Override
   public void extractDataFromSource(Object source) throws PersistenceException {
     if(! (source instanceof UnconditionalRunningStrategy))
       throw new UnsupportedOperationException(
@@ -26,6 +27,7 @@ public class UnconditionalRunningStrategyPersistence implements Persistence {
   }
 
 
+  @Override
   public Object createObject() throws PersistenceException,
                                       ResourceInstantiationException {
     return new UnconditionalRunningStrategy(

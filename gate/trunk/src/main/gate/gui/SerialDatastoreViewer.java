@@ -66,6 +66,7 @@ public class SerialDatastoreViewer extends JScrollPane implements
   public SerialDatastoreViewer() {
   }
 
+  @Override
   public void cleanup() {
     datastore.removeDatastoreListener(this);
     myHandle = null;
@@ -73,11 +74,13 @@ public class SerialDatastoreViewer extends JScrollPane implements
   }
 
   /** Accessor for features. */
+  @Override
   public FeatureMap getFeatures() {
     return features;
   }// getFeatures()
 
   /** Mutator for features */
+  @Override
   public void setFeatures(FeatureMap features) {
     this.features = features;
   }// setFeatures()
@@ -89,6 +92,7 @@ public class SerialDatastoreViewer extends JScrollPane implements
    * @param paramaterName the name of the parameter
    * @return the current value of the parameter
    */
+  @Override
   public Object getParameterValue(String paramaterName)
           throws ResourceInstantiationException {
     return AbstractResource.getParameterValue(this, paramaterName);
@@ -100,6 +104,7 @@ public class SerialDatastoreViewer extends JScrollPane implements
    * @param paramaterName the name for the parameteer
    * @param parameterValue the value the parameter will receive
    */
+  @Override
   public void setParameterValue(String paramaterName, Object parameterValue)
           throws ResourceInstantiationException {
     // get the beaninfo for the resource bean, excluding data about
@@ -124,12 +129,14 @@ public class SerialDatastoreViewer extends JScrollPane implements
    * @param parameters a feature map that has paramete names as keys and
    *          parameter values as values.
    */
+  @Override
   public void setParameterValues(FeatureMap parameters)
           throws ResourceInstantiationException {
     AbstractResource.setParameterValues(this, parameters);
   }
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     return this;
   }// init()
@@ -137,6 +144,7 @@ public class SerialDatastoreViewer extends JScrollPane implements
   public void clear() {
   }
 
+  @Override
   public void setTarget(Object target) {
     if(target == null) {
       datastore = null;
@@ -156,6 +164,7 @@ public class SerialDatastoreViewer extends JScrollPane implements
     }
   }
 
+  @Override
   public void setHandle(Handle handle) {
     if(handle instanceof NameBearerHandle) {
       myHandle = (NameBearerHandle)handle;
@@ -225,7 +234,7 @@ public class SerialDatastoreViewer extends JScrollPane implements
       CreoleRegister cReg = Gate.getCreoleRegister();
       while(lrTypesIter.hasNext()) {
         String type = (String)lrTypesIter.next();
-        ResourceData rData = (ResourceData)cReg.get(type);
+        ResourceData rData = cReg.get(type);
         DSType dsType = new DSType(rData.getName(), type);
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(dsType);
                
@@ -251,6 +260,7 @@ public class SerialDatastoreViewer extends JScrollPane implements
   protected void initListeners() {
     datastore.addDatastoreListener(this);
     mainTree.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
           // double click -> just load the resource
@@ -299,6 +309,7 @@ public class SerialDatastoreViewer extends JScrollPane implements
       super("Delete");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       // delete all selected resources
       TreePath[] selectedPaths = mainTree.getSelectionPaths();
@@ -356,8 +367,10 @@ public class SerialDatastoreViewer extends JScrollPane implements
       super("Load");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Runnable runner = new Runnable(){
+        @Override
         public void run(){
           // load all selected resources
           TreePath[] selectedPaths = mainTree.getSelectionPaths();
@@ -443,6 +456,7 @@ public class SerialDatastoreViewer extends JScrollPane implements
       this.id = id;
     }// DSEntry
 
+    @Override
     public String toString() {
       return name;
     }
@@ -465,6 +479,7 @@ public class SerialDatastoreViewer extends JScrollPane implements
       this.type = type;
     }
     
+    @Override
     public String toString() {
       return name;
     }
@@ -501,11 +516,13 @@ public class SerialDatastoreViewer extends JScrollPane implements
 
   private transient Vector statusListeners;
 
+  @Override
   public void resourceAdopted(DatastoreEvent e) {
     // do nothing; SerialDataStore does actually nothing on adopt()
     // we'll have to listen for RESOURE_WROTE events
   }
 
+  @Override
   public void resourceDeleted(DatastoreEvent e) {
     String resID = (String)e.getResourceID();
     DefaultMutableTreeNode node = null;
@@ -524,11 +541,12 @@ public class SerialDatastoreViewer extends JScrollPane implements
     }
   }
 
+  @Override
   public void resourceWritten(DatastoreEvent e) {
     Resource res = e.getResource();
     String resID = (String)e.getResourceID();
-    String resType = ((ResourceData)Gate.getCreoleRegister().get(
-            res.getClass().getName())).getName();
+    String resType = Gate.getCreoleRegister().get(
+            res.getClass().getName()).getName();
     DefaultMutableTreeNode parent = treeRoot;
     DefaultMutableTreeNode node = null;
     // first look for the type node

@@ -71,12 +71,14 @@ public class XJMenuItem extends JMenuItem {
 
   protected void initListeners(){
     this.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseExited(MouseEvent e) {
         // clear the status
         listener.statusChanged("");
       }
     });
     this.addChangeListener(new ChangeListener() {
+      @Override
       public void stateChanged(ChangeEvent e) {
         // display the menu item description in the status
         listener.statusChanged(description);

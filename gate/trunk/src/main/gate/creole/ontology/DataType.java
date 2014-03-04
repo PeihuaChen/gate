@@ -364,6 +364,7 @@ public class DataType {
    * Compares if the two objects are same, i.e. if their string
    * representations are identical.
    */
+  @Override
   public boolean equals(Object o) {
     if(o instanceof DataType) {
       DataType dt = (DataType)o;
@@ -627,6 +628,7 @@ class BooleanDT extends DataType {
   /**
    * A Method to validate the boolean value
    */
+  @Override
   public boolean isValidValue(String value) {
     try {
       if((Boolean.parseBoolean(value) + "").equalsIgnoreCase(value))
@@ -656,6 +658,7 @@ class ByteDT extends DataType {
   /**
    * Methods check if the value is valid for the datatype
    */
+  @Override
   public boolean isValidValue(String value) {
     try {
       if((Byte.parseByte(value) + "").equalsIgnoreCase(value)) return true;
@@ -685,6 +688,7 @@ class DoubleDT extends DataType {
   /**
    * Methods check if the value is valid for the datatype
    */
+  @Override
   public boolean isValidValue(String value) {
     try {
       Double.parseDouble(value);
@@ -707,6 +711,7 @@ class DateDT extends DataType {
   /**
    * Methods check if the value is valid for the datatype
    */
+  @Override
   public boolean isValidValue(String value) {
     try {
       XMLGregorianCalendar cal = datatypeFactory.newXMLGregorianCalendar(value);
@@ -731,6 +736,7 @@ class DateTimeDT extends DataType {
   /**
    * Methods check if the value is valid for the datatype
    */
+  @Override
   public boolean isValidValue(String value) {
     try {
       XMLGregorianCalendar cal = datatypeFactory.newXMLGregorianCalendar(value);
@@ -756,6 +762,7 @@ class TimeDT extends DataType {
   /**
    * Methods check if the value is valid for the datatype
    */
+  @Override
   public boolean isValidValue(String value) {
     try {
       XMLGregorianCalendar cal = datatypeFactory.newXMLGregorianCalendar(value);
@@ -786,6 +793,7 @@ class LongDT extends DataType {
   /**
    * Methods check if the value is valid for the datatype
    */
+  @Override
   public boolean isValidValue(String value) {
     try {
       if((Long.parseLong(value) + "").equalsIgnoreCase(value)) return true;
@@ -815,6 +823,7 @@ class FloatDT extends DataType {
   /**
    * Methods check if the value is valid for the datatype
    */
+  @Override
   public boolean isValidValue(String value) {
     try {
       Float.parseFloat(value);
@@ -843,6 +852,7 @@ class IntegerDT extends DataType {
   /**
    * Methods check if the value is valid for the datatype
    */
+  @Override
   public boolean isValidValue(String value) {
     try {
       if((Integer.parseInt(value) + "").equalsIgnoreCase(value)) return true;
@@ -872,6 +882,7 @@ class NegativeIntegerDT extends DataType {
   /**
    * Methods check if the value is valid for the datatype
    */
+  @Override
   public boolean isValidValue(String value) {
     try {
       int intVal = Integer.parseInt(value);
@@ -901,6 +912,7 @@ class NonNegativeIntegerDT extends DataType {
   /**
    * Methods check if the value is valid for the datatype
    */
+  @Override
   public boolean isValidValue(String value) {
     try {
       int intVal = Integer.parseInt(value);
@@ -930,6 +942,7 @@ class ShortDT extends DataType {
   /**
    * Methods check if the value is valid for the datatype
    */
+  @Override
   public boolean isValidValue(String value) {
     try {
       short intVal = Short.parseShort(value);
@@ -959,6 +972,7 @@ class UnsignedByteDT extends DataType {
   /**
    * Methods check if the value is valid for the datatype
    */
+  @Override
   public boolean isValidValue(String value) {
     try {
       byte byteVal = Byte.parseByte(value);
@@ -988,6 +1002,7 @@ class UnsignedLongDT extends DataType {
   /**
    * Methods check if the value is valid for the datatype
    */
+  @Override
   public boolean isValidValue(String value) {
     try {
       long longVal = Long.parseLong(value);
@@ -1017,6 +1032,7 @@ class UnsignedShortDT extends DataType {
   /**
    * Methods check if the value is valid for the datatype
    */
+  @Override
   public boolean isValidValue(String value) {
     try {
       short shortVal = Short.parseShort(value);

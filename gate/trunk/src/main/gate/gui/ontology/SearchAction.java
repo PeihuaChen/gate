@@ -68,6 +68,7 @@ public class SearchAction extends AbstractAction {
     resourcesBox.setEditable(true);
     resourcesBox.getEditor().getEditorComponent().addKeyListener(
             new KeyAdapter() {
+              @Override
               public void keyReleased(KeyEvent keyevent) {
                 String s = ((JTextComponent)resourcesBox.getEditor()
                         .getEditorComponent()).getText();
@@ -127,6 +128,7 @@ public class SearchAction extends AbstractAction {
             .setPrototypeDisplayValue("this is just an example, not a value. OK?");
     properties.getEditor().getEditorComponent().addKeyListener(
             new KeyAdapter() {
+              @Override
               public void keyReleased(KeyEvent keyevent) {
                 String s = ((JTextComponent)properties.getEditor()
                         .getEditorComponent()).getText();
@@ -171,6 +173,7 @@ public class SearchAction extends AbstractAction {
    * Obtains a list of resources from the ontology being displayed in
    * the ontology editor and invokes the search dialog.
    */
+  @Override
   public void actionPerformed(ActionEvent ae) {
     @SuppressWarnings("deprecation")
     List<OResource> resources = ontologyEditor.ontology.getAllResources();
@@ -310,6 +313,7 @@ public class SearchAction extends AbstractAction {
     /**
      * Renderer method
      */
+    @Override
     public Component getListCellRendererComponent(JList list, Object value,
         int row, boolean isSelected, boolean hasFocus) {
 

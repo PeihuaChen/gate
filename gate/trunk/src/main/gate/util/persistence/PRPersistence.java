@@ -26,6 +26,7 @@ public class PRPersistence extends ResourcePersistence {
    * Populates this Persistence with the data that needs to be stored from the
    * original source object.
    */
+  @Override
   public void extractDataFromSource(Object source)throws PersistenceException{
     if(! (source instanceof ProcessingResource)){
       throw new UnsupportedOperationException(
@@ -38,8 +39,7 @@ public class PRPersistence extends ResourcePersistence {
     super.extractDataFromSource(source);
     Resource res = (Resource)source;
 
-    ResourceData rData = (ResourceData)
-                         Gate.getCreoleRegister().get(res.getClass().getName());
+    ResourceData rData = Gate.getCreoleRegister().get(res.getClass().getName());
     if(rData == null) throw new PersistenceException(
                                 "Could not find CREOLE data for " +
                                 res.getClass().getName());
@@ -71,6 +71,7 @@ public class PRPersistence extends ResourcePersistence {
    * Creates a new object from the data contained. This new object is supposed
    * to be a copy for the original object used as source for data extraction.
    */
+  @Override
   public Object createObject()throws PersistenceException,
                                      ResourceInstantiationException{
     Object res = super.createObject();

@@ -11,6 +11,7 @@ import gate.util.*;
 public class GazetteerListsCollector extends AbstractLanguageAnalyser {
   private static String PERSON_ANNOT_NAME = "PER";
 
+  @Override
   public void execute() throws gate.creole.ExecutionException {
     //reinitialise the stats
     statsPerType = new HashMap();

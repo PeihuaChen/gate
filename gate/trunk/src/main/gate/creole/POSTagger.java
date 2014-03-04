@@ -93,6 +93,7 @@ public class POSTagger extends AbstractLanguageAnalyser {
 
   protected Logger logger = Logger.getLogger(this.getClass().getName());
   
+  @Override
   public Resource init()throws ResourceInstantiationException{
     if(lexiconURL == null){
       throw new ResourceInstantiationException(
@@ -111,6 +112,7 @@ public class POSTagger extends AbstractLanguageAnalyser {
   }
 
 
+  @Override
   public void execute() throws ExecutionException{
     //check the parameters
     if(document == null) throw new ExecutionException(
@@ -217,7 +219,7 @@ public class POSTagger extends AbstractLanguageAnalyser {
                                       tokensIter.next() : null);
         }
         //run the POS tagger
-        List taggerResults = (List)tagger.runTagger(sentencesForTagger).get(0);
+        List taggerResults = tagger.runTagger(sentencesForTagger).get(0);
         //add the results
         //make sure no malfunction occurred
         if(taggerResults.size() != tokensInCurrentSentence.size())

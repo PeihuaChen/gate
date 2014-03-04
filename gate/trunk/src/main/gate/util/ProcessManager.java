@@ -241,6 +241,7 @@ public class ProcessManager {
      * Main body of the thread.  Waits until we have been given a stream to
      * gobble, then reads it until there is no more input available.
      */
+    @Override
     public void run() {
       if(DEBUG) {
         System.err.println("StreamGobbler starting");

@@ -105,23 +105,29 @@ public class PhraseQuery extends Query {
       this.searcher = searcher;
     }
 
+    @Override
     public String toString() { return "weight(" + PhraseQuery.this + ")"; }
 
+    @Override
     public Query getQuery() { return PhraseQuery.this; }
+    @Override
     public float getValue() { return value; }
 
+    @Override
     public float sumOfSquaredWeights() throws IOException {
       idf = getSimilarity(searcher).idf(terms, searcher);
       queryWeight = idf * getBoost();             // compute query weight
       return queryWeight * queryWeight;           // square it
     }
 
+    @Override
     public void normalize(float queryNorm) {
       this.queryNorm = queryNorm;
       queryWeight *= queryNorm;                   // normalize query weight
       value = queryWeight * idf;                  // idf for document
     }
 
+    @Override
     public Scorer scorer(IndexReader reader, Searcher searcher) throws IOException {
         if (terms.size() == 0)			  // optimize zero-term case
             return null;
@@ -147,6 +153,7 @@ public class PhraseQuery extends Query {
     }
     
 
+    @Override
     public Explanation explain(IndexReader reader, int doc)
       throws IOException {
 
@@ -226,6 +233,7 @@ public class PhraseQuery extends Query {
     }
   }
 
+  @Override
   protected Weight createWeight(Searcher searcher) {
     if (terms.size() == 1) {			  // optimize one-term case
       Term term = (Term)terms.elementAt(0);
@@ -238,6 +246,7 @@ public class PhraseQuery extends Query {
 
 
   /** Prints a user-readable version of this query. */
+  @Override
   public String toString(String f) {
     StringBuffer buffer = new StringBuffer();
     if (!field.equals(f)) {
@@ -267,6 +276,7 @@ public class PhraseQuery extends Query {
   }
 
   /** Returns true iff <code>o</code> is equal to this. */
+  @Override
   public boolean equals(Object o) {
     if (!(o instanceof PhraseQuery))
       return false;
@@ -277,6 +287,7 @@ public class PhraseQuery extends Query {
   }
 
   /** Returns a hash code value for this object.*/
+  @Override
   public int hashCode() {
     return Float.floatToIntBits(getBoost())
       ^ Float.floatToIntBits(slop)

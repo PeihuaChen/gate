@@ -218,6 +218,7 @@ public final class Field implements java.io.Serializable {
   public final boolean isTermVectorStored() { return storeTermVector; }
 
   /** Prints a Field for human consumption. */
+  @Override
   public final String toString() {
     if (isStored && isIndexed && !isTokenized)
       return "Keyword<" + name + ":" + stringValue + ">";

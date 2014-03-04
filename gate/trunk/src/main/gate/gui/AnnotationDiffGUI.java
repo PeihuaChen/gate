@@ -81,7 +81,8 @@ public class AnnotationDiffGUI extends JFrame{
     populateGUI();
 
     // set programmatically the different settings
-    SwingUtilities.invokeLater(new Runnable(){ public void run() {
+    SwingUtilities.invokeLater(new Runnable(){ @Override
+    public void run() {
       keyDocCombo.setSelectedItem(keyDocumentName);
       resDocCombo.setSelectedItem(responseDocumentName);
       if (keyAnnotationSetName != null) {
@@ -105,11 +106,13 @@ public class AnnotationDiffGUI extends JFrame{
        && responseAnnotationSetName != null
        && annotationType != null) {
         SwingUtilities.invokeLater(new Runnable() {
+        @Override
         public void run() {
           // wait some time
           Date timeToRun = new Date(System.currentTimeMillis() + 1000);
           Timer timer = new Timer("Annotation diff init timer", true);
           timer.schedule(new TimerTask() {
+            @Override
             public void run() {
               diffAction.actionPerformed(
                 new ActionEvent(this, -1, "corpus quality"));
@@ -310,6 +313,7 @@ public class AnnotationDiffGUI extends JFrame{
     diffTable.setDefaultRenderer(Boolean.class, new DiffTableCellRenderer());
     diffTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     diffTable.setComparator(DiffTableModel.COL_MATCH, new Comparator(){
+      @Override
       public int compare(Object o1, Object o2){
         String label1 = (String)o1;
         String label2 = (String)o2;
@@ -329,6 +333,7 @@ public class AnnotationDiffGUI extends JFrame{
     diffTable.hideColumn(DiffTableModel.COL_RES_COPY);
 
     Comparator startEndComparator = new Comparator() {
+      @Override
       public int compare(Object o1, Object o2) {
         String no1 = (String) o1;
         String no2 = (String) o2;
@@ -573,18 +578,21 @@ public class AnnotationDiffGUI extends JFrame{
   protected void initListeners(){
 
     addWindowListener(new WindowAdapter(){
+      @Override
       public void windowClosing(WindowEvent e) {
         new CloseAction().actionPerformed(null);
       }
     });
 
     addWindowFocusListener(new WindowAdapter(){
+      @Override
       public void windowGainedFocus(WindowEvent e) {
         populateGUI();
       }
     });
 
     keyDocCombo.addActionListener(new ActionListener(){
+      @Override
       public void actionPerformed(ActionEvent evt){
         int keyDocSelectedIndex = keyDocCombo.getSelectedIndex();
         if (keyDocSelectedIndex == -1) { return; }
@@ -638,6 +646,7 @@ public class AnnotationDiffGUI extends JFrame{
     });
 
     resDocCombo.addActionListener(new ActionListener(){
+      @Override
       public void actionPerformed(ActionEvent evt){
         int resDocSelectedIndex = resDocCombo.getSelectedIndex();
         if (resDocSelectedIndex == -1) { return; }
@@ -694,6 +703,7 @@ public class AnnotationDiffGUI extends JFrame{
      * This populates the types combo when set selection changes
      */
     ActionListener setComboActionListener = new ActionListener(){
+      @Override
       public void actionPerformed(ActionEvent evt){
         keySet = keySets == null || keySets.isEmpty()?
                  null : keySets.get(keySetCombo.getSelectedIndex());
@@ -729,6 +739,7 @@ public class AnnotationDiffGUI extends JFrame{
     resSetCombo.addActionListener(setComboActionListener);
 
     someFeaturesBtn.addActionListener(new ActionListener(){
+      @Override
       public void actionPerformed(ActionEvent evt){
         if(someFeaturesBtn.isSelected()){
           if(keySet == null || keySet.isEmpty() ||
@@ -774,6 +785,7 @@ public class AnnotationDiffGUI extends JFrame{
 
     // enable/disable buttons according to the table state
     diffTableModel.addTableModelListener(new TableModelListener() {
+      @Override
       public void tableChanged(javax.swing.event.TableModelEvent e) {
         if (diffTableModel.getRowCount() > 0) {
           htmlExportAction.setEnabled(true);
@@ -795,6 +807,7 @@ public class AnnotationDiffGUI extends JFrame{
     // enable/disable buttons according to the table selection
     diffTable.getSelectionModel().addListSelectionListener(
       new ListSelectionListener() {
+        @Override
         public void valueChanged(ListSelectionEvent e) {
           int row = diffTable.rowViewToModel(diffTable.getSelectedRow());
           if (row == -1) { showDocumentAction.setEnabled(false); return; }
@@ -824,10 +837,15 @@ public class AnnotationDiffGUI extends JFrame{
     // enable/disable buttons according to the table selection
     diffTable.getColumnModel().addColumnModelListener(
       new TableColumnModelListener() {
+        @Override
         public void columnAdded(TableColumnModelEvent e) { /* do nothing */ }
+        @Override
         public void columnRemoved(TableColumnModelEvent e) { /* do nothing */ }
+        @Override
         public void columnMoved(TableColumnModelEvent e) { /* do nothing */ }
+        @Override
         public void columnMarginChanged(ChangeEvent e) { /* do nothing */ }
+        @Override
         public void columnSelectionChanged(ListSelectionEvent e) {
           int row = diffTable.rowViewToModel(diffTable.getSelectedRow());
           if (row == -1) { showDocumentAction.setEnabled(false); return; }
@@ -856,6 +874,7 @@ public class AnnotationDiffGUI extends JFrame{
 
     // inverse state of selected checkboxes when Space key is pressed
     diffTable.addKeyListener(new KeyAdapter() {
+      @Override
       public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() != KeyEvent.VK_SPACE
           || !(diffTable.isColumnSelected(DiffTableModel.COL_KEY_COPY)
@@ -881,9 +900,11 @@ public class AnnotationDiffGUI extends JFrame{
     diffTable.addMouseListener(new MouseAdapter() {
       private JPopupMenu mousePopup;
       JMenuItem menuItem;
+      @Override
       public void mousePressed(MouseEvent e) {
         showContextMenu(e);
       }
+      @Override
       public void mouseReleased(MouseEvent e) {
         showContextMenu(e);
       }
@@ -899,6 +920,7 @@ public class AnnotationDiffGUI extends JFrame{
         for (final String tick : new String[] {"Tick", "Untick"}) {
           menuItem = new JMenuItem(tick + " selected check boxes");
           menuItem.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ae) {
               int keyCol = diffTable.convertColumnIndexToView(
                   DiffTableModel.COL_KEY_COPY);
@@ -929,6 +951,7 @@ public class AnnotationDiffGUI extends JFrame{
           menuItem = new JMenuItem("Tick "+ types[i] + " annotations");
           final String symbol = symbols[i];
           menuItem.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ae) {
               int matchCol = diffTable.convertColumnIndexToView(
                   DiffTableModel.COL_MATCH);
@@ -954,6 +977,7 @@ public class AnnotationDiffGUI extends JFrame{
 
     // revert to default name if the field is empty and lost focus
     consensusASTextField.addFocusListener(new FocusAdapter() {
+      @Override
       public void focusLost(FocusEvent e) {
         String target = consensusASTextField.getText().trim();
         if (target.length() == 0) {
@@ -969,6 +993,7 @@ public class AnnotationDiffGUI extends JFrame{
     });
 
     bottomTabbedPane.addChangeListener(new ChangeListener(){
+      @Override
       public void stateChanged(ChangeEvent e) {
         if (bottomTabbedPane.getSelectedIndex() == 0) {
           diffTable.hideColumn(DiffTableModel.COL_KEY_COPY);
@@ -992,12 +1017,14 @@ public class AnnotationDiffGUI extends JFrame{
     ActionMap actionMap = ((JComponent)this.getContentPane()).getActionMap();
     inputMap.put(KeyStroke.getKeyStroke("F1"), "Help");
     actionMap.put("Help", new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         new HelpAction().actionPerformed(null);
       }
     });
   }
 
+  @Override
   public void pack(){
     super.pack();
     // add some vertical space for the table
@@ -1048,6 +1075,7 @@ public class AnnotationDiffGUI extends JFrame{
       putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-action-run"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt){
       final int rowView = diffTable.getSelectedRow();
       final int colView = diffTable.getSelectedColumn();
@@ -1059,7 +1087,8 @@ public class AnnotationDiffGUI extends JFrame{
       getContentPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
       // compute the differences
-      Runnable runnable = new Runnable() { public void run() {
+      Runnable runnable = new Runnable() { @Override
+      public void run() {
         Set<Annotation> keys = new HashSet<Annotation>(
           keySet.get((String)annTypeCombo.getSelectedItem()));
         Set<Annotation> responses = new HashSet<Annotation>(
@@ -1107,7 +1136,8 @@ public class AnnotationDiffGUI extends JFrame{
         }
 
         final int countHiddenF = countHidden;
-        SwingUtilities.invokeLater(new Runnable(){ public void run(){
+        SwingUtilities.invokeLater(new Runnable(){ @Override
+        public void run(){
         // update the GUI
         diffTableModel.fireTableDataChanged();
         correctLbl.setText(Integer.toString(differ.getCorrectMatches()));
@@ -1149,7 +1179,8 @@ public class AnnotationDiffGUI extends JFrame{
 
         if (!command.equals("setvalue") && !command.equals("copy")) { return; }
 
-        SwingUtilities.invokeLater(new Runnable(){ public void run(){
+        SwingUtilities.invokeLater(new Runnable(){ @Override
+        public void run(){
           if (command.equals("setvalue")) {
             // select the cell containing the previously selected annotation
             for (int row = 0; row < diffTable.getRowCount(); row++) {
@@ -1167,7 +1198,8 @@ public class AnnotationDiffGUI extends JFrame{
             // select the previously selected cell
              diffTable.changeSelection(rowView, colView, false, false);
           }
-          SwingUtilities.invokeLater(new Runnable(){ public void run(){
+          SwingUtilities.invokeLater(new Runnable(){ @Override
+          public void run(){
             diffTable.scrollRectToVisible(diffTable.getCellRect(
               diffTable.getSelectedRow(), diffTable.getSelectedColumn(), true));
           }});
@@ -1194,6 +1226,7 @@ public class AnnotationDiffGUI extends JFrame{
       putValue(MNEMONIC_KEY, KeyEvent.VK_RIGHT);
       putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-action-loopnone"));
     }
+    @Override
     public void actionPerformed(ActionEvent evt){
       String step = (String) keyDoc.getFeatures().get("anndiffsteps");
       if (step == null) { step = "0"; }
@@ -1269,6 +1302,7 @@ public class AnnotationDiffGUI extends JFrame{
       putValue(SMALL_ICON,
         MainFrame.getIcon("crystal-clear-app-download-manager"));
     }
+    @Override
     public void actionPerformed(ActionEvent evt){
       XJFileChooser fileChooser =  (MainFrame.getFileChooser() != null) ?
         MainFrame.getFileChooser() : new XJFileChooser();
@@ -1376,6 +1410,7 @@ public class AnnotationDiffGUI extends JFrame{
       putValue(SMALL_ICON, MainFrame.getIcon("document"));
       putValue(MNEMONIC_KEY, KeyEvent.VK_UP);
     }
+    @Override
     public void actionPerformed(ActionEvent evt){
       int rowModel = diffTable.rowViewToModel(diffTable.getSelectedRow());
       boolean isKeySelected = (diffTable.convertColumnIndexToModel(
@@ -1386,12 +1421,14 @@ public class AnnotationDiffGUI extends JFrame{
       final String asname = isKeySelected ? keySet.getName() : resSet.getName();
       // show the expression in the document
       SwingUtilities.invokeLater(new Runnable() {
+      @Override
       public void run() {
         MainFrame.getInstance().select(doc);
         // wait some time for the document to be displayed
         Date timeToRun = new Date(System.currentTimeMillis() + 1000);
         Timer timer = new Timer("Annotation diff show document timer", true);
         timer.schedule(new TimerTask() {
+          @Override
           public void run() {
             showExpressionInDocument(doc, annotation, asname);
           }
@@ -1465,6 +1502,7 @@ public class AnnotationDiffGUI extends JFrame{
       putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-action-info"));
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("F1"));
     }
+    @Override
     public void actionPerformed(ActionEvent e) {
       MainFrame.getInstance().showHelpFrame(
         "sec:eval:annotationdiff", AnnotationDiffGUI.class.getName());
@@ -1475,6 +1513,7 @@ public class AnnotationDiffGUI extends JFrame{
     public CloseAction(){
       super("Close");
     }
+    @Override
     public void actionPerformed(ActionEvent evt){
       MainFrame.getGuiRoots().remove(AnnotationDiffGUI.this);
       dispose();
@@ -1482,6 +1521,7 @@ public class AnnotationDiffGUI extends JFrame{
   }
 
   protected class DiffTableCellRenderer extends DefaultTableCellRenderer{
+    @Override
     public Component getTableCellRendererComponent(JTable table, Object value,
       boolean isSelected, boolean hasFocus, int row, int column){
       int rowModel = diffTable.rowViewToModel(row);
@@ -1650,10 +1690,12 @@ public class AnnotationDiffGUI extends JFrame{
 
   protected class DiffTableModel extends AbstractTableModel{
 
+    @Override
     public int getRowCount(){
       return pairings.size();
     }
 
+    @Override
     public Class getColumnClass(int columnIndex){
       switch (columnIndex){
         case COL_KEY_COPY: return Boolean.class;
@@ -1662,10 +1704,12 @@ public class AnnotationDiffGUI extends JFrame{
       }
     }
 
+    @Override
     public int getColumnCount(){
       return COL_COUNT;
     }
 
+    @Override
     public String getColumnName(int column){
       switch(column){
         case COL_KEY_START: return "Start";
@@ -1724,6 +1768,7 @@ public class AnnotationDiffGUI extends JFrame{
 //      }
     }
 
+    @Override
     public Object getValueAt(int row, int column){
       AnnotationDiffer.Pairing pairing = pairings.get(row);
       Annotation key = pairing.getKey();
@@ -1792,6 +1837,7 @@ public class AnnotationDiffGUI extends JFrame{
       }
     }
 
+    @Override
     public boolean isCellEditable(int rowIndex, int columnIndex){
       if (pairings.size() == 0) { return false; }
       AnnotationDiffer.Pairing pairing = pairings.get(rowIndex);
@@ -1808,6 +1854,7 @@ public class AnnotationDiffGUI extends JFrame{
       }
     }
 
+    @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex){
       AnnotationDiffer.Pairing pairing = pairings.get(rowIndex);
       AnnotationSet keyAS =

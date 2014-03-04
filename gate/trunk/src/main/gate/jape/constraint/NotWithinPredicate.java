@@ -29,6 +29,7 @@ public class NotWithinPredicate extends WithinPredicate {
 
     public static final String OPERATOR = "notWithin";
 
+    @Override
     public String getOperator() {
         return OPERATOR;
     }
@@ -36,6 +37,7 @@ public class NotWithinPredicate extends WithinPredicate {
     /**
      * Sets up environment for concreate class to do the specific matching check
      */
+    @Override
     public boolean doMatch(Object annotValue, AnnotationSet context)
             throws JapeException {
 

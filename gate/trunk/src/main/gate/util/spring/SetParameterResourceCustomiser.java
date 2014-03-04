@@ -34,6 +34,7 @@ public class SetParameterResourceCustomiser implements ResourceCustomiser {
 
   private String prName = null;
 
+  @Override
   public void customiseResource(Resource res) throws Exception {
     if(prName == null) {
       res.setParameterValue(paramName, value);

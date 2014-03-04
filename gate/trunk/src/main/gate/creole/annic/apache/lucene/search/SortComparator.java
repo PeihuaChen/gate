@@ -1,12 +1,7 @@
 package gate.creole.annic.apache.lucene.search;
 
 import gate.creole.annic.apache.lucene.index.IndexReader;
-import gate.creole.annic.apache.lucene.index.Term;
-import gate.creole.annic.apache.lucene.index.TermDocs;
-import gate.creole.annic.apache.lucene.index.TermEnum;
-
 import java.io.IOException;
-import java.io.Serializable;
 
 /**
  * Abstract base class for sorting hits returned by a Query.
@@ -30,20 +25,24 @@ public abstract class SortComparator
 implements SortComparatorSource {
 
   // inherit javadocs
+  @Override
   public ScoreDocComparator newComparator (final IndexReader reader, final String fieldname)
   throws IOException {
     final String field = fieldname.intern();
     return new ScoreDocComparator() {
       protected Comparable[] cachedValues = FieldCache.DEFAULT.getCustom (reader, field, SortComparator.this);
 
+      @Override
       public int compare (ScoreDoc i, ScoreDoc j) {
         return cachedValues[i.doc].compareTo (cachedValues[j.doc]);
       }
 
+      @Override
       public Comparable sortValue (ScoreDoc i) {
         return cachedValues[i.doc];
       }
 
+      @Override
       public int sortType(){
         return SortField.CUSTOM;
       }

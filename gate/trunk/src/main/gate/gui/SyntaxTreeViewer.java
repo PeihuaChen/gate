@@ -237,15 +237,18 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     this.setSize(600, 400);
     this.setBounds(0, 0, 600, 400);
     this.addComponentListener(new java.awt.event.ComponentAdapter() {
+      @Override
       public void componentShown(ComponentEvent e) {
         this_componentShown(e);
       }
+      @Override
       public void componentHidden(ComponentEvent e) {
         this_componentHidden(e);
       }
     });
     this.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
 
+      @Override
       public void propertyChange(PropertyChangeEvent e) {
         this_propertyChange(e);
       }
@@ -269,6 +272,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     * @param ann the annotation to be displayed or edited. If ann is null then
     * the method simply returns
     */
+  @Override
   public void editAnnotation(Annotation ann, AnnotationSet set){
     if (ann == null || set == null) return;
 
@@ -290,6 +294,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
    * Called by the GUI when the user has pressed the "OK" button. This should
    * trigger the saving of the newly created annotation(s)
    */
+  @Override
   public void okAction() throws GateException{
     //Out.println("Visible coords" + this.getVisibleRect().toString());
     //Out.println("Size" + this.getBounds().toString());
@@ -301,6 +306,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
    * Called by the GUI when the user has pressed the "Cancel" button. This should
    * trigger the cleanup operation
    */
+  @Override
   public void cancelAction() throws GateException{
     //if we added a new utterance but user does not want it any more...
     if (utteranceAdded) {
@@ -316,6 +322,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   /**
    * Returns <tt>true</tt>.
    */
+  @Override
   public boolean supportsCancel() {
     return true;
   }
@@ -324,6 +331,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   /**
    * Returns <tt>true</tt>. 
    */
+  @Override
   public boolean editingFinished() {
     return true;
   }
@@ -331,6 +339,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   /* (non-Javadoc)
    * @see gate.creole.AnnotationVisualResource#getAnnotationCurrentlyEdited()
    */
+  @Override
   public Annotation getAnnotationCurrentlyEdited() {
     return utterance;
   }
@@ -338,6 +347,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   /* (non-Javadoc)
    * @see gate.creole.AnnotationVisualResource#getAnnotationSetCurrentlyEdited()
    */
+  @Override
   public AnnotationSet getAnnotationSetCurrentlyEdited() {
     return currentSet;
   }
@@ -345,6 +355,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   /* (non-Javadoc)
    * @see gate.creole.AnnotationVisualResource#isActive()
    */
+  @Override
   public boolean isActive() {
     return isVisible();
   }
@@ -356,6 +367,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     * @return true if the SchemaAnnotationEditor can handle the annotationType
     * or false otherwise.
     */
+  @Override
   public boolean canDisplayAnnotationType(String annotationType){
     // Returns true only if the there is an AnnotationSchema with the same type
     // as annotationType.
@@ -366,7 +378,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
                                      getAnnotationVRs(annotationType);
     Iterator<String> editorIter = specificEditors.iterator();
     while(editorIter.hasNext() && !found){
-      String editorClass = (String)editorIter.next();
+      String editorClass = editorIter.next();
 
 //      Out.println(editorClass);
       if (editorClass.equals(this.getClass().getCanonicalName())) {
@@ -475,6 +487,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   }// public static void main
 */
 
+  @Override
   protected void paintComponent(Graphics g) {
     super.paintComponent( g);
     drawLines(g);
@@ -493,15 +506,18 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     }// for
   }// private void drawLines(Graphics g)
 
+  @Override
   public Dimension getPreferredScrollableViewportSize() {
         return getPreferredSize();
   }// public Dimension getPreferredScrollableViewportSize()
 
+  @Override
   public int getScrollableUnitIncrement(Rectangle visibleRect,
                                               int orientation, int direction) {
     return maxUnitIncrement;
   }// public int getScrollableUnitIncrement
 
+  @Override
   public int getScrollableBlockIncrement(Rectangle visibleRect,
                                               int orientation, int direction) {
     if (orientation == SwingConstants.HORIZONTAL)
@@ -510,10 +526,12 @@ public class SyntaxTreeViewer extends AbstractVisualResource
         return visibleRect.height - maxUnitIncrement;
   }// public int getScrollableBlockIncrement
 
+  @Override
   public boolean getScrollableTracksViewportWidth() {
     return false;
   }// public boolean getScrollableTracksViewportWidth()
 
+  @Override
   public boolean getScrollableTracksViewportHeight() {
     return false;
   }
@@ -612,7 +630,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     selection.clear();
 
     this.scrollRectToVisible(new
-      Rectangle(0, (int) getHeight()- (int) getVisibleRect().getHeight(),
+      Rectangle(0, getHeight()- (int) getVisibleRect().getHeight(),
         (int) getVisibleRect().getWidth(), (int) getVisibleRect().getHeight()));
   } //annotations2Trees
 
@@ -628,7 +646,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
       JButton childButton;
 
       if (processed.containsKey(child.getId()))
-        childButton = (JButton) processed.get(child.getId());
+        childButton = processed.get(child.getId());
       else
         childButton = processChildrenAnnots(child, processed);
 
@@ -927,6 +945,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     }
   }// private void shiftButtonsDown(int offset)
 
+  @Override
   public void actionPerformed(ActionEvent e) {
 
     //check for the popup menu items
@@ -1006,6 +1025,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
 
   }// public void actionPerformed(ActionEvent e)
 
+  @Override
   public void mouseClicked(MouseEvent e) {
 
     if (! (e.getSource() instanceof JButton))
@@ -1038,15 +1058,19 @@ public class SyntaxTreeViewer extends AbstractVisualResource
 
   }// public void mouseClicked(MouseEvent e)
 
+  @Override
   public void mousePressed(MouseEvent e) {
   }
 
+  @Override
   public void mouseReleased(MouseEvent e) {
   }
 
+  @Override
   public void mouseEntered(MouseEvent e) {
   }
 
+  @Override
   public void mouseExited(MouseEvent e) {
   } // createButton4Node
 
@@ -1415,6 +1439,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   //    return true;
   //  }// public boolean isManagingFocus()
   
+    @Override
     public void processComponentKeyEvent(KeyEvent e) {
       super.processComponentKeyEvent(e);
   

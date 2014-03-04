@@ -60,6 +60,7 @@ public class EmailDocumentFormat extends TextualDocumentFormat
     *
     */
 
+  @Override
   public void unpackMarkup(gate.Document doc) throws DocumentFormatException{
     if ( (doc == null) ||
          (doc.getSourceUrl() == null && doc.getContent() == null)){
@@ -77,6 +78,7 @@ public class EmailDocumentFormat extends TextualDocumentFormat
                                                        this.markupElementsMap,
                                                        this.element2StringMap);
     StatusListener statusListener = new StatusListener(){
+        @Override
         public void statusChanged(String text) {
           // this is implemented in DocumentFormat.java and inherited here
           fireStatusChanged(text);
@@ -109,6 +111,7 @@ public class EmailDocumentFormat extends TextualDocumentFormat
   }//unpackMarkup(doc)
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException{
     // Register EMAIL mime type
     MimeType mime = new MimeType("text","email");

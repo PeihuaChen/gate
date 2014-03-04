@@ -67,6 +67,7 @@ public interface ONodeID extends Comparable<ONodeID> {
    */
   public boolean isAnonymousResource();
 
+  @Override
   public int compareTo(ONodeID other);
   
   @Override

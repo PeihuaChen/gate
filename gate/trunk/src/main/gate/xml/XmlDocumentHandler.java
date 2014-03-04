@@ -144,6 +144,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
    * This method is called when the SAX parser encounts the beginning of the
    * XML document.
    */
+  @Override
   public void startDocument() throws org.xml.sax.SAXException {
     // init of variables in the parent
     super.startDocument();
@@ -172,6 +173,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
    * After that we use the colector to generate all the annotation reffering
    * this new gate document.
    */
+  @Override
   public void endDocument() throws org.xml.sax.SAXException {
 
     // replace the document content with the one without markups
@@ -242,6 +244,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
    * @param atts
    * @throws SAXException
    */
+  @Override
   public void startElement(String uri, String localName, String qName,
           Attributes atts) throws SAXException {
 
@@ -328,6 +331,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
    * @param qName - fully qualified, prefixed element name
    * @throws SAXException
    */
+  @Override
   public void endElement(String uri, String localName, String qName)
           throws SAXException {
 
@@ -384,6 +388,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
    * stack and update with the new values. For entities, this method is called
    * separatley regardless of the text sourinding the entity.
    */
+  @Override
   public void characters(char[] text, int start, int length) throws SAXException {
     if (!readCharacterStatus) {
       contentBuffer = new StringBuffer(new String(text, start, length));
@@ -514,6 +519,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
   /**
    * This method is called when the SAX parser encounts white spaces
    */
+  @Override
   public void ignorableWhitespace(char ch[], int start, int length) throws
           SAXException {
 
@@ -533,6 +539,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
   /**
    * Error method.We deal with this exception inside SimpleErrorHandler class
    */
+  @Override
   public void error(SAXParseException ex) throws SAXException {
     // deal with a SAXParseException
     // see SimpleErrorhandler class
@@ -542,6 +549,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
   /**
    * FatalError method.
    */
+  @Override
   public void fatalError(SAXParseException ex) throws SAXException {
     // deal with a SAXParseException
     // see SimpleErrorhandler class
@@ -551,6 +559,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
   /**
    * Warning method comment.
    */
+  @Override
   public void warning(SAXParseException ex) throws SAXException {
     // deal with a SAXParseException
     // see SimpleErrorhandler class
@@ -735,6 +744,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
     }// End CustomObject()
 
     // Methos implemented as required by Comparable interface
+    @Override
     public int compareTo(Object o) {
       CustomObject obj = (CustomObject) o;
       return this.id.compareTo(obj.getId());

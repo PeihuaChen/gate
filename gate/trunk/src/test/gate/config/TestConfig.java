@@ -19,8 +19,6 @@ package gate.config;
 import java.io.*;
 import java.net.URL;
 import java.util.Map;
-import java.util.Set;
-
 import junit.framework.*;
 
 import gate.*;
@@ -38,6 +36,7 @@ public class TestConfig extends TestCase
   public TestConfig(String name) throws GateException { super(name); }
 
   /** Fixture set up */
+  @Override
   public void setUp() throws Exception {
     CreoleRegister register = Gate.getCreoleRegister();
     register.registerDirectories(new URL(TestDocument.getTestServerName()+"tests"));
@@ -46,6 +45,7 @@ public class TestConfig extends TestCase
   /** Put things back as they should be after running tests
     * (reinitialise the CREOLE register).
     */
+  @Override
   public void tearDown() throws Exception {
     CreoleRegister register = Gate.getCreoleRegister();
     register.clear();

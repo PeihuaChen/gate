@@ -35,6 +35,7 @@ public class UimaDocumentFormat extends XmlDocumentFormat {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  @Override
   public void unpackMarkup(Document doc, RepositioningInfo repInfo,
           RepositioningInfo ampCodingInfo) throws DocumentFormatException {
     super.unpackMarkup(doc, repInfo, ampCodingInfo);
@@ -164,6 +165,7 @@ public class UimaDocumentFormat extends XmlDocumentFormat {
     }
   }
 
+  @Override
   public Resource init() throws ResourceInstantiationException {
     // Register XML mime type
     MimeType mime = new MimeType("text", "xmi+xml");

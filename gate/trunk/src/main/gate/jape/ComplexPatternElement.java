@@ -17,8 +17,6 @@
 
 package gate.jape;
 
-import gate.AnnotationSet;
-import gate.Document;
 import gate.util.Strings;
 
 import java.util.Iterator;
@@ -85,6 +83,7 @@ implements JapeConstants, java.io.Serializable
   /** Need cloning for processing of macro references. See comments on
     * <CODE>PatternElement.clone()</CODE>
     */
+  @Override
   public Object clone() {
     ComplexPatternElement newPE = (ComplexPatternElement) super.clone();
     newPE.constraintGroup = (ConstraintGroup) constraintGroup.clone();
@@ -94,14 +93,17 @@ implements JapeConstants, java.io.Serializable
   /** Finish: replace dynamic data structures with Java arrays; called
     * after parsing.
     */
+  @Override
   public void finish() {
     constraintGroup.finish();
   } // finish
 
   /** Create a string representation of the object. */
+  @Override
   public String toString() { return toString(""); }
 
   /** Create a string representation of the object. */
+  @Override
   public String toString(String pad) {
     String newline = Strings.getNl();
 

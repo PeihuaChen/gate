@@ -79,30 +79,37 @@ public class SimpleArraySet<T> implements Serializable, Iterable<T>
   /**
    * iterator
    */
+  @Override
   public java.util.Iterator<T> iterator()
   {
     if (theArray == null)
       return new java.util.Iterator<T>()
         {
+          @Override
           public boolean hasNext() {return false;}
+          @Override
           public T next() { return null; }
+          @Override
           public void remove() {}
         };
     else
       return new java.util.Iterator<T>()
         {
           int count = 0;
+          @Override
           public boolean hasNext()
           {
             if (theArray == null)
               throw new RuntimeException("");
             return count < theArray.length;
           }
+          @Override
           public T next() {
             if (theArray == null)
               throw new RuntimeException("");
             return (T) theArray[count++];
           }
+          @Override
           public void remove() {}
         }; // anonymous iterator
   } // iterator

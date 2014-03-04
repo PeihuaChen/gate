@@ -15,7 +15,8 @@ public class MatchRule2 implements OrthoMatcherRule {
 		this.orthomatcher=orthmatcher;
 	}
 	
-	public boolean value(String s1, String s2) {
+	@Override
+  public boolean value(String s1, String s2) {
 
 	  boolean result=false;
 	  
@@ -33,6 +34,7 @@ public class MatchRule2 implements OrthoMatcherRule {
 	    return result;
 	  }
 	
+  @Override
   public String getId(){
     return "MatchRule2";
   }

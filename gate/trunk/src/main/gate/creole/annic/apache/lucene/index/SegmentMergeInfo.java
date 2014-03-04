@@ -17,7 +17,6 @@ package gate.creole.annic.apache.lucene.index;
  */
 
 import java.io.IOException;
-import gate.creole.annic.apache.lucene.util.BitVector;
 
 final class SegmentMergeInfo {
   Term term;

@@ -21,7 +21,6 @@ import java.net.URL;
 import java.util.*;
 
 import gate.*;
-import gate.annotation.AnnotationSetImpl;
 import gate.creole.*;
 import gate.util.*;
 
@@ -102,6 +101,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   }
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException {
 
     //0. preconditions
@@ -143,6 +143,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
    * the resource has changed since the resource has been created then the
    * resource will change too after calling reInit().
   */
+  @Override
   public void reInit() throws ResourceInstantiationException {
 
     if (null != this.qtTransducer) {
@@ -158,6 +159,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
 
   /** Set the document to run on. */
+  @Override
   public void setDocument(Document newDocument) {
 
     //0. precondition
@@ -197,6 +199,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
    * This method runs the coreferencer. It assumes that all the needed parameters
    * are set. If they are not, an exception will be fired.
    */
+  @Override
   public void execute() throws ExecutionException{
 
     //0. preconditions
@@ -833,6 +836,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       }
     }
 
+    @Override
     public int compare(Object o1,Object o2) {
 
       //0. preconditions
@@ -1276,6 +1280,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   /* (non-Javadoc)
    * @see gate.util.Benchmarkable#getBenchmarkId()
    */
+  @Override
   public String getBenchmarkId() {
     if(benchmarkId == null) {
       return getName();
@@ -1288,6 +1293,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   /* (non-Javadoc)
    * @see gate.util.Benchmarkable#setBenchmarkId(java.lang.String)
    */
+  @Override
   public void setBenchmarkId(String benchmarkId) {
     this.benchmarkId = benchmarkId;
   }

@@ -345,20 +345,24 @@ public class LogArea extends XJTextPane {
    * Overridden to fetch new start and end Positions when the document is
    * changed.
    */
+  @Override
   public void setDocument(Document d) {
     super.setDocument(d);
     startPos = d.getStartPosition();
     endPos = d.getEndPosition();
   }
 
+  @Override
   public void setStyledDocument(StyledDocument d) {
     this.setDocument(d);
   }
 
   /** Init all listeners for this object */
+  @Override
   public void initListeners() {
     super.initListeners();
     this.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         if(SwingUtilities.isRightMouseButton(e)) {
           popup.show(thisLogArea, e.getPoint().x, e.getPoint().y);
@@ -383,6 +387,7 @@ public class LogArea extends XJTextPane {
       super("Select all");
     }// SelectAll
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       thisLogArea.selectAll();
     }// actionPerformed();
@@ -394,6 +399,7 @@ public class LogArea extends XJTextPane {
       super("Copy");
     }// CopyAction
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       thisLogArea.copy();
     }// actionPerformed();
@@ -409,6 +415,7 @@ public class LogArea extends XJTextPane {
       this.style = style;
     }
 
+    @Override
     public void run() {
 
       if(cboAppend.isSelected() && logFileWriter != null) {
@@ -516,6 +523,7 @@ public class LogArea extends XJTextPane {
      * @param s
      *          the string to be printed
      */
+    @Override
     public void print(String s) {
       try {
         write(s.getBytes("UTF-8"));
@@ -533,6 +541,7 @@ public class LogArea extends XJTextPane {
      * @param s
      *          the string to be printed
      */
+    @Override
     public void print(char s[]) {
       print(String.valueOf(s));
     }
@@ -544,6 +553,7 @@ public class LogArea extends XJTextPane {
       super("Clear all");
     }// ClearAllAction
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       try {
         thisLogArea.getDocument().remove(startPos.getOffset(),
@@ -582,6 +592,7 @@ public class LogArea extends XJTextPane {
      * Writes an int which must be a the code of a char, into the LogArea, using
      * the style specified in constructor. The int is downcast to a byte.
      */
+    @Override
     public void write(int charCode) {
       // charCode int must be a char. Let us be sure of that
       charCode &= 0x000000FF;
@@ -595,6 +606,7 @@ public class LogArea extends XJTextPane {
      * Writes an array of bytes into the LogArea, using the style specified in
      * constructor.
      */
+    @Override
     public void write(byte[] data, int offset, int length) {
       // Insert the string to the log area
       try {

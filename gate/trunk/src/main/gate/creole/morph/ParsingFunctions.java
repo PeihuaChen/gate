@@ -872,7 +872,7 @@ public class ParsingFunctions {
 				}
 
 				// yes it is a variable
-				String replaceWith = "(" + (String) (storage.get(varNames[i]))
+				String replaceWith = "(" + (storage.get(varNames[i]))
 						+ ")";
 				newExpr.replace(index, (varNames[i].length() + index),
 						replaceWith);

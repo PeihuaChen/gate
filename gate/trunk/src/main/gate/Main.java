@@ -48,7 +48,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JOptionPane;
-import javax.swing.RepaintManager;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
@@ -99,6 +98,7 @@ public class Main {
       
       final PrintStream out = System.out;
       
+      @Override
       public void deadlockDetected(ThreadInfo inf) {
         out.println("Deadlocked Thread:");
         out.println("------------------");
@@ -107,6 +107,7 @@ public class Main {
           out.println("\t" + ste);
         }
       }
+      @Override
       public void thresholdExceeded(ThreadInfo[] threads) { }
     });
 
@@ -175,6 +176,7 @@ public class Main {
 
     //create the main frame, show it
     SwingUtilities.invokeLater(new Runnable(){
+      @Override
       public void run(){
         GraphicsConfiguration gc = GraphicsEnvironment.
         getLocalGraphicsEnvironment().getDefaultScreenDevice().
@@ -233,6 +235,7 @@ public class Main {
         //load session if required and available;
         //do everything from a new thread.
         Runnable runnable = new Runnable(){
+          @Override
           public void run(){
             try{
               File sessionFile = Gate.getUserSessionFile();

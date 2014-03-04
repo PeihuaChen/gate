@@ -19,8 +19,6 @@ package gate.jape;
 
 import java.util.Stack;
 
-import gate.AnnotationSet;
-
 
 /**
   * Superclass of the various types of pattern element, and of
@@ -55,6 +53,7 @@ abstract public class PatternElement implements Cloneable,
     * actually need it anywhere but during parsing the .jape, where there
     * is no match history yet.
     */
+  @Override
   public Object clone() {
     try {
       PatternElement newPE = (PatternElement) super.clone();

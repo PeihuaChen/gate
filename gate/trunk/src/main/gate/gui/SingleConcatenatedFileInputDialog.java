@@ -182,6 +182,7 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
    */
   protected void initListeners() {
     filerBtn.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         JFileChooser filer = MainFrame.getFileChooser();
         filer.setFileSelectionMode(JFileChooser.FILES_ONLY);

@@ -33,12 +33,14 @@ public class TestSplitterTagger extends TestCase{
   public TestSplitterTagger(String name) { super(name); }
 
   /** Fixture set up */
+  @Override
   public void setUp() throws GateException {
   } // setUp
 
   /** Put things back as they should be after running tests
     * (reinitialise the CREOLE register).
     */
+  @Override
   public void tearDown() throws Exception {
   } // tearDown
 

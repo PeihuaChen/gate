@@ -158,17 +158,20 @@ public final class FSDirectory extends Directory {
   }
 
   /** Returns an array of strings, one for each file in the directory. */
+  @Override
   public final String[] list() throws IOException {
     return directory.list();
   }
 
   /** Returns true iff a file with the given name exists. */
+  @Override
   public final boolean fileExists(String name) throws IOException {
     File file = new File(directory, name);
     return file.exists();
   }
 
   /** Returns the time the named file was last modified. */
+  @Override
   public final long fileModified(String name) throws IOException {
     File file = new File(directory, name);
     return file.lastModified();
@@ -182,18 +185,21 @@ public final class FSDirectory extends Directory {
   }
 
   /** Set the modified time of an existing file to now. */
+  @Override
   public void touchFile(String name) throws IOException {
     File file = new File(directory, name);
     file.setLastModified(System.currentTimeMillis());
   }
 
   /** Returns the length in bytes of a file in the directory. */
+  @Override
   public final long fileLength(String name) throws IOException {
     File file = new File(directory, name);
     return file.length();
   }
 
   /** Removes an existing file in the directory. */
+  @Override
   public final void deleteFile(String name) throws IOException {
     File file = new File(directory, name);
     if (!file.delete())
@@ -201,6 +207,7 @@ public final class FSDirectory extends Directory {
   }
 
   /** Renames an existing file in the directory. */
+  @Override
   public final synchronized void renameFile(String from, String to)
       throws IOException {
     File old = new File(directory, from);
@@ -261,11 +268,13 @@ public final class FSDirectory extends Directory {
 
   /** Creates a new, empty file in the directory with the given name.
       Returns a stream writing this file. */
+  @Override
   public final OutputStream createFile(String name) throws IOException {
     return new FSOutputStream(new File(directory, name));
   }
 
   /** Returns a stream reading an existing file. */
+  @Override
   public final InputStream openFile(String name) throws IOException {
     return new FSInputStream(new File(directory, name));
   }
@@ -287,6 +296,7 @@ public final class FSDirectory extends Directory {
    * @param name the name of the lock file
    * @return an instance of <code>Lock</code> holding the lock
    */
+  @Override
   public final Lock makeLock(String name) {
     StringBuffer buf = getLockPrefix();
     buf.append("-");
@@ -296,6 +306,7 @@ public final class FSDirectory extends Directory {
     final File lockFile = new File(lockDir, buf.toString());
 
     return new Lock() {
+      @Override
       public boolean obtain() throws IOException {
         if (DISABLE_LOCKS)
           return true;
@@ -308,17 +319,20 @@ public final class FSDirectory extends Directory {
 
         return lockFile.createNewFile();
       }
+      @Override
       public void release() {
         if (DISABLE_LOCKS)
           return;
         lockFile.delete();
       }
+      @Override
       public boolean isLocked() {
         if (DISABLE_LOCKS)
           return false;
         return lockFile.exists();
       }
 
+      @Override
       public String toString() {
         return "Lock@" + lockFile;
       }
@@ -349,6 +363,7 @@ public final class FSDirectory extends Directory {
   }
 
   /** Closes the store to future operations. */
+  @Override
   public final synchronized void close() throws IOException {
     if (--refCount <= 0) {
       synchronized (DIRECTORIES) {
@@ -362,6 +377,7 @@ public final class FSDirectory extends Directory {
   }
 
   /** For debug output. */
+  @Override
   public String toString() {
     return "FSDirectory@" + directory;
   }
@@ -409,6 +425,7 @@ final class FSInputStream extends InputStream {
   }
 
   /** InputStream methods */
+  @Override
   protected final void readInternal(byte[] b, int offset, int len)
        throws IOException {
     synchronized (file) {
@@ -429,19 +446,23 @@ final class FSInputStream extends InputStream {
     }
   }
 
+  @Override
   public final void close() throws IOException {
     if (!isClone)
       file.close();
   }
 
   /** Random-access methods */
+  @Override
   protected final void seekInternal(long position) throws IOException {
   }
 
+  @Override
   protected final void finalize() throws IOException {
     close();            // close the file
   }
 
+  @Override
   public Object clone() {
     FSInputStream clone = (FSInputStream)super.clone();
     clone.isClone = true;
@@ -465,23 +486,28 @@ final class FSOutputStream extends OutputStream {
   }
 
   /** output methods: */
+  @Override
   public final void flushBuffer(byte[] b, int size) throws IOException {
     file.write(b, 0, size);
   }
+  @Override
   public final void close() throws IOException {
     super.close();
     file.close();
   }
 
   /** Random-access methods */
+  @Override
   public final void seek(long pos) throws IOException {
     super.seek(pos);
     file.seek(pos);
   }
+  @Override
   public final long length() throws IOException {
     return file.length();
   }
 
+  @Override
   protected final void finalize() throws IOException {
     file.close();          // close the file
   }

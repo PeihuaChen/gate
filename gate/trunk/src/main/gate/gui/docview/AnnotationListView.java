@@ -53,7 +53,8 @@ public class AnnotationListView extends AbstractDocumentView
     *  (non-Javadoc)
     * @see gate.gui.docview.AnnotationList#getAnnotationAtRow(int)
     */
-   public AnnotationData getAnnotationAtRow(int row) {
+   @Override
+  public AnnotationData getAnnotationAtRow(int row) {
      return annDataList == null ? null : annDataList.get(
              table.rowViewToModel(row));
    }
@@ -62,7 +63,8 @@ public class AnnotationListView extends AbstractDocumentView
    /* (non-Javadoc)
     * @see gate.gui.docview.AnnotationList#getSelectionModel()
     */
-   public ListSelectionModel getSelectionModel() {
+   @Override
+  public ListSelectionModel getSelectionModel() {
      return table == null ? null : table.getSelectionModel();
    }
 
@@ -80,7 +82,8 @@ public class AnnotationListView extends AbstractDocumentView
    /* (non-Javadoc)
     * @see gate.gui.docview.AbstractDocumentView#initGUI()
     */
-   protected void initGUI() {
+   @Override
+  protected void initGUI() {
      tableModel = new AnnotationTableModel();
      table = new XJTable(tableModel);
      table.setAutoResizeMode(XJTable.AUTO_RESIZE_LAST_COLUMN);
@@ -131,13 +134,15 @@ public class AnnotationListView extends AbstractDocumentView
      initListeners();
    }
 
-   public Component getGUI(){
+   @Override
+  public Component getGUI(){
      return mainPanel;
    }
 
    protected void initListeners(){
 
         tableModel.addTableModelListener(new TableModelListener(){
+          @Override
           public void tableChanged(TableModelEvent e){
             statusLabel.setText(
                     Integer.toString(tableModel.getRowCount()) +
@@ -149,6 +154,7 @@ public class AnnotationListView extends AbstractDocumentView
 
         table.getSelectionModel().
           addListSelectionListener(new ListSelectionListener(){
+            @Override
             public void valueChanged(ListSelectionEvent e){
               if(!isActive())return;
               if(e.getValueIsAdjusting()) return;
@@ -187,12 +193,15 @@ public class AnnotationListView extends AbstractDocumentView
         });
 
         table.addMouseListener(new MouseAdapter() {
+          @Override
           public void mouseClicked(MouseEvent me) {
             processMouseEvent(me);
           }
+          @Override
           public void mouseReleased(MouseEvent me) {
             processMouseEvent(me);
           }
+          @Override
           public void mousePressed(MouseEvent me) {
             int row = table.rowAtPoint(me.getPoint());
             if(me.isPopupTrigger()
@@ -242,12 +251,15 @@ public class AnnotationListView extends AbstractDocumentView
         });
 
         table.addAncestorListener(new AncestorListener() {
+          @Override
           public void ancestorAdded(AncestorEvent event) {
             // force the table to be sorted when the view is shown
             tableModel.fireTableDataChanged();
           }
+          @Override
           public void ancestorMoved(AncestorEvent event) {
           }
+          @Override
           public void ancestorRemoved(AncestorEvent event) {
           }
         });
@@ -256,13 +268,17 @@ public class AnnotationListView extends AbstractDocumentView
     filterTextField.getDocument().addDocumentListener( new DocumentListener() {
       private Timer timer = new Timer("Annotation list selection timer", true);
       private TimerTask timerTask;
+      @Override
       public void changedUpdate(DocumentEvent e) { /* do nothing */ }
+      @Override
       public void insertUpdate(DocumentEvent e) { update(); }
+      @Override
       public void removeUpdate(DocumentEvent e) { update(); }
       private void update() {
         if (timerTask != null) { timerTask.cancel(); }
         Date timeToRun = new Date(System.currentTimeMillis() + 300);
-        timerTask = new TimerTask() { public void run() {
+        timerTask = new TimerTask() { @Override
+        public void run() {
           selectRows();
         }};
         // add a delay
@@ -298,7 +314,8 @@ public class AnnotationListView extends AbstractDocumentView
 
     // Delete key for deleting selected annotations
     table.addKeyListener(new KeyAdapter() {
-     public void keyPressed(KeyEvent e) {
+     @Override
+    public void keyPressed(KeyEvent e) {
        if (e.getKeyCode() == KeyEvent.VK_DELETE) {
          new DeleteAction().actionPerformed(new ActionEvent(e.getSource(),
            e.getID(), "", e.getWhen(), e.getModifiers()));
@@ -376,6 +393,7 @@ public class AnnotationListView extends AbstractDocumentView
       putValue(SHORT_DESCRIPTION, "Delete selected annotations");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("DELETE"));
     }
+    @Override
     public void actionPerformed(ActionEvent event){
       if ((event.getModifiers() & ActionEvent.SHIFT_MASK)
                                != ActionEvent.SHIFT_MASK
@@ -404,6 +422,7 @@ public class AnnotationListView extends AbstractDocumentView
    /* (non-Javadoc)
        * @see gate.gui.docview.AbstractDocumentView#registerHooks()
        */
+      @Override
       protected void registerHooks() {
         //this is called on activation
     //    showHighlights();
@@ -412,7 +431,8 @@ public class AnnotationListView extends AbstractDocumentView
    /* (non-Javadoc)
     * @see gate.gui.docview.AbstractDocumentView#unregisterHooks()
     */
-   protected void unregisterHooks() {
+   @Override
+  protected void unregisterHooks() {
      //this is called on de-activation
      //remove highlights
  //    textView.removeAllBlinkingHighlights();
@@ -421,7 +441,8 @@ public class AnnotationListView extends AbstractDocumentView
    /* (non-Javadoc)
     * @see gate.gui.docview.DocumentView#getType()
     */
-   public int getType() {
+   @Override
+  public int getType() {
      return HORIZONTAL;
    }
 
@@ -506,7 +527,8 @@ public class AnnotationListView extends AbstractDocumentView
        //this needs to happen after the table has caught up with all the changes
        //hence we need to queue it to the GUI thread
        SwingUtilities.invokeLater(new Runnable(){
-       public void run(){
+       @Override
+      public void run(){
          owner.setSelectedAnnotations(selAnns);
        }});
      }
@@ -551,7 +573,8 @@ public class AnnotationListView extends AbstractDocumentView
      return annDataList;
    }
 
-   public void annotationUpdated(AnnotationEvent e){
+   @Override
+  public void annotationUpdated(AnnotationEvent e){
      //update all occurrences of this annotation
     // if annotations tab has not been set to visible state
      // table will be null.
@@ -610,7 +633,8 @@ public class AnnotationListView extends AbstractDocumentView
      //if we got this far, the selection lists were different
      //we need to change the selection from the UI thread.
      SwingUtilities.invokeLater(new Runnable(){
-       public void run(){
+       @Override
+      public void run(){
          try{
            //block upward events
            localSelectionUpdating = true;
@@ -657,7 +681,8 @@ public class AnnotationListView extends AbstractDocumentView
    /* (non-Javadoc)
     * @see gate.gui.annedit.AnnotationEditorOwner#annotationChanged(gate.Annotation, gate.AnnotationSet, java.lang.String)
     */
-   public void annotationChanged(Annotation ann, AnnotationSet set,
+   @Override
+  public void annotationChanged(Annotation ann, AnnotationSet set,
            String oldType) {
      //do nothing
    }
@@ -665,7 +690,8 @@ public class AnnotationListView extends AbstractDocumentView
    /* (non-Javadoc)
     * @see gate.gui.annedit.AnnotationEditorOwner#getNextAnnotation()
     */
-   public Annotation getNextAnnotation() {
+   @Override
+  public Annotation getNextAnnotation() {
      return null;
    }
 
@@ -673,7 +699,8 @@ public class AnnotationListView extends AbstractDocumentView
    /* (non-Javadoc)
     * @see gate.gui.annedit.AnnotationEditorOwner#getPreviousAnnotation()
     */
-   public Annotation getPreviousAnnotation() {
+   @Override
+  public Annotation getPreviousAnnotation() {
      return null;
    }
 
@@ -681,7 +708,8 @@ public class AnnotationListView extends AbstractDocumentView
    /* (non-Javadoc)
     * @see gate.gui.annedit.AnnotationEditorOwner#getTextComponent()
     */
-   public JTextComponent getTextComponent() {
+   @Override
+  public JTextComponent getTextComponent() {
      //get a pointer to the text view used to display
      //the selected annotations
      Iterator centralViewsIter = owner.getCentralViews().iterator();
@@ -696,26 +724,31 @@ public class AnnotationListView extends AbstractDocumentView
    /* (non-Javadoc)
     * @see gate.gui.annedit.AnnotationEditorOwner#selectAnnotation(gate.gui.annedit.AnnotationData)
     */
-   public void selectAnnotation(AnnotationData data) {
+   @Override
+  public void selectAnnotation(AnnotationData data) {
    }
 
    /* (non-Javadoc)
     * @see gate.gui.docview.AnnotationList#getRowForAnnotation(gate.gui.annedit.AnnotationData)
     */
-   public int getRowForAnnotation(AnnotationData data) {
+   @Override
+  public int getRowForAnnotation(AnnotationData data) {
      return annDataList.indexOf(data);
    }
 
   class AnnotationTableModel extends AbstractTableModel{
-       public int getRowCount(){
+       @Override
+      public int getRowCount(){
          return annDataList.size();
        }
 
-       public int getColumnCount(){
+       @Override
+      public int getColumnCount(){
          return 6;
        }
 
-       public String getColumnName(int column){
+       @Override
+      public String getColumnName(int column){
          switch(column){
            case TYPE_COL: return "Type";
            case SET_COL: return "Set";
@@ -727,7 +760,8 @@ public class AnnotationListView extends AbstractDocumentView
          }
        }
 
-       public Class getColumnClass(int column){
+       @Override
+      public Class getColumnClass(int column){
          switch(column){
            case TYPE_COL: return String.class;
            case SET_COL: return String.class;
@@ -739,11 +773,13 @@ public class AnnotationListView extends AbstractDocumentView
          }
        }
 
-       public boolean isCellEditable(int rowIndex, int columnIndex){
+       @Override
+      public boolean isCellEditable(int rowIndex, int columnIndex){
          return false;
        }
 
-       public Object getValueAt(int row, int column){
+       @Override
+      public Object getValueAt(int row, int column){
          if(row >= annDataList.size()) return null;
          AnnotationData aData = annDataList.get(row);
          switch(column){
@@ -796,7 +832,8 @@ public class AnnotationListView extends AbstractDocumentView
          }
        }
 
-       public void actionPerformed(ActionEvent evt){
+       @Override
+      public void actionPerformed(ActionEvent evt){
    //      editor.setTarget(set);
    //      editor.setAnnotation(ann);
          if(editor instanceof OwnedAnnotationEditor){

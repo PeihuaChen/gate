@@ -53,6 +53,7 @@ public class CheckBoxTableCellRenderer extends JCheckBox implements
     setOpaque(true);
   }
 
+  @Override
   public Component getTableCellRendererComponent(JTable table, Object value,
           boolean isSelected, boolean hasFocus, int row, int column) {
 

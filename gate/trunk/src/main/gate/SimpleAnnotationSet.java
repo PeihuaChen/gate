@@ -89,16 +89,19 @@ public interface SimpleAnnotationSet extends Set<Annotation>, Cloneable,
    * @return <code>true</code> if the set was modified by this
    *         operation, <code>false</code> otherwise.
    */
+  @Override
   public boolean add(Annotation a);
 
   /**
    * Get an iterator for this set
    */
+  @Override
   public Iterator<Annotation> iterator();
 
   /**
    * Get the size of (i.e. number of annotations in) this set.
    */
+  @Override
   public int size();
 
   /**
@@ -108,6 +111,7 @@ public interface SimpleAnnotationSet extends Set<Annotation>, Cloneable,
    * @return <code>true</code> if the set was modified by this
    *         operation, <code>false</code> otherwise.
    */
+  @Override
   public boolean remove(Object o);
 
   /**

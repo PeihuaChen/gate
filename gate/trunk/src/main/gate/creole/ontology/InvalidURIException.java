@@ -50,6 +50,7 @@ public class InvalidURIException extends GateRuntimeException {
   /**
    * Overriden so we can print the enclosed exception's stacktrace too.
    */
+  @Override
   public void printStackTrace() {
     printStackTrace(System.err);
   }
@@ -57,6 +58,7 @@ public class InvalidURIException extends GateRuntimeException {
   /**
    * Overriden so we can print the enclosed exception's stacktrace too.
    */
+  @Override
   public void printStackTrace(java.io.PrintStream s) {
     s.flush();
     super.printStackTrace(s);
@@ -67,6 +69,7 @@ public class InvalidURIException extends GateRuntimeException {
   /**
    * Overriden so we can print the enclosed exception's stacktrace too.
    */
+  @Override
   public void printStackTrace(java.io.PrintWriter s) {
     s.flush();
     super.printStackTrace(s);

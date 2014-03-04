@@ -137,11 +137,13 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
   /** Overrides the hashCode method from Object so this obejcts can be stored in
     * hash maps and hash sets.
     */
+  @Override
   public int hashCode() {
     return (int)length ^ priority ^ fileIndex ^ bindings.hashCode() ^
            FSMPosition.getAction().hashCode();
   }
 
+  @Override
   public boolean equals(Object other){
     if (other == null) return false;
     if(other instanceof FSMInstance){
@@ -164,6 +166,7 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     * themselves
     * @return an Object value that is actually a FSMInstance object
     */
+  @Override
   public Object clone() {
     //do a classic clone except for bindings which need to be cloned themselves
     try {
@@ -197,6 +200,7 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     * The order imposed by this method is the priority needed in case of a
     * multiple match.
     */
+  @Override
   public int compareTo(Object obj) {
     if (obj instanceof FSMInstance) {
       if(obj == this) return 0;
@@ -215,6 +219,7 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
 
   /** Returns a textual representation of this FSM instance.
     */
+  @Override
   public String toString() {
     String res = "";
     RightHandSide rhs = getFSMPosition().getAction();
@@ -231,7 +236,7 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
       Iterator<String> labelIter = bindings.keySet().iterator();
       res += "\n{";
       while(labelIter.hasNext()){
-        String label = (String)labelIter.next();
+        String label = labelIter.next();
         Collection<Annotation> annots = bindings.get(label);
         res += "\n" + label + ": ";
         Iterator<Annotation> annIter = annots.iterator();

@@ -24,8 +24,6 @@ import org.apache.log4j.Logger;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
-import org.apache.tika.parser.AutoDetectParser;
-import org.apache.tika.parser.CompositeParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.xml.sax.SAXException;
@@ -89,6 +87,7 @@ public class TikaFormat extends DocumentFormat {
 
     // Create a status listener
     StatusListener statusListener = new StatusListener() {
+      @Override
       public void statusChanged(String text) {
         // This is implemented in DocumentFormat.java and inherited here
         fireStatusChanged(text);

@@ -16,8 +16,6 @@ package gate.swing;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
-import java.util.List;
-
 import javax.swing.*;
 import javax.swing.event.ListDataListener;
 
@@ -30,6 +28,7 @@ import javax.swing.event.ListDataListener;
  */
 public class JChoice extends JPanel implements ItemSelectable{
 
+  @Override
   public Object[] getSelectedObjects() {
     return new Object[]{getSelectedItem()};
   }
@@ -148,6 +147,7 @@ public class JChoice extends JPanel implements ItemSelectable{
        */
       private boolean disabled = false;
       
+      @Override
       public void itemStateChanged(ItemEvent e) {
         if(disabled) return;
         if(e.getSource() == combo){
@@ -216,11 +216,13 @@ public class JChoice extends JPanel implements ItemSelectable{
             "Dec"});
     fChoice.setMaximumFastChoices(20);
     fChoice.addActionListener(new ActionListener(){
+      @Override
       public void actionPerformed(ActionEvent e) {
         System.out.println("Action (" + e.getActionCommand() + ") :" + fChoice.getSelectedItem() + " selected!");
       }
     });
     fChoice.addItemListener(new ItemListener(){
+      @Override
       public void itemStateChanged(ItemEvent e) {
         System.out.println("Item " + e.getItem().toString() +
                (e.getStateChange() == ItemEvent.SELECTED ? " selected!" :
@@ -234,6 +236,7 @@ public class JChoice extends JPanel implements ItemSelectable{
     Box topBox = Box.createHorizontalBox();
     JButton aButn = new JButton("Clear");
     aButn.addActionListener(new ActionListener(){
+      @Override
       public void actionPerformed(ActionEvent e) {
         System.out.println("Clearing");
         fChoice.setSelectedItem(null);
@@ -263,6 +266,7 @@ public class JChoice extends JPanel implements ItemSelectable{
    * @param listener
    * @see javax.swing.JComboBox#removeItemListener(java.awt.event.ItemListener)
    */
+  @Override
   public void removeItemListener(ItemListener listener) {
     ListenerWrapper wrapper = listenersMap.remove(listener);
     combo.removeActionListener(wrapper);
@@ -280,6 +284,7 @@ public class JChoice extends JPanel implements ItemSelectable{
    * @param listener
    * @see javax.swing.JComboBox#addItemListener(java.awt.event.ItemListener)
    */
+  @Override
   public void addItemListener(ItemListener listener) {
     combo.addItemListener(new ListenerWrapper(listener));
   }
@@ -443,6 +448,7 @@ public class JChoice extends JPanel implements ItemSelectable{
       listenersMap.put(originalListener, this);
     }
 
+    @Override
     public void itemStateChanged(ItemEvent e) {
       //generate a new event with this as source
       ((ItemListener)originalListener).itemStateChanged(
@@ -450,6 +456,7 @@ public class JChoice extends JPanel implements ItemSelectable{
                       e.getStateChange()));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       //generate a new event
       ((ActionListener)originalListener).actionPerformed(new ActionEvent(

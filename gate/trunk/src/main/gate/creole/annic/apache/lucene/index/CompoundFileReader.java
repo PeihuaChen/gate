@@ -19,10 +19,8 @@ package gate.creole.annic.apache.lucene.index;
 import gate.creole.annic.apache.lucene.store.Directory;
 import gate.creole.annic.apache.lucene.store.InputStream;
 import gate.creole.annic.apache.lucene.store.OutputStream;
-import gate.creole.annic.apache.lucene.store.FSDirectory;
 import gate.creole.annic.apache.lucene.store.Lock;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.io.IOException;
 
 
@@ -105,6 +103,7 @@ class CompoundFileReader extends Directory {
         return fileName;
     }
 
+    @Override
     public synchronized void close() throws IOException {
         if (stream == null)
             throw new IOException("Already closed");
@@ -114,6 +113,7 @@ class CompoundFileReader extends Directory {
         stream = null;
     }
 
+    @Override
     public synchronized InputStream openFile(String id)
     throws IOException
     {
@@ -128,27 +128,32 @@ class CompoundFileReader extends Directory {
     }
 
     /** Returns an array of strings, one for each file in the directory. */
+    @Override
     public String[] list() {
         String res[] = new String[entries.size()];
         return (String[]) entries.keySet().toArray(res);
     }
 
     /** Returns true iff a file with the given name exists. */
+    @Override
     public boolean fileExists(String name) {
         return entries.containsKey(name);
     }
 
     /** Returns the time the named file was last modified. */
+    @Override
     public long fileModified(String name) throws IOException {
         return directory.fileModified(fileName);
     }
 
     /** Set the modified time of an existing file to now. */
+    @Override
     public void touchFile(String name) throws IOException {
         directory.touchFile(fileName);
     }
 
     /** Removes an existing file in the directory. */
+    @Override
     public void deleteFile(String name)
     {
         throw new UnsupportedOperationException();
@@ -157,12 +162,14 @@ class CompoundFileReader extends Directory {
     /** Renames an existing file in the directory.
     If a file already exists with the new name, then it is replaced.
     This replacement should be atomic. */
+    @Override
     public void renameFile(String from, String to)
     {
         throw new UnsupportedOperationException();
     }
 
     /** Returns the length of a file in the directory. */
+    @Override
     public long fileLength(String name)
     throws IOException
     {
@@ -174,6 +181,7 @@ class CompoundFileReader extends Directory {
 
     /** Creates a new, empty file in the directory with the given name.
       Returns a stream writing this file. */
+    @Override
     public OutputStream createFile(String name)
     {
         throw new UnsupportedOperationException();
@@ -182,6 +190,7 @@ class CompoundFileReader extends Directory {
     /** Construct a {@link Lock}.
      * @param name the name of the lock file
      */
+    @Override
     public Lock makeLock(String name)
     {
         throw new UnsupportedOperationException();
@@ -211,6 +220,7 @@ class CompoundFileReader extends Directory {
          * @param offset the offset in the array to start storing bytes
          * @param length the number of bytes to read
          */
+        @Override
         protected void readInternal(byte[] b, int offset, int len)
         throws IOException
         {
@@ -229,9 +239,11 @@ class CompoundFileReader extends Directory {
          *  the next {@link #readInternal(byte[],int,int)} will occur.
          * @see #readInternal(byte[],int,int)
          */
+        @Override
         protected void seekInternal(long pos) throws IOException {}
 
         /** Closes the stream to futher operations. */
+        @Override
         public void close() throws IOException {}
 
     }

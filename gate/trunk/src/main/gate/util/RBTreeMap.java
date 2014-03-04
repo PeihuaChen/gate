@@ -130,6 +130,7 @@ public class RBTreeMap extends AbstractMap
     *
     * @return the number of key-value mappings in this map.
     */
+  @Override
   public int size() {
     return size;
   }
@@ -148,6 +149,7 @@ public class RBTreeMap extends AbstractMap
     *		  natural ordering, or its comparator does not tolerate
     *            <tt>null</tt> keys.
     */
+  @Override
   public boolean containsKey(Object key) {
     return getEntry(key) != null;
   }
@@ -163,6 +165,7 @@ public class RBTreeMap extends AbstractMap
     * @param value value whose presence in this Map is to be tested.
     * @since JDK1.2
     */
+  @Override
   public boolean containsValue(Object value) {
       return (value==null ? valueSearchNull(root)
               : valueSearchNonNull(root, value));
@@ -252,6 +255,7 @@ public class RBTreeMap extends AbstractMap
     *
     * @see #containsKey(Object)
     */
+  @Override
   public Object get(Object key) {
     Entry p = getEntry(key);
     return (p==null ? null : p.value);
@@ -264,6 +268,7 @@ public class RBTreeMap extends AbstractMap
     * @return the comparator associated with this sorted map, or
     * 	       <tt>null</tt> if it uses its keys' natural sort method.
     */
+  @Override
   public Comparator comparator() {
       return comparator;
   }
@@ -274,6 +279,7 @@ public class RBTreeMap extends AbstractMap
     * @return the first (lowest) key currently in this sorted map.
     * @throws    NoSuchElementException Map is empty.
     */
+  @Override
   public Object firstKey() {
       return key(firstEntry());
   }
@@ -284,6 +290,7 @@ public class RBTreeMap extends AbstractMap
     * @return the last (highest) key currently in this sorted map.
     * @throws    NoSuchElementException Map is empty.
     */
+  @Override
   public Object lastKey() {
       return key(lastEntry());
   }
@@ -300,6 +307,7 @@ public class RBTreeMap extends AbstractMap
     * @throws NullPointerException this map does not permit <tt>null</tt>
     *            keys and a specified key is <tt>null</tt>.
     */
+  @Override
   public void putAll(Map map) {
       int mapSize = map.size();
       if (size==0 && mapSize!=0 && map instanceof SortedMap) {
@@ -439,6 +447,7 @@ public class RBTreeMap extends AbstractMap
     *		  natural order, or its comparator does not tolerate
     *		  <tt>null</tt> keys.
     */
+  @Override
   public Object put(Object key, Object value) {
     Entry t = root;
 
@@ -488,6 +497,7 @@ public class RBTreeMap extends AbstractMap
     *		  natural order, or its comparator does not tolerate
     *		  <tt>null</tt> keys.
     */
+  @Override
   public Object remove(Object key) {
     Entry p = getEntry(key);
     if (p == null)
@@ -501,6 +511,7 @@ public class RBTreeMap extends AbstractMap
   /**
     * Removes all mappings from this RBTreeMap.
     */
+  @Override
   public void clear() {
     modCount++;
     size = 0;
@@ -513,6 +524,7 @@ public class RBTreeMap extends AbstractMap
     *
     * @return a shallow copy of this Map.
     */
+  @Override
   public Object clone() {
     return new RBTreeMap(this);
   }
@@ -541,26 +553,32 @@ public class RBTreeMap extends AbstractMap
     *
     * @return a set view of the keys contained in this RBTreeMap.
     */
+  @Override
   public Set keySet() {
     if (keySet == null) {
       keySet = new AbstractSet() {
 
+        @Override
         public java.util.Iterator iterator() {
             return new Iterator(KEYS);
         }
 
+        @Override
         public int size() {
           return RBTreeMap.this.size();
         }
 
+        @Override
         public boolean contains(Object o) {
           return containsKey(o);
         }
 
+        @Override
         public boolean remove(Object o) {
           return RBTreeMap.this.remove(o) != null;
         }
 
+        @Override
         public void clear() {
           RBTreeMap.this.clear();
         }
@@ -582,17 +600,21 @@ public class RBTreeMap extends AbstractMap
     *
     * @return a collection view of the values contained in this map.
     */
+  @Override
   public Collection values() {
     if (values == null) {
       values = new AbstractCollection() {
+        @Override
         public java.util.Iterator iterator() {
             return new Iterator(VALUES);
         }
 
+        @Override
         public int size() {
             return RBTreeMap.this.size();
         }
 
+        @Override
         public boolean contains(Object o) {
             for (Entry e = firstEntry(); e != null; e = successor(e))
                 if (valEquals(e.getValue(), o))
@@ -600,6 +622,7 @@ public class RBTreeMap extends AbstractMap
             return false;
         }
 
+        @Override
         public boolean remove(Object o) {
           for (Entry e = firstEntry(); e != null; e = successor(e)) {
             if (valEquals(e.getValue(), o)) {
@@ -610,6 +633,7 @@ public class RBTreeMap extends AbstractMap
           return false;
         }
 
+        @Override
         public void clear() {
             RBTreeMap.this.clear();
         }
@@ -631,13 +655,16 @@ public class RBTreeMap extends AbstractMap
     *
     * @return a set view of the mappings contained in this map.
     */
+  @Override
   public Set entrySet() {
     if (entrySet == null) {
       entrySet = new AbstractSet() {
+        @Override
         public java.util.Iterator iterator() {
           return new Iterator(ENTRIES);
         }
 
+        @Override
         public boolean contains(Object o) {
           if (!(o instanceof Map.Entry))
               return false;
@@ -647,6 +674,7 @@ public class RBTreeMap extends AbstractMap
           return p != null && valEquals(p.getValue(), value);
         }
 
+        @Override
         public boolean remove(Object o) {
           if (!(o instanceof Map.Entry))
               return false;
@@ -660,10 +688,12 @@ public class RBTreeMap extends AbstractMap
           return false;
         }
 
+        @Override
         public int size() {
             return RBTreeMap.this.size();
         }
 
+        @Override
         public void clear() {
             RBTreeMap.this.clear();
         }
@@ -714,6 +744,7 @@ public class RBTreeMap extends AbstractMap
     * @throws IllegalArgumentException if <tt>fromKey</tt> is greater than
     *            <tt>toKey</tt>.
     */
+  @Override
   public SortedMap subMap(Object fromKey, Object toKey) {
     return new SubMap(fromKey, toKey);
   }
@@ -748,6 +779,7 @@ public class RBTreeMap extends AbstractMap
     *		  this map uses natural order, or its comparator does * not
     *		  tolerate <tt>null</tt> keys.
     */
+  @Override
   public SortedMap headMap(Object toKey) {
     return new SubMap(toKey, true);
   }
@@ -781,6 +813,7 @@ public class RBTreeMap extends AbstractMap
     *		  map uses natural ordering, or its comparator does
     *            not tolerate <tt>null</tt> keys.
     */
+  @Override
   public SortedMap tailMap(Object fromKey) {
     return new SubMap(fromKey, false);
   }
@@ -817,40 +850,48 @@ public class RBTreeMap extends AbstractMap
       this.toKey = toKey;
     }
 
+    @Override
     public boolean isEmpty() {
       return entrySet.isEmpty();
     }
 
+    @Override
     public boolean containsKey(Object key) {
       return inRange(key) && RBTreeMap.this.containsKey(key);
     }
 
+    @Override
     public Object get(Object key) {
       if (!inRange(key))
         return null;
       return RBTreeMap.this.get(key);
     }
 
+    @Override
     public Object put(Object key, Object value) {
       if (!inRange(key))
         throw new IllegalArgumentException("key out of range");
       return RBTreeMap.this.put(key, value);
     }
 
+    @Override
     public Comparator comparator() {
         return comparator;
     }
 
+    @Override
     public Object firstKey() {
         return key(fromStart ? firstEntry() : getCeilEntry(fromKey));
     }
 
+    @Override
     public Object lastKey() {
         return key(toEnd ? lastEntry() : getPrecedingEntry(toKey));
     }
 
     private transient Set entrySet = new EntrySetView();
 
+    @Override
     public Set entrySet() {
         return entrySet;
     }
@@ -858,6 +899,7 @@ public class RBTreeMap extends AbstractMap
     private class EntrySetView extends AbstractSet {
       private transient int size = -1, sizeModCount;
 
+      @Override
       public int size() {
         if (size == -1 || sizeModCount != RBTreeMap.this.modCount) {
           size = 0;  sizeModCount = RBTreeMap.this.modCount;
@@ -870,10 +912,12 @@ public class RBTreeMap extends AbstractMap
         return size;
       } // size
 
+      @Override
       public boolean isEmpty() {
         return !iterator().hasNext();
       }// isEmpty
 
+      @Override
       public boolean contains(Object o) {
         if (!(o instanceof Map.Entry))
           return false;
@@ -887,6 +931,7 @@ public class RBTreeMap extends AbstractMap
                  valEquals(node.getValue(), entry.getValue());
       } // contains
 
+      @Override
       public boolean remove(Object o) {
         if (!(o instanceof Map.Entry))
           return false;
@@ -902,6 +947,7 @@ public class RBTreeMap extends AbstractMap
         return false;
       }
 
+      @Override
       public java.util.Iterator iterator() {
         return new Iterator(
                   (fromStart ? firstEntry() : getCeilEntry(fromKey)),
@@ -909,6 +955,7 @@ public class RBTreeMap extends AbstractMap
       }
     } // EntrySetView
 
+    @Override
     public SortedMap subMap(Object fromKey, Object toKey) {
       if (!inRange(fromKey))
         throw new IllegalArgumentException("fromKey out of range");
@@ -917,12 +964,14 @@ public class RBTreeMap extends AbstractMap
       return new SubMap(fromKey, toKey);
     }
 
+    @Override
     public SortedMap headMap(Object toKey) {
       if (!inRange2(toKey))
         throw new IllegalArgumentException("toKey out of range");
       return new SubMap(fromStart, fromKey, false, toKey);
     }
 
+    @Override
     public SortedMap tailMap(Object fromKey) {
       if (!inRange(fromKey))
         throw new IllegalArgumentException("fromKey out of range");
@@ -974,10 +1023,12 @@ public class RBTreeMap extends AbstractMap
       this.firstExcluded = firstExcluded;
     }
 
+    @Override
     public boolean hasNext() {
       return next != firstExcluded;
     } //hasNext
 
+    @Override
     public Object next() {
       if (next == firstExcluded)
         throw new NoSuchElementException();
@@ -991,6 +1042,7 @@ public class RBTreeMap extends AbstractMap
         (type == VALUES ? lastReturned.value : lastReturned));
     } // next
 
+    @Override
     public void remove() {
       if (lastReturned == null)
         throw new IllegalStateException();
@@ -1051,6 +1103,7 @@ public class RBTreeMap extends AbstractMap
       *
       * @return the key.
       */
+    @Override
     public Object getKey() {
         return key;
     }
@@ -1060,6 +1113,7 @@ public class RBTreeMap extends AbstractMap
       *
       * @return the value associated with the key.
       */
+    @Override
     public Object getValue() {
         return value;
     }
@@ -1071,12 +1125,14 @@ public class RBTreeMap extends AbstractMap
       * @return the value associated with the key before this method was
       * called.
       */
+    @Override
     public Object setValue(Object value) {
         Object oldValue = this.value;
         this.value = value;
         return oldValue;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (!(o instanceof Map.Entry))
       return false;
@@ -1085,12 +1141,14 @@ public class RBTreeMap extends AbstractMap
         return valEquals(key,e.getKey()) && valEquals(value,e.getValue());
     } // equals
 
+    @Override
     public int hashCode() {
         int keyHash = (key==null ? 0 : key.hashCode());
         int valueHash = (value==null ? 0 : value.hashCode());
         return keyHash ^ valueHash;
     } // hashCode
 
+    @Override
     public String toString() {
         return key + "=" + value;
     }

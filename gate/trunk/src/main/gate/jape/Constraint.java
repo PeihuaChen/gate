@@ -168,6 +168,7 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
    * Need cloning for processing of macro references. See comments on
    * <CODE>PatternElement.clone()</CODE>
    */
+  @Override
   public Object clone() {
     Constraint newC = null;
     try {
@@ -187,6 +188,7 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
    * Constraint, compares the two objects using
    * <CODE>Object.equals()</CODE>.
    */
+  @Override
   public boolean equals(Object other) {
     if(!(other instanceof Constraint)) return super.equals(other);
     Constraint o = (Constraint)other;
@@ -198,6 +200,7 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
   /**
    * Returns an integer hash code for this object.
    */
+  @Override
   public int hashCode() {
     int hashCode = negated ? 0 : 37 * 17;
     hashCode = 37 * hashCode + annotType.hashCode();
@@ -225,6 +228,7 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
   } // finish
 
   /** Create a string representation of the object. */
+  @Override
   public String toString() {
     return getDisplayString("Constraint: ");
   }

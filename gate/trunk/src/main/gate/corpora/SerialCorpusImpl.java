@@ -111,7 +111,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     // now cache the names of all docs for future use
     List docNames = tCorpus.getDocumentNames();
     for(int i = 0; i < docNames.size(); i++) {
-      Document doc = (Document)tCorpus.get(i);
+      Document doc = tCorpus.get(i);
       docDataList.add(new DocumentData((String)docNames.get(i), null, doc
               .getClass().getName()));
     }
@@ -130,6 +130,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    * @return a {@link List} of Strings representing the names of the
    *         documents in this corpus.
    */
+  @Override
   public List<String> getDocumentNames() {
     List<String> docsNames = new ArrayList<String>();
     if(docDataList == null) return docsNames;
@@ -191,6 +192,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    *         <tt>index</tt> in this corpus.
    *         <P>
    */
+  @Override
   public String getDocumentName(int index) {
     if(index >= docDataList.size()) return "No such document";
 
@@ -232,7 +234,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     // not used
     // any more
     if(sync) {
-      Document doc = (Document)documents.get(index);
+      Document doc = documents.get(index);
       try {
         // if the document is not already adopted, we need to do that
         // first
@@ -282,6 +284,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    * 
    * @param doc the document to be unloaded.
    */
+  @Override
   public void unloadDocument(Document doc) {
     unloadDocument(doc, true);
   }
@@ -300,6 +303,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    * This method returns true when the document is already loaded in
    * memory
    */
+  @Override
   public boolean isDocumentLoaded(int index) {
     if(documents == null || documents.isEmpty()) return false;
     return documents.get(index) != null;
@@ -320,6 +324,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    * objects which it has been listening to. Otherwise, the object will
    * not be released from memory (memory leak!).
    */
+  @Override
   public void cleanup() {
     if(DEBUG) Out.prln("serial corpus cleanup called");
     if(corpusListeners != null) corpusListeners = null;
@@ -352,6 +357,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    *          the filter otherwise the children directories will be
    *          ignored.
    */
+  @Override
   public void populate(URL directory, FileFilter filter, String encoding,
           boolean recurseDirectories) throws IOException,
           ResourceInstantiationException {
@@ -379,6 +385,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    *          the filter otherwise the children directories will be
    *          ignored.
    */
+  @Override
   public void populate(URL directory, FileFilter filter, String encoding,
           String mimeType, boolean recurseDirectories) throws IOException,
           ResourceInstantiationException {
@@ -402,6 +409,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    * @return total length of populated documents in the corpus in number
    *         of bytes
    */  
+  @Override
   public long populate(URL singleConcatenatedFile, String documentRootElement,
           String encoding, int numberOfFilesToExtract,
           String documentNamePrefix, String mimeType, boolean includeRootElement) throws IOException,
@@ -411,6 +419,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
             documentNamePrefix, mimeType, includeRootElement);
   }
 
+  @Override
   public synchronized void removeCorpusListener(CorpusListener l) {
     if(corpusListeners != null && corpusListeners.contains(l)) {
       Vector v = (Vector)corpusListeners.clone();
@@ -419,6 +428,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     }
   }
 
+  @Override
   public synchronized void addCorpusListener(CorpusListener l) {
     Vector v = corpusListeners == null
             ? new Vector(2)
@@ -449,12 +459,15 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     }
   }
 
+  @Override
   public void resourceLoaded(CreoleEvent e) {
   }
 
+  @Override
   public void resourceRenamed(Resource resource, String oldName, String newName) {
   }
 
+  @Override
   public void resourceUnloaded(CreoleEvent e) {
     Resource res = e.getResource();
     if(res instanceof Document) {
@@ -475,12 +488,15 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     }
   }
 
+  @Override
   public void datastoreOpened(CreoleEvent e) {
   }
 
+  @Override
   public void datastoreCreated(CreoleEvent e) {
   }
 
+  @Override
   public void datastoreClosed(CreoleEvent e) {
     if(!e.getDatastore().equals(this.getDataStore())) return;
     if(this.getDataStore() != null)
@@ -494,12 +510,14 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   /**
    * Called by a datastore when a new resource has been adopted
    */
+  @Override
   public void resourceAdopted(DatastoreEvent evt) {
   }
 
   /**
    * Called by a datastore when a resource has been deleted
    */
+  @Override
   public void resourceDeleted(DatastoreEvent evt) {
     DataStore ds = (DataStore)evt.getSource();
     // 1. check whether this datastore fired the event. If not, return.
@@ -558,6 +576,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    * Called by a datastore when a resource has been wrote into the
    * datastore
    */
+  @Override
   public void resourceWritten(DatastoreEvent evt) {
     if(evt.getResourceID().equals(this.getLRPersistenceId())) {
       thisResourceWritten();
@@ -567,14 +586,17 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   // List methods
   // java docs will be automatically copied from the List interface.
 
+  @Override
   public int size() {
     return docDataList.size();
   }
 
+  @Override
   public boolean isEmpty() {
     return docDataList.isEmpty();
   }
 
+  @Override
   public boolean contains(Object o) {
     // return true if:
     // - the document data list contains a document with such a name
@@ -588,14 +610,17 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     else return true;
   }
 
+  @Override
   public Iterator iterator() {
     return new Iterator() {
       Iterator docDataIter = docDataList.iterator();
 
+      @Override
       public boolean hasNext() {
         return docDataIter.hasNext();
       }
 
+      @Override
       public Object next() {
 
         // try finding a document with the same name and persistent ID
@@ -604,6 +629,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
         return SerialCorpusImpl.this.get(index);
       }
 
+      @Override
       public void remove() {
         throw new UnsupportedOperationException("SerialCorpusImpl does not "
                 + "support remove in the iterators");
@@ -612,11 +638,13 @@ public class SerialCorpusImpl extends AbstractLanguageResource
 
   }// iterator
 
+  @Override
   public String toString() {
     return "document data " + docDataList.toString() + " documents "
             + documents;
   }
 
+  @Override
   public Object[] toArray() {
     // there is a problem here, because some docs might not be
     // instantiated
@@ -624,6 +652,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
             "toArray() is not implemented for SerialCorpusImpl");
   }
 
+  @Override
   public Object[] toArray(Object[] a) {
     // there is a problem here, because some docs might not be
     // instantiated
@@ -631,9 +660,10 @@ public class SerialCorpusImpl extends AbstractLanguageResource
             "toArray(Object[] a) is not implemented for SerialCorpusImpl");
   }
 
+  @Override
   public boolean add(Document o) {
     if(o == null) return false;
-    Document doc = (Document)o;
+    Document doc = o;
 
     // make it accept only docs from its own datastore
     if(doc.getDataStore() != null && !this.dataStore.equals(doc.getDataStore())) {
@@ -657,6 +687,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     return result;
   }
 
+  @Override
   public boolean remove(Object o) {
     if(DEBUG) Out.prln("SerialCorpus:Remove object called");
     if(!(o instanceof Document)) return false;
@@ -717,6 +748,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     else return -1;
   }// findDocument
 
+  @Override
   public boolean containsAll(Collection c) {
     Iterator iter = c.iterator();
     while(iter.hasNext()) {
@@ -735,10 +767,12 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     return allAdded;
   }
 
+  @Override
   public boolean addAll(int index, Collection c) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public boolean removeAll(Collection c) {
     boolean allRemoved = true;
     Iterator iter = c.iterator();
@@ -749,15 +783,18 @@ public class SerialCorpusImpl extends AbstractLanguageResource
 
   }
 
+  @Override
   public boolean retainAll(Collection c) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public void clear() {
     documents.clear();
     docDataList.clear();
   }
 
+  @Override
   public boolean equals(Object o) {
     if(!(o instanceof SerialCorpusImpl)) return false;
     SerialCorpusImpl oCorpus = (SerialCorpusImpl)o;
@@ -772,10 +809,12 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     return false;
   }
 
+  @Override
   public int hashCode() {
     return docDataList.hashCode();
   }
 
+  @Override
   public Document get(int index) {
     if(index >= docDataList.size()) return null;
 
@@ -809,6 +848,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     return res;
   }
 
+  @Override
   public Document set(int index, Document element) {
     throw new gate.util.MethodNotImplementedException();
     // fire the 2 events
@@ -821,9 +861,10 @@ public class SerialCorpusImpl extends AbstractLanguageResource
      */
   }
 
+  @Override
   public void add(int index, Document o) {
-    if(!(o instanceof Document) || o == null) return;
-    Document doc = (Document)o;
+    if(o == null) return;
+    Document doc = o;
 
     DocumentData docData = new DocumentData(doc.getName(), doc
             .getLRPersistenceId(), doc.getClass().getName());
@@ -836,10 +877,11 @@ public class SerialCorpusImpl extends AbstractLanguageResource
 
   }
 
+  @Override
   public Document remove(int index) {
     if(DEBUG) Out.prln("Remove index called");
     // try to get the actual document if it was loaded
-    Document res = isDocumentLoaded(index) ? (Document)get(index) : null;
+    Document res = isDocumentLoaded(index) ? get(index) : null;
     Object docLRID = ((DocumentData)docDataList.get(index)).persistentID;
     if(docLRID != null) documentRemoved(docLRID.toString());
     docDataList.remove(index);
@@ -849,20 +891,24 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     return res;
   }
 
+  @Override
   public int indexOf(Object o) {
     if(o instanceof Document) return findDocument((Document)o);
 
     return -1;
   }
 
+  @Override
   public int lastIndexOf(Object o) {
     throw new gate.util.MethodNotImplementedException();
   }
 
+  @Override
   public ListIterator listIterator() {
     throw new gate.util.MethodNotImplementedException();
   }
 
+  @Override
   public ListIterator listIterator(int index) {
     throw new gate.util.MethodNotImplementedException();
   }
@@ -871,10 +917,12 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    * persistent Corpus does not support this method as all the documents
    * might no be in memory
    */
+  @Override
   public List subList(int fromIndex, int toIndex) {
     throw new gate.util.MethodNotImplementedException();
   }
 
+  @Override
   public void setDataStore(DataStore dataStore)
           throws gate.persist.PersistenceException {
     super.setDataStore(dataStore);
@@ -904,7 +952,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     // now cache the names of all docs for future use
     List docNames = tCorpus.getDocumentNames();
     for(int i = 0; i < docNames.size(); i++) {
-      Document aDoc = (Document)tCorpus.get(i);
+      Document aDoc = tCorpus.get(i);
       docDataList.add(new DocumentData((String)docNames.get(i), null, aDoc
               .getClass().getName()));
     }
@@ -928,6 +976,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     return null;
   }
 
+  @Override
   public Resource init() throws gate.creole.ResourceInstantiationException {
     super.init();
 
@@ -981,6 +1030,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     }
   }// readObject
 
+  @Override
   public void setIndexDefinition(IndexDefinition definition) {
     if(definition != null) {
       this.getFeatures().put(GateConstants.CORPUS_INDEX_DEFINITION_FEATURE_KEY,
@@ -1011,15 +1061,18 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     }
   }
 
+  @Override
   public IndexDefinition getIndexDefinition() {
     return (IndexDefinition)this.getFeatures().get(
             GateConstants.CORPUS_INDEX_DEFINITION_FEATURE_KEY);
   }
 
+  @Override
   public IndexManager getIndexManager() {
     return this.indexManager;
   }
 
+  @Override
   public IndexStatistics getIndexStatistics() {
     return (IndexStatistics)this.getFeatures().get(
             GateConstants.CORPUS_INDEX_STATISTICS_FEATURE_KEY);
@@ -1042,7 +1095,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       try {
         for(int i = 0; i < documents.size(); i++) {
           if(documents.get(i) != null) {
-            Document doc = (Document)documents.get(i);
+            Document doc = documents.get(i);
             if(!addedDocs.contains(doc) && doc.isModified()) {
               changedDocs.add(doc);
             }
@@ -1059,6 +1112,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   /**
    * SerialCorpusImpl does not support duplication.
    */
+  @Override
   public Resource duplicate(Factory.DuplicationContext ctx)
           throws ResourceInstantiationException {
     throw new ResourceInstantiationException("Duplication of "

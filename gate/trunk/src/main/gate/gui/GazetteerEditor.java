@@ -142,6 +142,7 @@ public class GazetteerEditor extends AbstractVisualResource
     actions.add(new SaveAsGazetteerAction());
   }
 
+  @Override
   public Resource init() throws ResourceInstantiationException {
     initGUI();
     initListeners();
@@ -168,8 +169,11 @@ public class GazetteerEditor extends AbstractVisualResource
     JTextComponent listTextComponent = (JTextField)
       newListComboBox.getEditor().getEditorComponent();
     listTextComponent.getDocument().addDocumentListener(new DocumentListener() {
+      @Override
       public void insertUpdate(DocumentEvent e) { update(e); }
+      @Override
       public void removeUpdate(DocumentEvent e) { update(e); }
+      @Override
       public void changedUpdate(DocumentEvent e) { update(e); }
       public void update(DocumentEvent e) {
         Document document = e.getDocument();
@@ -196,6 +200,7 @@ public class GazetteerEditor extends AbstractVisualResource
     });
     newListComboBox.getEditor().getEditorComponent()
         .addKeyListener(new KeyAdapter() {
+      @Override
       public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
           // Enter key in the text field add the entry to the table
@@ -208,6 +213,7 @@ public class GazetteerEditor extends AbstractVisualResource
       + "&nbsp;&nbsp;</small></font></html>");
     newListButton.setMargin(new Insets(2, 2, 2, 2));
     newListButton.addActionListener(new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         String listName = (String) newListComboBox.getEditor().getItem();
         newListComboBox.removeItem(listName);
@@ -231,6 +237,7 @@ public class GazetteerEditor extends AbstractVisualResource
         final int column = definitionTable.convertColumnIndexToView(0);
         definitionTable.setRowSelectionInterval(row, row);
         SwingUtilities.invokeLater(new Runnable() {
+          @Override
           public void run() {
             // scroll to the selected new list
             definitionTable.scrollRectToVisible(
@@ -245,6 +252,7 @@ public class GazetteerEditor extends AbstractVisualResource
     definitionPanel.add(definitionTopPanel, BorderLayout.NORTH);
     definitionTable = new XJTable() {
       // shift + Delete keys delete the selected rows
+      @Override
       protected void processKeyEvent(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_DELETE
         && ((e.getModifiersEx() & KeyEvent.SHIFT_DOWN_MASK) != 0)) {
@@ -266,6 +274,7 @@ public class GazetteerEditor extends AbstractVisualResource
     // use red colored font for modified lists name
     definitionTable.getColumnModel().getColumn(0).setCellRenderer(
       new DefaultTableCellRenderer() {
+        @Override
         public Component getTableCellRendererComponent(JTable table,
             Object value, boolean isSelected, boolean hasFocus,
             int row, int column) {
@@ -299,6 +308,7 @@ public class GazetteerEditor extends AbstractVisualResource
     filterListButton.setMargin(new Insets(2, 2, 2, 2));
     filterListButton.setEnabled(false);
     filterListButton.addActionListener(new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         String filter = listEntryTextField.getText().trim();
         listTableModel.setFilterText(filter);
@@ -312,6 +322,7 @@ public class GazetteerEditor extends AbstractVisualResource
     newEntryButton.setMargin(new Insets(2, 2, 2, 2));
     newEntryButton.setEnabled(false);
     newEntryButton.addActionListener(new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         // update the gazetteer
         GazetteerNode newGazetteerNode = new GazetteerNode(
@@ -332,6 +343,7 @@ public class GazetteerEditor extends AbstractVisualResource
         listEntryTextField.setText("");
         listEntryTextField.requestFocusInWindow();
         SwingUtilities.invokeLater(new Runnable() {
+          @Override
           public void run() {
             listTable.scrollRectToVisible(
               listTable.getCellRect(row, column, true));
@@ -347,6 +359,7 @@ public class GazetteerEditor extends AbstractVisualResource
     });
     // Enter key in the text field add the entry to the table
     listEntryTextField.addKeyListener(new KeyAdapter() {
+      @Override
       public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
           newEntryButton.doClick();
@@ -355,8 +368,11 @@ public class GazetteerEditor extends AbstractVisualResource
     });
     // enable/disable button according to the text field content
     listEntryTextField.getDocument().addDocumentListener(new DocumentListener() {
+      @Override
       public void insertUpdate(DocumentEvent e) { update(e); }
+      @Override
       public void removeUpdate(DocumentEvent e) { update(e); }
+      @Override
       public void changedUpdate(DocumentEvent e) { update(e); }
       public void update(DocumentEvent e) {
         Document document = e.getDocument();
@@ -407,6 +423,7 @@ public class GazetteerEditor extends AbstractVisualResource
     addColumnsButton.setMargin(new Insets(2, 2, 2, 2));
     addColumnsButton.setEnabled(false);
     addColumnsButton.addActionListener(new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         if (linearDefinition.getSeparator() == null
          || linearDefinition.getSeparator().length() == 0) {
@@ -435,6 +452,7 @@ public class GazetteerEditor extends AbstractVisualResource
     listPanel.add(listTopPanel, BorderLayout.NORTH);
     listTable = new XJTable() {
       // shift + Delete keys delete the selected rows
+      @Override
       protected void processKeyEvent(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_DELETE
         && ((e.getModifiersEx() & KeyEvent.SHIFT_DOWN_MASK) != 0)) {
@@ -477,6 +495,7 @@ public class GazetteerEditor extends AbstractVisualResource
     caseInsensitiveCheckBox.setSelected(true);
     caseInsensitiveCheckBox.setToolTipText("Case Insensitive");
     caseInsensitiveCheckBox.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         // redisplay the table with the new filter option
         listEntryTextField.setText(listEntryTextField.getText());
@@ -485,6 +504,7 @@ public class GazetteerEditor extends AbstractVisualResource
     listTopPanel.add(regexCheckBox = new JCheckBox("Regex"));
     regexCheckBox.setToolTipText("Regular Expression");
     regexCheckBox.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         listEntryTextField.setText(listEntryTextField.getText());
       }
@@ -492,6 +512,7 @@ public class GazetteerEditor extends AbstractVisualResource
     listTopPanel.add(onlyValueCheckBox = new JCheckBox("Value"));
     onlyValueCheckBox.setToolTipText("Filter only Value column");
     onlyValueCheckBox.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         listEntryTextField.setText(listEntryTextField.getText());
       }
@@ -510,6 +531,7 @@ public class GazetteerEditor extends AbstractVisualResource
     // display the list corresponding to the selected row
     definitionTable.getSelectionModel().addListSelectionListener(
       new ListSelectionListener() {
+        @Override
         public void valueChanged(ListSelectionEvent e) {
           if (e.getValueIsAdjusting()
            || definitionTable.isEditing()) {
@@ -554,6 +576,7 @@ public class GazetteerEditor extends AbstractVisualResource
 
     // update linear nodes with changes in the definition table
     definitionTableModel.addTableModelListener(new TableModelListener() {
+      @Override
       public void tableChanged(TableModelEvent e) {
         if (selectedLinearNode == null) { return; }
         int row = e.getFirstRow();
@@ -656,12 +679,15 @@ public class GazetteerEditor extends AbstractVisualResource
 
     // context menu to delete a row
     definitionTable.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent me) {
         processMouseEvent(me);
       }
+      @Override
       public void mouseReleased(MouseEvent me) {
         processMouseEvent(me);
       }
+      @Override
       public void mousePressed(MouseEvent me) {
         JTable table = (JTable) me.getSource();
         int row = table.rowAtPoint(me.getPoint());
@@ -689,12 +715,15 @@ public class GazetteerEditor extends AbstractVisualResource
 
     // context menu to delete a row
     listTable.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent me) {
         processMouseEvent(me);
       }
+      @Override
       public void mouseReleased(MouseEvent me) {
         processMouseEvent(me);
       }
+      @Override
       public void mousePressed(MouseEvent me) {
         JTable table = (JTable) me.getSource();
         int row = table.rowAtPoint(me.getPoint());
@@ -723,6 +752,7 @@ public class GazetteerEditor extends AbstractVisualResource
     });
 
     listTableModel.addTableModelListener(new TableModelListener() {
+      @Override
       public void tableChanged(TableModelEvent e) {
         listCountLabel.setText(String.valueOf(listTableModel.getRowCount())
         + " entries ");
@@ -744,6 +774,7 @@ public class GazetteerEditor extends AbstractVisualResource
     actionMap.put("paste table selection", new PasteSelectionAction());
   }
 
+  @Override
   public void setTarget(Object target) {
     if (null == target) {
       throw new GateRuntimeException("The resource set is null.");
@@ -761,6 +792,7 @@ public class GazetteerEditor extends AbstractVisualResource
     processGazetteerEvent(new GazetteerEvent(target, GazetteerEvent.REINIT));
   }
 
+  @Override
   public void processGazetteerEvent(GazetteerEvent e) {
     gazetteer = (Gazetteer) e.getSource();
 
@@ -804,6 +836,7 @@ public class GazetteerEditor extends AbstractVisualResource
       File gazetteerDirectory = new File(
         Files.fileFromURL(gazetteer.getListsURL()).getParent());
       File[] files = gazetteerDirectory.listFiles(new FilenameFilter() {
+        @Override
         public boolean accept(File dir, String name) {
           return name.endsWith(".lst")
             && !linearDefinition.getLists().contains(name);
@@ -828,10 +861,12 @@ public class GazetteerEditor extends AbstractVisualResource
       gazetteerListFiltered = new GazetteerList();
     }
 
+    @Override
     public int getRowCount() {
       return gazetteerListFiltered.size();
     }
 
+    @Override
     public int getColumnCount() {
       if (columnCount > -1) { return columnCount; }
       if (gazetteerListFiltered == null) { return 0; }
@@ -847,6 +882,7 @@ public class GazetteerEditor extends AbstractVisualResource
       return columnCount;
     }
 
+    @Override
     public String getColumnName(int column) {
       if (column == 0) {
         return "Value";
@@ -860,10 +896,12 @@ public class GazetteerEditor extends AbstractVisualResource
       }
     }
 
+    @Override
     public boolean isCellEditable(int row, int column) {
       return true;
     }
 
+    @Override
     public Object getValueAt(int row, int column) {
       GazetteerNode node = (GazetteerNode) gazetteerListFiltered.get(row);
       if (column == 0) {
@@ -884,6 +922,7 @@ public class GazetteerEditor extends AbstractVisualResource
       }
     }
 
+    @Override
     public void setValueAt(Object value, int row, int column) {
       if (row == -1 || column == -1) { return; }
       // remove separator characters that are contained in the value
@@ -896,7 +935,8 @@ public class GazetteerEditor extends AbstractVisualResource
         point.translate(listTable.getLocationOnScreen().x,
           listTable.getLocationOnScreen().y);
         final Timer timer = new Timer("GazetteerEditor tooltip timer", true);
-        SwingUtilities.invokeLater(new Runnable() { public void run() {
+        SwingUtilities.invokeLater(new Runnable() { @Override
+        public void run() {
           if (!listTable.isShowing()) { return; }
           JToolTip toolTip = listTable.createToolTip();
           toolTip.setTipText("No separator character allowed: [" +
@@ -906,8 +946,10 @@ public class GazetteerEditor extends AbstractVisualResource
             listTable, toolTip, point.x, point.y - 20);
           popup.show();
           Date timeToRun = new Date(System.currentTimeMillis() + 3000);
-          timer.schedule(new TimerTask() { public void run() {
-            SwingUtilities.invokeLater(new Runnable() { public void run() {
+          timer.schedule(new TimerTask() { @Override
+          public void run() {
+            SwingUtilities.invokeLater(new Runnable() { @Override
+            public void run() {
               popup.hide(); // hide the tooltip after some time
             }});
           }}, timeToRun);
@@ -937,11 +979,13 @@ public class GazetteerEditor extends AbstractVisualResource
       definitionTable.repaint();
     }
 
+    @Override
     public void fireTableStructureChanged() {
       columnCount = -1;
       super.fireTableStructureChanged();
     }
 
+    @Override
     public void fireTableChanged(TableModelEvent e) {
       if (gazetteerList == null) { return; }
       if (filter.length() < 1) {
@@ -1043,6 +1087,7 @@ public class GazetteerEditor extends AbstractVisualResource
     private GazetteerList gazetteerListFiltered;
   }
 
+  @Override
   public List<Action> getActions() {
     return actions;
   }
@@ -1051,6 +1096,7 @@ public class GazetteerEditor extends AbstractVisualResource
     public ReloadGazetteerListAction() {
       super("Reload List");
     }
+    @Override
     public void actionPerformed(ActionEvent e) {
       if (selectedLinearNode == null) { return; }
       GazetteerList gazetteerList = (GazetteerList)
@@ -1076,6 +1122,7 @@ public class GazetteerEditor extends AbstractVisualResource
         "Save the definition and all the lists then reinitialise");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S"));
     }
+    @Override
     public void actionPerformed(ActionEvent e) {
       try {
         if (linearDefinition.isModified()) {
@@ -1106,6 +1153,7 @@ public class GazetteerEditor extends AbstractVisualResource
       putValue(SHORT_DESCRIPTION, "Save the definition and all the lists");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift S"));
     }
+    @Override
     public void actionPerformed(ActionEvent e) {
       XJFileChooser fileChooser = MainFrame.getFileChooser();
       ExtensionFileFilter filter =
@@ -1156,6 +1204,7 @@ public class GazetteerEditor extends AbstractVisualResource
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("shift DELETE"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       int[] rowsToDelete = definitionTable.getSelectedRows();
       definitionTable.clearSelection();
@@ -1177,6 +1226,7 @@ public class GazetteerEditor extends AbstractVisualResource
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("shift DELETE"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       int[] rowsToDelete = listTable.getSelectedRows();
       listTable.clearSelection();
@@ -1197,6 +1247,7 @@ public class GazetteerEditor extends AbstractVisualResource
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control D"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       int[] rows = listTable.getSelectedRows();
       int[] columns = listTable.getSelectedColumns();
@@ -1219,6 +1270,7 @@ public class GazetteerEditor extends AbstractVisualResource
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control C"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
        listTable.getActionMap().get("copy").actionPerformed(
         new ActionEvent(listTable, ActionEvent.ACTION_PERFORMED, null));
@@ -1236,6 +1288,7 @@ public class GazetteerEditor extends AbstractVisualResource
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control V"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       int firstRow = listTable.getSelectedRow();
       int firstColumn = listTable.getSelectedColumn();
@@ -1275,6 +1328,7 @@ public class GazetteerEditor extends AbstractVisualResource
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control DELETE"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       int[] rows = listTable.getSelectedRows();
       int[] columns = listTable.getSelectedColumns();

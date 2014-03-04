@@ -101,7 +101,7 @@ public class QueryParser {
     queries = SubQueryParser.parseQuery(query);
     Query[] q = new Query[queries.size()];
     for(int i = 0; i < queries.size(); i++) {
-      Query phraseQuery = createPhraseQuery((String)queries.get(i));
+      Query phraseQuery = createPhraseQuery(queries.get(i));
       // if the corpusID is not provided we donot want to create a
       // boolean query
       if(corpusID == null && annotationSetToSearchIn == null) {
@@ -144,7 +144,7 @@ public class QueryParser {
    * representation of the query at the given index.
    */
   public String getQueryString(int i) {
-    return (String)queries.get(i);
+    return queries.get(i);
   }
 
   /**
@@ -207,7 +207,7 @@ public class QueryParser {
         if(areAllTermsTokens)
           needValidation = false;
         else needValidation = true;
-        return new TermQuery((Term)terms.get(0));
+        return new TermQuery(terms.get(0));
       }
       else {
         position = 0;
@@ -235,7 +235,7 @@ public class QueryParser {
       boolean allTermsTokens = true;
       // lets first find out if there's any token in this terms
       for(int k = 0; k < terms.size(); k++) {
-        Term t = (Term)terms.get(k);
+        Term t = terms.get(k);
 
         if(allTermsTokens) allTermsTokens = isBaseTokenTerm(t);
       }
@@ -253,9 +253,9 @@ public class QueryParser {
       }
 
       for(int k = 0; k < terms.size(); k++) {
-        Term t = (Term)terms.get(k);
-        boolean considerValue = ((Boolean)consider.get(k)).booleanValue();
-        phQuery.add(t, (Integer)pos.get(k), considerValue);
+        Term t = terms.get(k);
+        boolean considerValue = consider.get(k).booleanValue();
+        phQuery.add(t, pos.get(k), considerValue);
         if(considerValue) totalTerms++;
       }
 
@@ -332,7 +332,7 @@ public class QueryParser {
         continue;
       }
 
-      token += (char)ch;
+      token += ch;
     }
 
     if(balance != 0) {

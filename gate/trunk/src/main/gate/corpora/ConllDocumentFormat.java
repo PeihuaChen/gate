@@ -48,6 +48,7 @@ public class ConllDocumentFormat extends TextualDocumentFormat {
   public ConllDocumentFormat() { super();}
 
 
+  @Override
   public void unpackMarkup(gate.Document doc) throws DocumentFormatException{
     if ( (doc == null) || (doc.getSourceUrl() == null && doc.getContent() == null) ) {
       throw new DocumentFormatException("GATE document is null or no content found. Nothing to parse!");
@@ -228,6 +229,7 @@ public class ConllDocumentFormat extends TextualDocumentFormat {
   
   
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException{
     // Register ad hoc MIME-type
     MimeType mime = new MimeType("text","x-conll");

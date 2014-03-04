@@ -226,6 +226,7 @@ public class IndexWriter {
 
       synchronized (directory) {        // in- & inter-process sync
         new Lock.With(directory.makeLock(IndexWriter.COMMIT_LOCK_NAME), COMMIT_LOCK_TIMEOUT) {
+            @Override
             public Object doBody() throws IOException {
               if (create)
                 segmentInfos.write(directory);
@@ -248,6 +249,7 @@ public class IndexWriter {
   }
 
   /** Release the write lock, if needed. */
+  @Override
   protected void finalize() throws IOException {
     if (writeLock != null) {
       writeLock.release();                        // release write lock
@@ -414,7 +416,8 @@ public class IndexWriter {
 
     synchronized (directory) {			  // in- & inter-process sync
       new Lock.With(directory.makeLock("commit.lock"), COMMIT_LOCK_TIMEOUT) {
-	  public Object doBody() throws IOException {
+	  @Override
+    public Object doBody() throws IOException {
 	    segmentInfos.write(directory);	  // commit changes
 	    return null;
 	  }
@@ -499,6 +502,7 @@ public class IndexWriter {
 
     synchronized (directory) {                 // in- & inter-process sync
       new Lock.With(directory.makeLock(IndexWriter.COMMIT_LOCK_NAME), COMMIT_LOCK_TIMEOUT) {
+          @Override
           public Object doBody() throws IOException {
             segmentInfos.write(directory);     // commit before deleting
             deleteSegments(segmentsToDelete);  // delete now-unused segments

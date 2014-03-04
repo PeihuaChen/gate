@@ -40,12 +40,14 @@ public class LuceneSearch implements Search {
   private IndexedCorpus indexedCorpus;
 
   /** Set the indexed corpus resource for searching. */
+  @Override
   public void setCorpus(IndexedCorpus ic){
     this.indexedCorpus = ic;
   }
 
   /** Search in corpus with this query. 
    * Result length is limited by DEFAULTMAXRESULTS */
+  @Override
   public QueryResultList search(String query)
                                          throws IndexException, SearchException{
     return search(query, DEFAULTMAXRESULTS);
@@ -53,6 +55,7 @@ public class LuceneSearch implements Search {
 
   /** Search in corpus with this query.
    *  Size of the result list is limited. */
+  @Override
   public QueryResultList search(String query, int limit)
                                          throws IndexException, SearchException{
     return search(query, limit, null);
@@ -61,6 +64,7 @@ public class LuceneSearch implements Search {
   /** Search in corpus with this query.
    *  In each QueryResult will be added values of theise fields.
    *  Result length is limited by DEFAULTMAXRESULTS. */
+  @Override
   public QueryResultList search(String query, List fieldNames)
                                          throws IndexException, SearchException{
     return search(query, DEFAULTMAXRESULTS, fieldNames);
@@ -69,6 +73,7 @@ public class LuceneSearch implements Search {
   /** Search in corpus with this query.
    *  In each QueryResult will be added values of these fields.
    *  Result length is limited. */
+  @Override
   public QueryResultList search(String query, int limit, List fieldNames)
                                          throws IndexException, SearchException{
     

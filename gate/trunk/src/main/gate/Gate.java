@@ -1636,6 +1636,7 @@ public class Gate implements GateConstants {
      * Visit the class header, checking whether this is an abstract class or
      * interface and setting the isAbstract flag appropriately.
      */
+    @Override
     public void visit(int version, int access, String name, String signature,
             String superName, String[] interfaces) {
       isAbstract = ((access &
@@ -1645,11 +1646,13 @@ public class Gate implements GateConstants {
     /**
      * Visit an annotation on the class.
      */
+    @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
       // we've found a CreoleResource annotation on this class
       if(desc.equals(CREOLE_RESOURCE_DESC)) {
         foundCreoleResource = true;
         return new EmptyVisitor() {
+          @Override
           public void visit(String name, Object value) {
             if(name.equals("name") && resInfo.resourceName == null) {
               resInfo.resourceName = (String)value;
@@ -1659,6 +1662,7 @@ public class Gate implements GateConstants {
             }
           }
 
+          @Override
           public AnnotationVisitor visitAnnotation(String name,
                     String desc) {
             // don't want to recurse into AutoInstance annotations

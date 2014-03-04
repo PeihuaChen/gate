@@ -60,6 +60,7 @@ public class LuceneIndexManager implements IndexManager{
 
   /** Creates index directory and indexing all
    *  documents in the corpus. */
+  @Override
   public void createIndex() throws IndexException{
     if(indexDefinition == null)
       throw new GateRuntimeException("Index definition is null!");
@@ -98,7 +99,7 @@ public class LuceneIndexManager implements IndexManager{
 
       for(int i = 0; i<corpus.size(); i++) {
         boolean isLoaded = corpus.isDocumentLoaded(i);
-        gate.Document gateDoc = (gate.Document) corpus.get(i);
+        gate.Document gateDoc = corpus.get(i);
         writer.addDocument(getLuceneDoc(gateDoc));
         if (!isLoaded) {
           corpus.unloadDocument(gateDoc);
@@ -119,6 +120,7 @@ public class LuceneIndexManager implements IndexManager{
   }
 
   /** Optimize existing index. */
+  @Override
   public void optimizeIndex() throws IndexException{
     if(indexDefinition == null)
       throw new GateRuntimeException("Index definition is null!");
@@ -147,6 +149,7 @@ public class LuceneIndexManager implements IndexManager{
   }
 
   /** Delete index. */
+  @Override
   public void deleteIndex() throws IndexException{
     if(indexDefinition == null)
       throw new GateRuntimeException("Index definition is null!");
@@ -168,6 +171,7 @@ public class LuceneIndexManager implements IndexManager{
 
   /** Reindexing changed documents, removing removed documents and
    *  add to the index new corpus documents. */
+  @Override
   public void sync(List added, List removedIDs, List changed) throws IndexException{
     String location = indexDefinition.getIndexLocation();
     try {
@@ -254,15 +258,19 @@ public class LuceneIndexManager implements IndexManager{
     return luceneDoc;
   }
 
+  @Override
   public Corpus getCorpus() {
     return corpus;
   }
+  @Override
   public void setCorpus(Corpus corpus) {
     this.corpus = corpus;
   }
+  @Override
   public IndexDefinition getIndexDefinition() {
     return indexDefinition;
   }
+  @Override
   public void setIndexDefinition(IndexDefinition indexDefinition) {
     this.indexDefinition = indexDefinition;
   }

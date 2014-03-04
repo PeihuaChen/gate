@@ -47,6 +47,7 @@ public class DocumentData implements Serializable {
     persistentID = newID;
   }
 
+  @Override
   public String toString() {
     return new String("DocumentData: " + docName + ", " + persistentID + ", " + classType);
   }

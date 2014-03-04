@@ -75,6 +75,7 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   }
 
   /** String representation */
+  @Override
   public String toString() {
     int noInst = (instantiationStack == null) ? 0: instantiationStack.size();
 /*
@@ -102,6 +103,7 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   /** Equality: two resource data objects are the same if they have the
     * same name
     */
+  @Override
   public boolean equals(Object other) {
     if (other == null) return false;
     if(name.equals(((ResourceData) other).getName()))
@@ -110,6 +112,7 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   } // equals
 
   /** Hashing, based on the name field of the object */
+  @Override
   public int hashCode() {
     return name.hashCode();
   } // hashCode

@@ -73,7 +73,7 @@ public class Pattern extends Hit {
   public List<PatternAnnotation> getPatternAnnotations(int startOffset, int endOffset) {
     ArrayList<PatternAnnotation> annots = new ArrayList<PatternAnnotation>();
     for(int i = 0; i < annotations.size(); i++) {
-      PatternAnnotation ga1 = (PatternAnnotation)annotations.get(i);
+      PatternAnnotation ga1 = annotations.get(i);
       if(ga1.getStartOffset() >= startOffset && ga1.getEndOffset() <= endOffset) {
         annots.add(ga1);
       }

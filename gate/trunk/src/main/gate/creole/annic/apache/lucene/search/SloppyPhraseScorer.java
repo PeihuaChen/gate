@@ -29,6 +29,7 @@ final class SloppyPhraseScorer extends PhraseScorer {
         this.slop = slop;
     }
 
+    @Override
     protected final float phraseFreq() throws IOException {
         pq.clear();
         int end = 0;

@@ -1,7 +1,5 @@
 package gate.creole.annic.apache.lucene.index;
 
-import java.io.IOException;
-
 /** Provides access to stored term vector of
  *  a document field.
  */

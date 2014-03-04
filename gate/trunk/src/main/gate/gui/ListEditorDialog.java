@@ -78,7 +78,7 @@ public class ListEditorDialog extends JDialog {
   protected void initLocalData(Collection data,
           Class<? extends Collection> collectionType){
     try{
-      ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(itemType);
+      ResourceData rData = Gate.getCreoleRegister().get(itemType);
       itemTypeClass = rData == null ?
                       Class.forName(itemType, true, Gate.getClassLoader()) :
                       rData.getResourceClass();
@@ -88,7 +88,7 @@ public class ListEditorDialog extends JDialog {
 
     finiteType = Gate.isGateType(itemType);
 
-    ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(itemType);
+    ResourceData rData = Gate.getCreoleRegister().get(itemType);
 
     String typeDescription = null;
     if(List.class.isAssignableFrom(collectionType)) {
@@ -207,6 +207,7 @@ public class ListEditorDialog extends JDialog {
 
   protected void initListeners(){
     okButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         userCancelled = false;
         setVisible(false);
@@ -214,6 +215,7 @@ public class ListEditorDialog extends JDialog {
     });
 
     cancelButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         userCancelled = true;
         setVisible(false);
@@ -226,12 +228,14 @@ public class ListEditorDialog extends JDialog {
     ActionMap actionMap = ((JComponent)this.getContentPane()).getActionMap();
     inputMap.put(KeyStroke.getKeyStroke("ENTER"), "Apply");
     actionMap.put("Apply", new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         okButton.doClick();
       }
     });
     inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "Cancel");
     actionMap.put("Cancel", new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         cancelButton.doClick();
       }
@@ -239,6 +243,7 @@ public class ListEditorDialog extends JDialog {
 
     if(moveUpBtn != null) {
       moveUpBtn.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           int rows[] = listComponent.getSelectedIndices();
           if(rows == null || rows.length == 0){
@@ -274,6 +279,7 @@ public class ListEditorDialog extends JDialog {
 
     if(moveDownBtn != null) {
       moveDownBtn.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           int rows[] = listComponent.getSelectedIndices();
           if(rows == null || rows.length == 0){
@@ -359,6 +365,7 @@ public class ListEditorDialog extends JDialog {
       super("Add");
       putValue(SHORT_DESCRIPTION, "Add the edited value to the list");
     }
+    @Override
     public void actionPerformed(ActionEvent e){
       if(finiteType){
         listModel.addElement(combo.getSelectedItem());
@@ -425,6 +432,7 @@ public class ListEditorDialog extends JDialog {
       putValue(SHORT_DESCRIPTION, "Remove the selected value(s) from the list");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e){
       int[] indices = listComponent.getSelectedIndices();
       Arrays.sort(indices);
@@ -441,6 +449,7 @@ public class ListEditorDialog extends JDialog {
   protected class ResourceComboModel extends AbstractListModel
                                   implements ComboBoxModel{
 
+    @Override
     public int getSize(){
       //get all corpora regardless of their actual type
       java.util.List loadedResources = null;
@@ -454,6 +463,7 @@ public class ListEditorDialog extends JDialog {
       return loadedResources == null ? 0 : loadedResources.size();
     }
 
+    @Override
     public Object getElementAt(int index){
       //get all corpora regardless of their actual type
       java.util.List loadedResources = null;
@@ -466,11 +476,13 @@ public class ListEditorDialog extends JDialog {
       return loadedResources == null? null : loadedResources.get(index);
     }
 
+    @Override
     public void setSelectedItem(Object anItem){
       if(anItem == null) selectedItem = null;
       else selectedItem = anItem;
     }
 
+    @Override
     public Object getSelectedItem(){
       return selectedItem;
     }
@@ -585,6 +597,7 @@ public class ListEditorDialog extends JDialog {
    * non-<code>null</code>.
    */
   protected class NaturalComparator implements Comparator {
+    @Override
     public int compare(Object a, Object b) {
       if(a == null) {
         if(b == null) {

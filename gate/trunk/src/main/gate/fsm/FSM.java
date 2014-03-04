@@ -447,7 +447,7 @@ public class FSM implements JapeConstants {
     while(innerStatesIter.hasNext()){
       State currentInnerState = (State)innerStatesIter.next();
       if(currentInnerState.isFinal()){
-        action = (RightHandSide)currentInnerState.getAction();
+        action = currentInnerState.getAction();
         initialState.setAction(action);
         initialState.setFileIndex(currentInnerState.getFileIndex());
         initialState.setPriority(currentInnerState.getPriority());
@@ -485,7 +485,7 @@ public class FSM implements JapeConstants {
 
                 if(currentInnerState.isFinal()) {
                   newState.setAction(
-                          (RightHandSide)currentInnerState.getAction());
+                          currentInnerState.getAction());
                   newState.setFileIndex(currentInnerState.getFileIndex());
                   newState.setPriority(currentInnerState.getPriority());
                   break;
@@ -493,8 +493,8 @@ public class FSM implements JapeConstants {
               }
             }// if(!dStates.contains(newDState))
 
-            State currentState = (State)newStates.get(currentDState);
-            State newState = (State)newStates.get(newDState);
+            State currentState = newStates.get(currentDState);
+            State newState = newStates.get(newDState);
             currentState.addTransition(new Transition(
                                         currentTrans.getConstraints(),
                                         newState,
@@ -546,7 +546,7 @@ public class FSM implements JapeConstants {
     Transition currentTransition;
     State currentState;
     while(!list.isEmpty()){
-      top = (State)list.removeFirst();
+      top = list.removeFirst();
       transIter = top.getTransitions().iterator();
 
       while(transIter.hasNext()){
@@ -583,7 +583,7 @@ public class FSM implements JapeConstants {
 
     stackToProcess.add(initialState);
     while (!stackToProcess.isEmpty()) {
-      currentState = (State) stackToProcess.iterator().next();
+      currentState = stackToProcess.iterator().next();
       stackToProcess.remove(currentState);
       processed.add(currentState);
 
@@ -616,7 +616,7 @@ public class FSM implements JapeConstants {
 
     stackToProcess.add(initialState);
     while (!stackToProcess.isEmpty()) {
-      currentState = (State) stackToProcess.iterator().next();
+      currentState = stackToProcess.iterator().next();
       stackToProcess.remove(currentState);
       processed.add(currentState);
 
@@ -739,6 +739,7 @@ public class FSM implements JapeConstants {
   /**
     * Returns a textual description of this FSM.
     */
+  @Override
   public String toString(){
     String res = "Starting from:" + initialState.getIndex() + "\n";
     Iterator stateIter = allStates.iterator();

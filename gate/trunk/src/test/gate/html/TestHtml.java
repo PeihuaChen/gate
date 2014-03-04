@@ -39,6 +39,7 @@ public class TestHtml extends TestCase
   public TestHtml(String name) { super(name); }
 
   /** Fixture set up */
+  @Override
   public void setUp() {
   } // setUp
 

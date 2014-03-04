@@ -38,23 +38,29 @@ public class TermQuery extends Query {
       this.searcher = searcher;
     }
 
+    @Override
     public String toString() { return "weight(" + TermQuery.this + ")"; }
 
+    @Override
     public Query getQuery() { return TermQuery.this; }
+    @Override
     public float getValue() { return value; }
 
+    @Override
     public float sumOfSquaredWeights() throws IOException {
       idf = getSimilarity(searcher).idf(term, searcher); // compute idf
       queryWeight = idf * getBoost();             // compute query weight
       return queryWeight * queryWeight;           // square it
     }
 
+    @Override
     public void normalize(float queryNorm) {
       this.queryNorm = queryNorm;
       queryWeight *= queryNorm;                   // normalize query weight
       value = queryWeight * idf;                  // idf for document
     }
 
+    @Override
     public Scorer scorer(IndexReader reader, Searcher searcher) throws IOException {
       this.searcher = searcher;
       TermDocs termDocs = reader.termDocs(term);
@@ -66,6 +72,7 @@ public class TermQuery extends Query {
                             reader.norms(term.field()), term);
     }
 
+    @Override
     public Explanation explain(IndexReader reader, int doc)
       throws IOException {
 
@@ -135,11 +142,13 @@ public class TermQuery extends Query {
   /** Returns the term of this query. */
   public Term getTerm() { return term; }
 
+  @Override
   protected Weight createWeight(Searcher searcher) {
     return new TermWeight(searcher);
   }
 
   /** Prints a user-readable version of this query. */
+  @Override
   public String toString(String field) {
     StringBuffer buffer = new StringBuffer();
     if (!term.field().equals(field)) {
@@ -155,6 +164,7 @@ public class TermQuery extends Query {
   }
 
   /** Returns true iff <code>o</code> is equal to this. */
+  @Override
   public boolean equals(Object o) {
     if (!(o instanceof TermQuery))
       return false;
@@ -170,6 +180,7 @@ public class TermQuery extends Query {
   }
 
   /** Returns a hash code value for this object.*/
+  @Override
   public int hashCode() {
     return Float.floatToIntBits(getBoost()) ^ term.hashCode();
   }

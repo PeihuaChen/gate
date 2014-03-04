@@ -44,6 +44,7 @@ public class SubClassAction extends AbstractAction implements
     mainPanel.add(className = new JTextField(30), gbc);
   }
 
+  @Override
   @SuppressWarnings("deprecation")
   public void actionPerformed(ActionEvent actionevent) {
     OResource selectedNode = ((OResourceNode)selectedNodes.get(0)
@@ -56,8 +57,7 @@ public class SubClassAction extends AbstractAction implements
     nameSpace.setText(ns);
     ArrayList<OClass> arraylist = new ArrayList<OClass>();
     for(int i = 0; i < selectedNodes.size(); i++) {
-      Object obj = ((OResourceNode)((DefaultMutableTreeNode)
-        selectedNodes.get(i)).getUserObject()).getResource();
+      Object obj = ((OResourceNode)selectedNodes.get(i).getUserObject()).getResource();
       if(obj instanceof OClass) arraylist.add((OClass)obj);
     }
 
@@ -65,6 +65,7 @@ public class SubClassAction extends AbstractAction implements
       "http://gate.ac.uk/example#" : ontology.getDefaultNameSpace());
     JOptionPane pane = new JOptionPane(mainPanel, JOptionPane.QUESTION_MESSAGE,
       JOptionPane.OK_CANCEL_OPTION, MainFrame.getIcon("ontology-subclass")) {
+      @Override
       public void selectInitialValue() {
         className.requestFocusInWindow();
         className.selectAll();
@@ -108,6 +109,7 @@ public class SubClassAction extends AbstractAction implements
     this.ontology = ontology;
   }
 
+  @Override
   public void selectionChanged(ArrayList<DefaultMutableTreeNode> arraylist) {
     selectedNodes = arraylist;
   }

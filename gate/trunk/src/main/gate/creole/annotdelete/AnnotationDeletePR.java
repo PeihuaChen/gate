@@ -79,6 +79,7 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
   
   
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException
   {
     return super.init();
@@ -92,12 +93,14 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
   * the resource has changed since the resource has been created then the
   * resource will change too after calling reInit().
   */
+  @Override
   public void reInit() throws ResourceInstantiationException
   {
     init();
   } // reInit()
 
   /** Run the resource. */
+  @Override
   public void execute() throws ExecutionException {
 
     if(document == null)
@@ -129,7 +132,7 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
           // remove this named set
           if (annotationTypes == null || annotationTypes.isEmpty()) {
             document.removeAnnotationSet(setName);
-            removeFromDocumentCorefData( (String) setName, matchesMap);
+            removeFromDocumentCorefData( setName, matchesMap);
           } else {
             removeSubSet(document.getAnnotations(setName), matchesMap);
           }
@@ -184,7 +187,7 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
   
             if (annotationTypes == null || annotationTypes.isEmpty()) {
               document.removeAnnotationSet(setName);
-              removeFromDocumentCorefData( (String) setName, matchesMap);
+              removeFromDocumentCorefData( setName, matchesMap);
             } else {
               removeSubSet(document.getAnnotations(setName), matchesMap);
             }

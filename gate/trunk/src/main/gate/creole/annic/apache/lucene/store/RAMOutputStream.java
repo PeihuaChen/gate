@@ -65,6 +65,7 @@ public class RAMOutputStream extends OutputStream {
     file.length = 0;
   }
 
+  @Override
   public void flushBuffer(byte[] src, int len) {
     int bufferNumber = pointer/BUFFER_SIZE;
     int bufferOffset = pointer%BUFFER_SIZE;
@@ -93,14 +94,17 @@ public class RAMOutputStream extends OutputStream {
     file.lastModified = System.currentTimeMillis();
   }
 
+  @Override
   public void close() throws IOException {
     super.close();
   }
 
+  @Override
   public void seek(long pos) throws IOException {
     super.seek(pos);
     pointer = (int)pos;
   }
+  @Override
   public long length() {
     return file.length;
   }

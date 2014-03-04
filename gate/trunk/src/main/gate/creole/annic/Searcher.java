@@ -7,8 +7,6 @@
  */
 package gate.creole.annic;
 
-import gate.creole.annic.lucene.StatsCalculator;
-
 import java.io.File;
 import java.util.List;
 import java.util.Map;

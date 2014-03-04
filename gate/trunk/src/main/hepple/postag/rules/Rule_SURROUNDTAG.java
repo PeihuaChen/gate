@@ -32,6 +32,7 @@ public class Rule_SURROUNDTAG extends Rule {
   public Rule_SURROUNDTAG() {
   }
 
+  @Override
   public boolean checkContext(POSTagger tagger) {
     return (tagger.lexBuff[2][0].equals(context[0]) &&
             tagger.lexBuff[4][0].equals(context[1]));

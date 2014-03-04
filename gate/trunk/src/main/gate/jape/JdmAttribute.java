@@ -95,6 +95,7 @@ public class JdmAttribute implements Serializable {
     return true;
   }
 
+  @Override
   public String toString() {
          return "JdmAttr: name=" + name + "; value=" + value.toString();
 

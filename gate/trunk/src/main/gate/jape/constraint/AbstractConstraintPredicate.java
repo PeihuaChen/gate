@@ -38,6 +38,7 @@ public abstract class AbstractConstraintPredicate implements
     setValue(value);
   }
 
+  @Override
   public String toString() {
     // If value is a String, quote it. Otherwise (for things like
     // Numbers), don't.
@@ -70,6 +71,7 @@ public abstract class AbstractConstraintPredicate implements
     return true;
   }
 
+  @Override
   public boolean matches(Annotation annot, AnnotationSet context) throws JapeException {
     //get the appropriate value using the accessor and then have
     //concrete subclasses do the eval
@@ -81,18 +83,22 @@ public abstract class AbstractConstraintPredicate implements
 
 
 
+  @Override
   public void setAccessor(AnnotationAccessor accessor) {
     this.accessor = accessor;
   }
 
+  @Override
   public AnnotationAccessor getAccessor() {
     return accessor;
   }
 
+  @Override
   public void setValue(Object value) {
     this.value = value;
   }
 
+  @Override
   public Object getValue() {
     return value;
   }

@@ -67,10 +67,12 @@ public class DetailsTableModel extends AbstractTableModel {
     itemComparator = new OntologyItemComparator();
   }
 
+  @Override
   public int getColumnCount() {
     return COLUMN_COUNT;
   }
 
+  @Override
   public int getRowCount() {
     int count = detailGroups.length;
     for(int j = 0; j < detailGroups.length; j++)
@@ -80,6 +82,7 @@ public class DetailsTableModel extends AbstractTableModel {
     return count;
   }
 
+  @Override
   public String getColumnName(int column) {
     switch(column) {
       case EXPANDED_COLUMN:
@@ -94,6 +97,7 @@ public class DetailsTableModel extends AbstractTableModel {
     return "";
   }
 
+  @Override
   public Class getColumnClass(int columnIndex) {
     switch(columnIndex) {
       case EXPANDED_COLUMN:
@@ -109,6 +113,7 @@ public class DetailsTableModel extends AbstractTableModel {
     return Object.class;
   }
 
+  @Override
   public boolean isCellEditable(int rowIndex, int columnIndex) {
     if (columnIndex != VALUE_COLUMN) { return false; }
     Object object = getItemForRow(rowIndex);
@@ -118,6 +123,7 @@ public class DetailsTableModel extends AbstractTableModel {
         || property instanceof DatatypeProperty;
   }
 
+  @Override
   public void setValueAt(Object value, int row, int col) {
     Object object = getItemForRow(row);
     switch (col) {
@@ -206,6 +212,7 @@ public class DetailsTableModel extends AbstractTableModel {
     }
   }
 
+  @Override
   public Object getValueAt(int row, int col) {
     Object object = getItemForRow(row);
     switch(col) {

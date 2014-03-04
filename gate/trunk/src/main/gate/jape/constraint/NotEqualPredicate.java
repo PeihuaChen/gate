@@ -20,10 +20,12 @@ import gate.jape.JapeException;
 
 public class NotEqualPredicate extends EqualPredicate {
 
+  @Override
   public String getOperator() {
     return NOT_EQUAL;
   }
 
+  @Override
   public boolean doMatch(Object annotValue, AnnotationSet context) throws JapeException {
     return !super.doMatch(annotValue, context);
   }

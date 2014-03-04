@@ -39,6 +39,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class DetailsTableCellRenderer extends DefaultTableCellRenderer {
   private static final long serialVersionUID = 3257572784619337525L;
 
+  @Override
   public Component getTableCellRendererComponent(JTable table, Object value,
                     boolean isSelected, boolean hasFocus, int row, int column) {
     super.getTableCellRendererComponent(

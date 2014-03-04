@@ -134,6 +134,7 @@ public class NekoHtmlDocumentHandler
    * Empty elements also trigger this method, followed immediately by an
    * {@link #endElement}.
    */
+  @Override
   public void startElement(QName element, XMLAttributes attributes,
           Augmentations augs) throws XNIException {
     // deal with any outstanding character content
@@ -190,6 +191,7 @@ public class NekoHtmlDocumentHandler
    * Characters may be reported in more than one chunk, so we gather all
    * contiguous chunks together and process them in one block.
    */
+  @Override
   public void characters(XMLString text, Augmentations augs)
           throws XNIException {
     if(!readCharacterStatus) {
@@ -361,6 +363,7 @@ public class NekoHtmlDocumentHandler
   /**
    * Called when the parser encounters the end of an element.
    */
+  @Override
   public void endElement(QName element, Augmentations augs) throws XNIException {
     endElement(element, augs, false);
   }
@@ -369,6 +372,7 @@ public class NekoHtmlDocumentHandler
    * Called to signal an empty element. This simply synthesizes a
    * startElement followed by an endElement event.
    */
+  @Override
   public void emptyElement(QName element, XMLAttributes attributes,
           Augmentations augs) throws XNIException {
     this.startElement(element, attributes, augs);
@@ -401,7 +405,7 @@ public class NekoHtmlDocumentHandler
 
     // If the stack is not empty then we get the object from the stack
     if(!stack.isEmpty()) {
-      obj = (CustomObject)stack.pop();
+      obj = stack.pop();
       // Before adding it to the colector, we need to check if is an
       // emptyAndSpan one. See CustomObject's isEmptyAndSpan field.
       // We only set isEmptyAndSpan if this endElement was NOT generated
@@ -426,6 +430,7 @@ public class NekoHtmlDocumentHandler
    * store the new content and construct the Original markups
    * annotations.
    */
+  @Override
   public void endDocument(Augmentations augs) throws XNIException {
     if(DEBUG_GENERAL) {
       Out.println("endDocument");
@@ -465,10 +470,12 @@ public class NekoHtmlDocumentHandler
   /**
    * Non-fatal error, print the stack trace but continue processing.
    */
+  @Override
   public void error(String domain, String key, XMLParseException e) {
     e.printStackTrace(Err.getPrintWriter());
   }
 
+  @Override
   public void fatalError(String domain, String key, XMLParseException e)
           throws XNIException {
     throw e;
@@ -479,20 +486,24 @@ public class NekoHtmlDocumentHandler
   // we must call charactersAction so the repositioning info is correctly
   // generated.
 
+  @Override
   public void processingInstruction(String target, XMLString data,
           Augmentations augs) throws XNIException {
     charactersAction();
   }
 
+  @Override
   public void comment(XMLString content,
           Augmentations augs) throws XNIException {
     charactersAction();
   }
 
+  @Override
   public void startCDATA(Augmentations augs) throws XNIException {
     charactersAction();
   }
 
+  @Override
   public void endCDATA(Augmentations augs) throws XNIException {
     charactersAction();
   }
@@ -506,6 +517,7 @@ public class NekoHtmlDocumentHandler
    * having to construct a PositionInfo record with the target value.
    */
   private static final Comparator<Object> POSITION_INFO_COMPARATOR = new Comparator<Object>() {
+    @Override
     public int compare(Object a, Object b) {
       Long offA = null;
       if(a instanceof Long) {
@@ -859,6 +871,7 @@ public class NekoHtmlDocumentHandler
     }// End CustomObject()
 
     // Methos implemented as required by Comparable interface
+    @Override
     public int compareTo(CustomObject obj) {
       return this.id.compareTo(obj.getId());
     }// compareTo();
@@ -932,6 +945,7 @@ public class NekoHtmlDocumentHandler
 
   // //// Unused methods from XNI interfaces //////
 
+  @Override
   public void doctypeDecl(String arg0, String arg1, String arg2,
           Augmentations arg3) throws XNIException {
     if(DEBUG_UNUSED) {
@@ -939,6 +953,7 @@ public class NekoHtmlDocumentHandler
     }
   }
 
+  @Override
   public void endGeneralEntity(String arg0, Augmentations arg1)
           throws XNIException {
     if(DEBUG_UNUSED) {
@@ -946,6 +961,7 @@ public class NekoHtmlDocumentHandler
     }
   }
 
+  @Override
   public XMLDocumentSource getDocumentSource() {
     if(DEBUG_UNUSED) {
       Out.println("getDocumentSource");
@@ -953,6 +969,7 @@ public class NekoHtmlDocumentHandler
     return null;
   }
 
+  @Override
   public void ignorableWhitespace(XMLString arg0, Augmentations arg1)
           throws XNIException {
     if(DEBUG_UNUSED) {
@@ -960,12 +977,14 @@ public class NekoHtmlDocumentHandler
     }
   }
 
+  @Override
   public void setDocumentSource(XMLDocumentSource arg0) {
     if(DEBUG_UNUSED) {
       Out.println("setDocumentSource");
     }
   }
 
+  @Override
   public void startDocument(XMLLocator arg0, String arg1,
           NamespaceContext arg2, Augmentations arg3) throws XNIException {
     if(DEBUG_UNUSED) {
@@ -973,6 +992,7 @@ public class NekoHtmlDocumentHandler
     }
   }
 
+  @Override
   public void startGeneralEntity(String arg0, XMLResourceIdentifier arg1,
           String arg2, Augmentations arg3) throws XNIException {
     if(DEBUG_UNUSED) {
@@ -980,6 +1000,7 @@ public class NekoHtmlDocumentHandler
     }
   }
 
+  @Override
   public void textDecl(String arg0, String arg1, Augmentations arg2)
           throws XNIException {
     if(DEBUG_UNUSED) {
@@ -987,6 +1008,7 @@ public class NekoHtmlDocumentHandler
     }
   }
 
+  @Override
   public void xmlDecl(String arg0, String arg1, String arg2, Augmentations arg3)
           throws XNIException {
     if(DEBUG_UNUSED) {
@@ -994,6 +1016,7 @@ public class NekoHtmlDocumentHandler
     }
   }
 
+  @Override
   public void warning(String arg0, String arg1, XMLParseException arg2)
           throws XNIException {
     if(DEBUG_GENERAL) {

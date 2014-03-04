@@ -64,6 +64,7 @@ public class DataStoreRegister extends HashSet<DataStore> {
    * Adds the specified element to this set if it is not already present.
    * Overriden here for event registration code.
    */
+  @Override
   public boolean add(DataStore o) {
     return super.add(o);
   } // add
@@ -72,6 +73,7 @@ public class DataStoreRegister extends HashSet<DataStore> {
    * Removes the given element from this set if it is present. Overriden here
    * for event registration code.
    */
+  @Override
   public boolean remove(Object o) {
     boolean res = super.remove(o);
     if (res) {
@@ -85,6 +87,7 @@ public class DataStoreRegister extends HashSet<DataStore> {
    * Removes all of the elements from this set. Overriden here for event
    * registration code.
    */
+  @Override
   public void clear() {
     Set datastores = new HashSet(this);
     super.clear();

@@ -43,6 +43,7 @@ public class DefaultIndexDefinition implements IndexDefinition{
     this.location = location;
   }
   /** @return String  path of index store directory*/
+  @Override
   public String getIndexLocation(){
     return location;
   }
@@ -89,6 +90,7 @@ public class DefaultIndexDefinition implements IndexDefinition{
 //  }
 
   /**  @return Iterator of IndexFields, fileds for indexing. */
+  @Override
   public Iterator getIndexFields(){
     return fields.iterator();
   }
@@ -113,6 +115,7 @@ public class DefaultIndexDefinition implements IndexDefinition{
    * Gets the fully qualified class name for the IR engine to be used.
    * @return a String.
    */
+  @Override
   public String getIrEngineClassName() {
     return irEngineClassName;
   }

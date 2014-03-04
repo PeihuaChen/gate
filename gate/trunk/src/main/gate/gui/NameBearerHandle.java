@@ -168,6 +168,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     viewsBuilt = false;
   }// public DefaultResourceHandle(FeatureBearer res)
 
+  @Override
   public Icon getIcon() {
     return icon;
   }
@@ -176,6 +177,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     this.icon = icon;
   }
 
+  @Override
   public String getTitle() {
     return target == null ? null : target.getName();
   }
@@ -186,6 +188,7 @@ public class NameBearerHandle implements Handle, StatusListener,
    * 
    * @return a <tt>boolean</tt> value.
    */
+  @Override
   public boolean viewsBuilt() {
     return viewsBuilt;
   }
@@ -194,6 +197,7 @@ public class NameBearerHandle implements Handle, StatusListener,
    * Returns a GUI component to be used as a small viewer/editor, e.g.
    * below the main tree in the Gate GUI for the selected resource
    */
+  @Override
   public JComponent getSmallView() {
     if(!viewsBuilt) buildViews();
     return smallView;
@@ -203,17 +207,19 @@ public class NameBearerHandle implements Handle, StatusListener,
    * Returns the large view for this resource. This view will go into
    * the main display area.
    */
+  @Override
   public JComponent getLargeView() {
     if(!viewsBuilt) buildViews();
     return largeView;
   }
 
+  @Override
   public JPopupMenu getPopup() {
     JPopupMenu popup = new XJPopupMenu();
     // first add the static items
     Iterator<XJMenuItem> itemIter = staticPopupItems.iterator();
     while(itemIter.hasNext()) {
-      JMenuItem anItem = (JMenuItem)itemIter.next();
+      JMenuItem anItem = itemIter.next();
       if(anItem == null)
         popup.addSeparator();
       else popup.add(anItem);
@@ -222,11 +228,11 @@ public class NameBearerHandle implements Handle, StatusListener,
     // next add the dynamic list from the target and its editors
     Iterator<ActionsPublisher> publishersIter = actionPublishers.iterator();
     while(publishersIter.hasNext()) {
-      ActionsPublisher aPublisher = (ActionsPublisher)publishersIter.next();
+      ActionsPublisher aPublisher = publishersIter.next();
       if(aPublisher.getActions() != null) {
         Iterator<Action> actionIter = aPublisher.getActions().iterator();
         while(actionIter.hasNext()) {
-          Action anAction = (Action)actionIter.next();
+          Action anAction = actionIter.next();
           if(anAction == null)
             popup.addSeparator();
           else {
@@ -245,7 +251,7 @@ public class NameBearerHandle implements Handle, StatusListener,
           if(res instanceof ResourceHelper) {
             Iterator<Action> actionIter = ((ResourceHelper)res).getActions(NameBearerHandle.this).iterator();
             while(actionIter.hasNext()) {
-              Action anAction = (Action)actionIter.next();
+              Action anAction = actionIter.next();
               if(anAction == null)
                 popup.addSeparator();
               else {
@@ -260,6 +266,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     return popup;
   }
 
+  @Override
   public String getTooltipText() {
     return tooltipText;
   }
@@ -268,6 +275,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     this.tooltipText = text;
   }
 
+  @Override
   public Object getTarget() {
     return target;
   }
@@ -369,8 +377,8 @@ public class NameBearerHandle implements Handle, StatusListener,
       Iterator<String> classNameIter = largeViewNames.iterator();
       while(classNameIter.hasNext()) {
         try {
-          String className = (String)classNameIter.next();
-          ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(
+          String className = classNameIter.next();
+          ResourceData rData = Gate.getCreoleRegister().get(
                   className);
           FeatureMap params = Factory.newFeatureMap();
           FeatureMap features = Factory.newFeatureMap();
@@ -409,8 +417,8 @@ public class NameBearerHandle implements Handle, StatusListener,
       Iterator<String> classNameIter = smallViewNames.iterator();
       while(classNameIter.hasNext()) {
         try {
-          String className = (String)classNameIter.next();
-          ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(
+          String className = classNameIter.next();
+          ResourceData rData = Gate.getCreoleRegister().get(
                   className);
           FeatureMap params = Factory.newFeatureMap();
           FeatureMap features = Factory.newFeatureMap();
@@ -453,6 +461,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     }// End if
   }// protected void buildViews
 
+  @Override
   public String toString() {
     return getTitle();
   }
@@ -533,6 +542,7 @@ public class NameBearerHandle implements Handle, StatusListener,
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control F4"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       if(target instanceof Controller) {
         // empty the controller of all its processing resources
@@ -571,6 +581,7 @@ public class NameBearerHandle implements Handle, StatusListener,
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("shift F4"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Factory.deleteResource((Resource)target);
       statusListeners.clear();
@@ -590,8 +601,10 @@ public class NameBearerHandle implements Handle, StatusListener,
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S"));
     }// SaveAsXmlAction()
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Runnable runableAction = new Runnable() {
+        @Override
         public void run() {
           XJFileChooser fileChooser = MainFrame.getFileChooser();
           ExtensionFileFilter filter = new ExtensionFileFilter("XML files",
@@ -714,8 +727,10 @@ public class NameBearerHandle implements Handle, StatusListener,
       putValue(SHORT_DESCRIPTION, "Saves each document in GATE XML format");
     }// SaveAsXmlAction()
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
+        @Override
         public void run() {
           try {
             // we need a directory
@@ -752,7 +767,7 @@ public class NameBearerHandle implements Handle, StatusListener,
               Set<String> usedFileNames = new HashSet<String>();
               while(docIter.hasNext()) {
                 boolean docWasLoaded = corpus.isDocumentLoaded(currentDocIndex);
-                Document currentDoc = (Document)docIter.next();
+                Document currentDoc = docIter.next();
                 URL sourceURL = currentDoc.getSourceUrl();
                 String fileName = null;
                 if(sourceURL != null) {
@@ -884,6 +899,7 @@ public class NameBearerHandle implements Handle, StatusListener,
       putValue(SHORT_DESCRIPTION, "Convert to a Conditional Corpus Pipeline");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       SerialAnalyserController existingController =
           (SerialAnalyserController)target;
@@ -915,8 +931,10 @@ public class NameBearerHandle implements Handle, StatusListener,
       putValue(SHORT_DESCRIPTION, "Save back to its datastore");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
+        @Override
         public void run() {
           DataStore ds = ((LanguageResource)target).getDataStore();
           if(ds != null) {
@@ -976,6 +994,7 @@ public class NameBearerHandle implements Handle, StatusListener,
               "Saves the data needed to recreate this application");
     }
 
+    @Override
     public void actionPerformed(ActionEvent ae) {
       final XJFileChooser fileChooser = MainFrame.getFileChooser();
       ExtensionFileFilter filter = new ExtensionFileFilter(
@@ -992,6 +1011,7 @@ public class NameBearerHandle implements Handle, StatusListener,
       if(fileChooser.showSaveDialog(largeView) == JFileChooser.APPROVE_OPTION) {
         final File file = fileChooser.getSelectedFile();
         Runnable runnable = new Runnable() {
+          @Override
           public void run() {
             try {
               Map<String, String> locations = fileChooser.getLocations();
@@ -1053,10 +1073,12 @@ public class NameBearerHandle implements Handle, StatusListener,
     class ExporterBuildListener implements BuildListener, Executable {
       private boolean interrupted = false;
 
+      @Override
       public boolean isInterrupted() {
         return interrupted;
       }
 
+      @Override
       public void interrupt() {
         interrupted = true;
       }
@@ -1064,6 +1086,7 @@ public class NameBearerHandle implements Handle, StatusListener,
       /**
        * Set status message appropriately when task completes or fails.
        */
+      @Override
       public void taskFinished(BuildEvent buildEvent) {
         if(buildEvent.getException() != null) {
           statusChanged("Error exporting application");
@@ -1080,6 +1103,7 @@ public class NameBearerHandle implements Handle, StatusListener,
        * executing Ant task. Other than that, we simply pass INFO and
        * higher messages to the GATE status listener.
        */
+      @Override
       public void messageLogged(BuildEvent buildEvent) {
         // check for interruption
         if(interrupted) {
@@ -1094,26 +1118,33 @@ public class NameBearerHandle implements Handle, StatusListener,
       }
 
       // not interested in these events
+      @Override
       public void buildStarted(BuildEvent buildEvent) {
       }
 
+      @Override
       public void buildFinished(BuildEvent buildEvent) {
       }
 
+      @Override
       public void targetStarted(BuildEvent buildEvent) {
       }
 
+      @Override
       public void targetFinished(BuildEvent buildEvent) {
       }
 
+      @Override
       public void taskStarted(BuildEvent buildEvent) {
       }
 
+      @Override
       public void execute() {
         // do nothing, only here to match the interface
       }
     }
 
+    @Override
     public void actionPerformed(ActionEvent ae) {
       XJFileChooser fileChooser = MainFrame.getFileChooser();
       ExtensionFileFilter filter = new ExtensionFileFilter("ZIP file", "zip");
@@ -1137,6 +1168,7 @@ public class NameBearerHandle implements Handle, StatusListener,
         final File targetZipFile = checkFile;
         
         Runnable runnable = new Runnable() {
+          @Override
           public void run() {
             try {
               // create and configure Ant Project
@@ -1239,17 +1271,19 @@ public class NameBearerHandle implements Handle, StatusListener,
       putValue(SHORT_DESCRIPTION, "Save this resource to a datastore");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
+        @Override
         public void run() {
           try {
             DataStoreRegister dsReg = Gate.getDataStoreRegister();
             Map<String, DataStore> dsByName = new HashMap<String, DataStore>();
             Iterator<DataStore> dsIter = dsReg.iterator();
             while(dsIter.hasNext()) {
-              DataStore oneDS = (DataStore)dsIter.next();
+              DataStore oneDS = dsIter.next();
               String name;
-              if((name = (String)oneDS.getName()) != null) {
+              if((name = oneDS.getName()) != null) {
               }
               else {
                 name = oneDS.getStorageUrl();
@@ -1277,7 +1311,7 @@ public class NameBearerHandle implements Handle, StatusListener,
                       JOptionPane.QUESTION_MESSAGE, null, dsNames.toArray(),
                       dsNames.get(0));
               if(answer == null) return;
-              DataStore ds = (DataStore)dsByName.get(answer);
+              DataStore ds = dsByName.get(answer);
               if(ds == null) {
                 Err.prln("The datastore does not exists. Saving procedure"
                         + " has FAILED! This should never happen again!");
@@ -1400,8 +1434,10 @@ public class NameBearerHandle implements Handle, StatusListener,
       putValue(SHORT_DESCRIPTION, "Reloads this resource");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
+        @Override
         public void run() {
           if(!(target instanceof ProcessingResource)) return;
           if(target instanceof Controller) return;
@@ -1410,6 +1446,7 @@ public class NameBearerHandle implements Handle, StatusListener,
             fireStatusChanged("Reinitialising " + target.getName());
             Map<String, EventListener> listeners = new HashMap<String, EventListener>();
             StatusListener sListener = new StatusListener() {
+              @Override
               public void statusChanged(String text) {
                 fireStatusChanged(text);
               }
@@ -1417,10 +1454,12 @@ public class NameBearerHandle implements Handle, StatusListener,
             listeners.put("gate.event.StatusListener", sListener);
 
             ProgressListener pListener = new ProgressListener() {
+              @Override
               public void progressChanged(int value) {
                 fireProgressChanged(value);
               }
 
+              @Override
               public void processFinished() {
                 fireProcessFinished();
               }
@@ -1478,12 +1517,14 @@ public class NameBearerHandle implements Handle, StatusListener,
               "Fills this corpus with documents from a directory");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       corpusFiller.setExtensions(new ArrayList());
       corpusFiller.setEncoding("");
       final boolean answer = OkCancelDialog.showDialog(window, corpusFiller,
               "Select a directory and allowed extensions");
       Runnable runnable = new Runnable() {
+        @Override
         public void run() {
           if(answer) {
             long startTime = System.currentTimeMillis();
@@ -1607,11 +1648,13 @@ public class NameBearerHandle implements Handle, StatusListener,
               "Fills this corpus by extracting multiple documents from a single file");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       scfInputDialog.reset();
       final boolean answer = OkCancelDialog.showDialog(window, scfInputDialog,
               "Populate from Single Concatenated File");
       Runnable runnable = new Runnable() {
+        @Override
         public void run() {
           if(answer) {
 
@@ -1705,6 +1748,7 @@ public class NameBearerHandle implements Handle, StatusListener,
       createIndexGui = new CreateIndexGUI();
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       boolean ok = OkCancelDialog.showDialog(largeView, createIndexGui,
               "Index \"" + target.getName() + "\" corpus");
@@ -1731,6 +1775,7 @@ public class NameBearerHandle implements Handle, StatusListener,
         ((IndexedCorpus)target).setIndexDefinition(did);
 
         Thread thread = new Thread(new Runnable() {
+          @Override
           public void run() {
             try {
               fireProgressChanged(1);
@@ -1777,12 +1822,15 @@ public class NameBearerHandle implements Handle, StatusListener,
       putValue(SHORT_DESCRIPTION, "Optimize existing index");
     }
 
+    @Override
     public boolean isEnabled() {
       return ((IndexedCorpus)target).getIndexDefinition() != null;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Thread thread = new Thread(new Runnable() {
+        @Override
         public void run() {
           try {
             fireProgressChanged(1);
@@ -1822,10 +1870,12 @@ public class NameBearerHandle implements Handle, StatusListener,
       putValue(SHORT_DESCRIPTION, "Delete existing index");
     }
 
+    @Override
     public boolean isEnabled() {
       return ((IndexedCorpus)target).getIndexDefinition() != null;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       int answer = JOptionPane.showOptionDialog(getLargeView() != null
               ? getLargeView()
@@ -1864,6 +1914,7 @@ public class NameBearerHandle implements Handle, StatusListener,
       super("New Corpus with this Document");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       try {
         Corpus corpus = Factory.newCorpus("Corpus for " + target.getName());
@@ -1876,6 +1927,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
   }
 
+  @Override
   public void removeViews() {
     // delete all the VRs that were created
     if(largeView != null) {
@@ -1924,6 +1976,7 @@ public class NameBearerHandle implements Handle, StatusListener,
    * Releases the memory, removes the listeners, cleans up. Will get
    * called when the target resource is unloaded from the system
    */
+  @Override
   public void cleanup() {
 
     removeViews();
@@ -1932,6 +1985,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   class ProxyStatusListener implements StatusListener {
+    @Override
     public void statusChanged(String text) {
       fireStatusChanged(text);
     }
@@ -1988,37 +2042,47 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
   }
 
+  @Override
   public void statusChanged(String e) {
     fireStatusChanged(e);
   }
 
+  @Override
   public void progressChanged(int e) {
     fireProgressChanged(e);
   }
 
+  @Override
   public void processFinished() {
     fireProcessFinished();
   }
 
+  @Override
   public Window getWindow() {
     return window;
   }
 
+  @Override
   public void resourceLoaded(CreoleEvent e) {
   }
 
+  @Override
   public void resourceUnloaded(CreoleEvent e) {
   }
 
+  @Override
   public void resourceRenamed(Resource resource, String oldName, String newName) {
   }
 
+  @Override
   public void datastoreOpened(CreoleEvent e) {
   }
 
+  @Override
   public void datastoreCreated(CreoleEvent e) {
   }
 
+  @Override
   public void datastoreClosed(CreoleEvent e) {
     if(getTarget() == e.getDatastore()) cleanup();
   }

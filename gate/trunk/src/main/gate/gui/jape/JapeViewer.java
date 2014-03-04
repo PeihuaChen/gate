@@ -116,6 +116,7 @@ public class JapeViewer extends AbstractVisualResource implements
     treePhases.getSelectionModel().setSelectionMode(
             TreeSelectionModel.SINGLE_TREE_SELECTION);
     treePhases.addTreeSelectionListener(new TreeSelectionListener() {
+      @Override
       public void valueChanged(TreeSelectionEvent e) {
         if(updating) return;
         if(e.getPath().getLastPathComponent() == null) return;
@@ -341,10 +342,12 @@ public class JapeViewer extends AbstractVisualResource implements
     updating = false;
   }
 
+  @Override
   public void processFinished() {
     setTarget(transducer);
   }
 
+  @Override
   public void progressChanged(int progress) {
 
   }

@@ -31,6 +31,7 @@ public class Rule_NEXTBIGRAM extends Rule {
 
   public Rule_NEXTBIGRAM() {
   }
+  @Override
   public boolean checkContext(POSTagger tagger) {
     return (tagger.lexBuff[4][0].equals(context[0]) &&
             tagger.lexBuff[5][0].equals(context[1]));

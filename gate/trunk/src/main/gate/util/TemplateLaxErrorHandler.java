@@ -42,6 +42,7 @@ public class TemplateLaxErrorHandler extends LaxErrorHandler {
   /**
     * error method comment.
     */
+  @Override
   public void error(SAXParseException ex) throws SAXException{
     // do something with the error
     File fInput = new File (ex.getSystemId());
@@ -52,6 +53,7 @@ public class TemplateLaxErrorHandler extends LaxErrorHandler {
   /**
     * fatalError method comment.
     */
+  @Override
   public void fatalError(SAXParseException ex) throws SAXException{
     // do something with the fatalError
     File fInput = new File(ex.getSystemId());
@@ -62,6 +64,7 @@ public class TemplateLaxErrorHandler extends LaxErrorHandler {
   /**
     * warning method comment.
     */
+  @Override
   public void warning(SAXParseException ex) throws SAXException {
     // do something with the warning.
     File fInput = new File(ex.getSystemId());

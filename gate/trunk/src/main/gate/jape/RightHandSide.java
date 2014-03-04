@@ -341,6 +341,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   } // transduce
 
   /** Create a string representation of the object. */
+  @Override
   public String toString() { return toString(""); }
 
   /** Create a string representation of the object. */

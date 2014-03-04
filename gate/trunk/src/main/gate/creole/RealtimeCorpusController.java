@@ -92,6 +92,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
       this.document = document;
     }
     
+    @Override
     public Object call() throws Exception {
       try {
         // save a reference to the executor thread
@@ -227,6 +228,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
     // GATE from exiting if this controller has not been properly disposed of.
     threadSource = Executors.newSingleThreadExecutor(new ThreadFactory() {
       private ThreadFactory dtf = Executors.defaultThreadFactory();
+      @Override
       public Thread newThread(Runnable r) {
         Thread t = dtf.newThread(r);
         t.setDaemon(true);
@@ -237,6 +239,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
   }
 
   /** Run the Processing Resources in sequence. */
+  @Override
   @SuppressWarnings("deprecation")
   public void executeImpl() throws ExecutionException{
     interrupted = false;
@@ -251,7 +254,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
         " application has been abruptly interrupted!");
 
       boolean docWasLoaded = corpus.isDocumentLoaded(i);
-      Document doc = (Document)corpus.get(i);
+      Document doc = corpus.get(i);
       // start the execution, in the separate thread
       threadDying = false;
       Future<?> docRunnerFuture = threadSource.submit(new DocRunner(doc));

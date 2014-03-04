@@ -78,11 +78,13 @@ public class ConfigXmlHandler extends DefaultHandler {
   private CreoleRegister register;
 
   /** Called when the SAX parser encounts the beginning of the XML document */
+  @Override
   public void startDocument() throws GateSaxException {
     if(DEBUG) Out.prln("start document");
   } // startDocument
 
   /** Called when the SAX parser encounts the end of the XML document */
+  @Override
   public void endDocument() throws GateSaxException {
     if(DEBUG) Out.prln("end document");
     if(! contentStack.isEmpty()) {
@@ -110,6 +112,7 @@ public class ConfigXmlHandler extends DefaultHandler {
   }// attributes2String()
 
   /** Called when the SAX parser encounts the beginning of an XML element */
+  @Override
   public void startElement (
     String uri, String qName, String elementName, Attributes atts
   ) throws SAXException {
@@ -159,6 +162,7 @@ public class ConfigXmlHandler extends DefaultHandler {
   /** Called when the SAX parser encounts the end of an XML element.
     * This is actions happen.
     */
+  @Override
   public void endElement (String uri, String qName, String elementName)
                                                       throws GateSaxException, SAXException {
 
@@ -223,6 +227,7 @@ public class ConfigXmlHandler extends DefaultHandler {
   } // endElement
 
   /** Called when the SAX parser encounts text (PCDATA) in the XML doc */
+  @Override
   public void characters(char [] text,int start,int length) throws SAXException {
     if(!readCharacterStatus) {
       contentBuffer = new StringBuffer(new String(text,start,length));
@@ -286,21 +291,25 @@ public class ConfigXmlHandler extends DefaultHandler {
   } // attributeListToParameterList
 
   /** Called when the SAX parser encounts white space */
+  @Override
   public void ignorableWhitespace(char ch[], int start, int length)
   throws SAXException {
   } // ignorableWhitespace
 
   /** Called for parse errors. */
+  @Override
   public void error(SAXParseException ex) throws SAXException {
     _seh.error(ex);
   } // error
 
   /** Called for fatal errors. */
+  @Override
   public void fatalError(SAXParseException ex) throws SAXException {
     _seh.fatalError(ex);
   } // fatalError
 
   /** Called for warnings. */
+  @Override
   public void warning(SAXParseException ex) throws SAXException {
     _seh.warning(ex);
   } // warning

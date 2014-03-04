@@ -38,6 +38,7 @@ public class XJPopupMenu extends JPopupMenu {
    * to the default JPopupMenu layout manager.
    * @param aFlag true if the popupmenu is visible
    */
+  @Override
   public void setVisible(boolean aFlag) {
     super.setVisible(aFlag);
     if (!aFlag) { return; }

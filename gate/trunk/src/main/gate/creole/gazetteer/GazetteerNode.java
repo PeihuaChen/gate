@@ -196,6 +196,7 @@ public class GazetteerNode {
    * 
    * @return the string representation of this node
    */
+  @Override
   public String toString() {
     if(featureMap == null || separator == null)
       return entry;
@@ -208,6 +209,7 @@ public class GazetteerNode {
    * @param o another node
    * @return true if the string representation of the entry and weighting match.
    */
+  @Override
   public boolean equals(Object o) {
     boolean result = false;
     if(o instanceof GazetteerNode) {
@@ -216,6 +218,7 @@ public class GazetteerNode {
     return result;
   }
   
+  @Override
   public int hashCode() {
     return toString().hashCode();
   }

@@ -19,15 +19,16 @@ public class MatchRule15 implements OrthoMatcherRule {
 			this.orthomatcher=orthmatcher;
 	}
 	
-	public boolean value(String s1, String s2) {
+	@Override
+  public boolean value(String s1, String s2) {
 		
 	  boolean result=false;
 	  
 	//  if (s1.equalsIgnoreCase("chin") || s2.equalsIgnoreCase("chin"))
 	//  Out.prln("Rule 14 " + s1 + " and " + s2);
 	    String s1_short = (String)
-	    ((Annotation) orthomatcher.tokensLongAnnot.get(
-	    		orthomatcher.tokensLongAnnot.size()-1)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+	    orthomatcher.tokensLongAnnot.get(
+	    		orthomatcher.tokensLongAnnot.size()-1).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
 	//  Out.prln("Converted to " + s1_short);
 	    if (orthomatcher.tokensLongAnnot.size()>1 && OrthoMatcherHelper.straightCompare(s1_short, s2,orthomatcher.caseSensitive)) {
 	     if (OrthoMatcher.log.isDebugEnabled()) {
@@ -41,6 +42,7 @@ public class MatchRule15 implements OrthoMatcherRule {
 	    return result;
 	}
 	
+  @Override
   public String getId(){
     return "MatchRule15";
   }

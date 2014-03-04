@@ -152,6 +152,7 @@ public class CorefEditor
   /**
    * This method intiates the GUI for co-reference editor
    */
+  @Override
   protected void initGUI() {
 
     //get a pointer to the textual view used for highlights
@@ -199,7 +200,7 @@ public class CorefEditor
     if (annotSetsMap != null) {
       Object [] array = annotSetsMap.keySet().toArray();
       for(int i=0;i<array.length;i++) {
-        ((AnnotationSet) annotSetsMap.get((String) array[i])).addAnnotationSetListener(this);
+        ((AnnotationSet) annotSetsMap.get(array[i])).addAnnotationSetListener(this);
       }
       annotSetsModel = new DefaultComboBoxModel(array);
     }
@@ -283,6 +284,7 @@ public class CorefEditor
   }
 
       /** This methods cleans up the memory by removing all listener registrations */
+  @Override
   public void cleanup() {
     document.removeDocumentListener(this);
     document.getFeatures().removeFeatureMapListener(this);
@@ -316,6 +318,7 @@ public class CorefEditor
    * co-reference editor..
    * @param de
    */
+  @Override
   public void annotationSetRemoved(gate.event.DocumentEvent de) {
     // this method removes the annotationSet from the annotSets
     // and all chainNodes under it
@@ -361,6 +364,7 @@ public class CorefEditor
    * This method is called when any new annotationSet is added
    * @param de
    */
+  @Override
   public void annotationSetAdded(gate.event.DocumentEvent de) {
 
     String annotSet = de.getAnnotationSetName();
@@ -396,14 +400,17 @@ public class CorefEditor
   /**Called when the content of the document has changed through an edit
    * operation.
    */
+  @Override
   public void contentEdited(gate.event.DocumentEvent e) {
     //ignore
   }
 
+  @Override
   public void annotationAdded(AnnotationSetEvent ase) {
     // ignore
   }
 
+  @Override
   public void annotationRemoved(AnnotationSetEvent ase) {
     Annotation delAnnot = ase.getAnnotation();
     Integer id = delAnnot.getId();
@@ -461,6 +468,7 @@ public class CorefEditor
   /**
    * Called when features are changed outside the co-refEditor
    */
+  @Override
   public void featureMapUpdated() {
 
     if (explicitCall)
@@ -500,7 +508,7 @@ public class CorefEditor
     Iterator setIter = matchesMap.keySet().iterator();
     HashMap annotSetsNamesMap = new HashMap();
     for (int i = 0; i < annotSets.getItemCount(); i++) {
-      annotSetsNamesMap.put( (String) annotSets.getItemAt(i), new Boolean(false));
+      annotSetsNamesMap.put( annotSets.getItemAt(i), new Boolean(false));
     }
     outer:while (setIter.hasNext()) {
       String currentSet = (String) setIter.next();
@@ -538,7 +546,7 @@ public class CorefEditor
 
         // intially no chainHead is visited
         while (chainsList.hasNext()) {
-          visitedList.put( (CorefTreeNode) chainsList.next(), new Boolean(false));
+          visitedList.put( chainsList.next(), new Boolean(false));
         }
 
         // now we need to search for the chainHead of each group
@@ -829,6 +837,7 @@ public class CorefEditor
    * ActionPerformed Activity
    * @param ae
    */
+  @Override
   public void actionPerformed(ActionEvent ae) {
     // when annotationSet value changes
     if (ae.getSource() == annotSets) {
@@ -1123,7 +1132,7 @@ public class CorefEditor
 
       if (matches.size() > 0 && set.size() > 0) {
 
-        String longestString = getString((Annotation) findOutTheLongestAnnotation(matches,
+        String longestString = getString(findOutTheLongestAnnotation(matches,
             set));
         // so this should become one of the tree node
         CorefTreeNode chainNode = new CorefTreeNode(longestString, false,
@@ -1305,21 +1314,25 @@ public class CorefEditor
     }
   }
 
+  @Override
   protected void registerHooks() {
     textPane.addMouseListener(textPaneMouseListener);
     textPane.addMouseMotionListener(textPaneMouseListener);
 
   }
 
+  @Override
   protected void unregisterHooks() {
     textPane.removeMouseListener(textPaneMouseListener);
     textPane.removeMouseMotionListener(textPaneMouseListener);
   }
 
+  @Override
   public Component getGUI() {
     return mainPanel;
   }
 
+  @Override
   public int getType() {
     return VERTICAL;
   }
@@ -1336,6 +1349,7 @@ public class CorefEditor
         newCorefActionTimer.setRepeats(false);
       }
 
+      @Override
       public void mouseMoved(MouseEvent me) {
         int textLocation = textPane.viewToModel(me.getPoint());
         chainToolTipAction.setTextLocation(textLocation);
@@ -1428,6 +1442,7 @@ public class CorefEditor
       list.setModel(model);
     }
 
+    @Override
     public void actionPerformed(ActionEvent ae) {
       int index = -1;
       if (highlightedChainAnnotsOffsets != null) {
@@ -1529,22 +1544,27 @@ public class CorefEditor
         myField.addKeyListener(this);
       }
 
+      @Override
       public void addActionListener(ActionListener al) {
         myField.addActionListener(al);
       }
 
+      @Override
       public void removeActionListener(ActionListener al) {
         myField.removeActionListener(al);
       }
 
+      @Override
       public Component getEditorComponent() {
         return myField;
       }
 
+      @Override
       public Object getItem() {
         return myField.getText();
       }
 
+      @Override
       public void selectAll() {
         if (myField.getText() != null && myField.getText().length() > 0) {
           myField.setSelectionStart(0);
@@ -1552,6 +1572,7 @@ public class CorefEditor
         }
       }
 
+      @Override
       public void setItem(Object item) {
         myField.setText( (String) item);
         field = myField.getText();
@@ -1561,6 +1582,7 @@ public class CorefEditor
         myField.requestFocus();
       }
 
+      @Override
       public void keyReleased(KeyEvent ke) {
         if (myField.getText() == null) {
           myField.setText("");
@@ -1630,6 +1652,7 @@ public class CorefEditor
 
     private class AddAction
         extends AbstractAction {
+      @Override
       public void actionPerformed(ActionEvent ae) {
         if (ae.getSource() == cancel) {
           popupWindow.setVisible(false);
@@ -1770,6 +1793,7 @@ public class CorefEditor
                           getColor("ToolTip.background"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent ae) {
 
       int index = -1;
@@ -1810,6 +1834,7 @@ public class CorefEditor
           deleteButton.setActionCommand(chainHead.toString());
           tempMap.put(chainHead.toString(), chainHead);
           deleteButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ae) {
               try {
                 int confirm = JOptionPane.showConfirmDialog(MainFrame.getInstance(),
@@ -1875,9 +1900,12 @@ public class CorefEditor
   protected class CorefTreeMouseListener
       extends MouseAdapter {
 
+    @Override
     public void mouseClicked(MouseEvent me) { }
+    @Override
     public void mouseReleased(MouseEvent me) { }
 
+    @Override
     public void mousePressed(MouseEvent me) {
       if (popupWindow != null && popupWindow.isVisible()) {
         popupWindow.setVisible(false);
@@ -1926,6 +1954,7 @@ public class CorefEditor
           popup.add(panel, BorderLayout.SOUTH);
 
           changeColor.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ae) {
               String currentAnnotSet = (String) annotSets.getSelectedItem();
               currentColors = (HashMap) colorChainsMap.get(currentAnnotSet);
@@ -1969,6 +1998,7 @@ public class CorefEditor
           });
 
           delete.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ae) {
               // get the ids of current chainNode
               HashMap chains = (HashMap)
@@ -2010,6 +2040,7 @@ public class CorefEditor
           });
 
           cancel.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ae) {
               popup.setVisible(false);
             }
@@ -2060,6 +2091,7 @@ public class CorefEditor
     /**
      * Renderer class
      */
+    @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value,
                                                   boolean isSelected,
                                                   boolean expanded,

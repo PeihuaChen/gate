@@ -53,7 +53,9 @@ public class XJFileChooser extends JFileChooser {
 
   public XJFileChooser() {
     addAncestorListener(new AncestorListener() {
+      @Override
       public void ancestorAdded(AncestorEvent event) { /* do nothing */ }
+      @Override
       public void ancestorRemoved(AncestorEvent event) {
         // reinitialise fields when the file chooser is hidden
         resource = null;
@@ -61,6 +63,7 @@ public class XJFileChooser extends JFileChooser {
         isFileSelected = false;
         resetChoosableFileFilters();
       }
+      @Override
       public void ancestorMoved(AncestorEvent event) { /* do nothing */ }
     });
   }
@@ -69,6 +72,7 @@ public class XJFileChooser extends JFileChooser {
    * Overridden to make sure the shared MainFrame instance is used as
    * a parent when no parent is specified
    */
+  @Override
   public int showDialog(Component parent, String approveButtonText)
   throws HeadlessException {
     setSelectedFileFromPreferences();
@@ -153,6 +157,7 @@ public class XJFileChooser extends JFileChooser {
 
   /** overriden to first save the location of the file chooser
    *  for the current resource. */
+  @Override
   public void approveSelection() {
     if (resource != null && getSelectedFile() != null) {
       try {
@@ -184,11 +189,13 @@ public class XJFileChooser extends JFileChooser {
   }
 
   /** Overriden to test first if the file exists */
+  @Override
   public void ensureFileIsVisible(File f) {
     if(f != null && f.exists()) super.ensureFileIsVisible(f);
   }
 
   /** Overriden to test first if the file exists */
+  @Override
   public void setSelectedFile(File file) {
     if(file != null){
       if(file.exists() ||
@@ -200,6 +207,7 @@ public class XJFileChooser extends JFileChooser {
   }
 
   /** overriden to add a filter only if not already present */
+  @Override
   public void addChoosableFileFilter(FileFilter filterToAdd) {
     for (FileFilter filter : getChoosableFileFilters()) {
       if (filter.getDescription().equals(filterToAdd.getDescription())) {

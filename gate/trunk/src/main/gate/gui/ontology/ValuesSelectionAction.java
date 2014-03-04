@@ -43,6 +43,7 @@ public class ValuesSelectionAction {
     panel.add(domainBox);
     domainBox.setEditable(true);
     domainBox.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
+      @Override
       public void keyReleased(KeyEvent keyevent) {
         String s = ((JTextComponent)domainBox.getEditor().getEditorComponent())
                 .getText();
@@ -72,6 +73,7 @@ public class ValuesSelectionAction {
     panel.add(jpanel);
     panel.add(new JScrollPane(list));
     add.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent actionevent) {
         String s = (String)domainBox.getSelectedItem();
         if(!allowValueOutsideDropDownList) {
@@ -91,6 +93,7 @@ public class ValuesSelectionAction {
       }
     });
     remove.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent actionevent) {
         Object aobj[] = list.getSelectedValues();
         if(aobj != null && aobj.length > 0) {
@@ -121,6 +124,7 @@ public class ValuesSelectionAction {
     list.setModel(new DefaultComboBoxModel(alreadySelected));
     JOptionPane pane = new JOptionPane(panel, JOptionPane.QUESTION_MESSAGE,
      JOptionPane.OK_CANCEL_OPTION, icon) {
+      @Override
       public void selectInitialValue() {
         domainBox.requestFocusInWindow();
         domainBox.getEditor().selectAll();

@@ -48,6 +48,7 @@ public class JNullableTextField extends JPanel {
       putValue(SHORT_DESCRIPTION, "Removes this feature completely");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       textField.setText(null);
       text = null;
@@ -139,16 +140,19 @@ public class JNullableTextField extends JPanel {
             new HashSet<DocumentListener>());
     
     final DocumentListener tfDocumentListener = new DocumentListener() {
+      @Override
       public void removeUpdate(DocumentEvent e) {
         text = textField.getText();
         fireRemoveUpdate(e);
       }
       
+      @Override
       public void insertUpdate(DocumentEvent e) {
         text = textField.getText();
         fireInsertUpdate(e);
       }
       
+      @Override
       public void changedUpdate(DocumentEvent e) {
         fireChangedUpdate(e);
       }
@@ -157,6 +161,7 @@ public class JNullableTextField extends JPanel {
     textField.getDocument().addDocumentListener(tfDocumentListener);
     
     textField.addPropertyChangeListener("document", new PropertyChangeListener() {
+      @Override
       public void propertyChange(PropertyChangeEvent evt) {
         textField.getDocument().addDocumentListener(tfDocumentListener);
       }
@@ -164,13 +169,16 @@ public class JNullableTextField extends JPanel {
     
     // listen to our own events, and highlight null value
     addDocumentListener(new DocumentListener() {
+      @Override
       public void removeUpdate(DocumentEvent e) {
         valueChanged();
       }
+      @Override
       public void insertUpdate(DocumentEvent e) {
         valueChanged();
       }
       
+      @Override
       public void changedUpdate(DocumentEvent e) { }
       
       private void valueChanged() {

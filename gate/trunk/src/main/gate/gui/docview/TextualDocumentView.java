@@ -233,6 +233,7 @@ public class TextualDocumentView extends AbstractDocumentView {
 //  }
 
 
+  @Override
   public int getType() {
     return CENTRAL;
   }
@@ -241,6 +242,7 @@ public class TextualDocumentView extends AbstractDocumentView {
    * Stores the target (which should always be a {@link Document}) into the
    * {@link #document} field.
    */
+  @Override
   public void setTarget(Object target) {
     if(document != null){
       //remove the old listener
@@ -258,6 +260,7 @@ public class TextualDocumentView extends AbstractDocumentView {
   /* (non-Javadoc)
    * @see gate.gui.docview.AbstractDocumentView#initGUI()
    */
+  @Override
   protected void initGUI() {
 //    textView = new JEditorPane();
 //    textView.setContentType("text/plain");
@@ -277,6 +280,7 @@ public class TextualDocumentView extends AbstractDocumentView {
     textView.getDocument().addDocumentListener(new SwingDocumentListener());
     // display and put the caret at the beginning of the file
     SwingUtilities.invokeLater(new Runnable() {
+      @Override
       public void run() {
         try {
           if (textView.modelToView(0) != null) {
@@ -318,6 +322,7 @@ public class TextualDocumentView extends AbstractDocumentView {
     initListeners();
   }
 
+  @Override
   public Component getGUI(){
 //    return contentPane;
     return scroller;
@@ -338,6 +343,7 @@ public class TextualDocumentView extends AbstractDocumentView {
 
     // stop control+H from deleting text and transfers the key to the parent
     textView.addKeyListener(new KeyAdapter() {
+      @Override
       public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_H
          && e.isControlDown()) {
@@ -348,13 +354,16 @@ public class TextualDocumentView extends AbstractDocumentView {
     });
   }
 
+  @Override
   protected void unregisterHooks(){}
+  @Override
   protected void registerHooks(){}
 
   /**
    * Blinks the blinking highlights if any.
    */
   protected class UpdateHighlightsAction extends AbstractAction{
+    @Override
     public void actionPerformed(ActionEvent evt){
       synchronized(blinkingTagsForAnnotations){
         updateBlinkingHighlights();
@@ -489,12 +498,15 @@ public class TextualDocumentView extends AbstractDocumentView {
 
   protected class GateDocumentListener implements DocumentListener{
 
+    @Override
     public void annotationSetAdded(DocumentEvent e) {
     }
 
+    @Override
     public void annotationSetRemoved(DocumentEvent e) {
     }
 
+    @Override
     public void contentEdited(DocumentEvent e) {
       if(active){
         //reload the content.
@@ -509,6 +521,7 @@ public class TextualDocumentView extends AbstractDocumentView {
   }
 
   protected class SwingDocumentListener implements javax.swing.event.DocumentListener{
+    @Override
     public void insertUpdate(final javax.swing.event.DocumentEvent e) {
       //propagate the edit to the document
       try{
@@ -530,6 +543,7 @@ public class TextualDocumentView extends AbstractDocumentView {
 //      if(listView != null) listView.repaint();
     }
 
+    @Override
     public void removeUpdate(final javax.swing.event.DocumentEvent e) {
       //propagate the edit to the document
       try{
@@ -549,6 +563,7 @@ public class TextualDocumentView extends AbstractDocumentView {
 //      if(listView != null) listView.repaint();
     }
 
+    @Override
     public void changedUpdate(javax.swing.event.DocumentEvent e) {
       //some attributes changed: we don't care about that
     }
@@ -559,6 +574,7 @@ public class TextualDocumentView extends AbstractDocumentView {
   // the painting
   public class PermanentSelectionCaret extends DefaultCaret {
     private boolean isFocused;
+    @Override
     public void setSelectionVisible(boolean hasFocus) {
       if (hasFocus != isFocused) {
         isFocused = hasFocus;
@@ -566,6 +582,7 @@ public class TextualDocumentView extends AbstractDocumentView {
         super.setSelectionVisible(true);
       }
     }
+    @Override
     public void focusGained(FocusEvent e) {
       super.focusGained(e);
       // force displaying the caret even if the document is not editable

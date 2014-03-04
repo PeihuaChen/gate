@@ -71,7 +71,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     try {
       Constructor<? extends SinglePhaseTransducer> c = sptClass.getConstructor
           (String.class);
-      return (SinglePhaseTransducer) c.newInstance(name);
+      return c.newInstance(name);
     } catch (NoSuchMethodException e) { // Shouldn't happen
       throw new RuntimeException(e);
     } catch (IllegalArgumentException e) { // Shouldn't happen

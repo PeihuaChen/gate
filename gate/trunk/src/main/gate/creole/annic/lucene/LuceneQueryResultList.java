@@ -47,7 +47,7 @@ public class LuceneQueryResultList {
 	public int getTotalNumberOfPatterns() {
 		int total = 0;
 		for (int i = 0; i < queryResults.size(); i++) {
-			total += ((LuceneQueryResult) queryResults.get(i)) 
+			total += queryResults.get(i) 
 					.getFirstTermPositions().size();
 		}
 		return total;

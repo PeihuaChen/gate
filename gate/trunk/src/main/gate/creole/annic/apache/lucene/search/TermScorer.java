@@ -59,10 +59,12 @@ final class TermScorer extends Scorer {
       scoreCache[i] = getSimilarity().tf(i) * weightValue;
   }
 
+  @Override
   public int doc() {
     return doc;
   }
 
+  @Override
   public boolean next(Searcher searcher) throws IOException {
     this.searcher = searcher;
     pointer++;
@@ -81,6 +83,7 @@ final class TermScorer extends Scorer {
     return true;
   }
 
+  @Override
   public float score(Searcher searcher) throws IOException {
     this.searcher = searcher;
     int f = freqs[pointer];
@@ -113,6 +116,7 @@ final class TermScorer extends Scorer {
     return score;
   }
 
+  @Override
   public boolean skipTo(int target) throws IOException {
     // first scan in cache
     for(pointer++; pointer < pointerMax; pointer++) {
@@ -136,6 +140,7 @@ final class TermScorer extends Scorer {
     return result;
   }
 
+  @Override
   public Explanation explain(int doc) throws IOException {
     TermQuery query = (TermQuery)weight.getQuery();
     Explanation tfExplanation = new Explanation();
@@ -159,6 +164,7 @@ final class TermScorer extends Scorer {
     return tfExplanation;
   }
 
+  @Override
   public String toString() {
     return "scorer(" + weight + ")";
   }

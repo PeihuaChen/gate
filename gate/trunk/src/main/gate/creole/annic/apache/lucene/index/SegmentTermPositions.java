@@ -31,6 +31,7 @@ extends SegmentTermDocs implements TermPositions {
     this.proxStream = (InputStream)parent.proxStream.clone();
   }
 
+  @Override
   final void seek(TermInfo ti) throws IOException {
     super.seek(ti);
     if (ti != null)
@@ -38,21 +39,25 @@ extends SegmentTermDocs implements TermPositions {
     proxCount = 0;
   }
 
+  @Override
   public final void close() throws IOException {
     super.close();
     proxStream.close();
   }
 
+  @Override
   public final int nextPosition() throws IOException {
     proxCount--;
     return position += proxStream.readVInt();
   }
 
+  @Override
   protected final void skippingDoc() throws IOException {
     for (int f = freq; f > 0; f--)		  // skip all positions
       proxStream.readVInt();
   }
 
+  @Override
   public final boolean next() throws IOException {
     for (int f = proxCount; f > 0; f--)		  // skip unread positions
       proxStream.readVInt();
@@ -65,6 +70,7 @@ extends SegmentTermDocs implements TermPositions {
     return false;
   }
 
+  @Override
   public final int read(final int[] docs, final int[] freqs)
       throws IOException {
     throw new UnsupportedOperationException("TermPositions does not support processing multiple documents in one call. Use TermDocs instead.");
@@ -72,6 +78,7 @@ extends SegmentTermDocs implements TermPositions {
 
 
   /** Called by super.skipTo(). */
+  @Override
   protected void skipProx(long proxPointer) throws IOException {
     proxStream.seek(proxPointer);
     proxCount = 0;

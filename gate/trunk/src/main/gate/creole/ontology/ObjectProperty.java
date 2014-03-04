@@ -40,6 +40,7 @@ public interface ObjectProperty extends RDFProperty {
   /**
    * Returns the set of domain restrictions for this property.
    */
+  @Override
   public Set<OResource> getDomain();
 
   /**
@@ -47,6 +48,7 @@ public interface ObjectProperty extends RDFProperty {
    * 
    * @return a set of {@link OClass} or {@link Class} objects.
    */
+  @Override
   public Set<OResource> getRange();
 
   /**

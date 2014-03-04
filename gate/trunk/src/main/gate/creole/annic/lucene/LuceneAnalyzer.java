@@ -28,6 +28,7 @@ public class LuceneAnalyzer extends Analyzer {
    * instanceof LuceneTokenizer. It is this instance that is returned to
    * the user.
    */
+  @Override
   public TokenStream tokenStream(String fieldName, Reader reader) {
     try {
       if(reader instanceof LuceneReader) {

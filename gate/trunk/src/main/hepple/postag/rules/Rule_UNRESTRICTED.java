@@ -32,6 +32,7 @@ public class Rule_UNRESTRICTED extends Rule {
   public Rule_UNRESTRICTED() {
   }
 
+  @Override
   public boolean checkContext(POSTagger tagger) {
     return true;
   }

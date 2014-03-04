@@ -19,7 +19,6 @@ import gate.Factory;
 import gate.Gate;
 import gate.ProcessingResource;
 import gate.creole.AbstractLanguageAnalyser;
-import gate.creole.AbstractProcessingResource;
 import gate.creole.ExecutionException;
 import gate.creole.SerialAnalyserController;
 import gate.creole.metadata.CreoleResource;

@@ -419,7 +419,7 @@ public class LuceneSearchThread {
 
       // deal with one query at a time
       for(; queryItemIndex < queryItemsList.size(); queryItemIndex++, ftpIndex = -1, this.ftp = null) {
-        QueryItem queryItem = (QueryItem)queryItemsList.get(queryItemIndex);
+        QueryItem queryItem = queryItemsList.get(queryItemIndex);
 
         /*
          * we've found the tokenStream and now we need to convert it
@@ -606,7 +606,7 @@ public class LuceneSearchThread {
       // highest is the textEndOffset
       // how to find the patternStartOffset
       int stPos = ((Integer)firstTermPositions.get(i)).intValue();
-      int endOffset = ((Integer)patternLength.get(i)).intValue();
+      int endOffset = patternLength.get(i).intValue();
       int patStart = Integer.MAX_VALUE;
 
       for(int j = 0; j < annotations.size(); j++) {

@@ -122,6 +122,7 @@ public class SerialControllerEditor extends AbstractVisualResource
 
   }
 
+  @Override
   public void setTarget(Object target){
     if(!(target instanceof SerialController))
     throw new IllegalArgumentException(
@@ -146,16 +147,16 @@ public class SerialControllerEditor extends AbstractVisualResource
   }//setController
 
 
+  @Override
   public void setHandle(Handle handle) {
     this.handle = handle;
 
     //register the listeners
-    if(handle instanceof StatusListener)
-      addStatusListener((StatusListener)handle);
-    if(handle instanceof ProgressListener)
-      addProgressListener((ProgressListener)handle);
+    addStatusListener(handle);
+    addProgressListener(handle);
   }
 
+  @Override
   public Resource init() throws ResourceInstantiationException{
     super.init();
     return this;
@@ -214,11 +215,13 @@ public class SerialControllerEditor extends AbstractVisualResource
     final int width1 = new JLabel("Loaded Processing resources").
                 getPreferredSize().width + 30;
     JScrollPane scroller = new JScrollPane(){
+      @Override
       public Dimension getPreferredSize(){
         Dimension dim = super.getPreferredSize();
         dim.width = Math.max(dim.width, width1);
         return dim;
       }
+      @Override
       public Dimension getMinimumSize(){
         Dimension dim = super.getMinimumSize();
         dim.width = Math.max(dim.width, width1);
@@ -287,11 +290,13 @@ public class SerialControllerEditor extends AbstractVisualResource
     final int width2 = new JLabel("Selected Processing resources").
                            getPreferredSize().width + 30;
     scroller = new JScrollPane(){
+      @Override
       public Dimension getPreferredSize(){
         Dimension dim = super.getPreferredSize();
         dim.width = Math.max(dim.width, width2);
         return dim;
       }
+      @Override
       public Dimension getMinimumSize(){
         Dimension dim = super.getMinimumSize();
         dim.width = Math.max(dim.width, width2);
@@ -469,16 +474,20 @@ public class SerialControllerEditor extends AbstractVisualResource
     final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, 
             topSplit, bottomSplit);
     splitPane.addAncestorListener(new AncestorListener() {
+      @Override
       public void ancestorRemoved(AncestorEvent event) {}
+      @Override
       public void ancestorMoved(AncestorEvent event) {}
       /**
        * One-shot ancestor listener that places the divider location on first
        * show, and then de-registers self. 
        */
+      @Override
       public void ancestorAdded(AncestorEvent event) {
         // This seems to work more reliably if queued rather than executed
         // directly.
         SwingUtilities.invokeLater(new Runnable(){
+          @Override
           public void run(){
             splitPane.setDividerLocation(0.5);    
           }
@@ -494,9 +503,11 @@ public class SerialControllerEditor extends AbstractVisualResource
     Gate.getCreoleRegister().addCreoleListener(this);
 
     this.addMouseListener(new MouseAdapter() {
+      @Override
       public void mousePressed(MouseEvent e) {
         processMouseEvent(e);
       }
+      @Override
       public void mouseReleased(MouseEvent e) {
         processMouseEvent(e);
       }
@@ -513,6 +524,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     });
 
     moveUpButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         int rows[] = memberPRsTable.getSelectedRows();
         if(rows == null || rows.length == 0){
@@ -547,6 +559,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     });
 
     moveDownButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         int rows[] = memberPRsTable.getSelectedRows();
         if(rows == null || rows.length == 0){
@@ -584,12 +597,15 @@ public class SerialControllerEditor extends AbstractVisualResource
     // mouse click edit the resource
     // mouse double click or context menu add the resource to the application
     loadedPRsTable.addMouseListener(new MouseAdapter() {
+      @Override
       public void mousePressed(MouseEvent e) {
         if(e.isPopupTrigger()) { processMouseEvent(e); }
       }
+      @Override
       public void mouseReleased(MouseEvent e) {
         if(e.isPopupTrigger()) { processMouseEvent(e); }
       }
+      @Override
       public void mouseClicked(MouseEvent e) {
         processMouseEvent(e);
       }
@@ -622,14 +638,18 @@ public class SerialControllerEditor extends AbstractVisualResource
     loadedPRsTable.setTransferHandler(new TransferHandler() {
       // minimal drag and drop that only call the removePRAction when importing
       String source = "";
+      @Override
       public int getSourceActions(JComponent c) {
         return MOVE;
       }
+      @Override
       protected Transferable createTransferable(JComponent c) {
         return new StringSelection("loadedPRsTable");
       }
+      @Override
       protected void exportDone(JComponent c, Transferable data, int action) {
       }
+      @Override
       public boolean canImport(JComponent c, DataFlavor[] flavors) {
         for(DataFlavor flavor : flavors) {
           if(DataFlavor.stringFlavor.equals(flavor)) {
@@ -638,6 +658,7 @@ public class SerialControllerEditor extends AbstractVisualResource
         }
         return false;
       }
+      @Override
       public boolean importData(JComponent c, Transferable t) {
         if (canImport(c, t.getTransferDataFlavors())) {
           try {
@@ -660,12 +681,15 @@ public class SerialControllerEditor extends AbstractVisualResource
     // mouse double click or context menu remove the resource from the
     // application
     memberPRsTable.addMouseListener(new MouseAdapter() {
+      @Override
       public void mousePressed(MouseEvent e) {
         if(e.isPopupTrigger()) { processMouseEvent(e); }
       }
+      @Override
       public void mouseReleased(MouseEvent e) {
         if(e.isPopupTrigger()) { processMouseEvent(e); }
       }
+      @Override
       public void mouseClicked(MouseEvent e) {
         processMouseEvent(e);
       }
@@ -703,17 +727,21 @@ public class SerialControllerEditor extends AbstractVisualResource
     memberPRsTable.setTransferHandler(new TransferHandler() {
       // minimal drag and drop that only call the addPRAction when importing
       String source = "";
+      @Override
       public int getSourceActions(JComponent c) {
         return MOVE;
       }
+      @Override
       protected Transferable createTransferable(JComponent c) {
         int selectedRows[] = memberPRsTable.getSelectedRows();
         Arrays.sort(selectedRows);
         return new StringSelection("memberPRsTable"
           + Arrays.toString(selectedRows));
       }
+      @Override
       protected void exportDone(JComponent c, Transferable data, int action) {
       }
+      @Override
       public boolean canImport(JComponent c, DataFlavor[] flavors) {
         for(DataFlavor flavor : flavors) {
           if(DataFlavor.stringFlavor.equals(flavor)) {
@@ -722,6 +750,7 @@ public class SerialControllerEditor extends AbstractVisualResource
         }
         return false;
       }
+      @Override
       public boolean importData(JComponent c, Transferable t) {
         if (!canImport(c, t.getTransferDataFlavors())) {
           return false;
@@ -776,6 +805,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     
     loadedPRsTable.getSelectionModel().addListSelectionListener(
       new ListSelectionListener() {
+        @Override
         public void valueChanged(ListSelectionEvent e) {
           // disable Add button if no selection
           addButton.setEnabled(loadedPRsTable.getSelectedRowCount() > 0);
@@ -784,6 +814,7 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     memberPRsTable.getSelectionModel().addListSelectionListener(
       new ListSelectionListener() {
+        @Override
         public void valueChanged(ListSelectionEvent e) {
           // disable Remove and Move buttons if no selection
           removeButton.setEnabled(memberPRsTable.getSelectedRowCount() > 0);
@@ -810,6 +841,7 @@ public class SerialControllerEditor extends AbstractVisualResource
        * action (e.g. editing one of the text fields, changes the selection). 
        */
       ItemListener strategyModeListener = new ItemListener() {
+        @Override
         public void itemStateChanged(ItemEvent e) {
           if(selectedPRRunStrategy != null) {
             if(selectedPRRunStrategy instanceof AnalyserRunningStrategy){
@@ -844,14 +876,17 @@ public class SerialControllerEditor extends AbstractVisualResource
       
       featureNameTextField.getDocument().addDocumentListener(
       new javax.swing.event.DocumentListener() {
+        @Override
         public void insertUpdate(javax.swing.event.DocumentEvent e) {
           changeOccured(e);
         }
 
+        @Override
         public void removeUpdate(javax.swing.event.DocumentEvent e) {
           changeOccured(e);
         }
 
+        @Override
         public void changedUpdate(javax.swing.event.DocumentEvent e) {
           changeOccured(e);
         }
@@ -870,14 +905,17 @@ public class SerialControllerEditor extends AbstractVisualResource
 
       featureValueTextField.getDocument().addDocumentListener(
       new javax.swing.event.DocumentListener() {
+        @Override
         public void insertUpdate(javax.swing.event.DocumentEvent e) {
           changeOccured(e);
         }
 
+        @Override
         public void removeUpdate(javax.swing.event.DocumentEvent e) {
           changeOccured(e);
         }
 
+        @Override
         public void changedUpdate(javax.swing.event.DocumentEvent e) {
           changeOccured(e);
         }
@@ -897,26 +935,32 @@ public class SerialControllerEditor extends AbstractVisualResource
     
     if(corpusControllerMode){
       corpusCombo.addPopupMenuListener(new PopupMenuListener() {
+        @Override
         public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
           corpusComboModel.fireDataChanged();
         }
 
+        @Override
         public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
         }
 
+        @Override
         public void popupMenuCanceled(PopupMenuEvent e) {
         }
       });
     }
 
     addAncestorListener(new AncestorListener() {
+      @Override
       public void ancestorAdded(AncestorEvent event) {
         // every time the user switches back to this view, we check
         // whether another controller has just included this one
         loadedPRsTableModel.fireTableDataChanged();
         memberPRsTableModel.fireTableDataChanged();
       }
+      @Override
       public void ancestorRemoved(AncestorEvent event) { /* do nothing */ }
+      @Override
       public void ancestorMoved(AncestorEvent event) { /* do nothing */
       }
     }
@@ -929,6 +973,7 @@ public class SerialControllerEditor extends AbstractVisualResource
   
   }//protected void initListeners()
   
+  @Override
   public List getActions(){
     return actionList;
   }
@@ -936,6 +981,7 @@ public class SerialControllerEditor extends AbstractVisualResource
   /**
    * Cleans the internal data and prepares this object to be collected
    */
+  @Override
   public void cleanup(){
     Gate.getCreoleRegister().removeCreoleListener(this);
     controller.removeControllerListener(this);
@@ -983,7 +1029,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     }
     if(pr != null){
       //update the GUI for the new PR
-      ResourceData rData = (ResourceData)Gate.getCreoleRegister().
+      ResourceData rData = Gate.getCreoleRegister().
                                          get(pr.getClass().getName());
       //update the border name
       parametersBorder.setTitle(" Runtime Parameters for the \"" + pr.getName() +
@@ -1078,6 +1124,7 @@ public class SerialControllerEditor extends AbstractVisualResource
 
 
   //CreoleListener implementation
+  @Override
   public void resourceLoaded(CreoleEvent e) {
     if(Gate.getHiddenAttribute(e.getResource().getFeatures())) return;
     if(e.getResource() instanceof ProcessingResource){
@@ -1091,6 +1138,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     }
   }
 
+  @Override
   public void resourceUnloaded(CreoleEvent e) {
     if(Gate.getHiddenAttribute(e.getResource().getFeatures())) return;
     if(e.getResource() instanceof ProcessingResource){
@@ -1123,6 +1171,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     }
   }
 
+  @Override
   public void resourceRenamed(Resource resource, String oldName,
                               String newName){
     if(Gate.getHiddenAttribute(resource.getFeatures())) return;
@@ -1131,10 +1180,13 @@ public class SerialControllerEditor extends AbstractVisualResource
     }
   }
 
+  @Override
   public void datastoreOpened(CreoleEvent e) {
   }
+  @Override
   public void datastoreCreated(CreoleEvent e) {
   }
+  @Override
   public void datastoreClosed(CreoleEvent e) {
   }
   public synchronized void removeStatusListener(StatusListener l) {
@@ -1148,6 +1200,7 @@ public class SerialControllerEditor extends AbstractVisualResource
   /* (non-Javadoc)
    * @see gate.event.ControllerListener#resourceAdded(gate.event.ControllerEvent)
    */
+  @Override
   public void resourceAdded(ControllerEvent evt){
     loadedPRsTableModel.fireTableDataChanged();
     memberPRsTableModel.fireTableDataChanged();
@@ -1156,6 +1209,7 @@ public class SerialControllerEditor extends AbstractVisualResource
   /* (non-Javadoc)
    * @see gate.event.ControllerListener#resourceRemoved(gate.event.ControllerEvent)
    */
+  @Override
   public void resourceRemoved(ControllerEvent evt){
     loadedPRsTableModel.fireTableDataChanged();
     memberPRsTableModel.fireTableDataChanged();
@@ -1191,6 +1245,7 @@ public class SerialControllerEditor extends AbstractVisualResource
    * the controller.
    */
   class LoadedPRsTableModel extends AbstractTableModel{
+    @Override
     public int getRowCount(){
       List<ProcessingResource> loadedPRs = new ArrayList<ProcessingResource>(
         Gate.getCreoleRegister().getPrInstances());
@@ -1210,6 +1265,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       return loadedPRs.size();
     }
 
+    @Override
     public Object getValueAt(int row, int column){
       List<ProcessingResource> loadedPRs = new ArrayList<ProcessingResource>(
         Gate.getCreoleRegister().getPrInstances());
@@ -1240,10 +1296,12 @@ public class SerialControllerEditor extends AbstractVisualResource
       }
     }
 
+    @Override
     public int getColumnCount(){
       return 2;
     }
 
+    @Override
     public String getColumnName(int columnIndex){
       switch(columnIndex){
         case 0 : return "Name";
@@ -1252,6 +1310,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       }
     }
 
+    @Override
     public Class getColumnClass(int columnIndex){
       switch(columnIndex){
         case 0 : return ProcessingResource.class;
@@ -1260,10 +1319,12 @@ public class SerialControllerEditor extends AbstractVisualResource
       }
     }
 
+    @Override
     public boolean isCellEditable(int rowIndex, int columnIndex){
       return false;
     }
 
+    @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex){
     }
     NameComparator nameComparator = new NameComparator();
@@ -1274,6 +1335,7 @@ public class SerialControllerEditor extends AbstractVisualResource
    */
   protected class CorporaComboModel extends AbstractListModel
                                   implements ComboBoxModel{
+    @Override
     public int getSize(){
       //get all corpora regardless of their actual type
       java.util.List loadedCorpora = null;
@@ -1287,6 +1349,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       return loadedCorpora == null ? 1 : loadedCorpora.size() + 1;
     }
 
+    @Override
     public Object getElementAt(int index){
       if(index == 0) return "<none>";
       else{
@@ -1303,12 +1366,14 @@ public class SerialControllerEditor extends AbstractVisualResource
     }
 
     //use the controller for data caching
+    @Override
     public void setSelectedItem(Object anItem){
       if(controller instanceof CorpusController)
       ((CorpusController)controller).
         setCorpus((Corpus)(anItem.equals("<none>") ? null : anItem));
     }
 
+    @Override
     public Object getSelectedItem(){
       Corpus corpus = null;
       if(controller instanceof CorpusController) {
@@ -1332,6 +1397,7 @@ public class SerialControllerEditor extends AbstractVisualResource
    */
   class IconRenderer extends DefaultTableCellRenderer{
     
+    @Override
     public Component getTableCellRendererComponent(JTable table,
                                                    Object value,
                                                    boolean isSelected,
@@ -1366,10 +1432,12 @@ public class SerialControllerEditor extends AbstractVisualResource
       yellow = MainFrame.getIcon("yellowBall");
     }
     
+    @Override
     public int getRowCount(){
       return controller == null ? 0 : controller.getPRs().size();
     }
 
+    @Override
     public Object getValueAt(int row, int column){
       ProcessingResource pr = (ProcessingResource)
                               ((List)controller.getPRs()).get(row);
@@ -1389,7 +1457,7 @@ public class SerialControllerEditor extends AbstractVisualResource
         }
         case 1 : return pr;
         case 2 : {
-          ResourceData rData = (ResourceData)Gate.getCreoleRegister().
+          ResourceData rData = Gate.getCreoleRegister().
                                     get(pr.getClass().getName());
           if(rData == null) return pr.getClass();
           else return rData.getName();
@@ -1398,10 +1466,12 @@ public class SerialControllerEditor extends AbstractVisualResource
       }
     }
 
+    @Override
     public int getColumnCount(){
       return 3;
     }
 
+    @Override
     public String getColumnName(int columnIndex){
       switch(columnIndex){
         case 0 : return "!";
@@ -1412,6 +1482,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       }
     }
 
+    @Override
     public Class getColumnClass(int columnIndex){
       switch(columnIndex){
         case 0 : return Icon.class;
@@ -1422,10 +1493,12 @@ public class SerialControllerEditor extends AbstractVisualResource
       }
     }
 
+    @Override
     public boolean isCellEditable(int rowIndex, int columnIndex){
       return false;
     }
 
+    @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex){
     }
 
@@ -1441,6 +1514,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       putValue(MNEMONIC_KEY, KeyEvent.VK_RIGHT);
     }
 
+    @Override
     public void actionPerformed(ActionEvent e){
       try {
         List<ProcessingResource> prs = new ArrayList<ProcessingResource>();
@@ -1491,6 +1565,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       putValue(MNEMONIC_KEY, KeyEvent.VK_LEFT);
     }
 
+    @Override
     public void actionPerformed(ActionEvent e){
       List<ProcessingResource> prs = new ArrayList<ProcessingResource>();
       for (int row : memberPRsTable.getSelectedRows()) {
@@ -1527,8 +1602,10 @@ public class SerialControllerEditor extends AbstractVisualResource
       +"&nbsp;&nbsp;</small></font></html>");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e){
       Runnable runnable = new Runnable(){
+        @Override
         public void run(){
 
           if (memberPRsTable.getRowCount() == 0) {
@@ -1629,6 +1706,7 @@ public class SerialControllerEditor extends AbstractVisualResource
           }catch(final ExecutionInterruptedException eie){
             MainFrame.unlockGUI();
             SwingUtilities.invokeLater(new Runnable() {
+              @Override
               public void run() {
                 JOptionPane.showMessageDialog(
                     SerialControllerEditor.this,
@@ -1640,6 +1718,7 @@ public class SerialControllerEditor extends AbstractVisualResource
             ee.printStackTrace(Err.getPrintWriter());
             MainFrame.unlockGUI();
             SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {  
               JOptionPane.showMessageDialog(
                   SerialControllerEditor.this,
@@ -1652,6 +1731,7 @@ public class SerialControllerEditor extends AbstractVisualResource
             e.printStackTrace(Err.getPrintWriter());
             MainFrame.unlockGUI();
             SwingUtilities.invokeLater(new Runnable() {
+              @Override
               public void run() {
                 JOptionPane.showMessageDialog(SerialControllerEditor.this,
                     "Unhandled execution error!\n " +
@@ -1688,10 +1768,12 @@ public class SerialControllerEditor extends AbstractVisualResource
    * A simple progress listener used to forward the events upstream.
    */
   protected class InternalProgressListener implements ProgressListener{
+    @Override
     public void progressChanged(int i){
       fireProgressChanged(i);
     }
 
+    @Override
     public void processFinished(){
       fireProcessFinished();
     }
@@ -1701,6 +1783,7 @@ public class SerialControllerEditor extends AbstractVisualResource
    * A simple status listener used to forward the events upstream.
    */
   protected class InternalStatusListener implements StatusListener{
+    @Override
     public void statusChanged(String message){
       fireStatusChanged(message);
     }

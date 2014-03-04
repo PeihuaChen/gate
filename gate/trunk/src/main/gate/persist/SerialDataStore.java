@@ -73,6 +73,7 @@ extends AbstractFeatureBearer implements DataStore {
   public File getStorageDir() { return storageDir; }
 
   /** Set the URL for the underlying storage mechanism. */
+  @Override
   public void setStorageUrl(String urlString) throws PersistenceException {
     URL storageUrl = null;
     try {
@@ -94,6 +95,7 @@ extends AbstractFeatureBearer implements DataStore {
   } // setStorageUrl
 
   /** Get the URL for the underlying storage mechanism. */
+  @Override
   public String getStorageUrl() {
     if(storageDir == null) return null;
 
@@ -111,6 +113,7 @@ extends AbstractFeatureBearer implements DataStore {
     * non-empty, or is
     * a file, or cannot be created, PersistenceException is thrown.
     */
+  @Override
   public void create()
   throws PersistenceException {
     if(storageDir == null)
@@ -189,6 +192,7 @@ extends AbstractFeatureBearer implements DataStore {
 
   /** Delete the data store.
     */
+  @Override
   public void delete() throws PersistenceException {
     if(storageDir == null || ! Files.rmdir(storageDir))
       throw new PersistenceException("couldn't delete " + storageDir);
@@ -198,6 +202,7 @@ extends AbstractFeatureBearer implements DataStore {
 
   /** Delete a resource from the data store.
     */
+  @Override
   public void delete(String lrClassName, Object lrPersistenceId)
   throws PersistenceException {
 
@@ -227,12 +232,13 @@ extends AbstractFeatureBearer implements DataStore {
     //let the world know about it
     fireResourceDeleted(
       new DatastoreEvent(
-        this, DatastoreEvent.RESOURCE_DELETED, null, (String) lrPersistenceId
+        this, DatastoreEvent.RESOURCE_DELETED, null, lrPersistenceId
       )
     );
   } // delete(lr)
 
   /** Adopt a resource for persistence. */
+  @Override
   public LanguageResource adopt(LanguageResource lr,SecurityInfo secInfo)
   throws PersistenceException,gate.security.SecurityException {
 
@@ -280,6 +286,7 @@ extends AbstractFeatureBearer implements DataStore {
   } // adopt(LR)
 
   /** Open a connection to the data store. */
+  @Override
   public void open() throws PersistenceException {
     if(storageDir == null)
       throw new PersistenceException("Can't open: storage dir is null");
@@ -312,6 +319,7 @@ extends AbstractFeatureBearer implements DataStore {
   } // open()
 
   /** Close the data store. */
+  @Override
   public void close() throws PersistenceException {
     Gate.getDataStoreRegister().remove(this);
   } // close()
@@ -319,6 +327,7 @@ extends AbstractFeatureBearer implements DataStore {
   /** Save: synchonise the in-memory image of the LR with the persistent
     * image.
     */
+  @Override
   public void sync(LanguageResource lr) throws PersistenceException {
 //    Out.prln("SDS: LR sync called. Saving " + lr.getClass().getName());
 
@@ -330,7 +339,7 @@ extends AbstractFeatureBearer implements DataStore {
 
     // find the resource data for this LR
     ResourceData lrData =
-      (ResourceData) Gate.getCreoleRegister().get(lr.getClass().getName());
+      Gate.getCreoleRegister().get(lr.getClass().getName());
 
     // create a subdirectory for resources of this type if none exists
     File resourceTypeDirectory = new File(storageDir, lrData.getClassName());
@@ -381,7 +390,7 @@ extends AbstractFeatureBearer implements DataStore {
           Out.prln("is persistent? "+ corpus.isPersistentDocument(i));
         if (DEBUG)
           Out.prln("Document name at position" + corpus.getDocumentName(i));
-        Document doc = (Document) corpus.get(i);
+        Document doc = corpus.get(i);
         try {
           //if the document is not already adopted, we need to do that first
           if (doc.getLRPersistenceId() == null) {
@@ -432,7 +441,7 @@ extends AbstractFeatureBearer implements DataStore {
     // let the world know about it
     fireResourceWritten(
       new DatastoreEvent(
-        this, DatastoreEvent.RESOURCE_WRITTEN, lr, (String) lrPersistenceId
+        this, DatastoreEvent.RESOURCE_WRITTEN, lr, lrPersistenceId
       )
     );
   } // sync(LR)
@@ -444,6 +453,7 @@ extends AbstractFeatureBearer implements DataStore {
     return lrName + "___" + new Date().getTime() + "___" + random();
   } // constructPersistenceId
 
+  @Override
   public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
   throws PersistenceException,SecurityException {
 
@@ -495,6 +505,7 @@ extends AbstractFeatureBearer implements DataStore {
   } // getLr(id)
 
   /** Get a list of the types of LR that are present in the data store. */
+  @Override
   public List getLrTypes() throws PersistenceException {
     if(storageDir == null || ! storageDir.exists())
       throw new PersistenceException("Can't read storage directory");
@@ -510,6 +521,7 @@ extends AbstractFeatureBearer implements DataStore {
   } // getLrTypes()
 
   /** Get a list of the IDs of LRs of a particular type that are present. */
+  @Override
   public List getLrIds(String lrType) throws PersistenceException {
     // a File to represent the directory for this type
     File resourceTypeDir = new File(storageDir, lrType);
@@ -520,6 +532,7 @@ extends AbstractFeatureBearer implements DataStore {
   } // getLrIds(lrType)
 
   /** Get a list of the names of LRs of a particular type that are present. */
+  @Override
   public List getLrNames(String lrType) throws PersistenceException {
     // the list of files storing LRs of this type; an array for the names
     List<String> lrFileNames = getLrIds(lrType);
@@ -534,6 +547,7 @@ extends AbstractFeatureBearer implements DataStore {
   } // getLrNames(lrType)
 
   /** Get the name of an LR from its ID. */
+  @Override
   public String getLrName(Object lrId) {
     int secondSeparator = ((String) lrId).lastIndexOf("___");
     lrId = ((String) lrId).substring(0, secondSeparator);
@@ -546,6 +560,7 @@ extends AbstractFeatureBearer implements DataStore {
     * <B>NOTE:</B> this type of datastore has no auto-save function,
     * therefore this method throws an UnsupportedOperationException.
     */
+  @Override
   public void setAutoSaving(boolean autoSaving)
   throws UnsupportedOperationException {
     throw new UnsupportedOperationException(
@@ -554,6 +569,7 @@ extends AbstractFeatureBearer implements DataStore {
   } // setAutoSaving
 
   /** Get the autosaving behaviour of the LR. */
+  @Override
   public boolean isAutoSaving() { return autoSaving; }
 
   /** Flag for autosaving behaviour. */
@@ -569,6 +585,7 @@ extends AbstractFeatureBearer implements DataStore {
   private transient Vector datastoreListeners;
 
   /** String representation */
+  @Override
   public String toString() {
     String nl = Strings.getNl();
     StringBuffer s = new StringBuffer("SerialDataStore: ");
@@ -580,11 +597,13 @@ extends AbstractFeatureBearer implements DataStore {
   } // toString()
 
   /** Calculate a hash code based on the class and the storage dir. */
+  @Override
   public int hashCode(){
     return getClass().hashCode() ^ storageDir.hashCode();
   } // hashCode
 
   /** Equality: based on storage dir of other. */
+  @Override
   public boolean equals(Object other) {
 
 
@@ -602,6 +621,7 @@ extends AbstractFeatureBearer implements DataStore {
       return ((SerialDataStore)other).name.equals(name);
   } // equals
 
+  @Override
   public synchronized void removeDatastoreListener(DatastoreListener l) {
     if (datastoreListeners != null && datastoreListeners.contains(l)) {
       Vector v = (Vector) datastoreListeners.clone();
@@ -609,6 +629,7 @@ extends AbstractFeatureBearer implements DataStore {
       datastoreListeners = v;
     }
   }
+  @Override
   public synchronized void addDatastoreListener(DatastoreListener l) {
     Vector v = datastoreListeners == null ? new Vector(2) : (Vector) datastoreListeners.clone();
     if (!v.contains(l)) {
@@ -648,6 +669,7 @@ extends AbstractFeatureBearer implements DataStore {
    * Returns the name of the icon to be used when this datastore is displayed
    * in the GUI
    */
+  @Override
   public String getIconName(){
     return "datastore";
   }
@@ -655,6 +677,7 @@ extends AbstractFeatureBearer implements DataStore {
   /**
    * Returns the comment displayed by the GUI for this DataStore
    */
+  @Override
   public String getComment(){
     return "GATE serial datastore";
   }
@@ -663,6 +686,7 @@ extends AbstractFeatureBearer implements DataStore {
    * Checks if the user (identified by the sessionID)
    *  has read access to the LR
    */
+  @Override
   public boolean canReadLR(Object lrID)
     throws PersistenceException, gate.security.SecurityException{
 
@@ -672,6 +696,7 @@ extends AbstractFeatureBearer implements DataStore {
    * Checks if the user (identified by the sessionID)
    * has write access to the LR
    */
+  @Override
   public boolean canWriteLR(Object lrID)
     throws PersistenceException, gate.security.SecurityException{
 
@@ -679,11 +704,13 @@ extends AbstractFeatureBearer implements DataStore {
   }
 
     /** Sets the name of this resource*/
+  @Override
   public void setName(String name){
     this.name = name;
   }
 
   /** Returns the name of this resource*/
+  @Override
   public String getName(){
     return name;
   }
@@ -691,6 +718,7 @@ extends AbstractFeatureBearer implements DataStore {
 
 
   /** get security information for LR . */
+  @Override
   public SecurityInfo getSecurityInfo(LanguageResource lr)
     throws PersistenceException {
 
@@ -699,6 +727,7 @@ extends AbstractFeatureBearer implements DataStore {
   }
 
   /** set security information for LR . */
+  @Override
   public void setSecurityInfo(LanguageResource lr,SecurityInfo si)
     throws PersistenceException, gate.security.SecurityException {
 
@@ -709,6 +738,7 @@ extends AbstractFeatureBearer implements DataStore {
 
 
   /** identify user using this datastore */
+  @Override
   public void setSession(Session s)
     throws gate.security.SecurityException {
 
@@ -718,6 +748,7 @@ extends AbstractFeatureBearer implements DataStore {
 
 
   /** identify user using this datastore */
+  @Override
   public Session getSession(Session s)
     throws gate.security.SecurityException {
 
@@ -728,6 +759,7 @@ extends AbstractFeatureBearer implements DataStore {
    * Try to acquire exlusive lock on a resource from the persistent store.
    * Always call unlockLR() when the lock is no longer needed
    */
+  @Override
   public boolean lockLr(LanguageResource lr)
   throws PersistenceException,SecurityException {
     return true;
@@ -736,12 +768,14 @@ extends AbstractFeatureBearer implements DataStore {
   /**
    * Releases the exlusive lock on a resource from the persistent store.
    */
+  @Override
   public void unlockLr(LanguageResource lr)
   throws PersistenceException,SecurityException {
     return;
   }
 
   /** Get a list of LRs that satisfy some set or restrictions */
+  @Override
   public List findLrIds(List constraints) throws PersistenceException {
     throw new UnsupportedOperationException(
                               "Serial DataStore does not support document retrieval.");
@@ -751,6 +785,7 @@ extends AbstractFeatureBearer implements DataStore {
    *  Get a list of LRs that satisfy some set or restrictions and are
    *  of a particular type
    */
+  @Override
   public List findLrIds(List constraints, String lrType) throws PersistenceException {
     throw new UnsupportedOperationException(
                               "Serial DataStore does not support document retrieval.");

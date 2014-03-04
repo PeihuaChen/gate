@@ -11,7 +11,6 @@ import gate.creole.annic.apache.lucene.analysis.Token;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

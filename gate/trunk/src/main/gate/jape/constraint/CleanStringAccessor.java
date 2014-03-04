@@ -31,6 +31,7 @@ public class CleanStringAccessor extends StringAccessor {
    * must be a {@link Document} or an {@link AnnotationSet} which points
    * to the document.
    */
+  @Override
   public Object getValue(Annotation annot, AnnotationSet context) {
     return Utils.cleanString((String)super.getValue(annot, context));
   }

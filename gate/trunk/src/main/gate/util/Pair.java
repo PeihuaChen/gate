@@ -33,6 +33,7 @@ public class Pair implements Serializable {
   public Pair(Pair p0) {first = p0.first; second = p0.second; }
 
   // Methods
+  @Override
   public String toString() { return "<" + first.toString() +
                                     ", " + second.toString() + ">" ;}
   
@@ -60,5 +61,6 @@ public class Pair implements Serializable {
     return true;
   }
   
+  @Override
   public synchronized Object clone() { return new Pair(first, second); }
 }

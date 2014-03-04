@@ -25,6 +25,7 @@ import gate.Annotation;
  */
 public class OffsetComparator implements Comparator<Annotation> {
 
+  @Override
   public int compare(Annotation a1, Annotation a2){
     int result;
 

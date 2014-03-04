@@ -43,7 +43,7 @@ public class Utils {
         className = "http://www.w3.org/2002/07/owl#minCardinality";
     } else if(res instanceof MaxCardinalityRestriction) {
         className = "http://www.w3.org/2002/07/owl#maxCardinality";
-    } else if(res instanceof AnonymousClass) {
+    } else {
         className = "Annonymous";
     }
     return className;

@@ -32,6 +32,7 @@ public class Rule_PREV2TAG extends Rule {
   public Rule_PREV2TAG() {
   }
 
+  @Override
   public boolean checkContext(POSTagger tagger) {
     return (tagger.lexBuff[1][0].equals(context[0]));
   }

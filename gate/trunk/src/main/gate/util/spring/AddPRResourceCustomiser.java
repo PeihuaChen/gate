@@ -21,6 +21,7 @@ public class AddPRResourceCustomiser implements ResourceCustomiser {
 
   private ProcessingResource pr;
 
+  @Override
   public void customiseResource(Resource res) throws Exception {
     if(!(res instanceof SerialController)) {
       throw new IllegalArgumentException(this.getClass().getName()

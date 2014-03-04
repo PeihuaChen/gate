@@ -23,7 +23,6 @@ import gate.Resource;
 import gate.util.AbstractFeatureBearer;
 import gate.util.Err;
 import gate.util.GateException;
-import gate.util.LuckyException;
 import gate.util.Strings;
 import gate.util.Tools;
 
@@ -50,16 +49,19 @@ extends AbstractFeatureBearer implements Resource, Serializable
   static final long serialVersionUID = -9196293927841163321L;
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     return this;
   } // init()
 
     /** Sets the name of this resource*/
+  @Override
   public void setName(String name){
     this.name = name;
   }
 
   /** Returns the name of this resource*/
+  @Override
   public String getName(){
     return name;
   }
@@ -68,6 +70,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
   /**
    * releases the memory allocated to this resource
    */
+  @Override
   public void cleanup(){
   }
 
@@ -180,7 +183,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
               //try to use the Parameter implementation for finding the
               //value
               if(String.class.isAssignableFrom(paramType)){
-                ResourceData rData = (ResourceData)Gate.getCreoleRegister().
+                ResourceData rData = Gate.getCreoleRegister().
                   get(resource.getClass().getName());
                 ParameterList pList = rData.getParameterList();
                 Parameter param = null;
@@ -396,6 +399,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
    * @param paramaterName the name of the parameter
    * @return the current value of the parameter
    */
+  @Override
   public Object getParameterValue(String paramaterName)
                 throws ResourceInstantiationException{
     return getParameterValue(this, paramaterName);
@@ -407,6 +411,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
    * @param paramaterName the name for the parameter
    * @param parameterValue the value the parameter will receive
    */
+  @Override
   public void setParameterValue(String paramaterName, Object parameterValue)
               throws ResourceInstantiationException{
     // get the beaninfo for the resource bean, excluding data about Object
@@ -428,6 +433,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
    * @param parameters a feature map that has paramete names as keys and
    * parameter values as values.
    */
+  @Override
   public void setParameterValues(FeatureMap parameters)
               throws ResourceInstantiationException{
     setParameterValues(this, parameters);
@@ -459,7 +465,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
    */
   public static FeatureMap getInitParameterValues(Resource res)
               throws ResourceInstantiationException {
-    ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(
+    ResourceData rData = Gate.getCreoleRegister().get(
             res.getClass().getName());
     if(rData == null)
       throw new ResourceInstantiationException(

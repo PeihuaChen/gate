@@ -228,7 +228,7 @@ public class CreoleAnnotationHandler {
     if(dirInfo != null) {
       Map<String, Element> resourceElements = new HashMap<String, Element>();
       findResourceElements(resourceElements, jdomElt);
-      for(ResourceInfo resInfo : (List<ResourceInfo>)dirInfo
+      for(ResourceInfo resInfo : dirInfo
           .getResourceInfoList()) {
         if(!resourceElements.containsKey(resInfo.getResourceClassName())) {
           // no existing RESOURCE element for this resource type (so it

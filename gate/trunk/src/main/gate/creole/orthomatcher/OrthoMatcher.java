@@ -224,6 +224,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
   }
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     //initialise the list of annotations which we will match
     if(definitionFileURL == null){
@@ -279,6 +280,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
    *  this in subclasses so the default implementation signals an
    *  exception.
    */
+  @Override
   public void execute() throws ExecutionException{
     try{
       //check the input
@@ -491,11 +493,10 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
 
       // System.out.println("Now trying to match the unknown string: " + unknownString);
       //get the tokens
-      List<Annotation> tokens = new ArrayList<Annotation>((Set<Annotation>)
-              nameAllTokens.getContained(
-                      unknown.getStartNode().getOffset(),
-                      unknown.getEndNode().getOffset()
-              ));
+      List<Annotation> tokens = new ArrayList<Annotation>(nameAllTokens.getContained(
+              unknown.getStartNode().getOffset(),
+              unknown.getEndNode().getOffset()
+      ));
       if (tokens.isEmpty())
         continue;
       Collections.sort(tokens, new gate.util.OffsetComparator());

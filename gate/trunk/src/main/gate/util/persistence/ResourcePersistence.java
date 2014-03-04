@@ -28,6 +28,7 @@ import gate.util.NameBearer;
  */
 class ResourcePersistence implements Persistence{
 
+  @Override
   public void extractDataFromSource(Object source) throws PersistenceException{
     if(! (source instanceof Resource)){
       throw new UnsupportedOperationException(
@@ -38,10 +39,9 @@ class ResourcePersistence implements Persistence{
     }
     Resource res = (Resource)source;
     resourceType = res.getClass().getName();
-    if(res instanceof NameBearer) resourceName = ((NameBearer)res).getName();
+    resourceName = ((NameBearer)res).getName();
 
-    ResourceData rData = (ResourceData)
-                         Gate.getCreoleRegister().get(resourceType);
+    ResourceData rData = Gate.getCreoleRegister().get(resourceType);
     if(rData == null) throw new PersistenceException(
                                 "Could not find CREOLE data for " +
                                 resourceType);
@@ -74,6 +74,7 @@ class ResourcePersistence implements Persistence{
   }
 
 
+  @Override
   public Object createObject()throws PersistenceException,
                                      ResourceInstantiationException {
     if(initParams != null)

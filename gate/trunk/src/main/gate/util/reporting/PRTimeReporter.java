@@ -157,6 +157,7 @@ public class PRTimeReporter implements BenchmarkReportable {
    *         processing elements (with time in milliseconds) in hierarchical
    *         structure. Null if there was an error.
    */
+  @Override
   public Object store(File inputFile)
       throws BenchmarkReportInputFileFormatException {
     LinkedHashMap<String, Object> globalStore =
@@ -355,7 +356,7 @@ public class PRTimeReporter implements BenchmarkReportable {
       sortedReport.put((String) tempKey, tempOutLHM.get(tempKey));
       if (mapperReport.containsKey(tempKey)) {
         sortedReport
-            .put((String) tempKey, mapperReport.get((String) tempKey));
+            .put((String) tempKey, mapperReport.get(tempKey));
       }
     }
     sortedReport.put("total", gStore.get("total"));
@@ -414,6 +415,7 @@ public class PRTimeReporter implements BenchmarkReportable {
    * @return An Object containing modified hierarchical structure of processing
    *         elements with totals and All others embedded in it.
    */
+  @Override
   public Object calculate(Object reportContainer) {
     LinkedHashMap<String, Object> globalStore =
       (LinkedHashMap<String, Object>) reportContainer;
@@ -480,6 +482,7 @@ public class PRTimeReporter implements BenchmarkReportable {
    * @param outputFile
    *          Path where to save the report.
    */
+  @Override
   public void printReport(Object reportSource, File outputFile) {
     if (printMedia.equalsIgnoreCase(MEDIA_TEXT)) {
       printToText(reportSource, outputFile, suppressZeroTimeEntries);
@@ -909,6 +912,7 @@ public class PRTimeReporter implements BenchmarkReportable {
    * @param args
    *          A string array containing the command line arguments.
    */
+  @Override
   public void parseArguments(String[] args) {
     Getopt g = new Getopt("gate.util.reporting.PRTimeReporter", args,
         "i:m:z:s:o:l:h");
@@ -1028,6 +1032,7 @@ public class PRTimeReporter implements BenchmarkReportable {
     Timer timer = null;
     try {
       TimerTask task = new FileWatcher(getBenchmarkFile()) {
+        @Override
         protected void onChange(File file) throws BenchmarkReportExecutionException {
           throw new BenchmarkReportExecutionException(getBenchmarkFile()
               + " file has been modified while generating the report.");
@@ -1058,6 +1063,7 @@ public class PRTimeReporter implements BenchmarkReportable {
    *
    * @see gate.util.reporting.BenchmarkReportable#executeReport()
    */
+  @Override
   public void executeReport() throws BenchmarkReportInputFileFormatException {
     generateReport();
   }
@@ -1216,6 +1222,7 @@ class ValueComparator implements Comparator {
    *         if obj1 is greater then obj2, negative if obj2 is greater then
    *         obj1)
    */
+  @Override
   public int compare(Object obj1, Object obj2) {
     int i1 = Integer.parseInt((String) obj1);
     int i2 = Integer.parseInt((String) obj2);

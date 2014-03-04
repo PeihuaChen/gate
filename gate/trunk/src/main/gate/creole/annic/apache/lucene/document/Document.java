@@ -200,6 +200,7 @@ public final class Document implements java.io.Serializable {
   }
 
   /** Prints the fields of a document for human consumption. */
+  @Override
   public final String toString() {
     StringBuffer buffer = new StringBuffer();
     buffer.append("Document<");

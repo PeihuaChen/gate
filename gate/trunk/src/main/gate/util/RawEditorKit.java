@@ -37,6 +37,7 @@ public class RawEditorKit extends StyledEditorKit {
     * It takes the text from the Reader and place it into Document at position
     * pos
     */
+  @Override
   public void read(Reader in, Document doc, int pos)
               throws IOException, BadLocationException {
 

@@ -23,6 +23,7 @@ final class PhraseQueue extends PriorityQueue {
     initialize(size);
   }
 
+  @Override
   protected final boolean lessThan(Object o1, Object o2) {
     PhrasePositions pp1 = (PhrasePositions)o1;
     PhrasePositions pp2 = (PhrasePositions)o2;

@@ -55,6 +55,7 @@ public class GateAwareObject implements BeanFactoryAware {
     }
   }
 
+  @Override
   public void setBeanFactory(BeanFactory factory) {
     this.factory = factory;
   }

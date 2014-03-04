@@ -111,6 +111,7 @@ public abstract class IndexReader {
       return (IndexReader)new Lock.With(
           directory.makeLock(IndexWriter.COMMIT_LOCK_NAME),
           IndexWriter.COMMIT_LOCK_TIMEOUT) {
+          @Override
           public Object doBody() throws IOException {
             SegmentInfos infos = new SegmentInfos();
             infos.read(directory);
@@ -485,7 +486,8 @@ public abstract class IndexReader {
         synchronized (directory) {      // in- & inter-process sync
            new Lock.With(directory.makeLock(IndexWriter.COMMIT_LOCK_NAME),
                    IndexWriter.COMMIT_LOCK_TIMEOUT) {
-             public Object doBody() throws IOException {
+             @Override
+            public Object doBody() throws IOException {
                doCommit();
                segmentInfos.write(directory);
                return null;
@@ -522,6 +524,7 @@ public abstract class IndexReader {
   protected abstract void doClose() throws IOException;
 
   /** Release the write lock, if needed. */
+  @Override
   protected final void finalize() throws IOException {
     if (writeLock != null) {
       writeLock.release();                        // release write lock

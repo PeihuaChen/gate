@@ -24,6 +24,7 @@ public class TestDocumentStaxUtils extends TestCase {
     super(name);
   }
 
+  @Override
   public void setUp() {
     
   }

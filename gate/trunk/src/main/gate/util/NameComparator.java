@@ -21,6 +21,7 @@ import java.util.Comparator;
  */
 public class NameComparator implements Comparator {
 
+  @Override
   public int compare(Object o1, Object o2){
     NameBearer nb1 = (NameBearer)o1;
     NameBearer nb2 = (NameBearer)o2;

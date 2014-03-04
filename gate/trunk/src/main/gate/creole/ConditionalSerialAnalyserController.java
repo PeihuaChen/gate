@@ -60,6 +60,7 @@ public class ConditionalSerialAnalyserController
   /**
    * @return the document
    */
+  @Override
   public Document getDocument() {
     return document;
   }
@@ -67,6 +68,7 @@ public class ConditionalSerialAnalyserController
   /**
    * @param document the document to set
    */
+  @Override
   @Optional
   @RunTime
   @CreoleParameter
@@ -74,10 +76,12 @@ public class ConditionalSerialAnalyserController
     this.document = document;
   }
   
+  @Override
   public gate.Corpus getCorpus() {
     return corpus;
   }
 
+  @Override
   public void setCorpus(gate.Corpus corpus) {
     this.corpus = corpus;
   }
@@ -171,6 +175,7 @@ public class ConditionalSerialAnalyserController
   
 
   /** Run the Processing Resources in sequence. */
+  @Override
   protected void executeImpl() throws ExecutionException{
     interrupted = false;
     if(corpus == null) throw new ExecutionException(
@@ -197,7 +202,7 @@ public class ConditionalSerialAnalyserController
           // record the time before loading the document
           long documentLoadingStartTime = Benchmark.startPoint();
   
-          Document doc = (Document)corpus.get(i);
+          Document doc = corpus.get(i);
   
           // include the document name in the benchmark ID for sub-events
           setBenchmarkId(Benchmark.createBenchmarkId("doc_" + doc.getName(),
@@ -333,6 +338,7 @@ public class ConditionalSerialAnalyserController
    * Overidden from {@link SerialController} to only allow
    * {@link LanguageAnalyser}s as components.
    */
+  @Override
   public void add(ProcessingResource pr){
     checkLanguageAnalyser(pr);
     super.add(pr);
@@ -342,6 +348,7 @@ public class ConditionalSerialAnalyserController
    * Overidden from {@link SerialController} to only allow
    * {@link LanguageAnalyser}s as components.
    */
+  @Override
   public void add(int index, ProcessingResource pr) {
     checkLanguageAnalyser(pr);
     super.add(index, pr);
@@ -385,6 +392,7 @@ public class ConditionalSerialAnalyserController
    * introspection problems and are usually caused by the lack of a parameter
    * or of the read accessor for a parameter.
    */
+  @Override
   public List getOffendingPocessingResources()
          throws ResourceInstantiationException{
     //take all the contained PRs
@@ -393,7 +401,7 @@ public class ConditionalSerialAnalyserController
     Iterator prIter = getPRs().iterator();
     while(prIter.hasNext()){
       ProcessingResource pr = (ProcessingResource)prIter.next();
-      ResourceData rData = (ResourceData)Gate.getCreoleRegister().
+      ResourceData rData = Gate.getCreoleRegister().
                                               get(pr.getClass().getName());
       //this is a list of lists
       List parameters = rData.getParameterList().getRuntimeParameters();
@@ -434,6 +442,7 @@ public class ConditionalSerialAnalyserController
   /**
    * Overridden to also clean up the corpus value.
    */
+  @Override
   public void resourceUnloaded(CreoleEvent e) {
     super.resourceUnloaded(e);    
     if(e.getResource() == corpus){

@@ -50,6 +50,7 @@ public class EntitySet extends AbstractSet implements Set, Serializable {
     * &quot;==== FILE : &quot; followed by each entity descriptor's string
     * representation, one-per-line.
     */
+  @Override
   public String toString() {
     ///String res = "==== FILE: " + fileName + "\n";
     StringBuffer res = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
@@ -67,8 +68,10 @@ public class EntitySet extends AbstractSet implements Set, Serializable {
     return res.toString();
   }
 
+  @Override
   public int size(){ return myEntities.size();}
 
+  @Override
   public Iterator iterator() {return myEntities.iterator();}
 
   String fileName;

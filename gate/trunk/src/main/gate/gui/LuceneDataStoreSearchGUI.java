@@ -292,6 +292,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
   /**
    * Called when a View is loaded in GATE.
    */
+  @Override
   public Resource init() {
 
     results = new ArrayList<Hit>();
@@ -327,6 +328,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     updateViews();
     validate();
     SwingUtilities.invokeLater(new Runnable() {
+      @Override
       public void run() {
         queryTextArea.requestFocusInWindow();
       }
@@ -338,6 +340,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
   /**
    * Called when the user close the datastore.
    */
+  @Override
   public void cleanup() {
     // no parent so need to be disposed explicitly
     configureStackViewFrame.dispose();
@@ -355,6 +358,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     stringCollator.setStrength(java.text.Collator.TERTIARY);
 
     Comparator<String> lastWordComparator = new Comparator<String>() {
+      @Override
       public int compare(String o1, String o2) {
         if(o1 == null || o2 == null) {
           return 0;
@@ -366,6 +370,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     };
 
     integerComparator = new Comparator<Integer>() {
+      @Override
       public int compare(Integer o1, Integer o2) {
         if(o1 == null || o2 == null) {
           return 0;
@@ -389,6 +394,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
             .put(KeyStroke.getKeyStroke("ESCAPE"), "close row manager");
     configureStackViewFrame.getRootPane().getActionMap()
             .put("close row manager", new AbstractAction() {
+              @Override
               public void actionPerformed(ActionEvent e) {
                 configureStackViewFrame.setVisible(false);
               }
@@ -400,6 +406,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     // called when Gate is exited, in case the user doesn't close the
     // datastore
     MainFrame.getInstance().addWindowListener(new WindowAdapter() {
+      @Override
       public void windowClosed(WindowEvent e) {
         // no parent so need to be disposed explicitly
         configureStackViewFrame.dispose();
@@ -443,8 +450,10 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       corpusToSearchIn.setEnabled(false);
     }
     corpusToSearchIn.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent ie) {
         SwingUtilities.invokeLater(new Runnable() {
+          @Override
           public void run() {
             updateAnnotationSetsList();
           }
@@ -459,6 +468,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     annotationSetsToSearchIn
             .setToolTipText("Select the annotation set to search in.");
     annotationSetsToSearchIn.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent ie) {
         updateAnnotationTypesList();
       }
@@ -481,6 +491,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     numberOfResultsSlider = new JSlider(1, 1100, 50);
     numberOfResultsSlider.setToolTipText("50 results per page");
     numberOfResultsSlider.addChangeListener(new ChangeListener() {
+      @Override
       public void stateChanged(ChangeEvent e) {
         if(numberOfResultsSlider.getValue() > (numberOfResultsSlider
                 .getMaximum() - 100)) {
@@ -510,6 +521,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
       boolean enabled;
 
+      @Override
       public void mouseEntered(MouseEvent e) {
         initialDelay = toolTipManager.getInitialDelay();
         reshowDelay = toolTipManager.getReshowDelay();
@@ -521,6 +533,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         toolTipManager.setEnabled(true);
       }
 
+      @Override
       public void mouseExited(MouseEvent e) {
         toolTipManager.setInitialDelay(initialDelay);
         toolTipManager.setReshowDelay(reshowDelay);
@@ -538,6 +551,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     contextSizeSlider
             .setToolTipText("Display 5 tokens of context in the results.");
     contextSizeSlider.addChangeListener(new ChangeListener() {
+      @Override
       public void stateChanged(ChangeEvent e) {
         contextSizeSlider.setToolTipText("Display "
                 + contextSizeSlider.getValue()
@@ -555,6 +569,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
       boolean enabled;
 
+      @Override
       public void mouseEntered(MouseEvent e) {
         initialDelay = toolTipManager.getInitialDelay();
         reshowDelay = toolTipManager.getReshowDelay();
@@ -566,6 +581,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         toolTipManager.setEnabled(true);
       }
 
+      @Override
       public void mouseExited(MouseEvent e) {
         toolTipManager.setInitialDelay(initialDelay);
         toolTipManager.setReshowDelay(reshowDelay);
@@ -661,6 +677,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
       JMenuItem menuItem;
 
+      @Override
       public void mousePressed(MouseEvent e) {
         int row = resultTable.rowAtPoint(e.getPoint());
         if(e.isPopupTrigger() && !resultTable.isRowSelected(row)) {
@@ -673,6 +690,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         }
       }
 
+      @Override
       public void mouseReleased(MouseEvent e) {
         if(e.isPopupTrigger()) {
           createPopup();
@@ -687,6 +705,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
                         + (resultTable.getSelectedRowCount() > 1 ? "s" : ""));
         mousePopup.add(menuItem);
         menuItem.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent ae) {
             int[] rows = resultTable.getSelectedRows();
             for(int i = 0; i < rows.length; i++) {
@@ -708,6 +727,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
                   new JMenuItem("Open the selected document"
                           + (resultTable.getSelectedRowCount() > 1 ? "s" : ""));
           menuItem.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ae) {
               Set<Pattern> patterns = new HashSet<Pattern>();
               Set<String> documentIds = new HashSet<String>();
@@ -756,6 +776,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
                 }
                 // show the expression in the document
                 SwingUtilities.invokeLater(new Runnable() {
+                  @Override
                   public void run() {
                     MainFrame.getInstance().select(doc);
                   }
@@ -765,6 +786,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
                   Date timeToRun = new Date(System.currentTimeMillis() + 2000);
                   Timer timer = new Timer("Annic show document timer", true);
                   timer.schedule(new TimerTask() {
+                    @Override
                     public void run() {
                       showResultInDocument(doc, pattern);
                     }
@@ -782,6 +804,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     // update the stack view and export button
     resultTable.getSelectionModel().addListSelectionListener(
             new javax.swing.event.ListSelectionListener() {
+              @Override
               public void valueChanged(javax.swing.event.ListSelectionEvent e) {
                 if(!e.getValueIsAdjusting()) {
                   updateStackView();
@@ -820,6 +843,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     statisticsTabbedPane = new JTabbedPane();
 
     globalStatisticsTable = new XJTable() {
+      @Override
       public boolean isCellEditable(int rowIndex, int vColIndex) {
         return false;
       }
@@ -832,6 +856,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     globalStatisticsTable.setSortedColumn(1);
     globalStatisticsTable.setAscending(false);
     globalStatisticsTable.addMouseListener(new MouseInputAdapter() {
+      @Override
       public void mousePressed(MouseEvent e) {
         if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
           updateQuery();
@@ -869,6 +894,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
       JMenuItem menuItem;
 
+      @Override
       public void mousePressed(MouseEvent e) {
         int tabIndex = statisticsTabbedPane.indexAtLocation(e.getX(), e.getY());
         if(e.isPopupTrigger() && tabIndex > 0) {
@@ -877,6 +903,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         }
       }
 
+      @Override
       public void mouseReleased(MouseEvent e) {
         int tabIndex = statisticsTabbedPane.indexAtLocation(e.getX(), e.getY());
         if(e.isPopupTrigger() && tabIndex > 0) {
@@ -890,6 +917,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         if(tabIndex == 1) {
           menuItem = new JMenuItem("Clear table");
           menuItem.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ie) {
               oneRowStatisticsTableModel.setRowCount(0);
             }
@@ -897,6 +925,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         } else {
           menuItem = new JMenuItem("Close tab");
           menuItem.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ie) {
               statisticsTabbedPane.remove(tabIndex);
             }
@@ -923,6 +952,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         button.addActionListener(this);
       }
 
+      @Override
       public Component getTableCellRendererComponent(JTable table,
               Object color, boolean isSelected, boolean hasFocus, int row,
               int col) {
@@ -930,10 +960,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         return button;
       }
 
+      @Override
       public boolean shouldSelectCell(EventObject anEvent) {
         return false;
       }
 
+      @Override
       public void actionPerformed(ActionEvent e) {
         int editingRow = oneRowStatisticsTable.getEditingRow();
         fireEditingStopped();
@@ -941,10 +973,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
                 .rowViewToModel(editingRow));
       }
 
+      @Override
       public Object getCellEditorValue() {
         return null;
       }
 
+      @Override
       public Component getTableCellEditorComponent(JTable table, Object value,
               boolean isSelected, int row, int col) {
         button.setSelected(isSelected);
@@ -953,10 +987,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     }
 
     oneRowStatisticsTable = new XJTable() {
+      @Override
       public boolean isCellEditable(int rowIndex, int vColIndex) {
         return vColIndex == 2;
       }
 
+      @Override
       public Component prepareRenderer(TableCellRenderer renderer, int row,
               int col) {
         Component c = super.prepareRenderer(renderer, row, col);
@@ -1307,6 +1343,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       final String typeFinal = type;
       final String featureFinal = feature;
       removeRowButton.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent ie) {
           int row =
                   findStackRow(ANNOTATION_TYPE, typeFinal, FEATURE,
@@ -1600,6 +1637,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_E);
     }
 
+    @Override
     public void actionPerformed(ActionEvent ae) {
       XJFileChooser fileChooser =
               (MainFrame.getFileChooser() != null)
@@ -1735,6 +1773,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_BACK_SPACE);
     }
 
+    @Override
     public void actionPerformed(ActionEvent ae) {
       queryTextArea.setText("");
       queryTextArea.requestFocusInWindow();
@@ -1752,6 +1791,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
     }
 
+    @Override
     public void actionPerformed(ActionEvent ae) {
 
       // disable all mouse and key events and display the wait cursor
@@ -1819,6 +1859,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       final String queryF = query;
       final Map<String, Object> parametersF = parameters;
       SwingUtilities.invokeLater(new Runnable() {
+        @Override
         public void run() {
           try {
             if(searcher.search(queryF, parametersF)) {
@@ -1857,6 +1898,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
                     + searcher.getHits().length + " results)");
             queryTextArea.requestFocusInWindow();
             SwingUtilities.invokeLater(new Runnable() {
+              @Override
               public void run() {
                 blockingGlassPane.block(false);
               }
@@ -1880,6 +1922,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_F5);
     }
 
+    @Override
     public void actionPerformed(ActionEvent ae) {
 
       // disable all mouse and key events and display the wait cursor
@@ -1889,6 +1932,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       blockingGlassPane.block(true);
 
       SwingUtilities.invokeLater(new Runnable() {
+        @Override
         public void run() {
           try {
             updateSetsTypesAndFeatures();
@@ -1896,6 +1940,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
             e.printStackTrace();
           } finally {
             SwingUtilities.invokeLater(new Runnable() {
+              @Override
               public void run() {
                 blockingGlassPane.block(false);
               }
@@ -1918,6 +1963,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_RIGHT);
     }
 
+    @Override
     public void actionPerformed(ActionEvent ae) {
 
       // disable all mouse and key events and display the wait cursor
@@ -1935,6 +1981,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       }
 
       SwingUtilities.invokeLater(new Runnable() {
+        @Override
         public void run() {
           noOfResults = ((Number)numberOfResultsSlider.getValue()).intValue();
           try {
@@ -1953,6 +2000,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
             }
             queryTextArea.requestFocusInWindow();
             SwingUtilities.invokeLater(new Runnable() {
+              @Override
               public void run() {
                 blockingGlassPane.block(false);
               }
@@ -1974,6 +2022,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_LEFT);
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       // to avoid having the frame behind a window
       configureStackViewFrame.setVisible(false);
@@ -1994,10 +2043,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       this.text = text;
     }
 
+    @Override
     public MouseInputAdapter createListener(String... parameters) {
       return new TextMouseListener(parameters[0]);
     }
 
+    @Override
     public void mouseClicked(MouseEvent me) {
       if(!me.isPopupTrigger() && me.getButton() == MouseEvent.BUTTON1
               && me.getClickCount() == 2) {
@@ -2018,6 +2069,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       }
     }
 
+    @Override
     public void mouseEntered(MouseEvent e) {
       Component component = e.getComponent();
       if(!isTooltipSet && component instanceof JLabel) {
@@ -2107,6 +2159,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       this.type = type;
     }
 
+    @Override
     public MouseInputAdapter createListener(String... parameters) {
       switch(parameters.length) {
         case 3:
@@ -2119,6 +2172,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       }
     }
 
+    @Override
     public void mouseEntered(MouseEvent e) {
       dismissDelay = toolTipManager.getDismissDelay();
       initialDelay = toolTipManager.getInitialDelay();
@@ -2142,6 +2196,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       toolTipManager.setEnabled(true);
     }
 
+    @Override
     public void mouseExited(MouseEvent e) {
       toolTipManager.setDismissDelay(dismissDelay);
       toolTipManager.setInitialDelay(initialDelay);
@@ -2149,6 +2204,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       toolTipManager.setEnabled(enabled);
     }
 
+    @Override
     public void mousePressed(MouseEvent e) {
       if(e.isPopupTrigger() && type != null && feature != null) {
         createPopup(e);
@@ -2158,6 +2214,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       }
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
       if(e.isPopupTrigger() && type != null && feature != null) {
         createPopup(e);
@@ -2246,6 +2303,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         Date timeToRun = new Date(System.currentTimeMillis() + 2000);
         Timer timer = new Timer("Annic statistics hide tooltip timer", true);
         timer.schedule(new TimerTask() {
+          @Override
           public void run() {
             // hide the tooltip after 2 seconds
             tipWindow.hide();
@@ -2259,6 +2317,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
       menuItem = new JMenuItem("Occurrences in datastore");
       menuItem.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent ie) {
           description = descriptionTemplate.replaceFirst("kind", "datastore");
           toolTip = toolTipTemplate.replaceFirst("kind", "datastore");
@@ -2289,6 +2348,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
       menuItem = new JMenuItem("Occurrences in matches");
       menuItem.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent ie) {
           description = descriptionTemplate.replaceFirst("kind", "matches");
           toolTip = toolTipTemplate.replaceFirst("kind", "matches");
@@ -2317,6 +2377,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
       menuItem = new JMenuItem("Occurrences in contexts");
       menuItem.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent ie) {
           description = descriptionTemplate.replaceFirst("kind", "contexts");
           toolTip = toolTipTemplate.replaceFirst("kind", "contexts");
@@ -2345,6 +2406,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
       menuItem = new JMenuItem("Occurrences in matches+contexts");
       menuItem.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent ie) {
           description = descriptionTemplate.replaceFirst("kind", "mch+ctxt");
           toolTip = toolTipTemplate.replaceFirst("kind", "matches+contexts");
@@ -2443,12 +2505,15 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
     void init() {
       addAncestorListener(new AncestorListener() {
+        @Override
         public void ancestorMoved(AncestorEvent event) {
         }
 
+        @Override
         public void ancestorAdded(AncestorEvent event) {
         }
 
+        @Override
         public void ancestorRemoved(AncestorEvent event) {
           // no parent so need to be disposed explicitly
           if(popupWindow != null) {
@@ -2462,6 +2527,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
                       : feature));
     }
 
+    @Override
     public MouseInputAdapter createListener(String... parameters) {
       switch(parameters.length) {
         case 1:
@@ -2473,6 +2539,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       }
     }
 
+    @Override
     public void mouseEntered(MouseEvent e) {
       Component component = e.getComponent();
       if(!isTooltipSet && component instanceof JLabel) {
@@ -2495,6 +2562,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
     // when double clicked shows a list of features for this annotation
     // type
+    @Override
     public void mouseClicked(MouseEvent e) {
       if(popupWindow != null && popupWindow.isVisible()) {
         popupWindow.dispose();
@@ -2516,6 +2584,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       list.setBackground(Color.WHITE);
       list.addMouseListener(new MouseAdapter() {
+        @Override
         public void mouseClicked(MouseEvent e) {
           if(e.getClickCount() == 1) {
             String newFeature = (String)list.getSelectedValue();
@@ -2533,6 +2602,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       // create the window that will contain the list
       popupWindow = new JWindow();
       popupWindow.addKeyListener(new KeyAdapter() {
+        @Override
         public void keyPressed(KeyEvent e) {
           if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
             popupWindow.setVisible(false);
@@ -2551,6 +2621,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       popupWindow.pack();
       popupWindow.setVisible(true);
       SwingUtilities.invokeLater(new Runnable() {
+        @Override
         public void run() {
           String newFeature = stackRows[row][FEATURE];
           if(newFeature.equals("")) {
@@ -2562,6 +2633,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       });
     }
 
+    @Override
     public void mousePressed(MouseEvent e) {
       if(e.isPopupTrigger()) {
         createPopup(e);
@@ -2569,6 +2641,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       }
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
       if(e.isPopupTrigger()) {
         createPopup(e);
@@ -2626,6 +2699,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         Date timeToRun = new Date(System.currentTimeMillis() + 2000);
         Timer timer = new Timer("Annic statistics hide tooltip timer", true);
         timer.schedule(new TimerTask() {
+          @Override
           public void run() {
             // hide the tooltip after 2 seconds
             tipWindow.hide();
@@ -2643,6 +2717,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
         menuItem = new JMenuItem("Occurrences in datastore");
         menuItem.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent ie) {
             description = descriptionTemplate.replaceFirst("kind", "datastore");
             toolTip = toolTipTemplate.replaceFirst("kind", "datastore");
@@ -2672,6 +2747,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
         menuItem = new JMenuItem("Occurrences in matches");
         menuItem.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent ie) {
             description = descriptionTemplate.replaceFirst("kind", "matches");
             toolTip = toolTipTemplate.replaceFirst("kind", "matches");
@@ -2702,6 +2778,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
         menuItem = new JMenuItem("Occurrences in contexts");
         menuItem.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent ie) {
             description = descriptionTemplate.replaceFirst("kind", "contexts");
             toolTip = toolTipTemplate.replaceFirst("kind", "contexts");
@@ -2732,6 +2809,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
         menuItem = new JMenuItem("Occurrences in matches+contexts");
         menuItem.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent ie) {
             description = descriptionTemplate.replaceFirst("kind", "mch+ctxt");
             toolTip = toolTipTemplate.replaceFirst("kind", "matches+contexts");
@@ -2765,6 +2843,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
         menuItem = new JMenuItem("All values from matches");
         menuItem.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent ie) {
             Map<String, Integer> freqs;
             try { // retrieves the number of occurrences
@@ -2782,6 +2861,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
               model.addRow(new Object[] {map.getKey(), map.getValue()});
             }
             table = new XJTable() {
+              @Override
               public boolean isCellEditable(int rowIndex, int vColIndex) {
                 return false;
               }
@@ -2808,6 +2888,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
         menuItem = new JMenuItem("All values from contexts");
         menuItem.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent ie) {
             Map<String, Integer> freqs;
             try { // retrieves the number of occurrences
@@ -2825,6 +2906,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
               model.addRow(new Object[] {map.getKey(), map.getValue()});
             }
             table = new XJTable() {
+              @Override
               public boolean isCellEditable(int rowIndex, int vColIndex) {
                 return false;
               }
@@ -2851,6 +2933,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
         menuItem = new JMenuItem("All values from matches+contexts");
         menuItem.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent ie) {
             Map<String, Integer> freqs;
             try { // retrieves the number of occurrences
@@ -2868,6 +2951,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
               model.addRow(new Object[] {map.getKey(), map.getValue()});
             }
             table = new XJTable() {
+              @Override
               public boolean isCellEditable(int rowIndex, int vColIndex) {
                 return false;
               }
@@ -2897,6 +2981,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
         menuItem = new JMenuItem("Occurrences in datastore");
         menuItem.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent ie) {
             description = descriptionTemplate.replaceFirst("kind", "datastore");
             toolTip = toolTipTemplate.replaceFirst("kind", "datastore");
@@ -2926,6 +3011,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
         menuItem = new JMenuItem("Occurrences in matches");
         menuItem.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent ie) {
             description = descriptionTemplate.replaceFirst("kind", "matches");
             toolTip = toolTipTemplate.replaceFirst("kind", "matches");
@@ -2955,6 +3041,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
         menuItem = new JMenuItem("Occurrences in contexts");
         menuItem.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent ie) {
             description = descriptionTemplate.replaceFirst("kind", "contexts");
             toolTip = toolTipTemplate.replaceFirst("kind", "contexts");
@@ -2984,6 +3071,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
         menuItem = new JMenuItem("Occurrences in matches+contexts");
         menuItem.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent ie) {
             description = descriptionTemplate.replaceFirst("kind", "mch+ctxt");
             toolTip = toolTipTemplate.replaceFirst("kind", "matches+contexts");
@@ -3015,6 +3103,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
   }
 
   protected class ResultTableCellRenderer extends DefaultTableCellRenderer {
+    @Override
     public Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
       String text = (String)value;
@@ -3090,14 +3179,17 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       featureByTypeMap = new HashMap<String, String>();
     }
 
+    @Override
     public int getRowCount() {
       return results.size();
     }
 
+    @Override
     public int getColumnCount() {
       return COLUMN_COUNT;
     }
 
+    @Override
     public String getColumnName(int columnIndex) {
       switch(columnIndex) {
         case LEFT_CONTEXT_COLUMN:
@@ -3119,14 +3211,17 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       }
     }
 
+    @Override
     public Class<?> getColumnClass(int columnIndex) {
       return String.class;
     }
 
+    @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
       return false;
     }
 
+    @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
       Pattern result = (Pattern)results.get(rowIndex);
       switch(columnIndex) {
@@ -3186,6 +3281,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       }
     }
 
+    @Override
     public void fireTableDataChanged() {
       // reinitialise types and features to display in the "Features"
       // column
@@ -3257,6 +3353,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
       configureStackViewTable.getColumnModel().getColumn(DISPLAY)
               .setCellRenderer(new DefaultTableCellRenderer() {
+                @Override
                 public Component getTableCellRendererComponent(JTable table,
                         Object color, boolean isSelected, boolean hasFocus,
                         int row, int col) {
@@ -3280,18 +3377,22 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
           checkBox.addActionListener(this);
         }
 
+        @Override
         public boolean shouldSelectCell(EventObject anEvent) {
           return false;
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
           fireEditingStopped();
         }
 
+        @Override
         public Object getCellEditorValue() {
           return (checkBox.isSelected()) ? "true" : "false";
         }
 
+        @Override
         public Component getTableCellEditorComponent(JTable table,
                 Object value, boolean isSelected, int row, int col) {
           checkBox.setSelected((!table.getValueAt(row, col).equals("false")));
@@ -3303,6 +3404,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
       configureStackViewTable.getColumnModel().getColumn(SHORTCUT)
               .setCellRenderer(new DefaultTableCellRenderer() {
+                @Override
                 public Component getTableCellRendererComponent(JTable table,
                         Object color, boolean isSelected, boolean hasFocus,
                         int row, int col) {
@@ -3326,6 +3428,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
       configureStackViewTable.getColumnModel().getColumn(ANNOTATION_TYPE)
               .setCellRenderer(new DefaultTableCellRenderer() {
+                @Override
                 public Component getTableCellRendererComponent(JTable table,
                         Object color, boolean isSelected, boolean hasFocus,
                         int row, int col) {
@@ -3345,31 +3448,34 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
           featuresBox.addActionListener(this);
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
           fireEditingStopped();
         }
 
+        @Override
         public Object getCellEditorValue() {
           return (featuresBox.getSelectedItem() == null) ? "" : featuresBox
                   .getSelectedItem();
         }
 
+        @Override
         public Component getTableCellEditorComponent(JTable table,
                 Object value, boolean isSelected, int row, int col) {
           TreeSet<String> ts = new TreeSet<String>(stringCollator);
           if(populatedAnnotationTypesAndFeatures
-                  .containsKey((String)configureStackViewTable.getValueAt(row,
+                  .containsKey(configureStackViewTable.getValueAt(row,
                           ANNOTATION_TYPE))) {
             // this annotation type still exists in the datastore
             ts.addAll(populatedAnnotationTypesAndFeatures
-                    .get((String)configureStackViewTable.getValueAt(row,
+                    .get(configureStackViewTable.getValueAt(row,
                             ANNOTATION_TYPE)));
           }
           DefaultComboBoxModel dcbm = new DefaultComboBoxModel(ts.toArray());
           dcbm.insertElementAt("", 0);
           featuresBox.setModel(dcbm);
           featuresBox.setSelectedItem(ts
-                  .contains((String)configureStackViewTable
+                  .contains(configureStackViewTable
                           .getValueAt(row, col)) ? configureStackViewTable
                   .getValueAt(row, col) : "");
           return featuresBox;
@@ -3380,6 +3486,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
       configureStackViewTable.getColumnModel().getColumn(FEATURE)
               .setCellRenderer(new DefaultTableCellRenderer() {
+                @Override
                 public Component getTableCellRendererComponent(JTable table,
                         Object color, boolean isSelected, boolean hasFocus,
                         int row, int col) {
@@ -3394,6 +3501,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
               .setCellEditor(cellEditor);
       configureStackViewTable.getColumnModel().getColumn(CROP)
               .setCellRenderer(new DefaultTableCellRenderer() {
+                @Override
                 public Component getTableCellRendererComponent(JTable table,
                         Object color, boolean isSelected, boolean hasFocus,
                         int row, int col) {
@@ -3415,6 +3523,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
           button.addActionListener(this);
         }
 
+        @Override
         public Component getTableCellRendererComponent(JTable table,
                 Object color, boolean isSelected, boolean hasFocus, int row,
                 int col) {
@@ -3432,10 +3541,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
           return button;
         }
 
+        @Override
         public boolean shouldSelectCell(EventObject anEvent) {
           return false;
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
           int row = configureStackViewTable.getEditingRow();
           fireEditingStopped();
@@ -3468,10 +3579,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
           }
         }
 
+        @Override
         public Object getCellEditorValue() {
           return null;
         }
 
+        @Override
         public Component getTableCellEditorComponent(JTable table,
                 Object value, boolean isSelected, int row, int col) {
           button.setIcon(MainFrame.getIcon(row == numStackRows
@@ -3491,12 +3604,14 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
       JButton closeButton = new JButton("Close");
       closeButton.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           configureStackViewFrame.setVisible(false);
         }
       });
       JButton moveRowUpButton = new JButton("Move row up");
       moveRowUpButton.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           if(configureStackViewTable.getRowCount() < 2) {
             return;
@@ -3511,6 +3626,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
             updateStackView();
             saveStackViewConfiguration();
             SwingUtilities.invokeLater(new Runnable() {
+              @Override
               public void run() {
                 configureStackViewTable.changeSelection(selectedRow - 1,
                         SHORTCUT, false, false);
@@ -3522,6 +3638,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       });
       JButton moveRowDownButton = new JButton("Move row down");
       moveRowDownButton.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           if(configureStackViewTable.getRowCount() < 2) {
             return;
@@ -3536,6 +3653,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
             updateStackView();
             saveStackViewConfiguration();
             SwingUtilities.invokeLater(new Runnable() {
+              @Override
               public void run() {
                 configureStackViewTable.changeSelection(selectedRow + 1,
                         SHORTCUT, false, false);
@@ -3565,27 +3683,33 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     private final int REMOVE = columnNames.length;
 
     // plus one to let the user adding a new row
+    @Override
     public int getRowCount() {
       return Math.min(numStackRows + 1, maxStackRows + 1);
     }
 
     // plus one for the add/remove column
+    @Override
     public int getColumnCount() {
       return columnNames.length + 1;
     }
 
+    @Override
     public String getColumnName(int col) {
       return (col == REMOVE) ? "Add/Remove" : columnNames[col];
     }
 
+    @Override
     public boolean isCellEditable(int row, int col) {
       return true;
     }
 
+    @Override
     public Class<?> getColumnClass(int c) {
       return String.class;
     }
 
+    @Override
     public Object getValueAt(int row, int col) {
       if(col == REMOVE) {
         return null;
@@ -3593,6 +3717,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       return stackRows[row][col];
     }
 
+    @Override
     public void setValueAt(Object value, int row, int col) {
       if(col == REMOVE) {
         return;
@@ -3732,12 +3857,15 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       getDocument().addDocumentListener(this);
       addMouseListener(this);
       addAncestorListener(new AncestorListener() {
+        @Override
         public void ancestorMoved(AncestorEvent event) {
         }
 
+        @Override
         public void ancestorAdded(AncestorEvent event) {
         }
 
+        @Override
         public void ancestorRemoved(AncestorEvent event) {
           // no parent so need to be disposed explicitly
           queryPopupWindow.dispose();
@@ -3775,6 +3903,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       queryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       queryList.setBackground(Color.WHITE);
       queryList.addMouseListener(new MouseAdapter() {
+        @Override
         public void mouseClicked(MouseEvent e) {
           if(e.getClickCount() == 2) {
             new EnterAction().actionPerformed(null);
@@ -3799,6 +3928,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       undo = new javax.swing.undo.UndoManager();
       getDocument().addUndoableEditListener(
               new javax.swing.event.UndoableEditListener() {
+                @Override
                 public void undoableEditHappened(
                         javax.swing.event.UndoableEditEvent e) {
                   // Remember the edit and update the menus
@@ -3813,6 +3943,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       mode = INSERT;
 
       addCaretListener(new CaretListener() {
+        @Override
         public void caretUpdate(CaretEvent e) {
           if((mode == POPUP_TYPES || mode == POPUP_FEATURES)
                   && (getCaretPosition() < start || getCaretPosition() > (end + 1))) {
@@ -3834,6 +3965,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         this.upto = upto;
       }
 
+      @Override
       public void actionPerformed(ActionEvent ie) {
         try {
           getDocument().insertString(getSelectionStart(), "(", null);
@@ -3845,9 +3977,11 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       }
     }
 
+    @Override
     public void changedUpdate(DocumentEvent ev) {
     }
 
+    @Override
     public void removeUpdate(DocumentEvent ev) {
       if(mode == PROGRAMMATIC || mode == INSERT) {
         return;
@@ -3894,6 +4028,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       }
     }
 
+    @Override
     public void insertUpdate(DocumentEvent ev) {
       if(mode == PROGRAMMATIC) {
         return;
@@ -3980,6 +4115,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     }
 
     private class PopupTypeTask implements Runnable {
+      @Override
       public void run() {
         try {
           TreeSet<String> types = new TreeSet<String>(stringCollator);
@@ -4018,6 +4154,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     }
 
     private class PopupFeatureTask implements Runnable {
+      @Override
       public void run() {
         // search the annotation type before the dot just typed
         int index =
@@ -4065,6 +4202,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     }
 
     private class EnterAction extends AbstractAction {
+      @Override
       public void actionPerformed(ActionEvent ev) {
         String selection = (String)queryList.getSelectedValue();
         if(mode == POPUP_TYPES) {
@@ -4112,12 +4250,14 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     }
 
     private class CancelAction extends AbstractAction {
+      @Override
       public void actionPerformed(ActionEvent ev) {
         cleanup();
       }
     }
 
     private class DownAction extends AbstractAction {
+      @Override
       public void actionPerformed(ActionEvent ev) {
         if(mode == POPUP_TYPES) {
           int index = queryList.getSelectedIndex();
@@ -4136,6 +4276,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     }
 
     private class UpAction extends AbstractAction {
+      @Override
       public void actionPerformed(ActionEvent ev) {
         if(mode == POPUP_TYPES) {
           int index = queryList.getSelectedIndex();
@@ -4154,6 +4295,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     }
 
     private class PreviousResultAction extends AbstractAction {
+      @Override
       public void actionPerformed(ActionEvent ev) {
         if(resultTable.getSelectedRow() > 0) {
           resultTable.setRowSelectionInterval(resultTable.getSelectedRow() - 1,
@@ -4165,6 +4307,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     }
 
     private class NextResultAction extends AbstractAction {
+      @Override
       public void actionPerformed(ActionEvent ev) {
         if(resultTable.getSelectedRow() + 1 < resultTable.getRowCount()) {
           resultTable.setRowSelectionInterval(resultTable.getSelectedRow() + 1,
@@ -4176,6 +4319,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     }
 
     private class NewLineAction extends AbstractAction {
+      @Override
       public void actionPerformed(ActionEvent ev) {
         try {
           getDocument().insertString(getCaretPosition(), "\n", null);
@@ -4191,6 +4335,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         setEnabled(false);
       }
 
+      @Override
       public void actionPerformed(ActionEvent e) {
         try {
           undo.undo();
@@ -4219,6 +4364,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         setEnabled(false);
       }
 
+      @Override
       public void actionPerformed(ActionEvent e) {
         try {
           undo.redo();
@@ -4241,15 +4387,19 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       }
     }
 
+    @Override
     public void mouseEntered(MouseEvent e) {
     }
 
+    @Override
     public void mouseClicked(MouseEvent e) {
     }
 
+    @Override
     public void mouseExited(MouseEvent e) {
     }
 
+    @Override
     public void mousePressed(MouseEvent e) {
       if(e.isPopupTrigger()) {
         createPopup(e);
@@ -4257,6 +4407,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       }
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
       if(e.isPopupTrigger()) {
         createPopup(e);
@@ -4302,6 +4453,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
    *          {@link gate.DataStore}or whatever) this viewer has to
    *          display
    */
+  @Override
   public void setTarget(Object target) {
 
     if(!(target instanceof LuceneDataStoreImpl)
@@ -4338,6 +4490,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
           }
         }
         SwingUtilities.invokeLater(new Runnable() {
+          @Override
           public void run() {
             corpusToSearchIn.updateUI();
             corpusToSearchIn.setSelectedItem(Constants.ENTIRE_DATASTORE);
@@ -4360,6 +4513,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
                 searcher.getAnnotationTypesMap();
 
         SwingUtilities.invokeLater(new Runnable() {
+          @Override
           public void run() {
             updateAnnotationSetsList();
           }
@@ -4373,6 +4527,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
   /**
    * This method is called by datastore when a new resource is adopted
    */
+  @Override
   public void resourceAdopted(DatastoreEvent de) {
     // don't want to do anything here
   }
@@ -4381,6 +4536,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
    * This method is called by datastore when an existing resource is
    * deleted
    */
+  @Override
   public void resourceDeleted(DatastoreEvent de) {
     Resource resource = de.getResource();
     if(resource instanceof Corpus) {
@@ -4405,6 +4561,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
   /**
    * This method is called when a resource is written into the datastore
    */
+  @Override
   public void resourceWritten(DatastoreEvent de) {
     Resource resource = de.getResource();
     if(resource instanceof Corpus) {
@@ -4425,6 +4582,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       annotationSetIDsFromDataStore = searcher.getIndexedAnnotationSetNames();
       allAnnotTypesAndFeaturesFromDatastore = searcher.getAnnotationTypesMap();
       SwingUtilities.invokeLater(new Runnable() {
+        @Override
         public void run() {
           updateAnnotationSetsList();
         }
@@ -4462,35 +4620,41 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       setContentAreaFilled(false);
       setFocusPainted(false);
       addMouseListener(new MouseAdapter() {
+        @Override
         public void mouseEntered(MouseEvent e) {
           JButton button = ((JButton)e.getComponent());
           button.setBorder(borderDarkerDarker);
           button.setBorderPainted(true);
         }
 
+        @Override
         public void mouseExited(MouseEvent e) {
           JButton button = ((JButton)e.getComponent());
           button.setBorder(borderDarker);
           button.setBorderPainted(showBorderWhenInactive);
         }
 
+        @Override
         public void mousePressed(MouseEvent e) {
           JButton button = ((JButton)e.getComponent());
           button.setContentAreaFilled(true);
         }
 
+        @Override
         public void mouseReleased(MouseEvent e) {
           JButton button = ((JButton)e.getComponent());
           button.setContentAreaFilled(false);
         }
       });
       addFocusListener(new FocusAdapter() {
+        @Override
         public void focusGained(FocusEvent e) {
           JButton button = ((JButton)e.getComponent());
           button.setBorder(borderDarkerDarker);
           button.setBorderPainted(true);
         }
 
+        @Override
         public void focusLost(FocusEvent e) {
           JButton button = ((JButton)e.getComponent());
           button.setBorder(borderDarker);

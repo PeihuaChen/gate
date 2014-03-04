@@ -340,9 +340,9 @@ public class Profiler {
   public String printSpeed(long timeMillis,
       double whatever, String whateverMeasure)
   {
-    double speed1000 = (double) whatever/ timeMillis;
-    long round = (long)((double)speed1000*1000);
-    long remaind =  (long)(((double)speed1000*100000) - 100 * round);
+    double speed1000 = whatever/ timeMillis;
+    long round = (long)(speed1000*1000);
+    long remaind =  (long)((speed1000*100000) - 100 * round);
     StringBuffer buff = new StringBuffer(10);
     buff.append(round);
     buff.append(".");

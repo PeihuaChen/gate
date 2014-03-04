@@ -39,10 +39,12 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
     itemComparator = new OntologyItemComparator();
   }
 
+  @Override
   public int getColumnCount() {
     return COLUMN_COUNT;
   }
 
+  @Override
   public int getRowCount() {
     int i = detailGroups.length;
     for(int j = 0; j < detailGroups.length; j++)
@@ -50,6 +52,7 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
     return i;
   }
 
+  @Override
   public String getColumnName(int i) {
     switch(i) {
       case 0: // '\0'
@@ -64,6 +67,7 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
     return "";
   }
 
+  @Override
   public Class getColumnClass(int i) {
     switch(i) {
       case 0:
@@ -78,10 +82,12 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
     return Object.class;
   }
 
+  @Override
   public boolean isCellEditable(int i, int j) {
     return false;
   }
 
+  @Override
   public void setValueAt(Object obj, int i, int j) {
     Object obj1 = getItemForRow(i);
     if(j == 0 && (obj1 instanceof DetailsGroup)) {
@@ -102,6 +108,7 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
     return null;
   }
 
+  @Override
   public Object getValueAt(int i, int j) {
     Object obj = getItemForRow(i);
     switch(j) {

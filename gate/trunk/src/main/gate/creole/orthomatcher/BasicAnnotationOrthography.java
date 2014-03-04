@@ -63,6 +63,7 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
   protected static final Logger log = Logger
       .getLogger(BasicAnnotationOrthography.class);
 
+  @Override
   public String getStringForAnnotation(Annotation a, gate.Document d)
       throws ExecutionException {
     String annotString =
@@ -73,6 +74,7 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
     return annotString;
   }
 
+  @Override
   public boolean fuzzyMatch(String s1, String s2) {
     String s1Lower = s1.toLowerCase();
     String s2Lower = s2.toLowerCase();
@@ -93,6 +95,7 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
    * @return true if all of the tokens in firstName are either found in second
    *         name or are stop words
    */
+  @Override
   public boolean allNonStopTokensInOtherAnnot(List<Annotation> firstName,
       List<Annotation> secondName, String TOKEN_STRING_FEATURE_NAME,
       boolean caseSensitive) {
@@ -117,6 +120,7 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
    * Return a person name without a title. Also remove title from global
    * variable tokensMap
    */
+  @Override
   public String stripPersonTitle(String annotString, Annotation annot,
       Document doc, Map<Integer, List<Annotation>> tokensMap,
       Map<Integer,List<Annotation>> normalizedTokensMap, AnnotationSet nameAllAnnots)
@@ -169,6 +173,7 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
     return annotString;
   }
 
+  @Override
   public boolean matchedAlready(Annotation annot1, Annotation annot2,
       List<List<Integer>> matchesDocFeature, AnnotationSet nameAllAnnots) {
     // the two annotations are already matched if the matches list of the first
@@ -182,6 +187,7 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
     return false;
   }
 
+  @Override
   public Annotation updateMatches(Annotation newAnnot, String annotString,
       Map<Integer, String> processedAnnots, AnnotationSet nameAllAnnots,
       List<List<Integer>> matchesDocFeature) {
@@ -241,6 +247,7 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
     return matchedAnnot;
   }
 
+  @Override
   public void updateMatches(Annotation newAnnot, Annotation prevAnnot,
       List<List<Integer>> matchesDocFeature, AnnotationSet nameAllAnnots) {
     @SuppressWarnings("unchecked")
@@ -286,6 +293,7 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
   /**
    * Tables for namematch info (used by the namematch rules)
    */
+  @Override
   public Set<String> buildTables(AnnotationSet nameAllAnnots) {
     FeatureMap tempMap = Factory.newFeatureMap();
     // reset the tables first
@@ -320,6 +328,7 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
     return cdg;
   }// buildTables
 
+  @Override
   public boolean isUnknownGender(String gender) {
     if(gender == null) return true;
     if(gender.equalsIgnoreCase("male") || gender.equalsIgnoreCase("female"))

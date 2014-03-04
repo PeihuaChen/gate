@@ -108,6 +108,7 @@ public class Lookup implements java.io.Serializable {
    * i.e. whenever class and ontology are filled then use the long version,incl.
    * list, ontology and class; else return just majorType.minorType
    */
+  @Override
   public String toString() {
     StringBuffer b = new StringBuffer();
     boolean longVersion = false;
@@ -159,6 +160,7 @@ public class Lookup implements java.io.Serializable {
    * 
    * @param obj
    */
+  @Override
   public boolean equals(Object obj) {
     if(obj instanceof Lookup)
       return obj.toString().equals(toString());
@@ -168,6 +170,7 @@ public class Lookup implements java.io.Serializable {
   /**
    * *
    */
+  @Override
   public int hashCode() {
     return toString().hashCode();
   }

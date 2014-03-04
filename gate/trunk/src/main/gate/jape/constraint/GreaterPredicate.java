@@ -19,6 +19,7 @@ import gate.jape.JapeException;
 
 public class GreaterPredicate extends ComparablePredicate {
 
+  @Override
   public String getOperator() {
     return GREATER;
   }
@@ -29,6 +30,7 @@ public class GreaterPredicate extends ComparablePredicate {
    * conversion between the values. Returns false if passed value is
    * null.
    */
+  @Override
   protected boolean doMatch(Object annotValue) throws JapeException {
     return compareValue(annotValue) < 0;
   }

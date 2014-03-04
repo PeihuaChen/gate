@@ -74,6 +74,7 @@ public class OntologyClassView extends AbstractDocumentView
     itemComparator = new OntologyItemComparator();
   }
 
+  @Override
   protected void initGUI() {
 
     // get a pointer to the text view used to display
@@ -162,11 +163,13 @@ public class OntologyClassView extends AbstractDocumentView
     Gate.getCreoleRegister().addCreoleListener(this);
 
     setComboBox.addItemListener(new ItemListener() {
+      @Override
       public void itemStateChanged(ItemEvent e) {
         selectedSet = (String) setComboBox.getSelectedItem();
         setColorTreeNodesWhenInstancesFound(selectedSet);
         // unselect annotations
-        SwingUtilities.invokeLater(new Runnable() { public void run() {
+        SwingUtilities.invokeLater(new Runnable() { @Override
+        public void run() {
           for (OClass oClass : highlightedClasses) {
             if (highlightsDataByClassMap.containsKey(oClass)) {
               textView.removeHighlights(highlightsDataByClassMap.get(oClass));
@@ -192,11 +195,13 @@ public class OntologyClassView extends AbstractDocumentView
     textMouseListener = new TextMouseListener();
   }
 
+  @Override
   protected void registerHooks() {
     textArea.addMouseListener(textMouseListener);
     textArea.addMouseMotionListener(textMouseListener);
     // reselect annotations
-    SwingUtilities.invokeLater(new Runnable() { public void run() {
+    SwingUtilities.invokeLater(new Runnable() { @Override
+    public void run() {
       for (OClass oClass : new HashSet<OClass>(highlightedClasses)) {
         if (highlightsDataByClassMap.containsKey(oClass)) {
           textView.addHighlights(highlightsDataByClassMap.get(oClass));
@@ -209,11 +214,13 @@ public class OntologyClassView extends AbstractDocumentView
     }
   }
 
+  @Override
   protected void unregisterHooks() {
     textArea.removeMouseListener(textMouseListener);
     textArea.removeMouseMotionListener(textMouseListener);
     // unselect annotations
-    SwingUtilities.invokeLater(new Runnable() { public void run() {
+    SwingUtilities.invokeLater(new Runnable() { @Override
+    public void run() {
       for (OClass oClass : highlightedClasses) {
         if (highlightsDataByClassMap.containsKey(oClass)) {
           textView.removeHighlights(highlightsDataByClassMap.get(oClass));
@@ -226,6 +233,7 @@ public class OntologyClassView extends AbstractDocumentView
     }
   }
 
+  @Override
   public void cleanup() {
     super.cleanup();
     Gate.getCreoleRegister().removeCreoleListener(this);
@@ -235,14 +243,17 @@ public class OntologyClassView extends AbstractDocumentView
     userConfig.put(prefix + "hiddenclasses", hiddenClassesSet);
   }
 
+  @Override
   public Component getGUI() {
     return mainPanel;
   }
 
+  @Override
   public int getType() {
     return VERTICAL;
   }
 
+  @Override
   public void resourceLoaded(CreoleEvent e) {
     if (e.getResource() instanceof Ontology) {
       if (messageLabel != null
@@ -266,6 +277,7 @@ public class OntologyClassView extends AbstractDocumentView
     }
   }
 
+  @Override
   public void resourceUnloaded(CreoleEvent e) {
     if (e.getResource() instanceof Ontology) {
       Ontology ontology = (Ontology) e.getResource();
@@ -280,30 +292,39 @@ public class OntologyClassView extends AbstractDocumentView
     }
   }
 
+  @Override
   public void datastoreOpened(CreoleEvent e) { /* do nothing */ }
 
+  @Override
   public void datastoreCreated(CreoleEvent e) { /* do nothing */ }
 
+  @Override
   public void datastoreClosed(CreoleEvent e) { /* do nothing */ }
 
+  @Override
   public void resourceRenamed(Resource resource, String oldName,
                               String newName) { /* do nothing */ }
+  @Override
   public void resourceRelationChanged(Ontology ontology, OResource
     resource1, OResource resource2, int eventType) { /* do nothing */  }
 
+  @Override
   public void resourcePropertyValueChanged(Ontology ontology, OResource
     resource, RDFProperty property, Object value, int eventType) {
     /* do nothing */  }
 
+  @Override
   public void resourcesRemoved(Ontology ontology, String[] resources) {  }
 
+  @Override
   public void resourceAdded(Ontology ontology, OResource resource) {
     if (resource instanceof OClass) {
       final JTree tree = treeByOntologyMap.get(ontology);
       DefaultMutableTreeNode node =
         (DefaultMutableTreeNode) tree.getModel().getRoot();
       final Enumeration enumeration = node.preorderEnumeration();
-      SwingUtilities.invokeLater(new Runnable() { public void run() {
+      SwingUtilities.invokeLater(new Runnable() { @Override
+      public void run() {
         // traverse the expanded class tree and update all the nodes
         while (enumeration.hasMoreElements()) {
           DefaultMutableTreeNode node =
@@ -323,6 +344,7 @@ public class OntologyClassView extends AbstractDocumentView
     }
   }
 
+  @Override
   public void ontologyReset(Ontology ontology) { /* do nothing */ }
 
   /**
@@ -351,7 +373,7 @@ public class OntologyClassView extends AbstractDocumentView
        && features.get(CLASS) != null
        && features.get(INSTANCE) != null) {
         // find the corresponding ontology
-        Ontology ontology = ontologyMap.get((String) features.get(ONTOLOGY));
+        Ontology ontology = ontologyMap.get(features.get(ONTOLOGY));
         if (ontology != null) {
           // choose a background color for the annotation type tree node
           OClass oClass = ontology.getOClass(ontology
@@ -391,6 +413,7 @@ public class OntologyClassView extends AbstractDocumentView
     // show/hide the tree when clicking the disclosure checkbox
     disclosureCheckBox.addActionListener(new ActionListener() {
       boolean isTreeBuilt = false;
+      @Override
       public void actionPerformed(ActionEvent e) {
         if (disclosureCheckBox.isSelected()) {
           if (!isTreeBuilt) {
@@ -408,14 +431,18 @@ public class OntologyClassView extends AbstractDocumentView
 
     // context menu to show root classes
     disclosureCheckBox.addMouseListener(new MouseAdapter() {
+      @Override
       public void mousePressed(MouseEvent e) { processMouseEvent(e); }
+      @Override
       public void mouseReleased(MouseEvent e) { processMouseEvent(e); }
+      @Override
       public void mouseClicked(MouseEvent e) { processMouseEvent(e); }
       protected void processMouseEvent(MouseEvent e) {
         JPopupMenu popup = new JPopupMenu();
         if (e.isPopupTrigger()) {
           popup.add(new JMenuItem(
             new AbstractAction("Show all root classes") {
+            @Override
             public void actionPerformed(ActionEvent e) {
               if (!disclosureCheckBox.isSelected()) {
                 disclosureCheckBox.doClick();
@@ -436,6 +463,7 @@ public class OntologyClassView extends AbstractDocumentView
     // when a class is selected in the tree update the instance table
     tree.getSelectionModel().addTreeSelectionListener(
       new TreeSelectionListener() {
+        @Override
         public void valueChanged(TreeSelectionEvent e) {
           if (e.getNewLeadSelectionPath() == null) {
            if (treeByOntologyMap.get(selectedClass.getOntology()).equals(tree)){
@@ -464,6 +492,7 @@ public class OntologyClassView extends AbstractDocumentView
 
     // context menu to hide/show classes
     tree.addMouseListener(new MouseAdapter() {
+      @Override
       public void mousePressed(MouseEvent e) {
         TreePath path = tree.getClosestPathForLocation(e.getX(), e.getY());
         if (e.isPopupTrigger()
@@ -473,9 +502,11 @@ public class OntologyClassView extends AbstractDocumentView
         }
         processMouseEvent(e);
       }
+      @Override
       public void mouseReleased(MouseEvent e) {
         processMouseEvent(e);
       }
+      @Override
       public void mouseClicked(MouseEvent e) {
         processMouseEvent(e);
       }
@@ -484,6 +515,7 @@ public class OntologyClassView extends AbstractDocumentView
         if (!e.isPopupTrigger()) { return; }
         popup.add(new JMenuItem(
           new AbstractAction("Hide selected classes") {
+          @Override
           public void actionPerformed(ActionEvent e) {
             DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
             TreePath[] selectedPaths = tree.getSelectionPaths();
@@ -502,6 +534,7 @@ public class OntologyClassView extends AbstractDocumentView
 
         if (tree.getSelectionCount() == 1) {
           popup.add(new JMenuItem(new AbstractAction("Show all sub classes") {
+            @Override
             public void actionPerformed(ActionEvent e) {
               DefaultMutableTreeNode node = (DefaultMutableTreeNode)
                 tree.getSelectionPath().getLastPathComponent();
@@ -537,6 +570,7 @@ public class OntologyClassView extends AbstractDocumentView
 
     // listener to lazily create children nodes
     tree.addTreeWillExpandListener(new TreeWillExpandListener() {
+      @Override
       public void treeWillExpand(TreeExpansionEvent event)
         throws ExpandVetoException {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)
@@ -554,6 +588,7 @@ public class OntologyClassView extends AbstractDocumentView
           addNodes(tree, node, classes, true);
         }
       }
+      @Override
       public void treeWillCollapse(TreeExpansionEvent event)
         throws ExpandVetoException { /* do nothing */  }
     });
@@ -562,7 +597,8 @@ public class OntologyClassView extends AbstractDocumentView
     final Set<OClass> classes = ontology.getOClasses(true);
     // add first level nodes to the tree
     addNodes(tree, node, classes, true);
-    SwingUtilities.invokeLater(new Runnable() { public void run() {
+    SwingUtilities.invokeLater(new Runnable() { @Override
+    public void run() {
       tree.setModel(new DefaultTreeModel(node));
       tree.setCellRenderer(new ClassTreeCellRenderer());
       tree.setCellEditor(new ClassTreeCellEditor(tree));
@@ -639,10 +675,12 @@ public class OntologyClassView extends AbstractDocumentView
    * Based on {@link AnnotationSetsView.TextMouseListener}.
    */
   protected class TextMouseListener extends MouseInputAdapter {
+    @Override
     public void mouseDragged(MouseEvent e){
       //do not create annotations while dragging
       mouseMovementTimer.stop();
     }
+    @Override
     public void mouseMoved(MouseEvent e){
       //this triggers select annotation leading to edit annotation or new
       //annotation actions
@@ -678,6 +716,7 @@ public class OntologyClassView extends AbstractDocumentView
         mouseMovementTimer.restart();
       }
     }
+    @Override
     public void mouseExited(MouseEvent e){
       mouseMovementTimer.stop();
     }
@@ -690,6 +729,7 @@ public class OntologyClassView extends AbstractDocumentView
    * Based on {@link AnnotationSetsView.MouseStoppedMovingAction}.
    */
   protected class MouseStoppedMovingAction extends AbstractAction {
+    @Override
     public void actionPerformed(ActionEvent evt) {
       List<LanguageResource> resources =
         gate.Gate.getCreoleRegister().getPublicLrInstances();
@@ -713,7 +753,7 @@ public class OntologyClassView extends AbstractDocumentView
          && features.get(INSTANCE) != null) {
           // find the corresponding ontology
           final Ontology ontology =
-            ontologyMap.get((String) features.get(ONTOLOGY));
+            ontologyMap.get(features.get(ONTOLOGY));
           if (ontology != null) {
             OClass oClass = ontology.getOClass(ontology
               .createOURI((String) features.get(CLASS)));
@@ -736,7 +776,8 @@ public class OntologyClassView extends AbstractDocumentView
                 TreePath nodePath = new TreePath(node.getPath());
                 tree.setSelectionPath(nodePath);
                 tree.scrollPathToVisible(nodePath);
-                SwingUtilities.invokeLater(new Runnable() { public void run() {
+                SwingUtilities.invokeLater(new Runnable() { @Override
+                public void run() {
                   // select the annotation in the instances table
                   instanceView.selectInstance(ontology.getOInstance(
                     ontology.createOURI((String) features.get(INSTANCE))));
@@ -794,7 +835,8 @@ public class OntologyClassView extends AbstractDocumentView
       if (annotationsData.isEmpty()) {
         // no instance annotation for this class
         colorByClassMap.remove(oClass);
-        SwingUtilities.invokeLater(new Runnable() { public void run() {
+        SwingUtilities.invokeLater(new Runnable() { @Override
+        public void run() {
           if (highlightsDataByClassMap.containsKey(oClass)) {
             textView.removeHighlights(highlightsDataByClassMap.get(oClass));
           }
@@ -809,7 +851,8 @@ public class OntologyClassView extends AbstractDocumentView
           color = AnnotationSetsView.getColor(selectedSet,oClass.getName());
           colorByClassMap.put(oClass, color);
         }
-        SwingUtilities.invokeLater(new Runnable() { public void run() {
+        SwingUtilities.invokeLater(new Runnable() { @Override
+        public void run() {
           highlightsDataByClassMap.put(oClass,
             textView.addHighlights(annotationsData, color));
           tree.repaint();
@@ -817,7 +860,8 @@ public class OntologyClassView extends AbstractDocumentView
       }
     } else { // if (!isHighlighted)
       highlightedClasses.remove(oClass);
-        SwingUtilities.invokeLater(new Runnable() { public void run() {
+        SwingUtilities.invokeLater(new Runnable() { @Override
+        public void run() {
           if (highlightsDataByClassMap.containsKey(oClass)) {
             textView.removeHighlights(highlightsDataByClassMap.get(oClass));
           }
@@ -846,7 +890,8 @@ public class OntologyClassView extends AbstractDocumentView
       color = AnnotationSetsView.getColor(set.getName(),oClass.getName());
       colorByClassMap.put(oClass, color);
     }
-    SwingUtilities.invokeLater(new Runnable() { public void run() {
+    SwingUtilities.invokeLater(new Runnable() { @Override
+    public void run() {
       highlightsData.add(textView.addHighlight(annotationData, color));
       highlightsDataByClassMap.put(oClass, highlightsData);
       tree.repaint();
@@ -891,6 +936,7 @@ public class OntologyClassView extends AbstractDocumentView
       add(label);
     }
 
+    @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value,
                                boolean isSelected, boolean isExpanded,
                                boolean isLeaf, int row, boolean hasFocus) {
@@ -921,6 +967,7 @@ public class OntologyClassView extends AbstractDocumentView
       this.tree = tree;
     }
 
+    @Override
     public Object getCellEditorValue() {
       boolean isSelected = renderer.getCheckBox().isSelected();
       Object userObject = renderer.getUserObject();
@@ -930,6 +977,7 @@ public class OntologyClassView extends AbstractDocumentView
       return userObject;
     }
 
+    @Override
     public boolean isCellEditable(EventObject event) {
       boolean returnValue = false;
       if (event instanceof MouseEvent) {
@@ -950,6 +998,7 @@ public class OntologyClassView extends AbstractDocumentView
       return returnValue;
     }
 
+    @Override
     public Component getTreeCellEditorComponent(final JTree tree, Object value,
         boolean selected, boolean expanded, boolean leaf, int row) {
 
@@ -959,6 +1008,7 @@ public class OntologyClassView extends AbstractDocumentView
 
       // stop editing when checkbox has state changed
       renderer.getCheckBox().addItemListener(new ItemListener() {
+        @Override
         public void itemStateChanged(ItemEvent itemEvent) {
           stopCellEditing();
         }

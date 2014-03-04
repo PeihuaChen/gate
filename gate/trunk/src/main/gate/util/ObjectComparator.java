@@ -29,6 +29,7 @@ public class ObjectComparator implements Comparator{
   /**
    * Compares two objects.
    */
+  @Override
   public int compare(Object o1, Object o2){
     // If both values are null, return 0.
     if (o1 == null && o2 == null) {

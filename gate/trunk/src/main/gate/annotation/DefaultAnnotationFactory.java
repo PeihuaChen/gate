@@ -24,6 +24,7 @@ public class DefaultAnnotationFactory implements AnnotationFactory {
   public DefaultAnnotationFactory() {
   }
   
+  @Override
   public Annotation createAnnotationInSet(AnnotationSet set, Integer id,
                                           Node start, Node end, String type,
                                           FeatureMap features) {

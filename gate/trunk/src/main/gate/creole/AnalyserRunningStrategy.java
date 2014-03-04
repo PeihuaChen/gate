@@ -55,6 +55,7 @@ public class AnalyserRunningStrategy implements RunningStrategy{
    * </ul>
    * @return a <tt>boolean</tt> value.
    */
+  @Override
   public boolean shouldRun() {
     if(runMode == RUN_ALWAYS) return true;
     if(runMode == RUN_NEVER) return false;
@@ -74,6 +75,7 @@ public class AnalyserRunningStrategy implements RunningStrategy{
     throw new GateRuntimeException("Unknown run mode!");
   }
 
+  @Override
   public int getRunMode() {
     return runMode;
   }
@@ -98,6 +100,7 @@ public class AnalyserRunningStrategy implements RunningStrategy{
     return featureValue;
   }
 
+  @Override
   public ProcessingResource getPR() {
     return pr;
   }

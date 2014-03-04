@@ -54,7 +54,7 @@ public abstract class InputStream implements Cloneable {
        throws IOException {
     if (len < BUFFER_SIZE) {
       for (int i = 0; i < len; i++)		  // read byte-by-byte
-	b[i + offset] = (byte)readByte();
+	b[i + offset] = readByte();
     } else {					  // read all-at-once
       long start = getFilePointer();
       seekInternal(start);
@@ -221,6 +221,7 @@ public abstract class InputStream implements Cloneable {
    * different points in the input from each other and from the stream they
    * were cloned from.
    */
+  @Override
   public Object clone() {
     InputStream clone = null;
     try {

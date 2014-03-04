@@ -20,10 +20,12 @@ import gate.jape.JapeException;
 
 public class EqualPredicate extends AbstractConstraintPredicate {
 
+  @Override
   public String getOperator() {
     return EQUAL;
   }
 
+  @Override
   public boolean doMatch(Object annotValue, AnnotationSet context)
           throws JapeException {
 

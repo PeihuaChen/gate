@@ -142,7 +142,7 @@ public class OUtils {
               default:
                       rsltAscii[out++] = (byte)'%';
                       // Get rid of sign ...
-                      int c = ((int)utf8[in])&255;
+                      int c = utf8[in]&255;
                       rsltAscii[out++] = hexEncode( c/16 );
                       rsltAscii[out++] = hexEncode( c%16 );
                       in++;
@@ -203,13 +203,13 @@ public class OUtils {
   private static final int hexDecode(byte b ) {
       switch (b) { 
           case (byte)'a': case (byte)'b': case (byte)'c': case (byte)'d': case (byte)'e': case (byte)'f':
-           return (((int)b)&255)-'a'+10;
+           return (b&255)-'a'+10;
           case (byte)'A': case (byte)'B': case (byte)'C': case (byte)'D': case (byte)'E': case (byte)'F': 
           return b - (byte)'A' + 10;
           case (byte)'0': case (byte)'1': case (byte)'2': case (byte)'3': case (byte)'4': case (byte)'5': case (byte)'6': case (byte)'7': case (byte)'8': case (byte)'9':
               return b - (byte)'0';
               default:
-                  throw new IllegalArgumentException("Bad Hex escape character: " + (((int)b)&255) );
+                  throw new IllegalArgumentException("Bad Hex escape character: " + (b&255) );
       }
   }
 }

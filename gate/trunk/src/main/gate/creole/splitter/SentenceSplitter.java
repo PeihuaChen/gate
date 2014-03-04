@@ -67,6 +67,7 @@ public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchm
   
   private String benchmarkId;
 
+  @Override
   public Resource init()throws ResourceInstantiationException{
     //create all the componets
     FeatureMap params;
@@ -123,11 +124,13 @@ public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchm
     return this;
   }
   
+  @Override
   public void cleanup() {
     Factory.deleteResource(gazetteer);
     Factory.deleteResource(transducer);
   }
 
+  @Override
   public void execute() throws ExecutionException{
     interrupted = false;
     //set the runtime parameters
@@ -159,6 +162,7 @@ public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchm
         "\" sentence splitter has been abruptly interrupted!");
     pListener = new IntervalProgressListener(5, 10);
     sListener = new StatusListener(){
+      @Override
       public void statusChanged(String text){
         fireStatusChanged(text);
       }
@@ -229,6 +233,7 @@ public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchm
    * Notifies all the PRs in this controller that they should stop their
    * execution as soon as possible.
    */
+  @Override
   public synchronized void interrupt(){
     interrupted = true;
     gazetteer.interrupt();
@@ -291,6 +296,7 @@ public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchm
   /* (non-Javadoc)
    * @see gate.util.Benchmarkable#getBenchmarkId()
    */
+  @Override
   public String getBenchmarkId() {
     if(benchmarkId == null) {
       return getName();
@@ -303,6 +309,7 @@ public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchm
   /* (non-Javadoc)
    * @see gate.util.Benchmarkable#setBenchmarkId(java.lang.String)
    */
+  @Override
   public void setBenchmarkId(String benchmarkId) {
     this.benchmarkId = benchmarkId;
   }

@@ -31,7 +31,6 @@ import java.net.URL;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Iterator;
 
 /**
  * <p>
@@ -121,6 +120,7 @@ public class Init implements BeanFactoryAware {
 
   private BeanFactory beanFactory;
 
+  @Override
   public void setBeanFactory(BeanFactory beanFactory) {
     this.beanFactory = beanFactory;
   }

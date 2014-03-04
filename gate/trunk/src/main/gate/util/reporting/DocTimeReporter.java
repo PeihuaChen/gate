@@ -160,6 +160,7 @@ public class DocTimeReporter implements BenchmarkReportable {
    * @return An Object containing modified hierarchical structure of processing
    *         elements with totals and All others embedded in it.
    */
+  @Override
   public Object calculate(Object reportContainer) {
     return sortHashMapByValues(
       doTotal((LinkedHashMap<String, Object>) reportContainer));
@@ -216,7 +217,7 @@ public class DocTimeReporter implements BenchmarkReportable {
   private LinkedHashMap<String, Object> doTotal(
     LinkedHashMap<String, Object> reportContainer) {
     LinkedHashMap<String, Object> myHash =
-      (LinkedHashMap<String, Object>) reportContainer;
+      reportContainer;
     Iterator<String> i = myHash.keySet().iterator();
     while (i.hasNext()) {
       Object key = i.next();
@@ -224,11 +225,11 @@ public class DocTimeReporter implements BenchmarkReportable {
         docContainer = doTotal((LinkedHashMap<String, Object>) (myHash
             .get(key)));
       } else {
-        if (docContainer.get((String) key) == null) {
+        if (docContainer.get(key) == null) {
           docContainer.put((String) key, myHash.get(key));
         } else {
           // Do total if value already exists
-          int val = Integer.parseInt((String) docContainer.get((String) key))
+          int val = Integer.parseInt((String) docContainer.get(key))
               + Integer.parseInt((String) myHash.get(key));
           docContainer.put((String) key, Integer.toString(val));
         }
@@ -247,6 +248,7 @@ public class DocTimeReporter implements BenchmarkReportable {
    * @param outputFile
    *          Path where to save the report.
    */
+  @Override
   public void printReport(Object reportSource, File outputFile) {
     if (printMedia.equalsIgnoreCase(MEDIA_TEXT)) {
       printToText(reportSource, outputFile);
@@ -374,6 +376,7 @@ public class DocTimeReporter implements BenchmarkReportable {
    * @throws BenchmarkReportInputFileFormatException
    *           if the input file provided is not a valid benchmark file.
    */
+  @Override
   public Object store(File inputFile)
       throws BenchmarkReportInputFileFormatException {
     String[] temp = inputFile.getAbsolutePath().split("\\" + File.separator);
@@ -555,7 +558,7 @@ public class DocTimeReporter implements BenchmarkReportable {
       String timeTakenHTMLString = "<td width = '100'>";
       String timeInPercentHTMLString = "<td width = '100'>";
       LinkedHashMap<String, Object> rcHash =
-        (LinkedHashMap<String, Object>) reportSource;
+        reportSource;
       rcHash.remove("total");
       Iterator<String> i = rcHash.keySet().iterator();
       int count = 0;
@@ -659,6 +662,7 @@ public class DocTimeReporter implements BenchmarkReportable {
    *
    * @param args array containing the command line arguments.
    */
+  @Override
   public void parseArguments(String[] args) {
     Getopt g = new Getopt("gate.util.reporting.DocTimeReporter", args,
         "i:m:d:p:o:l:h");
@@ -978,7 +982,7 @@ public class DocTimeReporter implements BenchmarkReportable {
           if (parseLinesFromLast(bytearray, lastNlines, fromPos)) {
             break;
           }
-          delta = ((String) lastNlines.get(lastNlines.size() - 1)).length();
+          delta = lastNlines.get(lastNlines.size() - 1).length();
           lastNlines.remove(lastNlines.size() - 1);
           curPos = fromPos + delta;
         }
@@ -1067,6 +1071,7 @@ public class DocTimeReporter implements BenchmarkReportable {
     Timer timer = null;
     try {
       TimerTask task = new FileWatcher(getBenchmarkFile()) {
+        @Override
         protected void onChange(File file) {
           throw new BenchmarkReportExecutionException(getBenchmarkFile()
               + " file has been modified while generating the report.");
@@ -1118,6 +1123,7 @@ public class DocTimeReporter implements BenchmarkReportable {
    *
    * @see gate.util.reporting.BenchmarkReportable#executeReport()
    */
+  @Override
   public void executeReport() throws BenchmarkReportInputFileFormatException,
                                      BenchmarkReportFileAccessException {
     generateReport();
@@ -1252,6 +1258,7 @@ abstract class FileWatcher extends TimerTask {
    *
    * @see java.util.TimerTask#run()
    */
+  @Override
   public final void run() {
     long oldTimeStamp = file.lastModified();
     if (timeStamp != oldTimeStamp) {

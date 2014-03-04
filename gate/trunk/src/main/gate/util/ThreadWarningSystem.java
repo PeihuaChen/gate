@@ -31,6 +31,7 @@ public class ThreadWarningSystem {
    */
   public ThreadWarningSystem() {
     threadCheck.schedule(new TimerTask() {
+      @Override
       public void run() {
         long[] ids = mbean.findMonitorDeadlockedThreads();
         if (ids != null && ids.length > 0) {
@@ -52,6 +53,7 @@ public class ThreadWarningSystem {
   public ThreadWarningSystem(final int threadThreshold) {
     this();
     threadCheck.schedule(new TimerTask() {
+      @Override
       public void run() {
         if (mbean.getThreadCount() > threadThreshold) {
           if (!threadThresholdNotified) {

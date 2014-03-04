@@ -45,6 +45,7 @@ public class TestAnnotation extends TestCase
   protected FeatureMap emptyFeatureMap;
 
   /** Fixture set up */
+  @Override
   public void setUp() throws Exception
   {
 	Gate.setNetConnected(false);

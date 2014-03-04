@@ -67,6 +67,7 @@ public class XJTable extends JTable{
     putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
   }
   
+  @Override
   public void setModel(TableModel dataModel) {
     sortingModel = new SortingModel(dataModel);
     componentSizedProperly = false;
@@ -86,6 +87,7 @@ public class XJTable extends JTable{
   }
   
   
+  @Override
   public void setTableHeader(JTableHeader newTableHeader) {
     //first remove the old listener from the old header
     JTableHeader oldHeader = getTableHeader();
@@ -100,6 +102,7 @@ public class XJTable extends JTable{
       newTableHeader.addMouseListener(headerMouseListener);
   }
   
+  @Override
   public Dimension getPreferredScrollableViewportSize(){
     return getPreferredSize();
   }
@@ -281,6 +284,7 @@ public class XJTable extends JTable{
    * @return true if the preferred height of the table is smaller than the
    *   viewport.
    */
+  @Override
   public boolean getScrollableTracksViewportHeight() {
     Container parent = getParent();
     Dimension dim = getPreferredSize();
@@ -434,6 +438,7 @@ public class XJTable extends JTable{
 
       // skip non editable cells when tabbing
       Action tabAction = new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           oldTabAction.actionPerformed(e);
           JTable table = (JTable) e.getSource();
@@ -457,6 +462,7 @@ public class XJTable extends JTable{
 
       // skip non editable cells when shift tabbing
       Action shiftTabAction = new AbstractAction() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           oldShiftTabAction.actionPerformed(e);
           JTable table = (JTable) e.getSource();
@@ -563,6 +569,7 @@ public class XJTable extends JTable{
         this.comparator = comparator;
       }
 
+      @Override
       public int compare(ValueHolder o1, ValueHolder o2) {
         return ascending ? comparator.compare(o1.value, o2.value) :
           comparator.compare(o1.value, o2.value) * -1;
@@ -589,6 +596,7 @@ public class XJTable extends JTable{
     /**
      * This gets events from the source model and forwards them to the UI
      */
+    @Override
     public void tableChanged(TableModelEvent e){
       int type = e.getType();
       int firstRow = e.getFirstRow();
@@ -668,22 +676,27 @@ public class XJTable extends JTable{
       }
     }
     
+    @Override
     public int getRowCount(){
       return sourceToTarget.length;
 //      return sourceModel.getRowCount();
     }
     
+    @Override
     public int getColumnCount(){
       return sourceModel.getColumnCount();
     }
     
+    @Override
     public String getColumnName(int columnIndex){
       return sourceModel.getColumnName(columnIndex);
     }
+    @Override
     public Class getColumnClass(int columnIndex){
       return sourceModel.getColumnClass(columnIndex);
     }
     
+    @Override
     public boolean isCellEditable(int rowIndex, int columnIndex){
       int sourceRow = targetToSource(rowIndex);
       return sourceRow >= 0 ? 
@@ -691,11 +704,13 @@ public class XJTable extends JTable{
              false;
     }
     
+    @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex){
       int sourceRow = targetToSource(rowIndex);
       if(sourceRow >= 0) sourceModel.setValueAt(aValue, sourceRow, columnIndex);
     }
     
+    @Override
     public Object getValueAt(int row, int column){
       try{
         return sourceModel.getValueAt(targetToSource(row), column);
@@ -818,14 +833,17 @@ public class XJTable extends JTable{
   }
   
   protected class HeaderMouseListener extends MouseAdapter{
+    @Override
     public void mouseClicked(MouseEvent e){
       process(e);
     }
 
+    @Override
     public void mousePressed(MouseEvent e){
       process(e);
     }
 
+    @Override
     public void mouseReleased(MouseEvent e){
       process(e);
     }
@@ -841,6 +859,7 @@ public class XJTable extends JTable{
           if (columnModel.getColumnCount() > 1) {
             popup.add(new AbstractAction("Hide column "
               + dataModel.getColumnName(column)){
+              @Override
               public void actionPerformed(ActionEvent e) {
                 hideColumn(column);
               }
@@ -853,6 +872,7 @@ public class XJTable extends JTable{
             final TableColumn hiddenColumnF = hiddenColumn;
             popup.add(new AbstractAction("Show column "
               + dataModel.getColumnName(hiddenColumn.getModelIndex())){
+              @Override
               public void actionPerformed(ActionEvent e) {
                 showColumn(hiddenColumnF.getModelIndex(), viewColumn);
               }
@@ -884,6 +904,7 @@ public class XJTable extends JTable{
     Comparator comparator;
   }
 
+  @Override
   public void changeSelection(int rowIndex, int columnIndex,
                               boolean toggle, boolean extend) {
     super.changeSelection(rowIndex, columnIndex, toggle, extend);
@@ -909,6 +930,7 @@ public class XJTable extends JTable{
    * <a href="http://www.objectdefinitions.com/odblog/2009/jtable-setrowheight-causes-slow-repainting/">this page</a>
    * for a more complete discussion. 
    */
+  @Override
   public void tableChanged(TableModelEvent e) {
     //if just an update, and not a data or structure changed event or an insert or delete, use the fixed row update handling
     //otherwise call super.tableChanged to let the standard JTable update handling manage it
@@ -965,6 +987,7 @@ public class XJTable extends JTable{
    * Overridden to fix 
    * //http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4330950:
    */ 
+  @Override
   public void columnMoved(TableColumnModelEvent e) {
     if (isEditing()) {
         cellEditor.stopCellEditing();
@@ -976,6 +999,7 @@ public class XJTable extends JTable{
    * Overridden to fix 
    * //http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4330950:
    */   
+  @Override
   public void columnMarginChanged(ChangeEvent e) {
     //save the current edit (otherwise it gets lost)
     if (isEditing()) cellEditor.stopCellEditing();

@@ -91,6 +91,7 @@ public class Transducer
    *
    * @return a reference to <b>this</b>
    */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     try {
       fireProgressChanged(0);
@@ -148,6 +149,7 @@ public class Transducer
    * Implementation of the run() method from {@link java.lang.Runnable}. This
    * method is responsible for doing all the processing of the input document.
    */
+  @Override
   public void execute() throws ExecutionException {
     interrupted = false;
     if(document == null) throw new ExecutionException("No document provided!");
@@ -174,6 +176,7 @@ public class Transducer
    *
    * @return a List of Action objects (or null values)
    */
+  @Override
   public List<Action> getActions() {
     List<Action> result = new ArrayList<Action>();
     result.addAll(actionList);
@@ -280,8 +283,10 @@ public class Transducer
       putValue(SHORT_DESCRIPTION, "Serializes the Transducer as binary file");
     }
 
+    @Override
     public void actionPerformed(java.awt.event.ActionEvent evt) {
       Runnable runnable = new Runnable() {
+        @Override
         public void run() {
           JFileChooser fileChooser = MainFrame.getFileChooser();
           fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
@@ -316,6 +321,7 @@ public class Transducer
    * Notifies all the PRs in this controller that they should stop their
    * execution as soon as possible.
    */
+  @Override
   public synchronized void interrupt() {
     interrupted = true;
     batch.interrupt();
@@ -470,6 +476,7 @@ public class Transducer
   /**
    * Get the benchmark ID of this Transducers batch.
    */
+  @Override
   public String getBenchmarkId() {
     return batch.getBenchmarkId();
   }
@@ -477,6 +484,7 @@ public class Transducer
   /**
    * Set the benchmark ID of this PR.
    */
+  @Override
   public void setBenchmarkId(String benchmarkId) {
     batch.setBenchmarkId(benchmarkId);
   }
@@ -576,6 +584,7 @@ public class Transducer
   }
 
   // methods implemeting ControllerAwarePR
+  @Override
   public void controllerExecutionStarted(Controller c)
     throws ExecutionException {
     actionContext.setController(c);
@@ -586,6 +595,7 @@ public class Transducer
     batch.runControllerExecutionStartedBlock(actionContext,c,ontology);
   }
 
+  @Override
   public void controllerExecutionFinished(Controller c)
     throws ExecutionException {
     batch.runControllerExecutionFinishedBlock(actionContext,c,ontology);
@@ -594,6 +604,7 @@ public class Transducer
     actionContext.setPR(null);
   }
 
+  @Override
   public void controllerExecutionAborted(Controller c, Throwable t)
     throws ExecutionException {
     batch.runControllerExecutionAbortedBlock(actionContext,c,t,ontology);

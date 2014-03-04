@@ -74,11 +74,13 @@ public class XmlDocumentFormat extends TextualDocumentFormat {
   }
 
   /** We could collect repositioning information during XML parsing */
+  @Override
   public Boolean supportsRepositioning() {
     return new Boolean(true);
   } // supportsRepositioning
 
   /** Old style of unpackMarkup (without collecting of RepositioningInfo) */
+  @Override
   public void unpackMarkup(Document doc) throws DocumentFormatException {
     unpackMarkup(doc, (RepositioningInfo)null, (RepositioningInfo)null);
   } // unpackMarkup
@@ -100,6 +102,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat {
    *          recomended because the parser will report errors corectlly
    *          if the XML document is not well formed.
    */
+  @Override
   public void unpackMarkup(Document doc, RepositioningInfo repInfo,
           RepositioningInfo ampCodingInfo) throws DocumentFormatException {
     if((doc == null)
@@ -111,6 +114,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat {
 
     // Create a status listener
     StatusListener statusListener = new StatusListener() {
+      @Override
       public void statusChanged(String text) {
         // This is implemented in DocumentFormat.java and inherited here
         fireStatusChanged(text);
@@ -356,6 +360,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat {
   }
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     // Register XML mime type
     MimeType mime = new MimeType("text", "xml");

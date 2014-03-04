@@ -330,7 +330,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       Class<Icon> clazz =
           (Class<Icon>)Class.forName("gate.resources.img.svg." + baseName + "Icon",true,Gate.getClassLoader());
       Constructor<Icon> con = clazz.getConstructor(int.class,int.class);
-      result = (Icon)con.newInstance(24,24);
+      result = con.newInstance(24,24);
       iconByName.put(baseName, result);
       return result;
     } catch(Exception e) {
@@ -434,6 +434,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         mainTabbedPane.setSelectedComponent(handle.getLargeView());
         // put the focus on the new tab
         SwingUtilities.invokeLater(new Runnable() {
+          @Override
           public void run() {
             if (largeView != null) {
               if ((largeView instanceof JTabbedPane)
@@ -572,9 +573,11 @@ public class MainFrame extends JFrame implements ProgressListener,
     resourcesTree.setDragEnabled(true);
     resourcesTree.setTransferHandler(new TransferHandler() {
       // drag and drop that export a list of the selected documents
+      @Override
       public int getSourceActions(JComponent c) {
         return COPY;
       }
+      @Override
       protected Transferable createTransferable(JComponent c) {
         TreePath[] paths = resourcesTree.getSelectionPaths();
         if(paths == null) { return new StringSelection(""); }
@@ -595,11 +598,14 @@ public class MainFrame extends JFrame implements ProgressListener,
         return new StringSelection("ResourcesTree"
           + Arrays.toString(documentsNames.toArray()));
       }
+      @Override
       protected void exportDone(JComponent c, Transferable data, int action) {
       }
+      @Override
       public boolean canImport(JComponent c, DataFlavor[] flavors) {
         return false;
       }
+      @Override
       public boolean importData(JComponent c, Transferable t) {
         return false;
       }
@@ -746,6 +752,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     constraints.fill = GridBagConstraints.NONE;
     final JButton okButton = new JButton("OK");
     okButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         splash.setVisible(false);
       }
@@ -760,12 +767,14 @@ public class MainFrame extends JFrame implements ProgressListener,
     ActionMap actionMap = ((JComponent)splash.getContentPane()).getActionMap();
     inputMap.put(KeyStroke.getKeyStroke("ENTER"), "Apply");
     actionMap.put("Apply", new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         okButton.doClick();
       }
     });
     inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "Cancel");
     actionMap.put("Cancel", new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         okButton.doClick();
       }
@@ -845,6 +854,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           putValue(SHORT_DESCRIPTION, "Edit GATE options");
         }
 
+        @Override
         public void actionPerformed(ActionEvent evt) {
           optionsDialog.showDialog();
           optionsDialog.dispose();
@@ -875,6 +885,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         new AbstractAction("Clear Profiling History") {
         { putValue(SHORT_DESCRIPTION,
           "Clear profiling history otherwise the report is cumulative."); }
+        @Override
         public void actionPerformed(ActionEvent evt) {
           // create a new log file
           File logFile = new File(System.getProperty("java.io.tmpdir"),
@@ -898,6 +909,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         // this profiling run.
         boolean benchmarkWasEnabled;
   
+        @Override
         public void actionPerformed(ActionEvent evt) {
           if (getValue(NAME).equals("Start Profiling Applications")) {
             reportClearMenuItem.setEnabled(false);
@@ -934,6 +946,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       }, this));
       reportMenu.add(reportClearMenuItem);
       reportMenu.add(new XJMenuItem(new AbstractAction("Help on this tool") {
+        @Override
         public void actionPerformed(ActionEvent e) {
           showHelpFrame("chap:profiling", "Profiling Processing Resources");
         }
@@ -943,6 +956,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       final JCheckBoxMenuItem reportZeroTimesCheckBox = new JCheckBoxMenuItem();
       reportZeroTimesCheckBox.setAction(
         new AbstractAction("Report Zero Time Entries") {
+        @Override
         public void actionPerformed(ActionEvent evt) {
           Gate.getUserConfig().put(MainFrame.class.getName()+".reportzerotime",
             reportZeroTimesCheckBox.isSelected());
@@ -953,6 +967,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       ButtonGroup group = new ButtonGroup();
       final JRadioButtonMenuItem reportSortExecution = new JRadioButtonMenuItem();
       reportSortExecution.setAction(new AbstractAction("Sort by Execution") {
+        @Override
         public void actionPerformed(ActionEvent evt) {
           Gate.getUserConfig().put(
             MainFrame.class.getName()+".reportsorttime", false);
@@ -963,6 +978,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       group.add(reportSortExecution);
       final JRadioButtonMenuItem reportSortTime = new JRadioButtonMenuItem();
       reportSortTime.setAction(new AbstractAction("Sort by Time") {
+        @Override
         public void actionPerformed(ActionEvent evt) {
           Gate.getUserConfig().put(
             MainFrame.class.getName()+".reportsorttime", true);
@@ -975,6 +991,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         new AbstractAction("Report on Processing Resources") {
         { putValue(SHORT_DESCRIPTION,
           "Report time taken by each processing resource"); }
+        @Override
         public void actionPerformed(ActionEvent evt) {
           PRTimeReporter report = new PRTimeReporter();
           report.setBenchmarkFile(new File(System.getProperty("java.io.tmpdir"),
@@ -1000,6 +1017,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       reportMenu.add(new XJMenuItem(
         new AbstractAction("Report on Documents Processed") {
           { putValue(SHORT_DESCRIPTION, "Report most time consuming documents"); }
+          @Override
           public void actionPerformed(ActionEvent evt) {
             DocTimeReporter report = new DocTimeReporter();
             report.setBenchmarkFile(new File(System.getProperty("java.io.tmpdir"),
@@ -1031,6 +1049,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       if (maxDocs == null) { maxDocs = "10"; }
       reportMenu.add(new XJMenuItem(
         new AbstractAction("Set Max Documents (" + maxDocs + ")") {
+          @Override
           public void actionPerformed(ActionEvent evt) {
             Object response = JOptionPane.showInputDialog(instance,
                 "Set the maximum of documents to report", "Report options",
@@ -1048,6 +1067,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       if (prRegex == null || prRegex.equals("")) { prRegex = "All"; }
       reportMenu.add(new XJMenuItem(
         new AbstractAction("Set PR Matching Regex (" + prRegex + ")") {
+          @Override
           public void actionPerformed(ActionEvent evt) {
             Object response = JOptionPane.showInputDialog(instance,
               "Set the processing resource regex filter\n" +
@@ -1092,6 +1112,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     helpMenu.add(new XJMenuItem(new HelpUserGuideAction(), this));
     helpMenu.add(new XJMenuItem(new HelpUserGuideInContextAction(), this));
     helpMenu.add(new XJMenuItem(new AbstractAction("Keyboard Shortcuts") {
+      @Override
       public void actionPerformed(ActionEvent e) {
         showHelpFrame("sec:developer:keyboard", "shortcuts");
       }
@@ -1099,12 +1120,14 @@ public class MainFrame extends JFrame implements ProgressListener,
     helpMenu.addSeparator();
     helpMenu.add(new XJMenuItem(new AbstractAction("Using GATE Developer") {
       { this.putValue(Action.SHORT_DESCRIPTION, "To read first"); }
+      @Override
       public void actionPerformed(ActionEvent e) {
         showHelpFrame("chap:developer", "Using GATE Developer");
       }
     }, this));
     helpMenu.add(new XJMenuItem(new AbstractAction("Demo Movies") {
       { this.putValue(Action.SHORT_DESCRIPTION, "Movie tutorials"); }
+      @Override
       public void actionPerformed(ActionEvent e) {
         showHelpFrame("http://gate.ac.uk/demos/developer-videos/", "movies");
       }
@@ -1127,6 +1150,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     helpMenu.add(new XJMenuItem(new AbstractAction("What's New") {
       { this.putValue(Action.SHORT_DESCRIPTION,
           "List new features and important changes"); }
+      @Override
       public void actionPerformed(ActionEvent e) {
         showHelpFrame("chap:changes", "changes");
       }
@@ -1225,6 +1249,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     Gate.getCreoleRegister().addCreoleListener(this);
    
     resourcesTree.addKeyListener(new KeyAdapter() {
+      @Override
       public void keyPressed(KeyEvent e) {
         if(e.getKeyCode() == KeyEvent.VK_ENTER) {
           // shows in the central tabbed pane, the selected resources
@@ -1242,6 +1267,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     });
 
     resourcesTree.addMouseListener(new MouseAdapter() {
+      @Override
       public void mousePressed(MouseEvent e) {
         TreePath path =
           resourcesTree.getClosestPathForLocation(e.getX(), e.getY());
@@ -1252,9 +1278,11 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
         processMouseEvent(e);
       }
+      @Override
       public void mouseReleased(MouseEvent e) {
           processMouseEvent(e);
       }
+      @Override
       public void mouseClicked(MouseEvent e) {
         processMouseEvent(e);
       }
@@ -1420,6 +1448,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     });
 
     resourcesTree.addTreeSelectionListener(new TreeSelectionListener() {
+      @Override
       public void valueChanged(TreeSelectionEvent e) {
         if (!Gate.getUserConfig().getBoolean(
           MainFrame.class.getName()+".treeselectview")) {
@@ -1458,6 +1487,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     ActionMap actionMap =
       ((JComponent)instance.getContentPane()).getActionMap();
     actionMap.put("Show context menu", new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         KeyboardFocusManager focusManager =
           KeyboardFocusManager.getCurrentKeyboardFocusManager();
@@ -1503,6 +1533,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     });
 
     mainTabbedPane.getModel().addChangeListener(new ChangeListener() {
+      @Override
       public void stateChanged(ChangeEvent e) {
         // find the handle in the resources tree for the main view
         JComponent largeView =
@@ -1557,9 +1588,11 @@ public class MainFrame extends JFrame implements ProgressListener,
     });
 
     mainTabbedPane.addMouseListener(new MouseAdapter() {
+      @Override
       public void mousePressed(MouseEvent e) {
         processMouseEvent(e);
       }
+      @Override
       public void mouseReleased(MouseEvent e) {
         processMouseEvent(e);
       }
@@ -1601,9 +1634,11 @@ public class MainFrame extends JFrame implements ProgressListener,
     });
 
     addComponentListener(new ComponentAdapter() {
+      @Override
       public void componentShown(ComponentEvent e) {
         leftSplit.setDividerLocation(0.7);
       }
+      @Override
       public void componentResized(ComponentEvent e) {
         // resize proportionally the status bar elements
         int width = MainFrame.this.getWidth();
@@ -1621,14 +1656,17 @@ public class MainFrame extends JFrame implements ProgressListener,
     // blink the messages tab when new information is displayed
     logArea.getDocument().addDocumentListener(
       new javax.swing.event.DocumentListener() {
+        @Override
         public void insertUpdate(javax.swing.event.DocumentEvent e) {
           changeOccured();
         }
 
+        @Override
         public void removeUpdate(javax.swing.event.DocumentEvent e) {
           changeOccured();
         }
 
+        @Override
         public void changedUpdate(javax.swing.event.DocumentEvent e) {
         }
 
@@ -1638,18 +1676,22 @@ public class MainFrame extends JFrame implements ProgressListener,
       });
 
     logArea.addPropertyChangeListener("document", new PropertyChangeListener() {
+      @Override
       public void propertyChange(PropertyChangeEvent evt) {
         // add the document listener
         logArea.getDocument().addDocumentListener(
           new javax.swing.event.DocumentListener() {
+            @Override
             public void insertUpdate(javax.swing.event.DocumentEvent e) {
               changeOccured();
             }
 
+            @Override
             public void removeUpdate(javax.swing.event.DocumentEvent e) {
               changeOccured();
             }
 
+            @Override
             public void changedUpdate(javax.swing.event.DocumentEvent e) {
               changeOccured();
             }
@@ -1719,6 +1761,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
         private Action exitAction = new ExitGateAction();
 
+        @Override
         public Object invoke(Object proxy, Method method, Object[] args)
           throws Throwable {
           Object appEvent = args[0];
@@ -1774,6 +1817,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
   }
 
+  @Override
   public void progressChanged(int i) {
     // progressBar.setStringPainted(true);
     int oldValue = progressBar.getValue();
@@ -1796,6 +1840,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * Called when the process is finished.
    *
    */
+  @Override
   public void processFinished() {
     // progressBar.setStringPainted(false);
     // if(stopAction.isEnabled()){
@@ -1807,7 +1852,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     // });
     // }
     SwingUtilities.invokeLater(new ProgressBarUpdater(0));
-    SwingUtilities.invokeLater(new Runnable() { public void run() {
+    SwingUtilities.invokeLater(new Runnable() { @Override
+    public void run() {
       globalProgressBar.setVisible(false);
     }});
     animator.deactivate();
@@ -1819,6 +1865,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   private static final Pattern START_RUNNING_PATTERN =
     Pattern.compile("Start running .* on (\\d+) documents?");
 
+  @Override
   public void statusChanged(String text) {
     SwingUtilities.invokeLater(new StatusBarUpdater(text));
     if (text != null) {
@@ -1826,7 +1873,8 @@ public class MainFrame extends JFrame implements ProgressListener,
       if (m.matches()) {
         // get the corpus size from the status text
         final int corpusSize = Integer.valueOf(m.group(1));
-        SwingUtilities.invokeLater(new Runnable() { public void run() {
+        SwingUtilities.invokeLater(new Runnable() { @Override
+        public void run() {
           // initialise the progress bar
           globalProgressBar.setMaximum(corpusSize);
           globalProgressBar.setValue(0);
@@ -1834,7 +1882,8 @@ public class MainFrame extends JFrame implements ProgressListener,
           globalProgressBar.setVisible(true);
         }});
       } else if (text.startsWith("Finished running ")) {
-        SwingUtilities.invokeLater(new Runnable() { public void run() {
+        SwingUtilities.invokeLater(new Runnable() { @Override
+        public void run() {
           // update the progress bar with one document processed
           globalProgressBar.setValue(globalProgressBar.getValue() + 1);
           globalProgressBar.setString(globalProgressBar.getValue() + "/"
@@ -1844,11 +1893,13 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
   }
 
+  @Override
   public void resourceLoaded(CreoleEvent e) {
     final Resource res = e.getResource();
     if(Gate.getHiddenAttribute(res.getFeatures())
       || res instanceof VisualResource) return;
     SwingUtilities.invokeLater(new Runnable() {
+      @Override
       public void run() {
         
         NameBearerHandle handle = null;
@@ -1897,10 +1948,12 @@ public class MainFrame extends JFrame implements ProgressListener,
     //
   }// resourceLoaded();
 
+  @Override
   public void resourceUnloaded(CreoleEvent e) {
     final Resource res = e.getResource();
     if(Gate.getHiddenAttribute(res.getFeatures())) return;
     Runnable runner = new Runnable() {
+      @Override
       public void run() {
         DefaultMutableTreeNode node;
         DefaultMutableTreeNode parent = null;
@@ -1936,6 +1989,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   /** Called when a {@link gate.DataStore} has been opened */
+  @Override
   public void datastoreOpened(CreoleEvent e) {
     DataStore ds = e.getDatastore();
     if(ds.getName() == null || ds.getName().length() == 0){
@@ -1996,11 +2050,13 @@ public class MainFrame extends JFrame implements ProgressListener,
   }// datastoreOpened();
 
   /** Called when a {@link gate.DataStore} has been created */
+  @Override
   public void datastoreCreated(CreoleEvent e) {
     datastoreOpened(e);
   }
 
   /** Called when a {@link gate.DataStore} has been closed */
+  @Override
   public void datastoreClosed(CreoleEvent e) {
     DataStore ds = e.getDatastore();
     DefaultMutableTreeNode node;
@@ -2027,6 +2083,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
   }
 
+  @Override
   public void resourceRenamed(Resource resource, String oldName, String newName) {
     //first find the handle for the renamed resource
     Handle handle = findHandleForResource(resource);
@@ -2045,6 +2102,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   /**
    * Overridden so we can exit when window is closed
    */
+  @Override
   protected void processWindowEvent(WindowEvent e) {
     if(e.getID() == WindowEvent.WINDOW_CLOSING) {
       new ExitGateAction().actionPerformed(null);
@@ -2075,6 +2133,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     // different thread
     // the Swing thread sounds good for that
     SwingUtilities.invokeLater(new Runnable() {
+      @Override
       public void run() {
      // build the dialog contents
         Object[] options = new Object[]{new JButton(new StopAction())};
@@ -2092,6 +2151,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         if(parentWindow instanceof Frame) {
           dialog = new JDialog((Frame)parentWindow, "Please wait", true) {
             private static final long serialVersionUID = 1L;
+            @Override
             protected void processWindowEvent(WindowEvent e) {
               if(e.getID() == WindowEvent.WINDOW_CLOSING) {
                 getToolkit().beep();
@@ -2102,6 +2162,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         else if(parentWindow instanceof Dialog) {
           dialog = new JDialog((Dialog)parentWindow, "Please wait", true) {
             private static final long serialVersionUID = 1L;
+            @Override
             protected void processWindowEvent(WindowEvent e) {
               if(e.getID() == WindowEvent.WINDOW_CLOSING) {
                 getToolkit().beep();
@@ -2112,6 +2173,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         else {
           dialog = new JDialog(JOptionPane.getRootFrame(), "Please wait", true) {
             private static final long serialVersionUID = 1L;
+            @Override
             protected void processWindowEvent(WindowEvent e) {
               if(e.getID() == WindowEvent.WINDOW_CLOSING) {
                 getToolkit().beep();
@@ -2166,6 +2228,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   } // setTitleChangable(boolean isChangable)
 
   /** Override to avoid Protege to change Frame title */
+  @Override
   public synchronized void setTitle(String title) {
     if(titleChangable) {
       super.setTitle(title);
@@ -2299,6 +2362,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SHORT_DESCRIPTION,
         "Compare annotations and features in one or two documents");
     }
+    @Override
     public void actionPerformed(ActionEvent e) {
       // find the handle in the resource tree for the displayed view
       Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
@@ -2346,8 +2410,10 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SMALL_ICON, getIcon("corpus-benchmark"));
     }// newCorpusEvalAction
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
+        @Override
         public void run() {
           fileChooser.setDialogTitle("Please select a directory which contains "
             + "the documents to be evaluated");
@@ -2410,8 +2476,10 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SMALL_ICON, getIcon("corpus-benchmark"));
     }// newCorpusEvalAction
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
+        @Override
         public void run() {
           fileChooser.setDialogTitle("Please select a directory which contains "
             + "the documents to be evaluated");
@@ -2468,8 +2536,10 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SMALL_ICON, getIcon("corpus-benchmark"));
     }// newCorpusEvalAction
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
+        @Override
         public void run() {
           fileChooser.setDialogTitle("Please select a directory which contains "
             + "the documents to be evaluated");
@@ -2532,8 +2602,10 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SMALL_ICON, getIcon("corpus-benchmark"));
     }// newCorpusEvalAction
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
+        @Override
         public void run() {
           fileChooser.setDialogTitle("Please select a directory which contains "
             + "the documents to be evaluated");
@@ -2590,6 +2662,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       return verboseMode;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       if(!(e.getSource() instanceof JCheckBoxMenuItem)) return;
       verboseMode = ((JCheckBoxMenuItem)e.getSource()).getState();
@@ -2611,8 +2684,10 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SMALL_ICON, getIcon("annie-application"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
+        @Override
         public void run() {
           lockGUI("ANNIE is being loaded...");
           final SerialAnalyserController controller;
@@ -2635,12 +2710,14 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
 
           SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
               List<ProcessingResource> prs =
                 new ArrayList<ProcessingResource>(controller.getPRs());
               for(ProcessingResource pr : prs) {
                 try {
                   SwingUtilities.invokeLater(new Runnable() {
+                    @Override
                     public void run() {
                       // select last processing resource in resources tree
                       int selectedRow = resourcesTree.getRowForPath(
@@ -2723,6 +2800,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       this.icon = icon;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       if (pipelineURL == null) {
         System.err.println("The URL of the application has not been correctly set and cannot be loaded.");
@@ -2730,6 +2808,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
       
       Runnable runnable = new Runnable() {
+        @Override
         public void run() {
           lockGUI(name + " is being loaded...");
           try {
@@ -2793,6 +2872,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SHORT_DESCRIPTION, "Create a generic resource to be completed");
     }// NewBootStrapAction
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       BootStrapDialog bootStrapDialog = new BootStrapDialog(MainFrame.this);
       bootStrapDialog.setVisible(true);
@@ -2829,8 +2909,10 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SMALL_ICON, getIcon(rData.getIcon()));
     } // NewResourceAction(ResourceData rData)
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
       Runnable runnable = new Runnable() {
+        @Override
         public void run() {
           newResourceDialog.setTitle("Parameters for the new "
             + rData.getName());
@@ -2849,10 +2931,12 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SHORT_DESCRIPTION, "Stops the current action");
     }
 
+    @Override
     public boolean isEnabled() {
       return Gate.getExecutable() != null;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Executable ex = Gate.getExecutable();
       if(ex != null) ex.interrupt();
@@ -2894,6 +2978,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       
       JButton editInputAS = new JButton(getIcon("edit-list"));
       editInputAS.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent ae) {
           ListEditorDialog listEditor =
             new ListEditorDialog(instance, inputASList, "java.lang.String");
@@ -2935,6 +3020,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       fte.setEditable(false);
       JButton editFTE = new JButton(getIcon("edit-list"));
       editFTE.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent ae) {
           ListEditorDialog listEditor =
             new ListEditorDialog(instance, fteList, "java.lang.String");
@@ -2969,6 +3055,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
       JButton indexBrowse = new JButton(getIcon("open-file"));
       indexBrowse.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent ae) {
           // first we need to ask for a new empty directory
           fileChooser.setDialogTitle(
@@ -3383,6 +3470,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SMALL_ICON, getIcon("datastore"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Map<String,String> dsTypes = DataStoreRegister.getDataStoreClassNames();
       HashMap<String,String> dsTypeByName = new HashMap<String,String>();
@@ -3410,6 +3498,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           MainFrame.this, "Create a datastore", true);
         dialog.setContentPane(optionPane);
         list.addMouseListener(new MouseAdapter() {
+          @Override
           public void mouseClicked(MouseEvent e) {
             if (e.getClickCount() == 2) {
               optionPane.setValue("OK");
@@ -3418,6 +3507,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
         });
         optionPane.addPropertyChangeListener(new PropertyChangeListener() {
+          @Override
           public void propertyChange(PropertyChangeEvent e) {
             Object value = optionPane.getValue();
             if (value == null || value.equals(JOptionPane.UNINITIALIZED_VALUE)) {
@@ -3477,6 +3567,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SMALL_ICON, getIcon("open-application"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       ExtensionFileFilter filter = new ExtensionFileFilter(
         "GATE Application files (.gapp, .xgapp)", ".gapp", ".xgapp");
@@ -3489,7 +3580,8 @@ public class MainFrame extends JFrame implements ProgressListener,
       if (fileChooser.showOpenDialog(MainFrame.this)
         == JFileChooser.APPROVE_OPTION) {
         final File file = fileChooser.getSelectedFile();
-        Runnable runnable = new Runnable() { public void run() {
+        Runnable runnable = new Runnable() { @Override
+        public void run() {
         try {
           Object resource = PersistenceManager.loadObjectFromFile(file);
           if(resource instanceof Resource) {
@@ -3513,6 +3605,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
         catch (final Exception error) {
           SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
               String message = error.getMessage();
               log.error(message, error);
@@ -3543,8 +3636,10 @@ public class MainFrame extends JFrame implements ProgressListener,
       this.handle = handle;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
-      SwingUtilities.invokeLater(new Runnable() { public void run() {
+      SwingUtilities.invokeLater(new Runnable() { @Override
+      public void run() {
         mainTabbedPane.remove(handle.getLargeView());
         mainTabbedPane.setSelectedIndex(mainTabbedPane.getTabCount() - 1);
         // remove all GUI resources used by this handle
@@ -3562,15 +3657,18 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SHORT_DESCRIPTION, "Hide the selected resources");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Runnable runner = new Runnable() {
+        @Override
         public void run() {
           TreePath[] paths = resourcesTree.getSelectionPaths();
           for(TreePath path : paths) {
             final Object value = ((DefaultMutableTreeNode)
               path.getLastPathComponent()).getUserObject();
             if(value instanceof Handle) {
-              SwingUtilities.invokeLater(new Runnable() { public void run() {
+              SwingUtilities.invokeLater(new Runnable() { @Override
+              public void run() {
                 new CloseViewAction((Handle)value).actionPerformed(null);
               }});
             }
@@ -3593,6 +3691,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       this.path = path;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       resourcesTree.startEditingAtPath(path);
     }
@@ -3607,15 +3706,18 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SHORT_DESCRIPTION, "Close the selected resources");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Runnable runner = new Runnable() {
+        @Override
         public void run() {
           TreePath[] paths = resourcesTree.getSelectionPaths();
           for(TreePath path : paths) {
             final Object userObject = ((DefaultMutableTreeNode)
               path.getLastPathComponent()).getUserObject();
             if(userObject instanceof NameBearerHandle) {
-              SwingUtilities.invokeLater(new Runnable() { public void run() {
+              SwingUtilities.invokeLater(new Runnable() { @Override
+              public void run() {
                 ((NameBearerHandle)userObject).getCloseAction()
                   .actionPerformed(null);
               }});
@@ -3636,15 +3738,18 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SHORT_DESCRIPTION, "Close recursively the selected resources");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Runnable runner = new Runnable() {
+        @Override
         public void run() {
           TreePath[] paths = resourcesTree.getSelectionPaths();
           for(TreePath path : paths) {
             final Object userObject = ((DefaultMutableTreeNode)
               path.getLastPathComponent()).getUserObject();
             if(userObject instanceof NameBearerHandle) {
-              SwingUtilities.invokeLater(new Runnable() { public void run() {
+              SwingUtilities.invokeLater(new Runnable() { @Override
+              public void run() {
                 ((NameBearerHandle)userObject).getCloseRecursivelyAction()
                   .actionPerformed(null);
               }});
@@ -3667,6 +3772,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift H"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       // for each element in the tree look if it is in the tab panel
       // if yes, remove it from the tab panel
@@ -3678,7 +3784,8 @@ public class MainFrame extends JFrame implements ProgressListener,
          && (mainTabbedPane.indexOfComponent(
             ((Handle)node.getUserObject()).getLargeView()) != -1)) {
           final Handle handle = (Handle)node.getUserObject();
-          SwingUtilities.invokeLater(new Runnable() { public void run() {
+          SwingUtilities.invokeLater(new Runnable() { @Override
+          public void run() {
             (new CloseViewAction(handle)).actionPerformed(null);
           }});
         }
@@ -3694,8 +3801,10 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("Enter"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Runnable runner = new Runnable() {
+        @Override
         public void run() {
           TreePath[] paths = resourcesTree.getSelectionPaths();
           if (paths == null) { return; }
@@ -3719,7 +3828,8 @@ public class MainFrame extends JFrame implements ProgressListener,
               value = ((DefaultMutableTreeNode)value).getUserObject();
               if(value instanceof Handle) {
                 final Handle handle = (Handle)value;
-                SwingUtilities.invokeLater(new Runnable() { public void run() {
+                SwingUtilities.invokeLater(new Runnable() { @Override
+                public void run() {
                   select(handle);
                 }});
               }
@@ -3743,8 +3853,10 @@ public class MainFrame extends JFrame implements ProgressListener,
       this.handle = handle;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       SwingUtilities.invokeLater(new Runnable() {
+        @Override
         public void run() { select(handle); }
       });
     }
@@ -3763,8 +3875,10 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("alt F4"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
+        @Override
         public void run() {
           // save the options
           OptionsMap userConfig = Gate.getUserConfig();
@@ -3916,6 +4030,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SMALL_ICON, getIcon("datastore"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Map<String,String> dsTypes = DataStoreRegister.getDataStoreClassNames();
       HashMap<String,String> dsTypeByName = new HashMap<String,String>();
@@ -3943,6 +4058,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           MainFrame.this, "Open a datastore", true);
         dialog.setContentPane(optionPane);
         list.addMouseListener(new MouseAdapter() {
+          @Override
           public void mouseClicked(MouseEvent e) {
             if (e.getClickCount() == 2) {
               optionPane.setValue("OK");
@@ -3951,6 +4067,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
         });
         optionPane.addPropertyChangeListener(new PropertyChangeListener() {
+          @Override
           public void propertyChange(PropertyChangeEvent e) {
             Object value = optionPane.getValue();
             if (value == null || value.equals(JOptionPane.UNINITIALIZED_VALUE)) {
@@ -4018,10 +4135,12 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     protected void init() {
       addMenuListener(new MenuListener() {
+        @Override
         public void menuCanceled(MenuEvent e) {
           menuDeselected(e);
         }
         
+        @Override
         public void menuDeselected(MenuEvent e) {
           // clear the status
           statusChanged("");
@@ -4031,6 +4150,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           removeAll();
         }
         
+        @Override
         public void menuSelected(MenuEvent e) {
           // find out the available types of LRs and repopulate the menu
           CreoleRegister reg = Gate.getCreoleRegister();
@@ -4073,6 +4193,7 @@ public class MainFrame extends JFrame implements ProgressListener,
               // empty PR menu -> add an action to load ANNIE plugin
               add(new AbstractAction("Add ANNIE Resources to this Menu") {
                 { putValue(SHORT_DESCRIPTION, "Load the ANNIE plugin."); }
+                @Override
                 public void actionPerformed(ActionEvent e) {
                 try {
                   URL pluginUrl = new File(Gate.getPluginsHome(),
@@ -4135,13 +4256,16 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     protected void init() {
       addMenuListener(new MenuListener() {
+        @Override
         public void menuCanceled(MenuEvent e) {
           // do nothing
         }
+        @Override
         public void menuDeselected(MenuEvent e) {
           // clear the status
           statusChanged("");
         }
+        @Override
         public void menuSelected(MenuEvent e) {
           removeAll();
           addMenuItems();
@@ -4161,8 +4285,10 @@ public class MainFrame extends JFrame implements ProgressListener,
       final XJMenuItem item = new XJMenuItem(new AbstractAction(name,
         MainFrame.getIcon("open-application")) {
         { this.putValue(Action.SHORT_DESCRIPTION, location); }
+        @Override
         public void actionPerformed(ActionEvent e) {
-          Runnable runnable = new Runnable() { public void run() {
+          Runnable runnable = new Runnable() { @Override
+          public void run() {
           try { File file = new File(location);
             PersistenceManager.loadObjectFromFile(file);
           } catch(Exception e) {
@@ -4179,7 +4305,9 @@ public class MainFrame extends JFrame implements ProgressListener,
           thread.start();
       }}, MainFrame.this);
       item.addMenuKeyListener(new MenuKeyListener() {
+        @Override
         public void menuKeyTyped(MenuKeyEvent e) { /* do nothing */ }
+        @Override
         public void menuKeyPressed(MenuKeyEvent e) {
           if (e.getKeyCode() == KeyEvent.VK_DELETE) {
             // remove selected element from the applications list
@@ -4190,11 +4318,13 @@ public class MainFrame extends JFrame implements ProgressListener,
 //            item.revalidate();
           }
         }
+        @Override
         public void menuKeyReleased(MenuKeyEvent e) {/* do nothing */ }
       });
       add(item);
     }
     add(new XJMenuItem(new AbstractAction("Clear List") {
+      @Override
       public void actionPerformed(ActionEvent e) {
         // clear the applications list
         locations.put("applications", "");
@@ -4256,6 +4386,7 @@ public class MainFrame extends JFrame implements ProgressListener,
      * register) then see if it publishes any actions and if so, add
      * them to the menu in the appropriate places.
      */
+    @Override
     public void resourceLoaded(CreoleEvent e) {
       Resource res = e.getResource();
       if(Gate.getCreoleRegister().get(res.getClass().getName()).isTool()
@@ -4334,6 +4465,7 @@ public class MainFrame extends JFrame implements ProgressListener,
      * If the resource just unloaded is one that contributed some menu
      * items then remove them again.
      */
+    @Override
     public void resourceUnloaded(CreoleEvent e) {
       Resource res = e.getResource();
       List<JMenuItem> items = itemsByResource.remove(res);
@@ -4384,9 +4516,13 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     // remaining CreoleListener methods not used
+    @Override
     public void datastoreClosed(CreoleEvent e) { }
+    @Override
     public void datastoreCreated(CreoleEvent e) { }
+    @Override
     public void datastoreOpened(CreoleEvent e) { }
+    @Override
     public void resourceRenamed(Resource resource, String oldName,
             String newName) { }
   }
@@ -4410,6 +4546,7 @@ public class MainFrame extends JFrame implements ProgressListener,
      * @return a string containing the tooltip or <code>null</code> if
      *         <code>event</code> is null
      */
+    @Override
     public String getToolTipText(MouseEvent event) {
       String res = super.getToolTipText(event);
       if(event != null) {
@@ -4428,6 +4565,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       return res;
     }
 
+    @Override
     public JToolTip createToolTip() {
       return myToolTip;
     }
@@ -4478,6 +4616,7 @@ public class MainFrame extends JFrame implements ProgressListener,
      */
     JPanel tipComponent;
 
+    @Override
     public void setTipText(String tipText) {
       // textLabel.setText(tipText);
     }
@@ -4524,6 +4663,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
     }
 
+    @Override
     public Dimension getPreferredSize() {
       Dimension d = tipComponent.getPreferredSize();
       Insets ins = getInsets();
@@ -4540,6 +4680,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SHORT_DESCRIPTION, "Show developers names and version");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       splash.showSplash();
     }
@@ -4558,6 +4699,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       super("Search in Mailing List");
       this.keywords = keywords;
     }
+    @Override
     public void actionPerformed(ActionEvent e) {
       if (keywords == null) {
         keywords = JOptionPane.showInputDialog(instance,
@@ -4588,6 +4730,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SHORT_DESCRIPTION, "Contents of the online user guide");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       showHelpFrame("", "help contents");
     }
@@ -4617,6 +4760,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       return;
     }
     Runnable runnable = new Runnable() {
+      @Override
       public void run() {
         StringBuilder actualURL = new StringBuilder(url.toString());
         if (url.toString().startsWith("http://gate.ac.uk/userguide/")) {
@@ -4740,6 +4884,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("F1"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       // get the handle for the selected tab pane resource view
       // then call HelpOnItemTreeAction with this handle
@@ -4775,6 +4920,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       this.resource = resource;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       String helpURL = null;
       String resourceClassName = resource.getTarget().getClass().getName();
@@ -4809,8 +4955,10 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SHORT_DESCRIPTION,
         "Tooltips appear in help balloon like this one");
     }
+    @Override
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
+        @Override
         public void run() {
           javax.swing.ToolTipManager toolTipManager =
             ToolTipManager.sharedInstance();
@@ -4837,6 +4985,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
     }
 
+    @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value,
       boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
       super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row,
@@ -4884,6 +5033,7 @@ public class MainFrame extends JFrame implements ProgressListener,
      * This is the original implementation from the super class with
      * some changes (i.e. shorter timer: 500 ms instead of 1200)
      */
+    @Override
     protected void startEditingTimer() {
       if(timer == null) {
         timer = new javax.swing.Timer(500, this);
@@ -4896,6 +5046,7 @@ public class MainFrame extends JFrame implements ProgressListener,
      * This is the original implementation from the super class with
      * some changes (i.e. correct discovery of icon)
      */
+    @Override
     public Component getTreeCellEditorComponent(JTree tree, Object value,
       boolean isSelected, boolean expanded, boolean leaf, int row) {
       Component retValue =
@@ -4918,6 +5069,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       super(root, asksAllowChildren);
     }
 
+    @Override
     public void valueForPathChanged(TreePath path, Object newValue) {
       DefaultMutableTreeNode aNode =
         (DefaultMutableTreeNode)path.getLastPathComponent();
@@ -4950,6 +5102,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       value = newValue;
     }
 
+    @Override
     public void run() {
       if(value == 0)
         progressBar.setVisible(false);
@@ -4965,6 +5118,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       this.text = text;
     }
 
+    @Override
     public void run() {
       statusBar.setText(text);
     }
@@ -5000,6 +5154,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     public void activate() {
       // add the label in the panel
       SwingUtilities.invokeLater(new Runnable() {
+        @Override
         public void run() {
           targetPanel.add(imageLabel);
         }
@@ -5019,6 +5174,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
       // clear the panel
       SwingUtilities.invokeLater(new Runnable() {
+        @Override
         public void run() {
           targetPanel.removeAll();
           targetPanel.repaint();
@@ -5031,10 +5187,12 @@ public class MainFrame extends JFrame implements ProgressListener,
       notifyAll();
     }
 
+    @Override
     public synchronized void run() {
       while(!dying) {
         if(active && targetPanel.isVisible()) {
           SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
               // targetPanel.getParent().validate();
               // targetPanel.getParent().repaint();

@@ -55,6 +55,7 @@ public class SearchExpressionsAction extends AbstractAction {
     this.searchRegExpChk = searchRegExpChk;
   }
 
+  @Override
   public void actionPerformed(ActionEvent arg0) {
     String[] values1 = {
       "Number",
@@ -140,6 +141,7 @@ public class SearchExpressionsAction extends AbstractAction {
     final JButton b3 = new JButton("Modify the selection");
     b3.setEnabled(false);
     modifiedTextField.addCaretListener(new CaretListener() {
+      @Override
       public void caretUpdate(CaretEvent e) {
         list3.setEnabled(modifiedTextField.getSelectedText() != null);
       }
@@ -154,12 +156,14 @@ public class SearchExpressionsAction extends AbstractAction {
       JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION,
       null, options, "Cancel");
     b1.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
           modifySearchExpression(list1.getSelectedValue().toString(),
             modifiedTextField);
       }
     });
     list1.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         super.mouseClicked(e);
         if (e.getClickCount() == 2) {
@@ -169,6 +173,7 @@ public class SearchExpressionsAction extends AbstractAction {
       }
     });
     list1.addListSelectionListener(new ListSelectionListener() {
+      @Override
       public void valueChanged(ListSelectionEvent e) {
         if (list1.getSelectedValue() != null) {
           b1.setEnabled(true);
@@ -178,12 +183,14 @@ public class SearchExpressionsAction extends AbstractAction {
       }
     });
     b2.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
           modifySearchExpression(list2.getSelectedValue().toString(),
             modifiedTextField);
       }
     });
     list2.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         super.mouseClicked(e);
         if (e.getClickCount() == 2) {
@@ -193,6 +200,7 @@ public class SearchExpressionsAction extends AbstractAction {
       }
     });
     list2.addListSelectionListener(new ListSelectionListener() {
+      @Override
       public void valueChanged(ListSelectionEvent e) {
         if (list2.getSelectedValue() != null) {
           b2.setEnabled(true);
@@ -202,12 +210,14 @@ public class SearchExpressionsAction extends AbstractAction {
       }
     });
     b3.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
           modifySearchExpression(list3.getSelectedValue().toString(),
             modifiedTextField);
       }
     });
     list3.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         super.mouseClicked(e);
         if (e.getClickCount() == 2 && list3.isEnabled()) {
@@ -217,6 +227,7 @@ public class SearchExpressionsAction extends AbstractAction {
       }
     });
     list3.addListSelectionListener(new ListSelectionListener() {
+      @Override
       public void valueChanged(ListSelectionEvent e) {
         if (list3.getSelectedValue() != null) {
           b3.setEnabled(true);
@@ -250,8 +261,7 @@ public class SearchExpressionsAction extends AbstractAction {
 
   private void modifySearchExpression(String modification,
                                       JTextField textField) {
-    if (modification == null
-     || !(modification instanceof String)) {
+    if (modification == null) {
       return;
     }
 

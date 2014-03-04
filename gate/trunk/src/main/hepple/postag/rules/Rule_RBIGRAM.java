@@ -32,6 +32,7 @@ public class Rule_RBIGRAM extends Rule {
   public Rule_RBIGRAM() {
   }
 
+  @Override
   public boolean checkContext(POSTagger tagger) {
     return (tagger.wordBuff[3].equals(context[0]) &&
             tagger.wordBuff[4].equals(context[1]));

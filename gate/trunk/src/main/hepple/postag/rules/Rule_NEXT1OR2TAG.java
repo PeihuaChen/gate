@@ -31,6 +31,7 @@ public class Rule_NEXT1OR2TAG extends Rule {
 
   public Rule_NEXT1OR2TAG() {
   }
+  @Override
   public boolean checkContext(POSTagger tagger) {
     return (tagger.lexBuff[4][0].equals(context[0]) ||
             tagger.lexBuff[5][0].equals(context[0]));

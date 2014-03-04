@@ -37,6 +37,7 @@ public class SimpleErrorHandler implements ErrorHandler {
     * This error method is called by the SAX parser when it encounts a
     * recoverable(can continue parsing) error.
     */
+  @Override
   public void error(SAXParseException ex) throws SAXException {
     String systemId = "not available";
     String publicId = "not available";
@@ -53,6 +54,7 @@ public class SimpleErrorHandler implements ErrorHandler {
     * This fatalError method is called by the SAX parser when it encounts a
     * fatal(can't continue parsing) error.
     */
+  @Override
   public void fatalError(SAXParseException ex) throws SAXException{
     String systemId = "not available";
     String publicId = "not available";
@@ -69,6 +71,7 @@ public class SimpleErrorHandler implements ErrorHandler {
     * This warning is called by the SAX parser when there is the danger of a
     * confusion.
     */
+  @Override
   public void warning(SAXParseException ex) throws SAXException {
     String systemId = "not available";
     String publicId = "not available";

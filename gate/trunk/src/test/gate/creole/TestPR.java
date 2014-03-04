@@ -90,11 +90,13 @@ public class TestPR extends TestCase
   public TestPR(String name) { super(name); }
 
   /** Fixture set up */
+  @Override
   public void setUp() throws Exception {
   } // setUp
 
   /** Put things back as they should be after running tests.
     */
+  @Override
   public void tearDown() throws Exception {
   } // tearDown
 
@@ -652,13 +654,15 @@ public class TestPR extends TestCase
              throws JapeException {
        return false;
      }
-     public String getOperator() {
+     @Override
+    public String getOperator() {
        return "fooOp";
      }
    };
 
    public static class TestAnnotationAccessor extends MetaPropertyAccessor {
-     public Object getValue(Annotation annot, AnnotationSet context) {
+     @Override
+    public Object getValue(Annotation annot, AnnotationSet context) {
        return "foo";
      }
 

@@ -9,7 +9,6 @@ package gate.creole.annic.lucene;
 
 import gate.creole.annic.PatternAnnotation;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

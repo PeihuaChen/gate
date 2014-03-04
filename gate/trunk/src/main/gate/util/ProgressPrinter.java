@@ -52,6 +52,7 @@ public class ProgressPrinter implements ProgressListener {
     this.out = out;
   }
 
+  @Override
   public void processFinished() {
     for(int i = currentValue; i < numberOfSteps; i++) {
       out.print("#");
@@ -61,6 +62,7 @@ public class ProgressPrinter implements ProgressListener {
     started = false;
   }
 
+  @Override
   public void progressChanged(int newValue) {
     if(!started){
       out.print("[");

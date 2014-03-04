@@ -31,9 +31,11 @@ public class TestTokeniser extends TestCase{
   }
 
   /** Fixture set up */
+  @Override
   public void setUp() throws Exception {
   }
 
+  @Override
   public void tearDown() throws Exception {
   } // tearDown
 

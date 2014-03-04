@@ -40,6 +40,7 @@ public class Splash extends JWindow {
     content.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
     getContentPane().add(content, BorderLayout.CENTER);
     content.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         // when the content pane is clicked, hide it
         setVisible(false);
