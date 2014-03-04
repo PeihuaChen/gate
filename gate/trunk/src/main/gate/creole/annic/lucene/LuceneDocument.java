@@ -312,7 +312,7 @@ public class LuceneDocument {
     // all the annotation sets to be indexed
     // however it must not contain the baseTokens or
     // indexUnitAnnotationType annotations
-    AnnotationSet mergedSet = null;
+    //AnnotationSet mergedSet = null;
 
     for(String annotSet : annotSetsToIndex) {
 
@@ -667,13 +667,14 @@ public class LuceneDocument {
       }
     }
 
-    ArrayList<Token> toReturn[] = new ArrayList[unitOffsetsSet.size()];
+    @SuppressWarnings("unchecked")
+    List<Token> toReturn[] = new ArrayList[unitOffsetsSet.size()];
     Iterator<OffsetGroup> iter = unitOffsetsSet.iterator();
     int counter = 0;
     while(iter.hasNext()) {
       OffsetGroup group = iter.next();
-      ArrayList<Token> newTokens = new ArrayList<Token>();
-      ArrayList<Annotation> tokens =
+      List<Token> newTokens = new ArrayList<Token>();
+      List<Annotation> tokens =
         new ArrayList<Annotation>(toUseSet.getContained(group.startOffset,
           group.endOffset));
 
@@ -737,9 +738,9 @@ public class LuceneDocument {
 
         // now find out the features and add them
         FeatureMap features = annot.getFeatures();
-        Iterator fIter = features.keySet().iterator();
+        Iterator<Object> fIter = features.keySet().iterator();
         while(fIter.hasNext()) {
-          String type1 = (String)fIter.next();
+          String type1 = fIter.next().toString();
           // if the feature is specified in featuresToExclude -exclude
           // it
           if(excludeFeatures && featuresToExclude.contains(type + "." + type1)) {

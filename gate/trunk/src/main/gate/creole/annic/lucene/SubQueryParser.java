@@ -30,7 +30,7 @@ public class SubQueryParser {
 
         if(line.length() == -1) break;
 
-        ArrayList<String> queries = parseQuery(line);
+        List<String> queries = parseQuery(line);
         for(int i = 0; i < queries.size(); i++) {
           System.out.println("=>" + queries.get(i));
         }
@@ -161,10 +161,10 @@ public class SubQueryParser {
    * 2. {B}{C}
    * @throws SearchException
    */
-  public static ArrayList<String> parseQuery(String q1) throws SearchException {
+  public static List<String> parseQuery(String q1) throws SearchException {
 
     // arraylist to return - will contain all the OR normalized queries
-    ArrayList<String> queries = new ArrayList<String>();
+    List<String> queries = new ArrayList<String>();
 
     // remove all extra spaces from the query
     q1 = q1.trim();
@@ -383,7 +383,7 @@ public class SubQueryParser {
    * @param dupliSize
    * @return
    */
-  private static ArrayList<String> writeTokens(ArrayList<String> tokens, ArrayList<String> queries,
+  private static List<String> writeTokens(List<String> tokens, List<String> queries,
           int dupliSize) {
     if(dupliSize == 0) dupliSize = 1;
 
@@ -413,11 +413,11 @@ public class SubQueryParser {
   /**
    * This is a helper method that helps in duplicating the provided tokens.
    */
-  private static ArrayList<String> duplicate(ArrayList<String> queries, String s, int dupliSize,
+  private static List<String> duplicate(List<String> queries, String s, int dupliSize,
           int no) {
     if(s == null) s = "";
 
-    ArrayList<String> strings = new ArrayList<String>();
+    List<String> strings = new ArrayList<String>();
     if(dupliSize == 0) {
       strings.add(s);
     }
@@ -523,7 +523,7 @@ public class SubQueryParser {
    * @param queries
    * @return
    */
-  private static ArrayList<String> writeCharInAll(char c, int no, ArrayList<String> queries) {
+  private static List<String> writeCharInAll(char c, int no, List<String> queries) {
     for(int i = 0; i < no; i++) {
       String s = queries.get(queries.size() - (i + 1));
       s += "" + c;
@@ -539,7 +539,7 @@ public class SubQueryParser {
    * @param queries
    * @return
    */
-  private static ArrayList<String> writeStringInAll(String c, int no, ArrayList<String> queries) {
+  private static List<String> writeStringInAll(String c, int no, List<String> queries) {
     for(int i = 0; i < no; i++) {
       String s = (String)queries.get(queries.size() - (i + 1));
       s += "" + c;
