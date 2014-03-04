@@ -89,7 +89,7 @@ implements FieldCache {
 
 
   /** The internal cache. Maps Entry to array of interpreted term values. **/
-  final Map cache = new WeakHashMap();
+  final Map<Entry, Object> cache = new WeakHashMap<Entry, Object>();
 
   /** See if an object is in the cache. */
   Object lookup (IndexReader reader, String field, int type) {

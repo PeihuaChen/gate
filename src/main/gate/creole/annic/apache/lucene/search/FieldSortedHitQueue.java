@@ -17,6 +17,7 @@ package gate.creole.annic.apache.lucene.search;
  */
 
 import gate.creole.annic.apache.lucene.index.IndexReader;
+import gate.creole.annic.apache.lucene.search.FieldCacheImpl.Entry;
 import gate.creole.annic.apache.lucene.util.PriorityQueue;
 
 import java.io.IOException;
@@ -127,7 +128,7 @@ extends PriorityQueue {
 
   /** Internal cache of comparators. Similar to FieldCache, only
    *  caches comparators instead of term values. */
-  static final Map Comparators = new WeakHashMap();
+  static final Map<Entry, Object> Comparators = new WeakHashMap<Entry, Object>();
 
   /** Returns a comparator if it is in the cache. */
   static ScoreDocComparator lookup (IndexReader reader, String field, int type, Object factory) {
