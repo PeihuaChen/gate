@@ -37,21 +37,25 @@ public abstract class AbstractVisualResource extends JPanel
   }
 
   /** Accessor for features. */
+  @Override
   public FeatureMap getFeatures(){
     return features;
   }//getFeatures()
 
   /** Mutator for features*/
+  @Override
   public void setFeatures(FeatureMap features){
     this.features = features;
   }// setFeatures()
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     return this;
   }//init()
 
   /** Does nothing now, but meant to clear all internal data **/
+  @Override
   public void cleanup() {
     this.handle = null;
     features.clear();
@@ -63,6 +67,7 @@ public abstract class AbstractVisualResource extends JPanel
    * @param target the object (be it a {@link gate.Resource},
    * {@link gate.DataStore} or whatever) this viewer has to display
    */
+  @Override
   public void setTarget(Object target){
     throw new RuntimeException(
       "Class " + getClass() + " hasn't implemented the setTarget() method!");
@@ -73,6 +78,7 @@ public abstract class AbstractVisualResource extends JPanel
    * Used by the main GUI to tell this VR what handle created it. The VRs can
    * use this information e.g. to add items to the popup for the resource.
    */
+  @Override
   public void setHandle(Handle handle){
     this.handle = handle;
   }
@@ -83,6 +89,7 @@ public abstract class AbstractVisualResource extends JPanel
    * @param paramaterName the name of the parameter
    * @return the current value of the parameter
    */
+  @Override
   public Object getParameterValue(String paramaterName)
                 throws ResourceInstantiationException{
     return AbstractResource.getParameterValue(this, paramaterName);
@@ -94,6 +101,7 @@ public abstract class AbstractVisualResource extends JPanel
    * @param paramaterName the name for the parameteer
    * @param parameterValue the value the parameter will receive
    */
+  @Override
   public void setParameterValue(String paramaterName, Object parameterValue)
               throws ResourceInstantiationException{
     // get the beaninfo for the resource bean, excluding data about Object
@@ -115,6 +123,7 @@ public abstract class AbstractVisualResource extends JPanel
    * @param parameters a feature map that has paramete names as keys and
    * parameter values as values.
    */
+  @Override
   public void setParameterValues(FeatureMap parameters)
               throws ResourceInstantiationException{
     AbstractResource.setParameterValues(this, parameters);

@@ -106,6 +106,7 @@ public class Morph
    * @return Resource
    * @throws ResourceInstantiationException
    */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     interpret = new Interpret();
     if(existingInterpret != null) {
@@ -137,6 +138,7 @@ public class Morph
    * <LI> adds them as features to the current token
    * @throws ExecutionException
    */
+  @Override
   public void execute() throws ExecutionException {
     // lets start the progress and initialize the progress counter
     fireProgressChanged(0);
@@ -348,6 +350,7 @@ public class Morph
    * Duplicate this morpher, sharing the compiled regular expression
    * patterns and finite state machine with the duplicate.
    */
+  @Override
   public Resource duplicate(DuplicationContext ctx)
           throws ResourceInstantiationException {
     String className = this.getClass().getName();

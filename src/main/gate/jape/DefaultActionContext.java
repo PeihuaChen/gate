@@ -53,14 +53,17 @@ public class DefaultActionContext implements ActionContext {
     this.pr = pr;
   }
   
+  @Override
   public Corpus getCorpus() {
     return corpus;
   }
 
+  @Override
   public FeatureMap getPRFeatures() {
     return prfeatures;
   }
   
+  @Override
   public String getPRName() {
     return prname;
   }
@@ -69,10 +72,12 @@ public class DefaultActionContext implements ActionContext {
     controller = c;
   }
 
+  @Override
   public Controller getController() {
     return controller;
   }
 
+  @Override
   public boolean endPhase() {
     phaseEnded = true;
     return true;
@@ -87,6 +92,7 @@ public class DefaultActionContext implements ActionContext {
     phaseEnded = isended;
   }
   
+  @Override
   public boolean isPREnabled() {
     return gate.Utils.isEnabled(controller, pr);
   }

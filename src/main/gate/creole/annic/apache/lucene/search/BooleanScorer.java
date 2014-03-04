@@ -96,10 +96,12 @@ final class BooleanScorer extends Scorer {
 
   private Bucket current;
 
+  @Override
   public int doc() {
     return current.doc;
   }
 
+  @Override
   public boolean next(Searcher searcher) throws IOException {
     this.searcher = searcher;
     boolean more;
@@ -133,6 +135,7 @@ final class BooleanScorer extends Scorer {
     return false;
   }
 
+  @Override
   public float score(Searcher searcher) throws IOException {
     this.searcher = searcher;
     if(coordFactors == null) computeCoordFactors();
@@ -186,6 +189,7 @@ final class BooleanScorer extends Scorer {
       this.bucketTable = bucketTable;
     }
 
+    @Override
     public final void collect(final int doc, final float score) {
       final BucketTable table = bucketTable;
       final int i = doc & BucketTable.MASK;
@@ -209,14 +213,17 @@ final class BooleanScorer extends Scorer {
     }
   }
 
+  @Override
   public boolean skipTo(int target) throws IOException {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public Explanation explain(int doc) throws IOException {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public String toString() {
     StringBuffer buffer = new StringBuffer();
     buffer.append("boolean(");

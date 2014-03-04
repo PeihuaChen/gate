@@ -149,6 +149,7 @@ public class Transition implements Serializable, Comparable {
     * Returns a textual desciption of this transition.
     * @return a String
     */
+  @Override
   public String toString(){
     return toString(true);
   }
@@ -205,6 +206,7 @@ public class Transition implements Serializable, Comparable {
   private static int index = 0;
 
 // >>> DAM, TransArray optimzation, now implements the Comparable interface
+  @Override
   public int compareTo(Object o)
   throws ClassCastException
   {

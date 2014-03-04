@@ -104,6 +104,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
                                                                   OwnedAnnotationEditor {
   private static final long serialVersionUID = 1L;
 
+  @Override
   public void editAnnotation(Annotation ann, AnnotationSet set) {
     // the external components we listen to (the text and the list view) can
     // change outside of our control, so we need to update the values frequently
@@ -176,6 +177,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
    * 
    * @see gate.gui.annedit.OwnedAnnotationEditor#editingFinished()
    */
+  @Override
   public boolean editingFinished() {
     if(annotation == null) return true;
     // if the dialog is hidden, we've missed the train and we can't force
@@ -255,6 +257,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
   /**
    * Does nothing, as this editor does not support cancelling and rollbacks.
    */
+  @Override
   public void cancelAction() throws GateException {
   }
 
@@ -262,6 +265,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
    * Returns <tt>true</tt> always as this editor is generic and can edit any
    * annotation type.
    */
+  @Override
   public boolean canDisplayAnnotationType(String annotationType) {
     return true;
   }
@@ -270,12 +274,14 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
    * Does nothing as this editor works in auto-commit mode (changes are
    * implemented immediately).
    */
+  @Override
   public void okAction() throws GateException {
   }
 
   /**
    * Returns <tt>false</tt>, as this editor does not support cancel operations.
    */
+  @Override
   public boolean supportsCancel() {
     return false;
   }
@@ -285,6 +291,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
    * 
    * @see gate.gui.annedit.AnnotationEditor#isActive()
    */
+  @Override
   public boolean isActive() {
     return dialog.isVisible();
   }
@@ -292,6 +299,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
   /**
    * Finds the best location for the editor dialog for a given span of text
    */
+  @Override
   public void placeDialog(int start, int end) {
     if(pinnedButton.isSelected()) {
       // just resize
@@ -486,6 +494,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
           (AnnotationSchema)aSchema);
     }
     creoleListener = new CreoleListener() {
+      @Override
       public void resourceLoaded(CreoleEvent e) {
         Resource newResource = e.getResource();
         if(newResource instanceof AnnotationSchema) {
@@ -494,6 +503,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
         }
       }
 
+      @Override
       public void resourceUnloaded(CreoleEvent e) {
         Resource newResource = e.getResource();
         if(newResource instanceof AnnotationSchema) {
@@ -504,15 +514,19 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
         }
       }
 
+      @Override
       public void datastoreOpened(CreoleEvent e) {
       }
 
+      @Override
       public void datastoreCreated(CreoleEvent e) {
       }
 
+      @Override
       public void datastoreClosed(CreoleEvent e) {
       }
 
+      @Override
       public void resourceRenamed(Resource resource, String oldName,
           String newName) {
       }
@@ -525,6 +539,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
        */
       private boolean dialogActive = false;
 
+      @Override
       public void ancestorAdded(AncestorEvent event) {
         if(dialogActive) {
           if(annotation != null) {
@@ -535,6 +550,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
         }
       }
 
+      @Override
       public void ancestorMoved(AncestorEvent event) {
         if(dialog.isVisible() && annotation != null) {
           placeDialog(annotation.getStartNode().getOffset().intValue(),
@@ -542,6 +558,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
         }
       }
 
+      @Override
       public void ancestorRemoved(AncestorEvent event) {
         if(dialog.isVisible()) {
           dialogActive = true;
@@ -551,6 +568,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
     };
   }
 
+  @Override
   public void cleanup() {
     Gate.getCreoleRegister().removeCreoleListener(creoleListener);
   }
@@ -663,6 +681,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
 
   protected void initListeners() {
     typesChoice.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         String newType;
         if(typesChoice.getSelectedItem() == null) {
@@ -692,6 +711,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
       }
     });
     dialog.addWindowListener(new WindowAdapter() {
+      @Override
       public void windowClosing(WindowEvent e) {
         if(editingFinished()) {
           // we can close
@@ -705,6 +725,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
     });
     dialog.getRootPane().addMouseListener(new MouseAdapter() {
       // allow dialog to be dragged with a mouse
+      @Override
       public void mousePressed(MouseEvent me) {
         pressed = me;
       }
@@ -713,6 +734,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
       Point location;
 
       // allow a dialog to be dragged with a mouse
+      @Override
       public void mouseDragged(MouseEvent me) {
         location = dialog.getLocation(location);
         int x = location.x - pressed.getX() + me.getX();
@@ -774,6 +796,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
     Action dismissAction = new AbstractAction() {
       private static final long serialVersionUID = 1L;
 
+      @Override
       public void actionPerformed(ActionEvent evt) {
         dialog.setVisible(false);
       }
@@ -869,6 +892,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
       super(text, icon, desc, mnemonic);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
       int increment = 1;
       if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0) {
@@ -898,6 +922,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
       super(text, icon, desc, mnemonic);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
       long endOffset = annotation.getEndNode().getOffset().longValue();
       int increment = 1;
@@ -927,6 +952,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
       super(text, icon, desc, mnemonic);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
       long startOffset = annotation.getStartNode().getOffset().longValue();
       int increment = 1;
@@ -957,6 +983,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
       super(text, icon, desc, mnemonic);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
       long maxOffset = owner.getDocument().getContent().size().longValue() - 1;
       int increment = 1;
@@ -987,6 +1014,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
       super(text, icon, desc, mnemonic);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
       annSet.remove(annotation);
       // clear the dialog
@@ -1100,6 +1128,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
   /**
    * @return the owner
    */
+  @Override
   public AnnotationEditorOwner getOwner() {
     return owner;
   }
@@ -1108,6 +1137,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
    * @param owner
    *          the owner to set
    */
+  @Override
   public void setOwner(AnnotationEditorOwner owner) {
     // if the owner is new, register existing listeners to new owner elements
     if(this.owner != owner) {
@@ -1116,18 +1146,22 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
     }
   }
 
+  @Override
   public AnnotationSet getAnnotationSetCurrentlyEdited() {
     return annSet;
   }
 
+  @Override
   public Annotation getAnnotationCurrentlyEdited() {
     return annotation;
   }
 
+  @Override
   public void setPinnedMode(boolean pinned) {
     pinnedButton.setSelected(pinned);
   }
 
+  @Override
   public void setEditingEnabled(boolean isEditingEnabled) {
     solButton.setEnabled(isEditingEnabled);
     sorButton.setEnabled(isEditingEnabled);

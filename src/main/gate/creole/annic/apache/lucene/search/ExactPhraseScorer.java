@@ -35,6 +35,7 @@ final class ExactPhraseScorer extends PhraseScorer {
     patternSize = totalTerms;
   }
 
+  @Override
   protected final float phraseFreq() throws IOException {
     // sort list with pq
     for(PhrasePositions pp = first; pp != null; pp = pp.next) {
@@ -60,7 +61,7 @@ final class ExactPhraseScorer extends PhraseScorer {
                       firstPositions, patternSize, freq);
             }
             /* End */
-            return (float)freq;
+            return freq;
           }
           
         } while(first.position < last.position);
@@ -75,6 +76,6 @@ final class ExactPhraseScorer extends PhraseScorer {
     ((IndexSearcher)searcher).setFirstTermPositions(1, first.doc,
             firstPositions, patternSize, freq);
     /* End */
-    return (float)freq;
+    return freq;
   }
 }

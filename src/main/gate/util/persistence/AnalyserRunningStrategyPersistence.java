@@ -13,6 +13,7 @@ import gate.persist.PersistenceException;
 
 public class AnalyserRunningStrategyPersistence implements Persistence {
 
+  @Override
   public void extractDataFromSource(Object source) throws PersistenceException {
     if(! (source instanceof AnalyserRunningStrategy))
       throw new UnsupportedOperationException(
@@ -28,6 +29,7 @@ public class AnalyserRunningStrategyPersistence implements Persistence {
   }
 
 
+  @Override
   public Object createObject() throws PersistenceException,
                                       ResourceInstantiationException {
     return new AnalyserRunningStrategy((LanguageAnalyser)

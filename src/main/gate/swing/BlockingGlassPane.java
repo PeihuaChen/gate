@@ -84,6 +84,7 @@ public class BlockingGlassPane extends JPanel {
    * The key dispatcher to block the keys.
    */
   private class BlockKeys implements KeyEventDispatcher {
+    @Override
     public boolean dispatchKeyEvent(KeyEvent ev) {
       Component source = ev.getComponent();
       if (source != null &&
@@ -100,6 +101,7 @@ public class BlockingGlassPane extends JPanel {
    * The mouse listener used to block the mouse.
    */
   private class BlockMouse extends MouseAdapter {
+    @Override
     public void mouseClicked(MouseEvent ev) {
       Toolkit.getDefaultToolkit().beep();
     }

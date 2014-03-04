@@ -65,6 +65,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
     classesByPropertyMap = new HashMap<String, Set<OClass>>();
   }
 
+  @Override
   protected void initGUI() {
 
     // get a pointer to the text view used to display
@@ -122,6 +123,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
     // tables at the bottom
     JPanel tablesPanel = new JPanel(new GridLayout(1, 2));
     instanceTable = new XJTable() {
+      @Override
       public boolean isCellEditable(int row, int column) {
         return false;
       }
@@ -132,6 +134,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
     instanceTable.setModel(model);
     tablesPanel.add(new JScrollPane(instanceTable));
     propertyTable = new XJTable(){
+      @Override
       public boolean isCellEditable(int row, int column) {
         // property values are editable
         return convertColumnIndexToModel(column) == 1;
@@ -154,6 +157,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
       new AbstractAction("", MainFrame.getIcon("exit.gif")) {
       { this.putValue(MNEMONIC_KEY, KeyEvent.VK_BACK_SPACE);
         this.putValue(SHORT_DESCRIPTION, "Clear text field"); }
+      @Override
       public void actionPerformed(ActionEvent e) {
         filterTextField.setText("");
         filterTextField.requestFocusInWindow();
@@ -163,6 +167,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
     // when an instance is selected, update the property table
     instanceTable.getSelectionModel().addListSelectionListener(
       new ListSelectionListener() {
+        @Override
         public void valueChanged(ListSelectionEvent e) {
           if (e.getValueIsAdjusting()) { return; }
           updatePropertyTable();
@@ -174,6 +179,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
 
     // when typing a character in the instance table, use it for filtering
     instanceTable.addKeyListener(new KeyAdapter() {
+      @Override
       public void keyTyped(KeyEvent e) {
         if (e.getKeyChar() != KeyEvent.VK_TAB
          && e.getKeyChar() != KeyEvent.VK_SPACE
@@ -187,9 +193,11 @@ public class OntologyInstanceView extends AbstractDocumentView {
 
     // context menu to delete instances
     instanceTable.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent evt) {
         processMouseEvent(evt);
       }
+      @Override
       public void mousePressed(MouseEvent evt) {
         JTable table = (JTable) evt.getSource();
         int row =  table.rowAtPoint(evt.getPoint());
@@ -200,6 +208,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
         }
         processMouseEvent(evt);
       }
+      @Override
       public void mouseReleased(MouseEvent evt) {
         processMouseEvent(evt);
       }
@@ -227,9 +236,11 @@ public class OntologyInstanceView extends AbstractDocumentView {
 
     // context menu to delete properties
     propertyTable.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent evt) {
         processMouseEvent(evt);
       }
+      @Override
       public void mousePressed(MouseEvent evt) {
         JTable table = (JTable) evt.getSource();
         int row =  table.rowAtPoint(evt.getPoint());
@@ -240,6 +251,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
         }
         processMouseEvent(evt);
       }
+      @Override
       public void mouseReleased(MouseEvent evt) {
         processMouseEvent(evt);
       }
@@ -265,13 +277,17 @@ public class OntologyInstanceView extends AbstractDocumentView {
     filterTextField.getDocument().addDocumentListener(new DocumentListener() {
       private Timer timer = new Timer("Instance view table rows filter", true);
       private TimerTask timerTask;
+      @Override
       public void changedUpdate(DocumentEvent e) { /* do nothing */ }
+      @Override
       public void insertUpdate(DocumentEvent e) { update(); }
+      @Override
       public void removeUpdate(DocumentEvent e) { update(); }
       private void update() {
         if (timerTask != null) { timerTask.cancel(); }
         Date timeToRun = new Date(System.currentTimeMillis() + 300);
-        timerTask = new TimerTask() { public void run() {
+        timerTask = new TimerTask() { @Override
+        public void run() {
           updateInstanceTable(selectedClass);
         }};
         // add a delay
@@ -281,6 +297,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
 
     // Up/Down key events in filterTextField are transferred to the table
     filterTextField.addKeyListener(new KeyAdapter() {
+      @Override
       public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_UP
          || e.getKeyCode() == KeyEvent.VK_DOWN
@@ -292,6 +309,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
     });
   }
 
+  @Override
   protected void registerHooks() {
     // show the class view at the right
     if (!classView.isActive()) {
@@ -299,6 +317,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
     }
   }
 
+  @Override
   protected void unregisterHooks() {
     // hide the class view at the right
     if (classView.isActive()) {
@@ -306,10 +325,12 @@ public class OntologyInstanceView extends AbstractDocumentView {
     }
   }
 
+  @Override
   public Component getGUI() {
     return mainPanel;
   }
 
+  @Override
   public int getType() {
     return HORIZONTAL;
   }
@@ -364,7 +385,8 @@ public class OntologyInstanceView extends AbstractDocumentView {
       }
     }
     final int hiddenInstances = allInstances.size() - instances.size();
-    SwingUtilities.invokeLater(new Runnable() { public void run() {
+    SwingUtilities.invokeLater(new Runnable() { @Override
+    public void run() {
       hiddenInstancesLabel.setText(" " + hiddenInstances + " hidden ");
       instanceTable.setModel(tableModel);
       if (instanceTable.getRowCount() > 0) {
@@ -426,12 +448,14 @@ public class OntologyInstanceView extends AbstractDocumentView {
         }
       }
     }
-    SwingUtilities.invokeLater(new Runnable() { public void run() {
+    SwingUtilities.invokeLater(new Runnable() { @Override
+    public void run() {
       propertyTable.setModel(tableModel);
       propertyTable.getColumnModel().getColumn(1)
         .setCellEditor(new PropertyValueCellEditor());
       propertyTable.getColumnModel().getColumn(0)
         .setCellRenderer(new DefaultTableCellRenderer() {
+          @Override
           public Component getTableCellRendererComponent(JTable table, Object
             value, boolean isSelected, boolean hasFocus, int row, int column) {
             super.getTableCellRendererComponent(
@@ -447,6 +471,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
         });
       propertyTable.getColumnModel().getColumn(1)
         .setCellRenderer(new DefaultTableCellRenderer() {
+          @Override
           public Component getTableCellRendererComponent(JTable table, Object
             value, boolean isSelected, boolean hasFocus, int row, int column) {
             super.getTableCellRendererComponent(
@@ -477,6 +502,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
       new AbstractAction(newInstanceButton.getText()) {
       { this.putValue(MNEMONIC_KEY, KeyEvent.VK_N);
         this.putValue(SHORT_DESCRIPTION, newInstanceButton.getToolTipText()); }
+      @Override
       public void actionPerformed(ActionEvent e) {
         createFromSelection(selectedSet, selectedText, start, end, true);
         filterTextField.setText("");
@@ -489,6 +515,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
       new AbstractAction(addLabelButton.getText()) {
       { this.putValue(MNEMONIC_KEY, KeyEvent.VK_A);
         this.putValue(SHORT_DESCRIPTION, addLabelButton.getToolTipText()); }
+      @Override
       public void actionPerformed(ActionEvent e) {
         createFromSelection(selectedSet, selectedText, start, end, false);
         filterTextField.setText("");
@@ -612,12 +639,12 @@ public class OntologyInstanceView extends AbstractDocumentView {
       instanceLabelsPattern = Pattern.compile("^(.+) \\[.*\\]$");
     }
 
+    @Override
     public Component getTableCellEditorComponent(JTable table, Object value,
         boolean isSelected, int row, int column) {
       oldValue = (String) value;
       TreeSet<String> ts = new TreeSet<String>(comparator);
-      Set<OClass> classes = classesByPropertyMap.get((String)
-        propertyTable.getModel().getValueAt(row, 0));
+      Set<OClass> classes = classesByPropertyMap.get(propertyTable.getModel().getValueAt(row, 0));
       if (classes.isEmpty()) { classes = selectedOntology.getOClasses(false); }
       for (OClass oClass : classes) {
         // get all the classes that belong to the property domain
@@ -647,10 +674,12 @@ public class OntologyInstanceView extends AbstractDocumentView {
       return valueComboBox;
     }
 
+    @Override
     public Object getCellEditorValue() {
       return valueComboBox.getSelectedItem();
     }
 
+    @Override
     protected void fireEditingStopped() {
       String newValue = (String) getCellEditorValue();
       if (newValue == null) {
@@ -703,6 +732,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
     }
 
     // TODO: itemlistener may be better
+    @Override
     public void actionPerformed(ActionEvent e) {
       if (getCellEditorValue() == null) {
         fireEditingCanceled();
@@ -717,15 +747,18 @@ public class OntologyInstanceView extends AbstractDocumentView {
       super("Show In Ontology Editor");
     }
 
+    @Override
     public void actionPerformed(ActionEvent event) {
       // show the ontology editor if not already displayed
-      SwingUtilities.invokeLater(new Runnable() { public void run() {
+      SwingUtilities.invokeLater(new Runnable() { @Override
+      public void run() {
         final Handle handle = MainFrame.getInstance().select(selectedOntology);
         if (handle == null) { return; }
         // wait some time for the ontology editor to be displayed
         Date timeToRun = new Date(System.currentTimeMillis() + 1000);
         Timer timer = new Timer("Ontology Instance View Timer", true);
-        timer.schedule(new TimerTask() { public void run() {
+        timer.schedule(new TimerTask() { @Override
+        public void run() {
           String instanceName = (String) instanceTable.getModel()
             .getValueAt(instanceTable.getSelectedRow(), 0);
           for (OInstance oInstance : instances) {
@@ -754,6 +787,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("shift DELETE"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       String ontology = selectedOntology.getDefaultNameSpace();
       ontology = ontology.substring(0, ontology.length()-1);
@@ -796,6 +830,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("shift DELETE"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       for (ObjectProperty objectProperty : setProperties) {
         for (int selectedRow : propertyTable.getSelectedRows()) {

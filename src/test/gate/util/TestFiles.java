@@ -32,6 +32,7 @@ public class TestFiles extends TestCase
   public TestFiles(String name) { super(name); }
 
   /** Fixture set up */
+  @Override
   public void setUp() {
   } // setUp
 

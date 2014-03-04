@@ -31,6 +31,7 @@ public class Rule_CURWD extends Rule {
 
   public Rule_CURWD() {
   }
+  @Override
   public boolean checkContext(POSTagger tagger) {
   return (tagger.wordBuff[3].equals(context[0]));
   }

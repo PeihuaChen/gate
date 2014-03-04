@@ -56,6 +56,7 @@ public class XJEditorPane extends JEditorPane {
 
   protected void initListeners(){
     addHyperlinkListener(new HyperlinkListener() {
+      @Override
       public void hyperlinkUpdate(HyperlinkEvent e){
         if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED){
           if (e instanceof HTMLFrameHyperlinkEvent) {
@@ -88,6 +89,7 @@ public class XJEditorPane extends JEditorPane {
     return backAction;
   }
 
+  @Override
   public void setPage(URL page) throws IOException{
     try{
       super.setPage(page);
@@ -103,6 +105,7 @@ public class XJEditorPane extends JEditorPane {
       super("Forward", MainFrame.getIcon("forward"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e){
       backUrls.addLast(getPage());
       try{
@@ -118,6 +121,7 @@ public class XJEditorPane extends JEditorPane {
       super("Back", MainFrame.getIcon("back"));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e){
       forwardUrls.addFirst(getPage());
       try{

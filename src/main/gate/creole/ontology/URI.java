@@ -86,6 +86,7 @@ public class URI implements OURI, ONodeID, OBNodeID {
    * it retrieves the string that appears before the last occurance of
    * '#' or '/'.
    */
+  @Override
   public String getNameSpace() {
     return this.namespace;
   }
@@ -95,6 +96,7 @@ public class URI implements OURI, ONodeID, OBNodeID {
    * implementation it retrieves the string that appears after the last
    * occurrence of '#' or '/'.
    */
+  @Override
   public String getResourceName() {
     return this.aResourceName;
   }
@@ -103,6 +105,7 @@ public class URI implements OURI, ONodeID, OBNodeID {
    * Returns the string representation of the uri. In case of anonymous
    * class, it returns the '[' + resourcename + ']'.
    */
+  @Override
   public String toString() {
     return this.uri;
   }
@@ -110,14 +113,17 @@ public class URI implements OURI, ONodeID, OBNodeID {
   /**
    * Indicates whether the URI refers to an anonymous resource
    */
+  @Override
   public boolean isAnonymousResource() {
     return this.isAnonymousResource;
   }
 
+  @Override
   public int compareTo(ONodeID other) {
     return this.toString().compareTo(other.toString());
   }
 
+  @Override
   public boolean equals(Object other) {
     if(other instanceof URI) {
       return uri.equals(((URI)other).uri);
@@ -126,10 +132,12 @@ public class URI implements OURI, ONodeID, OBNodeID {
     }
   }
 
+  @Override
   public int hashCode() {
     return uri.hashCode();
   }
 
+  @Override
   public String toTurtle() {
     if(isAnonymousResource()) {
       if(uri.startsWith("_:")) {
@@ -142,14 +150,17 @@ public class URI implements OURI, ONodeID, OBNodeID {
     }
   }
 
+  @Override
   public void validate() {
     throw new UnsupportedOperationException("Method not implemented");
   }
 
+  @Override
   public String toDisplayString() {
     throw new UnsupportedOperationException("Method not implemented");
   }
 
+  @Override
   public String toASCIIString() {
     throw new UnsupportedOperationException("Method not implemented");
   }

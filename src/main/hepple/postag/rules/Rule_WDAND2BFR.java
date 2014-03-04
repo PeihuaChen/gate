@@ -32,6 +32,7 @@ public class Rule_WDAND2BFR extends Rule {
   public Rule_WDAND2BFR() {
   }
 
+  @Override
   public boolean checkContext(POSTagger tagger) {
     return (tagger.wordBuff[1].equals(context[0]) &&
             tagger.wordBuff[3].equals(context[1]));

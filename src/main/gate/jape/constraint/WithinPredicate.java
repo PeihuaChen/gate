@@ -27,6 +27,7 @@ public class WithinPredicate extends EmbeddedConstraintPredicate {
 
   public static final String OPERATOR = "within";
 
+  @Override
   public String getOperator() {
     return OPERATOR;
   }
@@ -35,6 +36,7 @@ public class WithinPredicate extends EmbeddedConstraintPredicate {
    * Get all the annots of the right type that completely span the
    * length of the test annot
    */
+  @Override
   public AnnotationSet doMatch(Annotation annot, AnnotationSet as) {
     return as.getCovering(annotType, annot.getStartNode().getOffset(), annot
             .getEndNode().getOffset());

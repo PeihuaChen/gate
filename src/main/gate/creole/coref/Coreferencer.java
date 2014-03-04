@@ -66,6 +66,7 @@ public class Coreferencer extends AbstractLanguageAnalyser implements
   }
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException {
 
     Resource result = super.init();
@@ -84,11 +85,13 @@ public class Coreferencer extends AbstractLanguageAnalyser implements
    * create the resource has changed since the resource has been created
    * then the resource will change too after calling reInit().
    */
+  @Override
   public void reInit() throws ResourceInstantiationException {
     init();
   } // reInit()
 
   /** Set the document to run on. */
+  @Override
   public void setDocument(Document newDocument) {
 
     // Assert.assertNotNull(newDocument);
@@ -127,6 +130,7 @@ public class Coreferencer extends AbstractLanguageAnalyser implements
    * This method runs the coreferencer. It assumes that all the needed
    * parameters are set. If they are not, an exception will be fired.
    */
+  @Override
   public void execute() throws ExecutionException {
 
     fireStatusChanged("Pronominal Coreferencer processing: "

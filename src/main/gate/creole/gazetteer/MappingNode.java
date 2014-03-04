@@ -97,6 +97,7 @@ public class MappingNode implements Serializable {
    * Gets the string representation of the node
    * @return the string representation of the node
    */
+  @Override
   public String toString() {
     return list + ":" + ontologyID + ":" + classID;
   }

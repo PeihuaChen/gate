@@ -47,6 +47,7 @@ public class TextualDocumentFormat extends DocumentFormat
   public TextualDocumentFormat() { super(); }
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException{
     // Register plain text mime type
     MimeType mime = new MimeType("text","plain");
@@ -68,6 +69,7 @@ public class TextualDocumentFormat extends DocumentFormat
     * Uses the markupElementsMap to determine which elements to convert, and
     * what annotation type names to use.
     */
+  @Override
   public void unpackMarkup(Document doc) throws DocumentFormatException{
     if (doc == null || doc.getContent() == null) return;
     setNewLineProperty(doc);
@@ -78,6 +80,7 @@ public class TextualDocumentFormat extends DocumentFormat
                                 GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
   }//unpackMarkup
 
+  @Override
   public void unpackMarkup(Document doc, RepositioningInfo repInfo,
                             RepositioningInfo ampCodingInfo)
                                       throws DocumentFormatException {
@@ -293,6 +296,7 @@ public class TextualDocumentFormat extends DocumentFormat
     }// End if
   }// End annotateParagraphs();
 
+  @Override
   public DataStore getDataStore(){ return null;}
 
 } // class TextualDocumentFormat

@@ -22,7 +22,6 @@ import java.beans.Introspector;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import gate.*;
@@ -51,6 +50,7 @@ public class FeaturesSchemaEditor extends XJTable
   }
   
   
+  @Override
   public void cleanup() {
     if(targetFeatures != null){
       targetFeatures.removeFeatureMapListener(this);
@@ -63,6 +63,7 @@ public class FeaturesSchemaEditor extends XJTable
   /* (non-Javadoc)
    * @see gate.VisualResource#setTarget(java.lang.Object)
    */
+  @Override
   public void setTarget(Object target){
     this.target = (FeatureBearer)target;
     setTargetFeatures(this.target.getFeatures());
@@ -77,8 +78,10 @@ public class FeaturesSchemaEditor extends XJTable
    * @see gate.event.FeatureMapListener#featureMapUpdated()
    * Called each time targetFeatures is changed.
    */
+  @Override
   public void featureMapUpdated(){
     SwingUtilities.invokeLater(new Runnable(){
+      @Override
       public void run(){
         populate();    
       }
@@ -87,6 +90,7 @@ public class FeaturesSchemaEditor extends XJTable
   
   
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     featureList = new ArrayList<Feature>();
     emptyFeature = new Feature("", null);
@@ -243,14 +247,17 @@ public class FeaturesSchemaEditor extends XJTable
   
   
   protected class FeaturesTableModel extends AbstractTableModel{
+    @Override
     public int getRowCount(){
       return featureList.size();
     }
     
+    @Override
     public int getColumnCount(){
       return COLUMNS;
     }
     
+    @Override
     public Object getValueAt(int row, int column){
       Feature feature = featureList.get(row);
       switch(column){
@@ -263,11 +270,13 @@ public class FeaturesSchemaEditor extends XJTable
       }
     }
     
+    @Override
     public boolean isCellEditable(int rowIndex, int columnIndex){
       return columnIndex == VALUE_COL || columnIndex == NAME_COL || 
              columnIndex == DELETE_COL;
     }
     
+    @Override
     public void setValueAt(Object aValue, int rowIndex,  int columnIndex){
       Feature feature = featureList.get(rowIndex);
       if (feature == null) { return; }
@@ -286,6 +295,7 @@ public class FeaturesSchemaEditor extends XJTable
             targetFeatures.put(feature.name, aValue);
             targetFeatures.addFeatureMapListener(instance);
             SwingUtilities.invokeLater(new Runnable() {
+              @Override
               public void run() {
                 // edit the last row that is empty
                 FeaturesSchemaEditor.this.editCellAt(FeaturesSchemaEditor.this.getRowCount() - 1, NAME_COL);
@@ -310,6 +320,7 @@ public class FeaturesSchemaEditor extends XJTable
           }
           final int newRowF = newRow;
           SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
               // edit the cell containing the value associated with this name
               FeaturesSchemaEditor.this.editCellAt(newRowF, VALUE_COL);
@@ -325,6 +336,7 @@ public class FeaturesSchemaEditor extends XJTable
       
     }
     
+    @Override
     public String getColumnName(int column){
       switch(column){
         case NAME_COL:
@@ -349,6 +361,7 @@ public class FeaturesSchemaEditor extends XJTable
       editorCombo.setModel(new DefaultComboBoxModel());
       editorCombo.setEditable(true);
       editorCombo.addActionListener(new ActionListener(){
+        @Override
         public void actionPerformed(ActionEvent evt){
           stopCellEditing();
         }
@@ -371,10 +384,15 @@ public class FeaturesSchemaEditor extends XJTable
       rendererCombo.setOpaque(false);
       
       requiredIconLabel = new JLabel(){
+        @Override
         public void repaint(long tm, int x, int y, int width, int height){}
+        @Override
         public void repaint(Rectangle r){}
+        @Override
         public void validate(){}
+        @Override
         public void revalidate(){}
+        @Override
         protected void firePropertyChange(String propertyName,
                 													Object oldValue,
                 													Object newValue){}
@@ -392,10 +410,15 @@ public class FeaturesSchemaEditor extends XJTable
       requiredIconLabel.setToolTipText("Required feature");
       
       optionalIconLabel = new JLabel(){
+        @Override
         public void repaint(long tm, int x, int y, int width, int height){}
+        @Override
         public void repaint(Rectangle r){}
+        @Override
         public void validate(){}
+        @Override
         public void revalidate(){}
+        @Override
         protected void firePropertyChange(String propertyName,
                                           Object oldValue,
                                           Object newValue){}
@@ -413,10 +436,15 @@ public class FeaturesSchemaEditor extends XJTable
       optionalIconLabel.setToolTipText("Optional feature");
 
       nonSchemaIconLabel = new JLabel(MainFrame.getIcon("c")){
+        @Override
         public void repaint(long tm, int x, int y, int width, int height){}
+        @Override
         public void repaint(Rectangle r){}
+        @Override
         public void validate(){}
+        @Override
         public void revalidate(){}
+        @Override
         protected void firePropertyChange(String propertyName,
                 													Object oldValue,
                 													Object newValue){}
@@ -436,6 +464,7 @@ public class FeaturesSchemaEditor extends XJTable
       deleteButton.setMargin(new Insets(0,0,0,0));
       deleteButton.setToolTipText("Delete");
       deleteButton.addActionListener(new ActionListener(){
+        @Override
         public void actionPerformed(ActionEvent evt){
           int row = FeaturesSchemaEditor.this.getEditingRow();
           if(row < 0) return;
@@ -452,7 +481,8 @@ public class FeaturesSchemaEditor extends XJTable
       });
     }    
 		
-  	public Component getTableCellRendererComponent(JTable table, Object value,
+  	@Override
+    public Component getTableCellRendererComponent(JTable table, Object value,
          boolean isSelected, boolean hasFocus, int row, int column){
       Feature feature = featureList.get(row);
       switch(column){
@@ -474,6 +504,7 @@ public class FeaturesSchemaEditor extends XJTable
       }
     }
   
+    @Override
     public Component getTableCellEditorComponent(JTable table,  Object value, 
             boolean isSelected, int row, int column){
       switch(column){
@@ -545,11 +576,13 @@ public class FeaturesSchemaEditor extends XJTable
    * Resource implementation 
    */
   /** Accessor for features. */
+  @Override
   public FeatureMap getFeatures(){
     return features;
   }//getFeatures()
 
   /** Mutator for features*/
+  @Override
   public void setFeatures(FeatureMap features){
     this.features = features;
   }// setFeatures()
@@ -559,6 +592,7 @@ public class FeaturesSchemaEditor extends XJTable
    * Used by the main GUI to tell this VR what handle created it. The VRs can
    * use this information e.g. to add items to the popup for the resource.
    */
+  @Override
   public void setHandle(Handle handle){
     this.handle = handle;
   }
@@ -569,6 +603,7 @@ public class FeaturesSchemaEditor extends XJTable
    * @param paramaterName the name of the parameter
    * @return the current value of the parameter
    */
+  @Override
   public Object getParameterValue(String paramaterName)
                 throws ResourceInstantiationException{
     return AbstractResource.getParameterValue(this, paramaterName);
@@ -580,6 +615,7 @@ public class FeaturesSchemaEditor extends XJTable
    * @param paramaterName the name for the parameteer
    * @param parameterValue the value the parameter will receive
    */
+  @Override
   public void setParameterValue(String paramaterName, Object parameterValue)
               throws ResourceInstantiationException{
     // get the beaninfo for the resource bean, excluding data about Object
@@ -601,6 +637,7 @@ public class FeaturesSchemaEditor extends XJTable
    * @param parameters a feature map that has paramete names as keys and
    * parameter values as values.
    */
+  @Override
   public void setParameterValues(FeatureMap parameters)
               throws ResourceInstantiationException{
     AbstractResource.setParameterValues(this, parameters);

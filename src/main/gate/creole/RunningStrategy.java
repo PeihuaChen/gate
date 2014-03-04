@@ -69,12 +69,15 @@ public interface RunningStrategy{
       this.pr = pr;
       this.shouldRun = run;
     }
+    @Override
     public boolean shouldRun(){return shouldRun;}
     
     public void shouldRun(boolean run) { this.shouldRun = run; }
 
+    @Override
     public int getRunMode(){return shouldRun ? RUN_ALWAYS : RUN_NEVER;}
 
+    @Override
     public ProcessingResource getPR(){return pr;}
 
     ProcessingResource pr;

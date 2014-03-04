@@ -30,15 +30,18 @@ public interface ScoreDocComparator {
 
 	/** Special comparator for sorting hits according to computed relevance (document score). */
 	static final ScoreDocComparator RELEVANCE = new ScoreDocComparator() {
-		public int compare (ScoreDoc i, ScoreDoc j) {
+		@Override
+    public int compare (ScoreDoc i, ScoreDoc j) {
 			if (i.score > j.score) return -1;
 			if (i.score < j.score) return 1;
 			return 0;
 		}
-		public Comparable sortValue (ScoreDoc i) {
+		@Override
+    public Comparable sortValue (ScoreDoc i) {
 			return new Float (i.score);
 		}
-		public int sortType() {
+		@Override
+    public int sortType() {
 			return SortField.SCORE;
 		}
 	};
@@ -46,15 +49,18 @@ public interface ScoreDocComparator {
 
 	/** Special comparator for sorting hits according to index order (document number). */
 	static final ScoreDocComparator INDEXORDER = new ScoreDocComparator() {
-		public int compare (ScoreDoc i, ScoreDoc j) {
+		@Override
+    public int compare (ScoreDoc i, ScoreDoc j) {
 			if (i.doc < j.doc) return -1;
 			if (i.doc > j.doc) return 1;
 			return 0;
 		}
-		public Comparable sortValue (ScoreDoc i) {
+		@Override
+    public Comparable sortValue (ScoreDoc i) {
 			return new Integer (i.doc);
 		}
-		public int sortType() {
+		@Override
+    public int sortType() {
 			return SortField.DOC;
 		}
 	};

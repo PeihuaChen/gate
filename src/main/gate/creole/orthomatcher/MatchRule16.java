@@ -13,7 +13,8 @@ public class MatchRule16 implements OrthoMatcherRule {
 			this.orthmatcher=orthomatcher;
 	}
 	
-	public boolean value(String s1, String s2) {
+	@Override
+  public boolean value(String s1, String s2) {
 	
 	  boolean result =true;
 	  
@@ -21,7 +22,7 @@ public class MatchRule16 implements OrthoMatcherRule {
 	    Annotation token1, token2;
 	    // catch (ExecutionException e) {}
 	    for (int i=0; i < orthmatcher.tokensShortAnnot.size(); i++) {
-	      token1 = (Annotation) orthmatcher.tokensShortAnnot.get(i);
+	      token1 = orthmatcher.tokensShortAnnot.get(i);
 	      //first check if not punctuation, because we need to skip it
 	      if (token1.getFeatures().get(OrthoMatcher.TOKEN_KIND_FEATURE_NAME).equals(OrthoMatcher.PUNCTUATION_VALUE))
 	        continue;
@@ -30,7 +31,7 @@ public class MatchRule16 implements OrthoMatcherRule {
 	      boolean foundMatch = false;
 	      for (int j=0; j<orthmatcher.tokensLongAnnot.size(); j++) {
 	        // Out.prln("i = " + i);
-	        token2 = (Annotation) orthmatcher.tokensLongAnnot.get(j);
+	        token2 = orthmatcher.tokensLongAnnot.get(j);
 	        if (token2.getFeatures().get(OrthoMatcher.TOKEN_KIND_FEATURE_NAME).equals(OrthoMatcher.PUNCTUATION_VALUE))
 	          continue;
 
@@ -69,6 +70,7 @@ public class MatchRule16 implements OrthoMatcherRule {
 	    return result;
 	}
 	
+  @Override
   public String getId(){
     return "MatchRule16";
   }

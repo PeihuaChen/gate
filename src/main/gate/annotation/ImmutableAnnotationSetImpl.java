@@ -35,39 +35,48 @@ public class ImmutableAnnotationSetImpl extends AnnotationSetImpl {
    * The following methods throw an exception as they try to modify the state of
    * the object
    ****************************************************************************/
+  @Override
   public Integer add(Node start, Node end, String type, FeatureMap features) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public Integer add(Long start, Long end, String type, FeatureMap features) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public boolean add(Annotation a) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public void add(Integer id, Long start, Long end, String type,
           FeatureMap features) throws InvalidOffsetException {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public boolean removeAll(Collection<?> arg0) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public boolean addAll(Collection<? extends Annotation> arg0) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public boolean remove(Object o) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public boolean retainAll(Collection<?> arg0) {
     throw new UnsupportedOperationException();
   }
 
+  @Override
   public void clear() {
     throw new UnsupportedOperationException();
   }

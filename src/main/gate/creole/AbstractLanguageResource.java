@@ -30,9 +30,11 @@ extends AbstractResource implements LanguageResource
   static final long serialVersionUID = 3320133313194786685L;
 
   /** Get the data store that this LR lives in. Null for transient LRs. */
+  @Override
   public DataStore getDataStore() { return dataStore; }
 
   /** Set the data store that this LR lives in. */
+  @Override
   public void setDataStore(DataStore dataStore) throws PersistenceException {
     this.dataStore = dataStore;
   } // setDataStore(DS)
@@ -40,6 +42,7 @@ extends AbstractResource implements LanguageResource
   /** Returns the persistence id of this LR, if it has been stored in
    *  a datastore. Null otherwise.
    */
+  @Override
   public Object getLRPersistenceId(){
     return lrPersistentId;
   }
@@ -47,6 +50,7 @@ extends AbstractResource implements LanguageResource
   /** Sets the persistence id of this LR. To be used only in the
    *  Factory and DataStore code.
    */
+  @Override
   public void setLRPersistenceId(Object lrID){
     this.lrPersistentId = lrID;
   }
@@ -62,6 +66,7 @@ extends AbstractResource implements LanguageResource
   /** Save: synchonise the in-memory image of the LR with the persistent
     * image.
     */
+  @Override
   public void sync()
     throws PersistenceException,SecurityException {
     if(dataStore == null)
@@ -72,6 +77,7 @@ extends AbstractResource implements LanguageResource
 
   /** Clear the internal state of the resource
     */
+  @Override
   public void cleanup() {
   } //clear()
 
@@ -79,12 +85,14 @@ extends AbstractResource implements LanguageResource
    * Returns true of an LR has been modified since the last sync.
    * Always returns false for transient LRs.
    */
+  @Override
   public boolean isModified() {return false;}
 
   /**
    * Returns the parent LR of this LR.
    * Only relevant for LRs that support shadowing. Most do not by default.
    */
+  @Override
   public LanguageResource getParent()
     throws PersistenceException,SecurityException {
     if(dataStore == null)
@@ -97,6 +105,7 @@ extends AbstractResource implements LanguageResource
    * Sets the parent LR of this LR.
    * Only relevant for LRs that support shadowing. Most do not by default.
    */
+  @Override
   public void setParent(LanguageResource parentLR)
     throws PersistenceException,SecurityException {
     if(dataStore == null)

@@ -65,6 +65,7 @@ implements List {
   }
 
   /** @return true if the list has been modified after load/store  */
+  @Override
   public boolean isModified() {
     return isModified;
   }
@@ -229,32 +230,39 @@ implements List {
 
 
 /*--------------implementation of java.util.List--------------------*/
+  @Override
   public int size() {
     return entries.size();
   }
 
+  @Override
   public boolean isEmpty() {
     return (0 == entries.size());
   }
 
+  @Override
   public boolean contains(Object o) {
     return entries.contains(o);
   } // contains()
 
   /**Gets an iterator over the list. It is not dangerous if the iterator is modified since there
   are no dependencies of entries to other members  */
+  @Override
   public Iterator iterator() {
     return entries.iterator();
   }
 
+  @Override
   public Object[] toArray() {
     return entries.toArray();
   }
 
+  @Override
   public Object[] toArray(Object[] a) {
     return entries.toArray(a);
   }
 
+  @Override
   public boolean add(Object o) {
     boolean result = false;
     if (o instanceof GazetteerNode) {
@@ -264,12 +272,14 @@ implements List {
     return result;
   } // add()
 
+  @Override
   public boolean remove(Object o) {
     boolean result = entries.remove(o);
     isModified |= result;
     return result;
   }
 
+  @Override
   public boolean containsAll(Collection c) {
     return entries.containsAll(c);
   }
@@ -279,6 +289,7 @@ implements List {
    * @param c a collection to be addded
    * @return true if all the elements where Strings and all are sucessfully added
    */
+  @Override
   public boolean addAll(Collection c) {
     Iterator iter = c.iterator();
     Object o;
@@ -295,6 +306,7 @@ implements List {
     return result;
   } // addAll(Collection)
 
+  @Override
   public boolean addAll(int index, Collection c) {
     boolean result = entries.addAll(index,c);
     isModified |= result;
@@ -302,18 +314,21 @@ implements List {
   } //addAll(int,Collection)
 
 
+  @Override
   public boolean removeAll(Collection c) {
     boolean result = entries.removeAll(c);
     isModified |= result;
     return result;
   }
 
+  @Override
   public boolean retainAll(Collection c) {
     boolean result = entries.retainAll(c);
     isModified |= result;
     return result;
   }
 
+  @Override
   public void clear() {
     if (0 < entries.size())
       isModified = true;
@@ -340,20 +355,24 @@ implements List {
     return true;
   }
 
+  @Override
   public Object get(int index) {
     return entries.get(index);
   }
 
+  @Override
   public Object set(int index, Object element) {
     isModified=true;
     return entries.set(index,element);
   }
 
+  @Override
   public void add(int index, Object element) {
     isModified = true;
     entries.add(index,element);
   }
 
+  @Override
   public Object remove(int index) {
     int size = entries.size();
     Object result = entries.remove(index);
@@ -361,22 +380,27 @@ implements List {
     return result;
   }
 
+  @Override
   public int indexOf(Object o) {
     return entries.indexOf(o);
   }
 
+  @Override
   public int lastIndexOf(Object o) {
     return entries.lastIndexOf(o);
   }
 
+  @Override
   public ListIterator listIterator() {
     return entries.listIterator();
   }
 
+  @Override
   public ListIterator listIterator(int index) {
     return entries.listIterator(index);
   }
 
+  @Override
   public List subList(int fromIndex, int toIndex) {
     return entries.subList(fromIndex,toIndex);
   }
@@ -389,6 +413,7 @@ implements List {
    *  {@link #STRING_MODE} then
    *  the content (a string) of the gaz list is retrieved.
    *  @return the string representation of the gaz list*/
+  @Override
   public String toString() {
     String stres = null;
     switch (mode) {

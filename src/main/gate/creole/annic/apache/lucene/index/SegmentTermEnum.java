@@ -81,6 +81,7 @@ final class SegmentTermEnum extends TermEnum implements Cloneable {
 
   }
 
+  @Override
   protected Object clone() {
     SegmentTermEnum clone = null;
     try {
@@ -105,6 +106,7 @@ final class SegmentTermEnum extends TermEnum implements Cloneable {
   }
 
   /** Increments the enumeration to the next element.  True if one exists.*/
+  @Override
   public final boolean next() throws IOException {
     if (position++ >= size - 1) {
       term = null;
@@ -169,6 +171,7 @@ final class SegmentTermEnum extends TermEnum implements Cloneable {
 
   /** Returns the current Term in the enumeration.
    Initially invalid, valid after next() called for the first time.*/
+  @Override
   public final Term term() {
     return term;
   }
@@ -187,6 +190,7 @@ final class SegmentTermEnum extends TermEnum implements Cloneable {
 
   /** Returns the docFreq from the current TermInfo in the enumeration.
    Initially invalid, valid after next() called for the first time.*/
+  @Override
   public final int docFreq() {
     return termInfo.docFreq;
   }
@@ -204,6 +208,7 @@ final class SegmentTermEnum extends TermEnum implements Cloneable {
   }
 
   /** Closes the enumeration to further activity, freeing resources. */
+  @Override
   public final void close() throws IOException {
     input.close();
   }

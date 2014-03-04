@@ -16,7 +16,8 @@ public class MatchRule13 implements OrthoMatcherRule {
 			this.orthomatcher=orthmatcher;
 	}
 	
-	public boolean value(String s1, String s2) {
+	@Override
+  public boolean value(String s1, String s2) {
 	    // first do the easy case e.g. "Pan American" == "Pan Am"
 
 	    boolean result =false;
@@ -26,18 +27,18 @@ public class MatchRule13 implements OrthoMatcherRule {
 
 	      // get first and last tokens of s1 & s2
 	      String s1_first = (String)
-	      ((Annotation) orthomatcher.tokensLongAnnot.get(0)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+	      orthomatcher.tokensLongAnnot.get(0).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
 	      String s2_first = (String)
-	      ((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+	      orthomatcher.tokensShortAnnot.get(0).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
 
 	      MatchRule1 matchRule1=new MatchRule1(orthomatcher);
 	      if (!(matchRule1.value(s1_first,s2_first) || OrthoMatcherHelper.initialMatch(s1_first,s2_first)))
 	        result = false;
 	      else {
       	      String s1_last = (String)
-      	      ((Annotation) orthomatcher.tokensLongAnnot.get(orthomatcher.tokensLongAnnot.size()-1)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+      	      orthomatcher.tokensLongAnnot.get(orthomatcher.tokensLongAnnot.size()-1).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
       	      String s2_last = (String)
-      	      ((Annotation) orthomatcher.tokensShortAnnot.get(orthomatcher.tokensShortAnnot.size()-1)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+      	      orthomatcher.tokensShortAnnot.get(orthomatcher.tokensShortAnnot.size()-1).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
       
       	      boolean retVal =  OrthoMatcherHelper.straightCompare(s1_last,s2_last,orthomatcher.caseSensitive);
       	      if (retVal && OrthoMatcher.log.isDebugEnabled()) {
@@ -52,6 +53,7 @@ public class MatchRule13 implements OrthoMatcherRule {
 	    return result;
 	}
 	
+  @Override
   public String getId(){
     return "MatchRule13";
   }

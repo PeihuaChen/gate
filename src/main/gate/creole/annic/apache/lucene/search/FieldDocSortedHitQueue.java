@@ -103,7 +103,8 @@ extends PriorityQueue {
 	 * @param b ScoreDoc
 	 * @return <code>true</code> if document <code>a</code> should be sorted after document <code>b</code>.
 	 */
-	protected final boolean lessThan (final Object a, final Object b) {
+	@Override
+  protected final boolean lessThan (final Object a, final Object b) {
 		final FieldDoc docA = (FieldDoc) a;
 		final FieldDoc docB = (FieldDoc) b;
 		final int n = fields.length;

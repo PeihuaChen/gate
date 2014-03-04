@@ -49,6 +49,7 @@ public class PoolFiller implements InitializingBean {
     this.numInstances = numInstances;
   }
 
+  @Override
   public void afterPropertiesSet() throws Exception {
     int instancesToCreate = numInstances;
     if(instancesToCreate > targetSource.getMaxSize()) {

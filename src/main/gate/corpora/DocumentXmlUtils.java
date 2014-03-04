@@ -192,7 +192,7 @@ public class DocumentXmlUtils {
         StringBuffer normalizedKey = new StringBuffer(key2String);
         if (normalizedFeatureNames!=null){
           // has this key been already converted ?
-          normalizedKey = (StringBuffer)normalizedFeatureNames.get(key2String);
+          normalizedKey = normalizedFeatureNames.get(key2String);
           if (normalizedKey==null){
             // never seen so far!
             normalizedKey= combinedNormalisation(key2String);
@@ -229,7 +229,7 @@ public class DocumentXmlUtils {
       if(!isXmlChar(currentchar)) buffer.replace(i,i+1," ");
       // is the current character an xml char which needs replacing?
       else if(currentchar == '<' || currentchar == '>' || currentchar == '&'|| currentchar == '\''|| currentchar == '\"' || currentchar == 0xA0 || currentchar == 0xA9)
-        buffer.replace(i,i+1,(String) entitiesMap.get(new Character(currentchar)));
+        buffer.replace(i,i+1,entitiesMap.get(new Character(currentchar)));
       }
     return buffer;
   }
@@ -284,7 +284,7 @@ public class DocumentXmlUtils {
     for (int i=strBuff.length()-1; i>=0; i--){
       Character ch = new Character(strBuff.charAt(i));
       if (entitiesMap.keySet().contains(ch)){
-        strBuff.replace(i,i+1,(String) entitiesMap.get(ch));
+        strBuff.replace(i,i+1,entitiesMap.get(ch));
       }// End if
     }// End for
     return strBuff;
@@ -348,7 +348,7 @@ public class DocumentXmlUtils {
     allOffsets.addAll(offsets2CharsMap.keySet());
     Iterator<Long> allOffsetsIterator = allOffsets.iterator();
     while (allOffsetsIterator.hasNext()){
-      Long nextOffset = (Long)allOffsetsIterator.next();
+      Long nextOffset = allOffsetsIterator.next();
       int nextOffsetint = nextOffset.intValue();
       // is there some text to add since last time?
       if (nextOffsetint>lastCharactercopied){
@@ -361,7 +361,7 @@ public class DocumentXmlUtils {
       
       // do we need to convert an XML entity?
       if (offsets2CharsMap.containsKey(nextOffset)){
-       String entityString = (String)entitiesMap.get((Character)offsets2CharsMap.get(nextOffset));
+       String entityString = entitiesMap.get(offsets2CharsMap.get(nextOffset));
        // skip the character in the original String
        lastCharactercopied++;
        // append the corresponding entity
@@ -391,7 +391,7 @@ public class DocumentXmlUtils {
     Character c;
     int fromIndex;
     while(entitiesMapIterator.hasNext()) {
-      c = (Character)entitiesMapIterator.next();
+      c = entitiesMapIterator.next();
       fromIndex = 0;
       while(-1 != fromIndex) {
         fromIndex = aScanString.indexOf(c.charValue(), fromIndex);

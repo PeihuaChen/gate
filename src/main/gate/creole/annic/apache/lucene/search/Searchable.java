@@ -20,7 +20,6 @@ import java.io.IOException;
 
 import gate.creole.annic.apache.lucene.document.Document;
 import gate.creole.annic.apache.lucene.index.Term;
-import gate.creole.annic.apache.lucene.index.IndexReader;       // for javadoc
 
 /** The interface for search implementations.
  *

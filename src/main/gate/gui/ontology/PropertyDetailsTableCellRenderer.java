@@ -30,6 +30,7 @@ public class PropertyDetailsTableCellRenderer extends DefaultTableCellRenderer {
     propertyDetailsTableModel = detailstablemodel;
   }
 
+  @Override
   public Component getTableCellRendererComponent(JTable table, Object obj,
           boolean flag, boolean flag1, int i, int j) {
     Component component = super.getTableCellRendererComponent(table, "", flag,

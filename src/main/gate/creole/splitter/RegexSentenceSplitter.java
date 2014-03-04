@@ -14,7 +14,6 @@
 package gate.creole.splitter;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.*;
@@ -136,6 +135,7 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
     /* (non-Javadoc)
      * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
      */
+    @Override
     public int compare(MatchResult o1, MatchResult o2) {
       if(o1 == null && o2 == null) return 0;
       if(o1 == null) return 1;

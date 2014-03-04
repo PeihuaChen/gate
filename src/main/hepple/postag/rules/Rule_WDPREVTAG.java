@@ -31,6 +31,7 @@ public class Rule_WDPREVTAG extends Rule {
 
   public Rule_WDPREVTAG() {
   }
+  @Override
   public boolean checkContext(POSTagger tagger) {
     return (tagger.lexBuff[2][0].equals(context[0]) &&
             tagger.wordBuff[3].equals(context[1]));

@@ -198,6 +198,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
 
   /**Gets the value of the isModified flag.
    * @return true if the definition has been modified    */
+  @Override
   public boolean  isModified() {
     return isModified;
   }
@@ -343,6 +344,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
 
 
   /*---implementation of interface java.util.List---*/
+  @Override
   public boolean addAll(int index, Collection c) {
     int size = nodes.size();
     Iterator iter = c.iterator();
@@ -359,10 +361,12 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     return result;
   }
 
+  @Override
   public Object get(int index) {
     return nodes.get(index);
   }
 
+  @Override
   public Object set(int index, Object element) {
     throw new UnsupportedOperationException("this method has not been implemented");
   }
@@ -375,6 +379,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
    * @param index
    * @param o 
    */
+  @Override
   public void add(int index, Object o) {
     if (o instanceof LinearNode) {
       String list = ((LinearNode)o).getList();
@@ -394,6 +399,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     } // if a linear node
   }
 
+  @Override
   public Object remove(int index) {
     Object result = null;
     int size = nodes.size();
@@ -408,46 +414,57 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     return result;
   }
 
+  @Override
   public int indexOf(Object o) {
     return nodes.indexOf(o);
   }
 
+  @Override
   public int lastIndexOf(Object o) {
     return nodes.lastIndexOf(o);
   }
 
+  @Override
   public ListIterator listIterator() {
     throw new UnsupportedOperationException("this method is not implemented");
   }
 
+  @Override
   public ListIterator listIterator(int index) {
     throw new UnsupportedOperationException("this method is not implemented");
   }
 
+  @Override
   public List subList(int fromIndex, int toIndex) {
     return nodes.subList(fromIndex,toIndex);
   } // class SafeIterator
 
+  @Override
   public int size() {
     return nodes.size();
   }
 
+  @Override
   public boolean isEmpty() {
     return 0 == nodes.size();
   }
 
+  @Override
   public boolean contains(Object o) {
     return nodes.contains(o);
   }
 
+  @Override
   public Iterator iterator() {
     return new SafeIterator();
   }
 
+  @Override
   public Object[] toArray() {
     return nodes.toArray();
   }
 
+  @Override
   public Object[] toArray(Object[] a) {
     return nodes.toArray(a);
   }
@@ -461,6 +478,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
    * @param o a node
    * @return true if the list of node is not already mapped with another node.
    */
+  @Override
   public boolean add(Object o) {
     boolean result = false;
     if (o instanceof LinearNode) {
@@ -483,6 +501,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     return result;
   } // add()
 
+  @Override
   public boolean remove(Object o) {
     boolean result = false;
     int size = nodes.size();
@@ -497,10 +516,12 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     return result;
   }// remove
 
+  @Override
   public boolean containsAll(Collection c) {
     return nodes.containsAll(c);
   }
 
+  @Override
   public boolean addAll(Collection c) {
     boolean result = false;
     Iterator iter = c.iterator();
@@ -515,6 +536,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   } // addAll()
 
 
+  @Override
   public boolean removeAll(Collection c) {
     boolean result = false;
     Iterator iter = c.iterator();
@@ -527,6 +549,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   }// removeAll()
 
 
+  @Override
   public boolean retainAll(Collection c) {
     int aprioriSize = nodes.size();
     List scrap = new ArrayList();
@@ -546,6 +569,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   }
 
 
+  @Override
   public void clear() {
     nodes.clear();
     lists.clear();
@@ -598,16 +622,19 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     private boolean removeCalled = false;
     private Object last = null;
 
+    @Override
     public boolean hasNext() {
       return iter.hasNext();
     }
 
+    @Override
     public Object next() {
       removeCalled = false;
       last = iter.next();
       return last;
     }
 
+    @Override
     public void remove() {
       if (!removeCalled && null!=last ) {
         LinearDefinition.this.remove(last);

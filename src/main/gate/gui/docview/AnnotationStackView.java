@@ -55,11 +55,13 @@ public class AnnotationStackView  extends AbstractDocumentView
     headerMouseListener = new HeaderMouseListener();
   }
 
+  @Override
   public void cleanup() {
     super.cleanup();
     textView = null;
   }
 
+  @Override
   protected void initGUI() {
 
     //get a pointer to the text view used to display
@@ -102,6 +104,7 @@ public class AnnotationStackView  extends AbstractDocumentView
     toolBar.addSeparator();
     toolBar.add(targetSetLabel = new JLabel("Target set: Undefined"));
     targetSetLabel.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         askTargetSet();
       }
@@ -119,6 +122,7 @@ public class AnnotationStackView  extends AbstractDocumentView
     initListeners();
   }
 
+  @Override
   public Component getGUI(){
     return mainPanel;
   }
@@ -126,17 +130,21 @@ public class AnnotationStackView  extends AbstractDocumentView
   protected void initListeners(){
 
     stackPanel.addAncestorListener(new AncestorListener() {
+      @Override
       public void ancestorAdded(AncestorEvent event) {
         // when the view becomes visible
           updateStackView();
       }
+      @Override
       public void ancestorMoved(AncestorEvent event) {
       }
+      @Override
       public void ancestorRemoved(AncestorEvent event) {
       }
     });
 
     textView.getTextView().addCaretListener(new CaretListener() {
+      @Override
       public void caretUpdate(CaretEvent e) {
         updateStackView();
       }
@@ -152,6 +160,7 @@ public class AnnotationStackView  extends AbstractDocumentView
         "&nbsp;&nbsp;</small></font></html>");
       putValue(MNEMONIC_KEY, KeyEvent.VK_LEFT);
     }
+    @Override
     public void actionPerformed(ActionEvent e) {
       nextAnnotationAction.setEnabled(true);
       List<Annotation> list = new ArrayList<Annotation>();
@@ -211,6 +220,7 @@ public class AnnotationStackView  extends AbstractDocumentView
         "&nbsp;&nbsp;</small></font></html>");
       putValue(MNEMONIC_KEY, KeyEvent.VK_RIGHT);
     }
+    @Override
     public void actionPerformed(ActionEvent e) {
       previousAnnotationAction.setEnabled(true);
       List<Annotation> list = new ArrayList<Annotation>();
@@ -262,14 +272,18 @@ public class AnnotationStackView  extends AbstractDocumentView
     }
   }
 
+  @Override
   protected void registerHooks() { /* do nothing */ }
 
+  @Override
   protected void unregisterHooks() { /* do nothing */ }
 
+  @Override
   public int getType() {
     return HORIZONTAL;
   }
 
+  @Override
   public void annotationUpdated(AnnotationEvent e) {
     updateStackView();
   }
@@ -341,6 +355,7 @@ public class AnnotationStackView  extends AbstractDocumentView
       JPanel vspace = new JPanel();
       vspace.setSize(0, 5);
       list.addListSelectionListener(new ListSelectionListener() {
+        @Override
         public void valueChanged(ListSelectionEvent e) {
           JList list = (JList) e.getSource();
           if (list.getSelectedValue() != null) {
@@ -388,6 +403,7 @@ public class AnnotationStackView  extends AbstractDocumentView
       }
     }
 
+    @Override
     public MouseInputAdapter createListener(String... parameters) {
       switch(parameters.length) {
         case 3:
@@ -399,12 +415,15 @@ public class AnnotationStackView  extends AbstractDocumentView
       }
     }
 
+    @Override
     public void mousePressed(MouseEvent me) {
       processMouseEvent(me);
     }
+    @Override
     public void mouseReleased(MouseEvent me) {
       processMouseEvent(me);
     }
+    @Override
     public void mouseClicked(MouseEvent me) {
       processMouseEvent(me);
     }
@@ -490,8 +509,10 @@ public class AnnotationStackView  extends AbstractDocumentView
         Date timeToRun = new Date(System.currentTimeMillis() + 500);
         Timer timer = new Timer("Annotation stack view select type", true);
         timer.schedule(new TimerTask() {
+          @Override
           public void run() {
-            SwingUtilities.invokeLater(new Runnable() { public void run() {
+            SwingUtilities.invokeLater(new Runnable() { @Override
+            public void run() {
               // select the new annotation and update the stack view
               annotationSetsView.setTypeSelected(targetSetName,
                 annotation.getType(), true);
@@ -502,6 +523,7 @@ public class AnnotationStackView  extends AbstractDocumentView
       textView.getTextView().requestFocusInWindow();
     }
 
+    @Override
     public void mouseEntered(MouseEvent e) {
       dismissDelay = toolTipManager.getDismissDelay();
       initialDelay = toolTipManager.getInitialDelay();
@@ -527,6 +549,7 @@ public class AnnotationStackView  extends AbstractDocumentView
       toolTipManager.setEnabled(true);
     }
 
+    @Override
     public void mouseExited(MouseEvent e) {
       toolTipManager.setDismissDelay(dismissDelay);
       toolTipManager.setInitialDelay(initialDelay);
@@ -559,8 +582,11 @@ public class AnnotationStackView  extends AbstractDocumentView
 
     void init() {
       mainPanel.addAncestorListener(new AncestorListener() {
+        @Override
         public void ancestorMoved(AncestorEvent event) {}
+        @Override
         public void ancestorAdded(AncestorEvent event) {}
+        @Override
         public void ancestorRemoved(AncestorEvent event) {
           // no parent so need to be disposed explicitly
           if (popupWindow != null) { popupWindow.dispose(); }
@@ -568,6 +594,7 @@ public class AnnotationStackView  extends AbstractDocumentView
       });
     }
 
+    @Override
     public MouseInputAdapter createListener(String... parameters) {
       switch(parameters.length) {
         case 1:
@@ -580,6 +607,7 @@ public class AnnotationStackView  extends AbstractDocumentView
     }
 
     // when double clicked shows a list of features for this annotation type
+    @Override
     public void mouseClicked(MouseEvent e) {
       if (popupWindow != null && popupWindow.isVisible()) {
         popupWindow.dispose();
@@ -614,6 +642,7 @@ public class AnnotationStackView  extends AbstractDocumentView
       list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       list.setBackground(Color.WHITE);
       list.addMouseListener(new MouseAdapter() {
+        @Override
         public void mouseClicked(MouseEvent e) {
           if (e.getClickCount() == 1) {
             String feature = (String) list.getSelectedValue();
@@ -632,6 +661,7 @@ public class AnnotationStackView  extends AbstractDocumentView
       // create the window that will contain the list
       popupWindow = new JWindow();
       popupWindow.addKeyListener(new KeyAdapter() {
+        @Override
         public void keyPressed(KeyEvent e) {
           if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
             popupWindow.setVisible(false);
@@ -650,6 +680,7 @@ public class AnnotationStackView  extends AbstractDocumentView
       popupWindow.pack();
       popupWindow.setVisible(true);
       SwingUtilities.invokeLater(new Runnable() {
+      @Override
       public void run() {
         String newFeature = typesFeatures.get(type);
         if (newFeature == null) { newFeature = "          "; }
@@ -658,6 +689,7 @@ public class AnnotationStackView  extends AbstractDocumentView
       }});
     }
 
+    @Override
     public void mouseEntered(MouseEvent e) {
       Component component = e.getComponent();
       if (component instanceof JLabel

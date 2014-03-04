@@ -32,6 +32,7 @@ public class Rule_UNKNOWN extends Rule {
   public Rule_UNKNOWN() {
   }
 
+  @Override
   public boolean checkContext(POSTagger tagger) {
     return false;
   }

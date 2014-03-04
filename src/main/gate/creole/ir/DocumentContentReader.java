@@ -24,6 +24,7 @@ public class DocumentContentReader implements PropertyReader {
   public DocumentContentReader() {
   }
 
+  @Override
   public String getPropertyValue(Document doc) {
     return doc.getContent().toString();
   }

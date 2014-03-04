@@ -139,6 +139,7 @@ public class WaitDialog extends JWindow implements Runnable {
 
   /**    *
    */
+  @Override
   public void run() {
     while(!stop){
       try{

@@ -50,14 +50,17 @@ class AnnotationSetNameComboEditor implements ComboBoxEditor, FocusListener {
     realEditor.getEditorComponent().addFocusListener(this);
   }
 
+  @Override
   public void addActionListener(ActionListener l) {
     realEditor.addActionListener(l);
   }
 
+  @Override
   public Component getEditorComponent() {
     return realEditor.getEditorComponent();
   }
 
+  @Override
   public Object getItem() {
     Object realItem = realEditor.getItem();
     if(isEmpty || DEFAULT_SET_TEXT.equals(realItem)) {
@@ -68,16 +71,19 @@ class AnnotationSetNameComboEditor implements ComboBoxEditor, FocusListener {
     }
   }
 
+  @Override
   public void removeActionListener(ActionListener l) {
     realEditor.removeActionListener(l);
   }
 
+  @Override
   public void selectAll() {
     if(!isEmpty) {
       realEditor.selectAll();
     }
   }
 
+  @Override
   public void setItem(Object item) {
     setItem(item, true);
   }
@@ -111,6 +117,7 @@ class AnnotationSetNameComboEditor implements ComboBoxEditor, FocusListener {
 
   // FocusListener methods
 
+  @Override
   public void focusGained(FocusEvent e) {
     if(isEmpty) {
       JTextField field = (JTextField)realEditor.getEditorComponent();
@@ -119,6 +126,7 @@ class AnnotationSetNameComboEditor implements ComboBoxEditor, FocusListener {
     }
   }
 
+  @Override
   public void focusLost(FocusEvent e) {
     JTextField field = (JTextField)realEditor.getEditorComponent();
     if(field.getDocument().getLength() == 0

@@ -79,6 +79,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * @return a {@link List} of Strings representing the names of the
    *         documents in this corpus.
    */
+  @Override
   public List<String> getDocumentNames() {
     ArrayList<String> res = new ArrayList<String>(supportList.size());
     for(Object document : supportList) {
@@ -94,14 +95,16 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * @return a String value representing the name of the document at
    *         <tt>index</tt> in this corpus.
    */
+  @Override
   public String getDocumentName(int index) {
-    return ((Document)supportList.get(index)).getName();
+    return supportList.get(index).getName();
   }
 
   /**
    * This method does not make sense for transient corpora, so it does
    * nothing.
    */
+  @Override
   public void unloadDocument(Document doc) {
     return;
   }
@@ -123,14 +126,17 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       data = new ArrayList();
     }
 
+    @Override
     public Object get(int index) {
       return data.get(index);
     }
 
+    @Override
     public int size() {
       return data.size();
     }
 
+    @Override
     public Object set(int index, Object element) {
       if(element instanceof Document) {
         Document oldDoc = (Document)data.set(index, element);
@@ -150,6 +156,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       }
     }
 
+    @Override
     public void add(int index, Object element) {
       if(element instanceof Document) {
         data.add(index, element);
@@ -165,6 +172,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       }
     }
 
+    @Override
     public Object remove(int index) {
       Document oldDoc = (Document)data.remove(index);
 
@@ -183,6 +191,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * This method returns true when the document is already loaded in
    * memory
    */
+  @Override
   public boolean isDocumentLoaded(int index) {
     return true;
   }
@@ -195,115 +204,142 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   // List methods
   // java docs will be automatically copied from the List interface.
 
+  @Override
   public int size() {
     return supportList.size();
   }
 
+  @Override
   public boolean isEmpty() {
     return supportList.isEmpty();
   }
 
+  @Override
   public boolean contains(Object o) {
     return supportList.contains(o);
   }
 
+  @Override
   public Iterator iterator() {
     return supportList.iterator();
   }
 
+  @Override
   public Object[] toArray() {
     return supportList.toArray();
   }
 
+  @Override
   public Object[] toArray(Object[] a) {
     return supportList.toArray(a);
   }
 
+  @Override
   public boolean add(Document o) {
     return supportList.add(o);
   }
 
+  @Override
   public boolean remove(Object o) {
     return supportList.remove(o);
   }
 
+  @Override
   public boolean containsAll(Collection c) {
     return supportList.containsAll(c);
   }
 
+  @Override
   public boolean addAll(Collection c) {
     return supportList.addAll(c);
   }
 
+  @Override
   public boolean addAll(int index, Collection c) {
     return supportList.addAll(index, c);
   }
 
+  @Override
   public boolean removeAll(Collection c) {
     return supportList.removeAll(c);
   }
 
+  @Override
   public boolean retainAll(Collection c) {
     return supportList.retainAll(c);
   }
 
+  @Override
   public void clear() {
     supportList.clear();
   }
 
+  @Override
   public boolean equals(Object o) {
     if(!(o instanceof CorpusImpl)) return false;
 
     return supportList.equals(o);
   }
 
+  @Override
   public int hashCode() {
     return supportList.hashCode();
   }
 
+  @Override
   public Document get(int index) {
     return supportList.get(index);
   }
 
+  @Override
   public Document set(int index, Document element) {
     return supportList.set(index, element);
   }
 
+  @Override
   public void add(int index, Document element) {
     supportList.add(index, element);
   }
 
+  @Override
   public Document remove(int index) {
     return supportList.remove(index);
   }
 
+  @Override
   public int indexOf(Object o) {
     return supportList.indexOf(o);
   }
 
+  @Override
   public int lastIndexOf(Object o) {
     return supportList.lastIndexOf(o);
   }
 
+  @Override
   public ListIterator listIterator() {
     return supportList.listIterator();
   }
 
+  @Override
   public ListIterator listIterator(int index) {
     return supportList.listIterator(index);
   }
 
+  @Override
   public List subList(int fromIndex, int toIndex) {
     return supportList.subList(fromIndex, toIndex);
   }
 
   /** Construction */
 
+  @Override
   public void cleanup() {
     Gate.getCreoleRegister().removeCreoleListener(this);
   }
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() {
     if(documentsList != null && !documentsList.isEmpty()) {
       addAll(documentsList);
@@ -395,6 +431,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
 
     // sort the files alphabetically regardless of their paths
     Arrays.sort(files, new Comparator<File>() {
+      @Override
       public int compare(File f1, File f2) {
         return f1.getName().compareTo(f2.getName());
       }
@@ -460,6 +497,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    *          the filter otherwise the children directories will be
    *          ignored.
    */
+  @Override
   public void populate(URL directory, FileFilter filter, String encoding,
           boolean recurseDirectories) throws IOException,
           ResourceInstantiationException {
@@ -490,6 +528,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    *          the filter otherwise the children directories will be
    *          ignored.
    */
+  @Override
   public void populate(URL directory, FileFilter filter, String encoding,
           String mimeType, boolean recurseDirectories) throws IOException,
           ResourceInstantiationException {
@@ -676,6 +715,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * @return total length of populated documents in the corpus in number
    *         of bytes
    */ 
+  @Override
   public long populate(URL singleConcatenatedFile, String documentRootElement,
       String encoding, int numberOfFilesToExtract,
       String documentNamePrefix, String mimeType, boolean includeRootElement) throws IOException,
@@ -685,6 +725,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
         documentNamePrefix, mimeType, includeRootElement);
 }
 
+  @Override
   public synchronized void removeCorpusListener(CorpusListener l) {
     if(corpusListeners != null && corpusListeners.contains(l)) {
       Vector v = (Vector)corpusListeners.clone();
@@ -693,6 +734,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     }
   }
 
+  @Override
   public synchronized void addCorpusListener(CorpusListener l) {
     Vector v = corpusListeners == null
             ? new Vector(2)
@@ -708,10 +750,11 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * usual way, then duplicate the documents in this corpus and add them
    * to the duplicate.
    */
+  @Override
   public Resource duplicate(Factory.DuplicationContext ctx)
           throws ResourceInstantiationException {
     Corpus newCorpus = (Corpus)Factory.defaultDuplicate(this, ctx);
-    for(Document d : (List<Document>)this) {
+    for(Document d : this) {
       newCorpus.add((Document)Factory.duplicate(d, ctx));
     }
     return newCorpus;
@@ -754,9 +797,11 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     return documentsList;
   }
 
+  @Override
   public void resourceLoaded(CreoleEvent e) {
   }
 
+  @Override
   public void resourceUnloaded(CreoleEvent e) {
     Resource res = e.getResource();
     // remove all occurences
@@ -764,15 +809,19 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       remove(res);
   }
 
+  @Override
   public void resourceRenamed(Resource resource, String oldName, String newName) {
   }
 
+  @Override
   public void datastoreOpened(CreoleEvent e) {
   }
 
+  @Override
   public void datastoreCreated(CreoleEvent e) {
   }
 
+  @Override
   public void datastoreClosed(CreoleEvent e) {
   }
 } // class CorpusImpl

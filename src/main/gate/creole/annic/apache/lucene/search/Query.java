@@ -48,6 +48,7 @@ public abstract class Query implements java.io.Serializable, Cloneable {
   public abstract String toString(String field);
 
   /** Prints a query to a string. */
+  @Override
   public String toString() {
     return toString("");
   }
@@ -117,9 +118,10 @@ public abstract class Query implements java.io.Serializable, Cloneable {
   }
 
   /** Returns a clone of this query. */
+  @Override
   public Object clone() {
     try {
-      return (Query)super.clone();
+      return super.clone();
     } catch (CloneNotSupportedException e) {
       throw new RuntimeException("Clone not supported: " + e.getMessage());
     }

@@ -29,6 +29,7 @@ public class TestRBTreeMap extends TestCase
   public TestRBTreeMap(String name) { super(name); }
 
   /** Create a map  with sparse values as keys */
+  @Override
   public void setUp() {
     myTree=new RBTreeMap();
     myTree.put(new Long(10),"Ten");

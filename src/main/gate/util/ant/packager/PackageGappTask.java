@@ -66,6 +66,7 @@ public class PackageGappTask extends Task {
    * not <code>null</code>.
    */
   public static final Comparator<URL> PATH_COMPARATOR = new Comparator<URL>() {
+    @Override
     public int compare(URL a, URL b) {
       if(a == null) {
         return (b == null) ? 0 : -1;
@@ -884,6 +885,7 @@ public class PackageGappTask extends Task {
      * version that takes an <code>Object</code> as value rather than a
      * <code>String</code>.
      */
+    @Override
     protected void addProperty(String n, String v) {
       addProperty(n, (Object)v);
     }
@@ -892,6 +894,7 @@ public class PackageGappTask extends Task {
      * Rather than adding properties to the project, add mapping hints
      * to the task.
      */
+    @Override
     protected void addProperty(String n, Object vObj) {
       String v = (vObj == null) ? null : vObj.toString();
       try {

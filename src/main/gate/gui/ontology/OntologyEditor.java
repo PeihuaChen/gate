@@ -97,6 +97,7 @@ public class OntologyEditor extends AbstractVisualResource
    * 
    * @see gate.creole.AbstractVisualResource#setTarget(java.lang.Object)
    */
+  @Override
   public void setTarget(Object target) {
     this.ontology = (Ontology)target;
     selectedNodes = new ArrayList<DefaultMutableTreeNode>();
@@ -120,6 +121,7 @@ public class OntologyEditor extends AbstractVisualResource
    * Init method, that creates this object and returns this object as a
    * resource
    */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     super.init();
     initLocalData();
@@ -252,6 +254,7 @@ public class OntologyEditor extends AbstractVisualResource
       new JButton(MainFrame.getIcon("crystal-clear-action-reload-small"));
     refreshOntologyBtn.setToolTipText("Rebuilds the ontology tree");
     refreshOntologyBtn.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent ae) {
         rebuildModel();
       }
@@ -371,33 +374,40 @@ public class OntologyEditor extends AbstractVisualResource
   protected void initListeners() {
     tree.getSelectionModel().addTreeSelectionListener(
             new TreeSelectionListener() {
+              @Override
               public void valueChanged(TreeSelectionEvent e) {
                 updateSelection(tree, detailsTableScroller);
               }
             });
     propertyTree.getSelectionModel().addTreeSelectionListener(
             new TreeSelectionListener() {
+              @Override
               public void valueChanged(TreeSelectionEvent e) {
                 updateSelection(propertyTree, propertyDetailsTableScroller);
               }
             });
 
     mainSplit.addComponentListener(new ComponentListener() {
+      @Override
       public void componentHidden(ComponentEvent e) {
       }
 
+      @Override
       public void componentMoved(ComponentEvent e) {
       }
 
+      @Override
       public void componentResized(ComponentEvent e) {
         mainSplit.setDividerLocation(0.4);
       }
 
+      @Override
       public void componentShown(ComponentEvent e) {
       }
     });
 
     tree.addMouseListener(new MouseAdapter() {
+      @Override
       @SuppressWarnings("deprecation")
       public void mouseClicked(MouseEvent me) {
         if(SwingUtilities.isRightMouseButton(me)) {
@@ -423,6 +433,7 @@ public class OntologyEditor extends AbstractVisualResource
 
             // invoke new sub class action
             subClass.addActionListener(new ActionListener() {
+              @Override
               public void actionPerformed(ActionEvent ae) {
                 subClassAction.actionPerformed(ae);
               }
@@ -430,6 +441,7 @@ public class OntologyEditor extends AbstractVisualResource
 
             // invoke new instance action
             instance.addActionListener(new ActionListener() {
+              @Override
               public void actionPerformed(ActionEvent ae) {
                 instanceAction.actionPerformed(ae);
               }
@@ -437,6 +449,7 @@ public class OntologyEditor extends AbstractVisualResource
 
             // invoke same as action
             sameAs.addActionListener(new ActionListener() {
+              @Override
               public void actionPerformed(ActionEvent ae) {
                 Set<OClass> oclasses = ontology.getOClasses(false);
                 ArrayList<OClass> classList = new ArrayList<OClass>();
@@ -473,6 +486,7 @@ public class OntologyEditor extends AbstractVisualResource
           // same as action for OInstance
           if(candidate instanceof OInstance) {
             sameAs.addActionListener(new ActionListener() {
+              @Override
               public void actionPerformed(ActionEvent ae) {
                 Set<OInstance> instances = ontology.getOInstances();
                 ArrayList<OInstance> instancesList = new ArrayList<OInstance>();
@@ -507,6 +521,7 @@ public class OntologyEditor extends AbstractVisualResource
           // add the delete button here
           menu.add(delete);
           delete.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ae) {
               deleteOntoResourceAction.actionPerformed(ae);
             }
@@ -571,12 +586,13 @@ public class OntologyEditor extends AbstractVisualResource
     });
 
     propertyTree.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent me) {
         if(SwingUtilities.isRightMouseButton(me)) {
           if(selectedNodes == null || selectedNodes.size() != 1) return;
           final JPopupMenu menu = new JPopupMenu();
-          final OResource candidate = ((OResourceNode)((DefaultMutableTreeNode)selectedNodes
-                  .get(0)).getUserObject()).getResource();
+          final OResource candidate = ((OResourceNode)selectedNodes
+                  .get(0).getUserObject()).getResource();
           final JMenuItem sameAs = new JMenuItem("Equivalent Property");
           final JMenuItem delete = new JMenuItem("Delete", MainFrame
                   .getIcon("delete"));
@@ -595,12 +611,14 @@ public class OntologyEditor extends AbstractVisualResource
             inverseFunctional.setSelected(((ObjectProperty)candidate)
                     .isInverseFunctional());
             functional.addActionListener(new ActionListener() {
+              @Override
               public void actionPerformed(ActionEvent ae) {
                 ((ObjectProperty)candidate).setFunctional(functional
                         .isSelected());
               }
             });
             inverseFunctional.addActionListener(new ActionListener() {
+              @Override
               public void actionPerformed(ActionEvent ae) {
                 ((ObjectProperty)candidate)
                         .setInverseFunctional(inverseFunctional.isSelected());
@@ -616,6 +634,7 @@ public class OntologyEditor extends AbstractVisualResource
             props.addAll(ontology.getRDFProperties());
           }
           sameAs.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ae) {
               props.remove(candidate);
               Iterator<RDFProperty> iter = props.iterator();
@@ -642,6 +661,7 @@ public class OntologyEditor extends AbstractVisualResource
 
           menu.add(delete);
           delete.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent ae) {
               deleteOntoResourceAction.actionPerformed(ae);
             }
@@ -674,6 +694,7 @@ public class OntologyEditor extends AbstractVisualResource
               propertyCounter++;
 
               item.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent ae) {
                   String value = JOptionPane.showInputDialog(
                     MainFrame.getInstance(),
@@ -697,6 +718,7 @@ public class OntologyEditor extends AbstractVisualResource
     });
 
     detailsTable.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent me) {
         if(SwingUtilities.isLeftMouseButton(me)) {
           int row = detailsTable.getSelectedRow();
@@ -774,7 +796,8 @@ public class OntologyEditor extends AbstractVisualResource
               resource.addAnnotationPropertyValue(
                 (AnnotationProperty) property, new Literal(""));
               detailsTableModel.setItem(resource);
-              SwingUtilities.invokeLater(new Runnable() { public void run() {
+              SwingUtilities.invokeLater(new Runnable() { @Override
+              public void run() {
               for (int rowI = detailsTable.getRowCount()-1; rowI >= 0; rowI--) {
                 if (detailsTable.getValueAt(rowI,
                     DetailsTableModel.VALUE_COLUMN).equals("")
@@ -837,7 +860,8 @@ public class OntologyEditor extends AbstractVisualResource
                 return;
               }
               detailsTableModel.setItem(resource);
-              SwingUtilities.invokeLater(new Runnable() { public void run() {
+              SwingUtilities.invokeLater(new Runnable() { @Override
+              public void run() {
               for (int rowI = detailsTable.getRowCount()-1; rowI >= 0; rowI--) {
                 if (detailsTable.getValueAt(rowI,
                     DetailsTableModel.VALUE_COLUMN).equals(literalValue)
@@ -891,6 +915,7 @@ public class OntologyEditor extends AbstractVisualResource
               }
 
               SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                   TreePath path = tree.getSelectionPath();
                   tree.setSelectionRow(0);
@@ -910,6 +935,7 @@ public class OntologyEditor extends AbstractVisualResource
     });
 
     propertyDetailsTable.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent me) {
         if(SwingUtilities.isLeftMouseButton(me)) {
           int[] rows = propertyDetailsTable.getSelectedRows();
@@ -1017,6 +1043,7 @@ public class OntologyEditor extends AbstractVisualResource
               }
 
               SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                   TreePath path = propertyTree.getSelectionPath();
                   propertyTree.setSelectionRow(0);
@@ -1043,6 +1070,7 @@ public class OntologyEditor extends AbstractVisualResource
       this.oResource = oResource;
       this.property = property;
     }
+    @Override
     public void actionPerformed(ActionEvent e) {
       Object inputValue = JOptionPane.showInputDialog(MainFrame.getInstance(),
         "<html>Enter a value for the property <b>" +
@@ -1070,6 +1098,7 @@ public class OntologyEditor extends AbstractVisualResource
       this.oResource = oResource;
       this.property = property;
     }
+    @Override
     public void actionPerformed(ActionEvent ae) {
       Object inputValue = JOptionPane.showInputDialog(MainFrame.getInstance(),
         "<html>Enter a value for the property <b>" +
@@ -1113,6 +1142,7 @@ public class OntologyEditor extends AbstractVisualResource
       this.property = property;
       this.oldValue = oldValue;
     }
+    @Override
     public void actionPerformed(ActionEvent ae) {
       Set<OInstance> instances = ontology.getOInstances();
       ArrayList<String> validInstances = new ArrayList<String>();
@@ -1281,6 +1311,7 @@ public class OntologyEditor extends AbstractVisualResource
     symmetricPropertyAction.setOntologyClassesURIs(ontologyClassesURIs);
     transitivePropertyAction.setOntologyClassesURIs(ontologyClassesURIs);
     SwingUtilities.invokeLater(new Runnable() {
+      @Override
       public void run() {
         treeModel.nodeStructureChanged(rootNode);
         tree.setSelectionInterval(0, 0);
@@ -1690,7 +1721,7 @@ public class OntologyEditor extends AbstractVisualResource
                 else {
                   // that's it this is the class which should be added
                   // at the top of tree
-                  toAdd.add((OClass)res);
+                  toAdd.add(res);
                   break;
                 }
               }
@@ -1730,6 +1761,7 @@ public class OntologyEditor extends AbstractVisualResource
     }
   }
 
+  @Override
   public void resourcesRemoved(final Ontology ontology, final String[] resources) {
     if(this.ontology != ontology) {
       return;
@@ -1759,6 +1791,7 @@ public class OntologyEditor extends AbstractVisualResource
     }
     
     SwingUtilities.invokeLater(new Runnable() {
+      @Override
       public void run() {
         // first hide the tree
         scroller.getViewport().setView(new JLabel("PLease wait, updating..."));
@@ -1767,6 +1800,7 @@ public class OntologyEditor extends AbstractVisualResource
         // now update the tree
         // we can use a normal thread here
         Runnable treeUpdater = new Runnable() {
+          @Override
           public void run() {
             // this is not in the swing thread
             // update the tree...
@@ -1799,6 +1833,7 @@ public class OntologyEditor extends AbstractVisualResource
             // now we need to show back the tree
             // go back to the swing thread
             SwingUtilities.invokeLater(new Runnable() {
+              @Override
               public void run() {
                 // show the tree again
                 scroller.getViewport().setView(tree);
@@ -1942,6 +1977,7 @@ public class OntologyEditor extends AbstractVisualResource
     });
   }
 
+  @Override
   public void resourceAdded(Ontology ontology, OResource resource) {
     if(this.ontology != ontology) {
       return;
@@ -1983,11 +2019,13 @@ public class OntologyEditor extends AbstractVisualResource
     return;
   }
 
+  @Override
   public void resourceRelationChanged(Ontology ontology, OResource resource1,
           OResource resouce2, int eventType) {
     this.ontologyModified(ontology, resource1, eventType);
   }
 
+  @Override
   public void resourcePropertyValueChanged(Ontology ontology,
           OResource resource, RDFProperty property, Object value, int eventType) {
     this.ontologyModified(ontology, resource, eventType);
@@ -2055,6 +2093,7 @@ public class OntologyEditor extends AbstractVisualResource
    * 
    * @param ontology
    */
+  @Override
   public void ontologyReset(Ontology ontology) {
     if(this.ontology != ontology) {
       return;
@@ -2078,7 +2117,8 @@ public class OntologyEditor extends AbstractVisualResource
   }
 
   public void selectResourceInClassTree(final OResource resource) {
-    SwingUtilities.invokeLater(new Runnable() { public void run() {
+    SwingUtilities.invokeLater(new Runnable() { @Override
+    public void run() {
       tabbedPane.setSelectedComponent(scroller);
       tree.setSelectionPath(new TreePath(uri2TreeNodesListMap.get(
         resource.getONodeID().toString()).get(0).getPath()));

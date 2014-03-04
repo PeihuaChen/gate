@@ -46,6 +46,7 @@ public abstract class AbstractTreeTableModel implements TreeTableModel {
   /**
    * Default implementation. Gets the root of the tree.
    */
+  @Override
   public Object getRoot() {
       return root;
   }
@@ -53,16 +54,19 @@ public abstract class AbstractTreeTableModel implements TreeTableModel {
   /**
    * Is this node a leaf?
    */
+  @Override
   public boolean isLeaf(Object node) {
       return getChildCount(node) == 0;
   }
 
+  @Override
   public void valueForPathChanged(TreePath path, Object newValue) {}
 
   /**
    * This method is not called by the current implementation of JTree.
    * Implemented only for completion.
    */
+  @Override
   public int getIndexOfChild(Object parent, Object child) {
     for (int i = 0; i < getChildCount(parent); i++){
       if (getChild(parent, i).equals(child)){
@@ -76,6 +80,7 @@ public abstract class AbstractTreeTableModel implements TreeTableModel {
    * Registers a new {@link javax.swing.event.TreeModelListener} with this
    * model.
    */
+  @Override
   public void addTreeModelListener(TreeModelListener l) {
     listenerList.add(TreeModelListener.class, l);
   }
@@ -84,6 +89,7 @@ public abstract class AbstractTreeTableModel implements TreeTableModel {
    * Removes a {@link javax.swing.event.TreeModelListener} from the list of
    * listeners registered with this model.
    */
+  @Override
   public void removeTreeModelListener(TreeModelListener l) {
     listenerList.remove(TreeModelListener.class, l);
   }
@@ -191,14 +197,22 @@ public abstract class AbstractTreeTableModel implements TreeTableModel {
   /**
    * Default implementation. Does nothing.
    */
+  @Override
   public void setValueAt(Object aValue, Object node, int column){}
 
+  @Override
   abstract public Class getColumnClass(int column);
+  @Override
   abstract public boolean isCellEditable(Object node, int column);
+  @Override
   abstract public Object getChild(Object parent, int index);
+  @Override
   abstract public int getChildCount(Object parent);
+  @Override
   abstract public int getColumnCount();
+  @Override
   abstract public String getColumnName(int column);
+  @Override
   abstract public Object getValueAt(Object node, int column);
 
 }

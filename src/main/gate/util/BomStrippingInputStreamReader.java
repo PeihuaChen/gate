@@ -108,10 +108,12 @@ public class BomStrippingInputStreamReader extends BufferedReader {
     }
   }
 
+  @Override
   public int hashCode() {
     return super.hashCode();
   }
 
+  @Override
   public boolean equals(Object obj) {
     return super.equals(obj);
   }
@@ -129,6 +131,7 @@ public class BomStrippingInputStreamReader extends BufferedReader {
     return false;
   }
 
+  @Override
   public int read(CharBuffer target) throws IOException {
     if(checkPending()) {
       return -1;
@@ -136,6 +139,7 @@ public class BomStrippingInputStreamReader extends BufferedReader {
     return super.read(target);
   }
 
+  @Override
   public int read(char[] cbuf) throws IOException {
     if(checkPending()) {
       return -1;
@@ -143,6 +147,7 @@ public class BomStrippingInputStreamReader extends BufferedReader {
     return super.read(cbuf);
   }
 
+  @Override
   public int read() throws IOException {
     if(checkPending()) {
       return -1;
@@ -150,6 +155,7 @@ public class BomStrippingInputStreamReader extends BufferedReader {
     return super.read();
   }
 
+  @Override
   public int read(char[] cbuf, int off, int len) throws IOException {
     if(checkPending()) {
       return -1;
@@ -157,6 +163,7 @@ public class BomStrippingInputStreamReader extends BufferedReader {
     return super.read(cbuf, off, len);
   }
 
+  @Override
   public String readLine() throws IOException {
     if(checkPending()) {
       return null;
@@ -164,6 +171,7 @@ public class BomStrippingInputStreamReader extends BufferedReader {
     return super.readLine();
   }
 
+  @Override
   public long skip(long n) throws IOException {
     if(checkPending()) {
       return 0;
@@ -171,6 +179,7 @@ public class BomStrippingInputStreamReader extends BufferedReader {
     return super.skip(n);
   }
 
+  @Override
   public boolean ready() throws IOException {
     if(checkPending()) {
       return false;
@@ -178,20 +187,24 @@ public class BomStrippingInputStreamReader extends BufferedReader {
     return super.ready();
   }
 
+  @Override
   public boolean markSupported() {
     return super.markSupported();
   }
 
+  @Override
   public void mark(int readAheadLimit) throws IOException {
     checkPending();
     super.mark(readAheadLimit);
   }
 
+  @Override
   public void reset() throws IOException {
     checkPending();
     super.reset();
   }
 
+  @Override
   public void close() throws IOException {
     // go ahead and close on this call even if we have an IOException
     // sitting around.

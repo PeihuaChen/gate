@@ -31,6 +31,7 @@ class RAMInputStream extends InputStream implements Cloneable {
     length = file.length;
   }
 
+  @Override
   public void readInternal(byte[] dest, int destOffset, int len) {
     int remainder = len;
     int start = pointer;
@@ -48,9 +49,11 @@ class RAMInputStream extends InputStream implements Cloneable {
     pointer += len;
   }
 
+  @Override
   public void close() {
   }
 
+  @Override
   public void seekInternal(long pos) {
     pointer = (int)pos;
   }

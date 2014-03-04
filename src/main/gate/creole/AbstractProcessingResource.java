@@ -32,6 +32,7 @@ abstract public class AbstractProcessingResource
 extends AbstractResource implements ProcessingResource, ANNIEConstants
 {
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     return this;
   } // init()
@@ -40,6 +41,7 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
    *  this in subclasses so the default implementation signals an
    *  exception.
    */
+  @Override
   public void execute() throws ExecutionException{
     throw new ExecutionException(
       "Resource " + getClass() + " hasn't overriden the execute() method"
@@ -56,11 +58,13 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
    * The implementation in this class simply calls {@link #init()}. This
    * functionality must be overriden by derived classes as necessary.
    */
+  @Override
   public void reInit() throws ResourceInstantiationException{
     init();
   } // reInit()
 
   /** should clear all internal data of the resource. Does nothing now */
+  @Override
   public void cleanup() {
   }
 
@@ -68,6 +72,7 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
    * Checks whether this PR has been interrupted since the last time its
    * {@link #execute()} method was called.
    */
+  @Override
   public boolean isInterrupted(){
     return interrupted;
   }
@@ -75,6 +80,7 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
   /**
    * Notifies this PR that it should stop its execution as soon as possible.
    */
+  @Override
   public void interrupt(){
     interrupted = true;
   }
@@ -177,7 +183,7 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
    */
   public static FeatureMap getRuntimeParameterValues(Resource res)
               throws ResourceInstantiationException {
-    ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(
+    ResourceData rData = Gate.getCreoleRegister().get(
             res.getClass().getName());
     if(rData == null)
       throw new ResourceInstantiationException(
@@ -206,10 +212,12 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
       this.start = start;
       this.end = end;
     }
+    @Override
     public void progressChanged(int i){
       fireProgressChanged(start + (end - start) * i / 100);
     }
 
+    @Override
     public void processFinished(){
       fireProgressChanged(end);
     }
@@ -222,6 +230,7 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
    * A simple status listener used to forward the events upstream.
    */
   protected class InternalStatusListener implements StatusListener{
+    @Override
     public void statusChanged(String message){
       fireStatusChanged(message);
     }

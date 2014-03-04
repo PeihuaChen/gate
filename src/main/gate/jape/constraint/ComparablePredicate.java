@@ -46,6 +46,7 @@ public abstract class ComparablePredicate extends AbstractConstraintPredicate {
     super.setValue(value);
   }
 
+  @Override
   public boolean doMatch(Object value, AnnotationSet context) throws JapeException {
     if(value == null) return false;
 

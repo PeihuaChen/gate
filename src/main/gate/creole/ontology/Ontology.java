@@ -872,6 +872,7 @@ public interface Ontology extends LanguageResource {
    * 
    * @return whether the ontology has been modified after the loading
    */
+  @Override
   public boolean isModified();
 
   /**

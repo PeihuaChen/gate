@@ -37,6 +37,7 @@ public class OptionsMap extends TreeMap<Object, Object> {
    * There is get methods for values that are a String, an Integer, a Boolean,
    * a Font, a List of String and a Map of String*String.
    */
+  @Override
   public Object put(Object key, Object value) {
     if(value instanceof Font){
       Font font = (Font)value;

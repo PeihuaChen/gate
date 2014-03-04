@@ -16,8 +16,6 @@ package gate.gui.annedit;
 import javax.swing.text.JTextComponent;
 
 import gate.*;
-import gate.gui.docview.AnnotationList;
-import gate.gui.docview.DocumentEditor;
 
 /**
  * Objects of this type control the interaction with an 

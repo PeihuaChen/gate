@@ -20,14 +20,11 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.*;
-
 import javax.swing.*;
 
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
-import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
 import gate.util.*;
 
@@ -105,6 +102,7 @@ public class FeatureMapEditorDialog extends JDialog {
 
   protected void initListeners() {
     okButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         userCancelled = false;
         setVisible(false);
@@ -112,6 +110,7 @@ public class FeatureMapEditorDialog extends JDialog {
     });
 
     cancelButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         userCancelled = true;
         setVisible(false);
@@ -159,10 +158,12 @@ public class FeatureMapEditorDialog extends JDialog {
   FeatureBearer tempFMHolder = new FeatureBearer() {
     private FeatureMap fm;
 
+    @Override
     public void setFeatures(FeatureMap map) {
       fm = map;
     }
 
+    @Override
     public FeatureMap getFeatures() {
       return fm;
     }

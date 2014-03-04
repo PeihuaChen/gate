@@ -77,6 +77,7 @@ public class NominalCoref extends AbstractCoreferencer
   }
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     return super.init();
   } // init()
@@ -89,6 +90,7 @@ public class NominalCoref extends AbstractCoreferencer
    * the resource has changed since the resource has been created then the
    * resource will change too after calling reInit().
   */
+  @Override
   public void reInit() throws ResourceInstantiationException {
     this.anaphor2antecedent = new HashMap();
     init();
@@ -96,6 +98,7 @@ public class NominalCoref extends AbstractCoreferencer
 
 
   /** Set the document to run on. */
+  @Override
   public void setDocument(Document newDocument) {
 
     //0. precondition
@@ -105,6 +108,7 @@ public class NominalCoref extends AbstractCoreferencer
   }
 
   /** --- */
+  @Override
   @RunTime
   @Optional
   @CreoleParameter(comment="The annotation set to be used for the generated annotations")
@@ -113,6 +117,7 @@ public class NominalCoref extends AbstractCoreferencer
   }
 
   /** --- */
+  @Override
   public String getAnnotationSetName() {
     return annotationSetName;
   }
@@ -129,6 +134,7 @@ public class NominalCoref extends AbstractCoreferencer
    *      passes, we associate it with the Person annotation at the top
    *      of the stack
    */
+  @Override
   public void execute() throws ExecutionException{
 
     Annotation[] nominalArray;
@@ -211,7 +217,7 @@ public class NominalCoref extends AbstractCoreferencer
         
     // process all nominals
     for (int i=0; i<nominalArray.length; i++) {
-      Annotation nominal = (Annotation)nominalArray[i];
+      Annotation nominal = nominalArray[i];
       
       // Find the current place in the tokens array
       currentToken = advanceTokenPosition(nominal, currentToken, tokens);
@@ -270,7 +276,7 @@ public class NominalCoref extends AbstractCoreferencer
 
 	// Don't associate it if it's proceeded by a generic marker
         if (currentToken != 0) {
-          previousToken = (Annotation) tokens[currentToken - 1];
+          previousToken = tokens[currentToken - 1];
           previousValue = (String) 
 	    previousToken.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
           if (previousValue.equalsIgnoreCase("a") ||
@@ -293,10 +299,10 @@ public class NominalCoref extends AbstractCoreferencer
 	
 	// Luckily we have an array of all Person annotations in order...
 	if (i < nominalArray.length - 1) {
-	  Annotation nextAnnotation = (Annotation) nominalArray[i+1];
+	  Annotation nextAnnotation = nominalArray[i+1];
 	  if (nextAnnotation.getType().equals(PERSON_CATEGORY)) {
 	    // is it preceded by a definite article?
-	    previousToken = (Annotation) tokens[currentToken - 1];
+	    previousToken = tokens[currentToken - 1];
 	    previousValue = (String) 
 	      previousToken.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
 	    
@@ -353,7 +359,7 @@ public class NominalCoref extends AbstractCoreferencer
 	int personIndex = 0;
 	
 	Annotation previousPerson =
-	  (Annotation) previousPeople.get(personIndex);
+	  previousPeople.get(personIndex);
 	
 	// Don't associate if the two nominals are not the same gender
 	String personGender = (String) 
@@ -393,8 +399,7 @@ public class NominalCoref extends AbstractCoreferencer
 				      nominal.getStartNode().getOffset(),
 				      nominal.getEndNode().getOffset()).toArray(new Annotation[0]);
 	java.util.Arrays.sort(orgNounTokens, new OffsetComparator());
-	Annotation lastToken = (Annotation)
-	  orgNounTokens[orgNounTokens.length - 1];
+	Annotation lastToken = orgNounTokens[orgNounTokens.length - 1];
 	
 	// Don't associate if the org noun is not a singular noun
 	if (! lastToken.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME)

@@ -43,6 +43,7 @@ public class LuceneIndexSearcher extends IndexSearcher {
   /**
    * Searches through the lucene index and returns an instance of TopDocs.
    */
+  @Override
   public TopDocs search(Query query, Filter filter, final int nDocs)
           throws IOException {
     initializeTermPositions(); 

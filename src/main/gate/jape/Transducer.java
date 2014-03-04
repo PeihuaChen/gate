@@ -20,7 +20,6 @@ package gate.jape;
 import gate.AnnotationSet;
 import gate.Controller;
 import gate.Document;
-import gate.Gate;
 import gate.creole.ExecutionException;
 import gate.creole.ontology.Ontology;
 import gate.event.ProgressListener;
@@ -64,6 +63,7 @@ public abstract class Transducer implements Serializable, Benchmarkable
   /**
    * Gets the benchmark ID of this transducer.
    */
+  @Override
   public String getBenchmarkId() {
     if(benchmarkID == null) {
       return getName();
@@ -76,6 +76,7 @@ public abstract class Transducer implements Serializable, Benchmarkable
   /**
    * Set the benchmark ID for this transducer.
    */
+  @Override
   public void setBenchmarkId(String benchmarkId) {
     this.benchmarkID = benchmarkId;
   }

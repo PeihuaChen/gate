@@ -95,6 +95,7 @@ public class OkCancelDialog extends JDialog {
     getContentPane().add(vBox, BorderLayout.SOUTH);
 
     Action applyAction = new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         userHasPressedOK = true;
         setVisible(false);
@@ -102,6 +103,7 @@ public class OkCancelDialog extends JDialog {
     };
 
     Action cancelAction = new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         userHasPressedCancel = true;
         setVisible(false);
@@ -123,6 +125,7 @@ public class OkCancelDialog extends JDialog {
     cancelButton.addActionListener(cancelAction);
   }
 
+  @Override
   public void dispose(){
     MainFrame.getGuiRoots().remove(this);
     super.dispose();

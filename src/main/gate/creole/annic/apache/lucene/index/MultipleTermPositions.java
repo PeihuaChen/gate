@@ -56,7 +56,8 @@ public class MultipleTermPositions
 	    return (TermPositions)top();
 	}
 
-	public final boolean lessThan(Object a, Object b)
+	@Override
+  public final boolean lessThan(Object a, Object b)
 	{
 	    return ((TermPositions)a).doc() < ((TermPositions)b).doc();
 	}
@@ -141,6 +142,7 @@ public class MultipleTermPositions
      * @exception IOException if an error occurs
      * @see TermDocs#next()
      */
+    @Override
     public final boolean next()
 	throws IOException
     {
@@ -181,6 +183,7 @@ public class MultipleTermPositions
      * @exception IOException if an error occurs
      * @see TermPositions#nextPosition()
      */
+    @Override
     public final int nextPosition()
 	throws IOException
     {
@@ -195,6 +198,7 @@ public class MultipleTermPositions
      * @exception IOException if an error occurs
      * @see TermDocs#skipTo(int)
      */
+    @Override
     public final boolean skipTo(int target)
 	throws IOException
     {
@@ -217,6 +221,7 @@ public class MultipleTermPositions
      * @return an <code>int</code> value
      * @see TermDocs#doc()
      */
+    @Override
     public final int doc()
     {
 	return _doc;
@@ -228,6 +233,7 @@ public class MultipleTermPositions
      * @return an <code>int</code> value
      * @see TermDocs#freq()
      */
+    @Override
     public final int freq()
     {
 	return _freq;
@@ -239,6 +245,7 @@ public class MultipleTermPositions
      * @exception IOException if an error occurs
      * @see TermDocs#close()
      */
+    @Override
     public final void close()
 	throws IOException
     {
@@ -253,12 +260,14 @@ public class MultipleTermPositions
      * @exception IOException if an error occurs
      * @see TermDocs#seek(Term)
      */
+    @Override
     public void seek(Term arg0)
 	throws IOException
     {
 	throw new UnsupportedOperationException();
     }
 
+    @Override
     public void seek(TermEnum termEnum) throws IOException {
       throw new UnsupportedOperationException();
     }
@@ -273,6 +282,7 @@ public class MultipleTermPositions
      * @exception IOException if an error occurs
      * @see TermDocs#read(int[], int[])
      */
+    @Override
     public int read(int[] arg0, int[] arg1)
 	throws IOException
     {

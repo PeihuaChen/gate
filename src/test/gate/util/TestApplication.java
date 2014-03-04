@@ -244,6 +244,7 @@ public class TestApplication extends TestCase {
   // create a corpus from the clean documents
   Corpus newCorpus = Factory.newCorpus("New corpus");
   FileFilter acceptAllFileFilter = new FileFilter() {
+    @Override
     public boolean accept(File pathname) {
       return true;
     }

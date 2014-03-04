@@ -33,16 +33,19 @@ public abstract class LaxErrorHandler implements ErrorHandler {
   /**
    * error method comment.
    */
+  @Override
   public abstract void error(SAXParseException ex) throws SAXException;
 
   /**
    * fatalError method comment.
    */
+  @Override
   public abstract void fatalError(SAXParseException ex) throws SAXException ;
 
   /**
    * warning method comment.
    */
+  @Override
   public abstract void warning(SAXParseException ex) throws SAXException ;
 
 } // class LaxErrorHandler

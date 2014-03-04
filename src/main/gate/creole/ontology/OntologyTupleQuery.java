@@ -57,12 +57,14 @@ public interface OntologyTupleQuery
    * @return a boolean indicating if more results can be retrieved with one
    * of the next methods.
    */
+  @Override
   public boolean hasNext();
   /**
    * Retrieve the next tuple from the query object.
    * @return a vector of LiteralOrONodeID objects that represent the next
    * tuple of the query.
    */
+  @Override
   public Vector<LiteralOrONodeID> next();
   /**
    * Retrieve the next tuple from the query object as a vector of strings.
@@ -123,5 +125,6 @@ public interface OntologyTupleQuery
    * used if a query is not used any longer but the hasNext() method has
    * not returned false yet. 
    */
+  @Override
   public void close();
 }

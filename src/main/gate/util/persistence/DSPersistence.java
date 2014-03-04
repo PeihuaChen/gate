@@ -29,6 +29,7 @@ public class DSPersistence implements Persistence{
    * Populates this Persistence with the data that needs to be stored from the
    * original source object.
    */
+  @Override
   public void extractDataFromSource(Object source)throws PersistenceException{
     //check input
     if(! (source instanceof DataStore)){
@@ -54,6 +55,7 @@ public class DSPersistence implements Persistence{
    * Creates a new object from the data contained. This new object is supposed
    * to be a copy for the original object used as source for data extraction.
    */
+  @Override
   public Object createObject()throws PersistenceException,
                                      ResourceInstantiationException{
     if(storageUrl != null) {

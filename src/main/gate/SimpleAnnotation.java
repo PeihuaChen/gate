@@ -41,6 +41,7 @@ extends FeatureBearer, IdBearer, Comparable, Serializable {
   public Node getEndNode();
 
   /** Ordering */
+  @Override
   public int compareTo(Object o) throws ClassCastException;
 
 } // interface SimpleAnnotation,

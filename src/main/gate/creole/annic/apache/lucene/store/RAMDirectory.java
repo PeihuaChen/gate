@@ -90,6 +90,7 @@ public final class RAMDirectory extends Directory {
   }
 
   /** Returns an array of strings, one for each file in the directory. */
+  @Override
   public final String[] list() {
     String[] result = new String[files.size()];
     int i = 0;
@@ -100,18 +101,21 @@ public final class RAMDirectory extends Directory {
   }
 
   /** Returns true iff the named file exists in this directory. */
+  @Override
   public final boolean fileExists(String name) {
     RAMFile file = (RAMFile)files.get(name);
     return file != null;
   }
 
   /** Returns the time the named file was last modified. */
+  @Override
   public final long fileModified(String name) throws IOException {
     RAMFile file = (RAMFile)files.get(name);
     return file.lastModified;
   }
 
   /** Set the modified time of an existing file to now. */
+  @Override
   public void touchFile(String name) throws IOException {
 //     final boolean MONITOR = false;
 
@@ -134,17 +138,20 @@ public final class RAMDirectory extends Directory {
   }
 
   /** Returns the length in bytes of a file in the directory. */
+  @Override
   public final long fileLength(String name) {
     RAMFile file = (RAMFile)files.get(name);
     return file.length;
   }
 
   /** Removes an existing file in the directory. */
+  @Override
   public final void deleteFile(String name) {
     files.remove(name);
   }
 
   /** Removes an existing file in the directory. */
+  @Override
   public final void renameFile(String from, String to) {
     RAMFile file = (RAMFile)files.get(from);
     files.remove(from);
@@ -153,6 +160,7 @@ public final class RAMDirectory extends Directory {
 
   /** Creates a new, empty file in the directory with the given name.
       Returns a stream writing this file. */
+  @Override
   public final OutputStream createFile(String name) {
     RAMFile file = new RAMFile();
     files.put(name, file);
@@ -160,6 +168,7 @@ public final class RAMDirectory extends Directory {
   }
 
   /** Returns a stream reading an existing file. */
+  @Override
   public final InputStream openFile(String name) {
     RAMFile file = (RAMFile)files.get(name);
     return new RAMInputStream(file);
@@ -168,8 +177,10 @@ public final class RAMDirectory extends Directory {
   /** Construct a {@link Lock}.
    * @param name the name of the lock file
    */
+  @Override
   public final Lock makeLock(final String name) {
     return new Lock() {
+      @Override
       public boolean obtain() throws IOException {
         synchronized (files) {
           if (!fileExists(name)) {
@@ -179,9 +190,11 @@ public final class RAMDirectory extends Directory {
           return false;
         }
       }
+      @Override
       public void release() {
         deleteFile(name);
       }
+      @Override
       public boolean isLocked() {
         return fileExists(name);
       }
@@ -189,6 +202,7 @@ public final class RAMDirectory extends Directory {
   }
 
   /** Closes the store to future operations. */
+  @Override
   public final void close() {
   }
 }

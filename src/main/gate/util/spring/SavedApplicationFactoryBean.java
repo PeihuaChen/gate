@@ -21,9 +21,7 @@ import gate.creole.ResourceInstantiationException;
 import gate.util.GateException;
 import gate.util.persistence.PersistenceManager;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 
 import org.springframework.beans.factory.DisposableBean;
@@ -73,6 +71,7 @@ public class SavedApplicationFactoryBean extends GateAwareObject implements
    * 
    * @return the (possibly customised) application
    */
+  @Override
   public Object getObject() throws GateException, IOException {
     if(object == null) {
       ensureGateInit();
@@ -105,10 +104,12 @@ public class SavedApplicationFactoryBean extends GateAwareObject implements
     return object;
   }
 
+  @Override
   public Class getObjectType() {
     return null;
   }
 
+  @Override
   public boolean isSingleton() {
     return true;
   }
@@ -118,6 +119,7 @@ public class SavedApplicationFactoryBean extends GateAwareObject implements
    * {@link Factory#deleteResource}.  This will in turn delete
    * any PRs that the application contains.
    */
+  @Override
   public void destroy() throws Exception {
     if(object != null && object instanceof gate.Resource) {
       Factory.deleteResource((gate.Resource)object);

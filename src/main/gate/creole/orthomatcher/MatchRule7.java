@@ -16,7 +16,8 @@ public class MatchRule7 implements OrthoMatcherRule {
 		this.orthomatcher=orthmatcher;
 	}
 	
-	public boolean value(String s1, String s2) {
+	@Override
+  public boolean value(String s1, String s2) {
 		
 	      boolean result=false;
 	  
@@ -37,8 +38,7 @@ public class MatchRule7 implements OrthoMatcherRule {
         		    StringBuffer acronymDot_s1 = new StringBuffer("");
         
         		    for ( ;i < orthomatcher.tokensLongAnnot.size(); i++ ) {
-        		      String toAppend = ( (String) ((Annotation) orthomatcher.tokensLongAnnot.get(i)
-        		      ).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME)).substring(0,1);
+        		      String toAppend = ( (String) orthomatcher.tokensLongAnnot.get(i).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME)).substring(0,1);
         		      acronym_s1.append(toAppend);
         		      acronymDot_s1.append(toAppend);
         		      acronymDot_s1.append(".");
@@ -57,6 +57,7 @@ public class MatchRule7 implements OrthoMatcherRule {
 		    return result;
 	}
 	
+  @Override
   public String getId(){
     return "MatchRule7";
   }

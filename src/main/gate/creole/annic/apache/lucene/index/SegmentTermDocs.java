@@ -47,11 +47,13 @@ class SegmentTermDocs implements TermDocs {
     this.skipInterval = parent.tis.getSkipInterval();
   }
 
+  @Override
   public void seek(Term term) throws IOException {
     TermInfo ti = parent.tis.get(term);
     seek(ti);
   }
 
+  @Override
   public void seek(TermEnum termEnum) throws IOException {
     TermInfo ti;
 
@@ -82,18 +84,22 @@ class SegmentTermDocs implements TermDocs {
     }
   }
 
+  @Override
   public void close() throws IOException {
     freqStream.close();
     if (skipStream != null)
       skipStream.close();
   }
 
+  @Override
   public final int doc() { return doc; }
+  @Override
   public final int freq() { return freq; }
 
   protected void skippingDoc() throws IOException {
   }
 
+  @Override
   public boolean next() throws IOException {
     while (true) {
       if (count == df)
@@ -116,6 +122,7 @@ class SegmentTermDocs implements TermDocs {
   }
 
   /** Optimized implementation. */
+  @Override
   public int read(final int[] docs, final int[] freqs)
           throws IOException {
     final int length = docs.length;
@@ -144,6 +151,7 @@ class SegmentTermDocs implements TermDocs {
   protected void skipProx(long proxPointer) throws IOException {}
 
   /** Optimized implementation. */
+  @Override
   public boolean skipTo(int target) throws IOException {
     if (df >= skipInterval) {                      // optimized case
 

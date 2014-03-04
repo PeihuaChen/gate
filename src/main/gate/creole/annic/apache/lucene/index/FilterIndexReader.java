@@ -38,15 +38,23 @@ public class FilterIndexReader extends IndexReader {
 
     public FilterTermDocs(TermDocs in) { this.in = in; }
 
+    @Override
     public void seek(Term term) throws IOException { in.seek(term); }
+    @Override
     public void seek(TermEnum termEnum) throws IOException { in.seek(termEnum); }
+    @Override
     public int doc() { return in.doc(); }
+    @Override
     public int freq() { return in.freq(); }
+    @Override
     public boolean next() throws IOException { return in.next(); }
+    @Override
     public int read(int[] docs, int[] freqs) throws IOException {
       return in.read(docs, freqs);
     }
+    @Override
     public boolean skipTo(int i) throws IOException { return in.skipTo(i); }
+    @Override
     public void close() throws IOException { in.close(); }
   }
 
@@ -56,6 +64,7 @@ public class FilterIndexReader extends IndexReader {
 
     public FilterTermPositions(TermPositions in) { super(in); }
 
+    @Override
     public int nextPosition() throws IOException {
       return ((TermPositions) this.in).nextPosition();
     }
@@ -67,9 +76,13 @@ public class FilterIndexReader extends IndexReader {
 
     public FilterTermEnum(TermEnum in) { this.in = in; }
 
+    @Override
     public boolean next() throws IOException { return in.next(); }
+    @Override
     public Term term() { return in.term(); }
+    @Override
     public int docFreq() { return in.docFreq(); }
+    @Override
     public void close() throws IOException { in.close(); }
   }
 
@@ -87,52 +100,73 @@ public class FilterIndexReader extends IndexReader {
     this.in = in;
   }
 
+  @Override
   public TermFreqVector[] getTermFreqVectors(int docNumber)
           throws IOException {
     return in.getTermFreqVectors(docNumber);
   }
 
+  @Override
   public TermFreqVector getTermFreqVector(int docNumber, String field)
           throws IOException {
     return in.getTermFreqVector(docNumber, field);
   }
 
+  @Override
   public int numDocs() { return in.numDocs(); }
+  @Override
   public int maxDoc() { return in.maxDoc(); }
 
+  @Override
   public Document document(int n) throws IOException { return in.document(n); }
 
+  @Override
   public boolean isDeleted(int n) { return in.isDeleted(n); }
+  @Override
   public boolean hasDeletions() { return in.hasDeletions(); }
+  @Override
   protected void doUndeleteAll() throws IOException { in.undeleteAll(); }
 
+  @Override
   public byte[] norms(String f) throws IOException { return in.norms(f); }
+  @Override
   public void norms(String f, byte[] bytes, int offset) throws IOException {
     in.norms(f, bytes, offset);
   }
+  @Override
   protected void doSetNorm(int d, String f, byte b) throws IOException {
     in.setNorm(d, f, b);
   }
 
+  @Override
   public TermEnum terms() throws IOException { return in.terms(); }
+  @Override
   public TermEnum terms(Term t) throws IOException { return in.terms(t); }
 
+  @Override
   public int docFreq(Term t) throws IOException { return in.docFreq(t); }
 
+  @Override
   public TermDocs termDocs() throws IOException { return in.termDocs(); }
 
+  @Override
   public TermPositions termPositions() throws IOException {
     return in.termPositions();
   }
 
+  @Override
   protected void doDelete(int n) throws IOException { in.delete(n); }
+  @Override
   protected void doCommit() throws IOException { in.commit(); }
+  @Override
   protected void doClose() throws IOException { in.close(); }
 
+  @Override
   public Collection getFieldNames() throws IOException {
     return in.getFieldNames();
   }
 
+  @Override
   public Collection getFieldNames(boolean indexed) throws IOException {
     return in.getFieldNames(indexed);
   }
@@ -143,6 +177,7 @@ public class FilterIndexReader extends IndexReader {
    *                        else only indexed fields without term vector info
    * @return Collection of Strings indicating the names of the fields
    */
+  @Override
   public Collection getIndexedFieldNames(boolean storedTermVector) {
     return in.getIndexedFieldNames(storedTermVector);
   }

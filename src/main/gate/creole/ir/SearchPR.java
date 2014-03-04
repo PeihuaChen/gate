@@ -43,6 +43,7 @@ public class SearchPR extends AbstractProcessingResource
   }
 
    /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     Resource result = super.init();
     return result;
@@ -56,6 +57,7 @@ public class SearchPR extends AbstractProcessingResource
    * the resource has changed since the resource has been created then the
    * resource will change too after calling reInit().
   */
+  @Override
   public void reInit() throws ResourceInstantiationException {
     init();
   }
@@ -64,6 +66,7 @@ public class SearchPR extends AbstractProcessingResource
    * This method runs the coreferencer. It assumes that all the needed parameters
    * are set. If they are not, an exception will be fired.
    */
+  @Override
   public void execute() throws ExecutionException {
     if ( corpus == null){
       throw new ExecutionException("Corpus is not initialized");
@@ -85,7 +88,7 @@ public class SearchPR extends AbstractProcessingResource
 
 
     try {
-      if (((IndexedCorpus) corpus).getIndexManager() == null){
+      if (corpus.getIndexManager() == null){
         MainFrame.unlockGUI();
         JOptionPane.showMessageDialog(MainFrame.getInstance(), "Corpus is not indexed!\n"
                                     +"Please index first this corpus!",
@@ -95,7 +98,7 @@ public class SearchPR extends AbstractProcessingResource
 
       fireProgressChanged(0);
       resultList = null;
-      searcher.setCorpus((IndexedCorpus) corpus);
+      searcher.setCorpus(corpus);
       resultList = searcher.search(query, limit, fieldNames);
       fireProcessFinished();
     }

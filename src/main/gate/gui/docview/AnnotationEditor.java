@@ -120,6 +120,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
       schemasByType.put(aSchema.getAnnotationName(), aSchema);
     }
     CreoleListener creoleListener = new CreoleListener() {
+      @Override
       public void resourceLoaded(CreoleEvent e) {
         Resource newResource = e.getResource();
         if(newResource instanceof AnnotationSchema) {
@@ -128,6 +129,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
         }
       }
 
+      @Override
       public void resourceUnloaded(CreoleEvent e) {
         Resource newResource = e.getResource();
         if(newResource instanceof AnnotationSchema) {
@@ -138,15 +140,19 @@ public class AnnotationEditor extends AbstractVisualResource implements
         }
       }
 
+      @Override
       public void datastoreOpened(CreoleEvent e) {
       }
 
+      @Override
       public void datastoreCreated(CreoleEvent e) {
       }
 
+      @Override
       public void datastoreClosed(CreoleEvent e) {
       }
 
+      @Override
       public void resourceRenamed(Resource resource, String oldName,
           String newName) {
       }
@@ -157,6 +163,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
   protected void initGUI() {
     popupWindow =
         new JWindow(SwingUtilities.getWindowAncestor(owner.getTextComponent())) {
+          @Override
           public void pack() {
             // increase the feature table size only if not bigger
             // than the main frame
@@ -174,6 +181,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
             super.pack();
           }
 
+          @Override
           public void setVisible(boolean b) {
             super.setVisible(b);
             // when the editor is shown put the focus in the type combo box
@@ -289,17 +297,20 @@ public class AnnotationEditor extends AbstractVisualResource implements
       }
     });
     KeyAdapter keyAdapter = new KeyAdapter() {
+      @Override
       public void keyPressed(KeyEvent e) {
         hideTimer.stop();
       }
     };
     typeCombo.getEditor().getEditorComponent().addKeyListener(keyAdapter);
     MouseListener windowMouseListener = new MouseAdapter() {
+      @Override
       public void mouseEntered(MouseEvent evt) {
         hideTimer.stop();
       }
 
       // allow a JWindow to be dragged with a mouse
+      @Override
       public void mousePressed(MouseEvent me) {
         pressed = me;
       }
@@ -308,6 +319,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
       Point location;
 
       // allow a JWindow to be dragged with a mouse
+      @Override
       public void mouseDragged(MouseEvent me) {
         location = popupWindow.getLocation(location);
         int x = location.x - pressed.getX() + me.getX();
@@ -358,6 +370,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
         + "&nbsp;&nbsp;</small></font></html>");
     inputMap.put(KeyStroke.getKeyStroke("control P"), "toggle pin");
     actionMap.put("toggle pin", new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         pinnedButton.doClick();
       }
@@ -373,6 +386,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
     inputMap.put(KeyStroke.getKeyStroke("alt ENTER"), "applyAction");
     actionMap.put("applyAction", applyAction);
     typeCombo.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent evt) {
         String newType = typeCombo.getSelectedItem().toString();
         if(ann == null || ann.getType().equals(newType)) return;
@@ -394,12 +408,14 @@ public class AnnotationEditor extends AbstractVisualResource implements
       }
     });
     hideTimer = new Timer(HIDE_DELAY, new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent evt) {
         annotationEditorInstance.setVisible(false);
       }
     });
     hideTimer.setRepeats(false);
     AncestorListener textAncestorListener = new AncestorListener() {
+      @Override
       public void ancestorAdded(AncestorEvent event) {
         if(wasShowing) {
           annotationEditorInstance.setVisible(true);
@@ -407,6 +423,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
         wasShowing = false;
       }
 
+      @Override
       public void ancestorRemoved(AncestorEvent event) {
         if(isShowing()) {
           wasShowing = true;
@@ -414,6 +431,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
         }
       }
 
+      @Override
       public void ancestorMoved(AncestorEvent event) {
       }
 
@@ -427,10 +445,12 @@ public class AnnotationEditor extends AbstractVisualResource implements
    * 
    * @see gate.gui.annedit.AnnotationEditor#isActive()
    */
+  @Override
   public boolean isActive() {
     return popupWindow.isVisible();
   }
 
+  @Override
   public void editAnnotation(Annotation ann, AnnotationSet set) {
     this.ann = ann;
     this.set = set;
@@ -461,6 +481,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
     }
   }
 
+  @Override
   public Annotation getAnnotationCurrentlyEdited() {
     return ann;
   }
@@ -470,12 +491,14 @@ public class AnnotationEditor extends AbstractVisualResource implements
    * 
    * @see gate.gui.annedit.AnnotationEditor#editingFinished()
    */
+  @Override
   public boolean editingFinished() {
     // this editor implementation has no special requirements (such as schema
     // compliance), so it always returns true.
     return true;
   }
 
+  @Override
   public boolean isShowing() {
     return popupWindow.isShowing();
   }
@@ -493,6 +516,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
       popupWindow.setVisible(false);
       pinnedButton.setSelected(false);
       SwingUtilities.invokeLater(new Runnable() {
+        @Override
         public void run() {
           // when hiding the editor put back the focus in the document
           owner.getTextComponent().requestFocus();
@@ -504,6 +528,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
   /**
    * Finds the best location for the editor dialog for a given span of text.
    */
+  @Override
   public void placeDialog(int start, int end) {
     if(popupWindow.isVisible() && pinnedButton.isSelected()) {
       // just resize
@@ -621,6 +646,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
       super(text, icon, desc, mnemonic);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
       int increment = 1;
       if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0) {
@@ -649,6 +675,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
       super(text, icon, desc, mnemonic);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
       long endOffset = ann.getEndNode().getOffset().longValue();
       int increment = 1;
@@ -677,6 +704,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
       super(text, icon, desc, mnemonic);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
       long startOffset = ann.getStartNode().getOffset().longValue();
       int increment = 1;
@@ -706,6 +734,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
       super(text, icon, desc, mnemonic);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
       long maxOffset = owner.getDocument().getContent().size().longValue();
       int increment = 1;
@@ -735,6 +764,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
       super(text, icon, desc, mnemonic);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
       set.remove(ann);
       // clear the dialog
@@ -758,6 +788,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
       putValue(SMALL_ICON, exitIcon);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
       annotationEditorInstance.setVisible(false);
     }
@@ -770,6 +801,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
       super(text, icon, desc, mnemonic);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
       annotationEditorInstance.setVisible(false);
     }
@@ -876,6 +908,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
    * 
    * @see gate.gui.annedit.AnnotationEditor#getAnnotationSetCurrentlyEdited()
    */
+  @Override
   public AnnotationSet getAnnotationSetCurrentlyEdited() {
     return set;
   }
@@ -883,6 +916,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
   /**
    * @return the owner
    */
+  @Override
   public AnnotationEditorOwner getOwner() {
     return owner;
   }
@@ -891,14 +925,17 @@ public class AnnotationEditor extends AbstractVisualResource implements
    * @param owner
    *          the owner to set
    */
+  @Override
   public void setOwner(AnnotationEditorOwner owner) {
     this.owner = owner;
   }
 
+  @Override
   public void setPinnedMode(boolean pinned) {
     pinnedButton.setSelected(pinned);
   }
 
+  @Override
   public void setEditingEnabled(boolean isEditingEnabled) {
     solButton.setEnabled(isEditingEnabled);
     sorButton.setEnabled(isEditingEnabled);
@@ -925,6 +962,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
       final TableCellRenderer previousTcr =
           featuresEditor.getColumnModel().getColumn(col).getCellRenderer();
       TableCellRenderer tcr = new TableCellRenderer() {
+        @Override
         public Component getTableCellRendererComponent(JTable table,
             Object value, boolean isSelected, boolean hasFocus, int row,
             int column) {
@@ -958,6 +996,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
   /**
    * Does nothing, as this editor does not support cancelling and rollbacks.
    */
+  @Override
   public void cancelAction() throws GateException {
   }
 
@@ -965,6 +1004,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
    * Returns <tt>true</tt> always as this editor is generic and can edit any
    * annotation type.
    */
+  @Override
   public boolean canDisplayAnnotationType(String annotationType) {
     return true;
   }
@@ -973,12 +1013,14 @@ public class AnnotationEditor extends AbstractVisualResource implements
    * Does nothing as this editor works in auto-commit mode (changes are
    * implemented immediately).
    */
+  @Override
   public void okAction() throws GateException {
   }
 
   /**
    * Returns <tt>false</tt>, as this editor does not support cancel operations.
    */
+  @Override
   public boolean supportsCancel() {
     return false;
   }

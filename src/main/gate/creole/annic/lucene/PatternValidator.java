@@ -62,8 +62,8 @@ public class PatternValidator {
       for(int k = 0; k < terms.size(); k++) {
         // when consider is true, that means we should change the start
         // offset conditions
-        Term term = (Term)terms.get(k);
-        if(((Boolean)consider.get(k)).booleanValue()) {
+        Term term = terms.get(k);
+        if(consider.get(k).booleanValue()) {
           patLen++;
           // find relavant annotations where type and text should
           // match with terms type and text

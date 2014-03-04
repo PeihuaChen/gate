@@ -28,12 +28,14 @@ public class TestDiffer extends TestCase{
   public TestDiffer(String name) { super(name); }
 
   /** Fixture set up */
-   public void setUp() {
+   @Override
+  public void setUp() {
    } // setUp
 
    /** Put things back as they should be after running tests.
      */
-   public void tearDown() throws Exception {
+   @Override
+  public void tearDown() throws Exception {
    } // tearDown
 
    /** Test suite routine for the test runner */

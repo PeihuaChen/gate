@@ -21,7 +21,6 @@ import java.awt.Rectangle;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 
@@ -40,18 +39,21 @@ public class ResourceRenderer extends JLabel implements ListCellRenderer,
     setOpaque(true);
   }
 
+  @Override
   public Component getListCellRendererComponent(JList list, Object value,
           int index, boolean isSelected, boolean cellHasFocus) {
     prepareRendererList(list, value, isSelected, hasFocus());
     return this;
   }
 
+  @Override
   public Component getTableCellRendererComponent(JTable table, Object value,
           boolean isSelected, boolean hasFocus, int row, int column) {
     prepareRendererTable(table, value, isSelected, hasFocus, row, column);
     return this;
   }
 
+  @Override
   public Component getTreeCellRendererComponent(JTree tree, Object value,
           boolean selected, boolean expanded, boolean leaf, int row,
           boolean hasFocus) {
@@ -135,7 +137,7 @@ public class ResourceRenderer extends JLabel implements ListCellRenderer,
     if(value instanceof Resource) {
       text = ((Resource)value).getName();
 
-      rData = (ResourceData)Gate.getCreoleRegister().get(
+      rData = Gate.getCreoleRegister().get(
               value.getClass().getName());
     }
     else {
@@ -192,6 +194,7 @@ public class ResourceRenderer extends JLabel implements ListCellRenderer,
   /**
    * Overridden for performance reasons.
    */
+  @Override
   public boolean isOpaque() {
     Color back = getBackground();
     Component p = getParent();
@@ -208,36 +211,42 @@ public class ResourceRenderer extends JLabel implements ListCellRenderer,
   /**
    * Overridden for performance reasons.
    */
+  @Override
   public void invalidate() {
   }
 
   /**
    * Overridden for performance reasons.
    */
+  @Override
   public void validate() {
   }
 
   /**
    * Overridden for performance reasons.
    */
+  @Override
   public void revalidate() {
   }
 
   /**
    * Overridden for performance reasons.
    */
+  @Override
   public void repaint(long tm, int x, int y, int width, int height) {
   }
 
   /**
    * Overridden for performance reasons.
    */
+  @Override
   public void repaint(Rectangle r) {
   }
 
   /**
    * Overridden for performance reasons.
    */
+  @Override
   public void repaint() {
   }
 

@@ -37,8 +37,10 @@ final class ConjunctionScorer extends Scorer {
   private Scorer first() { return (Scorer)scorers.getFirst(); }
   private Scorer last() { return (Scorer)scorers.getLast(); }
 
+  @Override
   public int doc() { return first().doc(); }
 
+  @Override
   public boolean next(Searcher searcher) throws IOException {
     this.searcher = searcher;
     if (firstTime) {
@@ -57,6 +59,7 @@ final class ConjunctionScorer extends Scorer {
     return more;                                // found a doc with all clauses
   }
 
+  @Override
   public boolean skipTo(int target) throws IOException {
     Iterator i = scorers.iterator();
     while (more && i.hasNext()) {
@@ -67,6 +70,7 @@ final class ConjunctionScorer extends Scorer {
     return doNext();
   }
   
+  @Override
   public float score(Searcher searcher) throws IOException {
     this.searcher = searcher;
     float score = 0.0f;                           // sum scores
@@ -101,6 +105,7 @@ final class ConjunctionScorer extends Scorer {
 
     // note that this comparator is not consistent with equals!
     Arrays.sort(array, new Comparator() {         // sort the array
+        @Override
         public int compare(Object o1, Object o2) {
           return ((Scorer)o1).doc() - ((Scorer)o2).doc();
         }
@@ -114,6 +119,7 @@ final class ConjunctionScorer extends Scorer {
     }
   }
 
+  @Override
   public Explanation explain(int doc) throws IOException {
     throw new UnsupportedOperationException();
   }

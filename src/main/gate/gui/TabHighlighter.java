@@ -34,12 +34,14 @@ public class TabHighlighter {
     this.tab = tPane.indexOfComponent(comp);
     this.highlightColour = highlightColour;
     tPane.getModel().addChangeListener(new ChangeListener() {
+      @Override
       public void stateChanged(ChangeEvent e) {
         if(tPane.getSelectedIndex() == tab) removeHighlight();
       }
     });
 
     tPane.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         if(tPane.getSelectedIndex() == tab) removeHighlight();
       }

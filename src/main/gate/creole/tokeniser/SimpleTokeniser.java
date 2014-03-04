@@ -125,6 +125,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
    *
    * @exception ResourceInstantiationException
    */
+  @Override
   public Resource init() throws ResourceInstantiationException{
     Reader rulesReader;
     try{
@@ -571,6 +572,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
   /**
    * The method that does the actual tokenisation.
    */
+  @Override
   public void execute() throws ExecutionException {
     interrupted = false;
     AnnotationSet annotationSet;

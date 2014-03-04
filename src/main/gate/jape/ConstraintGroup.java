@@ -21,9 +21,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.HashSet;
 
-import gate.AnnotationSet;
-import gate.Document;
-import gate.annotation.AnnotationSetImpl;
 import gate.util.Strings;
 
 
@@ -47,6 +44,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   /** Need cloning for processing of macro references. See comments on
     * <CODE>PatternElement.clone()</CODE>
     */
+  @Override
   public Object clone() {
     ConstraintGroup newPE = (ConstraintGroup) super.clone();
 
@@ -174,6 +172,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   /** Finish: replace dynamic data structures with Java arrays; called
     * after parsing.
     */
+  @Override
   public void finish() {
 
     // index into patternElementDisjunction2
@@ -213,9 +212,11 @@ extends PatternElement implements JapeConstants, java.io.Serializable
 
 
   /** Create a string representation of the object. */
+  @Override
   public String toString() { return toString(""); }
 
   /** Create a string representation of the object. */
+  @Override
   public String toString(String pad) {
     String newline = Strings.getNl();
 

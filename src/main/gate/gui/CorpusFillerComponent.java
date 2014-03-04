@@ -160,6 +160,7 @@ public class CorpusFillerComponent extends JPanel {
    */
   protected void initListeners(){
     filerBtn.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         JFileChooser filer = MainFrame.getFileChooser();
         filer.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -179,6 +180,7 @@ public class CorpusFillerComponent extends JPanel {
     });
 
     listEditBtn.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         ListEditorDialog listEditor = new ListEditorDialog(
           CorpusFillerComponent.this, extensions, String.class.getName());

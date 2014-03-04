@@ -27,7 +27,6 @@ import java.util.Vector;
 import gate.creole.annic.apache.lucene.document.Document;
 import gate.creole.annic.apache.lucene.store.InputStream;
 import gate.creole.annic.apache.lucene.store.OutputStream;
-import gate.creole.annic.apache.lucene.store.Lock;
 import gate.creole.annic.apache.lucene.store.Directory;
 import gate.creole.annic.apache.lucene.util.BitVector;
 
@@ -127,6 +126,7 @@ final class SegmentReader extends IndexReader {
     }
   }
 
+  @Override
   protected final void doCommit() throws IOException {
     if (deletedDocsDirty) {               // re-write deleted
       deletedDocs.write(directory(), segment + ".tmp");
@@ -149,6 +149,7 @@ final class SegmentReader extends IndexReader {
     undeleteAll = false;
   }
 
+  @Override
   protected final void doClose() throws IOException {
     fieldsReader.close();
     tis.close();
@@ -169,6 +170,7 @@ final class SegmentReader extends IndexReader {
     return si.dir.fileExists(si.name + ".del");
   }
 
+  @Override
   public boolean hasDeletions() {
     return deletedDocs != null;
   }
@@ -189,6 +191,7 @@ final class SegmentReader extends IndexReader {
     return false;
   }
 
+  @Override
   protected final void doDelete(int docNum) throws IOException {
     if (deletedDocs == null)
       deletedDocs = new BitVector(maxDoc());
@@ -197,6 +200,7 @@ final class SegmentReader extends IndexReader {
     deletedDocs.set(docNum);
   }
 
+  @Override
   protected final void doUndeleteAll() throws IOException {
       deletedDocs = null;
       deletedDocsDirty = false;
@@ -223,14 +227,17 @@ final class SegmentReader extends IndexReader {
     return files;
   }
 
+  @Override
   public final TermEnum terms() throws IOException {
     return tis.terms();
   }
 
+  @Override
   public final TermEnum terms(Term t) throws IOException {
     return tis.terms(t);
   }
 
+  @Override
   public final synchronized Document document(int n) throws IOException {
     if (isDeleted(n))
       throw new IllegalArgumentException
@@ -238,18 +245,22 @@ final class SegmentReader extends IndexReader {
     return fieldsReader.doc(n);
   }
 
+  @Override
   public final synchronized boolean isDeleted(int n) {
     return (deletedDocs != null && deletedDocs.get(n));
   }
 
+  @Override
   public final TermDocs termDocs() throws IOException {
     return new SegmentTermDocs(this);
   }
 
+  @Override
   public final TermPositions termPositions() throws IOException {
     return new SegmentTermPositions(this);
   }
 
+  @Override
   public final int docFreq(Term t) throws IOException {
     TermInfo ti = tis.get(t);
     if (ti != null)
@@ -258,6 +269,7 @@ final class SegmentReader extends IndexReader {
       return 0;
   }
 
+  @Override
   public final int numDocs() {
     int n = maxDoc();
     if (deletedDocs != null)
@@ -265,6 +277,7 @@ final class SegmentReader extends IndexReader {
     return n;
   }
 
+  @Override
   public final int maxDoc() {
     return fieldsReader.size();
   }
@@ -272,6 +285,7 @@ final class SegmentReader extends IndexReader {
   /**
    * @see IndexReader#getFieldNames()
    */
+  @Override
   public Collection getFieldNames() throws IOException {
     // maintain a unique set of field names
     Set fieldSet = new HashSet();
@@ -285,6 +299,7 @@ final class SegmentReader extends IndexReader {
   /**
    * @see IndexReader#getFieldNames(boolean)
    */
+  @Override
   public Collection getFieldNames(boolean indexed) throws IOException {
     // maintain a unique set of field names
     Set fieldSet = new HashSet();
@@ -302,6 +317,7 @@ final class SegmentReader extends IndexReader {
    *                        else only indexed fields without term vector info
    * @return Collection of Strings indicating the names of the fields
    */
+  @Override
   public Collection getIndexedFieldNames(boolean storedTermVector) {
     // maintain a unique set of field names
     Set fieldSet = new HashSet();
@@ -315,6 +331,7 @@ final class SegmentReader extends IndexReader {
 
   }
 
+  @Override
   public synchronized byte[] norms(String field) throws IOException {
     Norm norm = (Norm) norms.get(field);
     if (norm == null)                             // not an indexed field
@@ -327,6 +344,7 @@ final class SegmentReader extends IndexReader {
     return norm.bytes;
   }
 
+  @Override
   protected final void doSetNorm(int doc, String field, byte value)
           throws IOException {
     Norm norm = (Norm) norms.get(field);
@@ -339,6 +357,7 @@ final class SegmentReader extends IndexReader {
   }
 
   /** Read norms into a pre-allocated array. */
+  @Override
   public synchronized void norms(String field, byte[] bytes, int offset)
     throws IOException {
 
@@ -387,6 +406,7 @@ final class SegmentReader extends IndexReader {
    *  the specified field of this document, if the field had storeTermVector
    *  flag set.  If the flag was not set, the method returns null.
    */
+  @Override
   public TermFreqVector getTermFreqVector(int docNumber, String field)
           throws IOException {
     // Check if this field is invalid or has no stored term vector
@@ -403,6 +423,7 @@ final class SegmentReader extends IndexReader {
    *  in a given vectorized field.
    *  If no such fields existed, the method returns null.
    */
+  @Override
   public TermFreqVector[] getTermFreqVectors(int docNumber)
           throws IOException {
     if (termVectorsReader == null)

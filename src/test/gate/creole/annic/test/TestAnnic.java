@@ -57,6 +57,7 @@ public class TestAnnic extends TestCase {
    * initialises the Tokenizer and sets up the other parameters for the
    * morph program
    */
+  @Override
   protected void setUp() throws Exception {
     super.setUp();
     indexURL = new File(File.createTempFile("abc", "abc").getParentFile(),
@@ -67,6 +68,7 @@ public class TestAnnic extends TestCase {
   /**
    * Called when tests ends
    */
+  @Override
   protected void tearDown() throws Exception {
     // clean up
     super.tearDown();
@@ -99,7 +101,7 @@ public class TestAnnic extends TestCase {
     splitter.setInputASName("Key");
     splitter.setOutputASName("Key");
     for(int i = 0; i < testCorpus.size(); i++) {
-      splitter.setDocument((Document)testCorpus.get(i));
+      splitter.setDocument(testCorpus.get(i));
       splitter.execute();
     }
 

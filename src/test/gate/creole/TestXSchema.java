@@ -40,14 +40,14 @@ public class TestXSchema extends TestCase
   public TestXSchema(String name) { super(name); }
 
   /** Fixture set up */
+  @Override
   public void setUp() {
   } // setUp
 
   /** A test */
   public void testFromAndToXSchema() throws Exception {
 
-    ResourceData resData = (ResourceData)
-      Gate.getCreoleRegister().get("gate.creole.AnnotationSchema");
+    ResourceData resData = Gate.getCreoleRegister().get("gate.creole.AnnotationSchema");
 
     FeatureMap parameters = Factory.newFeatureMap();
     parameters.put(
@@ -67,8 +67,7 @@ public class TestXSchema extends TestCase
   /** Test creation of annotation schemas via gate.Factory */
   public void testFactoryCreation() throws Exception {
 
-    ResourceData resData = (ResourceData)
-      Gate.getCreoleRegister().get("gate.creole.AnnotationSchema");
+    ResourceData resData = Gate.getCreoleRegister().get("gate.creole.AnnotationSchema");
 
     FeatureMap parameters = Factory.newFeatureMap();
     parameters.put(

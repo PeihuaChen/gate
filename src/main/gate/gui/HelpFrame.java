@@ -50,6 +50,7 @@ public class HelpFrame extends JFrame implements StatusListener {
 
   protected void initListeners(){
     textPane.addPropertyChangeListener(new PropertyChangeListener(){
+      @Override
       public void propertyChange(PropertyChangeEvent e) {
         if(e.getPropertyName().equals("document")){
           String title = (String)textPane.getDocument().
@@ -76,6 +77,7 @@ public class HelpFrame extends JFrame implements StatusListener {
   XJEditorPane textPane;
   JToolBar toolBar;
   JLabel status;
+  @Override
   public void statusChanged(String e) {
     status.setText(e);
   }

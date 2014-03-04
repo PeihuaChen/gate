@@ -60,6 +60,7 @@ public class HtmlLinksExtractor extends ParserCallback {
     * of a tag that means that the tag is paired by an end tag and it's
     * not an empty one.
     */
+  @Override
   public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos) {
 
     currentTag = t;
@@ -111,6 +112,7 @@ public class HtmlLinksExtractor extends ParserCallback {
    /** This method is called when the HTML parser encounts the end of a tag
      * that means that the tag is paired by a beginning tag
      */
+  @Override
   public void handleEndTag(HTML.Tag t, int pos){
     currentTag = null;
 
@@ -126,6 +128,7 @@ public class HtmlLinksExtractor extends ParserCallback {
 
   /** This method is called when the HTML parser encounts an empty tag
     */
+  @Override
   public void handleSimpleTag(HTML.Tag t, MutableAttributeSet a, int pos){
     if (HTML.Tag.A == t){
       Out.pr("<"+t);
@@ -141,6 +144,7 @@ public class HtmlLinksExtractor extends ParserCallback {
   } // handleSimpleTag
 
   /** This method is called when the HTML parser encounts text (PCDATA)*/
+  @Override
   public void handleText(char[] text, int pos){
 
     if(HTML.Tag.A == currentTag){
@@ -161,6 +165,7 @@ public class HtmlLinksExtractor extends ParserCallback {
     * This method is called when the HTML parser encounts an error
     * it depends on the programmer if he wants to deal with that error
     */
+  @Override
   public void handleError(String errorMsg, int pos) {
     //Out.println ("ERROR CALLED : " + errorMsg);
   }
@@ -169,11 +174,13 @@ public class HtmlLinksExtractor extends ParserCallback {
     * of its input streamin order to notify the parserCallback that there
     * is nothing more to parse.
     */
+  @Override
   public void flush() throws BadLocationException{
   }// flush
 
   /** This method is called when the HTML parser encounts a comment
     */
+  @Override
   public void handleComment(char[] text, int pos) {
   }
 

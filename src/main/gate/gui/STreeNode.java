@@ -67,6 +67,7 @@ public class STreeNode extends DefaultMutableTreeNode {
     end = 0;
   }// public STreeNode()
 
+  @Override
   public int getLevel() {
     return level;
   }// public int getLevel()
@@ -158,7 +159,7 @@ public class STreeNode extends DefaultMutableTreeNode {
                   text.substring( (int) (start - utteranceOffset),
                                  (int) (end - utteranceOffset) )
     );
-    attribs.put("cat", (String) this.getUserObject());
+    attribs.put("cat", this.getUserObject());
     attribs.put("consists", consists);
 
     // children comes from DefaultMutableTreeNode

@@ -37,6 +37,7 @@ public class TestIndex extends TestCase{
   }
 
   /** Fixture set up */
+  @Override
   public void setUp() throws Exception {
     try {
       File storageDir = File.createTempFile("TestIndex__", "__StorageDir");
@@ -76,6 +77,7 @@ public class TestIndex extends TestCase{
   /** Put things back as they should be after running tests
     * (reinitialise the CREOLE register).
     */
+  @Override
   public void tearDown() throws Exception {
     sds.delete();
   } // tearDown

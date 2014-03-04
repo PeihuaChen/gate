@@ -117,6 +117,7 @@ public class SchemaFeaturesEditor extends JPanel{
     protected void buildGui(){
       //prepare the action listener
       sharedActionListener = new ActionListener(){
+        @Override
         public void actionPerformed(ActionEvent e) {          
           Object newValue = null;
           if(e.getSource() == checkbox){
@@ -210,16 +211,19 @@ public class SchemaFeaturesEditor extends JPanel{
             textField.setText(defaultValue);
           }
           textField.addDocumentListener(new DocumentListener(){
+            @Override
             public void changedUpdate(DocumentEvent e) {
               sharedActionListener.actionPerformed(
                       new ActionEvent(textField, ActionEvent.ACTION_PERFORMED, 
                               null));
             }
+            @Override
             public void insertUpdate(DocumentEvent e) {
               sharedActionListener.actionPerformed(
                       new ActionEvent(textField, ActionEvent.ACTION_PERFORMED, 
                               null));
             }
+            @Override
             public void removeUpdate(DocumentEvent e) {
               sharedActionListener.actionPerformed(
                       new ActionEvent(textField, ActionEvent.ACTION_PERFORMED, 

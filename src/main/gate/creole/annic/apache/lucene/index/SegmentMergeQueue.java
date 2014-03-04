@@ -24,6 +24,7 @@ final class SegmentMergeQueue extends PriorityQueue {
     initialize(size);
   }
 
+  @Override
   protected final boolean lessThan(Object a, Object b) {
     SegmentMergeInfo stiA = (SegmentMergeInfo)a;
     SegmentMergeInfo stiB = (SegmentMergeInfo)b;

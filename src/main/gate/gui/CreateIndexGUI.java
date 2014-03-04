@@ -124,6 +124,7 @@ public class CreateIndexGUI extends JPanel {
       putValue(SHORT_DESCRIPTION, "Click to open a file chooser!");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e){
       JFileChooser fileChooser = MainFrame.getFileChooser();
       fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -141,6 +142,7 @@ public class CreateIndexGUI extends JPanel {
       putValue(SHORT_DESCRIPTION, "Click to edit list!");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e){
       ListEditorDialog listEditor = new ListEditorDialog(CreateIndexGUI.this,
                                                          featuresList,

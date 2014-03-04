@@ -96,6 +96,7 @@ implements JapeConstants, java.io.Serializable
     * bad choice of names: this is not related to the weFinished
     * member or the finished method!
     */
+  @Override
   public void finish(GateClassLoader classloader) {
     lhs.finish();
   } // finish
@@ -104,6 +105,7 @@ implements JapeConstants, java.io.Serializable
 
 
   /** Apply the RHS of this rule (LHS must have been matched first). */
+  @Override
   public void transduce(Document doc, AnnotationSet inputAS,
                         AnnotationSet outputAS) throws JapeException {
     // the righthand side does the transduction, using bindings from lhs */
@@ -126,15 +128,18 @@ implements JapeConstants, java.io.Serializable
   // public String getName() { return name; }
 
   /** Clean up (delete action class files, for e.g.). */
+  @Override
   public void cleanUp() {
     RightHandSide.cleanUp();
   } // cleanUp
 
 
   /** Create a string representation of the object. */
+  @Override
   public String toString() { return toString(""); }
 
   /** Create a string representation of the object. */
+  @Override
   public String toString(String pad) {
     String newline = Strings.getNl();
     String newPad = Strings.addPadding(pad, INDENT_PADDING);
@@ -161,7 +166,9 @@ implements JapeConstants, java.io.Serializable
   }
 
   //StatusReporter VOID Implementation
+  @Override
   public void addStatusListener(StatusListener listener){}
+  @Override
   public void removeStatusListener(StatusListener listener){}
 
   //ProcessProgressReporter VOID implementation

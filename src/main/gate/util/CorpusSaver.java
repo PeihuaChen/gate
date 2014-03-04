@@ -23,7 +23,6 @@ import java.util.*;
 import gate.*;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
-import gate.gui.MainFrame;
 
 public class CorpusSaver {
 
@@ -235,7 +234,7 @@ public class CorpusSaver {
         if (saveMode) {
           Document lr = (Document)ds.adopt(doc, null);
           theCorpus.add(lr);
-          theCorpus.unloadDocument( (Document) lr);
+          theCorpus.unloadDocument( lr);
 
           if (lr != doc)
             Factory.deleteResource(lr);

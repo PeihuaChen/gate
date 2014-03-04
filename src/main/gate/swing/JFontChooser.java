@@ -68,17 +68,20 @@ public class JFontChooser extends JPanel {
     dialog.getContentPane().add(buttonsBox);
     dialog.pack();
     fontChooser.addComponentListener(new ComponentAdapter() {
+      @Override
       public void componentResized(ComponentEvent e) {
         dialog.pack();
       }
     });
     okBtn.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         dialog.setVisible(false);
       }
     });
 
     cancelBtn.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         dialog.setVisible(false);
         fontChooser.setFontValue(null);
@@ -138,24 +141,28 @@ public class JFontChooser extends JPanel {
 
   protected void initListeners(){
     familyCombo.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         updateFont();
       }
     });
 
     sizeCombo.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         updateFont();
       }
     });
 
     boldChk.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         updateFont();
       }
     });
 
     italicChk.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         updateFont();
       }
@@ -164,7 +171,7 @@ public class JFontChooser extends JPanel {
 
   protected void updateFont(){
     Map fontAttrs = new HashMap();
-    fontAttrs.put(TextAttribute.FAMILY, (String)familyCombo.getSelectedItem());
+    fontAttrs.put(TextAttribute.FAMILY, familyCombo.getSelectedItem());
     fontAttrs.put(TextAttribute.SIZE, new Float((String)sizeCombo.getSelectedItem()));
 
     if(boldChk.isSelected())
@@ -199,6 +206,7 @@ public class JFontChooser extends JPanel {
     frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     JButton btn = new JButton("Show dialog");
     btn.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         System.out.println(showDialog(frame, "Fonter",
                                       UIManager.getFont("Button.font")));

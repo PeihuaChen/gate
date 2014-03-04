@@ -23,7 +23,8 @@ public class MatchRule4 implements OrthoMatcherRule {
 		this.orthomatcher=orthmatcher;
 	}
 	
-	public boolean value(String s1, String s2) {
+	@Override
+  public boolean value(String s1, String s2) {
 
 		boolean allTokensMatch = true;
 	    // Out.prln("MR4:  Matching" + s1 + " with " + s2);
@@ -31,13 +32,13 @@ public class MatchRule4 implements OrthoMatcherRule {
 	    Iterator<Annotation> tokensLongAnnotIter = orthomatcher.tokensLongAnnot.iterator();
 	    Iterator<Annotation> tokensShortAnnotIter = orthomatcher.tokensShortAnnot.iterator();
 	    while (tokensLongAnnotIter.hasNext() && tokensShortAnnotIter.hasNext()) {
-	      Annotation token = (Annotation) tokensLongAnnotIter.next();
+	      Annotation token = tokensLongAnnotIter.next();
 	      if (((String)token.getFeatures().get(TOKEN_KIND_FEATURE_NAME)).equals(PUNCTUATION_VALUE) ||
 	              token.getFeatures().containsKey("ortho_stop"))
 	        continue;
-	      if (! ((String)(((Annotation) tokensShortAnnotIter.next()).
+	      if (! ((String)(tokensShortAnnotIter.next().
 	              getFeatures().get(TOKEN_STRING_FEATURE_NAME))).equals(
-	                      (String) token.getFeatures().get(TOKEN_STRING_FEATURE_NAME))) {
+	                      token.getFeatures().get(TOKEN_STRING_FEATURE_NAME))) {
 	        allTokensMatch = false;
 	        break;
 	      } // if (!tokensLongAnnot.nextToken()
@@ -53,6 +54,7 @@ public class MatchRule4 implements OrthoMatcherRule {
 	    return allTokensMatch;
 	}
 	
+  @Override
   public String getId(){
     return "MatchRule4";
   }

@@ -57,6 +57,7 @@ public class AnnotationPropertyAction extends AbstractAction {
     mainPanel.add(propertyName = new JTextField(30), gbc);
   }
 
+  @Override
   public void actionPerformed(ActionEvent actionevent) {
     nameSpace.setText(ontology.getDefaultNameSpace() == null
         ? "http://gate.ac.uk/example#"
@@ -65,6 +66,7 @@ public class AnnotationPropertyAction extends AbstractAction {
         new JOptionPane(mainPanel, JOptionPane.QUESTION_MESSAGE,
             JOptionPane.OK_CANCEL_OPTION,
             MainFrame.getIcon("ontology-annotation-property")) {
+          @Override
           public void selectInitialValue() {
             propertyName.requestFocusInWindow();
             propertyName.selectAll();

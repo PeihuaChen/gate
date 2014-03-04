@@ -28,14 +28,17 @@ public class LuceneIREngine implements IREngine{
     indexManager = new LuceneIndexManager();
   }
 
+  @Override
   public Search getSearch() {
     return search;
   }
 
+  @Override
   public IndexManager getIndexmanager() {
     return indexManager;
   }
 
+  @Override
   public String getName(){
     return "Lucene IR engine";
   }

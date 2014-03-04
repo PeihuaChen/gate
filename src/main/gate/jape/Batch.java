@@ -158,6 +158,7 @@ public class Batch implements JapeConstants, Benchmarkable {
 
       StatusListener listener = null;
       listener = new StatusListener() {
+        @Override
         public void statusChanged(String text) {
           fireStatusChanged(text);
         }

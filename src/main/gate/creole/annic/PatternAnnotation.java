@@ -123,7 +123,7 @@ public class PatternAnnotation implements Serializable {
    * Gets the value of a feature
    */
   public String getFeature(String key) {
-    return (String)features.get(key);
+    return features.get(key);
   }
 
   /**

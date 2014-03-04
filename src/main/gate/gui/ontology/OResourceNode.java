@@ -34,6 +34,7 @@ public class OResourceNode implements Transferable {
    * 
    * @see java.awt.datatransfer.Transferable#getTransferDataFlavors()
    */
+  @Override
   public DataFlavor[] getTransferDataFlavors() {
     return flavors;
   }
@@ -43,6 +44,7 @@ public class OResourceNode implements Transferable {
    * 
    * @see java.awt.datatransfer.Transferable#isDataFlavorSupported(java.awt.datatransfer.DataFlavor)
    */
+  @Override
   public boolean isDataFlavorSupported(DataFlavor df) {
     return df.equals(ORESOURCE_NODE_FLAVOR);
   }
@@ -52,6 +54,7 @@ public class OResourceNode implements Transferable {
    * 
    * @see java.awt.datatransfer.Transferable#getTransferData(java.awt.datatransfer.DataFlavor)
    */
+  @Override
   public Object getTransferData(DataFlavor df)
           throws UnsupportedFlavorException, IOException {
     if(df.equals(ORESOURCE_NODE_FLAVOR)) {

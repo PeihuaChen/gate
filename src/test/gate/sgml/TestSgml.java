@@ -41,6 +41,7 @@ public class TestSgml extends TestCase
   public TestSgml(String name) { super(name); }
 
   /** Fixture set up */
+  @Override
   public void setUp() {
   } // setUp
 

@@ -28,9 +28,11 @@ abstract public class AbstractFeatureBearer implements FeatureBearer, Serializab
   static final long serialVersionUID = -2962478253218344471L;
 
   /** Get the feature set */
+  @Override
   public FeatureMap getFeatures() { return features; }
 
   /** Set the feature set */
+  @Override
   public void setFeatures(FeatureMap features) { this.features = features; }
 
   /** The feature set */

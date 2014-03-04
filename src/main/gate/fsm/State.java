@@ -270,6 +270,7 @@ public class State implements JapeConstants {
    *
    * @return a String value.
    */
+  @Override
   public String toString() {
 ///    String res = "State " + myIndex;
     StringBuffer res = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);

@@ -58,6 +58,7 @@ public abstract class AbstractController extends AbstractResource
    * delegates to the {@link #executeImpl()} method to do the real work.
    * Subclasses should override {@link #executeImpl()} rather than this method.
    */
+  @Override
   public void execute() throws ExecutionException {
 
     // inform ControllerAware PRs that execution has started
@@ -151,6 +152,7 @@ public abstract class AbstractController extends AbstractResource
   }
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     return this;
   }
@@ -158,11 +160,13 @@ public abstract class AbstractController extends AbstractResource
   /* (non-Javadoc)
    * @see gate.ProcessingResource#reInit()
    */
+  @Override
   public void reInit() throws ResourceInstantiationException {
     init();
   }
 
   /** Clears the internal data of the resource, when it gets released * */
+  @Override
   public void cleanup() {
   }
 
@@ -177,6 +181,7 @@ public abstract class AbstractController extends AbstractResource
    *           if the <tt>setPRs</tt> method is not supported by this
    *           controller.
    */
+  @Override
   public void setPRs(Collection PRs) {
   }
 
@@ -184,6 +189,7 @@ public abstract class AbstractController extends AbstractResource
    * Notifies all the PRs in this controller that they should stop their
    * execution as soon as possible.
    */
+  @Override
   public synchronized void interrupt() {
     interrupted = true;
     Iterator prIter = getPRs().iterator();
@@ -192,6 +198,7 @@ public abstract class AbstractController extends AbstractResource
     }
   }
 
+  @Override
   public synchronized boolean isInterrupted() {
     return interrupted;
   }
@@ -304,10 +311,12 @@ public abstract class AbstractController extends AbstractResource
       this.end = end;
     }
 
+    @Override
     public void progressChanged(int i) {
       fireProgressChanged(start + (end - start) * i / 100);
     }
 
+    @Override
     public void processFinished() {
       fireProgressChanged(end);
     }
@@ -320,6 +329,7 @@ public abstract class AbstractController extends AbstractResource
    * A simple status listener used to forward the events upstream.
    */
   protected class InternalStatusListener implements StatusListener {
+    @Override
     public void statusChanged(String message) {
       fireStatusChanged(message);
     }
@@ -347,7 +357,7 @@ public abstract class AbstractController extends AbstractResource
     while(prIter.hasNext()) {
       ProcessingResource pr = (ProcessingResource)prIter.next();
       ResourceData rData =
-        (ResourceData)Gate.getCreoleRegister().get(pr.getClass().getName());
+        Gate.getCreoleRegister().get(pr.getClass().getName());
       if(AbstractResource.checkParameterValues(pr, rData.getParameterList()
         .getRuntimeParameters())) {
         badPRs.remove(pr);
@@ -417,6 +427,7 @@ public abstract class AbstractController extends AbstractResource
   /**
    * Sets the benchmark ID of this controller.
    */
+  @Override
   public void setBenchmarkId(String benchmarkID) {
     this.benchmarkID = benchmarkID;
   }
@@ -424,6 +435,7 @@ public abstract class AbstractController extends AbstractResource
   /**
    * Returns the benchmark ID of this controller.
    */
+  @Override
   public String getBenchmarkId() {
     if(benchmarkID == null) {
       benchmarkID = getName().replaceAll("[ ]+", "_");

@@ -226,6 +226,7 @@ public class TextAttributesChooser extends JDialog {
     getContentPane().add(contents, BorderLayout.CENTER);
 
     fontFamilyCombo.addActionListener(new ActionListener(){
+      @Override
       public void actionPerformed(ActionEvent e){
         StyleConstants.setFontFamily(currentStyle,
                                      (String)fontFamilyCombo.getSelectedItem());
@@ -234,6 +235,7 @@ public class TextAttributesChooser extends JDialog {
     });
 
     fontSizeCombo.addActionListener(new ActionListener(){
+      @Override
       public void actionPerformed(ActionEvent e){
         try {
           Integer.parseInt((String)fontSizeCombo.getSelectedItem());
@@ -248,6 +250,7 @@ public class TextAttributesChooser extends JDialog {
     });
 
     boldChk.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         StyleConstants.setBold(currentStyle, boldChk.isSelected());
         updateSample();
@@ -255,6 +258,7 @@ public class TextAttributesChooser extends JDialog {
     });
 
     italicChk.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         StyleConstants.setItalic(currentStyle, italicChk.isSelected());
         updateSample();
@@ -262,6 +266,7 @@ public class TextAttributesChooser extends JDialog {
     });
 
     underlineChk.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         if(underlineChk.isSelected()) strikethroughChk.setSelected(false);
         StyleConstants.setUnderline(currentStyle, underlineChk.isSelected());
@@ -270,6 +275,7 @@ public class TextAttributesChooser extends JDialog {
     });
 
     strikethroughChk.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         if(strikethroughChk.isSelected()) underlineChk.setSelected(false);
         StyleConstants.setStrikeThrough(currentStyle,
@@ -279,6 +285,7 @@ public class TextAttributesChooser extends JDialog {
     });
 
     superscriptChk.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         if(superscriptChk.isSelected()) subscriptChk.setSelected(false);
         StyleConstants.setSuperscript(currentStyle,
@@ -288,6 +295,7 @@ public class TextAttributesChooser extends JDialog {
     });
 
     subscriptChk.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         if(subscriptChk.isSelected()) superscriptChk.setSelected(false);
         StyleConstants.setSubscript(currentStyle, subscriptChk.isSelected());
@@ -296,6 +304,7 @@ public class TextAttributesChooser extends JDialog {
     });
 
     fgChooser.getSelectionModel().addChangeListener(new ChangeListener() {
+      @Override
       public void stateChanged(ChangeEvent e) {
         StyleConstants.setForeground(currentStyle, fgChooser.getColor());
         useForegroundChk.setSelected(true);
@@ -304,6 +313,7 @@ public class TextAttributesChooser extends JDialog {
     });
 
     useForegroundChk.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         if(useForegroundChk.isSelected()) {
           StyleConstants.setForeground(currentStyle, fgChooser.getColor());
@@ -315,6 +325,7 @@ public class TextAttributesChooser extends JDialog {
     });
 
     bgChooser.getSelectionModel().addChangeListener(new ChangeListener() {
+      @Override
       public void stateChanged(ChangeEvent e) {
         StyleConstants.setBackground(currentStyle, bgChooser.getColor());
         useBackgroundChk.setSelected(true);
@@ -323,6 +334,7 @@ public class TextAttributesChooser extends JDialog {
     });
 
     useBackgroundChk.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         if(useBackgroundChk.isSelected()) {
           StyleConstants.setBackground(currentStyle, bgChooser.getColor());
@@ -334,12 +346,14 @@ public class TextAttributesChooser extends JDialog {
     });
 
     this.addComponentListener(new ComponentAdapter() {
+      @Override
       public void componentShown(ComponentEvent e) {
         updateSample();
       }// public void componentShown(ComponentEvent e)
     });
 
     okButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         choice = true;
         setVisible(false);
@@ -347,6 +361,7 @@ public class TextAttributesChooser extends JDialog {
     });
 
     cancelButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         choice = false;
         setVisible(false);
@@ -425,6 +440,7 @@ public class TextAttributesChooser extends JDialog {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
       JFrame frame = new JFrame("Frame");
       frame.addWindowListener(new WindowAdapter(){
+        @Override
         public void windowClosing(WindowEvent e){
           System.exit(0);
         }
@@ -434,6 +450,7 @@ public class TextAttributesChooser extends JDialog {
       //frame.getContentPane().add(dialog.getContentPane().getComponent(0));
       JButton btn = new JButton("Display Dialog");
       btn.addActionListener(new ActionListener(){
+        @Override
         public void actionPerformed(ActionEvent e){
           Style style = new StyleContext().addStyle(null,null);
           StyleConstants.setBackground(style, Color.white);

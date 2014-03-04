@@ -60,30 +60,35 @@ public class AnnotationImpl extends AbstractFeatureBearer
 
   /** The ID of the annotation.
    */
+  @Override
   public Integer getId() {
     return id;
   } // getId()
 
   /** The type of the annotation (corresponds to TIPSTER "name").
    */
+  @Override
   public String getType() {
     return type;
   } // getType()
 
   /** The start node.
    */
+  @Override
   public Node getStartNode() {
     return start;
   } // getStartNode()
 
   /** The end node.
    */
+  @Override
   public Node getEndNode() {
     return end;
   } // getEndNode()
 
   /** String representation of hte annotation
    */
+  @Override
   public String toString() {
     return "AnnotationImpl: id=" + id + "; type=" + type +
            "; features=" + features + "; start=" + start +
@@ -92,6 +97,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
 
   /** Ordering
    */
+  @Override
   public int compareTo(Object o) throws ClassCastException {
     Annotation other = (Annotation) o;
     return id.compareTo(other.getId());
@@ -103,6 +109,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
     * would be beneficial to happen that way.
     */
 
+  @Override
   public int hashCode(){
     // hash code based on type, id, start and end offsets (which should never
     // change once the annotation has been created).
@@ -118,6 +125,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
    *  Two Annotation are equals if their offsets, types, id and features are the
    *  same.
    */
+  @Override
   public boolean equals(Object obj){
     if(obj == null)
       return false;
@@ -173,6 +181,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
   /** Set the feature set. Overriden from the implementation in
    *  AbstractFeatureBearer because it needs to fire events
    */
+  @Override
   public void setFeatures(FeatureMap features) {
     //I need to remove first the old features listener if any
     if (eventHandler != null)
@@ -202,6 +211,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
     * @return <code>true</code> if aAnnot is compatible with <b>this</b> and
     * <code>false</code> otherwise.
     */
+  @Override
   public boolean isCompatible(Annotation anAnnot){
     if (anAnnot == null) return false;
     if (coextensive(anAnnot)){
@@ -225,6 +235,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
     * @return <code>true</code> if aAnnot is compatible with <b>this</b> and
     * <code>false</code> otherwise.
     */
+  @Override
   public boolean isCompatible(Annotation anAnnot, Set aFeatureNamesSet){
     // If the set is null then isCompatible(Annotation) will decide.
     if (aFeatureNamesSet == null) return isCompatible(anAnnot);
@@ -244,6 +255,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
     * @return <code>true</code> if <b>this</b> is partially compatible with
     * anAnnot and <code>false</code> otherwise.
     */
+  @Override
   public boolean isPartiallyCompatible(Annotation anAnnot){
     if (anAnnot == null) return false;
     if (overlaps(anAnnot)){
@@ -268,6 +280,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
     * @return <code>true</code> if <b>this</b> is partially compatible with
     * aAnnot and <code>false</code> otherwise.
     */
+  @Override
   public boolean isPartiallyCompatible(Annotation anAnnot,Set aFeatureNamesSet){
     if (aFeatureNamesSet == null) return isPartiallyCompatible(anAnnot);
     if (anAnnot == null) return false;
@@ -286,6 +299,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
     *  @return <code>true</code> if two annotation hit the same possition and
     *  <code>false</code> otherwise
     */
+  @Override
   public boolean coextensive(Annotation anAnnot){
     // If their start offset is not the same then return false
     if((anAnnot.getStartNode() == null) ^ (this.getStartNode() == null))
@@ -319,6 +333,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
     return true;
   }//coextensive
 
+  @Override
   public boolean overlaps(Annotation aAnnot){
     if (aAnnot == null) return false;
     if (aAnnot.getStartNode() == null ||
@@ -354,7 +369,8 @@ public class AnnotationImpl extends AbstractFeatureBearer
    * @return <code>true</code> if this annotation is fully contained in the 
    * other one.
    */
- public boolean withinSpanOf(Annotation aAnnot){
+ @Override
+public boolean withinSpanOf(Annotation aAnnot){
    if (aAnnot == null) return false;
    if (aAnnot.getStartNode() == null ||
        aAnnot.getEndNode() == null ||
@@ -394,6 +410,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
    *
    * Removes an annotation listener
    */
+  @Override
   public synchronized void removeAnnotationListener(AnnotationListener l) {
     if (annotationListeners != null && annotationListeners.contains(l)) {
       Vector v = (Vector) annotationListeners.clone();
@@ -405,6 +422,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
    *
    * Adds an annotation listener
    */
+  @Override
   public synchronized void addAnnotationListener(AnnotationListener l) {
     Vector v = annotationListeners == null ? new Vector(2) : (Vector) annotationListeners.clone();
 
@@ -471,6 +489,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
    * this inner class.
    */
   class EventsHandler implements gate.event.FeatureMapListener, Serializable {
+    @Override
     public void featureMapUpdated(){
       //tell the annotation listeners that my features have been updated
       fireAnnotationUpdated(new AnnotationEvent(

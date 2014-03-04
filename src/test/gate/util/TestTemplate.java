@@ -38,11 +38,13 @@ public class TestTemplate extends TestCase
   public TestTemplate(String name) { super(name); }
 
   /** Fixture set up */
+  @Override
   public void setUp() throws Exception {
   } // setUp
 
   /** Put things back as they should be after running tests.
     */
+  @Override
   public void tearDown() throws Exception {
   } // tearDown
 

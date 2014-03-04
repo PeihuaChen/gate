@@ -20,8 +20,6 @@ package gate.jape;
 import java.io.Serializable;
 import java.util.*;
 
-import gate.AnnotationSet;
-import gate.Document;
 import gate.util.Strings;
 
 
@@ -70,6 +68,7 @@ public class LeftHandSide implements JapeConstants, Serializable
   } // finish
 
   /** Create a string representation of the object. */
+  @Override
   public String toString() { return toString(""); }
 
   /** Create a string representation of the object. */

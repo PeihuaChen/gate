@@ -57,6 +57,7 @@ implements JapeConstants, java.io.Serializable
   /**
    * Notifies this PR that it should stop its execution as soon as possible.
    */
+  @Override
   public synchronized void interrupt(){
     interrupted = true;
     Iterator phasesIter = phases.iterator();
@@ -84,6 +85,7 @@ implements JapeConstants, java.io.Serializable
    * Sets the ontology used by this transducer;
    * @param ontology an {@link gate.creole.ontology.Ontology} value;
    */
+  @Override
   public void setOntology(Ontology ontology) {
     super.setOntology(ontology);
     Iterator phasesIter = phases.iterator();
@@ -123,6 +125,7 @@ implements JapeConstants, java.io.Serializable
   /** Finish: replace dynamic data structures with Java arrays; called
     * after parsing.
     */
+  @Override
   public void finish(GateClassLoader classloader){
     for(Iterator i = phases.iterator(); i.hasNext(); )
       ((Transducer) i.next()).finish(classloader);
@@ -130,6 +133,7 @@ implements JapeConstants, java.io.Serializable
 
 
   /** Transduce the document by running each phase in turn. */
+  @Override
   public void transduce(Document doc, AnnotationSet input,
                         AnnotationSet output) throws JapeException,
                                                      ExecutionException {
@@ -137,11 +141,13 @@ implements JapeConstants, java.io.Serializable
     ProgressListener pListener = null;
     StatusListener sListener = null;
     pListener = new ProgressListener(){
+      @Override
       public void processFinished(){
         donePhases ++;
         if(donePhases == phasesCnt) fireProcessFinished();
       }
 
+      @Override
       public void progressChanged(int i){
         int value = (donePhases * 100 + i)/phasesCnt;
         fireProgressChanged(value);
@@ -152,6 +158,7 @@ implements JapeConstants, java.io.Serializable
     };
 
     sListener = new StatusListener(){
+      @Override
       public void statusChanged(String text){
         fireStatusChanged(text);
       }
@@ -198,6 +205,7 @@ implements JapeConstants, java.io.Serializable
     cleanUp();
   } // transduce
 
+  @Override
   public void setEnableDebugging(boolean enableDebugging) {
     this.enableDebugging = enableDebugging;
     //propagate
@@ -208,6 +216,7 @@ implements JapeConstants, java.io.Serializable
 
 
   /** Ask each phase to clean up (delete action class files, for e.g.). */
+  @Override
   public void cleanUp() {
 
     for(Iterator i = phases.iterator(); i.hasNext(); )
@@ -218,9 +227,11 @@ implements JapeConstants, java.io.Serializable
   } // cleanUp
 
   /** Create a string representation of the object. */
+  @Override
   public String toString() { return toString(""); }
 
   /** Create a string representation of the object. */
+  @Override
   public String toString(String pad) {
     String newline = Strings.getNl();
 

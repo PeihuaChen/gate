@@ -74,6 +74,7 @@ public class GateResourceFactoryBean extends GateAwareObject implements
   /**
    * Create the resource specified by this bean.
    */
+  @Override
   public Object getObject() throws Exception {
     if(object == null) {
       ensureGateInit();
@@ -104,6 +105,7 @@ public class GateResourceFactoryBean extends GateAwareObject implements
     return object;
   }
 
+  @Override
   public Class getObjectType() {
     if(object != null) {
       return object.getClass();
@@ -111,6 +113,7 @@ public class GateResourceFactoryBean extends GateAwareObject implements
     return null;
   }
 
+  @Override
   public boolean isSingleton() {
     return true;
   }
@@ -119,6 +122,7 @@ public class GateResourceFactoryBean extends GateAwareObject implements
    * Destroy the resource created by this bean, by passing it to
    * {@link Factory#deleteResource}.
    */
+  @Override
   public void destroy() throws Exception {
     if(object != null) {
       Factory.deleteResource(object);

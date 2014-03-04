@@ -122,6 +122,7 @@ public class LuceneSearcher implements Searcher {
   /**
    * Return the next numberOfHits -1 indicates all
    */
+  @Override
   public Hit[] next(int numberOfHits) throws SearchException {
 
     annicPatterns = new ArrayList<Pattern>();
@@ -190,6 +191,7 @@ public class LuceneSearcher implements Searcher {
   /**
    * Method retunrs true/false indicating whether results were found or not.
    */
+  @Override
   public boolean search(String query, Map<String, Object> parameters)
       throws SearchException {
     luceneHits = null;
@@ -315,6 +317,7 @@ public class LuceneSearcher implements Searcher {
   /**
    * Gets the submitted query.
    */
+  @Override
   public String getQuery() {
     return this.query;
   }
@@ -329,11 +332,12 @@ public class LuceneSearcher implements Searcher {
   /**
    * Gets the found hits (annic patterns).
    */
+  @Override
   public Hit[] getHits() {
     if(annicPatterns == null) annicPatterns = new ArrayList<Pattern>();
     Hit[] hits = new Hit[annicPatterns.size()];
     for(int i = 0; i < annicPatterns.size(); i++) {
-      hits[i] = (Pattern)annicPatterns.get(i);
+      hits[i] = annicPatterns.get(i);
     }
     return hits;
   }
@@ -346,6 +350,7 @@ public class LuceneSearcher implements Searcher {
    * following format. Key: CorpusName;AnnotationSetName;AnnotationType Value:
    * respective features
    */
+  @Override
   public Map<String, List<String>> getAnnotationTypesMap() {
     return annotationTypesMap;
   }
@@ -359,6 +364,7 @@ public class LuceneSearcher implements Searcher {
    * where, the corpusName is the name of the corpus the annotationSetName
    * belongs to.
    */
+  @Override
   public String[] getIndexedAnnotationSetNames() throws SearchException {
     String indexLocation;
     try {
@@ -482,6 +488,7 @@ public class LuceneSearcher implements Searcher {
   /**
    * Gets the search parameters set by user.
    */
+  @Override
   public Map<String, Object> getParameters() {
     return parameters;
   }
@@ -510,10 +517,12 @@ public class LuceneSearcher implements Searcher {
    * This method allow exporting results in to the provided file. This method
    * has not been implemented yet.
    */
+  @Override
   public void exportResults(File outputFile) {
     throw new RuntimeException("ExportResults method is not implemented yet!");
   }
 
+  @Override
   public int freq(String corpusToSearchIn, String annotationSetToSearchIn,
       String annotationType, String featureName, String value)
       throws SearchException {
@@ -548,18 +557,21 @@ public class LuceneSearcher implements Searcher {
     return result;
   }
 
+  @Override
   public int freq(String corpusToSearchIn, String annotationSetToSearchIn,
       String annotationType) throws SearchException {
     return this.freq(corpusToSearchIn, annotationSetToSearchIn, annotationType,
         null, null);
   }
 
+  @Override
   public int freq(String corpusToSearchIn, String annotationSetToSearchIn,
       String annotationType, String featureName) throws SearchException {
     return this.freq(corpusToSearchIn, annotationSetToSearchIn, annotationType,
         featureName, null);
   }
 
+  @Override
   public int freq(List<Hit> patternsToSearchIn, String annotationType,
       String feature, String value, boolean inMatchedSpan, boolean inContext)
       throws SearchException {
@@ -567,12 +579,14 @@ public class LuceneSearcher implements Searcher {
         value, inMatchedSpan, inContext);
   }
 
+  @Override
   public int freq(List<Hit> patternsToSearchIn, String annotationType,
       boolean inMatchedSpan, boolean inContext) throws SearchException {
     return StatsCalculator.freq(patternsToSearchIn, annotationType,
         inMatchedSpan, inContext);
   }
 
+  @Override
   public Map<String, Integer> freqForAllValues(List<Hit> patternsToSearchIn,
       String annotationType, String feature, boolean inMatchedSpan,
       boolean inContext) throws SearchException {

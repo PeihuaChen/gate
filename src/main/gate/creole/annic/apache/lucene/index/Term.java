@@ -57,6 +57,7 @@ public final class Term implements Comparable, java.io.Serializable {
 
   /** Compares two terms, returning true iff they have the same
       field and text. */
+  @Override
   public final boolean equals(Object o) {
     if (o == null)
       return false;
@@ -79,6 +80,7 @@ public final class Term implements Comparable, java.io.Serializable {
   }
 
   /** Combines the hashCode() of the field and the text. */
+  @Override
   public final int hashCode() {
     if(type != null) {
     //Niraj
@@ -91,6 +93,7 @@ public final class Term implements Comparable, java.io.Serializable {
 
   }
 
+  @Override
   public int compareTo(Object other) {
     return compareTo((Term)other);
   }
@@ -175,6 +178,7 @@ public final class Term implements Comparable, java.io.Serializable {
   }
   // End
 
+  @Override
   public final String toString() {
     if(type == null)
       return field + ":" + text;

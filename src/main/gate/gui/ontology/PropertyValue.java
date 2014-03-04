@@ -62,6 +62,7 @@ public class PropertyValue {
    * is used to show in the right hand side panel of the Ontology
    * Editor.
    */
+  @Override
   public String toString() {
     StringBuffer sb = new StringBuffer(property.toString());
     sb.append("(");

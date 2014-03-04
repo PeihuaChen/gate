@@ -18,7 +18,8 @@ public class MatchRule3 implements OrthoMatcherRule {
 			this.orthomatcher=orthmatcher;
 		}
 	
-	public boolean value(String s1,  String s2) { //short string
+	@Override
+  public boolean value(String s1,  String s2) { //short string
 
 	  boolean result=false;
 	  
@@ -39,7 +40,7 @@ public class MatchRule3 implements OrthoMatcherRule {
 
 	      // now check the second case i.e. "Standard and Poor" == "Standard's"
 	      String token = (String)
-	      ((Annotation) orthomatcher.tokensLongAnnot.get(0)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+	      orthomatcher.tokensLongAnnot.get(0).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
 
 	      if (!token.endsWith("'s")) s2_poss = token.concat("'s");
 	      else s2_poss = token.concat("'");
@@ -58,6 +59,7 @@ public class MatchRule3 implements OrthoMatcherRule {
 	    return result;
 	}
 	
+  @Override
   public String getId(){
     return "MatchRule3";
   }

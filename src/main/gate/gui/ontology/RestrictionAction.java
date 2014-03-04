@@ -95,6 +95,7 @@ public class RestrictionAction extends AbstractAction {
     hasValChoice.setEnabled(false);
   }
 
+  @Override
   @SuppressWarnings("deprecation")
   public void actionPerformed(ActionEvent actionevent) {
 
@@ -186,6 +187,7 @@ public class RestrictionAction extends AbstractAction {
   protected Ontology ontology;
 
   class EnableDisableClass implements ActionListener {
+    @Override
     public void actionPerformed(ActionEvent ae) {
       if(hasVal.isSelected() || allVals.isSelected() || someVals.isSelected()) {
         value.setEnabled(false);

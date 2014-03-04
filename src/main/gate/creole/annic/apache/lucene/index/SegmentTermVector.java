@@ -1,5 +1,4 @@
 package gate.creole.annic.apache.lucene.index;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -19,10 +18,12 @@ class SegmentTermVector implements TermFreqVector {
    *
    * @return The number of the field this vector is associated with
    */
+  @Override
   public String getField() {
     return field;
   }
 
+  @Override
   public String toString() {
     StringBuffer sb = new StringBuffer();
     sb.append('{');
@@ -35,23 +36,28 @@ class SegmentTermVector implements TermFreqVector {
     return sb.toString();
   }
 
+  @Override
   public int size() {
     return terms == null ? 0 : terms.length;
   }
 
+  @Override
   public String [] getTerms() {
     return terms;
   }
 
+  @Override
   public int[] getTermFrequencies() {
     return termFreqs;
   }
 
+  @Override
   public int indexOf(String termText) {
     int res = Arrays.binarySearch(terms, termText);
     return res >= 0 ? res : -1;
   }
 
+  @Override
   public int[] indexesOf(String [] termNumbers, int start, int len) {
     // TODO: there must be a more efficient way of doing this.
     //       At least, we could advance the lower bound of the terms array

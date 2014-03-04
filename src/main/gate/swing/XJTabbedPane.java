@@ -41,6 +41,7 @@ public class XJTabbedPane extends JTabbedPane {
     return -1;
   }// int getIndexAt(Point p)
 
+  @Override
   public void setTitleAt(int index, String title) {
     if (title.length() > 15) { // shorten the tab title with ellipsis
       setToolTipText("<html>" + title + "<br>" + getToolTipText() + "</html>");
@@ -51,6 +52,7 @@ public class XJTabbedPane extends JTabbedPane {
     }
   }
 
+  @Override
   public void insertTab(String title, Icon icon, Component component, String tip, int index) {
     if (title.length() > 15) { // shorten the tab title with ellispsis
       tip = "<html>" + title + "<br>" + tip + "</html>";

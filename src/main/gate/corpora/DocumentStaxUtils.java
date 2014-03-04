@@ -1670,6 +1670,7 @@ public class DocumentStaxUtils {
    * considered to come first in the ordering.
    */
   public static final Comparator<Annotation> LONGEST_FIRST_OFFSET_COMPARATOR = new Comparator<Annotation>() {
+    @Override
     public int compare(Annotation left, Annotation right) {
       long loffset = left.getStartNode().getOffset().longValue();
       long roffset = right.getStartNode().getOffset().longValue();
@@ -1898,6 +1899,7 @@ public class DocumentStaxUtils {
       id = anId;
     }// End of setId()
 
+    @Override
     public String toString() {
       return " [id =" + id + " type=" + elemName + " startNode=" + start
               + " endNode=" + end + " features=" + fm + "] ";
@@ -1935,18 +1937,22 @@ public class DocumentStaxUtils {
       this.len = len;
     }
 
+    @Override
     public final char charAt(int i) {
       return array[offset + i];
     }
 
+    @Override
     public final int length() {
       return len;
     }
 
+    @Override
     public CharSequence subSequence(int start, int end) {
       return new ArrayCharSequence(array, offset + start, offset + end);
     }
 
+    @Override
     public String toString() {
       return String.valueOf(array, offset, len);
     }

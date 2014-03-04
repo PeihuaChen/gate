@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.ArrayList;
 
 import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
 
 
 /**
@@ -35,12 +34,14 @@ public class MenuLayout implements LayoutManager {
    * @param name the name of the component
    * @param comp the the component to be added
    */
+  @Override
   public void addLayoutComponent(String name, Component comp) {}
 
   /**
    * Removes the specified component from the layout. Not used by this class.
    * @param comp the component to remove
    */
+  @Override
   public void removeLayoutComponent(Component comp) {}
 
   /**
@@ -50,6 +51,7 @@ public class MenuLayout implements LayoutManager {
    * @see Container
    * @see #minimumLayoutSize
    */
+  @Override
   public Dimension preferredLayoutSize(Container target) {
     int membersCnt = target.getComponentCount();
     Dimension[] componentPrefSizes = new Dimension[membersCnt];
@@ -181,6 +183,7 @@ public class MenuLayout implements LayoutManager {
    * @param target the component which needs to be laid out
    * @see #preferredLayoutSize
    */
+  @Override
   public Dimension minimumLayoutSize(Container target) {
     int membersCnt = target.getComponentCount();
     Dimension[] componentMinSizes = new Dimension[membersCnt];
@@ -192,6 +195,7 @@ public class MenuLayout implements LayoutManager {
   }
 
 
+  @Override
   public void layoutContainer(Container target) {
     Insets insets = target.getInsets();
     Rectangle bounds = target.getBounds();

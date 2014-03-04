@@ -39,6 +39,7 @@ public abstract class AbstractDocumentView extends AbstractResource
    * This method will initialise the GUI the first time the view becomes active.
    * @param active a boolean value.
    */
+  @Override
   public void setActive(boolean active) {
     this.active = active;
     if(active){
@@ -56,10 +57,12 @@ public abstract class AbstractDocumentView extends AbstractResource
    * Returns the active state of this view. 
    * @return a boolean value
    */
+  @Override
   public boolean isActive() {
     return active;
   }
 
+  @Override
   public void setSelectedAnnotations(List<AnnotationData> selectedAnnots){
     //do nothing
   }
@@ -68,6 +71,7 @@ public abstract class AbstractDocumentView extends AbstractResource
    * By default return an empty list of actions.
    * @return an empty list.
    */
+  @Override
   public List getActions() {
     return new ArrayList();
   }
@@ -75,6 +79,7 @@ public abstract class AbstractDocumentView extends AbstractResource
   /* 
    * By default store the handle in the {@link #handle} field. 
    */
+  @Override
   public void setHandle(Handle handle) {
     this.handle = handle;
   }
@@ -83,6 +88,7 @@ public abstract class AbstractDocumentView extends AbstractResource
    * Stores the target (which should always be a {@link Document}) into the 
    * {@link #document} field.
    */
+  @Override
   public void setTarget(Object target) {
     this.document = (Document)target;
   }
@@ -99,6 +105,7 @@ public abstract class AbstractDocumentView extends AbstractResource
    * Stores the owner of this view into the {@link #owner} field. The owner is 
    * the {@link DocumentEditor} this view is part of.
    */
+  @Override
   public void setOwner(DocumentEditor editor) {
     this.owner = editor;
   }

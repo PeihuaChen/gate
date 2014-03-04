@@ -32,6 +32,7 @@ public class Rule_WDAND2AFT extends Rule {
   public Rule_WDAND2AFT() {
   }
 
+  @Override
   public boolean checkContext(POSTagger tagger) {
     return (tagger.wordBuff[3].equals(context[0]) &&
             tagger.wordBuff[5].equals(context[1]));

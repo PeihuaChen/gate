@@ -9,7 +9,6 @@ package gate.creole.annic.lucene;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -148,6 +147,7 @@ public class LuceneIndexer implements Indexer {
    *          <P>
    * 
    */
+  @Override
   public void createIndex(Map indexParameters) throws IndexException {
     checkIndexParameters(indexParameters);
     URL indexLocation = (URL)parameters.get(Constants.INDEX_LOCATION_URL);
@@ -169,7 +169,7 @@ public class LuceneIndexer implements Indexer {
         if(corpus != null) {
           // load documents and add them one by one
           for(int i = 0; i < corpus.size(); i++) {
-            gate.Document gateDoc = (gate.Document)corpus.get(i);
+            gate.Document gateDoc = corpus.get(i);
             String idToUse = gateDoc.getLRPersistenceId() == null ? gateDoc
                     .getName() : gateDoc.getLRPersistenceId().toString();
   
@@ -205,6 +205,7 @@ public class LuceneIndexer implements Indexer {
   }
 
   /** Optimize existing index. */
+  @Override
   public void optimizeIndex() throws IndexException {
     try {
       String location = ((URL)parameters.get(Constants.INDEX_LOCATION_URL))
@@ -224,6 +225,7 @@ public class LuceneIndexer implements Indexer {
   }
 
   /** Deletes the index. */
+  @Override
   public void deleteIndex() throws IndexException {
     boolean isDeleted = true;
     if(parameters == null) return;
@@ -260,6 +262,7 @@ public class LuceneIndexer implements Indexer {
    * Add new documents to Index
    * @throws IndexException
    */
+  @Override
   public void add(String corpusPersistenceID, List<gate.Document> added)
           throws IndexException {
 
@@ -320,6 +323,7 @@ public class LuceneIndexer implements Indexer {
    *          case provide the document Names instead of their IDs
    * @throws Exception
    */
+  @Override
   public void remove(List removedIDs) throws IndexException {
 
     String location = null;
@@ -428,6 +432,7 @@ public class LuceneIndexer implements Indexer {
   /**
    * Returns the corpus.
    */
+  @Override
   public Corpus getCorpus() {
     return corpus;
   }
@@ -435,6 +440,7 @@ public class LuceneIndexer implements Indexer {
   /**
    * Sets the corpus.
    */
+  @Override
   public void setCorpus(Corpus corpus) throws IndexException {
     this.corpus = corpus;
     if(corpus == null) {
@@ -533,6 +539,7 @@ public class LuceneIndexer implements Indexer {
   /**
    * Returns the set parameters
    */
+  @Override
   public Map getParameters() {
     return this.parameters;
   }

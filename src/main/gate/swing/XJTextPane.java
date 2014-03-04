@@ -44,6 +44,7 @@ public class XJTextPane extends JTextPane {
 
   protected void initListeners(){
     addPropertyChangeListener(new PropertyChangeListener() {
+      @Override
       public void propertyChange(PropertyChangeEvent e) {
         if(e.getPropertyName().equals("UI")){
           updateStyle();

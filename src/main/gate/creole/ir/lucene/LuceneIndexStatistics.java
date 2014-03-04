@@ -24,26 +24,31 @@ public class LuceneIndexStatistics implements IndexStatistics {
   public LuceneIndexStatistics(){
   }
 
+  @Override
   public Long getTermCount(){
     //NOT IMPLEMENTED YET
     return null;
   }
 
+  @Override
   public Long getUniqueTermCount(){
     //NOT IMPLEMENTED YET
     return null;
   }
 
+  @Override
   public Long getExhaustivity(Long docID, String fieldName){
     //NOT IMPLEMENTED YET
     return null;
   }
 
+  @Override
   public Long getSpecificity(String term){
     //NOT IMPLEMENTED YET
     return null;
   }
 
+  @Override
   public Map getTermFrequency(Long docID, String fieldName){
     //NOT IMPLEMENTED YET
     return null;

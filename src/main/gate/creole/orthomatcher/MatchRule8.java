@@ -19,7 +19,8 @@ public class MatchRule8 implements OrthoMatcherRule {
 		this.orthomatcher=orthmatcher;
 	}
 	
-	public boolean value(String s1, String s2) {
+	@Override
+  public boolean value(String s1, String s2) {
 		
 	    boolean result=false;
 	   
@@ -31,10 +32,8 @@ public class MatchRule8 implements OrthoMatcherRule {
       	    String previous_token = null;
       
       	    for (int i = 0;  i < orthomatcher.tokensLongAnnot.size(); i++ ) {
-      	      if (orthomatcher.connector.containsKey( ((Annotation) orthomatcher.tokensLongAnnot.get(i)
-      	      ).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME) )) {
-      	        previous_token = (String) ((Annotation) orthomatcher.tokensLongAnnot.get(i-1)
-      	        ).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+      	      if (orthomatcher.connector.containsKey( orthomatcher.tokensLongAnnot.get(i).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME) )) {
+      	        previous_token = (String) orthomatcher.tokensLongAnnot.get(i-1).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
       
       	        break;
       	      }
@@ -54,6 +53,7 @@ public class MatchRule8 implements OrthoMatcherRule {
 
 	}
 	
+  @Override
   public String getId(){
     return "MatchRule8";
   }

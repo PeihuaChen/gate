@@ -38,6 +38,7 @@ import gate.swing.XJTable;
 public class SearchPRViewer extends AbstractVisualResource
                             implements ProgressListener{
 
+  @Override
   public Resource init(){
     initLocalData();
     initGuiComponents();
@@ -61,6 +62,7 @@ public class SearchPRViewer extends AbstractVisualResource
 
   protected void initListeners(){
     resultsTable.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         if(e.getClickCount() == 2){
           //where inside the table
@@ -84,7 +86,7 @@ public class SearchPRViewer extends AbstractVisualResource
         i++);
     if(corpus.getDocumentName(i).equals(documentName)){
       //trigger document loading if needed
-      Document doc = (Document)corpus.get(i);
+      Document doc = corpus.get(i);
       //try to select the document
       Component root = SwingUtilities.getRoot(this);
       if(root instanceof MainFrame){
@@ -100,6 +102,7 @@ public class SearchPRViewer extends AbstractVisualResource
    * @param target the object (be it a {@link gate.Resource},
    * {@link gate.DataStore} or whatever) this viewer has to display
    */
+  @Override
   public void setTarget(Object target){
     if(!(target instanceof SearchPR)){
       throw new IllegalArgumentException(
@@ -114,11 +117,13 @@ public class SearchPRViewer extends AbstractVisualResource
    * Does nothing.
    * @param i
    */
+  @Override
   public void progressChanged(int i){}
 
   /**
    * Called when the process is finished, fires a refresh for this VR.
    */
+  @Override
   public void processFinished(){
     updateDisplay();
   }
@@ -132,6 +137,7 @@ public class SearchPRViewer extends AbstractVisualResource
         results.add(resIter.next());
       }
       SwingUtilities.invokeLater(new Runnable(){
+        @Override
         public void run(){
           resultsTableModel.fireTableDataChanged();
         }
@@ -140,14 +146,17 @@ public class SearchPRViewer extends AbstractVisualResource
   }
 
   protected class ResultsTableModel extends AbstractTableModel{
+    @Override
     public int getRowCount(){
       return results.size();
     }
 
+    @Override
     public int getColumnCount(){
       return 2;
     }
 
+    @Override
     public String getColumnName(int columnIndex){
       switch(columnIndex){
         case DOC_NAME_COLUMN: return "Document";
@@ -156,6 +165,7 @@ public class SearchPRViewer extends AbstractVisualResource
       }
     }
 
+    @Override
     public Class<?> getColumnClass(int columnIndex){
       switch(columnIndex){
         case DOC_NAME_COLUMN: return String.class;
@@ -164,12 +174,14 @@ public class SearchPRViewer extends AbstractVisualResource
       }
     }
 
+    @Override
     public boolean isCellEditable(int rowIndex, int columnIndex){
       return false;
     }
 
+    @Override
     public Object getValueAt(int rowIndex, int columnIndex){
-      QueryResult aResult = (QueryResult)results.get(rowIndex);
+      QueryResult aResult = results.get(rowIndex);
       switch(columnIndex){
         case DOC_NAME_COLUMN: return guessDocName(aResult.getDocumentID()).
                                      toString();
@@ -212,6 +224,7 @@ public class SearchPRViewer extends AbstractVisualResource
     }
 
 
+    @Override
     public Component getTableCellRendererComponent(JTable table,
                                                    Object value,
                                                    boolean isSelected,
@@ -236,6 +249,7 @@ public class SearchPRViewer extends AbstractVisualResource
     /**
      * Overridden for performance reasons.
      */
+    @Override
     public boolean isOpaque() {
       Color back = getBackground();
       Component p = getParent();
@@ -252,26 +266,31 @@ public class SearchPRViewer extends AbstractVisualResource
     /**
      * Overridden for performance reasons.
      */
+    @Override
     public void validate() {}
 
     /**
      * Overridden for performance reasons.
      */
+    @Override
     public void revalidate() {}
 
     /**
      * Overridden for performance reasons.
      */
+    @Override
     public void repaint(long tm, int x, int y, int width, int height) {}
 
     /**
      * Overridden for performance reasons.
      */
+    @Override
     public void repaint(Rectangle r) { }
 
     /**
      * Overridden for performance reasons.
      */
+    @Override
     protected void firePropertyChange(String propertyName, Object oldValue,
                                       Object newValue) {
       // Strings get interned...
@@ -283,6 +302,7 @@ public class SearchPRViewer extends AbstractVisualResource
     /**
      * Overridden for performance reasons.
      */
+    @Override
     public void firePropertyChange(String propertyName, boolean oldValue,
                                    boolean newValue) { }
 

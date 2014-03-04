@@ -84,6 +84,7 @@ public class VerticalTextIcon implements Icon, PropertyChangeListener {
    * Checks for changes to the font on the fComponent
    * so that it can invalidate the layout if the size changes
    */
+    @Override
     public void propertyChange(PropertyChangeEvent e) {
     String prop = e.getPropertyName();
     if("font".equals(prop)) {
@@ -148,6 +149,7 @@ public class VerticalTextIcon implements Icon, PropertyChangeListener {
      * may use the Component argument to get properties useful for
      * painting, e.g. the foreground or background color.
      */
+    @Override
     public void paintIcon(Component c, Graphics g, int x, int y) {
     // We don't insist that it be on the same Component
     g.setColor(c.getForeground());
@@ -198,6 +200,7 @@ public class VerticalTextIcon implements Icon, PropertyChangeListener {
      *
      * @return an int specifying the fixed width of the icon.
      */
+    @Override
     public int getIconWidth() {
     return fWidth;
   }
@@ -207,6 +210,7 @@ public class VerticalTextIcon implements Icon, PropertyChangeListener {
      *
      * @return an int specifying the fixed height of the icon.
      */
+    @Override
     public int getIconHeight() {
     return fHeight;
   }

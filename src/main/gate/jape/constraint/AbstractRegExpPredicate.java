@@ -57,6 +57,7 @@ public abstract class AbstractRegExpPredicate
    * value is null it is treated as an empty string. The actual matching
    * logic is defined by {@link #matcherResult}.
    */
+  @Override
   public boolean doMatch(Object annotValue, AnnotationSet context)
           throws JapeException {
 

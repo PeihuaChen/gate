@@ -26,6 +26,7 @@ public class LanguageAnalyserPersistence extends PRPersistence {
    * Populates this Persistence with the data that needs to be stored from the
    * original source object.
    */
+  @Override
   public void extractDataFromSource(Object source)throws PersistenceException{
     if(! (source instanceof LanguageAnalyser)){
       throw new UnsupportedOperationException(
@@ -46,6 +47,7 @@ public class LanguageAnalyserPersistence extends PRPersistence {
    * Creates a new object from the data contained. This new object is supposed
    * to be a copy for the original object used as source for data extraction.
    */
+  @Override
   public Object createObject()throws PersistenceException,
                                      ResourceInstantiationException{
     LanguageAnalyser la = (LanguageAnalyser)super.createObject();

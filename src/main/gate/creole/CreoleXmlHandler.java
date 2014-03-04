@@ -133,18 +133,20 @@ public class CreoleXmlHandler extends DefaultHandler {
   private CreoleRegister register;
 
   /** Called when the SAX parser encounts the beginning of the XML document */
+  @Override
   public void startDocument() throws GateSaxException {
     if(DEBUG) Out.prln("start document");
   } // startDocument
 
   /** Called when the SAX parser encounts the end of the XML document */
+  @Override
   public void endDocument() throws GateSaxException {
     if(DEBUG) Out.prln("end document");
     if(! contentStack.isEmpty()) {
       StringBuffer errorMessage =
         new StringBuffer("document ended but element stack not empty:");
       while(! contentStack.isEmpty())
-        errorMessage.append(Strings.getNl()+"  "+(String) contentStack.pop());
+        errorMessage.append(Strings.getNl()+"  "+contentStack.pop());
       throw new GateSaxException(errorMessage.toString());
     }
   } // endDocument
@@ -165,6 +167,7 @@ public class CreoleXmlHandler extends DefaultHandler {
   }// attributes2String()
 
   /** Called when the SAX parser encounts the beginning of an XML element */
+  @Override
   public void startElement (String uri, String qName, String elementName,
                                                              Attributes atts) throws SAXException {
 
@@ -292,6 +295,7 @@ public class CreoleXmlHandler extends DefaultHandler {
     * they are added to the CreoleRegister when we parsed their complete
     * metadata entries.
     */
+  @Override
   public void endElement (String uri, String qName, String elementName)
                                                     throws GateSaxException, SAXException {
     // call characterActions
@@ -416,7 +420,7 @@ public class CreoleXmlHandler extends DefaultHandler {
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("NAME")) {
       checkStack("endElement", "NAME");
-      resourceData.setName((String) contentStack.pop());
+      resourceData.setName(contentStack.pop());
     // End NAME processing
     //////////////////////////////////////////////////////////////////
     } else if (elementName.toUpperCase().equals("IVY")) {
@@ -431,7 +435,7 @@ public class CreoleXmlHandler extends DefaultHandler {
       checkStack("endElement", "JAR");
 
       // add jar file name
-      String jarFileName = (String) contentStack.pop();
+      String jarFileName = contentStack.pop();
       if(resourceData != null) {
         resourceData.setJarFileName(jarFileName);
       }
@@ -461,27 +465,27 @@ public class CreoleXmlHandler extends DefaultHandler {
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("CLASS")) {
       checkStack("endElement", "CLASS");
-      resourceData.setClassName((String) contentStack.pop());
+      resourceData.setClassName(contentStack.pop());
     // End CLASS processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("COMMENT")) {
       checkStack("endElement", "COMMENT");
-      resourceData.setComment((String) contentStack.pop());
+      resourceData.setComment(contentStack.pop());
     // End COMMENT processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("HELPURL")) {
       checkStack("endElement", "HELPURL");
-      resourceData.setHelpURL((String) contentStack.pop());
+      resourceData.setHelpURL(contentStack.pop());
     // End HELPURL processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("INTERFACE")) {
       checkStack("endElement", "INTERFACE");
-      resourceData.setInterfaceName((String) contentStack.pop());
+      resourceData.setInterfaceName(contentStack.pop());
     // End INTERFACE processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("ICON")) {
       checkStack("endElement", "ICON");
-      resourceData.setIcon((String) contentStack.pop());
+      resourceData.setIcon(contentStack.pop());
     // End ICON processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("OR")) {
@@ -491,7 +495,7 @@ public class CreoleXmlHandler extends DefaultHandler {
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("PARAMETER")) {
       checkStack("endElement", "PARAMETER");
-      currentParam.typeName = (String) contentStack.pop();
+      currentParam.typeName = contentStack.pop();
       String priorityStr = currentAttributes.getValue("PRIORITY");
       // if no priority specified, assume lowest (i.e. parameters with an
       // explicit priority come ahead of those without).
@@ -533,7 +537,7 @@ public class CreoleXmlHandler extends DefaultHandler {
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("RESOURCE_DISPLAYED")){
       checkStack("endElement", "RESOURCE_DISPLAYED");
-      String resourceDisplayed = (String) contentStack.pop();
+      String resourceDisplayed = contentStack.pop();
       resourceData.setResourceDisplayed(resourceDisplayed);
       try{
         @SuppressWarnings("unused")
@@ -548,7 +552,7 @@ public class CreoleXmlHandler extends DefaultHandler {
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("ANNOTATION_TYPE_DISPLAYED")){
       checkStack("endElement", "ANNOTATION_TYPE_DISPLAYED");
-      resourceData.setAnnotationTypeDisplayed((String) contentStack.pop());
+      resourceData.setAnnotationTypeDisplayed(contentStack.pop());
     // End ANNOTATION_TYPE_DISPLAYED processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("GUI")) {
@@ -565,7 +569,7 @@ public class CreoleXmlHandler extends DefaultHandler {
       if(resourceData != null)
         resourceData.getFeatures().put(
           elementName.toUpperCase(),
-          ((contentStack.isEmpty()) ? null : (String) contentStack.pop())
+          ((contentStack.isEmpty()) ? null : contentStack.pop())
         );
     }
     //////////////////////////////////////////////////////////////////
@@ -573,6 +577,7 @@ public class CreoleXmlHandler extends DefaultHandler {
   } // endElement
 
   /** Called when the SAX parser encounts text (PCDATA) in the XML doc */
+  @Override
   public void characters(char [] text,int start,int length) throws SAXException {
     if(!readCharacterStatus) {
       contentBuffer = new StringBuffer(new String(text,start,length));
@@ -609,21 +614,25 @@ public class CreoleXmlHandler extends DefaultHandler {
   }
 
   /** Called when the SAX parser encounts white space */
+  @Override
   public void ignorableWhitespace(char ch[], int start, int length)
   throws SAXException {
   } // ignorableWhitespace
 
   /** Called for parse errors. */
+  @Override
   public void error(SAXParseException ex) throws SAXException {
     _seh.error(ex);
   } // error
 
   /** Called for fatal errors. */
+  @Override
   public void fatalError(SAXParseException ex) throws SAXException {
     _seh.fatalError(ex);
   } // fatalError
 
   /** Called for warnings. */
+  @Override
   public void warning(SAXParseException ex) throws SAXException {
     _seh.warning(ex);
   } // warning

@@ -26,12 +26,14 @@ public class TestAnnotationMerging extends TestCase {
   }
 
   /** Fixture set up */
+  @Override
   public void setUp() {
   } // setUp
 
   /**
    * Put things back as they should be after running tests.
    */
+  @Override
   public void tearDown() throws Exception {
   } // tearDown
 
@@ -113,7 +115,7 @@ public class TestAnnotationMerging extends TestCase {
     int numDocs = data.size();
     AnnotationSet[][] annArr2 = new AnnotationSet[numDocs][numJudges];
     for(int i = 0; i < numDocs; ++i) {
-      Document doc = (Document)data.get(i);
+      Document doc = data.get(i);
       for(int j=0; j<numJudges; ++j) {
         // Get the annotation
         annArr2[i][j] = doc.getAnnotations(annSetsN[j]).get(nameAnnType);

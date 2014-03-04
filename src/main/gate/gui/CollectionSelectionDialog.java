@@ -180,21 +180,25 @@ public class CollectionSelectionDialog extends JDialog {
   /** Init all the listeners*/
   protected void initListeners(){
     okButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         doOk();
       }// actionPerformed();
     });// addActionListener();
     cancelButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         doCancel();
       }// actionPerformed();
     });// addActionListener();
     addButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         doAdd();
       }// actionPerformed();
     });// addActionListener();
     removeButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         doRemove();
       }// actionPerformed();
@@ -234,7 +238,7 @@ public class CollectionSelectionDialog extends JDialog {
     for (int i=0; i<targetListModel.getSize(); i++){
       resultsList.add(targetListModel.getElementAt(i));
     }// End for
-    return (Collection) resultsList;
+    return resultsList;
   }// getSelectedCollection()
 
   /** This method displays the CollectionSelectionDialog*/

@@ -189,6 +189,7 @@ public class Interpret {
 		// we have all states here
 		// we obtain all RHSes
 		SortedSet<RHS> rhses = new TreeSet<RHS>(new Comparator<RHS>() {
+      @Override
       public int compare(RHS r1, RHS r2) {
         return r1.getPatternIndex() - r2.getPatternIndex();
       }
@@ -707,7 +708,7 @@ public class Interpret {
 		}
 		Interpret interpret = new Interpret();
 		try {
-			interpret.init(new URL((String) args[0]));
+			interpret.init(new URL(args[0]));
 		} catch (MalformedURLException mue) {
 			throw new RuntimeException(mue);
 		}

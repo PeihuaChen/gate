@@ -195,7 +195,7 @@ public class ProfilePRs {
 
     prof.checkPoint("Done!");
 
-    totalDocLength = (double) totalDocLength/1024;
+    totalDocLength = totalDocLength/1024;
     Out.prln("\nTotal KBytes processed: " + (long)totalDocLength);
     Out.prln("\nMax document size in bytes: " + (long)maxDocLength +
       " (" + (long) maxDocLength/1024 + " Kb)");

@@ -50,20 +50,24 @@ public class NodeImpl implements Node, Comparable
 
   /** Returns the Id of the Node.
    */
+  @Override
   public Integer getId () { return  id; }
 
   /** Offset (will be null when the node is not anchored)
    */
+  @Override
   public Long getOffset () { return  offset; }
 
   /** String representation
    */
+  @Override
   public String toString() {
     return "NodeImpl: id=" + id + "; offset=" + offset;
   } // toString()
 
   /** Ordering
    */
+  @Override
   public int compareTo(Object o) throws ClassCastException {
     Node other = (Node) o;
     return id.compareTo(other.getId());

@@ -89,6 +89,7 @@ class SimpleMapImpl implements Map<Object, Object>,
   /**
    * return the number of elements in the map
    */
+  @Override
   public int size() {
     return count;
   } // size()
@@ -96,6 +97,7 @@ class SimpleMapImpl implements Map<Object, Object>,
   /**
    * return true if there are no elements in the map
    */
+  @Override
   public boolean isEmpty() {
     return (count == 0);
   } // isEmpty()
@@ -103,6 +105,7 @@ class SimpleMapImpl implements Map<Object, Object>,
   /**
    * Not supported. This method is here only to conform the Map interface
    */
+  @Override
   public Collection values() {
     throw new UnsupportedOperationException(
       "SimpleMapImpl.values() not implemented!");
@@ -112,6 +115,7 @@ class SimpleMapImpl implements Map<Object, Object>,
    * return the set of the keys in the map. The changes in the set DO NOT
    * affect the map.
    */
+  @Override
   public Set keySet()
   {
     HashSet s = new HashSet(size());
@@ -129,6 +133,7 @@ class SimpleMapImpl implements Map<Object, Object>,
   /**
    * clear the map
    */
+  @Override
   public void clear()
   {
     for (int i = 0; i < count; i++) {
@@ -141,6 +146,7 @@ class SimpleMapImpl implements Map<Object, Object>,
   /**
    * return true if the key is in the map
    */
+  @Override
   public boolean containsKey(Object key) {
     return (getPostionByKey(key) != -1);
   }// containsKey
@@ -148,6 +154,7 @@ class SimpleMapImpl implements Map<Object, Object>,
   /**
    * return true if the map contains that value
    */
+  @Override
   public boolean containsValue(Object value) {
     return (getPostionByValue(value) != -1);
   }// containsValue
@@ -156,6 +163,7 @@ class SimpleMapImpl implements Map<Object, Object>,
    * return the value associated with the key. If the key is
    * not in the map returns null.
    */
+  @Override
   public Object get(Object key) {
     int pos = getPostionByKey(key);
     return (pos == -1) ? null : theValues[pos];
@@ -165,6 +173,7 @@ class SimpleMapImpl implements Map<Object, Object>,
    * put a value in the map using the given key. If the key exist in the map
    * the value is replaced and the old one is returned.
    */
+  @Override
   public Object put(Object key, Object value) {
     Object gKey;
     if (key == null) {
@@ -201,6 +210,7 @@ class SimpleMapImpl implements Map<Object, Object>,
   /**
    * remove value from the map using it's key.
    */
+  @Override
   public Object remove(Object key) {
     int pos = getPostionByKey(key);
     if (pos == -1)
@@ -225,6 +235,7 @@ class SimpleMapImpl implements Map<Object, Object>,
   /**
    * put all the elements from a map
    */
+  @Override
   public void putAll(Map t)
   {
     if (t == null) {
@@ -327,24 +338,29 @@ class SimpleMapImpl implements Map<Object, Object>,
       this.value = value;
     }
 
+    @Override
     protected Object clone() {
       return new Entry(hash, key, value);
     }
 
+    @Override
     public Object getKey() {
       return key;
     }
 
+    @Override
     public Object getValue() {
       return value;
     }
 
+    @Override
     public Object setValue(Object value) {
       Object oldValue = this.value;
       this.value = value;
       return oldValue;
     }
 
+    @Override
     public boolean equals(Object o) {
       if (!(o instanceof Map.Entry))
         return false;
@@ -354,16 +370,19 @@ class SimpleMapImpl implements Map<Object, Object>,
         (value==null ? e.getValue()==null : value.equals(e.getValue()));
     }
 
+    @Override
     public int hashCode() {
       return hash ^ (key==null ? 0 : key.hashCode());
     }
 
+    @Override
     public String toString() {
       return key+"="+value;
     }
   } // Entry
 
 
+  @Override
   public Set entrySet() {
     HashSet s = new HashSet(size());
     Object v, k;
@@ -375,6 +394,7 @@ class SimpleMapImpl implements Map<Object, Object>,
   } // entrySet
 
   // Comparison and hashing
+  @Override
   public boolean equals(Object o) {
     if (!(o instanceof Map)) {
       return false;
@@ -404,6 +424,7 @@ class SimpleMapImpl implements Map<Object, Object>,
   /**
    * return the hashCode for the map
    */
+  @Override
   public int hashCode() {
     int h = 0;
     Iterator i = entrySet().iterator();
@@ -415,6 +436,7 @@ class SimpleMapImpl implements Map<Object, Object>,
   /**
    * Create a copy of the map including the data.
    */
+  @Override
   public Object clone() {
     SimpleMapImpl newMap;
     try {
@@ -433,6 +455,7 @@ class SimpleMapImpl implements Map<Object, Object>,
     return newMap;
   } // clone
 
+  @Override
   public String toString() {
     int max = size() - 1;
     StringBuffer buf = new StringBuffer();

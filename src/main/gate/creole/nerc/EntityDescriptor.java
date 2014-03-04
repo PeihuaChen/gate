@@ -73,6 +73,7 @@ public class EntityDescriptor implements Serializable{
   /** Returns a string giving the category, offsets and normalised string for
     * the entity, with no newlines.
     */
+  @Override
   public String toString(){
     return category + " " + offsets[0] + " " + offsets[1] + " " + string;
   }

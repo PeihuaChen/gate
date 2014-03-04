@@ -22,7 +22,6 @@ import gate.util.GateException;
 
 import junit.framework.*;
 import org.custommonkey.xmlunit.*;
-import org.jdom.input.DOMBuilder;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.DOMOutputter;
 import org.jdom.output.XMLOutputter;
@@ -49,6 +48,7 @@ public class TestCreoleAnnotationHandler extends TestCase {
     super(name);
   }
 
+  @Override
   public void setUp() throws Exception {
     // Initialise the GATE library and creole register
     Gate.init();
@@ -84,6 +84,7 @@ public class TestCreoleAnnotationHandler extends TestCase {
     // compare parameter elements with the same NAME, resources with the same
     // CLASS, and all other elements that have the same element name
     diff.overrideElementQualifier(new ElementNameQualifier() {
+      @Override
       public boolean qualifyForComparison(Element control, Element test) {
         if("PARAMETER".equals(control.getTagName()) && "PARAMETER".equals(test.getTagName())) {
           return control.getAttribute("NAME").equals(test.getAttribute("NAME"));

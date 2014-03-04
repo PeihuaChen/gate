@@ -204,14 +204,17 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       iter = annotsById.values().iterator();
     }
 
+    @Override
     public boolean hasNext() {
       return iter.hasNext();
     }
 
+    @Override
     public Annotation next() {
       return (lastNext = iter.next());
     }
 
+    @Override
     public void remove() {
       // this takes care of the ID index
       iter.remove();
@@ -232,11 +235,13 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   }; // AnnotationSetIterator
 
   /** Get an iterator for this set */
+  @Override
   public Iterator<Annotation> iterator() {
     return new AnnotationSetIterator();
   }
 
   /** Remove an element from this set. */
+  @Override
   public boolean remove(Object o) throws ClassCastException {
     Annotation a = (Annotation)o;
     boolean wasPresent = removeFromIdIndex(a);
@@ -294,11 +299,13 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   } // removeFromOffsetIndex(a)
 
   /** The size of this set */
+  @Override
   public int size() {
     return annotsById.size();
   }
 
   /** Find annotations by id */
+  @Override
   public Annotation get(Integer id) {
     return annotsById.get(id);
   } // get(id)
@@ -308,6 +315,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    *
    * @return an ImmutableAnnotationSet, empty or not
    */
+  @Override
   public AnnotationSet get() {
     if (annotsById.isEmpty()) return emptyAnnotationSet;
     return new ImmutableAnnotationSetImpl(doc, annotsById.values());
@@ -318,6 +326,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    *
    * @return an ImmutableAnnotationSet
    */
+  @Override
   public AnnotationSet get(String type) {
     if(annotsByType == null) indexByType();
     AnnotationSet byType = annotsByType.get(type);
@@ -331,6 +340,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    *
    * @return an ImmutableAnnotationSet
    */
+  @Override
   public AnnotationSet get(Set<String> types) throws ClassCastException {
     if(annotsByType == null) indexByType();
     Iterator<String> iter = types.iterator();
@@ -375,6 +385,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * @return An annotation set containing only those annotations with the given
    *         name and which have the specified set of feature-value pairs.
    */
+  @Override
   public AnnotationSet get(String type, FeatureMap constraints) {
     if(annotsByType == null) indexByType();
     AnnotationSet typeSet = get(type);
@@ -395,6 +406,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   } // get(type, constraints)
 
   /** Select annotations by type and feature names */
+  @Override
   public AnnotationSet get(String type, Set featureNames) {
     if(annotsByType == null) indexByType();
     AnnotationSet typeSet = null;
@@ -427,6 +439,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * positional index doesn't exist it is created. If there are no nodes at or
    * beyond the offset param then it will return an empty annotationset.
    */
+  @Override
   public AnnotationSet get(Long offset) {
     if(annotsByStartNode == null) indexByStartOffset();
     // find the next node at or after offset; get the annots starting
@@ -474,6 +487,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * @return a list of annotations ordered by increasing start offset. If a positional
    * index does not exist, it is created.
    */
+  @Override
   public List<Annotation> inDocumentOrder() {
     if(annotsByStartNode == null) indexByStartOffset();
     Collection<Object> values = nodesByOffset.values();
@@ -498,6 +512,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    *
    * @return an ImmutableAnnotationSet
    */
+  @Override
   public AnnotationSet get(Long startOffset, Long endOffset) {
     return get(null, startOffset, endOffset);
   } // get(startOfset, endOffset)
@@ -545,6 +560,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * <li>OR</li>
    * <li>start at a position between the start and the end offsets</li>
    */
+  @Override
   public AnnotationSet get(String neededType, Long startOffset, Long endOffset) {
     if(annotsByStartNode == null) indexByStartOffset();
     List<Annotation> annotationsToAdd = new ArrayList<Annotation>();
@@ -614,6 +630,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    *          annotation types will be returned.
    * @return annotations of the given type that completely span the range.
    */
+  @Override
   public AnnotationSet getCovering(String neededType, Long startOffset, Long endOffset) {
     //check the range
     if(endOffset < startOffset) return emptyAnnotationSet;
@@ -659,6 +676,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   } // get(type, startOfset, endOffset)
 
   /** Select annotations by type, features and offset */
+  @Override
   public AnnotationSet get(String type, FeatureMap constraints, Long offset) {
     // select by offset
     AnnotationSet nextAnnots = get(offset);
@@ -673,6 +691,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * >= <code>startOffset</code> and whose end position is &lt;= 
    * <code>endOffset</code>.
    */
+  @Override
   public AnnotationSet getContained(Long startOffset, Long endOffset) {
     // the result will include all the annotations that either:
     // start at a position between the start and end before the end
@@ -710,6 +729,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   } // get(startOfset, endOffset)
 
   /** Get the node with the smallest offset */
+  @Override
   public Node firstNode() {
     indexByStartOffset();
     if(nodesByOffset.isEmpty())
@@ -718,6 +738,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   } // firstNode
 
   /** Get the node with the largest offset */
+  @Override
   public Node lastNode() {
     indexByStartOffset();
     if(nodesByOffset.isEmpty())
@@ -729,6 +750,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * Get the first node that is relevant for this annotation set and which has
    * the offset larger than the one of the node provided.
    */
+  @Override
   public Node nextNode(Node node) {
     indexByStartOffset();
     return (Node)nodesByOffset.getNextOf(new Long(
@@ -757,6 +779,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * sets may lead to undefined behaviour. If in any doubt use the Long based add
    * method instead of this one.</B>
    */
+  @Override
   public Integer add(Node start, Node end, String type, FeatureMap features) {
     // the id of the new annotation
     Integer id = doc.getNextAnnotationId();
@@ -767,6 +790,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   } // add(Node, Node, String, FeatureMap)
 
   /** Add an existing annotation. Returns true when the set is modified. */
+  @Override
   public boolean add(Annotation a) throws ClassCastException {
     Object oldValue = annotsById.put(a.getId(), a);
     if(annotsByType != null) addToTypeIndex(a);
@@ -792,6 +816,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * @return <tt>true</tt> if the set has been modified as a result of this
    *         call.
    */
+  @Override
   public boolean addAll(Collection<? extends Annotation> c) {
     Iterator<? extends Annotation> annIter = c.iterator();
     boolean changed = false;
@@ -864,6 +889,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
 
 
   /** Create and add an annotation and return its id */
+  @Override
   public Integer add(Long start, Long end, String type, FeatureMap features)
           throws InvalidOffsetException {
     Node[] nodes = getNodes(start,end);
@@ -875,6 +901,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * Create and add an annotation from database read data In this case the id is
    * already known being previously fetched from the database
    */
+  @Override
   public void add(Integer id, Long start, Long end, String type,
           FeatureMap features) throws InvalidOffsetException {
     Node[] nodes = getNodes(start,end);
@@ -1107,11 +1134,13 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   } // edit(start,end,replacement)
 
   /** Get the name of this set. */
+  @Override
   public String getName() {
     return name;
   }
 
   /** Get the document this set is attached to. */
+  @Override
   public Document getDocument() {
     return doc;
   }
@@ -1120,6 +1149,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * Get a set of java.lang.String objects representing all the annotation types
    * present in this annotation set.
    */
+  @Override
   public Set<String> getAllTypes() {
     indexByType();
     return Collections.unmodifiableSet(annotsByType.keySet());
@@ -1149,10 +1179,12 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * @return a clone of this set.
    * @throws CloneNotSupportedException
    */
+  @Override
   public Object clone() throws CloneNotSupportedException {
     return super.clone();
   }
 
+  @Override
   public synchronized void removeAnnotationSetListener(AnnotationSetListener l) {
     if(annotationSetListeners != null && annotationSetListeners.contains(l)) {
       Vector<AnnotationSetListener> v = (Vector<AnnotationSetListener>)annotationSetListeners.clone();
@@ -1161,6 +1193,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     }
   }
 
+  @Override
   public synchronized void addAnnotationSetListener(AnnotationSetListener l) {
     Vector<AnnotationSetListener> v = annotationSetListeners == null
             ? new Vector<AnnotationSetListener>(2)
@@ -1191,6 +1224,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     }
   }
 
+  @Override
   public synchronized void removeGateListener(GateListener l) {
     if(gateListeners != null && gateListeners.contains(l)) {
       Vector<GateListener> v = (Vector<GateListener>)gateListeners.clone();
@@ -1199,6 +1233,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     }
   }
 
+  @Override
   public synchronized void addGateListener(GateListener l) {
     Vector<GateListener> v = gateListeners == null ? new Vector<GateListener>(2) : (Vector<GateListener>)gateListeners
             .clone();
@@ -1289,6 +1324,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     annotations = null;
   }
   
+  @Override
   public RelationSet getRelations() {
     if (relations == null) {
       relations = new RelationSet(this);

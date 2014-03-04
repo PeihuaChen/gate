@@ -53,6 +53,7 @@ public class ExtensionFileFilter extends javax.swing.filechooser.FileFilter
    *
    * @param f file to test with this filter
    */
+  @Override
   public boolean accept(File f){
     String name = f.getName();
     if(f.isDirectory()) return true;
@@ -67,6 +68,7 @@ public class ExtensionFileFilter extends javax.swing.filechooser.FileFilter
    * Returns the user-frielndly description for the files, e.g. "Text files"
    *
    */
+  @Override
   public String getDescription() {
     return (description == null) ? toString() : description;
   }
@@ -99,6 +101,7 @@ public class ExtensionFileFilter extends javax.swing.filechooser.FileFilter
   /**
    * @return a string representation of this file filter.
    */
+  @Override
   public String toString() {
     return "Filter for " + Arrays.toString(acceptedExtensions.toArray());
   }

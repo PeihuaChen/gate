@@ -82,6 +82,7 @@ public class NekoHtmlDocumentFormat extends TextualDocumentFormat {
   /**
    * We support repositioning info for HTML files.
    */
+  @Override
   public Boolean supportsRepositioning() {
     return Boolean.TRUE;
   }
@@ -89,6 +90,7 @@ public class NekoHtmlDocumentFormat extends TextualDocumentFormat {
   /**
    * Old-style unpackMarkup, without repositioning info.
    */
+  @Override
   public void unpackMarkup(Document doc) throws DocumentFormatException {
     unpackMarkup(doc, null, null);
   }
@@ -109,6 +111,7 @@ public class NekoHtmlDocumentFormat extends TextualDocumentFormat {
    *          recomended because the parser will report errors corectlly
    *          if the document is not well formed.
    */
+  @Override
   public void unpackMarkup(Document doc, RepositioningInfo repInfo,
           RepositioningInfo ampCodingInfo) throws DocumentFormatException {
     if((doc == null)
@@ -120,6 +123,7 @@ public class NekoHtmlDocumentFormat extends TextualDocumentFormat {
 
     // Create a status listener
     StatusListener statusListener = new StatusListener() {
+      @Override
       public void statusChanged(String text) {
         // This is implemented in DocumentFormat.java and inherited here
         fireStatusChanged(text);
@@ -281,6 +285,7 @@ public class NekoHtmlDocumentFormat extends TextualDocumentFormat {
   }
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     // Register HTML mime type
     MimeType mime = new MimeType("text", "html");

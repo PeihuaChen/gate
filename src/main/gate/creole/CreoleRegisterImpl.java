@@ -167,10 +167,12 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   }
 
   /** Get the list of CREOLE directory URLs. */
+  @Override
   public Set<URL> getDirectories() {
     return Collections.unmodifiableSet(directories);
   } // getDirectories
 
+  @Override
   public void registerComponent(Class<? extends Resource> resourceClass) throws GateException {
     URL creoleFileUrl = resourceClass.getResource("/gate/creole/CreoleRegisterImpl.class");
     Gate.addKnownPlugin(creoleFileUrl);
@@ -383,6 +385,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * resources are described by the <TT>creole.xml</TT> file in
    * <TT>resources/creole</TT>.
    */
+  @Override
   public void registerBuiltins() throws GateException {
 
     try {
@@ -405,6 +408,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * <P>
    * If Java allowed class methods in interfaces this would be static.
    */
+  @Override
   public File createCreoleDirectoryFile(File directoryFile, Set jarFileNames) {
     // //////////////////
     // dump xml header and comment header and <CREOLE-DIRECTORY> into dirfile
@@ -420,6 +424,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * the register, and a list of tool types. The key is the resource type, the
    * value its data.
    */
+  @Override
   public ResourceData put(String key, ResourceData rd) {
 
     if(super.containsKey(key)) {      
@@ -493,6 +498,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    *
    * @param directory
    */
+  @Override
   public void removeDirectory(URL directory) {
     int prCount = 0;
     
@@ -539,6 +545,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * Overide HashMap's delete method to update the lists of types in the
    * register.
    */
+  @Override
   public ResourceData remove(Object key) {
     ResourceData rd = get(key);
     if(rd == null) return null;
@@ -587,6 +594,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * Overide HashMap's clear to update the list of LR types in the register, and
    * remove all resources and forgets all directories.
    */
+  @Override
   public void clear() {
     lrTypes.clear();
     prTypes.clear();
@@ -598,36 +606,43 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   } // clear()
 
   /** Get the list of types of LR in the register. */
+  @Override
   public Set<String> getLrTypes() {
     return Collections.unmodifiableSet(lrTypes);
   }
 
   /** Get the list of types of PR in the register. */
+  @Override
   public Set<String> getPrTypes() {
     return Collections.unmodifiableSet(prTypes);
   }
 
   /** Get the list of types of VR in the register. */
+  @Override
   public Set<String> getVrTypes() {
     return Collections.unmodifiableSet(new HashSet<String>(vrTypes));
   }
 
   /** Get the list of types of Controller in the register. */
+  @Override
   public Set<String> getControllerTypes() {
     return Collections.unmodifiableSet(controllerTypes);
   }
 
   /** Get the list of types of TOOL resources in the register. */
+  @Override
   public Set<String> getToolTypes() {
     return Collections.unmodifiableSet(toolTypes);
   }
 
   /** Get the list of types of packaged application resources in the register. */
+  @Override
   public Set<String>getApplicationTypes() {
     return Collections.unmodifiableSet(applicationTypes);
   }
 
   /** Get a list of all instantiations of LR in the register. */
+  @Override
   public List<LanguageResource> getLrInstances() {
     Set<String> lrTypeSet = getLrTypes();
     List<LanguageResource> instances = new ArrayList<LanguageResource>();
@@ -641,6 +656,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   } // getLrInstances()
 
   /** Get a list of all instantiations of PR in the register. */
+  @Override
   public List<ProcessingResource> getPrInstances() {
     Set<String> prTypeSet = getPrTypes();
     List<ProcessingResource> instances = new ArrayList<ProcessingResource>();
@@ -655,6 +671,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   } // getPrInstances()
 
   /** Get a list of all instantiations of VR in the register. */
+  @Override
   public List<VisualResource> getVrInstances() {
     Set<String> vrTypeSet = getVrTypes();
     List<VisualResource> instances = new ArrayList<VisualResource>();
@@ -668,6 +685,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     return Collections.unmodifiableList(instances);
   } // getVrInstances()
 
+  @Override
   public List<LanguageResource> getLrInstances(String resourceTypeName) {
     ResourceData resData = get(resourceTypeName);
     if(resData == null) return Collections.emptyList();
@@ -676,6 +694,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       LanguageResource.class);
   } // getLrInstances
 
+  @Override
   public List<ProcessingResource> getPrInstances(String resourceTypeName) {
     ResourceData resData = get(resourceTypeName);
     if(resData == null) return Collections.emptyList();
@@ -684,6 +703,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       .getInstantiations(), ProcessingResource.class);
   } // getPrInstances
 
+  @Override
   public List<VisualResource> getVrInstances(String resourceTypeName) {
     ResourceData resData = get(resourceTypeName);
     if(resData == null) return Collections.emptyList();
@@ -693,40 +713,48 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   } // getVrInstances
 
   /** Get a list of all non-private instantiations of LR in the register. */
+  @Override
   public List<LanguageResource> getPublicLrInstances() {
     return Collections.unmodifiableList(getPublics(getLrInstances()));
   }// getPublicLrInstances()
 
   /** Get a list of all non-private instantiations of PR in the register. */
+  @Override
   public List<ProcessingResource> getPublicPrInstances() {
     return Collections.unmodifiableList(getPublics(getPrInstances()));
   }// getPublicPrInstances()
 
   /** Get a list of all non-private instantiations of VR in the register. */
+  @Override
   public List<VisualResource> getPublicVrInstances() {
     return Collections.unmodifiableList(getPublics(getVrInstances()));
   }// getPublicVrInstances()
 
   /** Get a list of all non-private types of LR in the register. */
+  @Override
   public List<String> getPublicLrTypes() {
     return Collections.unmodifiableList(getPublicTypes(getLrTypes()));
   }// getPublicLrTypes()
 
   /** Get a list of all non-private types of PR in the register. */
+  @Override
   public List<String> getPublicPrTypes() {
     return Collections.unmodifiableList(getPublicTypes(getPrTypes()));
   }// getPublicPrTypes()
 
   /** Get a list of all non-private types of VR in the register. */
+  @Override
   public List<String> getPublicVrTypes() {
     return Collections.unmodifiableList(getPublicTypes(vrTypes));
   }// getPublicVrTypes()
 
   /** Get a list of all non-private types of controller in the register. */
+  @Override
   public List<String> getPublicControllerTypes() {
     return Collections.unmodifiableList(getPublicTypes(getControllerTypes()));
   }// getPublicPrTypes()
 
+  @Override
   public List<Resource> getAllInstances(String type) throws GateException {
     return getAllInstances(type, false);
   }
@@ -782,6 +810,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * @return a list with Strings representing the large VRs for the
    *         resourceClassName
    */
+  @Override
   public List<String> getLargeVRsForResource(String resourceClassName) {
     return getVRsForResource(resourceClassName, ResourceData.LARGE_GUI);
   }// getLargeVRsForResource()
@@ -798,6 +827,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * @return a list with Strings representing the large VRs for the
    *         resourceClassName
    */
+  @Override
   public List<String> getSmallVRsForResource(String resourceClassName) {
     return getVRsForResource(resourceClassName, ResourceData.SMALL_GUI);
   }// getSmallVRsForResource
@@ -876,6 +906,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    *
    * @return a list with all VRs that can display all annotation types
    */
+  @Override
   public List<String> getAnnotationVRs() {
     LinkedList<String> responseList = new LinkedList<String>();
     String defaultVR = null;
@@ -917,6 +948,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * are able to display/edit a given annotation type The default VR will be the
    * first in the returned list.
    */
+  @Override
   public List<String> getAnnotationVRs(String annotationType) {
     if(annotationType == null)
       return Collections.unmodifiableList(new ArrayList<String>());
@@ -961,6 +993,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   /**
    * Renames an existing resource.
    */
+  @Override
   public void setResourceName(Resource res, String newName) {
     String oldName = res.getName();
     res.setName(newName);
@@ -971,6 +1004,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * Returns a list of strings representing annotations types for which there
    * are custom viewers/editor registered.
    */
+  @Override
   public List<String> getVREnabledAnnotationTypes() {
     LinkedList<String> responseList = new LinkedList<String>();
     Iterator<String> vrIterator = vrTypes.iterator();
@@ -1020,6 +1054,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     return Collections.unmodifiableList(publics);
   }// getPublicTypes
 
+  @Override
   public synchronized void removeCreoleListener(CreoleListener l) {
     if(creoleListeners != null && creoleListeners.contains(l)) {
       Vector<CreoleListener> v = (Vector<CreoleListener>)creoleListeners.clone();
@@ -1028,6 +1063,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     }
   }
 
+  @Override
   public synchronized void addCreoleListener(CreoleListener l) {
     Vector<CreoleListener> v =
       creoleListeners == null ? new Vector<CreoleListener>(2) : (Vector<CreoleListener>)creoleListeners.clone();
@@ -1140,26 +1176,32 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     }
   }
 
+  @Override
   public void resourceLoaded(CreoleEvent e) {
     fireResourceLoaded(e);
   }
 
+  @Override
   public void resourceUnloaded(CreoleEvent e) {
     fireResourceUnloaded(e);
   }
 
+  @Override
   public void resourceRenamed(Resource resource, String oldName, String newName) {
     fireResourceRenamed(resource, oldName, newName);
   }
 
+  @Override
   public void datastoreOpened(CreoleEvent e) {
     fireDatastoreOpened(e);
   }
 
+  @Override
   public void datastoreCreated(CreoleEvent e) {
     fireDatastoreCreated(e);
   }
 
+  @Override
   public void datastoreClosed(CreoleEvent e) {
     fireDatastoreClosed(e);
   }
@@ -1181,10 +1223,12 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       this.realType = realType;
     }
 
+    @Override
     public T get(int i) {
       return realType.cast(backingList.get(i));
     }
 
+    @Override
     public int size() {
       return backingList.size();
     }

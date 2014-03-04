@@ -58,6 +58,7 @@ public class SimpleFeatureMapImpl
     * @return <code>true</code> if aFeatureMap is incuded in <b>this</b> obj.
     * and <code>false</code> if not.
     */
+  @Override
   public boolean subsumes(FeatureMap aFeatureMap){
     // null is included in everything
     if (aFeatureMap == null) return true;
@@ -124,6 +125,7 @@ public class SimpleFeatureMapImpl
    * @return <code>true</code> if <b>this</b> includes aFeatureMap
    * and <code>false</code> if not.
    */
+  @Override
   public boolean subsumes(Ontology ontologyLR, FeatureMap aFeatureMap) {
 
     if (ontologyLR == null) {
@@ -246,6 +248,7 @@ public class SimpleFeatureMapImpl
     * from aFeatureMap are included in <b>this</b> obj, or <code>false</code>
     * otherwise.
     */
+  @Override
   public boolean subsumes(FeatureMap aFeatureMap, Set aFeatureNamesSet){
     // This means that all features are taken into consideration.
     if (aFeatureNamesSet == null) return this.subsumes(aFeatureMap);
@@ -311,6 +314,7 @@ public class SimpleFeatureMapImpl
    * Overriden to fire events, so that the persistent objects
    *  can keep track of what's updated
    */
+  @Override
   public Object put(Object key, Object value) {
     Object result = super.put(key, value);
     this.fireMapUpdatedEvent();
@@ -321,12 +325,14 @@ public class SimpleFeatureMapImpl
    * Overriden to fire events, so that the persistent objects
    *  can keep track of what's updated
    */
+  @Override
   public Object remove(Object key) {
     Object result = super.remove(key);
     this.fireMapUpdatedEvent();
     return result;
   } // remove
 
+  @Override
   public void clear() {
     super.clear();
     //tell the world if they're listening
@@ -334,10 +340,12 @@ public class SimpleFeatureMapImpl
   } // clear
 
   // Views
+  @Override
   public Object clone() {
     return super.clone();
   } //clone
 
+  @Override
   public boolean equals(Object o) {
     return super.equals(o);
   } // equals
@@ -349,6 +357,7 @@ public class SimpleFeatureMapImpl
   /**
    * Removes a gate listener
    */
+  @Override
   public synchronized void removeFeatureMapListener(FeatureMapListener l) {
     if (mapListeners != null && mapListeners.contains(l)) {
       Vector v = (Vector) mapListeners.clone();
@@ -359,6 +368,7 @@ public class SimpleFeatureMapImpl
   /**
    * Adds a gate listener
    */
+  @Override
   public synchronized void addFeatureMapListener(FeatureMapListener l) {
     Vector v = mapListeners == null ? new Vector(2) : (Vector)mapListeners.clone();
     if (!v.contains(l)) {

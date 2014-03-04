@@ -33,6 +33,7 @@ extends AbstractGazetteer implements OntoGazetteer {
    * Sets the class name of the linear gazetteer to be loaded.
    * @param name class name of a Gazetteer
    */
+  @Override
   public void setGazetteerName(String name) {
     gazetteerName = name;
   }
@@ -41,6 +42,7 @@ extends AbstractGazetteer implements OntoGazetteer {
    * Gets the class name of the linear gazetteer
    * @return the class name of the linear gazetteer
    */
+  @Override
   public String getGazetteerName() {
     return gazetteerName;
   }
@@ -49,6 +51,7 @@ extends AbstractGazetteer implements OntoGazetteer {
    * Sets the URL of the mapping definition
    * @param url the URL of the mapping definition
    */
+  @Override
   public void setMappingURL(java.net.URL url) {
     mappingURL = url;
   }
@@ -57,6 +60,7 @@ extends AbstractGazetteer implements OntoGazetteer {
    * Gets the URL of the mapping definition
    * @return the URL of the mapping definition
    */
+  @Override
   public java.net.URL getMappingURL() {
     return mappingURL;
   }
@@ -65,6 +69,7 @@ extends AbstractGazetteer implements OntoGazetteer {
    * Gets the linear gazetteer
    * @return the linear gazetteer
    */
+  @Override
   public Gazetteer getGazetteer(){
     return gaz;
   }
@@ -73,6 +78,7 @@ extends AbstractGazetteer implements OntoGazetteer {
    * Sets the linear gazetteer
    * @param gaze the linear gazetteer to be associated with this onto gazetteer.
    */
+  @Override
   public void setGazetteer(Gazetteer gaze) {
     gaz = gaze;
   }
@@ -80,6 +86,7 @@ extends AbstractGazetteer implements OntoGazetteer {
   /**Overrides {@link gate.creole.gazetteer.Gazetteer}
    * and retrieves the linear definition from the underlying
    * linear gazetteer*/
+  @Override
   public LinearDefinition getLinearDefinition() {
     if (null == gaz){
       throw new gate.util.GateRuntimeException(

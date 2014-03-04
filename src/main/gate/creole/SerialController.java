@@ -25,7 +25,6 @@ import gate.creole.metadata.*;
 import gate.event.*;
 import gate.util.*;
 import gate.util.profile.Profiler;
-import gate.util.Out;
 
 /**
  * Execute a list of PRs serially.
@@ -62,6 +61,7 @@ public class SerialController extends AbstractController implements
    * Returns all the {@link gate.ProcessingResource}s contained by thisFeature
    * controller as an unmodifiable list.
    */
+  @Override
   public Collection getPRs() {
     return Collections.unmodifiableList(prList);
   }
@@ -77,6 +77,7 @@ public class SerialController extends AbstractController implements
    *           if the <tt>setPRs</tt> method is not supported by this
    *           controller.
    */
+  @Override
   public void setPRs(Collection prs) {
     prList.clear();
     Iterator prIter = prs.iterator();
@@ -134,6 +135,7 @@ public class SerialController extends AbstractController implements
   }
 
   /** Run the Processing Resources in sequence. */
+  @Override
   protected void executeImpl() throws ExecutionException {
     // check all the PRs have the right parameters
     checkParameters();
@@ -249,6 +251,7 @@ public class SerialController extends AbstractController implements
   /**
    * Cleans the internal data and prepares this object to be collected
    */
+  @Override
   public void cleanup() {
     //stop listening to Creole events.
     Gate.getCreoleRegister().removeCreoleListener(this);
@@ -290,6 +293,7 @@ public class SerialController extends AbstractController implements
    * the controller itself, then recursively duplicate its contained
    * PRs and add these duplicates to the copy.
    */
+  @Override
   public Resource duplicate(Factory.DuplicationContext ctx)
           throws ResourceInstantiationException {
     // duplicate this controller in the default way - this handles
@@ -313,9 +317,11 @@ public class SerialController extends AbstractController implements
   /** A proxy for status events */
   protected StatusListener sListener;
 
+  @Override
   public void resourceLoaded(CreoleEvent e) {
   }
 
+  @Override
   public void resourceUnloaded(CreoleEvent e) {
     // remove all occurences of the resource from this controller
     if(e.getResource() instanceof ProcessingResource)
@@ -329,7 +335,7 @@ public class SerialController extends AbstractController implements
     for(int i = 0; i < prList.size(); i++) {
       ProcessingResource aPr = (ProcessingResource)prList.get(i);
       ResourceData rData =
-        (ResourceData)Gate.getCreoleRegister().get(aPr.getClass().getName());
+        Gate.getCreoleRegister().get(aPr.getClass().getName());
       if(rData != null) {
         Iterator rtParamDisjIter =
           rData.getParameterList().getRuntimeParameters().iterator();
@@ -354,15 +360,19 @@ public class SerialController extends AbstractController implements
     }
   }
 
+  @Override
   public void resourceRenamed(Resource resource, String oldName, String newName) {
   }
 
+  @Override
   public void datastoreOpened(CreoleEvent e) {
   }
 
+  @Override
   public void datastoreCreated(CreoleEvent e) {
   }
 
+  @Override
   public void datastoreClosed(CreoleEvent e) {
   }
 

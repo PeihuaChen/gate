@@ -685,14 +685,17 @@ public class PluginUpdateManager extends JDialog {
         .setCellEditor(new JTextPaneTableCellRenderer());
 
     tblAvailable.addMouseListener(new MouseAdapter() {
+      @Override
       public void mousePressed(MouseEvent e) {
         process(e);
       }
 
+      @Override
       public void mouseReleased(MouseEvent e) {
         process(e);
       }
 
+      @Override
       public void mouseClicked(MouseEvent e) {
         process(e);
       }
@@ -767,6 +770,7 @@ public class PluginUpdateManager extends JDialog {
             new JDialog(PluginUpdateManager.this, "Plugin Repository Info",
                 true);
         options.addPropertyChangeListener(new PropertyChangeListener() {
+          @Override
           public void propertyChange(PropertyChangeEvent e) {
             if (options.getValue().equals(JOptionPane.UNINITIALIZED_VALUE)) return;
             String prop = e.getPropertyName();

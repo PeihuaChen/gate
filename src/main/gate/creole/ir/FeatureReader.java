@@ -25,6 +25,7 @@ public class FeatureReader implements PropertyReader {
     this.featureName = featureName;
   }
 
+  @Override
   public String getPropertyValue(Document doc) {
     if(doc.getFeatures() != null){
       Object value = doc.getFeatures().get(featureName);

@@ -76,6 +76,7 @@ public class RepositioningInfo extends ArrayList {
     } // getCurrentLength
 
     /** For debug purposes */
+    @Override
     public String toString() {
       return "("+m_origPos+","+m_origLength+","
                 +m_currPos+","+m_currLength+")";

@@ -107,10 +107,12 @@ public class ComparablePredicateTest extends TestCase {
 
     public class ComparablePredicateImpl extends ComparablePredicate {
 
+        @Override
         public String getOperator() {
             return GREATER;
         }
 
+        @Override
         public boolean doMatch(Object featureValue) throws JapeException {
             return false;
         }

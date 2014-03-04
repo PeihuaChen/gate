@@ -19,7 +19,6 @@ import gate.Annotation;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.*;

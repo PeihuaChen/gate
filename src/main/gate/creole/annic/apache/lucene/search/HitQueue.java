@@ -23,6 +23,7 @@ final class HitQueue extends PriorityQueue {
     initialize(size);
   }
 
+  @Override
   protected final boolean lessThan(Object a, Object b) {
     ScoreDoc hitA = (ScoreDoc)a;
     ScoreDoc hitB = (ScoreDoc)b;

@@ -53,6 +53,7 @@ import gate.util.GateRuntimeException;
 public class CorpusEditor extends AbstractVisualResource
   implements CorpusListener {
 
+  @Override
   public Resource init(){
     initLocalData();
     initGuiComponents();
@@ -86,17 +87,21 @@ public class CorpusEditor extends AbstractVisualResource
       // drag and drop to move up and down the table rows
       // import selected documents from the resources tree
       String source = "";
+      @Override
       public int getSourceActions(JComponent c) {
         return MOVE;
       }
+      @Override
       protected Transferable createTransferable(JComponent c) {
         int selectedRows[] = docTable.getSelectedRows();
         Arrays.sort(selectedRows);
         return new StringSelection("CorpusEditor"
           + Arrays.toString(selectedRows));
       }
+      @Override
       protected void exportDone(JComponent c, Transferable data, int action) {
       }
+      @Override
       public boolean canImport(JComponent c, DataFlavor[] flavors) {
         for(DataFlavor flavor : flavors) {
           if(DataFlavor.stringFlavor.equals(flavor)) {
@@ -105,6 +110,7 @@ public class CorpusEditor extends AbstractVisualResource
         }
         return false;
       }
+      @Override
       public boolean importData(JComponent c, Transferable t) {
         if (!canImport(c, t.getTransferDataFlavors())) {
           return false;
@@ -145,6 +151,7 @@ public class CorpusEditor extends AbstractVisualResource
             }
             // select the moved/already existing documents
             SwingUtilities.invokeLater(new Runnable() {
+              @Override
               public void run() {
                 docTable.clearSelection();
                 for (String documentName : documentsNames) {
@@ -175,7 +182,7 @@ public class CorpusEditor extends AbstractVisualResource
                 // the user dragged the selected rows on themselves, do nothing
                 return false;
               }
-              documents.add((Document) corpus.get(
+              documents.add(corpus.get(
                 docTable.rowViewToModel(Integer.valueOf(row))));
               if (Integer.valueOf(row) < initialInsertion) { insertion--; }
             }
@@ -241,12 +248,15 @@ public class CorpusEditor extends AbstractVisualResource
     // mouse double-click to open the document
     // context menu to get the actions for the selection
     docTable.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         processMouseEvent(e);
       }
+      @Override
       public void mousePressed(MouseEvent e) {
         if(e.isPopupTrigger()) { processMouseEvent(e); }
       }
+      @Override
       public void mouseReleased(MouseEvent e) {
         if(e.isPopupTrigger()) { processMouseEvent(e); }
       }
@@ -275,6 +285,7 @@ public class CorpusEditor extends AbstractVisualResource
 
     // Enter key opens the selected documents
     docTable.addKeyListener(new KeyAdapter() {
+      @Override
       public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
           openDocumentsAction.actionPerformed(null);
@@ -284,6 +295,7 @@ public class CorpusEditor extends AbstractVisualResource
 
     docTable.getSelectionModel().addListSelectionListener(
       new ListSelectionListener() {
+        @Override
         public void valueChanged(ListSelectionEvent e) {
           // enable/disable buttons according to the selection
           removeDocumentsAction.setEnabled(docTable.getSelectedRowCount() > 0);
@@ -296,31 +308,39 @@ public class CorpusEditor extends AbstractVisualResource
       });
 
     Gate.getCreoleRegister().addCreoleListener(new CreoleListener() {
+      @Override
       public void resourceLoaded(CreoleEvent e) {
         if (e.getResource() instanceof Document) {
           documentsLoadedCount++;
           changeMessage();
         }
       }
+      @Override
       public void resourceUnloaded(CreoleEvent e) {
         if (e.getResource() instanceof Document) {
           documentsLoadedCount--;
           changeMessage();
         }
       }
+      @Override
       public void datastoreOpened(CreoleEvent e) { /* do nothing */ }
+      @Override
       public void datastoreCreated(CreoleEvent e) { /* do nothing */ }
+      @Override
       public void datastoreClosed(CreoleEvent e) { /* do nothing */ }
+      @Override
       public void resourceRenamed(Resource resource, String oldName,
                                   String newName) { /* do nothing */ }
     });
   }
 
+  @Override
   public void cleanup(){
     super.cleanup();
     corpus = null;
   }
 
+  @Override
   public void setTarget(Object target){
     if(corpus != null && corpus != target){
       //we already had a different corpus
@@ -335,15 +355,18 @@ public class CorpusEditor extends AbstractVisualResource
     corpus.addCorpusListener(this);
     docTableModel.dataChanged();
     SwingUtilities.invokeLater(new Runnable(){
+      @Override
       public void run(){
         docTableModel.fireTableDataChanged();
       }
     });
   }
 
+  @Override
   public void documentAdded(final CorpusEvent e) {
     docTableModel.dataChanged();
     SwingUtilities.invokeLater(new Runnable(){
+      @Override
       public void run(){
         changeMessage();
         docTableModel.fireTableRowsInserted(e.getDocumentIndex(),
@@ -352,9 +375,11 @@ public class CorpusEditor extends AbstractVisualResource
     });
   }
 
+  @Override
   public void documentRemoved(final CorpusEvent e) {
     docTableModel.dataChanged();
     SwingUtilities.invokeLater(new Runnable(){
+      @Override
       public void run(){
         changeMessage();
         docTableModel.fireTableRowsDeleted(e.getDocumentIndex(), 
@@ -381,14 +406,17 @@ public class CorpusEditor extends AbstractVisualResource
       oldDocs.clear();
     }
     
+    @Override
     public int getColumnCount() {
       return COLUMN_COUNT;
     }
 
+    @Override
     public int getRowCount() {
       return documentNames.size();
     }
 
+    @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
       //invalid indexes might appear when update events are slow to act 
       if(rowIndex < 0 || rowIndex >= documentNames.size() || 
@@ -439,6 +467,7 @@ public class CorpusEditor extends AbstractVisualResource
       setIcon(MainFrame.getIcon("document"));
     }
     
+    @Override
     public Component getListCellRendererComponent(JList list, Object value,
             int index, boolean isSelected, boolean cellHasFocus) {
       // prepare the renderer
@@ -474,6 +503,7 @@ public class CorpusEditor extends AbstractVisualResource
       putValue(MNEMONIC_KEY, KeyEvent.VK_UP);
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       int[] rowsTable = docTable.getSelectedRows();
       int[] rowsCorpus = new int[rowsTable.length];
@@ -487,7 +517,7 @@ public class CorpusEditor extends AbstractVisualResource
           //serial corpus does not load the document on remove, so we need
           //to load the document explicitly
           boolean wasLoaded = corpus.isDocumentLoaded(rowsCorpus[i]);
-          Document doc = (Document)corpus.get(rowsCorpus[i]);
+          Document doc = corpus.get(rowsCorpus[i]);
           corpus.remove(rowsCorpus[i]);
           rowsCorpus[i] = rowsCorpus[i] - 1;
           corpus.add(rowsCorpus[i], doc);
@@ -503,6 +533,7 @@ public class CorpusEditor extends AbstractVisualResource
       final int[] selectedRowsCorpus = new int[rowsCorpus.length];
       System.arraycopy(rowsCorpus, 0, selectedRowsCorpus, 0, rowsCorpus.length);
       SwingUtilities.invokeLater(new Runnable(){
+        @Override
         public void run(){
           docTable.clearSelection();
           for(int i = 0; i < selectedRowsCorpus.length; i++){
@@ -522,6 +553,7 @@ public class CorpusEditor extends AbstractVisualResource
       putValue(MNEMONIC_KEY, KeyEvent.VK_DOWN);
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       int[] rowsTable = docTable.getSelectedRows();
       int[] rowsCorpus = new int[rowsTable.length];
@@ -535,7 +567,7 @@ public class CorpusEditor extends AbstractVisualResource
           //serial corpus does not load the document on remove, so we need
           //to load the document explicitly
           boolean wasLoaded = corpus.isDocumentLoaded(rowsCorpus[i]);
-          Document doc = (Document)corpus.get(rowsCorpus[i]);
+          Document doc = corpus.get(rowsCorpus[i]);
           corpus.remove(rowsCorpus[i]);
           rowsCorpus[i]++;
           corpus.add(rowsCorpus[i], doc);
@@ -551,6 +583,7 @@ public class CorpusEditor extends AbstractVisualResource
       final int[] selectedRowsCorpus = new int[rowsCorpus.length];
       System.arraycopy(rowsCorpus, 0, selectedRowsCorpus, 0, rowsCorpus.length);
       SwingUtilities.invokeLater(new Runnable(){
+        @Override
         public void run(){
           docTable.clearSelection();
           for(int i = 0; i < selectedRowsCorpus.length; i++){
@@ -570,6 +603,7 @@ public class CorpusEditor extends AbstractVisualResource
       putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
     }
 
+    @Override
     public void actionPerformed(ActionEvent e){
       List<Resource> loadedDocuments;
       try {
@@ -598,6 +632,7 @@ public class CorpusEditor extends AbstractVisualResource
       final JDialog dialog = optionPane.createDialog(CorpusEditor.this,
         "Add document(s) to this corpus");
       docList.addMouseListener(new MouseAdapter() {
+        @Override
         public void mouseClicked(MouseEvent e) {
           if (e.getClickCount() == 2) {
             optionPane.setValue(JOptionPane.OK_OPTION);
@@ -624,6 +659,7 @@ public class CorpusEditor extends AbstractVisualResource
       putValue(MNEMONIC_KEY, KeyEvent.VK_DELETE);
     }
 
+    @Override
     public void actionPerformed(ActionEvent e){
       int[] selectedIndexes = docTable.getSelectedRows();
       int[] corpusIndexes = new int[selectedIndexes.length];
@@ -646,6 +682,7 @@ public class CorpusEditor extends AbstractVisualResource
         "Opens selected document(s) in a document editor");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e){
       Component root = SwingUtilities.getRoot(CorpusEditor.this);
       if (!(root instanceof MainFrame)) { return; }
@@ -669,9 +706,10 @@ public class CorpusEditor extends AbstractVisualResource
         // load the document if inside a datastore
         corpus.get(docTable.rowViewToModel(row));
       }
-      SwingUtilities.invokeLater(new Runnable() { public void run() {
+      SwingUtilities.invokeLater(new Runnable() { @Override
+      public void run() {
         for (int row : selectedRows) {
-          Document doc = (Document) corpus.get(docTable.rowViewToModel(row));
+          Document doc = corpus.get(docTable.rowViewToModel(row));
           // show the document in the central view
           mainFrame.select(doc);
         }
@@ -680,7 +718,8 @@ public class CorpusEditor extends AbstractVisualResource
   }
 
   protected void changeMessage() {
-    SwingUtilities.invokeLater(new Runnable(){ public void run() {
+    SwingUtilities.invokeLater(new Runnable(){ @Override
+    public void run() {
     if (corpus == null || corpus.size() == 0) {
       newDocumentAction.setEnabled(true);
       messageLabel.setText(

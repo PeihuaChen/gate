@@ -20,12 +20,13 @@ public class MatchRule6 implements OrthoMatcherRule {
 		this.orthomatcher=orthmatcher;
 	}
 	
-	public boolean value(String s1, String s2) {
+	@Override
+  public boolean value(String s1, String s2) {
 	  
 	  boolean result=false;
 	  
 		   if (orthomatcher.tokensLongAnnot.size()> 1 &&
-	            ((Annotation) orthomatcher.tokensLongAnnot.get(0)).getFeatures().get("kind").equals("number"))
+	            orthomatcher.tokensLongAnnot.get(0).getFeatures().get("kind").equals("number"))
 	     result=false;
 		   {
         	    //  if (s1.startsWith("Patrick") || s2.startsWith("Patrick")) {
@@ -45,12 +46,11 @@ public class MatchRule6 implements OrthoMatcherRule {
         	    else {
               	    if (orthomatcher.tokensLongAnnot.size()<=1)
               	      result = false; else 
-              	    if (((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().containsKey("ortho_stop"))
+              	    if (orthomatcher.tokensShortAnnot.get(0).getFeatures().containsKey("ortho_stop"))
               	      result = false; else
               	    
               	    {result = OrthoMatcherHelper.straightCompare((String)
-              	            ((Annotation) orthomatcher.tokensLongAnnot.get(0)
-              	            ).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME),
+              	            orthomatcher.tokensLongAnnot.get(0).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME),
               	            s2,
               	            orthomatcher.caseSensitive);
               	    }
@@ -66,6 +66,7 @@ public class MatchRule6 implements OrthoMatcherRule {
 	    return result;
 	}
 	
+  @Override
   public String getId(){
     return "MatchRule6";
   }

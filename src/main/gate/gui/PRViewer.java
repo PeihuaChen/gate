@@ -97,11 +97,13 @@ public class PRViewer extends AbstractVisualResource {
     });
   }
 
+  @Override
   public void cleanup(){
     super.cleanup();
     editor.cleanup();
   }
 
+  @Override
   public void setTarget(Object target){
     if(target == null) return;
     if(!(target instanceof Resource)){
@@ -115,7 +117,7 @@ public class PRViewer extends AbstractVisualResource {
 
     Resource pr = (Resource)target;
     ResourceData rData =
-        (ResourceData)Gate.getCreoleRegister().get(pr.getClass().getName());
+        Gate.getCreoleRegister().get(pr.getClass().getName());
     if(rData != null) {
       editor.init(pr, rData.getParameterList().getInitimeParameters());
     } else {
@@ -138,6 +140,7 @@ public class PRViewer extends AbstractVisualResource {
       this.column = column;
     }
     
+    @Override
     public void actionPerformed(ActionEvent e) {
       Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
       Object value = editor.getValueAt(row, column);

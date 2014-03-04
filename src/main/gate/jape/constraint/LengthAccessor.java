@@ -27,6 +27,7 @@ public class LengthAccessor extends MetaPropertyAccessor {
   /**
    * Return the length of the span of the annotation.
    */
+  @Override
   public Object getValue(Annotation annot, AnnotationSet context) {
     if(annot == null) return 0;
     Long retVal = annot.getEndNode().getOffset()

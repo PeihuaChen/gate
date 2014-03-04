@@ -46,6 +46,7 @@ public class LanguageAnalyserDocumentProcessor implements DocumentProcessor {
     this.analyser = a;
   }
 
+  @Override
   public synchronized void processDocument(Document doc) throws GateException {
     if(corpus == null) {
       corpus = Factory.newCorpus("DocumentProcessor corpus");

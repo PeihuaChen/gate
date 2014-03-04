@@ -59,7 +59,8 @@ public class TestJape extends BaseJapeTests {
     public void testSimple() throws Exception {
 	AnnotationCreator ac = new BaseAnnotationCreator() {
 
-	    public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
+	    @Override
+      public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
 		// defaultAS.add(new Long( 0), new Long( 2), "A",feat);
 		add(2, 4, "A");
 		// defaultAS.add(new Long( 4), new Long( 6), "A",feat);
@@ -154,7 +155,8 @@ public class TestJape extends BaseJapeTests {
 	String[] expectedResults = { "Find_A", "Find_A", "Find_A_B", "Find_A_B", "Find_A_B_C" };
 
 	AnnotationCreator annotCreator = new BaseAnnotationCreator() {
-	    public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
+	    @Override
+      public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
 		add(2, 4, "A");
 		add(2, 5, "A");
 		add(3, 5, "A");
@@ -178,7 +180,8 @@ public class TestJape extends BaseJapeTests {
 	String[] expectedResults = { "Find_A_B_C" };
 
 	AnnotationCreator annotCreator = new BaseAnnotationCreator() {
-	    public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
+	    @Override
+      public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
 		add(2, 4, "A");
 		add(4, 6, "B");
 		add(2, 3, "C");
@@ -202,7 +205,8 @@ public class TestJape extends BaseJapeTests {
 		"Find_A_B", "Find_B_C" };
 
 	AnnotationCreator annotCreator = new BaseAnnotationCreator() {
-	    public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
+	    @Override
+      public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
 		add(2, 4, "A");
 		add(2, 5, "A");
 		add(3, 5, "A");
@@ -248,7 +252,8 @@ public class TestJape extends BaseJapeTests {
 
     public static Test suite() {
 	Test suite = new TestSetup(new TestSuite(TestJape.class)) {
-	    protected void setUp() {
+	    @Override
+      protected void setUp() {
 		setUpGate();
 		logger.info("GATE initialized and fixure set up.");
 	    }

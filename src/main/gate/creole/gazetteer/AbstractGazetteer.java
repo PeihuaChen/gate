@@ -17,10 +17,8 @@ package gate.creole.gazetteer;
 
 import java.util.*;
 
-import gate.FeatureMap;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleParameter;
-import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
 
@@ -80,6 +78,7 @@ public abstract class AbstractGazetteer
    * Sets the AnnotationSet that will be used at the next run for the newly
    * produced annotations.
    */
+  @Override
   @RunTime
   @Optional
   @CreoleParameter(comment="The annotation set to be used for the generated annotations")
@@ -91,41 +90,50 @@ public abstract class AbstractGazetteer
    * Gets the AnnotationSet that will be used at the next run for the newly
    * produced annotations.
    */
+  @Override
   public String getAnnotationSetName() {
     return annotationSetName;
   }
 
+  @Override
   @CreoleParameter(comment="The encoding used for reading the definitions", defaultValue="UTF-8")
   public void setEncoding(String newEncoding) {
     encoding = newEncoding;
   }
 
+  @Override
   public String getEncoding() {
     return encoding;
   }
 
+  @Override
   public java.net.URL getListsURL() {
     return listsURL;
   }
 
+  @Override
   @CreoleParameter(comment="The URL to the file with list of lists", suffixes="def", defaultValue="resources/gazetteer/lists.def")
   public void setListsURL(java.net.URL newListsURL) {
     listsURL = newListsURL;
   }
 
+  @Override
   @CreoleParameter(comment="Should this gazetteer diferentiate on case?", defaultValue="true")
   public void setCaseSensitive(Boolean newCaseSensitive) {
     caseSensitive = newCaseSensitive;
   }
 
+  @Override
   public Boolean getCaseSensitive() {
     return caseSensitive;
   }
 
+  @Override
   public void setMappingDefinition(MappingDefinition mapping) {
     mappingDefinition = mapping;
   }
 
+  @Override
   public MappingDefinition getMappingDefinition(){
     return mappingDefinition;
   }
@@ -150,10 +158,12 @@ public abstract class AbstractGazetteer
    * set method because the definition is loaded through the listsUrl
    * on init().
    * @return the linear definition of the gazetteer */
+  @Override
   public LinearDefinition getLinearDefinition() {
     return definition;
   }
 
+  @Override
   public void reInit() throws ResourceInstantiationException {
     super.reInit();
     fireGazetteerEvent(new GazetteerEvent(this,GazetteerEvent.REINIT));
@@ -163,6 +173,7 @@ public abstract class AbstractGazetteer
    * fires a Gazetteer Event
    * @param ge Gazetteer Event to be fired
    */
+  @Override
   public void fireGazetteerEvent(GazetteerEvent ge) {
     Iterator li = listeners.iterator();
     while ( li.hasNext()) {
@@ -175,6 +186,7 @@ public abstract class AbstractGazetteer
    * Registers a Gazetteer Listener
    * @param gl Gazetteer Listener to be registered
    */
+  @Override
   public void addGazetteerListener(GazetteerListener gl){
     if ( null!=gl )
       listeners.add(gl);

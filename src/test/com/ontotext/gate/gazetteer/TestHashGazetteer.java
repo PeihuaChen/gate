@@ -9,18 +9,12 @@ package com.ontotext.gate.gazetteer;
  *  $Id$
  */
 
-import gate.Annotation;
-import gate.AnnotationSet;
 import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
 import gate.corpora.TestDocument;
-import gate.util.Strings;
-
 import java.net.URL;
-import java.util.Iterator;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -36,9 +30,11 @@ public class TestHashGazetteer extends TestCase {
   }
 
   /** Fixture set up */
+  @Override
   public void setUp() throws Exception {
   }
 
+  @Override
   public void tearDown() throws Exception {
   } // tearDown
 

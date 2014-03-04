@@ -47,7 +47,8 @@ public class TestMorph extends TestCase {
 	 * initialises the Tokenizer and sets up the other parameters for the morph
 	 * program
 	 */
-	protected void setUp() {
+	@Override
+  protected void setUp() {
 		try {
 			// make sure the right plugin is loaded
 			File pluginsHome = new File(System

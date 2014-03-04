@@ -191,6 +191,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
   } // default construction
 
   /** Cover unpredictable Features creation */
+  @Override
   public FeatureMap getFeatures() {
     if(features == null) {
       features = new SimpleFeatureMapImpl();
@@ -199,6 +200,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
   }
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     // set up the source URL and create the content
     if(sourceUrl == null) {
@@ -441,7 +443,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
         if(endWS - startWS > 0) {
           // put the repositioning information about the WS substitution
           info
-                  .addPositionInfo((long)startWS, (long)(endWS - startWS + 1),
+                  .addPositionInfo(startWS, (endWS - startWS + 1),
                           0, 1);
         } // if
         // clear positions
@@ -451,6 +453,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
   } // collectInformationForWS
 
   /** Clear all the data members of the object. */
+  @Override
   public void cleanup() {
     defaultAnnots = null;
     if((namedAnnotSets != null) && (!namedAnnotSets.isEmpty()))
@@ -478,11 +481,13 @@ public class DocumentImpl extends AbstractLanguageResource implements
   }
   
   /** Documents are identified by URLs */
+  @Override
   public URL getSourceUrl() {
     return sourceUrl;
   }
 
   /** Set method for the document's URL */
+  @Override
   @CreoleParameter(disjunction = "source", priority = 1, comment = "Source URL",
       suffixes = "txt;text;xml;xhtm;xhtml;html;htm;sgml;sgm;mail;email;eml;rtf;pdf;doc;ppt;pptx;docx;xls;xlsx;ods;odt;odp;iob;conll")
   public void setSourceUrl(URL sourceUrl) {
@@ -493,6 +498,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * Documents may be packed within files; in this case an optional pair of
    * offsets refer to the location of the document.
    */
+  @Override
   public Long[] getSourceUrlOffsets() {
     Long[] sourceUrlOffsets = new Long[2];
     sourceUrlOffsets[0] = sourceUrlStartOffset;
@@ -505,6 +511,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * the original content will be retrieved from the DocumentContent object and
    * preserved as document feature.
    */
+  @Override
   @CreoleParameter(comment = "Should the document preserve the original content?",
       defaultValue = "false")
   public void setPreserveOriginalContent(Boolean b) {
@@ -516,6 +523,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * 
    * @return whether the Document should preserve it's original content.
    */
+  @Override
   public Boolean getPreserveOriginalContent() {
     return preserveOriginalContent;
   } // getPreserveOriginalContent
@@ -527,6 +535,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * converting of coordinates between the original document content and
    * extracted from the document text.
    */
+  @Override
   @CreoleParameter(defaultValue = "false",
       comment = "Should the document collect repositioning information")
   public void setCollectRepositioningInfo(Boolean b) {
@@ -542,6 +551,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * 
    * @return whether the Document should collect and preserve information.
    */
+  @Override
   public Boolean getCollectRepositioningInfo() {
     return collectRepositioningInfo;
   } // getCollectRepositioningInfo
@@ -551,6 +561,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * offsets refer to the location of the document. This method gets the start
    * offset.
    */
+  @Override
   public Long getSourceUrlStartOffset() {
     return sourceUrlStartOffset;
   }
@@ -560,6 +571,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * offsets refer to the location of the document. This method sets the start
    * offset.
    */
+  @Override
   @Optional
   @CreoleParameter(
       comment = "Start offset for documents based on ranges")
@@ -572,6 +584,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * offsets refer to the location of the document. This method gets the end
    * offset.
    */
+  @Override
   public Long getSourceUrlEndOffset() {
     return sourceUrlEndOffset;
   }
@@ -581,6 +594,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * offsets refer to the location of the document. This method sets the end
    * offset.
    */
+  @Override
   @Optional
   @CreoleParameter(
       comment = "End offset for documents based on ranges")
@@ -589,11 +603,13 @@ public class DocumentImpl extends AbstractLanguageResource implements
   } // setSourceUrlStartOffset
 
   /** The content of the document: a String for text; MPEG for video; etc. */
+  @Override
   public DocumentContent getContent() {
     return content;
   }
 
   /** Set method for the document content */
+  @Override
   public void setContent(DocumentContent content) {
     this.content = content;
     // stringContent is a parameter, not a normal field, and
@@ -602,6 +618,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
   }
 
   /** Get the encoding of the document content source */
+  @Override
   public String getEncoding() {
     // we need to make sure we ALWAYS have an encoding
     if(encoding == null || encoding.trim().length() == 0) {
@@ -623,6 +640,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * Get the default set of annotations. The set is created if it doesn't exist
    * yet.
    */
+  @Override
   public AnnotationSet getAnnotations() {
     if(defaultAnnots == null) {
       defaultAnnots = new AnnotationSetImpl(this);
@@ -637,6 +655,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * doesn't exist yet. If the provided name is null or the empty string then
    * it returns the default annotation set.
    */
+  @Override
   public AnnotationSet getAnnotations(String name) {
     if(name == null || "".equals(name)) return getAnnotations();
     if(namedAnnotSets == null) {
@@ -662,6 +681,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * @param newMarkupAware
    *          markup awareness status.
    */
+  @Override
   @CreoleParameter(defaultValue = "true",
       comment = "Should the document read the original markup?")
   public void setMarkupAware(Boolean newMarkupAware) {
@@ -674,6 +694,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * 
    * @return whether the Document is markup aware.
    */
+  @Override
   public Boolean getMarkupAware() {
     return markupAware;
   }
@@ -685,6 +706,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * specified in the aSourceAnnotationSet. It is equivalent to
    * toXml(aSourceAnnotationSet, true).
    */
+  @Override
   public String toXml(Set aSourceAnnotationSet) {
     return toXml(aSourceAnnotationSet, true);
   }
@@ -708,6 +730,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * @return a string representing an XML document containing the original
    *         markup + dumped annotations form the aSourceAnnotationSet
    */
+  @Override
   public String toXml(Set aSourceAnnotationSet, boolean includeFeatures) {
     if(hasOriginalContentFeatures()) { return saveAnnotationSetAsXmlInOrig(
             aSourceAnnotationSet, includeFeatures); } // if
@@ -989,7 +1012,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
           if(offset.equals(a.getStartNode().getOffset())) {
             // Here, the annotation a Starts and Ends at the offset
             if(null != a.getFeatures().get("isEmptyAndSpan")
-                    && "true".equals((String)a.getFeatures().get(
+                    && "true".equals(a.getFeatures().get(
                             "isEmptyAndSpan"))) {
               // Assert: annotation a with start == end and isEmptyAndSpan
               tmpBuff.append(writeStartTag(a, includeFeatures));
@@ -1046,7 +1069,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
           // Replace the char at offsChar with its corresponding entity form
           // the entitiesMap.
           docContStrBuff.replace(offsChar.intValue(), offsChar.intValue() + 1,
-                  (String)DocumentXmlUtils.entitiesMap.get((Character)offsets2CharsMap
+                  DocumentXmlUtils.entitiesMap.get(offsets2CharsMap
                           .get(offsChar)));
           // Discard the offsChar after it was used.
           offsets2CharsMap.remove(offsChar);
@@ -1065,8 +1088,8 @@ public class DocumentImpl extends AbstractLanguageResource implements
       Long offsChar = (Long)offsets2CharsMap.lastKey();
       // Replace the char with its entity
       docContStrBuff.replace(offsChar.intValue(), offsChar.intValue() + 1,
-              (String)DocumentXmlUtils.entitiesMap
-                      .get((Character)offsets2CharsMap.get(offsChar)));
+              DocumentXmlUtils.entitiesMap
+                      .get(offsets2CharsMap.get(offsChar)));
       // remove the offset from the map
       offsets2CharsMap.remove(offsChar);
     }// End while
@@ -1141,7 +1164,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
       // Now, use it.
       // Returns a list with annotations that needs to be serialized in that
       // offset.
-      annotations = (List)annotsForOffset.get(offset);
+      annotations = annotsForOffset.get(offset);
       // order annotations in list for offset to print tags in correct order
       annotations = getAnnotationsForOffset(annotations, offset);
       // clear structures
@@ -1159,7 +1182,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
           if(offset.equals(a.getStartNode().getOffset())) {
             // Here, the annotation a Starts and Ends at the offset
             if(null != a.getFeatures().get("isEmptyAndSpan")
-                    && "true".equals((String)a.getFeatures().get(
+                    && "true".equals(a.getFeatures().get(
                             "isEmptyAndSpan"))) {
               // Assert: annotation a with start == end and isEmptyAndSpan
               tmpBuff.append(writeStartTag(a, includeFeatures));
@@ -1215,7 +1238,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
       // if there are chars to be replaced in range
       while(!offsetsInRange.isEmpty()) {
         tmpOffset = (Long)offsetsInRange.firstKey();
-        replacement = (String)DocumentXmlUtils.entitiesMap.get(
+        replacement = DocumentXmlUtils.entitiesMap.get(
           offsets2CharsMap.get(tmpOffset));
         partText.append(docContStrBuff.substring(
           tmpLastOffset.intValue(), tmpOffset.intValue()));
@@ -1243,7 +1266,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
     // they need to be replaced
     while(!offsetsInRange.isEmpty()) {
       tmpOffset = (Long)offsetsInRange.firstKey();
-      replacement = (String)DocumentXmlUtils.entitiesMap.get(
+      replacement = DocumentXmlUtils.entitiesMap.get(
         offsets2CharsMap.get(tmpOffset));
       partText.append(docContStrBuff.substring(
         tmpLastOffset.intValue(), tmpOffset.intValue()));
@@ -1397,7 +1420,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
             .getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
     // Create a dumping annotation set on the document. It will be used for
     // dumping annotations...
-    AnnotationSet dumpingSet = new AnnotationSetImpl((Document)this);
+    AnnotationSet dumpingSet = new AnnotationSetImpl(this);
     if(sListener != null)
       sListener.statusChanged("Constructing the dumping annotation set.");
     // Then take all the annotations from aSourceAnnotationSet and verify if
@@ -1463,7 +1486,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
           if(offset.equals(a.getStartNode().getOffset())) {
             // Here, the annotation a Starts and Ends at the offset
             if(null != a.getFeatures().get("isEmptyAndSpan")
-                    && "true".equals((String)a.getFeatures().get(
+                    && "true".equals(a.getFeatures().get(
                             "isEmptyAndSpan"))) {
               // Assert: annotation a with start == end and isEmptyAndSpan
               tmpBuff.append(writeStartTag(a, includeFeatures, false));
@@ -2009,6 +2032,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * 
    * @return a string representing a Gate Xml document.
    */
+  @Override
   public String toXml() {
     return DocumentStaxUtils.toXml(this);
     //return DocumentXmlUtils.toXml(this);
@@ -2032,6 +2056,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * Returns a map (possibly empty) with the named annotation sets. It returns <code>null</code>
    * if no named annotaton set exists.
    */
+  @Override
   public Map<String, AnnotationSet> getNamedAnnotationSets() {
     if (namedAnnotSets == null) {
       namedAnnotSets = new HashMap<String, AnnotationSet>();
@@ -2039,6 +2064,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
     return namedAnnotSets;
   } // getNamedAnnotationSets
 
+  @Override
   public Set<String> getAnnotationSetNames() {
     if (namedAnnotSets == null) {
       namedAnnotSets = new HashMap<String, AnnotationSet>();
@@ -2053,6 +2079,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * @param name
    *          the name of the annotation set to be removed
    */
+  @Override
   public void removeAnnotationSet(String name) {
     if(namedAnnotSets != null) {
       AnnotationSet removed = namedAnnotSets.remove(name);
@@ -2064,6 +2091,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
   }
 
   /** Propagate edit changes to the document content and annotations. */
+  @Override
   public void edit(Long start, Long end, DocumentContent replacement)
           throws InvalidOffsetException {
     if(!isValidOffsetRange(start, end)) throw new InvalidOffsetException("Offsets: "+start+"/"+end);
@@ -2117,6 +2145,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
   }
 
   /** Ordering based on URL.toString() and the URL offsets (if any) */
+  @Override
   public int compareTo(Object o) throws ClassCastException {
     DocumentImpl other = (DocumentImpl)o;
     return getOrderingString().compareTo(other.getOrderingString());
@@ -2285,6 +2314,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
   // return code;
   // } // hashcode
   /** String respresentation */
+  @Override
   public String toString() {
     String n = Strings.getNl();
     StringBuffer s = new StringBuffer("DocumentImpl: " + n);
@@ -2322,6 +2352,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
     }// AnnotationComparator()
 
     /** This method must be implemented according to Comparator interface */
+    @Override
     public int compare(Object o1, Object o2) {
       Annotation a1 = (Annotation)o1;
       Annotation a2 = (Annotation)o2;
@@ -2370,6 +2401,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
 
   private transient Vector gateListeners;
 
+  @Override
   public synchronized void removeDocumentListener(DocumentListener l) {
     if(documentListeners != null && documentListeners.contains(l)) {
       Vector v = (Vector)documentListeners.clone();
@@ -2378,6 +2410,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
     }
   }
 
+  @Override
   public synchronized void addDocumentListener(DocumentListener l) {
     Vector v = documentListeners == null
             ? new Vector(2)
@@ -2418,21 +2451,27 @@ public class DocumentImpl extends AbstractLanguageResource implements
     }
   }
 
+  @Override
   public void resourceLoaded(CreoleEvent e) {
   }
 
+  @Override
   public void resourceUnloaded(CreoleEvent e) {
   }
 
+  @Override
   public void datastoreOpened(CreoleEvent e) {
   }
 
+  @Override
   public void datastoreCreated(CreoleEvent e) {
   }
 
+  @Override
   public void resourceRenamed(Resource resource, String oldName, String newName) {
   }
 
+  @Override
   public void datastoreClosed(CreoleEvent e) {
     if(!e.getDatastore().equals(this.getDataStore())) return;
     // close this lr, since it cannot stay open when the DS it comes from
@@ -2440,6 +2479,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
     Factory.deleteResource(this);
   }
 
+  @Override
   public void setLRPersistenceId(Object lrID) {
     super.setLRPersistenceId(lrID);
     // make persistent documents listen to the creole register
@@ -2447,9 +2487,11 @@ public class DocumentImpl extends AbstractLanguageResource implements
     Gate.getCreoleRegister().addCreoleListener(this);
   }
 
+  @Override
   public void resourceAdopted(DatastoreEvent evt) {
   }
 
+  @Override
   public void resourceDeleted(DatastoreEvent evt) {
     if(!evt.getSource().equals(this.getDataStore())) return;
     // if an open document is deleted from a DS, then
@@ -2458,9 +2500,11 @@ public class DocumentImpl extends AbstractLanguageResource implements
       Factory.deleteResource(this);
   }
 
+  @Override
   public void resourceWritten(DatastoreEvent evt) {
   }
 
+  @Override
   public void setDataStore(DataStore dataStore)
           throws gate.persist.PersistenceException {
     super.setDataStore(dataStore);

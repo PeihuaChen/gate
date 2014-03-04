@@ -49,6 +49,7 @@ public class TransitivePropertyAction extends AbstractAction implements
 
     domainAction = new ValuesSelectionAction();
     domainButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent actionevent) {
         String as[] = new String[ontologyClassesURIs.size()];
         for(int i = 0; i < as.length; i++)
@@ -70,6 +71,7 @@ public class TransitivePropertyAction extends AbstractAction implements
     });
     rangeAction = new ValuesSelectionAction();
     rangeButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent actionevent) {
         String as[] = new String[ontologyClassesURIs.size()];
         for(int i = 0; i < as.length; i++)
@@ -80,12 +82,14 @@ public class TransitivePropertyAction extends AbstractAction implements
     });
   }
 
+  @Override
   public void actionPerformed(ActionEvent actionevent) {
     nameSpace.setText(ontology.getDefaultNameSpace() == null ?
       "http://gate.ac.uk/example#" : ontology.getDefaultNameSpace());
     JOptionPane pane = new JOptionPane(mainPanel, JOptionPane.QUESTION_MESSAGE,
       JOptionPane.OK_CANCEL_OPTION,
       MainFrame.getIcon("ontology-transitive-property")) {
+      @Override
       public void selectInitialValue() {
         propertyName.requestFocusInWindow();
         propertyName.selectAll();
@@ -140,6 +144,7 @@ public class TransitivePropertyAction extends AbstractAction implements
     this.ontology = ontology;
   }
 
+  @Override
   public void selectionChanged(ArrayList<DefaultMutableTreeNode> arraylist) {
     selectedNodes = arraylist;
   }

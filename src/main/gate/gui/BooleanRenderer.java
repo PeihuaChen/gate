@@ -23,6 +23,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  * A {@link javax.swing.table.TableCellRenderer} used for Booleans
  */
 public class BooleanRenderer extends DefaultTableCellRenderer {
+  @Override
   public Component getTableCellRendererComponent(JTable table,
                                                  Object value,
                                                  boolean isSelected,

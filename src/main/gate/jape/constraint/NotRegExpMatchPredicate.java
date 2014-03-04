@@ -29,6 +29,7 @@ public class NotRegExpMatchPredicate extends AbstractRegExpPredicate {
     return !m.matches();
   }
 
+  @Override
   public String getOperator() {
     return NOT_REGEXP_MATCH;
   }

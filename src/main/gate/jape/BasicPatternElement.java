@@ -19,8 +19,6 @@ package gate.jape;
 
 import java.util.*;
 
-import gate.*;
-import gate.annotation.AnnotationSetImpl;
 import gate.util.*;
 
 
@@ -65,6 +63,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   /** Need cloning for processing of macro references. See comments on
     * <CODE>PatternElement.clone()</CODE>
     */
+  @Override
   public Object clone() {
     BasicPatternElement newPE = (BasicPatternElement) super.clone();
     newPE.constraintsMap = (HashMap<Object, Constraint>) constraintsMap.clone();
@@ -122,6 +121,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   /** Finish: replace dynamic data structures with Java arrays; called
     * after parsing.
     */
+  @Override
   public void finish() {
     int j=0;
     constraints2 = new Constraint[constraints1.size()];
@@ -135,6 +135,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
 
 
   /** Create a string representation of the object. */
+  @Override
   public String toString() {
     StringBuffer result = new StringBuffer("{");
     Constraint[] constraints = getConstraints();
@@ -146,6 +147,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   }
 
   /** Create a string representation of the object. */
+  @Override
   public String toString(String pad) {
     String newline = Strings.getNl();
     String newPad = Strings.addPadding(pad, INDENT_PADDING);

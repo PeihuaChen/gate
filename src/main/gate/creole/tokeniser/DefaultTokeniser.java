@@ -48,6 +48,7 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser implements Benchm
 
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException{
     try{
       //init super object
@@ -111,11 +112,13 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser implements Benchm
     return this;
   }
   
+  @Override
   public void cleanup() {
     Factory.deleteResource(transducer);
     Factory.deleteResource(tokeniser);
   }
 
+  @Override
   public void execute() throws ExecutionException{
     interrupted = false;
     //set the parameters
@@ -143,6 +146,7 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser implements Benchm
     fireProgressChanged(5);
     pListener = new IntervalProgressListener(5, 50);
     sListener = new StatusListener(){
+      @Override
       public void statusChanged(String text){
         fireStatusChanged(text);
       }
@@ -186,6 +190,7 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser implements Benchm
    * Notifies all the PRs in this controller that they should stop their
    * execution as soon as possible.
    */
+  @Override
   public synchronized void interrupt(){
     interrupted = true;
     tokeniser.interrupt();
@@ -240,10 +245,12 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser implements Benchm
     return annotationSetName;
   }
   
+  @Override
   public void setBenchmarkId(String benchmarkId) {
     this.benchmarkId = benchmarkId;
   }
   
+  @Override
   public String getBenchmarkId() {
     if(benchmarkId == null) {
       return getName();

@@ -49,6 +49,7 @@ public class JapeException extends GateException {
     this.location = location;
   }
   
+  @Override
   public String getMessage() {
     if(location != null) {
       return super.getMessage() + " (at " + location + ")";

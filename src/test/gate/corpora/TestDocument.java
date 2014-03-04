@@ -26,7 +26,6 @@ import junit.framework.*;
 import gate.*;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.Err;
-import gate.util.GateException;
 import gate.util.SimpleFeatureMapImpl;
 
 /** Tests for the Document classes
@@ -47,6 +46,7 @@ public class TestDocument extends TestCase
   protected String testDocument1;
 
   /** Fixture set up */
+  @Override
   public void setUp() {
 
     //try{
@@ -230,7 +230,7 @@ public class TestDocument extends TestCase
              ") from annotation set " + annotSetName + " of GATE document :" +
              doc.getSourceUrl(),
              annot.getStartNode().getId(),
-             (Integer) offests2NodeId.get(annot.getStartNode().getOffset()));
+             offests2NodeId.get(annot.getStartNode().getOffset()));
         }// End if
         // Check the End node
         if (offests2NodeId.containsKey(annot.getEndNode().getOffset())){
@@ -239,7 +239,7 @@ public class TestDocument extends TestCase
              "END NODE is buggy for annotation(" + annot+ ") from annotation"+
              " set " + annotSetName +" of GATE document :" + doc.getSourceUrl(),
              annot.getEndNode().getId(),
-             (Integer) offests2NodeId.get(annot.getEndNode().getOffset()));
+             offests2NodeId.get(annot.getEndNode().getOffset()));
         }// End if
         offests2NodeId.put(annot.getStartNode().getOffset(),
                                                   annot.getStartNode().getId());

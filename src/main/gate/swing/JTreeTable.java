@@ -94,6 +94,7 @@ public class JTreeTable extends XJTable {
     addMouseListener(new MouseHandler());
 
     getColumnModel().getColumn(0).addPropertyChangeListener(new PropertyChangeListener() {
+      @Override
       public void propertyChange(PropertyChangeEvent e) {
         if(e.getPropertyName().equals("width")){
           int width = ((Number)e.getNewValue()).intValue();
@@ -109,6 +110,7 @@ public class JTreeTable extends XJTable {
    * sortable. In a tree-table component the ordering for the rows is given by
    * the structure of the tree and they cannot be reordered.
    */
+  @Override
   public void setSortable(boolean b){
     throw new UnsupportedOperationException(
           "A JTreeTable component cannot be sortable!\n" +
@@ -132,6 +134,7 @@ public class JTreeTable extends XJTable {
    * Will use an internal JTree object to paint the nodes.
    */
   public class TreeTableCellRenderer extends DefaultTableCellRenderer {
+    @Override
     public Component getTableCellRendererComponent(JTable table,
                      Object value,
                      boolean isSelected,
@@ -155,6 +158,7 @@ public class JTreeTable extends XJTable {
       setClickCountToStart(0);
     }
 
+    @Override
     public Component getTableCellEditorComponent(JTable table,
                                                  Object value,
                                                  boolean isSelected,
@@ -164,10 +168,12 @@ public class JTreeTable extends XJTable {
       editor = tree.getCellEditor();
 
       editor.addCellEditorListener(new CellEditorListener() {
+        @Override
         public void editingStopped(ChangeEvent e) {
           fireEditingStopped();
         }
 
+        @Override
         public void editingCanceled(ChangeEvent e) {
           fireEditingCanceled();
         }
@@ -187,14 +193,17 @@ public class JTreeTable extends XJTable {
 //      return editorComponent;
     }
 
+    @Override
     public Object getCellEditorValue() {
       return editor == null ? null : editor.getCellEditorValue();
     }
 
+    @Override
     public boolean stopCellEditing(){
       return editor == null ? true : editor.stopCellEditing();
     }
 
+    @Override
     public void cancelCellEditing(){
       if(editor != null) editor.cancelCellEditing();
     }
@@ -209,18 +218,21 @@ public class JTreeTable extends XJTable {
    * if they occured in the space used by the tree.
    */
   class MouseHandler extends MouseAdapter {
+    @Override
     public void mousePressed(MouseEvent e) {
       if(columnAtPoint(e.getPoint()) == 0){
         tree.dispatchEvent(convertEvent(e));
       }
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
       if(columnAtPoint(e.getPoint()) == 0){
         tree.dispatchEvent(convertEvent(e));
       }
     }
 
+    @Override
     public void mouseClicked(MouseEvent e) {
       if(columnAtPoint(e.getPoint()) == 0){
         tree.dispatchEvent(convertEvent(e));
@@ -228,12 +240,14 @@ public class JTreeTable extends XJTable {
     }
 
 
+    @Override
     public void mouseEntered(MouseEvent e) {
       if(columnAtPoint(e.getPoint()) == 0){
         tree.dispatchEvent(convertEvent(e));
       }
     }
 
+    @Override
     public void mouseExited(MouseEvent e) {
       if(columnAtPoint(e.getPoint()) == 0){
         tree.dispatchEvent(convertEvent(e));
@@ -270,23 +284,29 @@ public class JTreeTable extends XJTable {
       tree.addTreeExpansionListener(new TreeExpansionListener() {
         // Don't use fireTableRowsInserted() here;
         // the selection model would get  updated twice.
+        @Override
         public void treeExpanded(TreeExpansionEvent event) {
           fireTableDataChanged();
         }
+        @Override
         public void treeCollapsed(TreeExpansionEvent event) {
           fireTableDataChanged();
         }
       });
       tree.getModel().addTreeModelListener(new TreeModelListener() {
+        @Override
         public void treeNodesChanged(TreeModelEvent e) {
           fireTableDataChanged();
         }
+        @Override
         public void treeNodesInserted(TreeModelEvent e) {
           fireTableDataChanged();
         }
+        @Override
         public void treeNodesRemoved(TreeModelEvent e) {
           fireTableDataChanged();
         }
+        @Override
         public void treeStructureChanged(TreeModelEvent e) {
           fireTableDataChanged();
         }
@@ -294,19 +314,23 @@ public class JTreeTable extends XJTable {
     }
 
     // Wrappers, implementing TableModel interface.
+    @Override
     public int getColumnCount() {
       return treeTableModel.getColumnCount();
     }
 
+    @Override
     public String getColumnName(int column) {
       return treeTableModel.getColumnName(column);
     }
 
+    @Override
     public Class getColumnClass(int column) {
       if(column == 0) return TreeTableModel.class;
       else return treeTableModel.getColumnClass(column);
     }
 
+    @Override
     public int getRowCount() {
       return tree.getRowCount();
     }
@@ -316,15 +340,18 @@ public class JTreeTable extends XJTable {
       return treePath.getLastPathComponent();
     }
 
+    @Override
     public Object getValueAt(int row, int column) {
       if(column == 0) return treeTableModel;
       else return treeTableModel.getValueAt(nodeForRow(row), column);
     }
 
+    @Override
     public boolean isCellEditable(int row, int column) {
       return treeTableModel.isCellEditable(nodeForRow(row), column);
     }
 
+    @Override
     public void setValueAt(Object value, int row, int column) {
       Object node = nodeForRow(row);
       treeTableModel.setValueAt(value, node, column);
@@ -336,6 +363,7 @@ public class JTreeTable extends XJTable {
    */
   class CustomJTree extends JTree {
 
+    @Override
     public void updateUI(){
       super.updateUI();
       setRowHeight(0);
@@ -349,6 +377,7 @@ public class JTreeTable extends XJTable {
     /**
      * Paints only the current cell in the table
      */
+    @Override
     public void paint(Graphics g){
       Rectangle rowBounds = getRowBounds(visibleRow);
       g.translate(0, -rowBounds.y);
@@ -366,15 +395,20 @@ public class JTreeTable extends XJTable {
     }
 
 
+    @Override
     public Dimension getPreferredSize(){
       return new Dimension(super.getPreferredSize().width,
                            getRowBounds(visibleRow).height);
     }
 
 
+    @Override
     public void validate(){}
+    @Override
     public void revalidate(){}
+    @Override
     public void repaint(long tm, int x, int y, int width, int height){}
+    @Override
     public void repaint(Rectangle r){}
 
     protected int visibleRow;

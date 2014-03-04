@@ -14,9 +14,6 @@
 
 package gate.jape.constraint;
 
-import gate.AnnotationSet;
-import gate.Document;
-
 import org.apache.log4j.Logger;
 
 /**
@@ -52,6 +49,7 @@ public abstract class MetaPropertyAccessor implements AnnotationAccessor {
     return this.getClass().getSimpleName();
   }
 
+  @Override
   public void setKey(Object key) {
     if(key != null && !key.equals(""))
       log.warn(this.getClass().getName() + " doesn't use key values.  Key was: " + key);
@@ -60,5 +58,6 @@ public abstract class MetaPropertyAccessor implements AnnotationAccessor {
   /**
    * Sub-classes should return the name of the meta-property which they implement.
    */
+  @Override
   public abstract Object getKey();
 }

@@ -18,6 +18,7 @@ import java.util.Comparator;
  * 
  */
 public class OntologyItemComparator implements Comparator<OResource> {
+  @Override
   public int compare(OResource resource1, OResource resource2) {
     if (resource1 == null) return (resource2 != null) ? -1 : 0;
     if (resource2 == null) return 1;

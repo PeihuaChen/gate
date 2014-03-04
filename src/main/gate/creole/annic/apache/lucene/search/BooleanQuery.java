@@ -98,9 +98,12 @@ public class BooleanQuery extends Query {
       }
     }
 
+    @Override
     public Query getQuery() { return BooleanQuery.this; }
+    @Override
     public float getValue() { return getBoost(); }
 
+    @Override
     public float sumOfSquaredWeights() throws IOException {
       float sum = 0.0f;
       for (int i = 0 ; i < weights.size(); i++) {
@@ -116,6 +119,7 @@ public class BooleanQuery extends Query {
     }
 
 
+    @Override
     public void normalize(float norm) {
       norm *= getBoost();                         // incorporate boost
       for (int i = 0 ; i < weights.size(); i++) {
@@ -126,6 +130,7 @@ public class BooleanQuery extends Query {
       }
     }
 
+    @Override
     public Scorer scorer(IndexReader reader, Searcher searcher) throws IOException {
       this.searcher = searcher;
       // First see if the (faster) ConjunctionScorer will work.  This can be
@@ -173,6 +178,7 @@ public class BooleanQuery extends Query {
       return result;
     }
 
+    @Override
     public Explanation explain(IndexReader reader, int doc)
       throws IOException {
       Explanation sumExpl = new Explanation();
@@ -217,10 +223,12 @@ public class BooleanQuery extends Query {
     }
   }
 
+  @Override
   protected Weight createWeight(Searcher searcher) {
     return new BooleanWeight(searcher);
   }
 
+  @Override
   public Query rewrite(IndexReader reader) throws IOException {
     if (clauses.size() == 1) {                    // optimize 1-clause queries
       BooleanClause c = (BooleanClause)clauses.elementAt(0);
@@ -256,6 +264,7 @@ public class BooleanQuery extends Query {
   }
 
 
+  @Override
   public Object clone() {
     BooleanQuery clone = (BooleanQuery)super.clone();
     clone.clauses = (Vector)this.clauses.clone();
@@ -263,6 +272,7 @@ public class BooleanQuery extends Query {
   }
 
   /** Prints a user-readable version of this query. */
+  @Override
   public String toString(String field) {
     StringBuffer buffer = new StringBuffer();
     if (getBoost() != 1.0) {
@@ -297,6 +307,7 @@ public class BooleanQuery extends Query {
   }
 
   /** Returns true iff <code>o</code> is equal to this. */
+  @Override
   public boolean equals(Object o) {
     if (!(o instanceof BooleanQuery))
       return false;
@@ -306,6 +317,7 @@ public class BooleanQuery extends Query {
   }
 
   /** Returns a hash code value for this object.*/
+  @Override
   public int hashCode() {
     return Float.floatToIntBits(getBoost()) ^ clauses.hashCode();
   }

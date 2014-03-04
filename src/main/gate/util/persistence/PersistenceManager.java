@@ -101,10 +101,12 @@ public class PersistenceManager {
       this.target = target;
     }
 
+    @Override
     public int hashCode() {
       return System.identityHashCode(target);
     }
 
+    @Override
     public boolean equals(Object obj) {
       if(obj instanceof ObjectHolder)
         return ((ObjectHolder)obj).target == this.target;
@@ -134,6 +136,7 @@ public class PersistenceManager {
     /**
      * Does nothing
      */
+    @Override
     public void extractDataFromSource(Object source)
             throws PersistenceException {
     }
@@ -141,6 +144,7 @@ public class PersistenceManager {
     /**
      * Returns null
      */
+    @Override
     public Object createObject() throws PersistenceException,
             ResourceInstantiationException {
       return null;
@@ -166,6 +170,7 @@ public class PersistenceManager {
      * Populates this Persistence with the data that needs to be stored
      * from the original source object.
      */
+    @Override
     public void extractDataFromSource(Object source)
             throws PersistenceException {
       final Logger logger = Logger.getLogger(URLHolder.class);
@@ -268,6 +273,7 @@ public class PersistenceManager {
      * supposed to be a copy for the original object used as source for
      * data extraction.
      */
+    @Override
     public Object createObject() throws PersistenceException {
       try {
         if(urlString.startsWith(relativePathMarker)) {
@@ -327,7 +333,7 @@ public class PersistenceManager {
     
     public File getResourceshomePath() {
       if(haveResourceshomePath == null) {
-        String resourceshomeString = (String)System.getProperty(resourceshomePropertyName);
+        String resourceshomeString = System.getProperty(resourceshomePropertyName);
         if(resourceshomeString == null) {
           haveResourceshomePath = false;
           return null;
@@ -392,6 +398,7 @@ public class PersistenceManager {
      * {@link ClassCastException} will be thrown.
      *
      */
+    @Override
     public int compare(Class<?> c1, Class<?> c2) {
       
       if(c1.equals(c2)) return 0;
@@ -427,7 +434,7 @@ public class PersistenceManager {
           throws PersistenceException {
     if(target == null) return null;
     // first check we don't have it already
-    Persistence res = (Persistence)existingPersistentReplacements
+    Persistence res = existingPersistentReplacements
             .get().getFirst().get(new ObjectHolder(target));
     if(res != null) return res;
 
@@ -640,9 +647,9 @@ public class PersistenceManager {
         else relativePath += "/..";
       }
       for(int i = commonPathElements; i < targetPathComponents.size(); i++) {
-        String aDirName = ((File)targetPathComponents.get(i)).getName();
+        String aDirName = targetPathComponents.get(i).getName();
         if(aDirName.length() == 0) {
-          aDirName = ((File)targetPathComponents.get(i)).getAbsolutePath();
+          aDirName = targetPathComponents.get(i).getAbsolutePath();
           if(aDirName.endsWith(File.separator)) {
             aDirName = aDirName.substring(0, aDirName.length()
                     - File.separator.length());
@@ -713,6 +720,7 @@ public class PersistenceManager {
         xstream = new XStream(
           new Sun14ReflectionProvider(new FieldDictionary(new XStream12FieldKeySorter())),
           new StaxDriver(new XStream11NameCoder())) {
+          @Override
           protected boolean useXStream11XmlFriendlyMapper() {
             return true;
           }
@@ -872,6 +880,7 @@ public class PersistenceManager {
         }
 
         xstream = new XStream(new StaxDriver(new XStream11NameCoder())) {
+          @Override
           protected boolean useXStream11XmlFriendlyMapper() {
             return true;
           }
@@ -898,7 +907,7 @@ public class PersistenceManager {
 
         // and re-register them
         while(urlIter.hasNext()) {
-          URL anUrl = (URL)urlIter.next();
+          URL anUrl = urlIter.next();
           try {
             Gate.getCreoleRegister().registerDirectories(anUrl,false);
           }

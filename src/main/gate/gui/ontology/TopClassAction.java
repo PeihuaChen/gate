@@ -41,11 +41,13 @@ public class TopClassAction extends AbstractAction {
     mainPanel.add(className = new JTextField(30), gbc);
   }
 
+  @Override
   public void actionPerformed(ActionEvent actionevent) {
     nameSpace.setText(ontology.getDefaultNameSpace() == null ?
       "http://gate.ac.uk/example#" : ontology.getDefaultNameSpace());
     JOptionPane pane = new JOptionPane(mainPanel, JOptionPane.QUESTION_MESSAGE,
       JOptionPane.OK_CANCEL_OPTION, MainFrame.getIcon("ontology-topclass")) {
+      @Override
       public void selectInitialValue() {
         className.requestFocusInWindow();
         className.selectAll();

@@ -32,6 +32,7 @@ import junit.framework.TestSuite;
  */
 public class TestTikaFormats extends TestCase {
 
+  @Override
   public void setUp() throws GateException {
     Gate.init();
   }

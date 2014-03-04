@@ -44,6 +44,7 @@ public class HashGazetteer extends AbstractGazetteer {
 
   private AnnotationSet annotationSet = null;
 
+  @Override
   @SuppressWarnings("unchecked")
   public Resource init() throws ResourceInstantiationException {
     if(mapsList != null) {
@@ -65,7 +66,7 @@ public class HashGazetteer extends AbstractGazetteer {
         int j = 0;
         LinearNode linearnode;
         for(; iterator.hasNext(); readList(linearnode)) {
-          linearnode = (LinearNode)iterator.next();
+          linearnode = iterator.next();
           fireStatusChanged("Reading " + linearnode.toString());
           fireProgressChanged((++j * 100) / i);
         }
@@ -82,12 +83,14 @@ public class HashGazetteer extends AbstractGazetteer {
   /**
    * Re-initialize this gazetteer by re-loading the configuration.
    */
+  @Override
   public void reInit() throws ResourceInstantiationException {
     mapsList = null;
     categoryList = null;
     init();
   }
 
+  @Override
   public void execute() throws ExecutionException {
     if(document == null) throw new ExecutionException("Document is null!");
     annotationSet = document.getAnnotations(annotationSetName);
@@ -177,6 +180,7 @@ public class HashGazetteer extends AbstractGazetteer {
     fireStatusChanged("Hash Gazetteer processing finished!");
   }
 
+  @Override
   public boolean add(String word, Lookup lookup1) {
     if(!super.caseSensitive.booleanValue()) {
       word = word.toUpperCase();
@@ -219,7 +223,7 @@ public class HashGazetteer extends AbstractGazetteer {
           mapsList[i] = hashmap;
         }
         else {
-          hashmap = (Map<String, List<Lookup>>)mapsList[i];
+          hashmap = mapsList[i];
         }
         if(!hashmap.containsKey(s4)) hashmap.put(s4, null);
       }
@@ -240,12 +244,13 @@ public class HashGazetteer extends AbstractGazetteer {
     return true;
   }
 
+  @Override
   public Set<Lookup> lookup(String s) {
     Set<Lookup> set = null;
     String s1 = normalizeWhitespace(s);
     int i = s1.length();
     if(mapsList.length < i) return set;
-    Map<String, List<Lookup>> hashmap = (HashMap<String, List<Lookup>>)mapsList[i];
+    Map<String, List<Lookup>> hashmap = mapsList[i];
     if(hashmap == null) {
       return set;
     }
@@ -266,7 +271,7 @@ public class HashGazetteer extends AbstractGazetteer {
 
     if(null != arraylist) {
       for(Iterator<Lookup> iterator = arraylist.iterator(); iterator.hasNext();) {
-        Lookup lookup1 = (Lookup)iterator.next();
+        Lookup lookup1 = iterator.next();
         FeatureMap featuremap = Factory.newFeatureMap();
         featuremap.put("majorType", lookup1.majorType);
         if(null != lookup1.oClass && null != lookup1.ontology) {
@@ -297,6 +302,7 @@ public class HashGazetteer extends AbstractGazetteer {
    * @param s the item to remove
    * @return true if the operation was successful
    */
+  @Override
   public boolean remove(String s) {
 
     String s1 = a(s);
@@ -424,7 +430,7 @@ public class HashGazetteer extends AbstractGazetteer {
     if(linearnode == null)
       throw new GazetteerException("LinearNode node is null");
 
-    GazetteerList gazetteerlist = (GazetteerList)listsByNode.get(linearnode);
+    GazetteerList gazetteerlist = listsByNode.get(linearnode);
     if(gazetteerlist == null)
       throw new GazetteerException("gazetteer list not found by node");
 
@@ -461,11 +467,13 @@ public class HashGazetteer extends AbstractGazetteer {
     }
   }
   
+  @Override
   @HiddenCreoleParameter
   public void setWholeWordsOnly(Boolean wholeWordsOnly) {
     super.setWholeWordsOnly(wholeWordsOnly);
   }
   
+  @Override
   @HiddenCreoleParameter
   public void setLongestMatchOnly(Boolean longestMatchOnly) {
     super.setLongestMatchOnly(longestMatchOnly);

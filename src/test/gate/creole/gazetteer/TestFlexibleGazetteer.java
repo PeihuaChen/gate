@@ -21,7 +21,6 @@ import gate.*;
 import gate.corpora.*;
 import java.io.File;
 import java.net.*;
-import gate.gui.MainFrame;
 import gate.util.GateRuntimeException;
 
 public class TestFlexibleGazetteer extends TestCase {
@@ -33,6 +32,7 @@ public class TestFlexibleGazetteer extends TestCase {
   }
 
   /** Fixture set up - does nothing */
+  @Override
   public void setUp() throws Exception {
     //make sure the right plugin is loaded
     File pluginsHome = new File(System.getProperty(
@@ -47,6 +47,7 @@ public class TestFlexibleGazetteer extends TestCase {
   }
 
   /** Fixture tear down - does nothing */
+  @Override
   public void tearDown() throws Exception {
   } // tearDown
 

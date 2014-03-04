@@ -8,8 +8,6 @@ import gate.corpora.TestDocument;
 
 import java.util.ArrayList;
 import java.net.URL;
-import java.net.URI;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;

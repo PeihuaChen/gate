@@ -210,6 +210,7 @@ public class LinearNode {
    * 
    * @return the string representation of this node
    */
+  @Override
   public String toString() {
     String result = list + ':' + major;
     if((null != minor) && (0 != minor.length())) result += ':' + minor;

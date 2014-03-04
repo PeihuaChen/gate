@@ -44,6 +44,7 @@ public abstract class AbstractCoreferencer extends AbstractLanguageAnalyser
 
 
   /** Initialise this resource, and return it. */
+  @Override
   public Resource init() throws ResourceInstantiationException {
 
     Resource result = super.init();
@@ -60,11 +61,13 @@ public abstract class AbstractCoreferencer extends AbstractLanguageAnalyser
    * the resource has changed since the resource has been created then the
    * resource will change too after calling reInit().
   */
+  @Override
   public void reInit() throws ResourceInstantiationException {
     init();
   } // reInit()
 
   /** Set the document to run on. */
+  @Override
   public void setDocument(Document newDocument) {
     super.setDocument(newDocument);
   }

@@ -24,6 +24,7 @@ import java.util.regex.Matcher;
  */
 public class NotRegExpFindPredicate extends AbstractRegExpPredicate {
 
+  @Override
   public String getOperator() {
     return NOT_REGEXP_FIND;
   }

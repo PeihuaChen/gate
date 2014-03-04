@@ -18,16 +18,8 @@ package gate.jape;
 
 import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import gate.Gate;
-import gate.FeatureMap;
-import gate.Factory;
 import gate.creole.Transducer;
-import gate.jape.parser.ParseCpsl;
-import gate.util.Err;
-import gate.util.Out;
 
 /**
  * A utility class for compilig JAPE files.

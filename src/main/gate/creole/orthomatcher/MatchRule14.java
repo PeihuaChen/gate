@@ -23,7 +23,8 @@ public class MatchRule14 implements OrthoMatcherRule {
 			this.orthomatcher=orthmatcher;
 	}
 	
-	public boolean value(String s1, String s2) {
+	@Override
+  public boolean value(String s1, String s2) {
 	    
 	    boolean result = false; 
 	  
@@ -38,8 +39,8 @@ public class MatchRule14 implements OrthoMatcherRule {
     
     //	    Out.prln("i = " + i);
     //	    Out.prln("j = " + j);
-    	      if ( ((Annotation) orthomatcher.tokensLongAnnot.get(j)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME).equals(
-    	              ((Annotation) orthomatcher.tokensShortAnnot.get(i)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME)) ) {
+    	      if ( orthomatcher.tokensLongAnnot.get(j).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME).equals(
+    	              orthomatcher.tokensShortAnnot.get(i).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME)) ) {
     	        matched_tokens++;
     	        j++;
     	      } else
@@ -54,6 +55,7 @@ public class MatchRule14 implements OrthoMatcherRule {
 	    return result;
 	}
 	
+  @Override
   public String getId(){
     return "MatchRule14";
   }

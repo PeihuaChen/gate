@@ -83,6 +83,7 @@ public class PooledProxyBeanDefinitionDecorator implements
   
   private static final String TARGET_SOURCE_CLASS = "target-source-class";
 
+  @Override
   public BeanDefinitionHolder decorate(Node node,
           BeanDefinitionHolder definition, ParserContext parserContext) {
     String originalBeanName = definition.getBeanName();

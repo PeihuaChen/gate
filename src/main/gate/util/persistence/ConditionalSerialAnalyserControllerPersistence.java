@@ -29,6 +29,7 @@ public class ConditionalSerialAnalyserControllerPersistence extends ConditionalC
    * Populates this Persistence with the data that needs to be stored from the
    * original source object.
    */
+  @Override
   public void extractDataFromSource(Object source)throws PersistenceException{
     if(! (source instanceof ConditionalSerialAnalyserController)){
       throw new UnsupportedOperationException(
@@ -48,6 +49,7 @@ public class ConditionalSerialAnalyserControllerPersistence extends ConditionalC
    * Creates a new object from the data contained. This new object is supposed
    * to be a copy for the original object used as source for data extraction.
    */
+  @Override
   public Object createObject()throws PersistenceException,
                                      ResourceInstantiationException{
     ConditionalSerialAnalyserController sac = (ConditionalSerialAnalyserController)

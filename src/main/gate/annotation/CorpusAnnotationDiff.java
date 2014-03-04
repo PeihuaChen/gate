@@ -341,7 +341,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     if (diffSet == null) return results;
     Iterator<DiffSetElement> diffIter = diffSet.iterator();
     while(diffIter.hasNext()){
-      DiffSetElement diffElem = (DiffSetElement)diffIter.next();
+      DiffSetElement diffElem = diffIter.next();
       switch(annotType){
         case CORRECT_TYPE:{
           if (diffElem.getRightType() == CORRECT_TYPE)
@@ -374,6 +374,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
    * @param paramaterName the name of the parameter
    * @return the current value of the parameter
    */
+  @Override
   public Object getParameterValue(String paramaterName)
                 throws ResourceInstantiationException{
     return AbstractResource.getParameterValue(this, paramaterName);
@@ -385,6 +386,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
    * @param paramaterName the name for the parameteer
    * @param parameterValue the value the parameter will receive
    */
+  @Override
   public void setParameterValue(String paramaterName, Object parameterValue)
               throws ResourceInstantiationException{
     // get the beaninfo for the resource bean, excluding data about Object
@@ -406,6 +408,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
    * @param parameters a feature map that has paramete names as keys and
    * parameter values as values.
    */
+  @Override
   public void setParameterValues(FeatureMap parameters)
               throws ResourceInstantiationException{
     AbstractResource.setParameterValues(this, parameters);
@@ -509,15 +512,18 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     return annotationSchema;
   } // AnnotationSchema
 
+  @Override
   public Dimension getPreferredScrollableViewportSize() {
         return getPreferredSize();
   }// public Dimension getPreferredScrollableViewportSize()
 
+  @Override
   public int getScrollableUnitIncrement(Rectangle visibleRect,
                                               int orientation, int direction) {
     return maxUnitIncrement;
   }// public int getScrollableUnitIncrement
 
+  @Override
   public int getScrollableBlockIncrement(Rectangle visibleRect,
                                               int orientation, int direction) {
     if (orientation == SwingConstants.HORIZONTAL)
@@ -526,10 +532,12 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
         return visibleRect.height - maxUnitIncrement;
   }// public int getScrollableBlockIncrement
 
+  @Override
   public boolean getScrollableTracksViewportWidth() {
     return false;
   }// public boolean getScrollableTracksViewportWidth()
 
+  @Override
   public boolean getScrollableTracksViewportHeight() {
     return false;
   }
@@ -538,6 +546,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     * This method does the diff, Precision,Recall,FalsePositive
     * calculation and so on.
     */
+  @Override
   public Resource init() throws ResourceInstantiationException {
     colors[DEFAULT_TYPE] = WHITE;
     colors[CORRECT_TYPE] = GREEN;
@@ -568,13 +577,13 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     diffSet = new HashSet<DiffSetElement>();
 
     for(int i=0; i<keyCorpus.size(); ++i) {
-      keyDocument = (Document) keyCorpus.get(i);
+      keyDocument = keyCorpus.get(i);
       // find corresponding responce document if any
 
       Document doc;
       responseDocument = null;
       for(int j=0; j<responseCorpus.size(); ++j) {
-        doc = (Document) responseCorpus.get(j);
+        doc = responseCorpus.get(j);
         if(0 == doc.getName().compareTo(keyDocument.getName())
             || 0 == doc.getSourceUrl().getFile().compareTo(
                       keyDocument.getSourceUrl().getFile())) {
@@ -658,6 +667,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
 
     // Arange all components on a this JPanel
     SwingUtilities.invokeLater(new Runnable(){
+      @Override
       public void run(){
         arangeAllComponents();
       }
@@ -892,12 +902,12 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     // list which satisfies isCompatible() and isPartiallyCompatible() relations
     Iterator<Annotation> keyIterator = aKeyAnnotList.iterator();
     while(keyIterator.hasNext()){
-      Annotation keyAnnot = (Annotation) keyIterator.next();
+      Annotation keyAnnot = keyIterator.next();
       Iterator<Annotation> responseIterator = aResponseAnnotList.iterator();
 
       DiffSetElement diffElement = null;
       while(responseIterator.hasNext()){
-        Annotation responseAnnot = (Annotation) responseIterator.next();
+        Annotation responseAnnot = responseIterator.next();
 
         if(keyAnnot.isPartiallyCompatible(responseAnnot,keyFeatureNamesSet)){
           keyPartiallySet.add(keyAnnot);
@@ -952,7 +962,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
           // compatible with the keyAnnot
           Iterator<DiffSetElement> respParIter = diffSet.iterator();
           while (respParIter.hasNext()){
-            DiffSetElement diffElem = (DiffSetElement) respParIter.next();
+            DiffSetElement diffElem = respParIter.next();
             Annotation respAnnot = diffElem.getRightAnnotation();
             if (respAnnot != null && keyAnnot.isPartiallyCompatible(respAnnot,
                                                           keyFeatureNamesSet)){
@@ -983,7 +993,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     DiffSetElement diffElem = null;
     Iterator<Annotation> responseIter = aResponseAnnotList.iterator();
     while (responseIter.hasNext()){
-      Annotation respAnnot = (Annotation) responseIter.next();
+      Annotation respAnnot = responseIter.next();
       if (responsePartiallySet.contains(respAnnot))
         diffElem = new DiffSetElement( null,
                                        respAnnot,
@@ -1021,14 +1031,14 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
       precisionStrict =  ((double)typeCounter[CORRECT_TYPE])/((double)actual);
       precisionLenient = ((double)(typeCounter[CORRECT_TYPE] +
                          typeCounter[PARTIALLY_CORRECT_TYPE]))/((double)actual);
-      precisionAverage = ((double)(precisionStrict + precisionLenient)) /
-                                                                  ((double) 2);
+      precisionAverage = (precisionStrict + precisionLenient) /
+                                                                  2;
     } // End if
     if (possible != 0){
       recallStrict = ((double)typeCounter[CORRECT_TYPE])/((double)possible);
       recallLenient = ((double)(typeCounter[CORRECT_TYPE] +
                        typeCounter[PARTIALLY_CORRECT_TYPE]))/((double)possible);
-      recallAverage = ((double)(recallStrict + recallLenient)) / ((double)2);
+      recallAverage = (recallStrict + recallLenient) / 2;
     } // End if
 
 
@@ -1051,8 +1061,8 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
      falsePositiveStrict = ((double)(typeCounter[SPURIOUS_TYPE] +
                              typeCounter[PARTIALLY_CORRECT_TYPE])) /((double)no);
      falsePositiveLenient = ((double)typeCounter[SPURIOUS_TYPE]) /((double) no);
-     falsePositiveAverage = ((double)(falsePositiveStrict +
-                                           falsePositiveLenient))/((double)2) ;
+     falsePositiveAverage = (falsePositiveStrict +
+                                           falsePositiveLenient)/2 ;
     } // End if
 
     // Calculate F-Measure Strict
@@ -1066,7 +1076,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
       fMeasureLenient = (precisionLenient * recallLenient) / denominator ;
     else fMeasureLenient = 0.0;
     // Calculate F-Measure Average
-    fMeasureAverage = (fMeasureStrict + fMeasureLenient) / (double)2;
+    fMeasureAverage = (fMeasureStrict + fMeasureLenient) / 2;
 
   } // doDiff
 
@@ -1081,14 +1091,14 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     if (keyPartiallySet.contains(anAnnot)) return DEFAULT_TYPE;
     Iterator<Annotation> iter = responsePartiallySet.iterator();
     while(iter.hasNext()){
-      Annotation a = (Annotation) iter.next();
+      Annotation a = iter.next();
       if (anAnnot.isPartiallyCompatible(a,keyFeatureNamesSet))
         return DEFAULT_TYPE;
     } // End while
 
     iter = responseAnnotList.iterator();
     while(iter.hasNext()){
-      Annotation a = (Annotation) iter.next();
+      Annotation a = iter.next();
       if (anAnnot.isPartiallyCompatible(a,keyFeatureNamesSet)){
          responsePartiallySet.add(a);
          keyPartiallySet.add(anAnnot);
@@ -1110,14 +1120,14 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     if (responsePartiallySet.contains(anAnnot)) return PARTIALLY_CORRECT_TYPE;
     Iterator<Annotation> iter = keyPartiallySet.iterator();
     while(iter.hasNext()){
-      Annotation a = (Annotation) iter.next();
+      Annotation a = iter.next();
       if (a.isPartiallyCompatible(anAnnot,keyFeatureNamesSet))
         return PARTIALLY_CORRECT_TYPE;
     } // End while
 
     iter = keyAnnotList.iterator();
     while(iter.hasNext()){
-      Annotation a = (Annotation) iter.next();
+      Annotation a = iter.next();
       if (a.isPartiallyCompatible(anAnnot,keyFeatureNamesSet)){
          responsePartiallySet.add(anAnnot);
          keyPartiallySet.add(a);
@@ -1169,16 +1179,19 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     } // AnnotationDiffTableModel
 
     /** Return the size of data.*/
+    @Override
     public int getRowCount(){
       return modelData.size();
     } //getRowCount
 
     /** Return the number of columns.*/
+    @Override
     public int getColumnCount(){
       return 10;
     } //getColumnCount
 
     /** Returns the name of each column in the model*/
+    @Override
     public String getColumnName(int column){
       switch(column){
         case 0: return "String - Key";
@@ -1196,6 +1209,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     } //getColumnName
 
     /** Return the class type for each column. */
+    @Override
     public Class<?> getColumnClass(int column){
       switch(column){
         case 0: return String.class;
@@ -1213,8 +1227,9 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     } //getColumnClass
 
     /**Returns a value from the table model */
+    @Override
     public Object getValueAt(int row, int column){
-      DiffSetElement diffSetElement = (DiffSetElement) modelData.get(row);
+      DiffSetElement diffSetElement = modelData.get(row);
       if (diffSetElement == null) return null;
       switch(column){
         // Left Side (Key)
@@ -1323,6 +1338,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
 
     /** This method is called by JTable*/
 
+    @Override
     public Component getTableCellRendererComponent(
       JTable table, Object value, boolean isSelected, boolean hasFocus,
       int row, int column
@@ -1371,6 +1387,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
 
       public AnnotationSetComparator(){}
 
+      @Override
       public int compare(Annotation a1, Annotation a2) {
         
         Long l1 = a1.getStartNode().getOffset();

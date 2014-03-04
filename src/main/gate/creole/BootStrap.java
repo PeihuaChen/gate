@@ -208,9 +208,9 @@ public class BootStrap {
       featureMethod.setValueReturn(
                           listMethodsCurrentClass[i].getReturnType().getName());
 
-      Class[] parameters = (Class[])(
+      Class[] parameters = (
                                 listMethodsCurrentClass[i].getParameterTypes());
-      Class[] exceptions = (Class[])(
+      Class[] exceptions = (
                                 listMethodsCurrentClass[i].getExceptionTypes());
 
       // determine the parameters for the current method
@@ -248,17 +248,17 @@ public class BootStrap {
       FeatureMethod featureMethod = (FeatureMethod)methodsInterfacesList.get(i);
       if (methodsExtendList.contains(featureMethod) == false) {
         // the name of the method
-        String nameMethod = (String)(featureMethod.getNameMethod());
+        String nameMethod = (featureMethod.getNameMethod());
 
         // the types of the parameters of the method
-        List valTypes = (List)(featureMethod.getParameterTypes());
+        List valTypes = (featureMethod.getParameterTypes());
 
         // the value which the method returns
         String typeReturn = determineTypePackage(
-                                      (String)(featureMethod.getValueReturn()));
+                                      (featureMethod.getValueReturn()));
 
         // get the list of exceptions for the current method
-        List valException = (List)(featureMethod.getExceptionTypes());
+        List valException = (featureMethod.getExceptionTypes());
 
         String declaration = "public "+ typeReturn +" "+
                              nameMethod +"(";
@@ -568,7 +568,7 @@ public class BootStrap {
     String oldDirectories = properties.getProperty("directories");
     StringTokenizer token = new StringTokenizer(oldDirectories,",");
     while (token.hasMoreTokens()) {
-      String propPathDirectory = (String)token.nextToken();
+      String propPathDirectory = token.nextToken();
       if (propPathDirectory.endsWith("___ALLPACKAGES___")) {
         //create every directory from the path of package
         newPathFile =
@@ -598,7 +598,7 @@ public class BootStrap {
         token = new StringTokenizer(oldFiles,",");
         //go through all the files
         while (token.hasMoreTokens()) {
-          String propPathFiles = (String)token.nextToken();
+          String propPathFiles = token.nextToken();
           oldPathFile = changeKeyValue(propPathFiles,oldNames);
 
           // change the path according to input
@@ -725,6 +725,7 @@ class FeatureMethod {
     exceptionTypes = newExceptionTypes;
   }//setExceptionTypes
 
+  @Override
   public boolean equals(Object obj){
     if(obj == null)
       return false;
@@ -761,7 +762,8 @@ class FeatureMethod {
     return true;
   }// equals
 
-   public int hashCode(){
+   @Override
+  public int hashCode(){
     int hashCodeRes = 0;
     if (nameMethod != null )
        hashCodeRes ^= nameMethod.hashCode();

@@ -54,6 +54,7 @@ public class XmlPositionCorrectionHandler extends DefaultHandler {
   } // XmlPositionCorrectionHandler
 
   /** Initialization of variables on start of document parsing */
+  @Override
   public void startDocument() throws org.xml.sax.SAXException {
     m_realOffset = 0;
     m_lastPosition = 0;
@@ -67,6 +68,7 @@ public class XmlPositionCorrectionHandler extends DefaultHandler {
   } // getRealOffset
 
   /** Here is the correction of the Xerces parser bug. */
+  @Override
   public void characters(char[] text, int offset, int len)
                   throws org.xml.sax.SAXException {
     if(offset == 0 && len == 1 && text.length <= 2) {

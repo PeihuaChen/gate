@@ -38,6 +38,7 @@ public class AnnotationFeatureAccessor implements AnnotationAccessor {
   /**
    * Obtain a named feature
    */
+  @Override
   public Object getValue(Annotation annot, AnnotationSet context) {
 
     if(featureName == null || featureName.length() == 00)
@@ -73,10 +74,12 @@ public class AnnotationFeatureAccessor implements AnnotationAccessor {
     return featureName;
   }
 
+  @Override
   public void setKey(Object key) {
     if(key != null) featureName = key.toString();
   }
 
+  @Override
   public Object getKey() {
     return featureName;
   }

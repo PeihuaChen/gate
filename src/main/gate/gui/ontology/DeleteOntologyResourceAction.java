@@ -42,6 +42,7 @@ public class DeleteOntologyResourceAction extends AbstractAction implements
     super(caption, icon);
   }
 
+  @Override
   public void actionPerformed(ActionEvent actionevent) {
     String[] resourcesToDelete = new String[selectedNodes.size()];
     int i = 0;
@@ -90,6 +91,7 @@ public class DeleteOntologyResourceAction extends AbstractAction implements
     this.ontology = ontology;
   }
 
+  @Override
   public void selectionChanged(ArrayList<DefaultMutableTreeNode> arraylist) {
     selectedNodes = arraylist;
   }

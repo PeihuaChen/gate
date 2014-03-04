@@ -39,6 +39,7 @@ public class MimeType {
    * @param other the othe MIME Type to be compared with this one.
    * @return true if the two MIME Types are the same.
    */
+  @Override
   public boolean equals(Object other){
     return other != null && type.equals(((MimeType)other).getType()) &&
            subtype.equals(((MimeType)other).getSubtype());
@@ -49,6 +50,7 @@ public class MimeType {
    * subtype.
    * @return and integer.
    */
+  @Override
   public int hashCode(){
     return (type == null ? 0 : type.hashCode()) +
             (subtype == null ? 0 : subtype.hashCode());

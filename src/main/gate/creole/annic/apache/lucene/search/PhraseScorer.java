@@ -77,8 +77,10 @@ abstract class PhraseScorer extends Scorer {
 
   }
 
+  @Override
   public int doc() { return first.doc; }
 
+  @Override
   public boolean next(Searcher searcher) throws IOException {
     this.searcher = searcher;
     if (firstTime) {
@@ -110,12 +112,14 @@ abstract class PhraseScorer extends Scorer {
     return false;                                 // no more matches
   }
 
+  @Override
   public float score(Searcher searcher) throws IOException {
     this.searcher = searcher;
     float raw = getSimilarity().tf(freq) * value; // raw score
     return raw * Similarity.decodeNorm(norms[first.doc]); // normalize
   }
 
+  @Override
   public boolean skipTo(int target) throws IOException {
     for (PhrasePositions pp = first; more && pp != null; pp = pp.next) {
       more = pp.skipTo(target);
@@ -161,6 +165,7 @@ abstract class PhraseScorer extends Scorer {
     last.next = null;
   }
 
+  @Override
   public Explanation explain(final int doc) throws IOException {
     Explanation tfExplanation = new Explanation();
 
@@ -173,6 +178,7 @@ abstract class PhraseScorer extends Scorer {
     return tfExplanation;
   }
 
+  @Override
   public String toString() { return "scorer(" + weight + ")"; }
 
 }

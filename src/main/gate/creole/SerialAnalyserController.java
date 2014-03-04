@@ -53,6 +53,7 @@ public class SerialAnalyserController extends SerialController
   /**
    * @return the document
    */
+  @Override
   public Document getDocument() {
     return document;
   }
@@ -63,6 +64,7 @@ public class SerialAnalyserController extends SerialController
   /**
    * @param document the document to set
    */
+  @Override
   @Optional
   @RunTime
   @CreoleParameter
@@ -70,10 +72,12 @@ public class SerialAnalyserController extends SerialController
     this.document = document;
   }
 
+  @Override
   public gate.Corpus getCorpus() {
     return corpus;
   }
 
+  @Override
   public void setCorpus(gate.Corpus corpus) {
     this.corpus = corpus;
   }
@@ -162,6 +166,7 @@ public class SerialAnalyserController extends SerialController
   
 
   /** Run the Processing Resources in sequence. */
+  @Override
   protected void executeImpl() throws ExecutionException {
     interrupted = false;
     if(corpus == null)
@@ -191,7 +196,7 @@ public class SerialAnalyserController extends SerialController
           // record the time before loading the document
           long documentLoadingStartTime = Benchmark.startPoint();
   
-          Document doc = (Document)corpus.get(i);
+          Document doc = corpus.get(i);
   
           // include the document name in the benchmark ID for sub-events
           setBenchmarkId(Benchmark.createBenchmarkId("doc_" + doc.getName(),
@@ -279,6 +284,7 @@ public class SerialAnalyserController extends SerialController
    * Overidden from {@link SerialController} to only allow
    * {@link LanguageAnalyser}s as components.
    */
+  @Override
   public void add(ProcessingResource pr){
     checkLanguageAnalyser(pr);
     super.add(pr);
@@ -288,6 +294,7 @@ public class SerialAnalyserController extends SerialController
    * Overidden from {@link SerialController} to only allow
    * {@link LanguageAnalyser}s as components.
    */
+  @Override
   public void add(int index, ProcessingResource pr) {
     checkLanguageAnalyser(pr);
     super.add(index, pr);
@@ -332,6 +339,7 @@ public class SerialAnalyserController extends SerialController
    *           usually caused by the lack of a parameter or of the read accessor
    *           for a parameter.
    */
+  @Override
   public List getOffendingPocessingResources()
     throws ResourceInstantiationException {
     // take all the contained PRs
@@ -341,7 +349,7 @@ public class SerialAnalyserController extends SerialController
     while(prIter.hasNext()) {
       ProcessingResource pr = (ProcessingResource)prIter.next();
       ResourceData rData =
-        (ResourceData)Gate.getCreoleRegister().get(pr.getClass().getName());
+        Gate.getCreoleRegister().get(pr.getClass().getName());
       // this is a list of lists
       List parameters = rData.getParameterList().getRuntimeParameters();
       // remove corpus and document
@@ -385,6 +393,7 @@ public class SerialAnalyserController extends SerialController
   /**
    * Overridden to also clean up the corpus value.
    */
+  @Override
   public void resourceUnloaded(CreoleEvent e) {
     super.resourceUnloaded(e);
     if(e.getResource() == corpus) {

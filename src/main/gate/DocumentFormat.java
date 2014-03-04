@@ -554,6 +554,7 @@ extends AbstractLanguageResource implements LanguageResource{
   } // getDocumentFormat(URL)
 
   /** Get the feature set */
+  @Override
   public FeatureMap getFeatures() { return features; }
 
    /** Get the markup elements map */
@@ -573,6 +574,7 @@ extends AbstractLanguageResource implements LanguageResource{
   }
 
   /** Set the features map*/
+  @Override
   public void setFeatures(FeatureMap features){this.features = features;}
 
   /** Set the mime type*/

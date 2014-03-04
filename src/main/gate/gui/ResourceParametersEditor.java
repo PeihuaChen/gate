@@ -103,7 +103,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       parameterDisjunctions = new ArrayList<ParameterDisjunction>(parameters.size());
       for(int i = 0; i < parameters.size(); i++) {
         parameterDisjunctions.add(new ParameterDisjunction(resource,
-                (List)parameters.get(i)));
+                parameters.get(i)));
       }
     }
     else {
@@ -217,24 +217,30 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     return values;
   }
 
+  @Override
   public void resourceLoaded(CreoleEvent e) {
     repaint();
   }
 
+  @Override
   public void resourceUnloaded(CreoleEvent e) {
     repaint();
   }
 
+  @Override
   public void resourceRenamed(Resource resource, String oldName, String newName) {
     repaint();
   }
 
+  @Override
   public void datastoreOpened(CreoleEvent e) {
   }
 
+  @Override
   public void datastoreCreated(CreoleEvent e) {
   }
 
+  @Override
   public void datastoreClosed(CreoleEvent e) {
   }
 
@@ -286,10 +292,12 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
   // inner classes
   protected class ParametersTableModel extends AbstractTableModel {
 
+    @Override
     public int getColumnCount() {
       return 4;
     }
 
+    @Override
     public Class getColumnClass(int columnIndex) {
       switch(columnIndex) {
         case 0:
@@ -305,6 +313,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       }
     }// public Class getColumnClass(int columnIndex)
 
+    @Override
     public String getColumnName(int columnIndex) {
       switch(columnIndex) {
         case 0:
@@ -320,6 +329,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       }
     }// public String getColumnName(int columnIndex)
 
+    @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
       switch(columnIndex) {
         case 0:
@@ -335,10 +345,12 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       }
     }// public boolean isCellEditable
 
+    @Override
     public int getRowCount() {
       return (parameterDisjunctions == null) ? 0 : parameterDisjunctions.size();
     }
 
+    @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
       ParameterDisjunction pDisj = parameterDisjunctions.get(rowIndex);
       switch(columnIndex) {
@@ -356,6 +368,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       }
     }// public Object getValueAt
 
+    @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
       ParameterDisjunction pDisj = parameterDisjunctions.get(rowIndex);
       switch(columnIndex) {
@@ -388,6 +401,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     public ParameterDisjunctionRenderer() {
       combo = new JComboBox();
       class CustomRenderer extends JLabel implements ListCellRenderer {
+        @Override
         public Component getListCellRendererComponent(JList list, Object value,
                 int index, boolean isSelected, boolean cellHasFocus) {
 
@@ -399,6 +413,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       combo.setRenderer(new CustomRenderer());
     }
 
+    @Override
     public Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
       ParameterDisjunction pDisj = (ParameterDisjunction)value;
@@ -463,6 +478,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       combo.setRenderer(new ResourceRenderer());
     }// CustomObjectRenderer()
 
+    @Override
     public Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
 
@@ -591,6 +607,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
   }// class ObjectRenderer extends DefaultTableCellRenderer
 
   class ParameterDisjunctionComparator implements Comparator {
+    @Override
     public int compare(Object o1, Object o2) {
       ParameterDisjunction pDisj1 = (ParameterDisjunction)o1;
       ParameterDisjunction pDisj2 = (ParameterDisjunction)o2;
@@ -607,6 +624,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
           setOpaque(true);
         }
 
+        @Override
         public Component getListCellRendererComponent(JList list, Object value,
                 int index, boolean isSelected, boolean cellHasFocus) {
           if(isSelected) {
@@ -644,6 +662,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
         // ListCellRenderer
       combo.setRenderer(new CustomRenderer());
       combo.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           pDisj.setSelectedIndex(combo.getSelectedIndex());
           stopCellEditing();
@@ -651,6 +670,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       });
     }// public ParameterDisjunctionEditor()
 
+    @Override
     public Component getTableCellEditorComponent(JTable table, Object value,
             boolean isSelected, int row, int column) {
       pDisj = (ParameterDisjunction)value;
@@ -660,12 +680,14 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       return combo;
     }// public Component getTableCellEditorComponent
 
+    @Override
     public Object getCellEditorValue() {
       pDisj.setSelectedIndex(combo.getSelectedIndex());
 //      return combo.getSelectedIndex();
       return pDisj;
     }
 
+    @Override
     public boolean stopCellEditing() {
       combo.hidePopup();
       return super.stopCellEditing();
@@ -688,6 +710,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       fileButton = new JButton(MainFrame.getIcon("open-file"));
       fileButton.setToolTipText("Browse the file system");
       fileButton.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
           fileChooser.setDialogTitle("Select a file");
@@ -712,6 +735,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       listButton = new JButton(MainFrame.getIcon("edit-list"));
       listButton.setToolTipText("Edit the list");
       listButton.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           List returnedList = listEditor.showDialog();
           if(returnedList != null) {
@@ -727,6 +751,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       fmButton = new JButton(MainFrame.getIcon("edit-list"));
       fmButton.setToolTipText("Edit the feature map");
       fmButton.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           FeatureMap returnedFM = fmEditor.showDialog();
           if(returnedFM != null) {
@@ -745,6 +770,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       textFieldBoolean = new JTextField();
       textFieldBoolean.setEditable(false);
       textFieldBoolean.addMouseListener(new MouseAdapter() {
+        @Override
         public void mouseClicked(MouseEvent e) {
           Boolean value = Boolean.valueOf(textFieldBoolean.getText());
           value = !value;
@@ -752,6 +778,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
         }
       });
       textFieldBoolean.addKeyListener(new KeyAdapter() {
+        @Override
         public void keyTyped(KeyEvent e) {
           Boolean value = Boolean.valueOf(textFieldBoolean.getText());
           value = !value;
@@ -760,6 +787,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       });
 
       textButtonBox.addFocusListener(new FocusAdapter() {
+        @Override
         public void focusGained(FocusEvent e) {
           if(!comboUsed) {
             // needed because the focus would otherwise stay
@@ -770,6 +798,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       });
       // select the opposite element when tab key is pressed
       textField.addKeyListener(new KeyAdapter() {
+        @Override
         public void keyPressed(KeyEvent e) {
           JTextField textField = (JTextField) e.getSource();
           if((e.getKeyCode() == KeyEvent.VK_TAB)
@@ -782,6 +811,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
 
     }// ParameterValueEditor()
 
+    @Override
     public Component getTableCellEditorComponent(JTable table, Object value,
             boolean isSelected, int row, int column) {
       comboUsed = false;
@@ -936,6 +966,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       }
     }// getTableCellEditorComponent
 
+    @Override
     public Object getCellEditorValue() {
       if(comboUsed) {
         Object value = combo.getSelectedItem();

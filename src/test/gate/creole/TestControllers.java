@@ -41,6 +41,7 @@ public class TestControllers extends TestCase
   public TestControllers(String name) { super(name); }
 
   /** Fixture set up */
+  @Override
   public void setUp() throws GateException {
     // Initialise the GATE library and get the creole register
     Gate.init();
@@ -51,6 +52,7 @@ public class TestControllers extends TestCase
   /** Put things back as they should be after running tests
     * (reinitialise the CREOLE register).
     */
+  @Override
   public void tearDown() throws Exception {
     reg.clear();
     Gate.init();
@@ -73,7 +75,7 @@ public class TestControllers extends TestCase
                                                     params);
 
     if(DEBUG) {
-      ResourceData docRd = (ResourceData) reg.get("gate.corpora.DocumentImpl");
+      ResourceData docRd = reg.get("gate.corpora.DocumentImpl");
       assertNotNull("Couldn't find document res data", docRd);
       Out.prln(docRd.getParameterList().getInitimeParameters());
     }

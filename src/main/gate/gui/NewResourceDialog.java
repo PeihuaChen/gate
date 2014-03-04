@@ -111,6 +111,7 @@ public class NewResourceDialog extends JDialog {
 
   protected void initListeners(){
     Action applyAction = new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         userCanceled = false;
         TableCellEditor cellEditor = parametersEditor.getCellEditor();
@@ -121,12 +122,14 @@ public class NewResourceDialog extends JDialog {
       }
     };
     Action helpAction = new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         MainFrame.getInstance().showHelpFrame(resourceData.getHelpURL(),
           resourceData.getClassName());
       }
     };
     Action cancelAction = new AbstractAction() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         userCanceled = true;
         setVisible(false);
@@ -219,6 +222,7 @@ public class NewResourceDialog extends JDialog {
       return;
     } else {
       Runnable runnable = new Runnable(){
+        @Override
         public void run(){
           //create the new resource
           FeatureMap params = parametersEditor.getParameterValues();
@@ -279,6 +283,7 @@ public class NewResourceDialog extends JDialog {
             if(!success) {
               // re-show the dialog, to allow the suer to correct the entry
               SwingUtilities.invokeLater(new Runnable() {
+                @Override
                 public void run() {
                   show(null);    
                 }

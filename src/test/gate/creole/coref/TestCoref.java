@@ -56,9 +56,11 @@ public class TestCoref extends TestCase {
   } // suite
 
   /** Fixture set up */
+  @Override
   public void setUp() throws Exception {
   }
 
+  @Override
   public void tearDown() throws Exception {
   } // tearDown
 

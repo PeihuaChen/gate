@@ -78,17 +78,20 @@ public class MultiReader extends IndexReader {
    *  in a given vectorized field.
    *  If no such fields existed, the method returns null.
    */
+  @Override
   public TermFreqVector[] getTermFreqVectors(int n) throws IOException {
     int i = readerIndex(n);        // find segment num
     return subReaders[i].getTermFreqVectors(n - starts[i]); // dispatch to segment
   }
 
+  @Override
   public TermFreqVector getTermFreqVector(int n, String field)
       throws IOException {
     int i = readerIndex(n);        // find segment num
     return subReaders[i].getTermFreqVector(n - starts[i], field);
   }
 
+  @Override
   public synchronized int numDocs() {
     if (numDocs == -1) {        // check cache
       int n = 0;                // cache miss--recompute
@@ -99,22 +102,27 @@ public class MultiReader extends IndexReader {
     return numDocs;
   }
 
+  @Override
   public int maxDoc() {
     return maxDoc;
   }
 
+  @Override
   public Document document(int n) throws IOException {
     int i = readerIndex(n);                          // find segment num
     return subReaders[i].document(n - starts[i]);    // dispatch to segment reader
   }
 
+  @Override
   public boolean isDeleted(int n) {
     int i = readerIndex(n);                           // find segment num
     return subReaders[i].isDeleted(n - starts[i]);    // dispatch to segment reader
   }
 
+  @Override
   public boolean hasDeletions() { return hasDeletions; }
 
+  @Override
   protected void doDelete(int n) throws IOException {
     numDocs = -1;                             // invalidate cache
     int i = readerIndex(n);                   // find segment num
@@ -122,6 +130,7 @@ public class MultiReader extends IndexReader {
     hasDeletions = true;
   }
 
+  @Override
   protected void doUndeleteAll() throws IOException {
     for (int i = 0; i < subReaders.length; i++)
       subReaders[i].undeleteAll();
@@ -149,6 +158,7 @@ public class MultiReader extends IndexReader {
     return hi;
   }
 
+  @Override
   public synchronized byte[] norms(String field) throws IOException {
     byte[] bytes = (byte[])normsCache.get(field);
     if (bytes != null)
@@ -161,6 +171,7 @@ public class MultiReader extends IndexReader {
     return bytes;
   }
 
+  @Override
   public synchronized void norms(String field, byte[] result, int offset)
     throws IOException {
     byte[] bytes = (byte[])normsCache.get(field);
@@ -171,6 +182,7 @@ public class MultiReader extends IndexReader {
       subReaders[i].norms(field, result, offset + starts[i]);
   }
 
+  @Override
   protected void doSetNorm(int n, String field, byte value)
     throws IOException {
     normsCache.remove(field);                         // clear cache
@@ -178,14 +190,17 @@ public class MultiReader extends IndexReader {
     subReaders[i].setNorm(n-starts[i], field, value); // dispatch
   }
 
+  @Override
   public TermEnum terms() throws IOException {
     return new MultiTermEnum(subReaders, starts, null);
   }
 
+  @Override
   public TermEnum terms(Term term) throws IOException {
     return new MultiTermEnum(subReaders, starts, term);
   }
 
+  @Override
   public int docFreq(Term t) throws IOException {
     int total = 0;          // sum freqs in segments
     for (int i = 0; i < subReaders.length; i++)
@@ -193,19 +208,23 @@ public class MultiReader extends IndexReader {
     return total;
   }
 
+  @Override
   public TermDocs termDocs() throws IOException {
     return new MultiTermDocs(subReaders, starts);
   }
 
+  @Override
   public TermPositions termPositions() throws IOException {
     return new MultiTermPositions(subReaders, starts);
   }
 
+  @Override
   protected void doCommit() throws IOException {
     for (int i = 0; i < subReaders.length; i++)
       subReaders[i].commit();
   }
 
+  @Override
   protected synchronized void doClose() throws IOException {
     for (int i = 0; i < subReaders.length; i++)
       subReaders[i].close();
@@ -214,6 +233,7 @@ public class MultiReader extends IndexReader {
   /**
    * @see IndexReader#getFieldNames()
    */
+  @Override
   public Collection getFieldNames() throws IOException {
     // maintain a unique set of field names
     Set fieldSet = new HashSet();
@@ -232,6 +252,7 @@ public class MultiReader extends IndexReader {
   /**
    * @see IndexReader#getFieldNames(boolean)
    */
+  @Override
   public Collection getFieldNames(boolean indexed) throws IOException {
     // maintain a unique set of field names
     Set fieldSet = new HashSet();
@@ -243,6 +264,7 @@ public class MultiReader extends IndexReader {
     return fieldSet;
   }
 
+  @Override
   public Collection getIndexedFieldNames(boolean storedTermVector) {
     // maintain a unique set of field names
     Set fieldSet = new HashSet();
@@ -286,6 +308,7 @@ class MultiTermEnum extends TermEnum {
     }
   }
 
+  @Override
   public boolean next() throws IOException {
     SegmentMergeInfo top = (SegmentMergeInfo)queue.top();
     if (top == null) {
@@ -307,14 +330,17 @@ class MultiTermEnum extends TermEnum {
     return true;
   }
 
+  @Override
   public Term term() {
     return term;
   }
 
+  @Override
   public int docFreq() {
     return docFreq;
   }
 
+  @Override
   public void close() throws IOException {
     queue.close();
   }
@@ -338,13 +364,16 @@ class MultiTermDocs implements TermDocs {
     readerTermDocs = new TermDocs[r.length];
   }
 
+  @Override
   public int doc() {
     return base + current.doc();
   }
+  @Override
   public int freq() {
     return current.freq();
   }
 
+  @Override
   public void seek(Term term) {
     this.term = term;
     this.base = 0;
@@ -352,10 +381,12 @@ class MultiTermDocs implements TermDocs {
     this.current = null;
   }
 
+  @Override
   public void seek(TermEnum termEnum) throws IOException {
     seek(termEnum.term());
   }
 
+  @Override
   public boolean next() throws IOException {
     if (current != null && current.next()) {
       return true;
@@ -368,6 +399,7 @@ class MultiTermDocs implements TermDocs {
   }
 
   /** Optimized implementation. */
+  @Override
   public int read(final int[] docs, final int[] freqs) throws IOException {
     while (true) {
       while (current == null) {
@@ -391,6 +423,7 @@ class MultiTermDocs implements TermDocs {
   }
 
   /** As yet unoptimized implementation. */
+  @Override
   public boolean skipTo(int target) throws IOException {
     do {
       if (!next())
@@ -414,6 +447,7 @@ class MultiTermDocs implements TermDocs {
     return reader.termDocs();
   }
 
+  @Override
   public void close() throws IOException {
     for (int i = 0; i < readerTermDocs.length; i++) {
       if (readerTermDocs[i] != null)
@@ -427,10 +461,12 @@ class MultiTermPositions extends MultiTermDocs implements TermPositions {
     super(r,s);
   }
 
+  @Override
   protected TermDocs termDocs(IndexReader reader) throws IOException {
-    return (TermDocs)reader.termPositions();
+    return reader.termPositions();
   }
 
+  @Override
   public int nextPosition() throws IOException {
     return ((TermPositions)current).nextPosition();
   }

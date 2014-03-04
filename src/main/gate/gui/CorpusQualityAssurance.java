@@ -82,6 +82,7 @@ import gate.util.Strings;
 public class CorpusQualityAssurance extends AbstractVisualResource
   implements CorpusListener {
 
+  @Override
   public Resource init(){
     initLocalData();
     initGuiComponents();
@@ -113,6 +114,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     corpusChanged = false;
     measuresType = FSCORE_MEASURES;
     doubleComparator = new Comparator<String>() {
+      @Override
       public int compare(String s1, String s2) {
         if (s1 == null || s2 == null) {
           return 0;
@@ -126,6 +128,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       }
     };
     totalComparator = new Comparator<String>() {
+      @Override
       public int compare(String s1, String s2) {
         if (s1 == null || s2 == null) {
           return 0;
@@ -183,6 +186,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     sidePanel.add(Box.createVerticalStrut(2), gbc);
     setCheck = new JCheckBox("present in every document", false);
     setCheck.addActionListener(new AbstractAction(){
+      @Override
       public void actionPerformed(ActionEvent e) {
         updateSetList();
       }
@@ -205,6 +209,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     sidePanel.add(Box.createVerticalStrut(2), gbc);
     typeCheck = new JCheckBox("present in every selected set", false);
     typeCheck.addActionListener(new AbstractAction(){
+      @Override
       public void actionPerformed(ActionEvent e) {
         setList.getListSelectionListeners()[0].valueChanged(null);
       }
@@ -227,6 +232,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     sidePanel.add(Box.createVerticalStrut(2), gbc);
     featureCheck = new JCheckBox("present in every selected type", false);
     featureCheck.addActionListener(new AbstractAction(){
+      @Override
       public void actionPerformed(ActionEvent e) {
         typeList.getListSelectionListeners()[0].valueChanged(null);
       }
@@ -341,6 +347,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     // options button action
     optionsButton.setAction(new AbstractAction("Options") {
       int[] selectedIndices;
+      @Override
       public void actionPerformed(ActionEvent e) {
         JToggleButton button = (JToggleButton) e.getSource();
         // switch measure options panel and measure list
@@ -391,11 +398,14 @@ public class CorpusQualityAssurance extends AbstractVisualResource
 
     // tables
     annotationTable = new XJTable() {
+      @Override
       public boolean isCellEditable(int rowIndex, int vColIndex) {
         return false;
       }
+      @Override
       protected JTableHeader createDefaultTableHeader() {
         return new JTableHeader(columnModel) {
+          @Override
           public String getToolTipText(MouseEvent event) {
             int index = columnModel.getColumnIndexAtX(event.getPoint().x);
             if (index == -1) { return null; }
@@ -411,11 +421,14 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     annotationTable.setEnableHidingColumns(true);
     annotationTable.setAutoResizeMode(XJTable.AUTO_RESIZE_ALL_COLUMNS);
     documentTable = new XJTable() {
+      @Override
       public boolean isCellEditable(int rowIndex, int vColIndex) {
         return false;
       }
+      @Override
       protected JTableHeader createDefaultTableHeader() {
         return new JTableHeader(columnModel) {
+          @Override
           public String getToolTipText(MouseEvent event) {
             int index = columnModel.getColumnIndexAtX(event.getPoint().x);
             if (index == -1) { return null; }
@@ -431,12 +444,14 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     documentTable.setEnableHidingColumns(true);
     documentTable.setAutoResizeMode(XJTable.AUTO_RESIZE_ALL_COLUMNS);
     document2Table = new XJTable() {
+      @Override
       public boolean isCellEditable(int rowIndex, int vColIndex) {
         return false;
       }
     };
     document2Table.setModel(document2TableModel);
     confusionTable = new XJTable() {
+      @Override
       public boolean isCellEditable(int rowIndex, int vColIndex) {
         return false;
       }
@@ -466,21 +481,26 @@ public class CorpusQualityAssurance extends AbstractVisualResource
 
     // when the view is shown update the tables if the corpus has changed
     addAncestorListener(new AncestorListener() {
+      @Override
       public void ancestorAdded(AncestorEvent event) {
         if (!isShowing() || !corpusChanged) { return; }
         if (timerTask != null) { timerTask.cancel(); }
         Date timeToRun = new Date(System.currentTimeMillis() + 1000);
-        timerTask = new TimerTask() { public void run() {
+        timerTask = new TimerTask() { @Override
+        public void run() {
           readSetsTypesFeatures(0);
         }};
         timer.schedule(timerTask, timeToRun); // add a delay before updating
       }
+      @Override
       public void ancestorRemoved(AncestorEvent event) { /* do nothing */ }
+      @Override
       public void ancestorMoved(AncestorEvent event) { /* do nothing */ }
     });
 
     // when set list selection change
     setList.addListSelectionListener(new ListSelectionListener() {
+      @Override
       public void valueChanged(ListSelectionEvent e) {
         if (typesSelected == null) {
           typesSelected = typeList.getSelectedValues();
@@ -553,6 +573,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
 
     // when type list selection change
     typeList.addListSelectionListener(new ListSelectionListener() {
+      @Override
       public void valueChanged(ListSelectionEvent e) {
         // update feature UI list
         if (featuresSelected == null) {
@@ -628,6 +649,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
 
     // when type list selection change
     featureList.addListSelectionListener(new ListSelectionListener() {
+      @Override
       public void valueChanged(ListSelectionEvent e) {
         if (measuresType == CLASSIFICATION_MEASURES) {
           if (typeList.getSelectedIndices().length == 1
@@ -646,6 +668,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
 
     // when the measure tab selection change
     measureTabbedPane.addChangeListener(new ChangeListener() {
+      @Override
       public void stateChanged(ChangeEvent e) {
         JTabbedPane tabbedPane = (JTabbedPane) e.getSource();
         int selectedTab = tabbedPane.getSelectedIndex();
@@ -683,6 +706,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     // enable/disable toolbar icons according to the document table selection
     documentTable.getSelectionModel().addListSelectionListener(
       new ListSelectionListener() {
+        @Override
         public void valueChanged(ListSelectionEvent e) {
           if (e.getValueIsAdjusting()) { return; }
           boolean enabled = documentTable.getSelectedRow() != -1
@@ -697,6 +721,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     // enable/disable toolbar icons according to the document 2 table selection
     document2Table.getSelectionModel().addListSelectionListener(
       new ListSelectionListener() {
+        @Override
         public void valueChanged(ListSelectionEvent e) {
           if (e.getValueIsAdjusting()) { return; }
           boolean enabled = document2Table.getSelectedRow() != -1
@@ -711,6 +736,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
 
     // double click on a document loads it in the document editor
     documentTable.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         if (!e.isPopupTrigger()
           && e.getClickCount() == 2
@@ -722,6 +748,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
 
     // double click on a document loads it in the document editor
     document2Table.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         if (!e.isPopupTrigger()
           && e.getClickCount() == 2
@@ -783,6 +810,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
 
   protected static class ToggleSelectionModel extends DefaultListSelectionModel {
     boolean gestureStarted = false;
+    @Override
     public void setSelectionInterval(int index0, int index1) {
       if (isSelectedIndex(index0) && !gestureStarted) {
         super.removeSelectionInterval(index0, index1);
@@ -791,6 +819,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       }
       gestureStarted = true;
     }
+    @Override
     public void setValueIsAdjusting(boolean isAdjusting) {
       if (!isAdjusting) {
         gestureStarted = false;
@@ -806,6 +835,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     public ToggleSelectionABModel(JList list) {
       this.list = list;
     }
+    @Override
     public void setSelectionInterval(int index0, int index1) {
       ExtendedListModel model = (ExtendedListModel) list.getModel();
       String value = (String) model.getElementAt(index0);
@@ -835,6 +865,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         }
       }
     }
+    @Override
     public void clearSelection() {
       selectedValueA = null;
       selectedValueB = null;
@@ -850,11 +881,13 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     String selectedValueA, selectedValueB;
   }
 
+  @Override
   public void cleanup(){
     super.cleanup();
     corpus = null;
   }
 
+  @Override
   public void setTarget(Object target){
     if(corpus != null && corpus != target){
       //we already had a different corpus
@@ -872,29 +905,34 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     if (!isShowing()) { return; }
     if (timerTask != null) { timerTask.cancel(); }
     Date timeToRun = new Date(System.currentTimeMillis() + 2000);
-    timerTask = new TimerTask() { public void run() {
+    timerTask = new TimerTask() { @Override
+    public void run() {
       readSetsTypesFeatures(0);
     }};
     timer.schedule(timerTask, timeToRun); // add a delay before updating
   }
 
+  @Override
   public void documentAdded(final CorpusEvent e) {
     corpusChanged = true;
     if (!isShowing()) { return; }
     if (timerTask != null) { timerTask.cancel(); }
     Date timeToRun = new Date(System.currentTimeMillis() + 2000);
-    timerTask = new TimerTask() { public void run() {
+    timerTask = new TimerTask() { @Override
+    public void run() {
       readSetsTypesFeatures(0);
     }};
     timer.schedule(timerTask, timeToRun); // add a delay before updating
   }
 
+  @Override
   public void documentRemoved(final CorpusEvent e) {
     corpusChanged = true;
     if (!isShowing()) { return; }
     if (timerTask != null) { timerTask.cancel(); }
     Date timeToRun = new Date(System.currentTimeMillis() + 2000);
-    timerTask = new TimerTask() { public void run() {
+    timerTask = new TimerTask() { @Override
+    public void run() {
       readSetsTypesFeatures(0);
     }};
     timer.schedule(timerTask, timeToRun); // add a delay before updating
@@ -908,14 +946,16 @@ public class CorpusQualityAssurance extends AbstractVisualResource
   protected void readSetsTypesFeatures(final int documentStart) {
     if (!isShowing()) { return; }
     corpusChanged = false;
-    SwingUtilities.invokeLater(new Runnable(){ public void run() {
+    SwingUtilities.invokeLater(new Runnable(){ @Override
+    public void run() {
       progressBar.setMaximum(corpus.size() - 1);
       progressBar.setString("Read sets, types, features");
       reloadCacheAction.setEnabled(false);
     }});
     CorpusQualityAssurance.this.setCursor(
       Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    Runnable runnable = new Runnable() { public void run() {
+    Runnable runnable = new Runnable() { @Override
+    public void run() {
     if (docsSetsTypesFeatures.size() != corpus.getDocumentNames().size()
     || !docsSetsTypesFeatures.keySet().containsAll(corpus.getDocumentNames())) {
       if (documentStart == 0) { docsSetsTypesFeatures.clear(); }
@@ -925,7 +965,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       for (int i = documentStart; i < corpus.size(); i++) {
         // fill in the lists of document, set, type and feature names
         boolean documentWasLoaded = corpus.isDocumentLoaded(i);
-        Document document = (Document) corpus.get(i);
+        Document document = corpus.get(i);
         if (document != null && document.getAnnotationSetNames() != null) {
           setsTypesFeatures =
             new TreeMap<String, TreeMap<String, TreeSet<String>>>(collator);
@@ -953,7 +993,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
           Factory.deleteResource(document);
         }
         final int progressValue = i + 1;
-        SwingUtilities.invokeLater(new Runnable(){ public void run() {
+        SwingUtilities.invokeLater(new Runnable(){ @Override
+        public void run() {
           progressBar.setValue(progressValue);
           if ((progressValue+1) % 5 == 0) {
             // update the set list every 5 documents read
@@ -964,7 +1005,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       }
     }
     updateSetList();
-    SwingUtilities.invokeLater(new Runnable(){ public void run(){
+    SwingUtilities.invokeLater(new Runnable(){ @Override
+    public void run(){
       progressBar.setValue(progressBar.getMinimum());
       progressBar.setString("");
       CorpusQualityAssurance.this.setCursor(
@@ -997,7 +1039,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         firstLoop = false;
       }
     }
-    SwingUtilities.invokeLater(new Runnable(){ public void run() {
+    SwingUtilities.invokeLater(new Runnable(){ @Override
+    public void run() {
       // update the UI lists of sets
       setsNames.remove("");
       setsNames.add("[Default set]");
@@ -1033,7 +1076,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       progressValuePrevious = progressBar.getValue();
       readSetsTypesFeaturesThread.interrupt();
     }
-    SwingUtilities.invokeLater(new Runnable() { public void run() {
+    SwingUtilities.invokeLater(new Runnable() { @Override
+    public void run() {
       progressBar.setMaximum(corpus.size() - 1);
       progressBar.setString("Compare annotations");
       setList.setEnabled(false);
@@ -1067,7 +1111,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     // for each document
     for (int row = 0; row < corpus.size(); row++) {
       boolean documentWasLoaded = corpus.isDocumentLoaded(row);
-      Document document = (Document) corpus.get(row);
+      Document document = corpus.get(row);
       documentNames.add(document.getName());
       Set<Annotation> keys = new HashSet<Annotation>();
       Set<Annotation> responses = new HashSet<Annotation>();
@@ -1164,7 +1208,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         }
       }
       final int progressValue = row + 1;
-      SwingUtilities.invokeLater(new Runnable(){ public void run() {
+      SwingUtilities.invokeLater(new Runnable(){ @Override
+      public void run() {
         progressBar.setValue(progressValue);
       }});
     } // for (int row = 0; row < corpus.size(); row++)
@@ -1234,7 +1279,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       }
     }
 
-    SwingUtilities.invokeLater(new Runnable(){ public void run(){
+    SwingUtilities.invokeLater(new Runnable(){ @Override
+    public void run(){
       progressBar.setValue(progressBar.getMinimum());
       progressBar.setString("");
       setList.setEnabled(true);
@@ -1359,6 +1405,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       super("Browse");
       putValue(SHORT_DESCRIPTION, "Choose a BDM file to compute BDM measures");
     }
+    @Override
     public void actionPerformed(ActionEvent evt) {
       XJFileChooser fileChooser = MainFrame.getFileChooser();
       fileChooser.setAcceptAllFileFilterUsed(true);
@@ -1386,6 +1433,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
       putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-action-run"));
     }
+    @Override
     public void actionPerformed(ActionEvent evt) {
       boolean useBdm = false;
       for (Object measure : measureList.getSelectedValues()) {
@@ -1400,7 +1448,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
       setEnabled(false);
 
-      Runnable runnable = new Runnable() { public void run() {
+      Runnable runnable = new Runnable() { @Override
+      public void run() {
       if (measuresType == FSCORE_MEASURES) {
         documentTableModel = new DefaultTableModel();
         annotationTableModel = new DefaultTableModel();
@@ -1430,7 +1479,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         compareAnnotation(); // do all the computation
         // update data
 
-        SwingUtilities.invokeLater(new Runnable() { public void run() {
+        SwingUtilities.invokeLater(new Runnable() { @Override
+        public void run() {
           // redraw document table
           documentTable.setModel(documentTableModel);
           for (int col = 0; col < documentTable.getColumnCount(); col++) {
@@ -1460,7 +1510,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         }
         confusionTableModel = new DefaultTableModel();
         compareAnnotation(); // do all the computation
-        SwingUtilities.invokeLater(new Runnable() { public void run() {
+        SwingUtilities.invokeLater(new Runnable() { @Override
+        public void run() {
           document2Table.setSortable(false);
           document2Table.setModel(document2TableModel);
           document2Table.setComparator(0, totalComparator);
@@ -1487,12 +1538,13 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         "Opens document for the selected row in a document editor");
       putValue(MNEMONIC_KEY, KeyEvent.VK_UP);
     }
+    @Override
     public void actionPerformed(ActionEvent e){
-      final Document document = (Document)
-        corpus.get(measuresType == FSCORE_MEASURES ?
-          documentTable.rowViewToModel(documentTable.getSelectedRow())
-        : document2Table.rowViewToModel(document2Table.getSelectedRow()));
-      SwingUtilities.invokeLater( new Runnable() { public void run() {
+      final Document document = corpus.get(measuresType == FSCORE_MEASURES ?
+        documentTable.rowViewToModel(documentTable.getSelectedRow())
+      : document2Table.rowViewToModel(document2Table.getSelectedRow()));
+      SwingUtilities.invokeLater( new Runnable() { @Override
+      public void run() {
         MainFrame.getInstance().select(document);
       }});
     }
@@ -1505,11 +1557,11 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         "Opens annotation diff for the selected row in the document table");
       putValue(MNEMONIC_KEY, KeyEvent.VK_RIGHT);
     }
+    @Override
     public void actionPerformed(ActionEvent e){
-      Document document = (Document)
-        corpus.get(measuresType == FSCORE_MEASURES ?
-          documentTable.rowViewToModel(documentTable.getSelectedRow())
-        : document2Table.rowViewToModel(document2Table.getSelectedRow()));
+      Document document = corpus.get(measuresType == FSCORE_MEASURES ?
+        documentTable.rowViewToModel(documentTable.getSelectedRow())
+      : document2Table.rowViewToModel(document2Table.getSelectedRow()));
       String documentName = document.getName();
       String annotationType = (String) typeList.getSelectedValue();
       Set<String> featureSet = new HashSet<String>();
@@ -1532,6 +1584,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       putValue(SMALL_ICON,
         MainFrame.getIcon("crystal-clear-app-download-manager"));
     }
+    @Override
     public void actionPerformed(ActionEvent evt){
       XJFileChooser fileChooser = MainFrame.getFileChooser();
       fileChooser.setAcceptAllFileFilterUsed(true);
@@ -1630,6 +1683,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       putValue(SHORT_DESCRIPTION,
         "Reload cache for set, type and feature names list");
     }
+    @Override
     public void actionPerformed(ActionEvent e){
       docsSetsTypesFeatures.clear();
       readSetsTypesFeatures(0);
@@ -1643,6 +1697,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-action-info"));
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("F1"));
     }
+    @Override
     public void actionPerformed(ActionEvent e) {
       MainFrame.getInstance().showHelpFrame(
         "sec:eval:corpusqualityassurance",

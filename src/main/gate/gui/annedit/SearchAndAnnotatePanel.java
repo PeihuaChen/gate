@@ -246,6 +246,7 @@ public class SearchAndAnnotatePanel extends JPanel {
         searchTextField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 
             searchTextField.getPreferredSize().height));
         searchTextField.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent arg0) {
             findFirstAction.actionPerformed(null);
           }
@@ -295,6 +296,7 @@ public class SearchAndAnnotatePanel extends JPanel {
   protected void initListeners() {
 
     searchEnabledCheck.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         if (searchEnabledCheck.isSelected()) {
           //add the search box if not already there
@@ -344,6 +346,7 @@ public class SearchAndAnnotatePanel extends JPanel {
     });
 
     this.addAncestorListener(new AncestorListener() {
+      @Override
       public void ancestorAdded(AncestorEvent event) {
         // put the selection of the document into the search text field
         if (searchTextField.getText().trim().length() == 0
@@ -351,46 +354,55 @@ public class SearchAndAnnotatePanel extends JPanel {
           searchTextField.setText(getOwner().getTextComponent().getSelectedText());
         }
       }
+      @Override
       public void ancestorRemoved(AncestorEvent event) {
         // if the editor window is closed
         enableActions(false);
       }
+      @Override
       public void ancestorMoved(AncestorEvent event) {
         // do nothing
       }
     });
 
     searchTextField.getDocument().addDocumentListener(new DocumentListener(){
+      @Override
       public void changedUpdate(DocumentEvent e) {
         enableActions(false);
       }
+      @Override
       public void insertUpdate(DocumentEvent e) {
         enableActions(false);
       }
+      @Override
       public void removeUpdate(DocumentEvent e) {
         enableActions(false);
       }
     });
 
     searchCaseSensChk.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         enableActions(false);
       }
     });
 
     searchRegExpChk.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         enableActions(false);
       }
     });
 
     searchWholeWordsChk.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         enableActions(false);
       }
     });
 
       searchHighlightsChk.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         enableActions(false);
       }
@@ -439,6 +451,7 @@ public class SearchAndAnnotatePanel extends JPanel {
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_F);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt){
       if (!isAnnotationEditorReady()) { return; }
       annotationEditor.setPinnedMode(true);
@@ -525,6 +538,7 @@ public class SearchAndAnnotatePanel extends JPanel {
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_P);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt) {
       if (!isAnnotationEditorReady()) { return; }
       annotationEditor.setEditingEnabled(false);
@@ -558,6 +572,7 @@ public class SearchAndAnnotatePanel extends JPanel {
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_N);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt){
       if (!isAnnotationEditorReady()) { return; }
       annotationEditor.setEditingEnabled(false);
@@ -610,6 +625,7 @@ public class SearchAndAnnotatePanel extends JPanel {
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_A);
     }
     
+    @Override
     public void actionPerformed(ActionEvent evt){
       if (!isAnnotationEditorReady()) { return; }
       int start = getOwner().getTextComponent().getSelectionStart();
@@ -651,6 +667,7 @@ public class SearchAndAnnotatePanel extends JPanel {
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_L);
     }
 
+    @Override
     public void actionPerformed(ActionEvent evt){
       if (!isAnnotationEditorReady()) { return; }
       annotateAllAnnotationsID = new LinkedList<Annotation>();
@@ -719,6 +736,7 @@ public class SearchAndAnnotatePanel extends JPanel {
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_U);
     }
     
+    @Override
     public void actionPerformed(ActionEvent evt){
 
       for(Annotation annotation : annotateAllAnnotationsID) {

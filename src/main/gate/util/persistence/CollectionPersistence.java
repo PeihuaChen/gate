@@ -27,6 +27,7 @@ public class CollectionPersistence implements Persistence {
    * Populates this Persistence with the data that needs to be stored from the
    * original source object.
    */
+  @Override
   public void extractDataFromSource(Object source)throws PersistenceException{
     if(! (source instanceof Collection)){
       throw new UnsupportedOperationException(
@@ -52,6 +53,7 @@ public class CollectionPersistence implements Persistence {
    * Creates a new object from the data contained. This new object is supposed
    * to be a copy for the original object used as source for data extraction.
    */
+  @Override
   public Object createObject()throws PersistenceException,
                                      ResourceInstantiationException{
     List<String> exceptionsOccurred = new ArrayList<String>();
