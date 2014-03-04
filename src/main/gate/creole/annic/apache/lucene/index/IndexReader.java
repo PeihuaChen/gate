@@ -141,6 +141,7 @@ public abstract class IndexReader {
    *
    * @deprecated  Replaced by {@link #getCurrentVersion(String)}
    * */
+  @Deprecated
   public static long lastModified(String directory) throws IOException {
     return lastModified(new File(directory));
   }
@@ -156,6 +157,7 @@ public abstract class IndexReader {
    *
    * @deprecated  Replaced by {@link #getCurrentVersion(File)}
    * */
+  @Deprecated
   public static long lastModified(File directory) throws IOException {
     return FSDirectory.fileModified(directory, "segments");
   }
@@ -171,6 +173,7 @@ public abstract class IndexReader {
    *
    * @deprecated  Replaced by {@link #getCurrentVersion(Directory)}
    * */
+  @Deprecated
   public static long lastModified(Directory directory) throws IOException {
     return directory.fileModified("segments");
   }

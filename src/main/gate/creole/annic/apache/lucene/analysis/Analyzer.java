@@ -45,6 +45,7 @@ public abstract class Analyzer {
    * @deprecated use tokenStream(String, Reader) instead.
    * @see #tokenStream(String, Reader)
    */
+  @Deprecated
   public TokenStream tokenStream(Reader reader)
   {
 	  return tokenStream(null, reader);
