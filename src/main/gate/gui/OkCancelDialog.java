@@ -15,11 +15,27 @@
 
 package gate.gui;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
 /**
  * A simple modal dialog that displays a component provided by the user along
@@ -158,5 +174,5 @@ public class OkCancelDialog extends JDialog {
   protected JButton okButton;
   protected JButton cancelButton;
   protected boolean userHasPressedOK;
-  protected static boolean userHasPressedCancel;
+  protected boolean userHasPressedCancel;
 }

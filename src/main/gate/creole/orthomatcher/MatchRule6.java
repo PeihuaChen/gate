@@ -50,7 +50,7 @@ public class MatchRule6 implements OrthoMatcherRule {
               	    
               	    {result = OrthoMatcherHelper.straightCompare((String)
               	            ((Annotation) orthomatcher.tokensLongAnnot.get(0)
-              	            ).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME),
+              	            ).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME),
               	            s2,
               	            orthomatcher.caseSensitive);
               	    }
@@ -58,8 +58,8 @@ public class MatchRule6 implements OrthoMatcherRule {
 	    
 		   }
 		   
-		  if (result && orthomatcher.log.isDebugEnabled()) {
-         orthomatcher.log.debug("rule 6 matched " + s1 + " to " + s2);
+		  if (result && OrthoMatcher.log.isDebugEnabled()) {
+		    OrthoMatcher.log.debug("rule 6 matched " + s1 + " to " + s2);
        }
 	    if (result) OrthoMatcherHelper.usedRule(6);
 	    

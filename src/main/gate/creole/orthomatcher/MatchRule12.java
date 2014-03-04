@@ -25,9 +25,9 @@ public class MatchRule12 implements OrthoMatcherRule {
 
 	      // get first and last tokens of s1 & s2
 	      String s1_first = (String)
-	      ((Annotation) orthomatcher.tokensLongAnnot.get(0)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
+	      ((Annotation) orthomatcher.tokensLongAnnot.get(0)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
 	      String s2_first = (String)
-	      ((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
+	      ((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
 
 	      if (!OrthoMatcherHelper.straightCompare(s1_first,s2_first,orthomatcher.caseSensitive))
 	        result = false;
@@ -38,8 +38,8 @@ public class MatchRule12 implements OrthoMatcherRule {
     	      ((Annotation) orthomatcher.tokensShortAnnot.get(orthomatcher.tokensShortAnnot.size()-1)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
     
     	      boolean retVal =  OrthoMatcherHelper.straightCompare(s1_last,s2_last,orthomatcher.caseSensitive);
-    	      if (retVal && orthomatcher.log.isDebugEnabled()) {
-    	        orthomatcher.log.debug("rule 12 matched " + s1 + "(id: " + orthomatcher.longAnnot.getId() + ") to "
+    	      if (retVal && OrthoMatcher.log.isDebugEnabled()) {
+    	        OrthoMatcher.log.debug("rule 12 matched " + s1 + "(id: " + orthomatcher.longAnnot.getId() + ") to "
     	                + s2+ "(id: " + orthomatcher.shortAnnot.getId() + ")");
     	      }
     	      result = retVal;

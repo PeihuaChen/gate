@@ -1,8 +1,5 @@
 package gate.creole.orthomatcher;
 
-import java.util.HashSet;
-import java.util.Map;
-
 import gate.Annotation;
 
 /**
@@ -30,7 +27,7 @@ public class MatchRule9 implements OrthoMatcherRule {
 		//  Out.prln("Rule 9 " + s1 + " and " + s2);
 		    String s1_short = (String)
 		    ((Annotation) orthomatcher.tokensLongAnnot.get(
-		    		orthomatcher.tokensLongAnnot.size()-1)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
+		    		orthomatcher.tokensLongAnnot.size()-1)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
 		//  Out.prln("Converted to " + s1_short);
 		    if (orthomatcher.tokensLongAnnot.size()>1) {
 		      boolean matched = OrthoMatcherHelper.straightCompare(s1_short, s2, orthomatcher.caseSensitive);

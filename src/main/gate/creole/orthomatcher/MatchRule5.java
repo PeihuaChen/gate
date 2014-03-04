@@ -1,12 +1,12 @@
 package gate.creole.orthomatcher;
 
+import static gate.creole.ANNIEConstants.TOKEN_KIND_FEATURE_NAME;
+import static gate.creole.ANNIEConstants.TOKEN_STRING_FEATURE_NAME;
+import static gate.creole.orthomatcher.OrthoMatcher.PUNCTUATION_VALUE;
+import static gate.creole.orthomatcher.OrthoMatcher.log;
 import gate.Annotation;
 
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
-
-import static gate.creole.orthomatcher.OrthoMatcher.*;
 /**
  * RULE #4Name: Does all the non-punctuation tokens from the long string match the corresponding tokens 
  * in the short string?  

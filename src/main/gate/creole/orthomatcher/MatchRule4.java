@@ -28,8 +28,8 @@ public class MatchRule4 implements OrthoMatcherRule {
 		boolean allTokensMatch = true;
 	    // Out.prln("MR4:  Matching" + s1 + " with " + s2);
 
-	    Iterator tokensLongAnnotIter = orthomatcher.tokensLongAnnot.iterator();
-	    Iterator tokensShortAnnotIter = orthomatcher.tokensShortAnnot.iterator();
+	    Iterator<Annotation> tokensLongAnnotIter = orthomatcher.tokensLongAnnot.iterator();
+	    Iterator<Annotation> tokensShortAnnotIter = orthomatcher.tokensShortAnnot.iterator();
 	    while (tokensLongAnnotIter.hasNext() && tokensShortAnnotIter.hasNext()) {
 	      Annotation token = (Annotation) tokensLongAnnotIter.next();
 	      if (((String)token.getFeatures().get(TOKEN_KIND_FEATURE_NAME)).equals(PUNCTUATION_VALUE) ||

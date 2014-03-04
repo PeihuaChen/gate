@@ -27,11 +27,11 @@ public class MatchRule15 implements OrthoMatcherRule {
 	//  Out.prln("Rule 14 " + s1 + " and " + s2);
 	    String s1_short = (String)
 	    ((Annotation) orthomatcher.tokensLongAnnot.get(
-	    		orthomatcher.tokensLongAnnot.size()-1)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
+	    		orthomatcher.tokensLongAnnot.size()-1)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
 	//  Out.prln("Converted to " + s1_short);
 	    if (orthomatcher.tokensLongAnnot.size()>1 && OrthoMatcherHelper.straightCompare(s1_short, s2,orthomatcher.caseSensitive)) {
-	     if (orthomatcher.log.isDebugEnabled()) {
-	       orthomatcher.log.debug("rule 15 matched " + s1 + "(id: " + orthomatcher.longAnnot.getId() + ") to "  + s2 
+	     if (OrthoMatcher.log.isDebugEnabled()) {
+	       OrthoMatcher.log.debug("rule 15 matched " + s1 + "(id: " + orthomatcher.longAnnot.getId() + ") to "  + s2 
 	                + "(id: " + orthomatcher.shortAnnot.getId() + ")");
 	     }
 	      result = true;

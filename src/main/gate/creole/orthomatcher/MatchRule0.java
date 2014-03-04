@@ -1,7 +1,6 @@
 package gate.creole.orthomatcher;
 
 
-import java.util.HashMap;
 
 /** RULE #0: If the two names are listed in table of
  * spurius matches then they do NOT match
