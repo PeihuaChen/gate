@@ -5,11 +5,9 @@ import gate.AnnotationSet;
 import gate.Document;
 import gate.creole.ExecutionException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /*
  * This interface is used so that one can create an orthography class that that
@@ -26,26 +24,26 @@ public interface AnnotationOrthography {
 
   public boolean fuzzyMatch(String s1, String s2);
 
-  public boolean allNonStopTokensInOtherAnnot(ArrayList<Annotation> firstName,
-      ArrayList<Annotation> secondName, String TOKEN_STRING_FEATURE_NAME,
+  public boolean allNonStopTokensInOtherAnnot(List<Annotation> firstName,
+      List<Annotation> secondName, String TOKEN_STRING_FEATURE_NAME,
       boolean caseSensitive);
 
   public String stripPersonTitle(String annotString, Annotation annot,
       Document doc, Map<Integer, List<Annotation>> tokensMap,
-      HashMap normalizedTokensMap, AnnotationSet nameAllAnnots)
+      Map<Integer, List<Annotation>> normalizedTokensMap, AnnotationSet nameAllAnnots)
       throws ExecutionException;
 
   public boolean matchedAlready(Annotation annot1, Annotation annot2,
-      List matchesDocFeature, AnnotationSet nameAllAnnots);
+      List<List<Integer>> matchesDocFeature, AnnotationSet nameAllAnnots);
 
   public Annotation updateMatches(Annotation newAnnot, String annotString,
-      HashMap processedAnnots, AnnotationSet nameAllAnnots,
-      List matchesDocFeature);
+      Map<Integer,String> processedAnnots, AnnotationSet nameAllAnnots,
+      List<List<Integer>> matchesDocFeature);
 
   public void updateMatches(Annotation newAnnot, Annotation prevAnnot,
-      List matchesDocFeature, AnnotationSet nameAllAnnots);
+      List<List<Integer>> matchesDocFeature, AnnotationSet nameAllAnnots);
 
-  public HashSet buildTables(AnnotationSet nameAllAnnots);
+  public Set<String> buildTables(AnnotationSet nameAllAnnots);
 
   public boolean isUnknownGender(String gender);
 }

@@ -10,6 +10,8 @@ import gate.creole.orthomatcher.OrthoMatcher;
  */
 public class SampleOrthoMatcher extends OrthoMatcher {
 
+  private static final long serialVersionUID = -1774167249206778293L;
+
   @Override
   public Resource init() throws ResourceInstantiationException {
       

@@ -63,6 +63,9 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 @CreoleResource(name="ANNIE OrthoMatcher", comment="ANNIE orthographical coreference component.", helpURL="http://gate.ac.uk/userguide/sec:annie:orthomatcher", icon="ortho-matcher")
 public class OrthoMatcher extends AbstractLanguageAnalyser {
+
+  private static final long serialVersionUID = -6258229350677707465L;
+
   protected static final Logger log = Logger.getLogger(OrthoMatcher.class);
 
   public static final boolean DEBUG = false;
@@ -103,7 +106,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
   protected String annotationSetName;
 
   /** the types of the annotation */
-  protected List annotationTypes = new ArrayList(10);
+  protected List<String> annotationTypes = new ArrayList<String>(10);
 
   /** the organization type*/
   protected String organizationType = ORGANIZATION_ANNOTATION_TYPE;
@@ -137,26 +140,26 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
 
   // name lookup tables (used for namematch)
   //gave them bigger default size, coz rehash is expensive
-  protected HashMap alias = new HashMap(100);
-  protected HashSet cdg = new HashSet();
-  protected HashMap spur_match = new HashMap(100);
-  protected HashMap def_art = new HashMap(20);
-  protected HashMap connector = new HashMap(20);
-  protected HashMap prepos = new HashMap(30);
+  protected HashMap<String, String> alias = new HashMap<String, String>(100);
+  protected Set<String> cdg = new HashSet<String>();
+  protected HashMap<String, String> spur_match = new HashMap<String, String>(100);
+  protected HashMap<String, String> def_art = new HashMap<String, String>(20);
+  protected HashMap<String, String> connector = new HashMap<String, String>(20);
+  protected HashMap<String, String> prepos = new HashMap<String, String>(30);
 
 
   protected AnnotationSet nameAllAnnots = null;
 
-  protected HashMap processedAnnots = new HashMap(150);
-  protected HashMap annots2Remove = new HashMap(75);
-  protected List matchesDocFeature = new ArrayList();
+  protected HashMap<Integer, String> processedAnnots = new HashMap<Integer, String>(150);
+  protected HashMap<Integer, String> annots2Remove = new HashMap<Integer, String>(75);
+  protected List<List<Integer>> matchesDocFeature = new ArrayList<List<Integer>>();
   //maps annotation ids to array lists of tokens
-  protected HashMap tokensMap = new HashMap(150);
-  public HashMap getTokensMap() {
+  protected HashMap<Integer, List<Annotation>> tokensMap = new HashMap<Integer, List<Annotation>>(150);
+  public Map<Integer, List<Annotation>> getTokensMap() {
     return tokensMap;
   }
 
-  protected HashMap normalizedTokensMap = new HashMap(150);
+  protected Map<Integer, List<Annotation>> normalizedTokensMap = new HashMap<Integer, List<Annotation>>(150);
 
   protected Annotation shortAnnot;
   protected Annotation longAnnot;
@@ -301,7 +304,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
       //check if we've been run on this document before
       //and clean the doc if needed
       docCleanup();
-      Map matchesMap = (Map)document.getFeatures().
+      @SuppressWarnings("unchecked")
+      Map<String, List<List<Integer>>> matchesMap = (Map<String, List<List<Integer>>>)document.getFeatures().
       get(DOCUMENT_COREF_FEATURE_NAME);
 
 
@@ -321,7 +325,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
       //    determineMatchesDocument();
       if (! matchesDocFeature.isEmpty()) {
         if(matchesMap == null){
-          matchesMap = new HashMap();
+          matchesMap = new HashMap<String, List<List<Integer>>>();
         }
         matchesMap.put(nameAllAnnots.getName(), matchesDocFeature);
         // System.out.println("matchesMap is: " + matchesMap);
@@ -331,7 +335,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
 
         //cannot do clear() as this has already been put on the document
         //so I need a new one for the next run of matcher
-        matchesDocFeature = new ArrayList();
+        matchesDocFeature = new ArrayList<List<Integer>>();
 
 
         fireStatusChanged("OrthoMatcher completed");
@@ -345,7 +349,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
       annots2Remove.clear();
       tokensMap.clear();
       normalizedTokensMap.clear();
-      matchesDocFeature = new ArrayList();
+      matchesDocFeature = new ArrayList<List<Integer>>();
       longAnnot = null;
       shortAnnot = null;
       tokensLongAnnot = null;
@@ -357,9 +361,9 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
 
   protected void matchNameAnnotations() throws ExecutionException{
     // go through all the annotation types
-    Iterator iterAnnotationTypes = annotationTypes.iterator();
+    Iterator<String> iterAnnotationTypes = annotationTypes.iterator();
     while (iterAnnotationTypes.hasNext()) {
-      String annotationType = (String)iterAnnotationTypes.next();
+      String annotationType = iterAnnotationTypes.next();
 
       AnnotationSet nameAnnots = nameAllAnnots.get(annotationType);
 
@@ -374,7 +378,6 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
       for (int snaIndex = 0;snaIndex < sortedNameAnnots.size();snaIndex++) {
         Annotation tempAnnot = sortedNameAnnots.get(snaIndex);
         Annotation nameAnnot = nameAllAnnots.get(tempAnnot.getId()); // Not sure if this matters
-        Integer id = nameAnnot.getId();
 
         // get string and value
         String annotString = orthoAnnotation.getStringForAnnotation(nameAnnot, document);
@@ -392,7 +395,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
         }
 
         // get the tokens
-        List tokens = new ArrayList(tokensNameAS.getContained(nameAnnot.getStartNode().getOffset(),
+        List<Annotation> tokens = new ArrayList<Annotation>(tokensNameAS.getContained(nameAnnot.getStartNode().getOffset(),
                 nameAnnot.getEndNode().getOffset()));
 
         //if no tokens to match, do nothing
@@ -488,7 +491,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
 
       // System.out.println("Now trying to match the unknown string: " + unknownString);
       //get the tokens
-      List tokens = new ArrayList((Set)
+      List<Annotation> tokens = new ArrayList<Annotation>((Set<Annotation>)
               nameAllTokens.getContained(
                       unknown.getStartNode().getOffset(),
                       unknown.getEndNode().getOffset()
@@ -538,20 +541,21 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
     } //while though unknowns
 
     if (! annots2Remove.isEmpty()) {
-      Iterator unknownIter = annots2Remove.keySet().iterator();
+      Iterator<Integer> unknownIter = annots2Remove.keySet().iterator();
       while (unknownIter.hasNext()) {
-        Integer unknId = (Integer) unknownIter.next();
+        Integer unknId = unknownIter.next();
         Annotation unknown = nameAllAnnots.get(unknId);
         Integer newID = nameAllAnnots.add(
                 unknown.getStartNode(),
                 unknown.getEndNode(),
-                (String) annots2Remove.get(unknId),
+                annots2Remove.get(unknId),
                 unknown.getFeatures()
         );
         nameAllAnnots.remove(unknown);
 
         //change the id in the matches list
-        List mList = (List)unknown.getFeatures().
+        @SuppressWarnings("unchecked")
+        List<Integer> mList = (List<Integer>)unknown.getFeatures().
         get(ANNOTATION_COREF_FEATURE_NAME);
         mList.remove(unknId);
         mList.add(newID);
@@ -560,7 +564,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
   }
 
   private boolean matchHyphenatedUnknowns(Annotation unknown, String unknownString,
-          Iterator iter){
+          Iterator<Annotation> iter){
     boolean matched = false;
 
     //only take the substring before the hyphen
@@ -576,7 +580,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
       iter.remove();
       String newType;
       if (matchedAnnot.getType().equals(unknownType))
-        newType = (String)annots2Remove.get(matchedAnnot.getId());
+        newType = annots2Remove.get(matchedAnnot.getId());
       else
         newType = matchedAnnot.getType();
 
@@ -595,7 +599,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
       nameAllAnnots.remove(unknown);
 
       //change the id in the matches list
-      List mList = (List)unknown.getFeatures().
+      @SuppressWarnings("unchecked")
+      List<Integer> mList = (List<Integer>)unknown.getFeatures().
       get(ANNOTATION_COREF_FEATURE_NAME);
       mList.remove(unknown.getId());
       mList.add(newID);
@@ -703,6 +708,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
 
   protected void propagatePropertyToExactMatchingMatches(Annotation updateAnnot,String featureName,Object value) {
     try {
+      @SuppressWarnings("unchecked")
       List<Integer> matchesList = (List<Integer>) updateAnnot.getFeatures().get(ANNOTATION_COREF_FEATURE_NAME);
       if ((matchesList == null) || matchesList.isEmpty()) {
         return;
@@ -734,7 +740,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
 
     // find which annotation string of the two is longer
     //  this is useful for some of the matching rules
-    String prevAnnotString = (String) processedAnnots.get(prevAnnot.getId());
+    String prevAnnotString = processedAnnots.get(prevAnnot.getId());
     // Out.prln("matchAnnotations processing " + annotString + " and " + prevAnnotString);
     if (prevAnnotString == null) {
       //    Out.prln("We discovered that the following string is null!:  " + prevAnnot.getId() +
@@ -760,12 +766,13 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
       longerPrevious = false;
     }//if
 
-    tokensLongAnnot = (ArrayList) tokensMap.get(longAnnot.getId());
-    normalizedTokensLongAnnot = (ArrayList) normalizedTokensMap.get(longAnnot.getId());
-    tokensShortAnnot = (ArrayList) tokensMap.get(shortAnnot.getId());
-    normalizedTokensShortAnnot = (ArrayList) normalizedTokensMap.get(shortAnnot.getId());
+    tokensLongAnnot = (ArrayList<Annotation>) tokensMap.get(longAnnot.getId());
+    normalizedTokensLongAnnot = (ArrayList<Annotation>) normalizedTokensMap.get(longAnnot.getId());
+    tokensShortAnnot = (ArrayList<Annotation>) tokensMap.get(shortAnnot.getId());
+    normalizedTokensShortAnnot = (ArrayList<Annotation>) normalizedTokensMap.get(shortAnnot.getId());
 
-    List matchesList = (List) prevAnnot.getFeatures().
+    @SuppressWarnings("unchecked")
+    List<Integer> matchesList = (List<Integer>) prevAnnot.getFeatures().
     get(ANNOTATION_COREF_FEATURE_NAME);
     if (matchesList == null || matchesList.isEmpty())
       return apply_rules_namematch(prevAnnot.getType(), shortName,longName,
@@ -784,7 +791,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
       if (allMatchingNeeded) {
         allMatchingNeeded = false;
 
-        List toMatchList = new ArrayList(matchesList);
+        List<Integer> toMatchList = new ArrayList<Integer>(matchesList);
         //      if (newAnnot.getType().equals(unknownType))
         //        Out.prln("Matching new " + annotString + " with annots " + toMatchList);
         toMatchList.remove(prevAnnot.getId());
@@ -803,7 +810,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
    *  two different entities share a common token: e.g., BT Cellnet
    *  and BT and British Telecom.
    */
-  protected boolean matchOtherAnnots( List toMatchList, Annotation newAnnot,
+  protected boolean matchOtherAnnots( List<Integer> toMatchList, Annotation newAnnot,
           String annotString) {
 
     //if the list is empty, then we're matching all right :-)
@@ -814,11 +821,11 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
     int i = 0;
 
     while (matchedAll && i < toMatchList.size()) {
-      Annotation prevAnnot = nameAllAnnots.get((Integer) toMatchList.get(i));
+      Annotation prevAnnot = nameAllAnnots.get(toMatchList.get(i));
 
       // find which annotation string of the two is longer
       //  this is useful for some of the matching rules
-      String prevAnnotString = (String) processedAnnots.get(prevAnnot.getId());
+      String prevAnnotString = processedAnnots.get(prevAnnot.getId());
       if (prevAnnotString == null)
         try {
           prevAnnotString = document.getContent().getContent(
@@ -845,10 +852,10 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
           longerPrevious = false;
         }//if
 
-        tokensLongAnnot = (ArrayList) tokensMap.get(longAnnot.getId());
-        normalizedTokensLongAnnot = (ArrayList) normalizedTokensMap.get(longAnnot.getId());
-        tokensShortAnnot = (ArrayList) tokensMap.get(shortAnnot.getId());
-        normalizedTokensShortAnnot = (ArrayList) normalizedTokensMap.get(shortAnnot.getId());
+        tokensLongAnnot = (ArrayList<Annotation>) tokensMap.get(longAnnot.getId());
+        normalizedTokensLongAnnot = (ArrayList<Annotation>) normalizedTokensMap.get(longAnnot.getId());
+        tokensShortAnnot = (ArrayList<Annotation>) tokensMap.get(shortAnnot.getId());
+        normalizedTokensShortAnnot = (ArrayList<Annotation>) normalizedTokensMap.get(shortAnnot.getId());
 
         matchedAll = apply_rules_namematch(prevAnnot.getType(), shortName,longName,prevAnnot,newAnnot,
                 longerPrevious);
@@ -860,16 +867,17 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
     return matchedAll;
   }
 
+  @SuppressWarnings("unchecked")
   protected void docCleanup() {
     Object matchesValue = document.getFeatures().get(DOCUMENT_COREF_FEATURE_NAME);
     if (matchesValue != null && (matchesValue instanceof Map))
-      ((Map)matchesValue).remove(nameAllAnnots.getName());
+      ((Map<String,List<List<Integer>>>)matchesValue).remove(nameAllAnnots.getName());
     else if (matchesValue != null) {
-      document.getFeatures().put(DOCUMENT_COREF_FEATURE_NAME, new HashMap());
+      document.getFeatures().put(DOCUMENT_COREF_FEATURE_NAME, new HashMap<String,List<List<Integer>>>());
     }
 
     //get all annotations that have a matches feature
-    HashSet fNames = new HashSet();
+    HashSet<String> fNames = new HashSet<String>();
     fNames.add(ANNOTATION_COREF_FEATURE_NAME);
     AnnotationSet annots =
       nameAllAnnots.get(null, fNames);
@@ -890,11 +898,11 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
   static Pattern periodPat = Pattern.compile("[\\.]+");
 
   protected void normalizePersonName (Annotation annot) throws ExecutionException {
-    ArrayList<Annotation> tokens = (ArrayList) normalizedTokensMap.get(annot.getId());
+    ArrayList<Annotation> tokens = (ArrayList<Annotation>) normalizedTokensMap.get(annot.getId());
     for (int i = tokens.size() - 1; i >= 0; i--) {
       String tokenString = ((String) tokens.get(i).getFeatures().get(TOKEN_STRING_FEATURE_NAME));
       String kind = (String) tokens.get(i).getFeatures().get(TOKEN_KIND_FEATURE_NAME);
-      String category = (String) tokens.get(i).getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME);
+      //String category = (String) tokens.get(i).getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME);
       if (!caseSensitive)  {
         tokenString = tokenString.toLowerCase();
       }
@@ -919,11 +927,10 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
   /** return an organization  without a designator and starting The*/
   protected String normalizeOrganizationName (String annotString, Annotation annot){
 
-    ArrayList<Annotation> tokens = (ArrayList) tokensMap.get(annot.getId());
+    ArrayList<Annotation> tokens = (ArrayList<Annotation>) tokensMap.get(annot.getId());
 
     //strip starting The first
-    if ( ((String) ((Annotation) tokens.get(0)
-    ).getFeatures().get(TOKEN_STRING_FEATURE_NAME))
+    if ( ((String) tokens.get(0).getFeatures().get(TOKEN_STRING_FEATURE_NAME))
     .equalsIgnoreCase(THE_VALUE))
       tokens.remove(0);
 
@@ -972,8 +979,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
 
     StringBuffer newString = new StringBuffer(50);
     for (int i = 0; i < tokens.size(); i++){
-      newString.append((String) ((Annotation) tokens.get(i)
-      ).getFeatures().get(TOKEN_STRING_FEATURE_NAME) );
+      newString.append((String) tokens.get(i).getFeatures().get(TOKEN_STRING_FEATURE_NAME) );
       if (i != tokens.size()-1)
         newString.append(" ");
     }
@@ -1185,7 +1191,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
   @RunTime
   @Optional
   @CreoleParameter(comment="Name of the annotation types to use", defaultValue="Organization;Person;Location;Date")
-  public void setAnnotationTypes(List newType) {
+  public void setAnnotationTypes(List<String> newType) {
     annotationTypes = newType;
   }//setAnnotationTypes
 
@@ -1214,7 +1220,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
   }//getAnnotationSetName
 
   /** get the types of the annotation*/
-  public List getAnnotationTypes() {
+  public List<String> getAnnotationTypes() {
     return annotationTypes;
   }//getAnnotationTypes
 
@@ -1331,8 +1337,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
       }
       else {
         for (int i = 1; i < normalizedTokensLongAnnot.size() - 1;i++) {
-          String s1_middle = (String) ((Annotation) normalizedTokensLongAnnot.get(i)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-          String s2_middle = (String) ((Annotation) normalizedTokensShortAnnot.get(i)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+          String s1_middle = (String) normalizedTokensLongAnnot.get(i).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+          String s2_middle = (String) normalizedTokensShortAnnot.get(i).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
           if (!caseSensitive) {
             s1_middle = s1_middle.toLowerCase();
             s2_middle = s2_middle.toLowerCase();
