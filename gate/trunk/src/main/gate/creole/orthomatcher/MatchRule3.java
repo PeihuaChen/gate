@@ -1,7 +1,5 @@
 package gate.creole.orthomatcher;
 
-import java.util.ArrayList;
-
 import gate.Annotation;
 
 /**
@@ -33,22 +31,22 @@ public class MatchRule3 implements OrthoMatcherRule {
 	      else s2_poss = s2.concat("'");
 
 	      if (s2_poss != null && OrthoMatcherHelper.straightCompare(s1, s2_poss,orthomatcher.caseSensitive)) {
-	        if (orthomatcher.log.isDebugEnabled()) {
-	          orthomatcher.log.debug("rule 3 matched " + s1 + " to " + s2);
+	        if (OrthoMatcher.log.isDebugEnabled()) {
+	          OrthoMatcher.log.debug("rule 3 matched " + s1 + " to " + s2);
 	        }
 	        result = true;
 	      }
 
 	      // now check the second case i.e. "Standard and Poor" == "Standard's"
 	      String token = (String)
-	      ((Annotation) orthomatcher.tokensLongAnnot.get(0)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
+	      ((Annotation) orthomatcher.tokensLongAnnot.get(0)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
 
 	      if (!token.endsWith("'s")) s2_poss = token.concat("'s");
 	      else s2_poss = token.concat("'");
 
 	      if (s2_poss != null && OrthoMatcherHelper.straightCompare(s2_poss,s2,orthomatcher.caseSensitive)) {
-	        if (orthomatcher.log.isDebugEnabled()){
-	          orthomatcher.log.debug("rule 3 matched " + s1 + " to " + s2);
+	        if (OrthoMatcher.log.isDebugEnabled()){
+	          OrthoMatcher.log.debug("rule 3 matched " + s1 + " to " + s2);
 	        }
 	        result = true;
 	      }

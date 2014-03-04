@@ -38,8 +38,8 @@ public class MatchRule14 implements OrthoMatcherRule {
     
     //	    Out.prln("i = " + i);
     //	    Out.prln("j = " + j);
-    	      if ( ((Annotation) orthomatcher.tokensLongAnnot.get(j)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME).equals(
-    	              ((Annotation) orthomatcher.tokensShortAnnot.get(i)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME)) ) {
+    	      if ( ((Annotation) orthomatcher.tokensLongAnnot.get(j)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME).equals(
+    	              ((Annotation) orthomatcher.tokensShortAnnot.get(i)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME)) ) {
     	        matched_tokens++;
     	        j++;
     	      } else

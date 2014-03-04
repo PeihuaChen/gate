@@ -1,9 +1,5 @@
 package gate.creole.orthomatcher;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
 import gate.Annotation;
 
 /**

@@ -1,6 +1,5 @@
 package gate.creole.orthomatcher;
 
-import java.util.HashMap;
 
 /**
  * RULE #2: if the two names are listed as equivalent in the
@@ -22,8 +21,8 @@ public class MatchRule2 implements OrthoMatcherRule {
 	  
 	    if (orthomatcher.alias.containsKey(s1) && orthomatcher.alias.containsKey(s2)) {
 	      if (orthomatcher.alias.get(s1).toString().equals(orthomatcher.alias.get(s2).toString())) {
-	        if (orthomatcher.log.isDebugEnabled()) {
-	          orthomatcher.log.debug("rule 2 matched " + s1 + " to " + s2);
+	        if (OrthoMatcher.log.isDebugEnabled()) {
+	          OrthoMatcher.log.debug("rule 2 matched " + s1 + " to " + s2);
 	        }
 	        result=true;
 	      }

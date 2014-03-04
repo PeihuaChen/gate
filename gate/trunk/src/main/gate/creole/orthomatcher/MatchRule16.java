@@ -1,8 +1,5 @@
 package gate.creole.orthomatcher;
 
-import java.util.HashSet;
-import java.util.Map;
-
 import gate.Annotation;
 
 /**
@@ -26,10 +23,10 @@ public class MatchRule16 implements OrthoMatcherRule {
 	    for (int i=0; i < orthmatcher.tokensShortAnnot.size(); i++) {
 	      token1 = (Annotation) orthmatcher.tokensShortAnnot.get(i);
 	      //first check if not punctuation, because we need to skip it
-	      if (token1.getFeatures().get(orthmatcher.TOKEN_KIND_FEATURE_NAME).equals(orthmatcher.PUNCTUATION_VALUE))
+	      if (token1.getFeatures().get(OrthoMatcher.TOKEN_KIND_FEATURE_NAME).equals(OrthoMatcher.PUNCTUATION_VALUE))
 	        continue;
 
-	      String ts1 = (String)token1.getFeatures().get(orthmatcher.TOKEN_STRING_FEATURE_NAME);
+	      String ts1 = (String)token1.getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
 	      boolean foundMatch = false;
 	      for (int j=0; j<orthmatcher.tokensLongAnnot.size(); j++) {
 	        // Out.prln("i = " + i);
@@ -65,8 +62,8 @@ public class MatchRule16 implements OrthoMatcherRule {
 
 	    //only get to here if all word tokens in the short annot were found in
 	    //the long annot, so there is a coref relation
-	    if (orthmatcher.log.isDebugEnabled())
-	      orthmatcher.log.debug("rule 16 matched " + s1 + " to " + s2);
+	    if (OrthoMatcher.log.isDebugEnabled())
+	      OrthoMatcher.log.debug("rule 16 matched " + s1 + " to " + s2);
 	    
 	    if(result) OrthoMatcherHelper.usedRule(16);
 	    return result;

@@ -1,8 +1,5 @@
 package gate.creole.orthomatcher;
 
-import java.util.HashSet;
-import java.util.Map;
-
 import gate.Annotation;
 
 /**
@@ -43,8 +40,8 @@ public class MatchRule13 implements OrthoMatcherRule {
       	      ((Annotation) orthomatcher.tokensShortAnnot.get(orthomatcher.tokensShortAnnot.size()-1)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
       
       	      boolean retVal =  OrthoMatcherHelper.straightCompare(s1_last,s2_last,orthomatcher.caseSensitive);
-      	      if (retVal && orthomatcher.log.isDebugEnabled()) {
-      	        orthomatcher.log.debug("rule 13 matched " + s1 + "(id: " + orthomatcher.longAnnot.getId() + ") to "
+      	      if (retVal && OrthoMatcher.log.isDebugEnabled()) {
+      	        OrthoMatcher.log.debug("rule 13 matched " + s1 + "(id: " + orthomatcher.longAnnot.getId() + ") to "
       	                + s2+ "(id: " + orthomatcher.shortAnnot.getId() + ")");
       	      }
       	      result = retVal;

@@ -32,17 +32,17 @@ public class MatchRule11 implements OrthoMatcherRule {
 	    else {
     	    // 1st get the first two tokens of s1
     	    token11 = (String)
-    	    ((Annotation) orthomatcher.tokensLongAnnot.get(0)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
+    	    ((Annotation) orthomatcher.tokensLongAnnot.get(0)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
     	    token12 = (String)
-    	    ((Annotation) orthomatcher.tokensLongAnnot.get(1)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
+    	    ((Annotation) orthomatcher.tokensLongAnnot.get(1)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
     
     	    // now check for the first case i.e. "Pan American" == "Pan Am"
     	    if (orthomatcher.tokensShortAnnot.size() == 2)  {
     
     	      token21 = (String)
-    	      ((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
+    	      ((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
     	      token22 = (String)
-    	      ((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
+    	      ((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
     
     	      if (token11.startsWith(token21)
     	              && token12.startsWith(token22))
