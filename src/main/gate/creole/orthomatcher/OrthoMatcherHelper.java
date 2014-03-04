@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -170,7 +171,7 @@ public class OrthoMatcherHelper {
 	  protected static void setMatchesPositions(AnnotationSet nameAllAnnots) {
 	    
 	    //get all annotations that have a matches feature
-	    HashSet fNames = new HashSet();
+	    Set<String> fNames = new HashSet<String>();
 	    fNames.add(gate.creole.ANNIEConstants.ANNOTATION_COREF_FEATURE_NAME);
 	    AnnotationSet allMatchesAnnots =
 	      nameAllAnnots.get(null, fNames);

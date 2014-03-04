@@ -1,8 +1,21 @@
 package gate.creole.orthomatcher;
 
+import static gate.creole.ANNIEConstants.ANNOTATION_COREF_FEATURE_NAME;
+import static gate.creole.ANNIEConstants.LOOKUP_ANNOTATION_TYPE;
+import static gate.creole.orthomatcher.OrthoMatcherHelper.getStringForSpan;
+import static gate.creole.orthomatcher.OrthoMatcherHelper.round2Places;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.creole.ExecutionException;
+import gate.util.BomStrippingInputStreamReader;
+import gate.util.Err;
+import gate.util.InvalidOffsetException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,22 +30,6 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
-import gate.Annotation;
-import gate.AnnotationSet;
-import gate.Document;
-import gate.Factory;
-import gate.FeatureMap;
-import gate.creole.ExecutionException;
-import gate.util.BomStrippingInputStreamReader;
-import gate.util.Err;
-import gate.util.InvalidOffsetException;
-
-import static gate.creole.ANNIEConstants.ANNOTATION_COREF_FEATURE_NAME;
-import static gate.creole.ANNIEConstants.LOOKUP_ANNOTATION_TYPE;
-import static gate.creole.ANNIEConstants.PERSON_GENDER_FEATURE_NAME;
-
-import static gate.creole.orthomatcher.OrthoMatcherHelper.*;
-
 /*
  * This class defines an orthography which defines the primary behaviour of the
  * Orthomatcher processing resource in GATE.
@@ -44,8 +41,8 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
 
   private final String unknownType;
 
-  private Map<String, HashSet<String>> nicknameMap =
-      new HashMap<String, HashSet<String>>();
+  private Map<String, Set<String>> nicknameMap =
+      new HashMap<String, Set<String>>();
 
   private final Double minimumNicknameLikelihood;
 
@@ -96,8 +93,8 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
    * @return true if all of the tokens in firstName are either found in second
    *         name or are stop words
    */
-  public boolean allNonStopTokensInOtherAnnot(ArrayList<Annotation> firstName,
-      ArrayList<Annotation> secondName, String TOKEN_STRING_FEATURE_NAME,
+  public boolean allNonStopTokensInOtherAnnot(List<Annotation> firstName,
+      List<Annotation> secondName, String TOKEN_STRING_FEATURE_NAME,
       boolean caseSensitive) {
     for(Annotation a : firstName) {
       if(!a.getFeatures().containsKey("ortho_stop")) {
@@ -122,7 +119,7 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
    */
   public String stripPersonTitle(String annotString, Annotation annot,
       Document doc, Map<Integer, List<Annotation>> tokensMap,
-      HashMap normalizedTokensMap, AnnotationSet nameAllAnnots)
+      Map<Integer,List<Annotation>> normalizedTokensMap, AnnotationSet nameAllAnnots)
       throws ExecutionException {
     FeatureMap queryFM = Factory.newFeatureMap();
     // get the offsets
@@ -159,8 +156,8 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
             // annotString);
             // log.debug("Tokens are " + tokensMap.get(annot.getId()));
             // log.debug("Title is " + annotTitle);
-            ((ArrayList)tokensMap.get(annot.getId())).remove(0);
-            ((ArrayList)normalizedTokensMap.get(annot.getId())).remove(0);
+            tokensMap.get(annot.getId()).remove(0);
+            normalizedTokensMap.get(annot.getId()).remove(0);
             return annotString.substring(annotTitle.length() + 1,
                 annotString.length());
           }
@@ -173,11 +170,12 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
   }
 
   public boolean matchedAlready(Annotation annot1, Annotation annot2,
-      List matchesDocFeature, AnnotationSet nameAllAnnots) {
+      List<List<Integer>> matchesDocFeature, AnnotationSet nameAllAnnots) {
     // the two annotations are already matched if the matches list of the first
     // contains the id of the second
-    List matchesList =
-        (List)annot1.getFeatures().get(ANNOTATION_COREF_FEATURE_NAME);
+    @SuppressWarnings("unchecked")
+    List<Integer> matchesList =
+        (List<Integer>)annot1.getFeatures().get(ANNOTATION_COREF_FEATURE_NAME);
     if((matchesList == null) || matchesList.isEmpty())
       return false;
     else if(matchesList.contains(annot2.getId())) return true;
@@ -185,8 +183,8 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
   }
 
   public Annotation updateMatches(Annotation newAnnot, String annotString,
-      HashMap processedAnnots, AnnotationSet nameAllAnnots,
-      List matchesDocFeature) {
+      Map<Integer, String> processedAnnots, AnnotationSet nameAllAnnots,
+      List<List<Integer>> matchesDocFeature) {
     Annotation matchedAnnot = null;
     Integer id;
     // first find a processed annotation with the same string
@@ -195,11 +193,11 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
     // which is indexed on string rather than testing every id. Need to have the
     // index be String + Type
     // for safety
-    Iterator iter = processedAnnots.keySet().iterator();
+    Iterator<Integer> iter = processedAnnots.keySet().iterator();
     // System.out.println("ID's examined: ");
     while(iter.hasNext()) {
-      id = (Integer)iter.next();
-      String oldString = (String)processedAnnots.get(id);
+      id = iter.next();
+      String oldString = processedAnnots.get(id);
       // System.out.print(id + " ");
       if(annotString.equals(oldString)) {
         Annotation tempAnnot = nameAllAnnots.get(id);
@@ -220,12 +218,13 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
     }// while
      // System.out.println();
     if(matchedAnnot == null) return null;
-    List matchesList =
-        (List)matchedAnnot.getFeatures().get(ANNOTATION_COREF_FEATURE_NAME);
+    @SuppressWarnings("unchecked")
+    List<Integer> matchesList =
+        (List<Integer>)matchedAnnot.getFeatures().get(ANNOTATION_COREF_FEATURE_NAME);
     if((matchesList == null) || matchesList.isEmpty()) {
       // no previous matches, so need to add
       if(matchesList == null) {
-        matchesList = new ArrayList();
+        matchesList = new ArrayList<Integer>();
         matchedAnnot.getFeatures().put(ANNOTATION_COREF_FEATURE_NAME,
             matchesList);
         matchesDocFeature.add(matchesList);
@@ -243,14 +242,15 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
   }
 
   public void updateMatches(Annotation newAnnot, Annotation prevAnnot,
-      List matchesDocFeature, AnnotationSet nameAllAnnots) {
-    List matchesList =
-        (List)prevAnnot.getFeatures().get(
+      List<List<Integer>> matchesDocFeature, AnnotationSet nameAllAnnots) {
+    @SuppressWarnings("unchecked")
+    List<Integer> matchesList =
+        (List<Integer>)prevAnnot.getFeatures().get(
             OrthoMatcher.ANNOTATION_COREF_FEATURE_NAME);
     if((matchesList == null) || matchesList.isEmpty()) {
       // no previous matches, so need to add
       if(matchesList == null) {
-        matchesList = new ArrayList();
+        matchesList = new ArrayList<Integer>();
         prevAnnot.getFeatures().put(OrthoMatcher.ANNOTATION_COREF_FEATURE_NAME,
             matchesList);
         matchesDocFeature.add(matchesList);
@@ -286,10 +286,10 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
   /**
    * Tables for namematch info (used by the namematch rules)
    */
-  public HashSet buildTables(AnnotationSet nameAllAnnots) {
+  public Set<String> buildTables(AnnotationSet nameAllAnnots) {
     FeatureMap tempMap = Factory.newFeatureMap();
     // reset the tables first
-    HashSet cdg = new HashSet();
+    Set<String> cdg = new HashSet<String>();
     if(!extLists) {
       // i.e. get cdg from Lookup annotations
       // get all Lookup annotations
@@ -327,16 +327,16 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
     return true;
   } // isUnknownGender
 
-  protected Map<String, HashSet<String>> initNicknames(
+  protected Map<String, Set<String>> initNicknames(
       String nicknameFileEncoding, java.net.URL fileURL) throws IOException {
     Pattern spacePat = Pattern.compile("(\\s+)");
-    nicknameMap = new HashMap<String, HashSet<String>>();
+    nicknameMap = new HashMap<String, Set<String>>();
     // create the relative URL
     BufferedReader reader =
         new BomStrippingInputStreamReader(fileURL.openStream(),
             nicknameFileEncoding);
     String lineRead = null;
-    int ctr = 0;
+    
     while((lineRead = reader.readLine()) != null) {
       if(lineRead.length() == 0 || lineRead.charAt(0) == '#') {
         continue;
