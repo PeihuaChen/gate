@@ -84,6 +84,7 @@ public abstract class Lock {
      *  Defaults lockWaitTimeout to Lock.COMMIT_LOCK_TIMEOUT.
      *  @deprecated Kept only to avoid breaking existing code.
      */
+    @Deprecated
     public With(Lock lock)
     {
       this(lock, IndexWriter.COMMIT_LOCK_TIMEOUT);
