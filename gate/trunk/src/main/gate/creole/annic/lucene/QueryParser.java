@@ -430,9 +430,7 @@ public class QueryParser {
         if(i + 1 <= string.length() - 1) {
           char ch = string.charAt(i + 1);
           if(ch == ',' || ch == '.' || ch == '(' || ch == ')' || ch == '{'
-                  || ch == '}' || ch == '"')
-          ;
-          continue;
+                  || ch == '}' || ch == '"' || ch == '\\') continue;
         }
       }
       sb.append(string.charAt(i));
