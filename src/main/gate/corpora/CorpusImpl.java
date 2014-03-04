@@ -117,17 +117,19 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   /**
    * A proxy list that stores the actual data in an internal list and
    * forwards all operations to that one but it also fires the
-   * appropiate corpus events when necessary. It also does some type
+   * appropriate corpus events when necessary. It also does some type
    * checking so only Documents are accepted as corpus members.
    */
-  protected class VerboseList extends AbstractList implements Serializable {
+  protected class VerboseList extends AbstractList<Document> implements Serializable {
+
+    private static final long serialVersionUID = 3483062654980468826L;
 
     VerboseList() {
-      data = new ArrayList();
+      data = new ArrayList<Document>();
     }
 
     @Override
-    public Object get(int index) {
+    public Document get(int index) {
       return data.get(index);
     }
 
@@ -137,44 +139,29 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     }
 
     @Override
-    public Object set(int index, Object element) {
-      if(element instanceof Document) {
-        Document oldDoc = (Document)data.set(index, element);
-        Document newDoc = (Document)element;
+    public Document set(int index, Document element) {
+        Document oldDoc = data.set(index, element);
 
         // fire the 2 events
         fireDocumentRemoved(new CorpusEvent(CorpusImpl.this, oldDoc, index,
                 CorpusEvent.DOCUMENT_REMOVED));
-        fireDocumentAdded(new CorpusEvent(CorpusImpl.this, newDoc, index,
+        fireDocumentAdded(new CorpusEvent(CorpusImpl.this, element, index,
                 CorpusEvent.DOCUMENT_ADDED));
         return oldDoc;
-      }
-      else {
-        throw new UnsupportedOperationException(getClass().getName()
-                + " only accepts gate.Document values as members!\n"
-                + element.getClass().getName() + " is not a gate.Document");
-      }
     }
 
     @Override
-    public void add(int index, Object element) {
-      if(element instanceof Document) {
+    public void add(int index, Document element) {
         data.add(index, element);
 
         // fire the event
-        fireDocumentAdded(new CorpusEvent(CorpusImpl.this, (Document)element,
+        fireDocumentAdded(new CorpusEvent(CorpusImpl.this, element,
                 index, CorpusEvent.DOCUMENT_ADDED));
-      }
-      else {
-        throw new UnsupportedOperationException(getClass().getName()
-                + " only accepts gate.Document values as members!\n"
-                + element.getClass().getName() + " is not a gate.Document");
-      }
     }
 
     @Override
-    public Object remove(int index) {
-      Document oldDoc = (Document)data.remove(index);
+    public Document remove(int index) {
+      Document oldDoc = data.remove(index);
 
       fireDocumentRemoved(new CorpusEvent(CorpusImpl.this, oldDoc, index,
               CorpusEvent.DOCUMENT_REMOVED));
@@ -184,7 +171,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     /**
      * The List containing the actual data.
      */
-    ArrayList data;
+    List<Document> data;
   }
 
   /**
@@ -220,7 +207,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   }
 
   @Override
-  public Iterator iterator() {
+  public Iterator<Document> iterator() {
     return supportList.iterator();
   }
 
@@ -230,7 +217,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   }
 
   @Override
-  public Object[] toArray(Object[] a) {
+  public <T> T[] toArray(T[] a) {
     return supportList.toArray(a);
   }
 
@@ -245,27 +232,27 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   }
 
   @Override
-  public boolean containsAll(Collection c) {
+  public boolean containsAll(Collection<?> c) {
     return supportList.containsAll(c);
   }
 
   @Override
-  public boolean addAll(Collection c) {
+  public boolean addAll(Collection<? extends Document> c) {
     return supportList.addAll(c);
   }
 
   @Override
-  public boolean addAll(int index, Collection c) {
+  public boolean addAll(int index, Collection<? extends Document> c) {
     return supportList.addAll(index, c);
   }
 
   @Override
-  public boolean removeAll(Collection c) {
+  public boolean removeAll(Collection<?> c) {
     return supportList.removeAll(c);
   }
 
   @Override
-  public boolean retainAll(Collection c) {
+  public boolean retainAll(Collection<?> c) {
     return supportList.retainAll(c);
   }
 
@@ -317,17 +304,17 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   }
 
   @Override
-  public ListIterator listIterator() {
+  public ListIterator<Document> listIterator() {
     return supportList.listIterator();
   }
 
   @Override
-  public ListIterator listIterator(int index) {
+  public ListIterator<Document> listIterator(int index) {
     return supportList.listIterator(index);
   }
 
   @Override
-  public List subList(int fromIndex, int toIndex) {
+  public List<Document> subList(int fromIndex, int toIndex) {
     return supportList.subList(fromIndex, toIndex);
   }
 
@@ -728,7 +715,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   @Override
   public synchronized void removeCorpusListener(CorpusListener l) {
     if(corpusListeners != null && corpusListeners.contains(l)) {
-      Vector v = (Vector)corpusListeners.clone();
+      Vector<CorpusListener> v = (Vector<CorpusListener>)corpusListeners.clone();
       v.removeElement(l);
       corpusListeners = v;
     }
@@ -736,9 +723,9 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
 
   @Override
   public synchronized void addCorpusListener(CorpusListener l) {
-    Vector v = corpusListeners == null
-            ? new Vector(2)
-            : (Vector)corpusListeners.clone();
+    Vector<CorpusListener> v = corpusListeners == null
+            ? new Vector<CorpusListener>(2)
+            : (Vector<CorpusListener>)corpusListeners.clone();
     if(!v.contains(l)) {
       v.addElement(l);
       corpusListeners = v;
@@ -763,37 +750,37 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   /** Freeze the serialization UID. */
   static final long serialVersionUID = -1113142759053898456L;
 
-  private transient Vector corpusListeners;
+  private transient Vector<CorpusListener> corpusListeners;
 
-  protected transient java.util.List documentsList;
+  protected transient List<Document> documentsList;
 
   protected void fireDocumentAdded(CorpusEvent e) {
     if(corpusListeners != null) {
-      Vector listeners = corpusListeners;
+      Vector<CorpusListener> listeners = corpusListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((CorpusListener)listeners.elementAt(i)).documentAdded(e);
+        listeners.elementAt(i).documentAdded(e);
       }
     }
   }
 
   protected void fireDocumentRemoved(CorpusEvent e) {
     if(corpusListeners != null) {
-      Vector listeners = corpusListeners;
+      Vector<CorpusListener> listeners = corpusListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((CorpusListener)listeners.elementAt(i)).documentRemoved(e);
+        listeners.elementAt(i).documentRemoved(e);
       }
     }
   }
 
   @Optional
   @CreoleParameter(collectionElementType = Document.class, comment = "A list of GATE documents")
-  public void setDocumentsList(java.util.List documentsList) {
+  public void setDocumentsList(java.util.List<Document> documentsList) {
     this.documentsList = documentsList;
   }
 
-  public java.util.List getDocumentsList() {
+  public java.util.List<Document> getDocumentsList() {
     return documentsList;
   }
 
