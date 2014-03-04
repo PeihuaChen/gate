@@ -1,6 +1,5 @@
 package gate.creole.orthomatcher;
 
-import gate.Annotation;
 
 /**
  * RULE #6: if one name is the acronym of the other

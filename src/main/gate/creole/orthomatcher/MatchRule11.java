@@ -1,6 +1,5 @@
 package gate.creole.orthomatcher;
 
-import gate.Annotation;
 
 /**
  * RULE #11: does one name consist of contractions

@@ -796,9 +796,9 @@ public class SerialCorpusImpl extends AbstractLanguageResource
 
   @Override
   public boolean equals(Object o) {
+    if(o == null) return false;
     if(!(o instanceof SerialCorpusImpl)) return false;
-    SerialCorpusImpl oCorpus = (SerialCorpusImpl)o;
-    if(oCorpus == null) return false;
+    SerialCorpusImpl oCorpus = (SerialCorpusImpl)o;    
     if(oCorpus == this) return true;
     if((oCorpus.lrPersistentId == this.lrPersistentId || (this.lrPersistentId != null && this.lrPersistentId
             .equals(oCorpus.lrPersistentId)))

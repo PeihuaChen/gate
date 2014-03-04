@@ -1,6 +1,5 @@
 package gate.creole.orthomatcher;
 
-import gate.Annotation;
 
 /**
  * RULE #13: do multi-word names match except for

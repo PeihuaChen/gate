@@ -1,6 +1,5 @@
 package gate.creole.orthomatcher;
 
-import gate.Annotation;
 
 /**
  * RULE #9: does one of the names match the token

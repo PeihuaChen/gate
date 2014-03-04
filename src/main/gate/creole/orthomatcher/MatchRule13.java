@@ -1,6 +1,5 @@
 package gate.creole.orthomatcher;
 
-import gate.Annotation;
 
 /**
  * RULE #12: do the first and last tokens of one name

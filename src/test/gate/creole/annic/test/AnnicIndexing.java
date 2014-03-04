@@ -30,11 +30,6 @@ import java.net.URL;
 public class AnnicIndexing {
 
   /**
-   * serial version id
-   */
-  private static final long serialVersionUID = 3688785860577212210L;
-
-  /**
    * Corpus to index.
    */
   private gate.Corpus corpus;

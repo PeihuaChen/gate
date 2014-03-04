@@ -416,6 +416,10 @@ public class CorefEditor
     Integer id = delAnnot.getId();
     Map matchesMap = null;
     Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
+    
+    if(matchesMapObject == null)
+      return;
+    
     if(!(matchesMapObject instanceof Map)) {
       // no need to do anything
       // and return
@@ -425,8 +429,7 @@ public class CorefEditor
 
     matchesMap = (Map) matchesMapObject;
 
-    if(matchesMap == null)
-      return;
+    
 
     Set keySet = matchesMap.keySet();
     if(keySet == null)
@@ -485,7 +488,7 @@ public class CorefEditor
     // there is some change in the featureMap
     Map matchesMap = null;
     Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
-    if(!(matchesMapObject instanceof Map)) {
+    if(matchesMapObject == null || !(matchesMapObject instanceof Map)) {
       // no need to do anything
       // and return
       reinitAllVariables();
@@ -495,13 +498,6 @@ public class CorefEditor
     }
 
     matchesMap = (Map) matchesMapObject;
-
-    if (matchesMap == null) {
-      reinitAllVariables();
-      explicitCall = false;
-      annotSets.setSelectedIndex(0);
-      return;
-    }
 
     //AnnotationSetName --> List of ArrayLists
     //each ArrayList contains Ids of related annotations
