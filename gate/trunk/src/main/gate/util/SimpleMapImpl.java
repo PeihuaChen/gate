@@ -70,11 +70,11 @@ class SimpleMapImpl implements Map<Object, Object>,
   transient static Object nullKey = new NullKey();
 
   /** the static 'all keys' collection */
-  transient public static ConcurrentHashMap theKeysHere;
+  transient public static ConcurrentHashMap<Object,Object> theKeysHere;
 
   /** additional static members initialization */
   static {
-    theKeysHere = new ConcurrentHashMap();
+    theKeysHere = new ConcurrentHashMap<Object,Object>();
     theKeysHere.put(nullKey, nullKey);
   } // static code
 
@@ -106,7 +106,7 @@ class SimpleMapImpl implements Map<Object, Object>,
    * Not supported. This method is here only to conform the Map interface
    */
   @Override
-  public Collection values() {
+  public Collection<Object> values() {
     throw new UnsupportedOperationException(
       "SimpleMapImpl.values() not implemented!");
   } // values()
@@ -116,9 +116,9 @@ class SimpleMapImpl implements Map<Object, Object>,
    * affect the map.
    */
   @Override
-  public Set keySet()
+  public Set<Object> keySet()
   {
-    HashSet s = new HashSet(size());
+    Set<Object> s = new HashSet<Object>(size());
     Object k;
     for (int i = 0; i < count; i++) {
       k = theKeys[i];
@@ -236,7 +236,7 @@ class SimpleMapImpl implements Map<Object, Object>,
    * put all the elements from a map
    */
   @Override
-  public void putAll(Map t)
+  public void putAll(Map<? extends Object, ? extends Object> t)
   {
     if (t == null) {
       throw new UnsupportedOperationException(
@@ -327,7 +327,7 @@ class SimpleMapImpl implements Map<Object, Object>,
   /**
    * Auxiliary classes needed for the support of entrySet() method
    */
-  private static class Entry implements Map.Entry {
+  private static class Entry implements Map.Entry<Object,Object> {
     int hash;
     Object key;
     Object value;
@@ -364,7 +364,7 @@ class SimpleMapImpl implements Map<Object, Object>,
     public boolean equals(Object o) {
       if (!(o instanceof Map.Entry))
         return false;
-      Map.Entry e = (Map.Entry)o;
+      Map.Entry<?,?> e = (Map.Entry<?,?>)o;
 
       return (key==null ? e.getKey()==null : key.equals(e.getKey())) &&
         (value==null ? e.getValue()==null : value.equals(e.getValue()));
@@ -383,9 +383,9 @@ class SimpleMapImpl implements Map<Object, Object>,
 
 
   @Override
-  public Set entrySet() {
-    HashSet s = new HashSet(size());
-    Object v, k;
+  public Set<Map.Entry<Object, Object>> entrySet() {
+    Set<Map.Entry<Object, Object>> s = new HashSet<Map.Entry<Object,Object>>(size());
+    Object k;
     for (int i = 0; i < count; i++) {
       k = theKeys[i];
       s.add(new Entry(k.hashCode(), ((k==nullKey)?null:k), theValues[i]));
@@ -427,7 +427,7 @@ class SimpleMapImpl implements Map<Object, Object>,
   @Override
   public int hashCode() {
     int h = 0;
-    Iterator i = entrySet().iterator();
+    Iterator<Map.Entry<Object,Object>> i = entrySet().iterator();
     while (i.hasNext())
       h += i.next().hashCode();
     return h;
@@ -459,11 +459,11 @@ class SimpleMapImpl implements Map<Object, Object>,
   public String toString() {
     int max = size() - 1;
     StringBuffer buf = new StringBuffer();
-    Iterator i = entrySet().iterator();
+    Iterator<Map.Entry<Object, Object>> i = entrySet().iterator();
 
     buf.append("{");
     for (int j = 0; j <= max; j++) {
-      Entry e = (Entry) (i.next());
+      Map.Entry<Object, Object> e = (i.next());
       buf.append(e.getKey() + "=" + e.getValue());
       if (j < max)
         buf.append(", ");

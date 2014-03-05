@@ -57,7 +57,7 @@ public interface FeatureMap extends SimpleFeatureMap
     * from aFeatureMap are included in <b>this</b> obj, or <code>false</code>
     * otherwise.
     */
-  public boolean subsumes(FeatureMap aFeatureMap, Set aFeatureNamesSet);
+  public boolean subsumes(FeatureMap aFeatureMap, Set<? extends Object> aFeatureNamesSet);
 
   /**
    *
