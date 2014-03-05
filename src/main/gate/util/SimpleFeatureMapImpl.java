@@ -249,7 +249,7 @@ public class SimpleFeatureMapImpl
     * otherwise.
     */
   @Override
-  public boolean subsumes(FeatureMap aFeatureMap, Set aFeatureNamesSet){
+  public boolean subsumes(FeatureMap aFeatureMap, Set<? extends Object> aFeatureNamesSet){
     // This means that all features are taken into consideration.
     if (aFeatureNamesSet == null) return this.subsumes(aFeatureMap);
     // null is included in everything
@@ -353,14 +353,15 @@ public class SimpleFeatureMapImpl
 //////////////////THE EVENT HANDLING CODE//////////////
 //Needed so an annotation can listen to its features//
 //and update correctly the database//////////////////
-  private transient Vector mapListeners;
+  private transient Vector<FeatureMapListener> mapListeners;
   /**
    * Removes a gate listener
    */
   @Override
   public synchronized void removeFeatureMapListener(FeatureMapListener l) {
     if (mapListeners != null && mapListeners.contains(l)) {
-      Vector v = (Vector) mapListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<FeatureMapListener> v = (Vector<FeatureMapListener>) mapListeners.clone();
       v.removeElement(l);
       mapListeners = v;
     }
@@ -370,7 +371,8 @@ public class SimpleFeatureMapImpl
    */
   @Override
   public synchronized void addFeatureMapListener(FeatureMapListener l) {
-    Vector v = mapListeners == null ? new Vector(2) : (Vector)mapListeners.clone();
+    @SuppressWarnings("unchecked")
+    Vector<FeatureMapListener> v = mapListeners == null ? new Vector<FeatureMapListener>(2) : (Vector<FeatureMapListener>)mapListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       mapListeners = v;
@@ -382,11 +384,11 @@ public class SimpleFeatureMapImpl
    */
   protected void fireMapUpdatedEvent () {
     if (mapListeners != null) {
-      Vector listeners = mapListeners;
+      Vector<FeatureMapListener> listeners = mapListeners;
       int count = listeners.size();
       if (count == 0) return;
       for (int i = 0; i < count; i++)
-        ((FeatureMapListener) listeners.elementAt(i)).featureMapUpdated();
+        listeners.elementAt(i).featureMapUpdated();
     }
   }//fireMapUpdatedEvent
 

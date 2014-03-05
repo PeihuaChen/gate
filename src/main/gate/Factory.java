@@ -813,20 +813,18 @@ public abstract class Factory {
     }
   }
 
-  static Class<ParseCpsl> japeParserClass = ParseCpsl.class;
-  public static Class<ParseCpsl> getJapeParserClass() {
+  static Class<? extends ParseCpsl> japeParserClass = ParseCpsl.class;
+  public static Class<? extends ParseCpsl> getJapeParserClass() {
       return japeParserClass;
   }
-  @SuppressWarnings("unchecked")
-  public static void setJapeParserClass(Class newClass) {
-      if (! ParseCpsl.class.isAssignableFrom(newClass))
-          throw new IllegalArgumentException("Parser class must inherit from " + ParseCpsl.class);
+
+  public static void setJapeParserClass(Class<? extends ParseCpsl> newClass) {
       japeParserClass = newClass;
   }
 
   public static ParseCpsl newJapeParser(java.io.Reader stream, Map existingMacros) {
       try {
-          Constructor<ParseCpsl> c = japeParserClass.getConstructor
+          Constructor<? extends ParseCpsl> c = japeParserClass.getConstructor
               (new Class[] {java.io.Reader.class, existingMacros.getClass()});
           return c.newInstance(new Object[] {stream, existingMacros});
       } catch (NoSuchMethodException e) { // Shouldn't happen
