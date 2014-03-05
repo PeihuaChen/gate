@@ -30,7 +30,7 @@ import gate.util.FeatureBearer;
  *
  */
 public class AnnotationImpl extends AbstractFeatureBearer
-                            implements Annotation, FeatureBearer, Comparable {
+                            implements Annotation, FeatureBearer {
 
   /** Debug flag
    */
@@ -236,7 +236,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
     * <code>false</code> otherwise.
     */
   @Override
-  public boolean isCompatible(Annotation anAnnot, Set aFeatureNamesSet){
+  public boolean isCompatible(Annotation anAnnot, Set<? extends Object> aFeatureNamesSet){
     // If the set is null then isCompatible(Annotation) will decide.
     if (aFeatureNamesSet == null) return isCompatible(anAnnot);
     if (anAnnot == null) return false;
@@ -281,7 +281,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
     * aAnnot and <code>false</code> otherwise.
     */
   @Override
-  public boolean isPartiallyCompatible(Annotation anAnnot,Set aFeatureNamesSet){
+  public boolean isPartiallyCompatible(Annotation anAnnot,Set<? extends Object> aFeatureNamesSet){
     if (aFeatureNamesSet == null) return isPartiallyCompatible(anAnnot);
     if (anAnnot == null) return false;
     if (overlaps(anAnnot)){

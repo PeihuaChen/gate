@@ -56,7 +56,7 @@ extends SimpleAnnotation, Serializable {
     * @return <code>true</code> if aAnnot is compatible with <b>this</b> and
     * <code>false</code> otherwise.
     */
-  public boolean isCompatible(Annotation anAnnot, Set aFeatureNamesSet);
+  public boolean isCompatible(Annotation anAnnot, Set<? extends Object> aFeatureNamesSet);
 
   /** This method verifies if two annotation and are partially compatible.
     * Partially compatible means that they overlap and the FeatureMap of
@@ -79,7 +79,7 @@ extends SimpleAnnotation, Serializable {
     * @return <code>true</code> if <b>this</b> is partially compatible with
     * aAnnot and <code>false</code> otherwise.
     */
-  public boolean isPartiallyCompatible(Annotation anAnnot,Set aFeatureNamesSet);
+  public boolean isPartiallyCompatible(Annotation anAnnot,Set<? extends Object> aFeatureNamesSet);
 
   /**  Two Annotation are coestensive if their offsets are the same.
     *  @param anAnnot A Gate annotation.
