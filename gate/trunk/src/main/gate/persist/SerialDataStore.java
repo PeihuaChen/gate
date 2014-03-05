@@ -522,7 +522,7 @@ extends AbstractFeatureBearer implements DataStore {
 
   /** Get a list of the IDs of LRs of a particular type that are present. */
   @Override
-  public List getLrIds(String lrType) throws PersistenceException {
+  public List<String> getLrIds(String lrType) throws PersistenceException {
     // a File to represent the directory for this type
     File resourceTypeDir = new File(storageDir, lrType);
     if(! resourceTypeDir.exists())
@@ -533,7 +533,7 @@ extends AbstractFeatureBearer implements DataStore {
 
   /** Get a list of the names of LRs of a particular type that are present. */
   @Override
-  public List getLrNames(String lrType) throws PersistenceException {
+  public List<String> getLrNames(String lrType) throws PersistenceException {
     // the list of files storing LRs of this type; an array for the names
     List<String> lrFileNames = getLrIds(lrType);
     List<String> lrNames = new ArrayList<String>();

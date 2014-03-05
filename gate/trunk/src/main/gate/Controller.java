@@ -33,7 +33,7 @@ public interface Controller extends Resource, Executable, NameBearer,
    * controller. The actual type of collection returned depends on the
    * controller type.
    */
-  public Collection getPRs();
+  public Collection<ProcessingResource> getPRs();
 
   /**
    * Populates this controller from a collection of
@@ -45,7 +45,7 @@ public interface Controller extends Resource, Executable, NameBearer,
    * @throws UnsupportedOperationException if the <tt>setPRs</tt>
    *           method is not supported by this controller.
    */
-  public void setPRs(Collection PRs);
+  public void setPRs(Collection<ProcessingResource> PRs);
 
   /**
    * <p>

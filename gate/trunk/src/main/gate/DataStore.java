@@ -103,21 +103,23 @@ public interface DataStore extends FeatureBearer, NameBearer {
   throws PersistenceException,SecurityException;
 
   /** Get a list of the types of LR that are present in the data store. */
-  public List getLrTypes() throws PersistenceException;
+  public List<LanguageResource> getLrTypes() throws PersistenceException;
 
   /** Get a list of the IDs of LRs of a particular type that are present. */
-  public List getLrIds(String lrType) throws PersistenceException;
+  public List<String> getLrIds(String lrType) throws PersistenceException;
 
   /** Get a list of the names of LRs of a particular type that are present. */
-  public List getLrNames(String lrType) throws PersistenceException;
+  public List<String> getLrNames(String lrType) throws PersistenceException;
 
   /** Get a list of LRs that satisfy some set or restrictions */
+  @SuppressWarnings("rawtypes") // we've never implemented the types are unknown
   public List findLrIds(List constraints) throws PersistenceException;
 
   /**
    *  Get a list of LRs that satisfy some set or restrictions and are
    *  of a particular type
    */
+  @SuppressWarnings("rawtypes") // we've never implemented the types are unknown
   public List findLrIds(List constraints, String lrType) throws PersistenceException;
 
   /** Get the name of an LR from its ID. */

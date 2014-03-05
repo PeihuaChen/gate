@@ -89,20 +89,20 @@ public class DataStoreRegister extends HashSet<DataStore> {
    */
   @Override
   public void clear() {
-    Set datastores = new HashSet(this);
+    Set<DataStore> datastores = new HashSet<DataStore>(this);
     super.clear();
 
-    Iterator iter = datastores.iterator();
+    Iterator<DataStore> iter = datastores.iterator();
     while (iter.hasNext()) {
-      fireDatastoreClosed(new CreoleEvent((DataStore) iter.next(), CreoleEvent.DATASTORE_CLOSED));
+      fireDatastoreClosed(new CreoleEvent(iter.next(), CreoleEvent.DATASTORE_CLOSED));
     } // while
   } // clear()
 
   /** Configuration data such as driver names. */
-  private static Map configData = new HashMap();
+  private static Map<Object,Object> configData = new HashMap<Object,Object>();
 
   /** Get the configuration data map. */
-  public static Map getConfigData() {
+  public static Map<Object,Object> getConfigData() {
     return configData;
   }
 
@@ -111,24 +111,24 @@ public class DataStoreRegister extends HashSet<DataStore> {
    * register. New key/value pairs are added to the existing set (this will
    * overwrite existing pairs whose keys match new ones).
    */
-  public static void addConfig(Map configData) {
+  public static void addConfig(Map<Object,Object> configData) {
     DataStoreRegister.configData.putAll(configData);
   } // addConfig
 
   /** A hashmap from datastore to security data (current user and group) */
-  private static Map securityData = new HashMap();
+  private static Map<DataStore, Map<Object,Object>> securityData = new HashMap<DataStore, Map<Object,Object>>();
 
   /**
    * Returns the security data for this datastore
    */
-  public static Map getSecurityData(DataStore ds) {
-    return (Map) securityData.get(ds);
-  } //
+  public static Map<Object,Object> getSecurityData(DataStore ds) {
+    return securityData.get(ds);
+  }
 
   /**
    * Adds security data for this datastore
    */
-  public static void addSecurityData(DataStore ds, Map secData) {
+  public static void addSecurityData(DataStore ds, Map<Object,Object> secData) {
     DataStoreRegister.securityData.put(ds, secData);
   }
 
@@ -147,7 +147,8 @@ public class DataStoreRegister extends HashSet<DataStore> {
    */
   public synchronized void removeCreoleListener(CreoleListener l) {
     if (creoleListeners != null && creoleListeners.contains(l)) {
-      Vector v = (Vector) creoleListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<CreoleListener> v = (Vector<CreoleListener>) creoleListeners.clone();
       v.removeElement(l);
       creoleListeners = v;
     }
@@ -160,7 +161,8 @@ public class DataStoreRegister extends HashSet<DataStore> {
    * through {@link Gate#getCreoleRegister()}
    */
   public synchronized void addCreoleListener(CreoleListener l) {
-    Vector v = creoleListeners == null ? new Vector(2) : (Vector) creoleListeners.clone();
+    @SuppressWarnings("unchecked")
+    Vector<CreoleListener> v = creoleListeners == null ? new Vector<CreoleListener>(2) : (Vector<CreoleListener>)creoleListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       creoleListeners = v;
@@ -175,10 +177,10 @@ public class DataStoreRegister extends HashSet<DataStore> {
    */
   protected void fireDatastoreOpened(CreoleEvent e) {
     if (creoleListeners != null) {
-      Vector listeners = creoleListeners;
+      Vector<CreoleListener> listeners = creoleListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).datastoreOpened(e);
+        listeners.elementAt(i).datastoreOpened(e);
       } // for
     } // if
   } // fireDatastoreOpened(CreoleEvent e)
@@ -191,10 +193,10 @@ public class DataStoreRegister extends HashSet<DataStore> {
    */
   protected void fireDatastoreCreated(CreoleEvent e) {
     if (creoleListeners != null) {
-      Vector listeners = creoleListeners;
+      Vector<CreoleListener> listeners = creoleListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).datastoreCreated(e);
+        listeners.elementAt(i).datastoreCreated(e);
       } // for
     } // if
   } // fireDatastoreCreated(CreoleEvent e)
@@ -207,15 +209,15 @@ public class DataStoreRegister extends HashSet<DataStore> {
    */
   protected void fireDatastoreClosed(CreoleEvent e) {
     if (creoleListeners != null) {
-      Vector listeners = creoleListeners;
+      Vector<CreoleListener> listeners = creoleListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).datastoreClosed(e);
+        listeners.elementAt(i).datastoreClosed(e);
       } // for
     } // if
   } // fireDatastoreClosed(CreoleEvent e)
 
   /** */
-  private transient Vector creoleListeners;
+  private transient Vector<CreoleListener> creoleListeners;
 
 } // class DataStoreRegister

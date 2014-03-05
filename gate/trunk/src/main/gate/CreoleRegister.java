@@ -125,7 +125,7 @@ public interface CreoleRegister extends Map<String, ResourceData>, Serializable,
     * <P>
     * If Java allowed class methods in interfaces this would be static.
     */
-  public File createCreoleDirectoryFile(File directoryFile, Set jarFileNames);
+  public File createCreoleDirectoryFile(File directoryFile, Set<String> jarFileNames);
 
   /** Get the list of types of LR in the register. */
   public Set<String> getLrTypes();

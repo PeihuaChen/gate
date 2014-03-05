@@ -546,7 +546,8 @@ public class NameBearerHandle implements Handle, StatusListener,
     public void actionPerformed(ActionEvent e) {
       if(target instanceof Controller) {
         // empty the controller of all its processing resources
-        ((Controller)target).setPRs(Collections.emptyList());
+        List<ProcessingResource> empty = Collections.emptyList();
+        ((Controller)target).setPRs(empty);
         if(target instanceof ConditionalController) {
           ((ConditionalController)target).setRunningStrategies(Collections
                   .emptyList());
@@ -1339,7 +1340,7 @@ public class NameBearerHandle implements Handle, StatusListener,
                                   + " seconds");
               }
               else {
-                FeatureMap securityData = (FeatureMap)DataStoreRegister
+                Map<Object,Object> securityData = DataStoreRegister
                         .getSecurityData(ds);
                 SecurityInfo si = null;
                 // check whether the datastore supports security data

@@ -122,7 +122,7 @@ public interface AnnotationSet extends SimpleAnnotationSet, Serializable {
    *         annotations match these constraints, an empty set is
    *         returned. The returned set is immutable.
    */
-  public AnnotationSet get(String type, Set featureNames);
+  public AnnotationSet get(String type, Set<? extends Object> featureNames);
 
   /**
    * Select annotations by type, features and offset. This method is a
