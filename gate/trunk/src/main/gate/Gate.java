@@ -1392,6 +1392,7 @@ public class Gate implements GateConstants {
         while(!jobsList.isEmpty()) {
           Element currentElem = jobsList.remove(0);
           if(currentElem.getName().equalsIgnoreCase("JAR")) {
+            @SuppressWarnings("unchecked")
             List<Attribute> attrs = currentElem.getAttributes();
             Iterator<Attribute> attrsIt = attrs.iterator();
             while(attrsIt.hasNext()) {
@@ -1418,6 +1419,7 @@ public class Gate implements GateConstants {
           else {
             // this is some higher level element -> simulate recursion
             // we want Depth-first-search so we need to add at the beginning
+            @SuppressWarnings("unchecked")
             List<Element> newJobsList = new ArrayList<Element>(currentElem.getChildren());
             newJobsList.addAll(jobsList);
             jobsList = newJobsList;
