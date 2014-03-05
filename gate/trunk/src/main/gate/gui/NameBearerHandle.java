@@ -37,6 +37,7 @@ import gate.creole.ConditionalController;
 import gate.creole.ConditionalSerialAnalyserController;
 import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.RunningStrategy;
 import gate.creole.SerialAnalyserController;
 import gate.creole.ir.DefaultIndexDefinition;
 import gate.creole.ir.DocumentContentReader;
@@ -549,8 +550,8 @@ public class NameBearerHandle implements Handle, StatusListener,
         List<ProcessingResource> empty = Collections.emptyList();
         ((Controller)target).setPRs(empty);
         if(target instanceof ConditionalController) {
-          ((ConditionalController)target).setRunningStrategies(Collections
-                  .emptyList());
+          List<RunningStrategy> emptyRS = Collections.emptyList();
+          ((ConditionalController)target).setRunningStrategies(emptyRS);
         }
       }
       if(target instanceof Resource) {

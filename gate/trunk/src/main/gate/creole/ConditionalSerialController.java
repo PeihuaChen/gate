@@ -38,11 +38,11 @@ public class ConditionalSerialController extends SerialController
                                          implements ConditionalController{
 
   public ConditionalSerialController(){
-    strategiesList = new ArrayList();
+    strategiesList = new ArrayList<RunningStrategy>();
   }
 
   @Override
-  public Collection getRunningStrategies(){
+  public Collection<RunningStrategy> getRunningStrategies(){
     return Collections.unmodifiableList(strategiesList);
   }
 
@@ -118,9 +118,9 @@ public class ConditionalSerialController extends SerialController
    * 	       is not supported by this controller.
    */
   @Override
-  public void setRunningStrategies(Collection strategies){
+  public void setRunningStrategies(Collection<RunningStrategy> strategies){
     strategiesList.clear();
-    Iterator stratIter = strategies.iterator();
+    Iterator<RunningStrategy> stratIter = strategies.iterator();
     while(stratIter.hasNext()) strategiesList.add(stratIter.next());
   }
 
@@ -153,7 +153,7 @@ public class ConditionalSerialController extends SerialController
 
 
     //run the thing
-    if(((RunningStrategy)strategiesList.get(componentIndex)).shouldRun()){
+    if(strategiesList.get(componentIndex).shouldRun()){
       benchmarkFeatures.put(Benchmark.PR_NAME_FEATURE, currentPR.getName());
 
       long startTime = System.currentTimeMillis();
@@ -236,5 +236,5 @@ public class ConditionalSerialController extends SerialController
   /**
    * The list of running strategies for the member PRs.
    */
-  protected List strategiesList;
+  protected List<RunningStrategy> strategiesList;
 } // class SerialController
