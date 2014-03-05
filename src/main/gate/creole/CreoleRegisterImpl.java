@@ -409,7 +409,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * If Java allowed class methods in interfaces this would be static.
    */
   @Override
-  public File createCreoleDirectoryFile(File directoryFile, Set jarFileNames) {
+  public File createCreoleDirectoryFile(File directoryFile, Set<String> jarFileNames) {
     // //////////////////
     // dump xml header and comment header and <CREOLE-DIRECTORY> into dirfile
     // for each jar file pick out resource.xml
