@@ -715,6 +715,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   @Override
   public synchronized void removeCorpusListener(CorpusListener l) {
     if(corpusListeners != null && corpusListeners.contains(l)) {
+      @SuppressWarnings("unchecked")
       Vector<CorpusListener> v = (Vector<CorpusListener>)corpusListeners.clone();
       v.removeElement(l);
       corpusListeners = v;
@@ -723,6 +724,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
 
   @Override
   public synchronized void addCorpusListener(CorpusListener l) {
+    @SuppressWarnings("unchecked")
     Vector<CorpusListener> v = corpusListeners == null
             ? new Vector<CorpusListener>(2)
             : (Vector<CorpusListener>)corpusListeners.clone();
