@@ -150,9 +150,9 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   public List getDocumentPersistentIDs() {
     List docsIDs = new ArrayList();
     if(docDataList == null) return docsIDs;
-    Iterator iter = docDataList.iterator();
+    Iterator<DocumentData> iter = docDataList.iterator();
     while(iter.hasNext()) {
-      DocumentData data = (DocumentData)iter.next();
+      DocumentData data = iter.next();
       docsIDs.add(data.getPersistentID());
     }
     return docsIDs;
@@ -422,7 +422,8 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   @Override
   public synchronized void removeCorpusListener(CorpusListener l) {
     if(corpusListeners != null && corpusListeners.contains(l)) {
-      Vector v = (Vector)corpusListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<CorpusListener> v = (Vector<CorpusListener>)corpusListeners.clone();
       v.removeElement(l);
       corpusListeners = v;
     }
@@ -654,7 +655,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   }
 
   @Override
-  public Object[] toArray(Object[] a) {
+  public <T> T[] toArray(T[] a) {
     // there is a problem here, because some docs might not be
     // instantiated
     throw new MethodNotImplementedException(
@@ -750,8 +751,8 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   }// findDocument
 
   @Override
-  public boolean containsAll(Collection c) {
-    Iterator iter = c.iterator();
+  public boolean containsAll(Collection<?> c) {
+    Iterator<?> iter = c.iterator();
     while(iter.hasNext()) {
       if(!contains(iter.next())) return false;
     }
@@ -769,14 +770,14 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   }
 
   @Override
-  public boolean addAll(int index, Collection c) {
+  public boolean addAll(int index, Collection<? extends Document> c) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public boolean removeAll(Collection c) {
+  public boolean removeAll(Collection<?> c) {
     boolean allRemoved = true;
-    Iterator iter = c.iterator();
+    Iterator<?> iter = c.iterator();
     while(iter.hasNext()) {
       if(!remove(iter.next())) allRemoved = false;
     }
@@ -785,7 +786,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   }
 
   @Override
-  public boolean retainAll(Collection c) {
+  public boolean retainAll(Collection<?> c) {
     throw new UnsupportedOperationException();
   }
 
@@ -905,12 +906,12 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   }
 
   @Override
-  public ListIterator listIterator() {
+  public ListIterator<Document> listIterator() {
     throw new gate.util.MethodNotImplementedException();
   }
 
   @Override
-  public ListIterator listIterator(int index) {
+  public ListIterator<Document> listIterator(int index) {
     throw new gate.util.MethodNotImplementedException();
   }
 
@@ -919,7 +920,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    * might no be in memory
    */
   @Override
-  public List subList(int fromIndex, int toIndex) {
+  public List<Document> subList(int fromIndex, int toIndex) {
     throw new gate.util.MethodNotImplementedException();
   }
 
