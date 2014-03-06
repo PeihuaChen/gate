@@ -28,7 +28,8 @@ import org.apache.commons.lang.StringEscapeUtils;
 
 public abstract class AbstractTermbank extends AbstractBank 
     implements ActionsPublisher  {
-  private static final long serialVersionUID = -2809051430169834059L;
+
+  private static final long serialVersionUID = -1044054380153036770L;
   
   // additional CREOLE init parameters
   protected Set<String> inputAnnotationTypes;

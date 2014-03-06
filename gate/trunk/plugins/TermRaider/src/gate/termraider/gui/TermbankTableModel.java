@@ -17,7 +17,8 @@ import java.util.*;
 import javax.swing.table.AbstractTableModel;
 
 public class TermbankTableModel extends AbstractTableModel {
-  private static final long serialVersionUID = 3477026307772675813L;
+
+  private static final long serialVersionUID = 5178553454244139001L;
 
   private List<Term> terms;
   private AbstractTermbank termbank;

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008--2012, The University of Sheffield. See the file
+ *  Copyright (c) 2008--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -27,7 +27,7 @@ public class HyponymyDebugger
   extends JPanel 
   implements ANNIEConstants {
 
-  private static final long serialVersionUID = -3587317001405213679L;
+  private static final long serialVersionUID = 4949616706410088547L;
   
   private JScrollPane scrollPane;
   private HyponymyTermbank termbank;

@@ -27,8 +27,9 @@ import gate.termraider.util.*;
  * min & max scores).
  */
 public abstract class AbstractBank extends AbstractLanguageResource {
-  private static final long serialVersionUID = -9168657973312733783L;
 
+  private static final long serialVersionUID = -7924866363771311062L;
+  
   protected Set<String> languages, types;
   protected int documentCount;
   
