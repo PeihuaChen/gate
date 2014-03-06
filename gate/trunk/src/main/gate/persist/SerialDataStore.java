@@ -612,7 +612,7 @@ extends AbstractFeatureBearer implements DataStore {
 
   /** Random number generator */
   private static final Random randomiser = new Random();
-  private transient Vector datastoreListeners;
+  private transient Vector<DatastoreListener> datastoreListeners;
 
   /** String representation */
   @Override
@@ -654,14 +654,16 @@ extends AbstractFeatureBearer implements DataStore {
   @Override
   public synchronized void removeDatastoreListener(DatastoreListener l) {
     if (datastoreListeners != null && datastoreListeners.contains(l)) {
-      Vector v = (Vector) datastoreListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<DatastoreListener> v = (Vector<DatastoreListener>) datastoreListeners.clone();
       v.removeElement(l);
       datastoreListeners = v;
     }
   }
   @Override
   public synchronized void addDatastoreListener(DatastoreListener l) {
-    Vector v = datastoreListeners == null ? new Vector(2) : (Vector) datastoreListeners.clone();
+    @SuppressWarnings("unchecked")
+    Vector<DatastoreListener> v = datastoreListeners == null ? new Vector<DatastoreListener>(2) : (Vector<DatastoreListener>) datastoreListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       datastoreListeners = v;
@@ -669,28 +671,28 @@ extends AbstractFeatureBearer implements DataStore {
   }
   protected void fireResourceAdopted(DatastoreEvent e) {
     if (datastoreListeners != null) {
-      Vector listeners = datastoreListeners;
+      Vector<DatastoreListener> listeners = datastoreListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((DatastoreListener) listeners.elementAt(i)).resourceAdopted(e);
+        listeners.elementAt(i).resourceAdopted(e);
       }
     }
   }
   protected void fireResourceDeleted(DatastoreEvent e) {
     if (datastoreListeners != null) {
-      Vector listeners = datastoreListeners;
+      Vector<DatastoreListener> listeners = datastoreListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((DatastoreListener) listeners.elementAt(i)).resourceDeleted(e);
+        listeners.elementAt(i).resourceDeleted(e);
       }
     }
   }
   protected void fireResourceWritten(DatastoreEvent e) {
     if (datastoreListeners != null) {
-      Vector listeners = datastoreListeners;
+      Vector<DatastoreListener> listeners = datastoreListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((DatastoreListener) listeners.elementAt(i)).resourceWritten(e);
+        listeners.elementAt(i).resourceWritten(e);
       }
     }
   }
