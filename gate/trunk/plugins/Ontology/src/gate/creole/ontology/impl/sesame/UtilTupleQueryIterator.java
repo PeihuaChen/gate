@@ -330,7 +330,13 @@ import org.openrdf.repository.RepositoryConnection;
       } else if(mIsClosed) {
         throw new GateOntologyException("Cannot get bindings for a closed tuple query");
       } else {
-        return mResult.getBindingNames();
+        List<String> bns = null;
+        try {
+          bns = mResult.getBindingNames();
+        } catch(QueryEvaluationException ex) {
+          throw new GateOntologyException("Could not get the bindings for query "+mQuery,ex);
+        }
+        return bns;
       }
     }
     
