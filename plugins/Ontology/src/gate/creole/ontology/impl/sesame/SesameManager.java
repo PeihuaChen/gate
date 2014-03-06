@@ -228,7 +228,8 @@ public class SesameManager {
     public void connectToRemoteLocation(String url) {
       isManagedRepository = true;
       HTTPClient httpClient = new HTTPClient();
-      httpClient.setServerURL(url);
+      httpClient.setQueryURL(url);
+      httpClient.setUpdateURL(url);
       RemoteRepositoryManager mgr = new RemoteRepositoryManager(url);
       try {
         java.net.URL javaurl = new java.net.URL(url);
