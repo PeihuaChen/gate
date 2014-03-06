@@ -53,6 +53,8 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -63,18 +65,22 @@ public class CSVImporter extends ResourceHelper {
   private static JComponent dialog = new JPanel();
 
   private static SpinnerNumberModel textColModel = new SpinnerNumberModel(0, 0,
-    Integer.MAX_VALUE, 1);
+      Integer.MAX_VALUE, 1);
 
   private static JCheckBox cboFeatures = new JCheckBox(
-    "1st Row Contains Column Labels", true);
+      "1st Row Contains Column Labels", true);
 
   private static JCheckBox cboDocuments = new JCheckBox(
-    "Create One Document Per Row", false);
+      "Create One Document Per Row", false);
 
   private static JTextField txtURL = new JTextField(30);
 
+  private static JTextField txtSeparator = new JTextField(",", 3);
+
+  private static JTextField txtQuoteChar = new JTextField("\"", 3);
+
   private static FileFilter CSV_FILE_FILTER = new ExtensionFileFilter(
-    "CSV Files (*.csv)", "csv");
+      "CSV Files (*.csv)", "csv");
 
   static {
     // we'll use the same dialog instance regardless of the corpus we are
@@ -94,7 +100,7 @@ public class CSVImporter extends ResourceHelper {
     constraints = new GridBagConstraints();
     constraints.gridx = GridBagConstraints.RELATIVE;
     constraints.gridy = 0;
-    constraints.gridwidth = 3;
+    constraints.gridwidth = 5;
     constraints.fill = GridBagConstraints.HORIZONTAL;
     constraints.insets = new Insets(0, 0, 0, 10);
     dialog.add(txtURL, constraints);
@@ -110,6 +116,38 @@ public class CSVImporter extends ResourceHelper {
     constraints = new GridBagConstraints();
     constraints.gridx = GridBagConstraints.RELATIVE;
     constraints.gridy = 1;
+    constraints.gridwidth = 2;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.insets = new Insets(0, 0, 15, 5);
+    dialog.add(new JLabel("Column Separator:"), constraints);
+
+    constraints = new GridBagConstraints();
+    constraints.gridx = GridBagConstraints.RELATIVE;
+    constraints.gridy = 1;
+    constraints.gridwidth = 1;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.insets = new Insets(0, 15, 15, 10);
+    dialog.add(txtSeparator, constraints);
+
+    constraints = new GridBagConstraints();
+    constraints.gridx = GridBagConstraints.RELATIVE;
+    constraints.gridy = 1;
+    constraints.gridwidth = 1;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.insets = new Insets(0, 0, 15, 5);
+    dialog.add(new JLabel("Quote Character:"), constraints);
+
+    constraints = new GridBagConstraints();
+    constraints.gridx = GridBagConstraints.RELATIVE;
+    constraints.gridy = 1;
+    constraints.gridwidth = 1;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.insets = new Insets(0, 0, 15, 10);
+    dialog.add(txtQuoteChar, constraints);
+
+    constraints = new GridBagConstraints();
+    constraints.gridx = GridBagConstraints.RELATIVE;
+    constraints.gridy = 2;
     constraints.gridwidth = 3;
     constraints.anchor = GridBagConstraints.NORTHWEST;
     constraints.insets = new Insets(0, 0, 15, 5);
@@ -117,21 +155,21 @@ public class CSVImporter extends ResourceHelper {
 
     constraints = new GridBagConstraints();
     constraints.gridx = GridBagConstraints.RELATIVE;
-    constraints.gridy = 1;
+    constraints.gridy = 2;
     constraints.gridwidth = 3;
     constraints.anchor = GridBagConstraints.NORTHWEST;
     dialog.add(new JSpinner(textColModel), constraints);
 
     constraints = new GridBagConstraints();
     constraints.gridx = GridBagConstraints.RELATIVE;
-    constraints.gridy = 2;
+    constraints.gridy = 3;
     constraints.gridwidth = GridBagConstraints.RELATIVE;
     constraints.anchor = GridBagConstraints.NORTHWEST;
     dialog.add(cboFeatures, constraints);
 
     constraints = new GridBagConstraints();
     constraints.gridx = GridBagConstraints.RELATIVE;
-    constraints.gridy = 3;
+    constraints.gridy = 4;
     constraints.gridwidth = GridBagConstraints.RELATIVE;
     constraints.anchor = GridBagConstraints.NORTHWEST;
     dialog.add(cboDocuments, constraints);
@@ -146,14 +184,14 @@ public class CSVImporter extends ResourceHelper {
         filer.resetChoosableFileFilters();
         filer.setAcceptAllFileFilterUsed(false);
         filer
-          .addChoosableFileFilter((javax.swing.filechooser.FileFilter)CSV_FILE_FILTER);
+            .addChoosableFileFilter((javax.swing.filechooser.FileFilter)CSV_FILE_FILTER);
         filer
-          .setFileFilter((javax.swing.filechooser.FileFilter)CSV_FILE_FILTER);
+            .setFileFilter((javax.swing.filechooser.FileFilter)CSV_FILE_FILTER);
 
         if(filer.showOpenDialog(dialog) != JFileChooser.APPROVE_OPTION) return;
         try {
           txtURL.setText(filer.getSelectedFile().toURI().toURL()
-            .toExternalForm());
+              .toExternalForm());
         } catch(IOException ioe) {
           // do nothing here
         }
@@ -173,84 +211,98 @@ public class CSVImporter extends ResourceHelper {
 
         // display the populater dialog and return if it is cancelled
         if(JOptionPane.showConfirmDialog(null, dialog,
-          "Populate From CSV File", JOptionPane.OK_CANCEL_OPTION,
-          JOptionPane.PLAIN_MESSAGE) != JOptionPane.OK_OPTION) return;
+            "Populate From CSV File", JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.PLAIN_MESSAGE) != JOptionPane.OK_OPTION) return;
 
         // we want to run the population in a separate thread so we don't lock
         // up the GUI
         Thread thread =
-          new Thread(Thread.currentThread().getThreadGroup(),
-            "CSV Corpus Populater") {
+            new Thread(Thread.currentThread().getThreadGroup(),
+                "CSV Corpus Populater") {
 
-            public void run() {
-              try {
-                // see if we can convert the URL to a File instance
-                File file = null;
+              public void run() {
                 try {
-                  file = Files.fileFromURL(new URL(txtURL.getText()));
-                } catch(IllegalArgumentException iae) {
-                  // this will happen if someone enters an actual URL, but we
-                  // handle that later so we can just ignore the exception for
-                  // now and keep going
-                }
 
-                if(file != null && file.isDirectory()) {
-                  // if we have a File instance and that points at a directory
-                  // then....
+                  // unescape the strings that define the format of the file and
+                  // get the actual chars
+                  char separator =
+                      StringEscapeUtils.unescapeJava(txtSeparator.getText())
+                          .charAt(0);
+                  char quote =
+                      StringEscapeUtils.unescapeJava(txtQuoteChar.getText())
+                          .charAt(0);
 
-                  // get all the CSV files in the directory structure
-                  File[] files =
-                    Files.listFilesRecursively(file, CSV_FILE_FILTER);
+                  // see if we can convert the URL to a File instance
+                  File file = null;
+                  try {
+                    file = Files.fileFromURL(new URL(txtURL.getText()));
+                  } catch(IllegalArgumentException iae) {
+                    // this will happen if someone enters an actual URL, but we
+                    // handle that later so we can just ignore the exception for
+                    // now and keep going
+                  }
 
-                  for(File f : files) {
-                    // for each file...
+                  if(file != null && file.isDirectory()) {
+                    // if we have a File instance and that points at a directory
+                    // then....
 
-                    // skip directories as we don't want to handle those
-                    if(f.isDirectory()) continue;
+                    // get all the CSV files in the directory structure
+                    File[] files =
+                        Files.listFilesRecursively(file, CSV_FILE_FILTER);
+
+                    for(File f : files) {
+                      // for each file...
+
+                      // skip directories as we don't want to handle those
+                      if(f.isDirectory()) continue;
+
+                      if(cboDocuments.isSelected()) {
+                        // if we are creating lots of documents from a single
+                        // file
+                        // then call the populate method passing through all the
+                        // options from the GUI
+                        populate((Corpus)handle.getTarget(), f.toURI().toURL(),
+                            (Integer)textColModel.getValue(),
+                            cboFeatures.isSelected(), separator, quote);
+                      } else {
+                        // if we are creating a single document from a single
+                        // file
+                        // then call the createDoc method passing through all
+                        // the
+                        // options from the GUI
+                        createDoc((Corpus)handle.getTarget(),
+                            f.toURI().toURL(),
+                            (Integer)textColModel.getValue(),
+                            cboFeatures.isSelected(), separator, quote);
+                      }
+                    }
+                  } else {
+                    // we have a single URL to process so...
 
                     if(cboDocuments.isSelected()) {
                       // if we are creating lots of documents from a single file
                       // then call the populate method passing through all the
                       // options from the GUI
-                      populate((Corpus)handle.getTarget(), f.toURI().toURL(),
-                        (Integer)textColModel.getValue(),
-                        cboFeatures.isSelected());
+                      populate((Corpus)handle.getTarget(),
+                          new URL(txtURL.getText()),
+                          (Integer)textColModel.getValue(),
+                          cboFeatures.isSelected(), separator, quote);
                     } else {
                       // if we are creating a single document from a single file
                       // then call the createDoc method passing through all the
                       // options from the GUI
-                      createDoc((Corpus)handle.getTarget(), f.toURI().toURL(),
-                        (Integer)textColModel.getValue(),
-                        cboFeatures.isSelected());
+                      createDoc((Corpus)handle.getTarget(),
+                          new URL(txtURL.getText()),
+                          (Integer)textColModel.getValue(),
+                          cboFeatures.isSelected(), separator, quote);
                     }
                   }
-                } else {
-                  // we have a single URL to process so...
-
-                  if(cboDocuments.isSelected()) {
-                    // if we are creating lots of documents from a single file
-                    // then call the populate method passing through all the
-                    // options from the GUI
-                    populate((Corpus)handle.getTarget(),
-                      new URL(txtURL.getText()),
-                      (Integer)textColModel.getValue(),
-                      cboFeatures.isSelected());
-                  } else {
-                    // if we are creating a single document from a single file
-                    // then call the createDoc method passing through all the
-                    // options from the GUI
-                    createDoc((Corpus)handle.getTarget(),
-                      new URL(txtURL.getText()),
-                      (Integer)textColModel.getValue(),
-                      cboFeatures.isSelected());
-                  }
+                } catch(Exception e) {
+                  // TODO give a sensible error message
+                  e.printStackTrace();
                 }
-              } catch(Exception e) {
-                // TODO give a sensible error message
-                e.printStackTrace();
               }
-            }
-          };
+            };
 
         // let's leave the GUI nice and responsive
         thread.setPriority(Thread.MIN_PRIORITY);
@@ -264,6 +316,11 @@ public class CSVImporter extends ResourceHelper {
     return actions;
   }
 
+  public static void populate(Corpus corpus, URL csv, int column,
+      boolean colLabels) {
+    populate(corpus, csv, column, colLabels, ',', '"');
+  }
+
   /**
    * Create a new document from each row and push it into the specified corpus
    * 
@@ -275,13 +332,20 @@ public class CSVImporter extends ResourceHelper {
    *          the (zero index based) column which contains the text content
    * @param colLabels
    *          true if the first row contains column labels, true otherwise
+   * @param separator
+   *          the character that is used to separate columns (usually ,)
+   * @param quote
+   *          the character used to quote data that includes the column
+   *          separator (usually ")
    */
   public static void populate(Corpus corpus, URL csv, int column,
-                              boolean colLabels) {
+      boolean colLabels, char separator, char quote) {
     CSVReader reader = null;
     try {
       // open a CSVReader over the URL
-      reader = new CSVReader(new InputStreamReader(csv.openStream()));
+      reader =
+          new CSVReader(new InputStreamReader(csv.openStream()), separator,
+              quote);
 
       // if we are adding features read the first line
       String[] features = (colLabels ? reader.readNext() : null);
@@ -311,12 +375,12 @@ public class CSVImporter extends ResourceHelper {
         // setup the initialization params for the document
         FeatureMap params = Factory.newFeatureMap();
         params.put(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME,
-          nextLine[column]);
+            nextLine[column]);
 
         // create the document
         Document doc =
-          (Document)Factory.createResource(
-            gate.corpora.DocumentImpl.class.getName(), params, fmap);
+            (Document)Factory.createResource(
+                gate.corpora.DocumentImpl.class.getName(), params, fmap);
 
         // add the document to the corpus
         corpus.add(doc);
@@ -343,6 +407,11 @@ public class CSVImporter extends ResourceHelper {
     }
   }
 
+  public static void createDoc(Corpus corpus, URL csv, int column,
+      boolean colLabels) {
+    createDoc(corpus, csv, column, colLabels, ',', '"');
+  }
+
   /**
    * Creates a single document from the CSV file
    * 
@@ -354,14 +423,21 @@ public class CSVImporter extends ResourceHelper {
    *          the (zero index based) column which contains the text content
    * @param colLabels
    *          true if the first row contains column labels, true otherwise
+   * @param separator
+   *          the character that is used to separate columns (usually ,)
+   * @param quote
+   *          the character used to quote data that includes the column
+   *          separator (usually ")
    */
   public static void createDoc(Corpus corpus, URL csv, int column,
-                               boolean colLabels) {
+      boolean colLabels, char separator, char quote) {
     CSVReader reader = null;
     Document doc = null;
     try {
       // open a CSVReader over the URL
-      reader = new CSVReader(new InputStreamReader(csv.openStream()));
+      reader =
+          new CSVReader(new InputStreamReader(csv.openStream()), separator,
+              quote);
 
       // if we are adding features read the first line
       String[] features = (colLabels ? reader.readNext() : null);
@@ -396,14 +472,14 @@ public class CSVImporter extends ResourceHelper {
         long length = doc.getContent().size();
 
         // add the new text to the document
-        doc.edit(length, length, new DocumentContentImpl(nextLine[column] +
-          "\n\n"));
+        doc.edit(length, length, new DocumentContentImpl(nextLine[column]
+            + "\n\n"));
 
         // add the spanning annotation to the Original markups set, we use the
         // type "Text" if the columns don't have labels
         doc.getAnnotations("Original markups").add(length,
-          length + nextLine[column].length(),
-          (colLabels ? features[column] : "Text"), fmap);
+            length + nextLine[column].length(),
+            (colLabels ? features[column] : "Text"), fmap);
       }
 
       // store the original csv file URL as a document feature
@@ -413,7 +489,7 @@ public class CSVImporter extends ResourceHelper {
       // created into the init param that will be used if the document is
       // recreated
       doc.setParameterValue(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME,
-        doc.toXml());
+          doc.toXml());
 
       // add the document to the corpus
       corpus.add(doc);
