@@ -399,7 +399,7 @@ public boolean withinSpanOf(Annotation aAnnot){
    *   <LI> FEATURES_UPDATED event
    * </UL>
    */
-  private transient Vector annotationListeners;
+  private transient Vector<AnnotationListener> annotationListeners;
   /**
    * The listener for the events coming from the features.
    */
@@ -413,7 +413,8 @@ public boolean withinSpanOf(Annotation aAnnot){
   @Override
   public synchronized void removeAnnotationListener(AnnotationListener l) {
     if (annotationListeners != null && annotationListeners.contains(l)) {
-      Vector v = (Vector) annotationListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<AnnotationListener> v = (Vector<AnnotationListener>) annotationListeners.clone();
       v.removeElement(l);
       annotationListeners = v;
     }
@@ -424,7 +425,8 @@ public boolean withinSpanOf(Annotation aAnnot){
    */
   @Override
   public synchronized void addAnnotationListener(AnnotationListener l) {
-    Vector v = annotationListeners == null ? new Vector(2) : (Vector) annotationListeners.clone();
+    @SuppressWarnings("unchecked")
+    Vector<AnnotationListener> v = annotationListeners == null ? new Vector<AnnotationListener>(2) : (Vector<AnnotationListener>) annotationListeners.clone();
 
     //now check and if this is the first listener added,
     //start listening to all features, so their changes can
@@ -447,10 +449,10 @@ public boolean withinSpanOf(Annotation aAnnot){
    */
   protected void fireAnnotationUpdated(AnnotationEvent e) {
     if (annotationListeners != null) {
-      Vector listeners = annotationListeners;
+      Vector<AnnotationListener> listeners = annotationListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((AnnotationListener) listeners.elementAt(i)).annotationUpdated(e);
+        listeners.elementAt(i).annotationUpdated(e);
       }
     }
   }//fireAnnotationUpdated

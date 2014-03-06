@@ -17,6 +17,7 @@ package gate.gui;
 import gate.Gate;
 import gate.Resource;
 import gate.creole.AbstractResource;
+import gate.creole.ResourceInstantiationException;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
 
@@ -40,7 +41,7 @@ public abstract class ResourceHelper extends AbstractResource implements
   Map<Object, List<Action>> actions = new HashMap<Object, List<Action>>();
 
   @Override
-  public Resource init() {
+  public Resource init() throws ResourceInstantiationException{
     // we need to listen for unload events so we register ourselves with the
     // creole register
     Gate.getCreoleRegister().addCreoleListener(this);
