@@ -2402,6 +2402,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
   @Override
   public synchronized void removeDocumentListener(DocumentListener l) {
     if(documentListeners != null && documentListeners.contains(l)) {
+      @SuppressWarnings("unchecked")
       Vector<DocumentListener> v = (Vector<DocumentListener>)documentListeners.clone();
       v.removeElement(l);
       documentListeners = v;
@@ -2410,6 +2411,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
 
   @Override
   public synchronized void addDocumentListener(DocumentListener l) {
+    @SuppressWarnings("unchecked")
     Vector<DocumentListener> v = documentListeners == null
             ? new Vector<DocumentListener>(2)
             : (Vector<DocumentListener>)documentListeners.clone();
