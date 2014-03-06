@@ -248,11 +248,11 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       }
       catch(PersistenceException ex) {
         throw new GateRuntimeException("Error unloading document from corpus"
-                + "because document sync failed: " + ex.getMessage());
+                + "because document sync failed: " + ex.getMessage(), ex);
       }
       catch(gate.security.SecurityException ex1) {
         throw new GateRuntimeException("Error unloading document from corpus"
-                + "because of document access error: " + ex1.getMessage());
+                + "because of document access error: " + ex1.getMessage(), ex1);
       }
     }
     // 3. remove the document from the memory

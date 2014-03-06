@@ -16,22 +16,53 @@
 
 package gate.persist;
 
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.*;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-
-import gate.*;
+import gate.Corpus;
+import gate.DataStore;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.LanguageResource;
 import gate.corpora.SerialCorpusImpl;
 import gate.creole.ResourceData;
 import gate.event.DatastoreEvent;
 import gate.event.DatastoreListener;
-import gate.security.*;
 import gate.security.SecurityException;
-import gate.util.*;
+import gate.security.SecurityInfo;
+import gate.security.Session;
+import gate.util.AbstractFeatureBearer;
+import gate.util.Files;
+import gate.util.GateRuntimeException;
+import gate.util.Out;
+import gate.util.Strings;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+import java.util.Vector;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * A data store based on Java serialisation.
@@ -435,7 +466,7 @@ extends AbstractFeatureBearer implements DataStore {
       oos.writeObject(lr);
       oos.close();
     } catch(IOException e) {
-      throw new PersistenceException("Couldn't write to storage file: " + e);
+      throw new PersistenceException("Couldn't write to storage file: " + e.getMessage(),e);
     }
 
     // let the world know about it
@@ -449,7 +480,9 @@ extends AbstractFeatureBearer implements DataStore {
   /** Create a persistent store Id from the name of a resource. */
   protected String constructPersistenceId(String lrName) {
     // change the persistence ID so that it can be used as a filename
-    lrName=lrName.replaceAll("[\\/:\\*\\?\"<>|]","_");
+    lrName =
+        lrName.substring(0, Math.min(50, lrName.length())).replaceAll(
+            "[\\/:\\*\\?\"<>|]", "_");
     return lrName + "___" + new Date().getTime() + "___" + random();
   } // constructPersistenceId
 
