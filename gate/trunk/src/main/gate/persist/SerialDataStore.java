@@ -506,13 +506,13 @@ extends AbstractFeatureBearer implements DataStore {
 
   /** Get a list of the types of LR that are present in the data store. */
   @Override
-  public List getLrTypes() throws PersistenceException {
+  public List<String> getLrTypes() throws PersistenceException {
     if(storageDir == null || ! storageDir.exists())
       throw new PersistenceException("Can't read storage directory");
 
     // filter out the version file
     String[] fileArray = filterIgnoredFileNames(storageDir.list());
-    List lrTypes = new ArrayList();
+    List<String> lrTypes = new ArrayList<String>();
     for(int i=0; i<fileArray.length; i++)
       if(! fileArray[i].equals(versionFileName))
         lrTypes.add(fileArray[i]);

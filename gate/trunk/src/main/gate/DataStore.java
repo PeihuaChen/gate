@@ -103,7 +103,7 @@ public interface DataStore extends FeatureBearer, NameBearer {
   throws PersistenceException,SecurityException;
 
   /** Get a list of the types of LR that are present in the data store. */
-  public List<LanguageResource> getLrTypes() throws PersistenceException;
+  public List<String> getLrTypes() throws PersistenceException;
 
   /** Get a list of the IDs of LRs of a particular type that are present. */
   public List<String> getLrIds(String lrType) throws PersistenceException;

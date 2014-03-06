@@ -502,8 +502,7 @@ public class TestPR extends TestCase
                      storageDir.toExternalForm());
 
     //get LR id
-    String lrId = (String)ds.getLrIds
-                                ("gate.corpora.DocumentImpl").get(0);
+    String lrId = ds.getLrIds("gate.corpora.DocumentImpl").get(0);
 
 
     // get the document from data store
@@ -523,7 +522,7 @@ public class TestPR extends TestCase
     ds = Factory.openDataStore("gate.persist.SerialDataStore",
                                storageDir.toExternalForm());
     //get LR id
-    lrId = (String)ds.getLrIds("gate.corpora.DocumentImpl").get(0);
+    lrId = ds.getLrIds("gate.corpora.DocumentImpl").get(0);
     // get the document from data store
     features = Factory.newFeatureMap();
     features.put(DataStore.DATASTORE_FEATURE_NAME, ds);
@@ -541,7 +540,7 @@ public class TestPR extends TestCase
     ds = Factory.openDataStore("gate.persist.SerialDataStore",
                                storageDir.toExternalForm());
     //get LR id
-    lrId = (String)ds.getLrIds("gate.corpora.DocumentImpl").get(0);
+    lrId = ds.getLrIds("gate.corpora.DocumentImpl").get(0);
     // get the document from data store
     features = Factory.newFeatureMap();
     features.put(DataStore.DATASTORE_FEATURE_NAME, ds);
