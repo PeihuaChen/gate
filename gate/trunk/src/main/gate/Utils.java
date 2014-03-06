@@ -876,7 +876,6 @@ public class Utils {
    * @return a String with name prefixes or base URI expanded 
    */
   public static String expandUriString(String toExpand, Map<String,String> prefixes ) {
-    String expanded = "";
     // lets see if we have a basename entry in the map
     String baseUri = prefixes.get("");
     // if there is a baseURI and it is the only entry, just prefix toExpand with
@@ -1081,6 +1080,7 @@ public class Utils {
    * corpus in the parameter list that has a value for that feature.
    *  
    */
+  @SuppressWarnings("unchecked")
   public static String replaceVariablesInString(
           String string, Object... sources)
   {
@@ -1119,7 +1119,7 @@ public class Utils {
         for(Object source : sources) {
           if(type.isEmpty()) { // an empty variable type matches only maps from the sources
             if(source instanceof Map) {
-              value = ((Map)source).get(varname);
+              value = ((Map<String,?>)source).get(varname);
             }
           } else if(type.equals("pr") && (source instanceof ProcessingResource)) {
             value = ((FeatureBearer)source).getFeatures().get(varname);
