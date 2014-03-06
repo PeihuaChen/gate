@@ -76,9 +76,9 @@ public class SerialCorpusImpl extends AbstractLanguageResource
 
   static final long serialVersionUID = 3632609241787241616L;
 
-  protected transient Vector corpusListeners;
+  protected transient Vector<CorpusListener> corpusListeners;
 
-  protected java.util.List docDataList = null;
+  protected List<DocumentData> docDataList = null;
 
   // here I keep document index as key (same as the index in docDataList
   // which defines the document order) and Documents as value
@@ -86,11 +86,11 @@ public class SerialCorpusImpl extends AbstractLanguageResource
 
   protected transient IndexManager indexManager = null;
 
-  protected transient List addedDocs = null;
+  protected transient List<Document> addedDocs = null;
 
-  protected transient List removedDocIDs = null;
+  protected transient List<String> removedDocIDs = null;
 
-  protected transient List changedDocs = null;
+  protected transient List<Document> changedDocs = null;
 
   public SerialCorpusImpl() {
   }
@@ -107,17 +107,17 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     this.setName(tCorpus.getName());
     this.setFeatures(tCorpus.getFeatures());
 
-    docDataList = new ArrayList();
+    docDataList = new ArrayList<DocumentData>();
     // now cache the names of all docs for future use
-    List docNames = tCorpus.getDocumentNames();
+    List<String> docNames = tCorpus.getDocumentNames();
     for(int i = 0; i < docNames.size(); i++) {
       Document doc = tCorpus.get(i);
-      docDataList.add(new DocumentData((String)docNames.get(i), null, doc
+      docDataList.add(new DocumentData(docNames.get(i), null, doc
               .getClass().getName()));
     }
 
     // copy all the documents from the transient corpus
-    documents = new ArrayList();
+    documents = new ArrayList<Document>();
     documents.addAll(tCorpus);
 
     // make sure we fire events when docs are added/removed/etc
@@ -164,12 +164,12 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    * @return a {@link List} of Objects representing the persistent IDs
    *         of the documents in this corpus.
    */
-  public List getDocumentClassTypes() {
-    List docsIDs = new ArrayList();
+  public List<String> getDocumentClassTypes() {
+    List<String> docsIDs = new ArrayList<String>();
     if(docDataList == null) return docsIDs;
-    Iterator iter = docDataList.iterator();
+    Iterator<DocumentData> iter = docDataList.iterator();
     while(iter.hasNext()) {
-      DocumentData data = (DocumentData)iter.next();
+      DocumentData data = iter.next();
       docsIDs.add(data.getClassType());
     }
     return docsIDs;
@@ -180,7 +180,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    */
   public void setDocumentPersistentID(int index, Object persID) {
     if(index >= docDataList.size()) return;
-    ((DocumentData)docDataList.get(index)).setPersistentID(persID);
+    docDataList.get(index).setPersistentID(persID);
     if(DEBUG) Out.prln("IDs are now: " + docDataList);
   }
 
@@ -196,7 +196,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   public String getDocumentName(int index) {
     if(index >= docDataList.size()) return "No such document";
 
-    return ((DocumentData)docDataList.get(index)).getDocumentName();
+    return docDataList.get(index).getDocumentName();
   }
 
   /**
@@ -209,12 +209,12 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    */
   public Object getDocumentPersistentID(int index) {
     if(index >= docDataList.size()) return null;
-    return ((DocumentData)docDataList.get(index)).getPersistentID();
+    return docDataList.get(index).getPersistentID();
   }
 
   public String getDocumentClassType(int index) {
     if(index >= docDataList.size()) return null;
-    return ((DocumentData)docDataList.get(index)).getClassType();
+    return docDataList.get(index).getClassType();
   }
 
   /**
@@ -252,7 +252,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       }
       catch(gate.security.SecurityException ex1) {
         throw new GateRuntimeException("Error unloading document from corpus"
-                + "because of document access error: " + ex1.getMessage(), ex1);
+                + "because of document access error: " + ex1.getMessage(),ex1);
       }
     }
     // 3. remove the document from the memory
@@ -315,7 +315,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    */
   public boolean isPersistentDocument(int index) {
     if(documents == null || documents.isEmpty()) return false;
-    return (((DocumentData)docDataList.get(index)).getPersistentID() != null);
+    return (docDataList.get(index).getPersistentID() != null);
   }
 
   /**
@@ -430,9 +430,10 @@ public class SerialCorpusImpl extends AbstractLanguageResource
 
   @Override
   public synchronized void addCorpusListener(CorpusListener l) {
-    Vector v = corpusListeners == null
-            ? new Vector(2)
-            : (Vector)corpusListeners.clone();
+    @SuppressWarnings("unchecked")
+    Vector<CorpusListener> v = corpusListeners == null
+            ? new Vector<CorpusListener>(2)
+            : (Vector<CorpusListener>)corpusListeners.clone();
     if(!v.contains(l)) {
       v.addElement(l);
       corpusListeners = v;
@@ -441,20 +442,20 @@ public class SerialCorpusImpl extends AbstractLanguageResource
 
   protected void fireDocumentAdded(CorpusEvent e) {
     if(corpusListeners != null) {
-      Vector listeners = corpusListeners;
+      Vector<CorpusListener> listeners = corpusListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((CorpusListener)listeners.elementAt(i)).documentAdded(e);
+        listeners.elementAt(i).documentAdded(e);
       }
     }
   }
 
   protected void fireDocumentRemoved(CorpusEvent e) {
     if(corpusListeners != null) {
-      Vector listeners = corpusListeners;
+      Vector<CorpusListener> listeners = corpusListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((CorpusListener)listeners.elementAt(i)).documentRemoved(e);
+        listeners.elementAt(i).documentRemoved(e);
       }
     }
   }
@@ -539,7 +540,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     // and nothing else, so I need to determine the index of the doc
     // first
     for(int i = 0; i < docDataList.size(); i++) {
-      DocumentData docData = (DocumentData)docDataList.get(i);
+      DocumentData docData = docDataList.get(i);
       // we've found the correct document
       // don't break the loop, because it might appear more than once
       if(docID.equals(docData.getPersistentID())) {
@@ -547,7 +548,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
           // instead of calling remove() which tries to load the
           // document
           // remove it from the documents and docDataList
-          documentRemoved(((DocumentData)docDataList.get(i)).persistentID
+          documentRemoved(docDataList.get(i).persistentID
                   .toString());
           docDataList.remove(i);
           documents.remove(i);
@@ -611,9 +612,9 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   }
 
   @Override
-  public Iterator iterator() {
-    return new Iterator() {
-      Iterator docDataIter = docDataList.iterator();
+  public Iterator<Document> iterator() {
+    return new Iterator<Document>() {
+      Iterator<DocumentData> docDataIter = docDataList.iterator();
 
       @Override
       public boolean hasNext() {
@@ -621,10 +622,10 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       }
 
       @Override
-      public Object next() {
+      public Document next() {
 
         // try finding a document with the same name and persistent ID
-        DocumentData docData = (DocumentData)docDataIter.next();
+        DocumentData docData = docDataIter.next();
         int index = docDataList.indexOf(docData);
         return SerialCorpusImpl.this.get(index);
       }
@@ -701,7 +702,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       // by Andrey Shafirin: this part of code can produce an exception
       // if
       // document wasn't loaded
-      String docName = ((DocumentData)docDataList.get(index)).getDocumentName();
+      String docName = docDataList.get(index).getDocumentName();
       Object docPersistentID = getDocumentPersistentID(index);
       docDataList.remove(index);
       // Document oldDoc = (Document) documents.remove(index);
@@ -733,9 +734,9 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     if(index > -1 && index < docDataList.size()) return index;
 
     // else try finding a document with the same name and persistent ID
-    Iterator iter = docDataList.iterator();
+    Iterator<DocumentData> iter = docDataList.iterator();
     for(index = 0; iter.hasNext(); index++) {
-      docData = (DocumentData)iter.next();
+      docData = iter.next();
       if(docData.getDocumentName().equals(doc.getName())
               && docData.getPersistentID().equals(doc.getLRPersistenceId())
               && docData.getClassType().equals(doc.getClass().getName())) {
@@ -828,10 +829,10 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       FeatureMap parameters = Factory.newFeatureMap();
       parameters.put(DataStore.DATASTORE_FEATURE_NAME, this.dataStore);
       try {
-        parameters.put(DataStore.LR_ID_FEATURE_NAME, ((DocumentData)docDataList
-                .get(index)).getPersistentID());
-        Document lr = (Document) Factory.createResource(((DocumentData)docDataList
-                .get(index)).getClassType(), parameters);
+        parameters.put(DataStore.LR_ID_FEATURE_NAME, docDataList
+                .get(index).getPersistentID());
+        Document lr = (Document) Factory.createResource(docDataList
+                .get(index).getClassType(), parameters);
         if(DEBUG) Out.prln("Loaded document :" + lr.getName());
         // change the result to the newly loaded doc
         res = lr;
@@ -882,7 +883,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     if(DEBUG) Out.prln("Remove index called");
     // try to get the actual document if it was loaded
     Document res = isDocumentLoaded(index) ? get(index) : null;
-    Object docLRID = ((DocumentData)docDataList.get(index)).persistentID;
+    Object docLRID = docDataList.get(index).persistentID;
     if(docLRID != null) documentRemoved(docLRID.toString());
     docDataList.remove(index);
     documents.remove(index);
@@ -948,22 +949,22 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     this.setName(tCorpus.getName());
     this.setFeatures(tCorpus.getFeatures());
 
-    docDataList = new ArrayList();
+    docDataList = new ArrayList<DocumentData>();
     // now cache the names of all docs for future use
-    List docNames = tCorpus.getDocumentNames();
+    List<String> docNames = tCorpus.getDocumentNames();
     for(int i = 0; i < docNames.size(); i++) {
       Document aDoc = tCorpus.get(i);
-      docDataList.add(new DocumentData((String)docNames.get(i), null, aDoc
+      docDataList.add(new DocumentData(docNames.get(i), null, aDoc
               .getClass().getName()));
     }
 
     // copy all the documents from the transient corpus
-    documents = new ArrayList();
+    documents = new ArrayList<Document>();
     documents.addAll(tCorpus);
 
-    this.addedDocs = new Vector();
-    this.removedDocIDs = new Vector();
-    this.changedDocs = new Vector();
+    this.addedDocs = new Vector<Document>();
+    this.removedDocIDs = new Vector<String>();
+    this.changedDocs = new Vector<Document>();
 
     // make sure we fire events when docs are added/removed/etc
     Gate.getCreoleRegister().addCreoleListener(this);
@@ -993,10 +994,10 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   private void readObject(ObjectInputStream s) throws IOException,
           ClassNotFoundException {
     s.defaultReadObject();
-    documents = new ArrayList(docDataList.size());
+    documents = new ArrayList<Document>(docDataList.size());
     for(int i = 0; i < docDataList.size(); i++)
       documents.add(null);
-    corpusListeners = new Vector();
+    corpusListeners = new Vector<CorpusListener>();
     // finally set the creole listeners if the LR is like that
     Gate.getCreoleRegister().addCreoleListener(this);
     if(this.dataStore != null) this.dataStore.addDatastoreListener(this);
@@ -1008,7 +1009,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       String className = definition.getIrEngineClassName();
       try {
         // Class aClass = Class.forName(className);
-        Class aClass = Class.forName(className, true, Gate.getClassLoader());
+        Class<?> aClass = Class.forName(className, true, Gate.getClassLoader());
         IREngine engine = (IREngine)aClass.newInstance();
         this.indexManager = engine.getIndexmanager();
         this.indexManager.setIndexDefinition(definition);
@@ -1024,9 +1025,9 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       // this.indexManager.setCorpus(this);
       // break;
       // }
-      this.addedDocs = new Vector();
-      this.removedDocIDs = new Vector();
-      this.changedDocs = new Vector();
+      this.addedDocs = new Vector<Document>();
+      this.removedDocIDs = new Vector<String>();
+      this.changedDocs = new Vector<Document>();
     }
   }// readObject
 
@@ -1039,7 +1040,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       String className = definition.getIrEngineClassName();
       try {
         // Class aClass = Class.forName(className);
-        Class aClass = Class.forName(className, true, Gate.getClassLoader());
+        Class<?> aClass = Class.forName(className, true, Gate.getClassLoader());
         IREngine engine = (IREngine)aClass.newInstance();
         this.indexManager = engine.getIndexmanager();
         this.indexManager.setIndexDefinition(definition);
@@ -1055,9 +1056,9 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       // this.indexManager.setCorpus(this);
       // break;
       // }
-      this.addedDocs = new Vector();
-      this.removedDocIDs = new Vector();
-      this.changedDocs = new Vector();
+      this.addedDocs = new Vector<Document>();
+      this.removedDocIDs = new Vector<String>();
+      this.changedDocs = new Vector<Document>();
     }
   }
 
