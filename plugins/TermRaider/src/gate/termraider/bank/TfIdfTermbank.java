@@ -27,7 +27,7 @@ import java.util.*;
 public class TfIdfTermbank extends AbstractTermbank
     implements ActionsPublisher  {
 
-  private static final long serialVersionUID = -8275690376233755995L;
+  private static final long serialVersionUID = 2256964300070167978L;
   
   /* EXTRA CREOLE PARAMETERS */
   private TfCalculation tfCalculation;

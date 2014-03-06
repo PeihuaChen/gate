@@ -26,7 +26,7 @@ import java.util.*;
 public class PMIBank extends AbstractPairbank
     implements ActionsPublisher  {
 
-  private static final long serialVersionUID = 1275893998609017476L;
+  private static final long serialVersionUID = -5727540527631075420L;
 
   /* EXTRA CREOLE PARAMETERS */
   protected String outerAnnotationType;

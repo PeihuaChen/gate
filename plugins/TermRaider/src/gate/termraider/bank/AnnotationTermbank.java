@@ -25,7 +25,8 @@ import java.util.*;
     comment = "TermRaider Termbank derived from document annotations")
 public class AnnotationTermbank extends AbstractTermbank
     implements ActionsPublisher  {
-  private static final long serialVersionUID = 5433955185886301874L;
+
+  private static final long serialVersionUID = -775090785732060049L;
   
   /* EXTRA CREOLE PARAMETERS */
   protected String inputScoreFeature;

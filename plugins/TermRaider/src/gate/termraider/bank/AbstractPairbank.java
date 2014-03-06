@@ -27,9 +27,7 @@ import javax.swing.Action;
 public abstract class AbstractPairbank extends AbstractBank
     implements ActionsPublisher {
 
-  private static final long serialVersionUID = 424942970862740181L;
-
-  // CREOLE init parameters
+  private static final long serialVersionUID = 3544077331310241919L;
 
   protected transient List<Action> actionsList;
   

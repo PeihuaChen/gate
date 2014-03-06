@@ -66,7 +66,7 @@ public class TermbankViewer
   extends AbstractVisualResource 
   implements ANNIEConstants, ProgressListener {
 
-  private static final long serialVersionUID = 3838369793341101794L;
+  private static final long serialVersionUID = 8894861995037230059L;
   
   private JPanel controlPanel;
   private SliderPanel sliderPanel;

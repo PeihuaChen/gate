@@ -36,8 +36,8 @@ comment = "Document frequency counter derived from corpora and other DFBs")
 public class DocumentFrequencyBank extends AbstractTermbank
 implements ActionsPublisher{
   
-  private static final long serialVersionUID = 5149075094060830331L;
-  
+  private static final long serialVersionUID = 8486379203429800194L;
+
   // Note: corpora parameter inherited from AbstractBank
   private Set<DocumentFrequencyBank> inputBanks;
   

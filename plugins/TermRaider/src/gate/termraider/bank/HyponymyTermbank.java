@@ -27,8 +27,8 @@ import java.util.*;
 
 public class HyponymyTermbank extends AbstractTermbank
     implements ActionsPublisher  {
-  private static final long serialVersionUID = 6846311108437600048L;
-  
+
+  private static final long serialVersionUID = -2382834479385875682L;
 
   
   /* EXTRA CREOLE PARAMETERS */

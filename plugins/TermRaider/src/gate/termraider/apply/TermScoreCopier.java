@@ -32,8 +32,7 @@ import java.util.*;
 public class TermScoreCopier extends AbstractLanguageAnalyser
   implements  ProcessingResource {
 
-  private static final long serialVersionUID = -8766478645866790985L;
-  
+  private static final long serialVersionUID = -6975121300500542261L;
   
   /* CREOLE PARAMETERS */
   private AbstractTermbank termbank;

@@ -21,7 +21,7 @@ import gate.termraider.bank.*;
 
 public class SliderPanel extends JPanel {
   
-  private static final long serialVersionUID = -6864836321387988786L;
+  private static final long serialVersionUID = 809001332419282768L;
   
   private AbstractBank scoredbank;
   private JSlider slider;
