@@ -18,6 +18,7 @@ package gate;
 import gate.annotation.AnnotationSetImpl;
 import gate.creole.ConditionalSerialController;
 import gate.creole.RunningStrategy;
+import gate.util.FeatureBearer;
 import gate.util.GateRuntimeException;
 import gate.util.InvalidOffsetException;
 import gate.util.OffsetComparator;
@@ -1009,5 +1010,160 @@ public class Utils {
       return Factory.createImmutableAnnotationSet(source.getDocument(), annotationsToAdd);
     }
   }
+  
+  /**
+   * This will replace all occurrences of variables of the form $env{name}, 
+   * $prop{name}, $doc{featname}, $pr_parm{inputAS} or $$env{name} etc in a String.
+   * 
+   * The source for replacing the variable can be  environment variables,
+   * system properties, or arbitrary maps or resources specified when calling
+   * the method.
+   * <p>
+   * Examples:
+   * <ul>
+   * <li><code>replaceVariablesInString("text $env{GATE_HOME} more text")</code>:
+   * returns "text /path/to/gate more text" if the environment variable 
+   * "GATE_HOME" was set to "/path/to/gate"
+   * <li><code>replaceVariablesInString("text $pr{myfeature1} more text",pr1)</code>:
+   * returns "myvalue1" if the feature map of the processing resource pr1 
+   * contains an entry with key "myfeature" and value "myvalue"
+   * <li><code>replaceVariablesInString("text ${somekey} more text",map1,map2,resource1,map3)</code>:
+   *  this will
+   * find the value of an entry with key "somekey" in the first Map object specified
+   * in the parameter list of the method.
+   * </ul>
+   * <p>
+   * The possible sources for finding values for a variable are:
+   * <ul>
+   * <li><code>System.getenv()</code>: for variables of the form $env{name}
+   * <li><code>System.getProperties()</code>: for variables of the form $prop{name}
+   * <li><code>Resource</code>: the feature map of any resource which is specified in the 
+   * list of objects is used for variables of the form $resource{name} or 
+   * for variables of the form $corpus{name} if the resource is a corpus, for
+   * $pr{name} if the resource is a processing resource and so on. If the 
+   * resource is a processing resource its 
+   * <li><code>FeatureMap</code> or <code>Map</code>: any feature map or 
+   * Map which can be used to look up String keys can be specified
+   * as a source and will be used for variables of the form ${name}.
+   * </ul>
+   * <p>
+   * The value substituted is converted to a string using the toString() 
+   * method of whatever object is stored in the map. If the value returned
+   * by Map.get(key) is null, no substitution is carried out and the 
+   * variable is left unchanged in the string.
+   * <p>
+   * The following variable constructs are supported:
+   * <ul>
+   * <li>$env{name} will be replaced with the value from the environment variables map 
+   * from System.getenv() and nothing else.
+   * <li>$prop{name} will be replaced with the value of the properties map 
+   * from System.getProperties() and nothing else.
+   * <li>$controller{name} will be replaced with the value of a feature from the FeatureMap
+   * of the first resource of type Controller found in the argument list.
+   * <li>$corpus{name} will be replaced with the value of a feature from the FeatureMap
+   * of the first resource of type Corpus found in the argument list.
+   * <li>$pr{name} will be replaced with the value of a feature from the FeatureMap
+   * of the first resource of type ProcessingResource found in the argument list.
+   * <li>$pr_parm{name} will be replaced with the value of the parameter 'name'
+   * of the first resource of type ProcessingResource found in the argument list.
+   * This can be especially useful to replace a variable in one parameter with
+   * the value of another, potentially hidden, parameter of the same PR.
+   * <li>$doc{name} will be replaced with the value of a feature from the FeatureMap
+   * of the first resource of type Document found in the argument list.
+   * <li>$resource{name} will be replaced with the value of a feature from the FeatureMap
+   * of the first resource of type Resource found in the argument list.
+   * </ul>
+   * <p>
+   * If two dollar characters are used instead of one, the replacement string
+   * will in turn be subject to replacement, e.g. $$env{abc} could get replaced
+   * with the replacement string '$corpus{f1}' which would in turn get replaced
+   * with the value of the feature 'f1' from the feature set of the first 
+   * corpus in the parameter list that has a value for that feature.
+   *  
+   */
+  public static String replaceVariablesInString(
+          String string, Object... sources)
+  {
+    Matcher matcher = Pattern.compile("(\\$\\$?)([a-zA-Z]*)\\{([^}]+)\\}").matcher(string);
+    int findFrom = 0;
+    int lastEnd = 0;
+    StringBuilder sb = new StringBuilder(string.length()*2);
+    while(findFrom < string.length() && matcher.find(findFrom)) {
+      String dollars = matcher.group(1);
+      String type = matcher.group(2);
+      String varname = matcher.group(3);
+      int matchStart = matcher.start();
+      // whenever we have found something, we can immediately move the part
+      // from the last end of match to the new start of match to the 
+      // return string, that is just unmodified string ...
+      // But only if the length is > 0
+      if((matchStart - lastEnd) > 0) {
+        sb.append(string.substring(lastEnd,matchStart));
+      }
+      lastEnd = matcher.end();
+      Object value = null;
+      // for each match we find, go through all the sources in the order
+      // listed and if the type of the source matches the requested type
+      // then try to look the variable up. If we find something use it and
+      // finish looking, otherwise continue until all sources have been 
+      // exhausted. 
+      // A variable where no value has been found anywhere is not replaced.
+      // If a variable got replaced and it was a variable that started with
+      // two dollar signs, then the replacement value is first getting 
+      // recursively replaced too.
+      if(type.equals("env")) {
+        value = System.getenv().get(varname);
+      } else if(type.equals("prop")) {
+        value = System.getProperties().get(varname);
+      } else {
+        for(Object source : sources) {
+          if(type.isEmpty()) { // an empty variable type matches only maps from the sources
+            if(source instanceof Map) {
+              value = ((Map)source).get(varname);
+            }
+          } else if(type.equals("pr") && (source instanceof ProcessingResource)) {
+            value = ((FeatureBearer)source).getFeatures().get(varname);
+          } else if(type.equals("pr_parm") && (source instanceof ProcessingResource)) {
+            try {
+              value = ((ProcessingResource)source).getParameterValue(varname);
+            } catch(Exception ex) {
+              // do nothing, leave the value null
+            }
+          } else if(type.equals("doc") && (source instanceof Document)) {
+            value = ((FeatureBearer)source).getFeatures().get(varname);
+          } else if(type.equals("controller") && (source instanceof Controller)) {
+            value = ((FeatureBearer)source).getFeatures().get(varname);
+          } else if(type.equals("corpus") && (source instanceof Corpus)) {
+            value = ((FeatureBearer)source).getFeatures().get(varname);
+          } else if(type.equals("resource") && (source instanceof Resource)) {
+            value = ((FeatureBearer)source).getFeatures().get(varname);
+          }
+          if(value != null) {
+            break;
+          }
+        } // for source : sources
+      }
+      // only do anything at all if we found a value for this parameter
+      if(value != null) {
+        String replacement = value.toString();
+        // if we had double-dollars, first do the recursive replacement ...
+        if(dollars.equals("$$")) {
+          replacement = replaceVariablesInString(replacement, sources);
+        }
+        sb.append(replacement);
+      } else {
+        sb.append(matcher.group());
+        // the first character after the match
+      }
+      findFrom = matcher.end();
+    } // while matcher.find ...
+    // if we have some unmatched string left over, append it too
+    if(lastEnd < string.length()) {
+      sb.append(string.substring(lastEnd));
+    }
+    return sb.toString();    
+  }
+  
+  
   
 }
