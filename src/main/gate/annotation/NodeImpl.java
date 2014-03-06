@@ -21,7 +21,7 @@ import gate.Node;
 /** Provides an implementation for the interface gate.Node.
  *
  */
-public class NodeImpl implements Node, Comparable
+public class NodeImpl implements Node, Comparable<Node>
 {
   /** Debug flag
    */
@@ -68,8 +68,7 @@ public class NodeImpl implements Node, Comparable
   /** Ordering
    */
   @Override
-  public int compareTo(Object o) throws ClassCastException {
-    Node other = (Node) o;
+  public int compareTo(Node other) throws ClassCastException {
     return id.compareTo(other.getId());
   } // compareTo
 

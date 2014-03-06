@@ -289,6 +289,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
         return;
       }
       // otherwise it is a Collection
+      @SuppressWarnings("unchecked")
       Collection<Annotation> starterAnnots = (Collection<Annotation>)objectAtNode;
       starterAnnots.remove(a);
       // if there is only one annotation left
@@ -407,7 +408,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
 
   /** Select annotations by type and feature names */
   @Override
-  public AnnotationSet get(String type, Set featureNames) {
+  public AnnotationSet get(String type, Set<? extends Object> featureNames) {
     if(annotsByType == null) indexByType();
     AnnotationSet typeSet = null;
     if(type != null) {
@@ -948,6 +949,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * Add an annotation to the start offset index. Does nothing if the index
    * doesn't exist.
    */
+  @SuppressWarnings("unchecked")
   void addToStartOffsetIndex(Annotation a) {
     Node startNode = a.getStartNode();
     Node endNode = a.getEndNode();
@@ -1161,6 +1163,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * hashmap can be Annotations or a Collection of Annotations. Returns null if
    * there are no Annotations at that position
    */
+  @SuppressWarnings("unchecked")
   private final Collection<Annotation> getAnnotsByStartNode(Integer id) {
     Object objFromPoint = annotsByStartNode.get(id);
     if(objFromPoint == null) return null;
@@ -1187,6 +1190,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   @Override
   public synchronized void removeAnnotationSetListener(AnnotationSetListener l) {
     if(annotationSetListeners != null && annotationSetListeners.contains(l)) {
+      @SuppressWarnings("unchecked")
       Vector<AnnotationSetListener> v = (Vector<AnnotationSetListener>)annotationSetListeners.clone();
       v.removeElement(l);
       annotationSetListeners = v;
@@ -1195,6 +1199,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
 
   @Override
   public synchronized void addAnnotationSetListener(AnnotationSetListener l) {
+    @SuppressWarnings("unchecked")
     Vector<AnnotationSetListener> v = annotationSetListeners == null
             ? new Vector<AnnotationSetListener>(2)
             : (Vector<AnnotationSetListener>)annotationSetListeners.clone();
@@ -1227,6 +1232,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   @Override
   public synchronized void removeGateListener(GateListener l) {
     if(gateListeners != null && gateListeners.contains(l)) {
+      @SuppressWarnings("unchecked")
       Vector<GateListener> v = (Vector<GateListener>)gateListeners.clone();
       v.removeElement(l);
       gateListeners = v;
@@ -1235,6 +1241,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
 
   @Override
   public synchronized void addGateListener(GateListener l) {
+    @SuppressWarnings("unchecked")
     Vector<GateListener> v = gateListeners == null ? new Vector<GateListener>(2) : (Vector<GateListener>)gateListeners
             .clone();
     if(!v.contains(l)) {
@@ -1290,6 +1297,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     this.annotations = (Annotation[])gf.get("annotations", null);
     if(this.annotations == null) {
       // old style serialised version
+      @SuppressWarnings("unchecked")
       Map<Integer, Annotation> annotsByIdMap = (Map<Integer, Annotation>)gf
               .get("annotsById", null);
       if(annotsByIdMap == null)

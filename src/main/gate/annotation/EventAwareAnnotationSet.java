@@ -17,18 +17,19 @@
 
 package gate.annotation;
 
-import java.util.Collection;
-
+import gate.Annotation;
 import gate.AnnotationSet;
+
+import java.util.Collection;
 
 
 
 public interface EventAwareAnnotationSet extends AnnotationSet {
 
-  public Collection getAddedAnnotations();
+  public Collection<Annotation> getAddedAnnotations();
 
-  public Collection getChangedAnnotations();
+  public Collection<Annotation> getChangedAnnotations();
 
-  public Collection getRemovedAnnotations();
+  public Collection<Annotation> getRemovedAnnotations();
 
 }
