@@ -1084,7 +1084,7 @@ public class Utils {
   public static String replaceVariablesInString(
           String string, Object... sources)
   {
-    Matcher matcher = Pattern.compile("(\\$\\$?)([a-zA-Z]*)\\{([^}]+)\\}").matcher(string);
+    Matcher matcher = varnamePattern.matcher(string);
     int findFrom = 0;
     int lastEnd = 0;
     StringBuilder sb = new StringBuilder(string.length()*2);
@@ -1163,6 +1163,7 @@ public class Utils {
     }
     return sb.toString();    
   }
+  static private Pattern varnamePattern = Pattern.compile("(\\$\\$?)([a-zA-Z]*)\\{([^}]+)\\}");
   
   
   
