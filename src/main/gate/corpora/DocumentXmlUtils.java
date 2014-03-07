@@ -121,8 +121,8 @@ public class DocumentXmlUtils {
   public static StringBuffer featuresToXml(FeatureMap aFeatureMap, Map<String,StringBuffer> normalizedFeatureNames) {
     if(aFeatureMap == null) return new StringBuffer();
     StringBuffer buffer = new StringBuffer(1024);
-    Set keySet = aFeatureMap.keySet();
-    Iterator keyIterator = keySet.iterator();
+    Set<Object> keySet = aFeatureMap.keySet();
+    Iterator<Object> keyIterator = keySet.iterator();
     while(keyIterator.hasNext()) {
       Object key = keyIterator.next();
       Object value = aFeatureMap.get(key);
@@ -149,7 +149,7 @@ public class DocumentXmlUtils {
         // If key is collection serialize the collection in a specific format
         if(key instanceof java.util.Collection) {
           StringBuffer keyStrBuff = new StringBuffer();
-          Iterator iter = ((Collection)key).iterator();
+          Iterator<?> iter = ((Collection<?>)key).iterator();
           if(iter.hasNext()) {
             item = iter.next();
             if(item instanceof java.lang.Number)
@@ -166,7 +166,7 @@ public class DocumentXmlUtils {
         // If key is collection serialize the colection in a specific format
         if(value instanceof java.util.Collection) {
           StringBuffer valueStrBuff = new StringBuffer();
-          Iterator iter = ((Collection)value).iterator();
+          Iterator<?> iter = ((Collection<?>)value).iterator();
           if(iter.hasNext()) {
             item = iter.next();
             if(item instanceof java.lang.Number)

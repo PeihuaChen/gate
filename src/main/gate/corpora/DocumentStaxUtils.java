@@ -567,6 +567,7 @@ public class DocumentStaxUtils {
    * @return the name or value represented by this element.
    * @throws XMLStreamException
    */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   static Object readFeatureNameOrValue(XMLStreamReader xsr)
           throws XMLStreamException {
     String className = xsr.getAttributeValue(null, "className");
@@ -608,7 +609,7 @@ public class DocumentStaxUtils {
     }
 
     // otherwise, do some fancy reflection
-    Class theClass = null;
+    Class<?> theClass = null;
     try {
       theClass = Class.forName(className, true, Gate.getClassLoader());
     }
@@ -618,8 +619,8 @@ public class DocumentStaxUtils {
     }
 
     if(java.util.Collection.class.isAssignableFrom(theClass)) {
-      Class itemClass = null;
-      Constructor itemConstructor = null;
+      Class<?> itemClass = null;
+      Constructor<?> itemConstructor = null;
       Collection featObject = null;
 
       boolean addItemAsString = false;
@@ -647,7 +648,7 @@ public class DocumentStaxUtils {
           itemClass = Class.forName(itemClassName, true, Gate.getClassLoader());
           // Let's detect if itemClass takes a constructor with a String
           // as param
-          Class[] paramsArray = new Class[1];
+          Class<?>[] paramsArray = new Class[1];
           paramsArray[0] = java.lang.String.class;
           itemConstructor = itemClass.getConstructor(paramsArray);
         }
@@ -690,10 +691,10 @@ public class DocumentStaxUtils {
 
     // If currentfeatClass is not a Collection and not String, test to
     // see if it has a constructor that takes a String as param
-    Class[] params = new Class[1];
+    Class<?>[] params = new Class[1];
     params[0] = java.lang.String.class;
     try {
-      Constructor featConstr = theClass.getConstructor(params);
+      Constructor<?> featConstr = theClass.getConstructor(params);
       Object[] featConstrParams = new Object[1];
       featConstrParams[0] = stringRep.toString();
       Object featObject = featConstr.newInstance(featConstrParams);
@@ -1108,7 +1109,7 @@ public class DocumentStaxUtils {
    */
   public static void writeAnnotationSet(AnnotationSet annotations,
           XMLStreamWriter xsw, String namespaceURI) throws XMLStreamException {
-    writeAnnotationSet((Collection)annotations, annotations.getName(), xsw,
+    writeAnnotationSet((Collection<Annotation>)annotations, annotations.getName(), xsw,
             namespaceURI);
   }
 
@@ -1215,7 +1216,7 @@ public class DocumentStaxUtils {
   public static void writeAnnotationSet(AnnotationSet annotations,
           String asName, XMLStreamWriter xsw, String namespaceURI)
           throws XMLStreamException {
-    writeAnnotationSet((Collection)annotations, asName, xsw, namespaceURI);
+    writeAnnotationSet((Collection<Annotation>)annotations, asName, xsw, namespaceURI);
   }
 
   /**
@@ -1334,8 +1335,6 @@ public class DocumentStaxUtils {
    * </ul>
    * 
    * @param buf the buffer to process
-   * @param start TODO
-   * @param len TODO
    */
   static void replaceXMLIllegalCharacters(char[] buf, int start, int len) {
     ArrayCharSequence bufSequence = new ArrayCharSequence(buf, start, len);
@@ -1467,8 +1466,8 @@ public class DocumentStaxUtils {
       return;
     }
 
-    Set keySet = features.keySet();
-    Iterator keySetIterator = keySet.iterator();
+    Set<Object> keySet = features.keySet();
+    Iterator<Object> keySetIterator = keySet.iterator();
     FEATURES:while(keySetIterator.hasNext()) {
       Object key = keySetIterator.next();
       Object value = features.get(key);
@@ -1510,7 +1509,7 @@ public class DocumentStaxUtils {
         // format
         if(key instanceof java.util.Collection) {
           StringBuffer keyStrBuff = new StringBuffer();
-          Iterator iter = ((Collection)key).iterator();
+          Iterator<?> iter = ((Collection<?>)key).iterator();
           if(iter.hasNext()) {
             item = iter.next();
             if(item == null) continue FEATURES;
@@ -1531,7 +1530,7 @@ public class DocumentStaxUtils {
         // format
         if(value instanceof java.util.Collection) {
           StringBuffer valueStrBuff = new StringBuffer();
-          Iterator iter = ((Collection)value).iterator();
+          Iterator<?> iter = ((Collection<?>)value).iterator();
           if(iter.hasNext()) {
             item = iter.next();
             if(item == null) continue FEATURES;
@@ -1822,7 +1821,7 @@ public class DocumentStaxUtils {
       newLine(xsw);
 
       if(fm != null && fm.size() != 0) {
-        for(Map.Entry att : fm.entrySet()) {
+        for(Map.Entry<Object,Object> att : fm.entrySet()) {
           if(!"isEmptyAndSpan".equals(att.getKey())) {
             xsw.writeCharacters(indentMore);
             xsw.writeEmptyElement(XCES_NAMESPACE, "feat");
