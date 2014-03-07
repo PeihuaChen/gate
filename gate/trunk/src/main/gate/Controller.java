@@ -45,7 +45,7 @@ public interface Controller extends Resource, Executable, NameBearer,
    * @throws UnsupportedOperationException if the <tt>setPRs</tt>
    *           method is not supported by this controller.
    */
-  public void setPRs(Collection<ProcessingResource> PRs);
+  public void setPRs(Collection<? extends ProcessingResource> PRs);
 
   /**
    * <p>

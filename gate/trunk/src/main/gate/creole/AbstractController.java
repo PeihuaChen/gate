@@ -41,6 +41,8 @@ import java.util.Vector;
 public abstract class AbstractController extends AbstractResource 
        implements Controller, ProcessingResource, Benchmarkable {
 
+  private static final long serialVersionUID = 6466829205468662382L;
+
   /**
    * Benchmark ID of this resource.
    */
@@ -49,7 +51,7 @@ public abstract class AbstractController extends AbstractResource
   /**
    * Shared featureMap
    */
-  protected Map benchmarkFeatures = new HashMap();
+  protected Map<String,String> benchmarkFeatures = new HashMap<String,String>();
 
   // executable code
   /**
@@ -182,7 +184,7 @@ public abstract class AbstractController extends AbstractResource
    *           controller.
    */
   @Override
-  public void setPRs(Collection PRs) {
+  public void setPRs(Collection<? extends ProcessingResource> PRs) {
   }
 
   /**
@@ -192,9 +194,9 @@ public abstract class AbstractController extends AbstractResource
   @Override
   public synchronized void interrupt() {
     interrupted = true;
-    Iterator prIter = getPRs().iterator();
+    Iterator<ProcessingResource> prIter = getPRs().iterator();
     while(prIter.hasNext()) {
-      ((ProcessingResource)prIter.next()).interrupt();
+      prIter.next().interrupt();
     }
   }
 
@@ -210,7 +212,8 @@ public abstract class AbstractController extends AbstractResource
    */
   public synchronized void removeStatusListener(StatusListener l) {
     if(statusListeners != null && statusListeners.contains(l)) {
-      Vector v = (Vector)statusListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<StatusListener> v = (Vector<StatusListener>)statusListeners.clone();
       v.removeElement(l);
       statusListeners = v;
     }
@@ -221,8 +224,9 @@ public abstract class AbstractController extends AbstractResource
    * processing resource
    */
   public synchronized void addStatusListener(StatusListener l) {
-    Vector v =
-      statusListeners == null ? new Vector(2) : (Vector)statusListeners.clone();
+    @SuppressWarnings("unchecked")
+    Vector<StatusListener> v =
+      statusListeners == null ? new Vector<StatusListener>(2) : (Vector<StatusListener>)statusListeners.clone();
     if(!v.contains(l)) {
       v.addElement(l);
       statusListeners = v;
@@ -237,10 +241,10 @@ public abstract class AbstractController extends AbstractResource
    */
   protected void fireStatusChanged(String e) {
     if(statusListeners != null) {
-      Vector listeners = statusListeners;
+      Vector<StatusListener> listeners = statusListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((StatusListener)listeners.elementAt(i)).statusChanged(e);
+        listeners.elementAt(i).statusChanged(e);
       }
     }
   }
@@ -250,8 +254,9 @@ public abstract class AbstractController extends AbstractResource
    * this processing resource.
    */
   public synchronized void addProgressListener(ProgressListener l) {
-    Vector v =
-      progressListeners == null ? new Vector(2) : (Vector)progressListeners
+    @SuppressWarnings("unchecked")
+    Vector<ProgressListener> v =
+      progressListeners == null ? new Vector<ProgressListener>(2) : (Vector<ProgressListener>)progressListeners
         .clone();
     if(!v.contains(l)) {
       v.addElement(l);
@@ -265,7 +270,8 @@ public abstract class AbstractController extends AbstractResource
    */
   public synchronized void removeProgressListener(ProgressListener l) {
     if(progressListeners != null && progressListeners.contains(l)) {
-      Vector v = (Vector)progressListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<ProgressListener> v = (Vector<ProgressListener>)progressListeners.clone();
       v.removeElement(l);
       progressListeners = v;
     }
@@ -280,10 +286,10 @@ public abstract class AbstractController extends AbstractResource
    */
   protected void fireProgressChanged(int e) {
     if(progressListeners != null) {
-      Vector listeners = progressListeners;
+      Vector<ProgressListener> listeners = progressListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((ProgressListener)listeners.elementAt(i)).progressChanged(e);
+        listeners.elementAt(i).progressChanged(e);
       }
     }
   }
@@ -294,10 +300,10 @@ public abstract class AbstractController extends AbstractResource
    */
   protected void fireProcessFinished() {
     if(progressListeners != null) {
-      Vector listeners = progressListeners;
+      Vector<ProgressListener> listeners = progressListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((ProgressListener)listeners.elementAt(i)).processFinished();
+        listeners.elementAt(i).processFinished();
       }
     }
   }
@@ -348,14 +354,14 @@ public abstract class AbstractController extends AbstractResource
    *           usually caused by the lack of a parameter or of the read accessor
    *           for a parameter.
    */
-  public List getOffendingPocessingResources()
+  public List<ProcessingResource> getOffendingPocessingResources()
     throws ResourceInstantiationException {
     // take all the contained PRs
-    ArrayList badPRs = new ArrayList(getPRs());
+    List<ProcessingResource> badPRs = new ArrayList<ProcessingResource>(getPRs());
     // remove the ones that no parameters problems
-    Iterator prIter = getPRs().iterator();
+    Iterator<ProcessingResource> prIter = getPRs().iterator();
     while(prIter.hasNext()) {
-      ProcessingResource pr = (ProcessingResource)prIter.next();
+      ProcessingResource pr = prIter.next();
       ResourceData rData =
         Gate.getCreoleRegister().get(pr.getClass().getName());
       if(AbstractResource.checkParameterValues(pr, rData.getParameterList()
@@ -368,15 +374,17 @@ public abstract class AbstractController extends AbstractResource
 
   public synchronized void removeControllerListener(ControllerListener l) {
     if(controllerListeners != null && controllerListeners.contains(l)) {
-      Vector v = (Vector)controllerListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<ControllerListener> v = (Vector<ControllerListener>)controllerListeners.clone();
       v.removeElement(l);
       controllerListeners = v;
     }
   }
 
   public synchronized void addControllerListener(ControllerListener l) {
-    Vector v =
-      controllerListeners == null ? new Vector(2) : (Vector)controllerListeners
+    @SuppressWarnings("unchecked")
+    Vector<ControllerListener> v =
+      controllerListeners == null ? new Vector<ControllerListener>(2) : (Vector<ControllerListener>)controllerListeners
         .clone();
     if(!v.contains(l)) {
       v.addElement(l);
@@ -388,38 +396,38 @@ public abstract class AbstractController extends AbstractResource
    * The list of {@link gate.event.StatusListener}s registered with this
    * resource
    */
-  private transient Vector statusListeners;
+  private transient Vector<StatusListener> statusListeners;
 
   /**
    * The list of {@link gate.event.ProgressListener}s registered with this
    * resource
    */
-  private transient Vector progressListeners;
+  private transient Vector<ProgressListener> progressListeners;
 
   /**
    * The list of {@link gate.event.ControllerListener}s registered with this
    * resource
    */
-  private transient Vector controllerListeners;
+  private transient Vector<ControllerListener> controllerListeners;
 
   protected boolean interrupted = false;
 
   protected void fireResourceAdded(ControllerEvent e) {
     if(controllerListeners != null) {
-      Vector listeners = controllerListeners;
+      Vector<ControllerListener> listeners = controllerListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((ControllerListener)listeners.elementAt(i)).resourceAdded(e);
+        listeners.elementAt(i).resourceAdded(e);
       }
     }
   }
 
   protected void fireResourceRemoved(ControllerEvent e) {
     if(controllerListeners != null) {
-      Vector listeners = controllerListeners;
+      Vector<ControllerListener> listeners = controllerListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((ControllerListener)listeners.elementAt(i)).resourceRemoved(e);
+        listeners.elementAt(i).resourceRemoved(e);
       }
     }
   }

@@ -915,7 +915,8 @@ public class NameBearerHandle implements Handle, StatusListener,
         while(it.hasNext()) {
           newController.add((ProcessingResource)it.next());
         }
-        existingController.setPRs(Collections.emptyList());
+        List<ProcessingResource> empty = Collections.emptyList();
+        existingController.setPRs(empty);
         Factory.deleteResource(existingController);
       } catch(Exception ex) {
         JOptionPane.showMessageDialog(getLargeView(),
