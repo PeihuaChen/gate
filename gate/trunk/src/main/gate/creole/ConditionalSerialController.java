@@ -134,7 +134,8 @@ public class ConditionalSerialController extends SerialController
     ProcessingResource currentPR = prList.get(componentIndex);
 
     //create the listeners
-    FeatureMap listeners = Factory.newFeatureMap();
+    //FeatureMap listeners = Factory.newFeatureMap();
+    Map<String, Object> listeners = new HashMap<String, Object>();
     listeners.put("gate.event.StatusListener", sListener);
     int componentProgress = 100 / prList.size();
     listeners.put("gate.event.ProgressListener",

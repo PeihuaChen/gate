@@ -166,15 +166,15 @@ extends AbstractFeatureBearer implements Resource, Serializable
 
         // convert the parameter to the right type eg String -> URL
         if(parameterValue != null){
-          Class propertyType = prop.getPropertyType();
-          Class typeToCreate = propertyType;
+          Class<?> propertyType = prop.getPropertyType();
+          Class<?> typeToCreate = propertyType;
           if(Parameter.substituteClasses.containsKey(propertyType)) {
             typeToCreate = Parameter.substituteClasses.get(propertyType);
           }
-          Class paramType = parameterValue.getClass();
+          Class<?> paramType = parameterValue.getClass();
           if(!propertyType.isAssignableFrom(paramType)) {
             try {
-              Constructor mostSpecificConstructor =
+              Constructor<?> mostSpecificConstructor =
                 Tools.getMostSpecificConstructor(typeToCreate, paramType);
               parameterValue = mostSpecificConstructor
                  .newInstance( new Object[]{parameterValue} );
@@ -187,19 +187,19 @@ extends AbstractFeatureBearer implements Resource, Serializable
                   get(resource.getClass().getName());
                 ParameterList pList = rData.getParameterList();
                 Parameter param = null;
-                Iterator disjIter = pList.getInitimeParameters().iterator();
+                Iterator<List<Parameter>> disjIter = pList.getInitimeParameters().iterator();
                 while(param == null && disjIter.hasNext()){
-                  Iterator paramIter = ((List)disjIter.next()).iterator();
+                  Iterator<Parameter> paramIter = disjIter.next().iterator();
                   while(param == null && paramIter.hasNext()){
-                    Parameter aParam = (Parameter)paramIter.next();
+                    Parameter aParam = paramIter.next();
                     if(aParam.getName().equals(paramaterName)) param = aParam;
                   }
                 }
                 disjIter = pList.getRuntimeParameters().iterator();
                 while(param == null && disjIter.hasNext()){
-                  Iterator paramIter = ((List)disjIter.next()).iterator();
+                  Iterator<Parameter> paramIter = disjIter.next().iterator();
                   while(param == null && paramIter.hasNext()){
-                    Parameter aParam = (Parameter)paramIter.next();
+                    Parameter aParam = paramIter.next();
                     if(aParam.getName().equals(paramaterName)) param = aParam;
                   }
                 }
@@ -254,7 +254,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
   /**
    * Sets the values for more parameters for a resource in one step.
    *
-   * @param parameters a feature map that has paramete names as keys and
+   * @param parameters a feature map that has parameter names as keys and
    * parameter values as values.
    */
   public static void setParameterValues(Resource resource,
@@ -271,7 +271,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
       );
     }
 
-    Iterator parnameIter = parameters.keySet().iterator();
+    Iterator<Object> parnameIter = parameters.keySet().iterator();
     while(parnameIter.hasNext()){
       String parName = (String)parnameIter.next();
       setParameterValue(resource, resBeanInf, parName, parameters.get(parName));
@@ -286,7 +286,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
    * string) to listener (of the type declared by the key).
    * @param resource the resource that listeners will be registered to.
    */
-  public static void setResourceListeners(Resource resource, Map listeners)
+  public static void setResourceListeners(Resource resource, Map<String, ? extends Object> listeners)
   throws
     IntrospectionException, InvocationTargetException,
     IllegalAccessException, GateException
@@ -325,7 +325,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
    * (as a string) to listener (of the type declared by the key).
    * @param resource the resource that listeners will be removed from.
    */
-  public static void removeResourceListeners(Resource resource, Map listeners)
+  public static void removeResourceListeners(Resource resource, Map<String, ? extends Object> listeners)
                      throws IntrospectionException, InvocationTargetException,
                             IllegalAccessException, GateException{
 
@@ -372,18 +372,18 @@ extends AbstractFeatureBearer implements Resource, Serializable
    * or of the read accessor for a parameter.
    */
   public static boolean checkParameterValues(Resource resource,
-                                             List parameters)
+                                             List<List<Parameter>> parameters)
                 throws ResourceInstantiationException{
-    Iterator disIter = parameters.iterator();
+    Iterator<List<Parameter>> disIter = parameters.iterator();
     while(disIter.hasNext()){
-      List disjunction = (List)disIter.next();
-      boolean required = !((Parameter)disjunction.get(0)).isOptional();
+      List<Parameter> disjunction = (List<Parameter>)disIter.next();
+      boolean required = !disjunction.get(0).isOptional();
       if(required){
         //at least one parameter in the disjunction must have a value
         boolean valueSet = false;
-        Iterator parIter = disjunction.iterator();
+        Iterator<Parameter> parIter = disjunction.iterator();
         while(!valueSet && parIter.hasNext()){
-          Parameter par = (Parameter)parIter.next();
+          Parameter par = parIter.next();
           valueSet = (resource.getParameterValue(par.getName()) != null);
         }
         if(!valueSet) return false;

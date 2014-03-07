@@ -92,7 +92,8 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
    */
   public synchronized void removeStatusListener(StatusListener l) {
     if (statusListeners != null && statusListeners.contains(l)) {
-      Vector v = (Vector) statusListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<StatusListener> v = (Vector<StatusListener>)statusListeners.clone();
       v.removeElement(l);
       statusListeners = v;
     }
@@ -103,7 +104,8 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
    * this processing resource
    */
   public synchronized void addStatusListener(StatusListener l) {
-    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    @SuppressWarnings("unchecked")
+    Vector<StatusListener> v = statusListeners == null ? new Vector<StatusListener>(2) : (Vector<StatusListener>)statusListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       statusListeners = v;
@@ -116,10 +118,10 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
    */
   protected void fireStatusChanged(String e) {
     if (statusListeners != null) {
-      Vector listeners = statusListeners;
+      Vector<StatusListener> listeners = statusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+        listeners.elementAt(i).statusChanged(e);
       }
     }
   }
@@ -129,7 +131,8 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
    * this processing resource.
    */
   public synchronized void addProgressListener(ProgressListener l) {
-    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
+    @SuppressWarnings("unchecked")
+    Vector<ProgressListener> v = progressListeners == null ? new Vector<ProgressListener>(2) : (Vector<ProgressListener>)progressListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       progressListeners = v;
@@ -142,7 +145,8 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
    */
   public synchronized void removeProgressListener(ProgressListener l) {
     if (progressListeners != null && progressListeners.contains(l)) {
-      Vector v = (Vector) progressListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<ProgressListener> v = (Vector<ProgressListener>)progressListeners.clone();
       v.removeElement(l);
       progressListeners = v;
     }
@@ -155,10 +159,10 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
    */
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
-      Vector listeners = progressListeners;
+      Vector<ProgressListener> listeners = progressListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
+        listeners.elementAt(i).progressChanged(e);
       }
     }
   }
@@ -169,10 +173,10 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
    */
   protected void fireProcessFinished() {
     if (progressListeners != null) {
-      Vector listeners = progressListeners;
+      Vector<ProgressListener> listeners = progressListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).processFinished();
+        listeners.elementAt(i).processFinished();
       }
     }
   }
@@ -240,13 +244,13 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
    * The list of {@link gate.event.StatusListener}s registered with this
    * resource
    */
-  private transient Vector statusListeners;
+  private transient Vector<StatusListener> statusListeners;
 
   /**
    * The list of {@link gate.event.ProgressListener}s registered with this
    * resource
    */
-  private transient Vector progressListeners;
+  private transient Vector<ProgressListener> progressListeners;
 
   protected volatile boolean interrupted = false;
 } // class AbstractProcessingResource
