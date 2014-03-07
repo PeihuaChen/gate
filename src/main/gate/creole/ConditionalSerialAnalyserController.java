@@ -419,7 +419,7 @@ public class ConditionalSerialAnalyserController
         List<Parameter> newDisjunction = new ArrayList<Parameter>(aDisjunction);
         Iterator<Parameter> internalParIter = newDisjunction.iterator();
         while(internalParIter.hasNext()){
-          Parameter parameter = (Parameter)internalParIter.next();
+          Parameter parameter = internalParIter.next();
           if(parameter.getName().equals("corpus") ||
              parameter.getName().equals("document")) internalParIter.remove();
         }
