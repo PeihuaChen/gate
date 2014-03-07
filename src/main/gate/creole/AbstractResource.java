@@ -376,7 +376,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
                 throws ResourceInstantiationException{
     Iterator<List<Parameter>> disIter = parameters.iterator();
     while(disIter.hasNext()){
-      List<Parameter> disjunction = (List<Parameter>)disIter.next();
+      List<Parameter> disjunction = disIter.next();
       boolean required = !disjunction.get(0).isOptional();
       if(required){
         //at least one parameter in the disjunction must have a value
