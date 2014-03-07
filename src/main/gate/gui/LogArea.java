@@ -526,7 +526,7 @@ public class LogArea extends XJTextPane {
     @Override
     public void print(String s) {
       try {
-        write(s.getBytes("UTF-8"));
+        write((s == null ? "null" : s).getBytes("UTF-8"));
       } catch(UnsupportedEncodingException uee) {
         // support for UTF-8 is guaranteed by the JVM specification
       } catch(IOException ioe) {
