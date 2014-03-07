@@ -383,7 +383,7 @@ public class HtmlDocumentHandler extends ParserCallback {
     long offsetInExtracted;
 
     for(int i = 0; i < ampCodingInfo.size(); ++i) {
-      pi = (RepositioningInfo.PositionInfo) ampCodingInfo.get(i);
+      pi = ampCodingInfo.get(i);
       substituteStart = pi.getOriginalPosition();
 
       if(substituteStart >= startPos) {

@@ -563,8 +563,7 @@ public class NekoHtmlDocumentHandler
     // if there is a repos record we move by the record's originalLength
     else {
       return wsOffset
-              + ((RepositioningInfo.PositionInfo)ampCodingInfo
-                      .get(wsPosInfoIndex)).getOriginalLength();
+              + ampCodingInfo.get(wsPosInfoIndex).getOriginalLength();
     }
   }
 
@@ -586,7 +585,7 @@ public class NekoHtmlDocumentHandler
     long offsetInExtracted;
 
     for(int i = 0; i < ampCodingInfo.size(); ++i) {
-      pi = (RepositioningInfo.PositionInfo)ampCodingInfo.get(i);
+      pi = ampCodingInfo.get(i);
       substituteStart = pi.getOriginalPosition();
 
       if(substituteStart >= startPos) {

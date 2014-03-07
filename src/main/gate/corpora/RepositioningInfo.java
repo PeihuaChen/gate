@@ -16,10 +16,11 @@
 
 package gate.corpora;
 
+import gate.corpora.RepositioningInfo.PositionInfo;
+import gate.util.Out;
+
 import java.io.Serializable;
 import java.util.ArrayList;
-
-import gate.util.Out;
 
 /**
  * RepositioningInfo keep information about correspondence of positions
@@ -29,7 +30,7 @@ import gate.util.Out;
  * or in "flow" way (return near computable position)
  */
 
-public class RepositioningInfo extends ArrayList {
+public class RepositioningInfo extends ArrayList<PositionInfo> {
 
   /** Freeze the serialization UID. */
   static final long serialVersionUID = -2895662600168468559L;
@@ -96,7 +97,7 @@ public class RepositioningInfo extends ArrayList {
     PositionInfo lastPI;
 
     for(int i = size(); i>0; i--) {
-      lastPI = (PositionInfo) get(i-1);
+      lastPI = get(i-1);
       if(lastPI.getOriginalPosition() < origPos) {
         insertPos = i;
         break;
@@ -119,7 +120,7 @@ public class RepositioningInfo extends ArrayList {
       boolean found = false;
 
       for(int i=0; i<size; ++i) {
-        currPI = (PositionInfo) get(i);
+        currPI = get(i);
         origPos = currPI.getOriginalPosition();
         origLen = currPI.getOriginalLength();
 
@@ -163,7 +164,7 @@ public class RepositioningInfo extends ArrayList {
       boolean found = false;
 
       for(int i=0; i<size; ++i) {
-        currPI = (PositionInfo) get(i);
+        currPI = get(i);
         currPos = currPI.getCurrentPosition();
         currLen = currPI.getCurrentLength();
 
@@ -221,7 +222,7 @@ public class RepositioningInfo extends ArrayList {
 
     // Find with the liniear algorithm. Could be extended to binary search.
     for(int i=0; i<size; ++i) {
-      currPI = (PositionInfo) get(i);
+      currPI = get(i);
       origPos = currPI.getOriginalPosition();
       origLen = currPI.getOriginalLength();
 
@@ -251,7 +252,7 @@ public class RepositioningInfo extends ArrayList {
 
     // Find with the liniear algorithm. Could be extended to binary search.
     for(int i=0; i<size; ++i) {
-      currPI = (PositionInfo) get(i);
+      currPI = get(i);
       origPos = currPI.getOriginalPosition();
       origLen = currPI.getOriginalLength();
 
@@ -313,11 +314,11 @@ public class RepositioningInfo extends ArrayList {
     // (origLen - newLen) i.e. <code> m_currPos -= origLen - newLen; </code>
 
     for(int i=index; i<size(); ++i) {
-      currPI = (PositionInfo) get(i);
+      currPI = get(i);
       currPI.m_currPos -= origLen - newLen;
     } // for
 
-    currPI = (PositionInfo) get(index);
+    currPI = get(index);
     if(originalPos >= currPI.m_origPos
         && currPI.m_origPos + currPI.m_origLength >= originalPos + origLen) {
       long frontLen = originalPos - currPI.m_origPos;
@@ -372,11 +373,11 @@ public class RepositioningInfo extends ArrayList {
     } // if
 
     for(int i = index+1; i<size(); ++i) {
-      currPI = (PositionInfo) get(i);
+      currPI = get(i);
       currPI.m_origPos += moveLen;
     } // for
 
-    currPI = (PositionInfo) get(index);
+    currPI = get(index);
 
     // should we split this record to two new records (inside the record)
     if(originalPos > currPI.m_origPos) {

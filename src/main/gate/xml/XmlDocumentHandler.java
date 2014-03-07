@@ -15,15 +15,32 @@
  */
 package gate.xml;
 
-import java.util.*;
-
-import org.xml.sax.*;
-
-import gate.*;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.GateConstants;
 import gate.corpora.DocumentContentImpl;
 import gate.corpora.RepositioningInfo;
 import gate.event.StatusListener;
-import gate.util.*;
+import gate.util.Err;
+import gate.util.GateSaxException;
+import gate.util.OptionsMap;
+import gate.util.Out;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
+import java.util.StringTokenizer;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /**
  * Implements the behaviour of the XML reader
@@ -113,14 +130,14 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
     // init parent
     super();
     // init stack
-    stack = new java.util.Stack();
+    stack = new Stack<CustomObject>();
 
     // this string contains the plain text (the text without markup)
     tmpDocContent = new StringBuffer(aDocument.getContent().size().intValue());
 
     // colector is used later to transform all custom objects into annotation
     // objects
-    colector = new LinkedList();
+    colector = new LinkedList<CustomObject>();
 
     // the Gate document
     doc = aDocument;
@@ -155,7 +172,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
      *  ELEMENT_NAMESPACE_URI: feature name to use to hold namespace uri
      *  ELEMENT_NAMESPACE_PREFIX: feature name to use to hold namespace prefix
      */
-    Map configData = Gate.getUserConfig();
+    OptionsMap configData = Gate.getUserConfig();
 
     boolean addNSFeature = Boolean.parseBoolean((String) configData.get(GateConstants.ADD_NAMESPACE_FEATURES));
     namespaceURIFeature = (String) configData.get(GateConstants.ELEMENT_NAMESPACE_URI);
@@ -190,10 +207,10 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
 
     // sort colector ascending on its id
     Collections.sort(colector);
-    Set testIdsSet = new HashSet();
+    Set<Integer> testIdsSet = new HashSet<Integer>();
     // create all the annotations (on this new document) from the collector
     while (!colector.isEmpty()) {
-      CustomObject obj = (CustomObject) colector.getFirst();
+      CustomObject obj = colector.getFirst();
       // Test to see if there are two annotation objects with the same id.
       if (testIdsSet.contains(obj.getId())) {
         throw new GateSaxException("Found two annotations with the same Id(" +
@@ -294,7 +311,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
         }// End if
         if ("matches".equals(attName)) {
           StringTokenizer strTokenizer = new StringTokenizer(attValue, ";");
-          List list = new ArrayList();
+          List<Integer> list = new ArrayList<Integer>();
           // Take all tokens,create Integers and add them to the list
           while (strTokenizer.hasMoreTokens()) {
             String token = strTokenizer.nextToken();
@@ -352,7 +369,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
 
     // if the stack is not empty, we extract the custom object and delete it
     if (!stack.isEmpty()) {
-      obj = (CustomObject) stack.pop();
+      obj = stack.pop();
     }// End if
 
     // Before adding it to the colector, we need to check if is an
@@ -474,13 +491,12 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
         RepositioningInfo.PositionInfo pi;
 
         if (reposInfo.size() > 0) {
-          pi =
-                  (RepositioningInfo.PositionInfo) reposInfo.get(reposInfo.size() - 1);
+          pi = reposInfo.get(reposInfo.size() - 1);
           lastPosition = pi.getOriginalPosition();
         } // if
 
         for (int i = 0; i < ampCodingInfo.size(); ++i) {
-          pi = (RepositioningInfo.PositionInfo) ampCodingInfo.get(i);
+          pi = ampCodingInfo.get(i);
           if (pi.getOriginalPosition() > lastPosition) {
             // found
             reposInfo.addPositionInfo(pi.getOriginalPosition(),
@@ -502,10 +518,10 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
     CustomObject obj = null;
     // Iterate through stack to modify the End index of the existing elements
 
-    java.util.Iterator anIterator = stack.iterator();
+    Iterator<CustomObject> anIterator = stack.iterator();
     while (anIterator.hasNext()) {
       // get the object and move to the next one
-      obj = (CustomObject) anIterator.next();
+      obj = anIterator.next();
       if (incrementStartIndex && obj.getStart().equals(obj.getEnd())) {
         obj.setStart(new Long(obj.getStart().longValue() + 1));
       }// End if
@@ -637,9 +653,9 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
    * event.
    */
   protected void fireStatusChangedEvent(String text) {
-    Iterator listenersIter = myStatusListeners.iterator();
+    Iterator<StatusListener> listenersIter = myStatusListeners.iterator();
     while (listenersIter.hasNext()) {
-      ((StatusListener) listenersIter.next()).statusChanged(text);
+      listenersIter.next().statusChanged(text);
     }
   }
 
@@ -697,20 +713,20 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
   /**The content of the XML document, without any tag for internal use*/
   private StringBuffer tmpDocContent = null;
   /**A stack used to remember elements and to keep the order */
-  private java.util.Stack stack = null;
+  private Stack<CustomObject> stack = null;
   /**A gate document */
   private gate.Document doc = null;
   /**An annotation set used for creating annotation reffering the doc */
   private gate.AnnotationSet basicAS = null;
   /**Listeners for status report */
-  protected List myStatusListeners = new LinkedList();
+  protected List<StatusListener> myStatusListeners = new LinkedList<StatusListener>();
   /**This reports the the number of elements that have beed processed so far*/
   private int elements = 0;
   /** We need a colection to retain all the CustomObjects that will be
    * transformed into annotation over the gate document...
    * the transformation will take place inside onDocumentEnd() method
    */
-  private LinkedList colector = null;
+  private LinkedList<CustomObject> colector = null;
   /** This is used to generate unique Ids for the CustomObjects read*/
   protected int customObjectsId = 0;
 
@@ -724,7 +740,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
    * The objects belonging to this class are used inside the stack.
    * This class is for internal needs
    */
-  class CustomObject implements Comparable {
+  class CustomObject implements Comparable<CustomObject> {
 
     // constructor
     public CustomObject(Integer anId, String anElemName, FeatureMap aFm,
@@ -745,8 +761,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
 
     // Methos implemented as required by Comparable interface
     @Override
-    public int compareTo(Object o) {
-      CustomObject obj = (CustomObject) o;
+    public int compareTo(CustomObject obj) {
       return this.id.compareTo(obj.getId());
     }// compareTo();
 
