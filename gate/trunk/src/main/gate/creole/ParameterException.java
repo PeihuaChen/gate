@@ -22,9 +22,8 @@ import gate.util.GateException;
   */
 public class ParameterException extends GateException {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
+  private static final long serialVersionUID = -7543043652378574393L;
+  
   public ParameterException() {
     super();
   }

@@ -18,6 +18,9 @@ package gate.creole;
  * as a result of a call to their interrupt() method.
  */
 public class ExecutionInterruptedException extends ExecutionException {
+
+  private static final long serialVersionUID = -6341242221676672764L;
+
   public ExecutionInterruptedException(String message){
     super(message);
   }

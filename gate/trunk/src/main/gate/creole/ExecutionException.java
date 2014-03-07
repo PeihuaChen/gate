@@ -23,6 +23,8 @@ import gate.util.GateException;
   */
 public class ExecutionException extends GateException {
 
+  private static final long serialVersionUID = -4184224637622988276L;
+
   public ExecutionException() {
     super();
   }
