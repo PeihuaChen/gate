@@ -36,15 +36,17 @@ public class SerialController extends AbstractController implements
                                                         CreoleListener,
                                                         CustomDuplication {
 
+  private static final long serialVersionUID = 5865826535505675541L;
+
   protected static final Logger log = Logger.getLogger(SerialController.class);
 
   /** Profiler to track PR execute time */
   protected Profiler prof;
-  protected HashMap timeMap;
-  protected HashMap<String, Long> prTimeMap;
+  protected Map<String,Long> timeMap;
+  protected Map<String, Long> prTimeMap;
 
   public SerialController() {
-    prList = Collections.synchronizedList(new ArrayList());
+    prList = Collections.synchronizedList(new ArrayList<ProcessingResource>());
     sListener = new InternalStatusListener();
     prTimeMap = new HashMap<String, Long>();
 
@@ -52,7 +54,7 @@ public class SerialController extends AbstractController implements
       prof = new Profiler();
       prof.enableGCCalling(false);
       prof.printToSystemOut(true);
-      timeMap = new HashMap();
+      timeMap = new HashMap<String,Long>();
     }
     Gate.getCreoleRegister().addCreoleListener(this);
   }
@@ -62,7 +64,7 @@ public class SerialController extends AbstractController implements
    * controller as an unmodifiable list.
    */
   @Override
-  public Collection getPRs() {
+  public Collection<ProcessingResource> getPRs() {
     return Collections.unmodifiableList(prList);
   }
 
@@ -78,11 +80,11 @@ public class SerialController extends AbstractController implements
    *           controller.
    */
   @Override
-  public void setPRs(Collection prs) {
+  public void setPRs(Collection<? extends ProcessingResource> prs) {
     prList.clear();
-    Iterator prIter = prs.iterator();
+    Iterator<? extends ProcessingResource> prIter = prs.iterator();
     while(prIter.hasNext())
-      add((ProcessingResource)prIter.next());
+      add(prIter.next());
   }
 
   public void add(int index, ProcessingResource pr) {
@@ -98,7 +100,7 @@ public class SerialController extends AbstractController implements
   }
 
   public ProcessingResource remove(int index) {
-    ProcessingResource aPr = (ProcessingResource)prList.remove(index);
+    ProcessingResource aPr = prList.remove(index);
     fireResourceRemoved(new ControllerEvent(this,
       ControllerEvent.RESOURCE_REMOVED, aPr));
     return aPr;
@@ -113,14 +115,14 @@ public class SerialController extends AbstractController implements
   }
 
   public ProcessingResource set(int index, ProcessingResource pr) {
-    return (ProcessingResource)prList.set(index, pr);
+    return prList.set(index, pr);
   }
 
   /**
    * Verifies that all PRs have all their required rutime parameters set.
    */
   protected void checkParameters() throws ExecutionException {
-    List badPRs;
+    List<ProcessingResource> badPRs;
     try {
       badPRs = getOffendingPocessingResources();
     }
@@ -155,17 +157,17 @@ public class SerialController extends AbstractController implements
       runComponent(i);
       if(log.isDebugEnabled()) {
         prof.checkPoint("~Execute PR ["
-          + ((ProcessingResource)prList.get(i)).getName() + "]");
+          + prList.get(i).getName() + "]");
         Long timeOfPR =
-          (Long)timeMap.get(((ProcessingResource)prList.get(i)).getName());
+          timeMap.get(prList.get(i).getName());
         if(timeOfPR == null)
-          timeMap.put(((ProcessingResource)prList.get(i)).getName(), new Long(
+          timeMap.put(prList.get(i).getName(), new Long(
             prof.getLastDuration()));
-        else timeMap.put(((ProcessingResource)prList.get(i)).getName(),
+        else timeMap.put(prList.get(i).getName(),
           new Long(timeOfPR.longValue() + prof.getLastDuration()));
         log.debug("Time taken so far by "
-          + ((ProcessingResource)prList.get(i)).getName() + ": "
-          + timeMap.get(((ProcessingResource)prList.get(i)).getName()));
+          + prList.get(i).getName() + ": "
+          + timeMap.get(prList.get(i).getName()));
 
       }
     }
@@ -187,7 +189,7 @@ public class SerialController extends AbstractController implements
   /**
    * Returns the HashMap that lists the total time taken by each PR
    */
-  public HashMap<String, Long> getPrTimeMap() {
+  public Map<String, Long> getPrTimeMap() {
     return this.prTimeMap;
   }
 
@@ -196,7 +198,7 @@ public class SerialController extends AbstractController implements
    */
   protected void runComponent(int componentIndex) throws ExecutionException {
     ProcessingResource currentPR =
-      (ProcessingResource)prList.get(componentIndex);
+      prList.get(componentIndex);
 
     // create the listeners
     FeatureMap listeners = Factory.newFeatureMap();
@@ -276,9 +278,9 @@ public class SerialController extends AbstractController implements
 //            Factory.deleteResource((Resource)aPr);
 //          }
 //        }
-        for(Object aPr : new ArrayList(getPRs())){
+        for(Resource aPr : new ArrayList<Resource>(getPRs())){
           if(!prsInOtherControllers.contains(aPr)){
-            Factory.deleteResource((Resource)aPr);
+            Factory.deleteResource(aPr);
           }
         }
       }
@@ -312,7 +314,7 @@ public class SerialController extends AbstractController implements
   }
 
   /** The list of contained PRs */
-  protected List prList;
+  protected List<ProcessingResource> prList;
 
   /** A proxy for status events */
   protected StatusListener sListener;
@@ -333,17 +335,17 @@ public class SerialController extends AbstractController implements
         ;
     // remove links in parameters
     for(int i = 0; i < prList.size(); i++) {
-      ProcessingResource aPr = (ProcessingResource)prList.get(i);
+      ProcessingResource aPr = prList.get(i);
       ResourceData rData =
         Gate.getCreoleRegister().get(aPr.getClass().getName());
       if(rData != null) {
-        Iterator rtParamDisjIter =
+        Iterator<List<Parameter>> rtParamDisjIter =
           rData.getParameterList().getRuntimeParameters().iterator();
         while(rtParamDisjIter.hasNext()) {
-          List aDisjunction = (List)rtParamDisjIter.next();
-          Iterator rtParamIter = aDisjunction.iterator();
+          List<Parameter> aDisjunction = rtParamDisjIter.next();
+          Iterator<Parameter> rtParamIter = aDisjunction.iterator();
           while(rtParamIter.hasNext()) {
-            Parameter aParam = (Parameter)rtParamIter.next();
+            Parameter aParam = rtParamIter.next();
             String paramName = aParam.getName();
             try {
               if(aPr.getParameterValue(paramName) == e.getResource()) {

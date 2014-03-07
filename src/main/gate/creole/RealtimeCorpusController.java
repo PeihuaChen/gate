@@ -19,7 +19,6 @@ import gate.Document;
 import gate.Executable;
 import gate.Factory;
 import gate.LanguageAnalyser;
-import gate.ProcessingResource;
 import gate.Resource;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
@@ -52,6 +51,8 @@ import org.apache.log4j.Logger;
     helpURL = "http://gate.ac.uk/userguide/sec:creole-model:applications")
 public class RealtimeCorpusController extends SerialAnalyserController {
 	
+  private static final long serialVersionUID = -676170588997880008L;
+
   private final static boolean DEBUG = false;
   
   /**
@@ -144,18 +145,17 @@ public class RealtimeCorpusController extends SerialAnalyserController {
           }
           if(DEBUG) {
             prof.checkPoint("~Execute PR ["
-                    + ((ProcessingResource)prList.get(j)).getName() + "]");
-            Long timeOfPR = timeMap.get(((ProcessingResource)prList.get(j))
-                    .getName());
+                    + prList.get(j).getName() + "]");
+            Long timeOfPR = timeMap.get(prList.get(j).getName());
             if(timeOfPR == null)
-              timeMap.put(((ProcessingResource)prList.get(j)).getName(),
+              timeMap.put(prList.get(j).getName(),
                       new Long(prof.getLastDuration()));
-            else timeMap.put(((ProcessingResource)prList.get(j)).getName(),
+            else timeMap.put(prList.get(j).getName(),
                     new Long(timeOfPR.longValue() + prof.getLastDuration()));
             Out.println("Time taken so far by "
-                    + ((ProcessingResource)prList.get(j)).getName()
+                    + prList.get(j).getName()
                     + ": "
-                    + timeMap.get(((ProcessingResource)prList.get(j)).getName()));
+                    + timeMap.get(prList.get(j).getName()));
           }
         }
       }

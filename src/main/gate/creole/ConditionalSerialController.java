@@ -37,6 +37,8 @@ import gate.util.Err;
 public class ConditionalSerialController extends SerialController
                                          implements ConditionalController{
 
+  private static final long serialVersionUID = -3791943170768459208L;
+
   public ConditionalSerialController(){
     strategiesList = new ArrayList<RunningStrategy>();
   }
@@ -129,8 +131,7 @@ public class ConditionalSerialController extends SerialController
    */
   @Override
   protected void runComponent(int componentIndex) throws ExecutionException{
-    ProcessingResource currentPR = (ProcessingResource)
-                                   prList.get(componentIndex);
+    ProcessingResource currentPR = prList.get(componentIndex);
 
     //create the listeners
     FeatureMap listeners = Factory.newFeatureMap();
