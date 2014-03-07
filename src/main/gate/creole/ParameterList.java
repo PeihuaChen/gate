@@ -30,6 +30,8 @@ import gate.util.Strings;
   */
 public class ParameterList implements Serializable
 {
+  private static final long serialVersionUID = -2690236156403182440L;
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 

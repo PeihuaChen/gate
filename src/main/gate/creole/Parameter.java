@@ -16,22 +16,36 @@
 
 package gate.creole;
 
-import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
-
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
 import gate.Resource;
-import gate.util.*;
+import gate.util.GateRuntimeException;
+import gate.util.Strings;
+
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 
 /** Models a resource parameter.
   */
 public class Parameter implements Serializable
 {
+  private static final long serialVersionUID = 6611664706992065985L;
+
   /**
    * Constructor
    * @param baseUrl the URL to the creole.xml file that defines the resource 
@@ -67,7 +81,7 @@ public class Parameter implements Serializable
   String itemClassName = null;
 
   /** A set of strings representing suffixes for URL params*/
-  Set suffixes = null;
+  Set<String> suffixes = null;
   
   /**
    * Map giving concrete classes that should be used for a parameter
@@ -81,8 +95,8 @@ public class Parameter implements Serializable
    * 
    * <code>k.isAssignableFrom(substituteClasses.get(k))</code>
    */
-   static Map<Class, Class> substituteClasses = 
-    new HashMap<Class, Class>();
+   static Map<Class<?>, Class<?>> substituteClasses = 
+    new HashMap<Class<?>, Class<?>>();
   
   static {
     substituteClasses.put(Collection.class, ArrayList.class);
@@ -106,6 +120,7 @@ public class Parameter implements Serializable
 
   /** Calculate and return the value for this parameter starting from a String
    */
+  @SuppressWarnings("unchecked")
   public Object calculateValueFromString(String stringValue)
   throws ParameterException {
     //if we have no string we can't construct a value
@@ -362,7 +377,7 @@ public class Parameter implements Serializable
   /** Get the suffixes atached with this param. If it's null then there are
    *  no suffices attached with it
    */
-  public Set getSuffixes(){ return suffixes;}
+  public Set<String> getSuffixes(){ return suffixes;}
 
   /** Is this a run-time parameter? */
   boolean runtime = false;
@@ -380,10 +395,10 @@ public class Parameter implements Serializable
   public boolean isRuntime() { return runtime; }
 
   /** The Class for the parameter type */
-  protected Class paramClass;
+  protected Class<?> paramClass;
 
   /** Find the class for this parameter type. */
-  protected Class getParameterClass() throws ParameterException
+  protected Class<?> getParameterClass() throws ParameterException
   {
     // get java builtin classes via class; else look in the register
     try {
