@@ -31,8 +31,8 @@ import java.util.SortedSet;
 /** Slightly modified implementation of java.util.TreeMap in order to return the
   * closest neighbours in the case of a failed search.
   */
-public class RBTreeMap extends AbstractMap
-               implements SortedMap, Cloneable, java.io.Serializable
+public class RBTreeMap<K,V> extends AbstractMap<K,V>
+               implements SortedMap<K,V>, Cloneable, java.io.Serializable
 {
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -46,7 +46,7 @@ public class RBTreeMap extends AbstractMap
     *
     * @serial
     */
-  private Comparator comparator = null;
+  private Comparator<? super K> comparator = null;
 
    private transient Entry root = null;
 
@@ -88,7 +88,7 @@ public class RBTreeMap extends AbstractMap
     * map that violates this constraint, the <tt>put(Object key, Object
     * value)</tt> call will throw a <tt>ClassCastException</tt>.
     */
-  public RBTreeMap(Comparator c) {
+  public RBTreeMap(Comparator<? super K> c) {
     this.comparator = c;
   }
 
@@ -104,7 +104,7 @@ public class RBTreeMap extends AbstractMap
     * @throws    ClassCastException the keys in t are not Comparable, or
     * are not mutually comparable.
     */
-  public RBTreeMap(Map m) {
+  public RBTreeMap(Map<? extends K, ? extends V> m) {
     putAll(m);
   }
 
@@ -113,7 +113,7 @@ public class RBTreeMap extends AbstractMap
     * <tt>SortedMap</tt>, sorted according to the same ordering.  This method
     * runs in linear time.
     */
-  public RBTreeMap(SortedMap m) {
+  public RBTreeMap(SortedMap<K, ? extends V> m) {
       comparator = m.comparator();
       try {
           buildFromSorted(m.size(), m.entrySet().iterator(), null, null);
@@ -255,10 +255,11 @@ public class RBTreeMap extends AbstractMap
     *
     * @see #containsKey(Object)
     */
+  @SuppressWarnings("unchecked")
   @Override
-  public Object get(Object key) {
+  public V get(Object key) {
     Entry p = getEntry(key);
-    return (p==null ? null : p.value);
+    return (V)(p==null ? null : p.value);
   }
 
   /**
@@ -269,7 +270,7 @@ public class RBTreeMap extends AbstractMap
     * 	       <tt>null</tt> if it uses its keys' natural sort method.
     */
   @Override
-  public Comparator comparator() {
+  public Comparator<? super K> comparator() {
       return comparator;
   }
 
@@ -279,9 +280,10 @@ public class RBTreeMap extends AbstractMap
     * @return the first (lowest) key currently in this sorted map.
     * @throws    NoSuchElementException Map is empty.
     */
+  @SuppressWarnings("unchecked")
   @Override
-  public Object firstKey() {
-      return key(firstEntry());
+  public K firstKey() {
+      return (K)key(firstEntry());
   }
 
   /**
@@ -290,9 +292,10 @@ public class RBTreeMap extends AbstractMap
     * @return the last (highest) key currently in this sorted map.
     * @throws    NoSuchElementException Map is empty.
     */
+  @SuppressWarnings("unchecked")
   @Override
-  public Object lastKey() {
-      return key(lastEntry());
+  public K lastKey() {
+      return (K)key(lastEntry());
   }
 
   /**
@@ -308,10 +311,11 @@ public class RBTreeMap extends AbstractMap
     *            keys and a specified key is <tt>null</tt>.
     */
   @Override
-  public void putAll(Map map) {
+  public void putAll(Map<? extends K, ? extends V> map) {
       int mapSize = map.size();
       if (size==0 && mapSize!=0 && map instanceof SortedMap) {
-          Comparator c = ((SortedMap)map).comparator();
+          @SuppressWarnings("unchecked")
+          Comparator<? super K> c = ((SortedMap<K,V>)map).comparator();
           if (c == comparator || (c != null && c.equals(comparator))) {
             ++modCount;
             try {
@@ -447,8 +451,9 @@ public class RBTreeMap extends AbstractMap
     *		  natural order, or its comparator does not tolerate
     *		  <tt>null</tt> keys.
     */
+  @SuppressWarnings("unchecked")
   @Override
-  public Object put(Object key, Object value) {
+  public V put(K key, V value) {
     Entry t = root;
 
     if (t == null) {
@@ -460,7 +465,7 @@ public class RBTreeMap extends AbstractMap
     while (true) {
         int cmp = compare(key, t.key);
         if (cmp == 0) {
-      return t.setValue(value);
+      return (V)t.setValue(value);
         } else if (cmp < 0) {
       if (t.left != null) {
           t = t.left;
@@ -498,12 +503,13 @@ public class RBTreeMap extends AbstractMap
     *		  <tt>null</tt> keys.
     */
   @Override
-  public Object remove(Object key) {
+  public V remove(Object key) {
     Entry p = getEntry(key);
     if (p == null)
         return null;
 
-    Object oldValue = p.value;
+    @SuppressWarnings("unchecked")
+    V oldValue = (V)p.value;
     deleteEntry(p);
     return oldValue;
   }
@@ -526,7 +532,7 @@ public class RBTreeMap extends AbstractMap
     */
   @Override
   public Object clone() {
-    return new RBTreeMap(this);
+    return new RBTreeMap<K,V>(this);
   }
 
 
@@ -537,9 +543,9 @@ public class RBTreeMap extends AbstractMap
     * view the first time this view is requested.  The views are stateless,
     * so there's no reason to create more than one of each.
     */
-  private transient Set		keySet = null;
-  private transient Set		entrySet = null;
-  private transient Collection	values = null;
+  private transient Set<K>		keySet = null;
+  private transient Set<Map.Entry<K,V>>		entrySet = null;
+  private transient Collection<V>	values = null;
 
   /**
     * Returns a Set view of the keys contained in this map.  The set's
@@ -554,13 +560,13 @@ public class RBTreeMap extends AbstractMap
     * @return a set view of the keys contained in this RBTreeMap.
     */
   @Override
-  public Set keySet() {
+  public Set<K> keySet() {
     if (keySet == null) {
-      keySet = new AbstractSet() {
+      keySet = new AbstractSet<K>() {
 
         @Override
-        public java.util.Iterator iterator() {
-            return new Iterator(KEYS);
+        public java.util.Iterator<K> iterator() {
+            return new Iterator<K>(KEYS);
         }
 
         @Override
@@ -601,12 +607,12 @@ public class RBTreeMap extends AbstractMap
     * @return a collection view of the values contained in this map.
     */
   @Override
-  public Collection values() {
+  public Collection<V> values() {
     if (values == null) {
-      values = new AbstractCollection() {
+      values = new AbstractCollection<V>() {
         @Override
-        public java.util.Iterator iterator() {
-            return new Iterator(VALUES);
+        public java.util.Iterator<V> iterator() {
+            return new Iterator<V>(VALUES);
         }
 
         @Override
@@ -656,19 +662,20 @@ public class RBTreeMap extends AbstractMap
     * @return a set view of the mappings contained in this map.
     */
   @Override
-  public Set entrySet() {
+  public Set<Map.Entry<K,V>> entrySet() {
     if (entrySet == null) {
-      entrySet = new AbstractSet() {
+      entrySet = new AbstractSet<Map.Entry<K,V>>() {
         @Override
-        public java.util.Iterator iterator() {
-          return new Iterator(ENTRIES);
+        public java.util.Iterator<Map.Entry<K,V>> iterator() {
+          return new Iterator<Map.Entry<K,V>>(ENTRIES);
         }
 
         @Override
         public boolean contains(Object o) {
           if (!(o instanceof Map.Entry))
               return false;
-          Map.Entry entry = (Map.Entry)o;
+          @SuppressWarnings("unchecked")
+          Map.Entry<K,V> entry = (Map.Entry<K,V>)o;
           Object value = entry.getValue();
           Entry p = getEntry(entry.getKey());
           return p != null && valEquals(p.getValue(), value);
@@ -678,7 +685,8 @@ public class RBTreeMap extends AbstractMap
         public boolean remove(Object o) {
           if (!(o instanceof Map.Entry))
               return false;
-          Map.Entry entry = (Map.Entry)o;
+          @SuppressWarnings("unchecked")
+          Map.Entry<K,V> entry = (Map.Entry<K,V>)o;
           Object value = entry.getValue();
           Entry p = getEntry(entry.getKey());
           if (p != null && valEquals(p.getValue(), value)) {
@@ -744,8 +752,9 @@ public class RBTreeMap extends AbstractMap
     * @throws IllegalArgumentException if <tt>fromKey</tt> is greater than
     *            <tt>toKey</tt>.
     */
+  @SuppressWarnings("unchecked")
   @Override
-  public SortedMap subMap(Object fromKey, Object toKey) {
+  public SortedMap<K,V> subMap(Object fromKey, Object toKey) {
     return new SubMap(fromKey, toKey);
   }
 
@@ -779,8 +788,9 @@ public class RBTreeMap extends AbstractMap
     *		  this map uses natural order, or its comparator does * not
     *		  tolerate <tt>null</tt> keys.
     */
+  @SuppressWarnings("unchecked")
   @Override
-  public SortedMap headMap(Object toKey) {
+  public SortedMap<K,V> headMap(K toKey) {
     return new SubMap(toKey, true);
   }
 
@@ -813,8 +823,9 @@ public class RBTreeMap extends AbstractMap
     *		  map uses natural ordering, or its comparator does
     *            not tolerate <tt>null</tt> keys.
     */
+  @SuppressWarnings("unchecked")
   @Override
-  public SortedMap tailMap(Object fromKey) {
+  public SortedMap<K,V> tailMap(K fromKey) {
     return new SubMap(fromKey, false);
   }
 
@@ -867,11 +878,12 @@ public class RBTreeMap extends AbstractMap
       return RBTreeMap.this.get(key);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object put(Object key, Object value) {
       if (!inRange(key))
         throw new IllegalArgumentException("key out of range");
-      return RBTreeMap.this.put(key, value);
+      return RBTreeMap.this.put((K)key, (V)value);
     }
 
     @Override
@@ -1001,7 +1013,7 @@ public class RBTreeMap extends AbstractMap
   /**
     * RBTreeMap Iterator.
     */
-  private class Iterator implements java.util.Iterator {
+  private class Iterator<E> implements java.util.Iterator<E> {
     private int type;
 
     private int expectedModCount = RBTreeMap.this.modCount;
@@ -1028,8 +1040,9 @@ public class RBTreeMap extends AbstractMap
       return next != firstExcluded;
     } //hasNext
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Object next() {
+    public E next() {
       if (next == firstExcluded)
         throw new NoSuchElementException();
 
@@ -1038,7 +1051,7 @@ public class RBTreeMap extends AbstractMap
 
       lastReturned = next;
       next = successor(next);
-      return (type == KEYS ? lastReturned.key :
+      return (E)(type == KEYS ? lastReturned.key :
         (type == VALUES ? lastReturned.value : lastReturned));
     } // next
 
@@ -1059,9 +1072,10 @@ public class RBTreeMap extends AbstractMap
   /**
     * Compares two keys using the correct comparison method for this RBTreeMap.
     */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private int compare(Object k1, Object k2) {
     return (comparator==null ? ((Comparable)k1).compareTo(k2)
-       : comparator.compare(k1, k2));
+       : comparator.compare((K)k1, (K)k2));
   }
 
   /**
@@ -1081,7 +1095,7 @@ public class RBTreeMap extends AbstractMap
     * user (see Map.Entry).
     */
 
-  static class Entry implements Map.Entry {
+  private static class Entry implements Map.Entry {
     Object key;
     Object value;
     Entry left = null;
@@ -1526,10 +1540,10 @@ public class RBTreeMap extends AbstractMap
     s.writeInt(size);
 
           // Write out keys and values (alternating)
-    for (java.util.Iterator i = entrySet().iterator(); i.hasNext(); ) {
-              Entry e = (Entry)i.next();
-              s.writeObject(e.key);
-              s.writeObject(e.value);
+    for (java.util.Iterator<Map.Entry<K,V>> i = entrySet().iterator(); i.hasNext(); ) {
+              Map.Entry<K,V> e = i.next();
+              s.writeObject(e.getKey());
+              s.writeObject(e.getValue());
     }
   } // writeObject
 
@@ -1552,13 +1566,13 @@ public class RBTreeMap extends AbstractMap
   } // readObject
 
   /** Intended to be called only from TreeSet.readObject */
-  void readTreeSet(int size, java.io.ObjectInputStream s, Object defaultVal)
+  void readTreeSet(int size, java.io.ObjectInputStream s, V defaultVal)
       throws java.io.IOException, ClassNotFoundException {
     buildFromSorted(size, null, s, defaultVal);
   }
 
   /** Intended to be called only from TreeSet.addAll */
-  void addAllForTreeSet(SortedSet set, Object defaultVal) {
+  void addAllForTreeSet(SortedSet<K> set, V defaultVal) {
     try {
       buildFromSorted(set.size(), set.iterator(), null, defaultVal);
     } catch (java.io.IOException cannotHappen) {
@@ -1597,9 +1611,9 @@ public class RBTreeMap extends AbstractMap
     * @throws ClassNotFoundException propagated from readObject.
     *         This cannot occur if str is null.
     */
-  private void buildFromSorted(int size, java.util.Iterator it,
+  private void buildFromSorted(int size, java.util.Iterator<?> it,
                                 java.io.ObjectInputStream str,
-                                Object defaultVal)
+                                V defaultVal)
     throws  java.io.IOException, ClassNotFoundException {
 
     this.size = size;
@@ -1623,7 +1637,7 @@ public class RBTreeMap extends AbstractMap
     */
   private static Entry buildFromSorted(int level, int lo, int hi,
                                        int redLevel,
-                                       java.util.Iterator it,
+                                       java.util.Iterator<?> it,
                                        java.io.ObjectInputStream str,
                                        Object defaultVal)
     throws  java.io.IOException, ClassNotFoundException {
@@ -1655,7 +1669,7 @@ public class RBTreeMap extends AbstractMap
     if (it != null) { // use iterator
 
       if (defaultVal==null) {
-        Map.Entry entry = (Map.Entry) it.next();
+        Map.Entry<?,?> entry = (Map.Entry<?,?>)it.next();
         key = entry.getKey();
         value = entry.getValue();
       } else {
