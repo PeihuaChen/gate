@@ -39,7 +39,7 @@ public class ConfigXmlHandler extends DefaultHandler {
    *  onto it. Probably. Ok, so I should check, but a) it works, b)
    *  I'm bald already and c) life is short.)
    */
-  private Stack contentStack = new Stack();
+  private Stack<String> contentStack = new Stack<String>();
 
   /** The current resource data object */
   private SystemData systemData;
@@ -91,7 +91,7 @@ public class ConfigXmlHandler extends DefaultHandler {
       StringBuffer errorMessage =
         new StringBuffer("document ended but element stack not empty:");
       while(! contentStack.isEmpty())
-        errorMessage.append(Strings.getNl()+"  "+(String) contentStack.pop());
+        errorMessage.append(Strings.getNl()+"  "+contentStack.pop());
       throw new GateSaxException(errorMessage.toString());
     }
   } // endDocument
@@ -179,7 +179,7 @@ public class ConfigXmlHandler extends DefaultHandler {
 
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("CREOLE-DIRECTORY")) {
-      String dirUrlName = (String) contentStack.pop();
+      String dirUrlName = contentStack.pop();
       try {
         register.registerDirectories(new URL(dirUrlName));
       } catch(MalformedURLException e) {
@@ -195,17 +195,17 @@ public class ConfigXmlHandler extends DefaultHandler {
 
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("CONTROLLER")) {
-      systemData.controllerTypeName = (String) contentStack.pop();
+      systemData.controllerTypeName = contentStack.pop();
 
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("LR")) {
       // create an LR and add it to the SystemData
-      createResource((String) contentStack.pop(), systemData.lrList);
+      createResource(contentStack.pop(), systemData.lrList);
 
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("PR")) {
       // create a PR and add it to the SystemData
-      createResource((String) contentStack.pop(), systemData.prList);
+      createResource(contentStack.pop(), systemData.prList);
 
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("DBCONFIG")) {
