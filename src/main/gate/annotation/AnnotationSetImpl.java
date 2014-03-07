@@ -96,7 +96,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   /** Maps annotation ids (Integers) to Annotations */
   transient protected HashMap<Integer, Annotation> annotsById;
   /** Maps offsets (Longs) to nodes */
-  transient RBTreeMap nodesByOffset = null;
+  transient RBTreeMap<Long,Node> nodesByOffset = null;
   /**
    * This field is used temporarily during serialisation to store all the
    * annotations that need to be saved. At all other times, this will be null;
@@ -150,6 +150,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   } // construction from document and name
 
   /** Construction from an existing AnnotationSet */
+  @SuppressWarnings("unchecked")
   public AnnotationSetImpl(AnnotationSet c) throws ClassCastException {
     this(c.getDocument(), c.getName());
     // the original annotationset is of the same implementation
@@ -165,7 +166,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
         annotsByType.putAll(theC.annotsByType);
       }
       if(theC.nodesByOffset != null) {
-        nodesByOffset = (RBTreeMap)theC.nodesByOffset.clone();
+        nodesByOffset = (RBTreeMap<Long,Node>)theC.nodesByOffset.clone();
       }
     }
     // the implementation is not the default one
@@ -473,7 +474,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    */
   public AnnotationSet getStartingAt(long offset) {
     if(annotsByStartNode == null) indexByStartOffset();
-    Node node = (Node)nodesByOffset.get(offset);
+    Node node = nodesByOffset.get(offset);
     if(node == null) { // no nodes at or beyond this offset
       return emptyAnnotationSet;
     }
@@ -491,10 +492,10 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   @Override
   public List<Annotation> inDocumentOrder() {
     if(annotsByStartNode == null) indexByStartOffset();
-    Collection<Object> values = nodesByOffset.values();
+    Collection<Node> values = nodesByOffset.values();
     List<Annotation> result = new ArrayList<Annotation>();
-    for(Object nodeObj : values) {
-      Collection<Annotation> anns = getAnnotsByStartNode(((Node)nodeObj).getId());
+    for(Node nodeObj : values) {
+      Collection<Annotation> anns = getAnnotsByStartNode(nodeObj.getId());
       if(anns != null) {
         result.addAll(anns);
       }
@@ -533,7 +534,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     Node currentNode;
     Annotation currentAnnot;
     // find all the annots that start at the start offset
-    currentNode = (Node)nodesByOffset.get(startOffset);
+    currentNode = nodesByOffset.get(startOffset);
     if(currentNode != null) {
       Collection<Annotation> objFromPoint = getAnnotsByStartNode(currentNode
               .getId());
@@ -735,7 +736,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     indexByStartOffset();
     if(nodesByOffset.isEmpty())
       return null;
-    else return (Node)nodesByOffset.get(nodesByOffset.firstKey());
+    else return nodesByOffset.get(nodesByOffset.firstKey());
   } // firstNode
 
   /** Get the node with the largest offset */
@@ -744,7 +745,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     indexByStartOffset();
     if(nodesByOffset.isEmpty())
       return null;
-    else return (Node)nodesByOffset.get(nodesByOffset.lastKey());
+    else return nodesByOffset.get(nodesByOffset.lastKey());
   } // lastNode
 
   /**
@@ -871,7 +872,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     }
     // find existing nodes if appropriate nodes don't already exist,
     // create them
-    Node startNode = (Node)nodesByOffset.get(start);
+    Node startNode = nodesByOffset.get(start);
     if(startNode == null)
       startNode = new NodeImpl(doc.getNextNodeId(), start);
 
@@ -881,7 +882,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       return new Node[]{startNode,endNode};
     }
 
-    endNode = (Node)nodesByOffset.get(end);
+    endNode = nodesByOffset.get(end);
     if(endNode == null)
       endNode = new NodeImpl(doc.getNextNodeId(), end);
 
@@ -923,7 +924,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   /** Construct the positional indices for annotation start */
   protected void indexByStartOffset() {
     if(annotsByStartNode != null) return;
-    if(nodesByOffset == null) nodesByOffset = new RBTreeMap();
+    if(nodesByOffset == null) nodesByOffset = new RBTreeMap<Long,Node>();
     annotsByStartNode = new HashMap<Integer, Object>(annotsById.size());
     Iterator<Annotation> annotIter = annotsById.values().iterator();
     while(annotIter.hasNext())
@@ -1322,7 +1323,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       annotsByType = new HashMap<String, AnnotationSet>(Gate.HASH_STH_SIZE);
     }
     if(isIndexedByStartNode) {
-      nodesByOffset = new RBTreeMap();
+      nodesByOffset = new RBTreeMap<Long,Node>();
       annotsByStartNode = new HashMap<Integer, Object>(annotations.length);
     }
     // add all the annotations one by one
