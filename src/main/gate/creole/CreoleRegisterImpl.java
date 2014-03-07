@@ -1057,6 +1057,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   @Override
   public synchronized void removeCreoleListener(CreoleListener l) {
     if(creoleListeners != null && creoleListeners.contains(l)) {
+      @SuppressWarnings("unchecked")
       Vector<CreoleListener> v = (Vector<CreoleListener>)creoleListeners.clone();
       v.removeElement(l);
       creoleListeners = v;
@@ -1065,6 +1066,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
 
   @Override
   public synchronized void addCreoleListener(CreoleListener l) {
+    @SuppressWarnings("unchecked")
     Vector<CreoleListener> v =
       creoleListeners == null ? new Vector<CreoleListener>(2) : (Vector<CreoleListener>)creoleListeners.clone();
     if(!v.contains(l)) {
