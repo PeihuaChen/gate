@@ -2,10 +2,8 @@ package gate.corpora;
 
 import gate.Document;
 import gate.DocumentFormat;
+import gate.FeatureMap;
 import gate.Resource;
-import gate.corpora.DocumentImpl;
-import gate.corpora.MimeType;
-import gate.corpora.RepositioningInfo;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.CreoleResource;
@@ -17,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -126,7 +123,7 @@ public class TikaFormat extends DocumentFormat {
   }
 
   private void setDocumentFeatures(Metadata metadata, Document doc) {
-    Map fmap = doc.getFeatures();
+    FeatureMap fmap = doc.getFeatures();
     setTikaFeature(metadata, Metadata.TITLE, fmap);
     setTikaFeature(metadata, Metadata.AUTHOR, fmap);
     setTikaFeature(metadata, Metadata.COMMENTS, fmap);
@@ -136,7 +133,7 @@ public class TikaFormat extends DocumentFormat {
     fmap.put("MimeType", metadata.get(Metadata.CONTENT_TYPE));
   }
 
-  private void setTikaFeature(Metadata metadata, String key, Map fmap) {
+  private void setTikaFeature(Metadata metadata, String key, FeatureMap fmap) {
     String value = metadata.get(key);
     if (value == null) {
       return;
