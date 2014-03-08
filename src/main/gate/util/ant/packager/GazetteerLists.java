@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.DataType;
@@ -56,6 +57,7 @@ public class GazetteerLists extends DataType implements ResourceCollection {
    * ResourceCollection interface: returns an iterator over the list
    * files.
    */
+  @SuppressWarnings("rawtypes")
   @Override
   public Iterator iterator() {
     load();
@@ -100,35 +102,33 @@ public class GazetteerLists extends DataType implements ResourceCollection {
 
     Set<String> lists = new HashSet<String>();
 
+    BufferedReader in = null;
+    
     try {
-      FileInputStream fis = new FileInputStream(definition);
-      try {
-        BufferedReader in = null;
-        if(encoding == null) {
-          in = new BomStrippingInputStreamReader(fis);
-        }
-        else {
-          in = new BomStrippingInputStreamReader(fis, encoding);
-        }
-
-        String line;
-        while((line = in.readLine()) != null) {
-          int indexOfColon = line.indexOf(':');
-          // Ignore lines that don't include a colon.
-          if(indexOfColon > 0) {
-            String listFile = line.substring(0, indexOfColon);
-            lists.add(listFile);
-            log("Found list file " + listFile, Project.MSG_VERBOSE);
-          }
-        }
+      if(encoding == null) {
+        in = new BomStrippingInputStreamReader(new FileInputStream(definition));
       }
-      finally {
-        fis.close();
+      else {
+        in = new BomStrippingInputStreamReader(new FileInputStream(definition), encoding);
+      }
+
+      String line;
+      while((line = in.readLine()) != null) {
+        int indexOfColon = line.indexOf(':');
+        // Ignore lines that don't include a colon.
+        if(indexOfColon > 0) {
+          String listFile = line.substring(0, indexOfColon);
+          lists.add(listFile);
+          log("Found list file " + listFile, Project.MSG_VERBOSE);
+        }
       }
     }
     catch(IOException ioe) {
       throw new BuildException("Error reading gazetteer definition file "
               + definition, ioe);
+    }
+    finally {
+      IOUtils.closeQuietly(in);
     }
 
     listNames = lists.toArray(new String[lists.size()]);

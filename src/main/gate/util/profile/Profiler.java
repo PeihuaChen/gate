@@ -43,8 +43,9 @@ package gate.util.profile;
  */
 
 //import java.io.PrintStream;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -59,14 +60,14 @@ public class Profiler {
   private boolean m_doPrintToStdOut = true;
 
   // keeps the sum of the time spend on a category of tasks
-  // the catoegries are identified via strings which are used as
+  // the categories are identified via strings which are used as
   // keys in the table. The values in the table are Long objects, millisec.
-  private Hashtable m_categorySums;
+  private Map<String,Long> m_categorySums;
 
   // keeps the time spend on the last task of a category
-  // the catoegries are identified via strings which are used as
+  // the categories are identified via strings which are used as
   // keys in the table. The values in the table are Long objects, millisec.
-  private Hashtable m_categoryLasts;
+  private Map<String,Long> m_categoryLasts;
 
   private Runtime m_rt;
 
@@ -170,8 +171,8 @@ public class Profiler {
     m_lastCheckTime=0;
     m_lastDuration=0;
 
-    m_categorySums = new Hashtable();
-    m_categoryLasts = new Hashtable();
+    m_categorySums = new HashMap<String,Long>();
+    m_categoryLasts = new HashMap<String,Long>();
     if ( m_doPrintToStdOut ) {
       log.debug(buf.toString());
     }
@@ -237,11 +238,11 @@ public class Profiler {
   private void checkCategories(String categs[]) {
     int size = categs.length;
     String categ;
-    long last, sum;
+    long sum;
     Long l;
     for (int i=0; i<size; i++) {
       categ = categs[i].toUpperCase();
-      l = (Long)m_categorySums.get(categ);
+      l = m_categorySums.get(categ);
       sum = (l==null) ? 0 : l.longValue();
       sum += m_lastDuration;
       m_categorySums.put(categ, new Long(sum));
@@ -286,7 +287,7 @@ public class Profiler {
    * Returns 0 if the category was not found
    */
   public long getCategoryTimeSum(String category) {
-    Long sum = (Long)m_categorySums.get(category.toUpperCase());
+    Long sum = m_categorySums.get(category.toUpperCase());
     return (sum == null) ? 0 : sum.longValue();
   } // getCategoryTimeSum
 
@@ -294,7 +295,7 @@ public class Profiler {
    * Returns 0 if the category was not found
    */
   public long getCategoryTimeLast(String category) {
-    Long sum = (Long)m_categoryLasts.get(category.toUpperCase());
+    Long sum = m_categoryLasts.get(category.toUpperCase());
     return (sum == null) ? 0 : sum.longValue();
   } // getCategoryTimeSum
 
@@ -303,10 +304,10 @@ public class Profiler {
    */
   public void showCategoryTimes() {
     log.debug("Time spent by categories:");
-    Enumeration categNames = m_categorySums.keys();
+    Iterator<String> categNames = m_categorySums.keySet().iterator();
     String categ;
-    while (categNames.hasMoreElements()) {
-      categ = (String)categNames.nextElement();
+    while (categNames.hasNext()) {
+      categ = categNames.next();
       showCategoryTime(categ);
     } // while
   } // showCategoryTimes
