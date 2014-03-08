@@ -281,11 +281,9 @@ public class GazetteerEditor extends AbstractVisualResource
           super.getTableCellRendererComponent(
             table, value, isSelected, hasFocus, row, column);
           setForeground(table.getForeground());
-          LinearNode linearNode = (LinearNode)
-            linearDefinition.getNodesByListNames().get(value);
+          LinearNode linearNode = linearDefinition.getNodesByListNames().get(value);
           if (linearNode != null) {
-            GazetteerList gazetteerList = (GazetteerList)
-              linearDefinition.getListsByNode().get(linearNode);
+            GazetteerList gazetteerList = linearDefinition.getListsByNode().get(linearNode);
             if (gazetteerList != null && gazetteerList.isModified()) {
               setForeground(Color.RED);
             }
@@ -325,8 +323,7 @@ public class GazetteerEditor extends AbstractVisualResource
       @Override
       public void actionPerformed(ActionEvent e) {
         // update the gazetteer
-        GazetteerNode newGazetteerNode = new GazetteerNode(
-          listEntryTextField.getText(), Factory.newFeatureMap());
+        GazetteerNode newGazetteerNode = new GazetteerNode(listEntryTextField.getText());
         
         // if you don't set the separator then all features/values
         // entered before the list is saved and reinitialised are lost
@@ -349,8 +346,7 @@ public class GazetteerEditor extends AbstractVisualResource
               listTable.getCellRect(row, column, true));
             listTable.setRowSelectionInterval(row, row);
             listTable.setColumnSelectionInterval(column, column);
-            GazetteerList gazetteerList = (GazetteerList)
-              linearDefinition.getListsByNode().get(selectedLinearNode);
+            GazetteerList gazetteerList = linearDefinition.getListsByNode().get(selectedLinearNode);
             gazetteerList.setModified(true);
             definitionTable.repaint();
           }
@@ -394,8 +390,7 @@ public class GazetteerEditor extends AbstractVisualResource
             filterListButton.setEnabled(false);
           } else {
             // check if the entry already exists in the list
-            GazetteerList gazetteerList = (GazetteerList)
-              linearDefinition.getListsByNode().get(selectedLinearNode);
+            GazetteerList gazetteerList = linearDefinition.getListsByNode().get(selectedLinearNode);
             boolean found = false;
             for (Object object : gazetteerList) {
               GazetteerNode node = (GazetteerNode) object;
@@ -547,11 +542,9 @@ public class GazetteerEditor extends AbstractVisualResource
             String listName = (String) definitionTable.getValueAt(
               definitionTable.getSelectedRow(),
               definitionTable.convertColumnIndexToView(0));
-            selectedLinearNode = (LinearNode)
-              linearDefinition.getNodesByListNames().get(listName);
+            selectedLinearNode = linearDefinition.getNodesByListNames().get(listName);
             if (selectedLinearNode != null) {
-              listTableModel.setGazetteerList((GazetteerList)
-                linearDefinition.getListsByNode().get(selectedLinearNode));
+              listTableModel.setGazetteerList(linearDefinition.getListsByNode().get(selectedLinearNode));
             }
             listEntryTextField.setEnabled(true);
             addColumnsButton.setEnabled(true);
@@ -581,8 +574,7 @@ public class GazetteerEditor extends AbstractVisualResource
         if (selectedLinearNode == null) { return; }
         int row = e.getFirstRow();
         int column = e.getColumn();
-        GazetteerList gazetteerList = (GazetteerList)
-          linearDefinition.getListsByNode().get(selectedLinearNode);
+        GazetteerList gazetteerList = linearDefinition.getListsByNode().get(selectedLinearNode);
         switch (e.getType()) {
           case TableModelEvent.UPDATE:
             if (row == -1 || column == -1) { return; }
@@ -903,7 +895,7 @@ public class GazetteerEditor extends AbstractVisualResource
 
     @Override
     public Object getValueAt(int row, int column) {
-      GazetteerNode node = (GazetteerNode) gazetteerListFiltered.get(row);
+      GazetteerNode node = gazetteerListFiltered.get(row);
       if (column == 0) {
         return node.getEntry();
       } else {
@@ -957,8 +949,7 @@ public class GazetteerEditor extends AbstractVisualResource
         value = ((String)value).replaceAll(
           "\\Q"+linearDefinition.getSeparator()+"\\E", "");
       }
-      GazetteerNode gazetteerNode =
-        (GazetteerNode) gazetteerListFiltered.get(row);
+      GazetteerNode gazetteerNode = gazetteerListFiltered.get(row);
       if (column == 0) {
         // update entry
         gazetteerNode.setEntry((String) value);
@@ -1044,8 +1035,8 @@ public class GazetteerEditor extends AbstractVisualResource
     public void addEmptyFeatureColumns() {
       // find the first row fully filled with value
       if (getColumnCount() == 1) {
-        GazetteerNode node = (GazetteerNode) gazetteerListFiltered.get(0);
-        Map<String, String> map = new HashMap<String, String>();
+        GazetteerNode node = gazetteerListFiltered.get(0);
+        Map<String, Object> map = new HashMap<String, Object>();
         // add a couple of rows
         map.put("", "");
         node.setFeatureMap(map);
@@ -1099,8 +1090,7 @@ public class GazetteerEditor extends AbstractVisualResource
     @Override
     public void actionPerformed(ActionEvent e) {
       if (selectedLinearNode == null) { return; }
-      GazetteerList gazetteerList = (GazetteerList)
-        linearDefinition.getListsByNode().get(selectedLinearNode);
+      GazetteerList gazetteerList = linearDefinition.getListsByNode().get(selectedLinearNode);
       gazetteerList.clear();
       try {
         gazetteerList.load(true);

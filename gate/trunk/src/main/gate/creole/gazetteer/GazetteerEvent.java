@@ -19,6 +19,8 @@ import gate.event.GateEvent;
  * Gazetteer Event to be used whenever an event needs to be fired and spread
  * among Gazetteer Listeners */
 public class GazetteerEvent extends GateEvent {
+  
+  private static final long serialVersionUID = 1824667976328958501L;
 
   /**gazetteer reinitialized event*/
   public static final int REINIT = 1;

@@ -15,9 +15,14 @@
  */
 package gate.creole.gazetteer;
 
-import gate.*;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.Resource;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
+
+import java.util.Set;
 
 /** OntoGazetteerImpl <br>
  *  An ontology-aware gazetteer, producing additional annotations
@@ -25,11 +30,13 @@ import gate.creole.ResourceInstantiationException;
  */
 public class OntoGazetteerImpl extends AbstractOntoGazetteer {
 
+  private static final long serialVersionUID = -1899789184476649606L;
+
   public OntoGazetteerImpl() {
   }
 
   @Override
-  public java.util.Set lookup(String singleItem) {
+  public Set<Lookup> lookup(String singleItem) {
     return gaz.lookup(singleItem);
   }
 
@@ -41,7 +48,7 @@ public class OntoGazetteerImpl extends AbstractOntoGazetteer {
       checkParameters();
 
       // load gazetteer class from GATE classloader
-      Class cl = Class.forName(gazetteerName, true, Gate.getClassLoader());
+      Class<?> cl = Class.forName(gazetteerName, true, Gate.getClassLoader());
 
       FeatureMap params = Factory.newFeatureMap();
 

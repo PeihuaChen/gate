@@ -17,6 +17,7 @@ package gate.creole.gazetteer;
 
 import gate.creole.ANNIEConstants;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -31,14 +32,12 @@ import java.util.Map;
  * optional features field stores arbitary features as part of the lookup
  * annotation. This can be used to set meta-data for a gazetteer entry.
  */
-public class Lookup implements java.io.Serializable {
-  /**
-   * Debug flag
-   */
-  private static final boolean DEBUG = false;
+public class Lookup implements Serializable {
+
+  private static final long serialVersionUID = 4107354748136747541L;
 
   /** a map of arbitary features */
-  public Map features = null;
+  public Map<String,Object> features = null;
 
   /**
    * Creates a new Lookup value with the given major and minor types and
@@ -141,14 +140,14 @@ public class Lookup implements java.io.Serializable {
     if(hasArbitaryFeatures) {
       // as the ordering of the featureMap is undefined, create a new list of
       // keys and sort it to ensure the string returned is always the same
-      List sortedKeys = new ArrayList(features.keySet());
+      List<String> sortedKeys = new ArrayList<String>(features.keySet());
       Collections.sort(sortedKeys);
-      for(Iterator it = sortedKeys.iterator(); it.hasNext();) {
-        String key = (String)it.next();
+      for(Iterator<String> it = sortedKeys.iterator(); it.hasNext();) {
+        String key = it.next();
         b.append("|");
         b.append(key);
         b.append(":");
-        b.append(features.get(key).toString());
+        b.append(features.get(key));
       }
     }
     return b.toString();

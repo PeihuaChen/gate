@@ -23,6 +23,8 @@ import gate.util.GateException;
 /** exception thrown when an invalid format of a file is detected */
 public class InvalidFormatException extends GateException{
 
+  private static final long serialVersionUID = 5229935133798314714L;
+
   /**
    * the associated file
    */
@@ -69,7 +71,7 @@ public class InvalidFormatException extends GateException{
    * Gets the asssociated URL
    * @return the associated URL
    */
-  private URL getURL() {
+  public URL getURL() {
     return url;
   }
 } // class InvalidFormatException

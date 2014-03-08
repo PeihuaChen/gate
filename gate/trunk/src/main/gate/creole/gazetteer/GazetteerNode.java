@@ -37,7 +37,7 @@ public class GazetteerNode {
   private String entry;
   
   /** The features associated to the entry. If there are no features for this entry, it is null */
-  private Map featureMap = null;
+  private Map<String,Object> featureMap = null;
   
   /** The separator used in a GazetteerNode string */
   private String separator;
@@ -48,7 +48,7 @@ public class GazetteerNode {
    * @param entry the gazetteer entry
    * @param featureMap a map of name-value pairs
    */
-  public GazetteerNode(String entry, Map featureMap) {
+  public GazetteerNode(String entry, Map<String,Object> featureMap) {
     this.entry = entry;
     this.featureMap = featureMap;
   }
@@ -108,7 +108,7 @@ public class GazetteerNode {
    * @param isOrdered true if the map returned should be ordered
    * @return a Map of the features
    */
-  private Map getFeatures(String features, boolean isOrdered) {
+  private Map<String,Object> getFeatures(String features, boolean isOrdered) {
     
     if (separator == null)
       return null;
@@ -137,11 +137,11 @@ public class GazetteerNode {
     }
     
     // extract the name and value from the pair strings and put in feature map
-    Map<String,String> featureMap;
+    Map<String,Object> featureMap;
     if (isOrdered) {
-      featureMap = new LinkedHashMap<String,String>(pairs.length);
+      featureMap = new LinkedHashMap<String,Object>(pairs.length);
     } else {
-      featureMap = new HashMap<String,String>(pairs.length);
+      featureMap = new HashMap<String,Object>(pairs.length);
     }
     for(int i = 0; i < pairs.length; i++) {
       String pair = pairs[i];
@@ -171,7 +171,7 @@ public class GazetteerNode {
    * @param featureMap map to be converted
    * @return string of name/value pairs
    */
-  public String featureMapToString(Map featureMap) {
+  public String featureMapToString(Map<String,Object> featureMap) {
     String str = "";
     if (featureMap instanceof LinkedHashMap) {
       for (Object key : featureMap.keySet()) {
@@ -179,11 +179,11 @@ public class GazetteerNode {
       }
     } else {
       // sort into a predictable order
-      List sortedKeys = new ArrayList(featureMap.keySet());
+      List<String> sortedKeys = new ArrayList<String>(featureMap.keySet());
       Collections.sort(sortedKeys);
-      for(Iterator it = sortedKeys.iterator(); it.hasNext();) {
-        String key = (String)it.next();
-        str += separator + key + "=" + featureMap.get(key);
+      for(Iterator<String> it = sortedKeys.iterator(); it.hasNext();) {
+        String key = it.next();
+        str += separator + key + "=" + featureMap.get(key).toString();
       }
     }
     return str;
@@ -241,14 +241,14 @@ public class GazetteerNode {
   /**
    * @return the featureMap
    */
-  public Map getFeatureMap() {
+  public Map<String,Object> getFeatureMap() {
     return featureMap;
   }
   
   /**
    * @param featureMap the featureMap to set
    */
-  public void setFeatureMap(Map featureMap) {
+  public void setFeatureMap(Map<String,Object> featureMap) {
     this.featureMap = featureMap;
   }
 

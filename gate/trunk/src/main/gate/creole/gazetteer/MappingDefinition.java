@@ -16,13 +16,25 @@
 package gate.creole.gazetteer;
 
 
-import java.io.*;
-import java.net.URL;
-import java.util.*;
-
 import gate.creole.ResourceInstantiationException;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.Files;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
 /** Represents a mapping definition which maps gazetteer lists to ontology classes */
 public class MappingDefinition extends gate.creole.AbstractLanguageResource
@@ -160,7 +172,7 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
   }
 
   @Override
-  public Iterator iterator() {
+  public Iterator<MappingNode> iterator() {
     return new SafeIterator();
   }
 
@@ -170,7 +182,7 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
   }
 
   @Override
-  public Object[] toArray(Object[] a) {
+  public <T> T[] toArray(T[] a) {
     return nodes.toArray(a);
   }
 
@@ -243,42 +255,38 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
   }
 
   @Override
-  public boolean containsAll(Collection c) {
+  public boolean containsAll(Collection<?> c) {
     return nodes.containsAll(c);
   }
 
   @Override
-  public boolean addAll(Collection c) {
+  public boolean addAll(Collection<? extends MappingNode> c) {
     boolean result = false;
-    Iterator iter = c.iterator();
-    Object o;
-    while (iter.hasNext()) {
+    Iterator<? extends MappingNode> iter = c.iterator();
+    MappingNode o;
+    while(iter.hasNext()) {
       o = iter.next();
-      if (o instanceof MappingNode)  {
-        result |= add((MappingNode)o);
-      } // instance of MappingNode
+      result |= add(o);
     } // while
     return result;
   } // addAll(Collection)
 
   @Override
-  public boolean addAll(int index,Collection c) {
+  public boolean addAll(int index, Collection<? extends MappingNode> c) {
     int size = nodes.size();
-    Iterator iter = c.iterator();
-    Object o;
-    while (iter.hasNext()) {
+    Iterator<? extends MappingNode> iter = c.iterator();
+    MappingNode o;
+    while(iter.hasNext()) {
       o = iter.next();
-      if (o instanceof MappingNode)  {
-        add(index++, (MappingNode)o);
-      } // instance of MappingNode
+      add(index++, o);
     } // while
-    return (size!=nodes.size());
-  }//addAll(int,Collection)
+    return (size != nodes.size());
+  }// addAll(int,Collection)
 
   @Override
-  public boolean removeAll(Collection c) {
+  public boolean removeAll(Collection<?> c) {
     boolean result = false;
-    Iterator iter = c.iterator();
+    Iterator<?> iter = c.iterator();
     Object o;
     while (iter.hasNext()) {
       o = iter.next();
@@ -289,9 +297,9 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
 
 
   @Override
-  public boolean retainAll(Collection c) {
+  public boolean retainAll(Collection<?> c) {
     int aprioriSize = nodes.size();
-    List scrap = new ArrayList();
+    List<MappingNode> scrap = new ArrayList<MappingNode>();
 
     MappingNode node;
     for (int index = 0; index < nodes.size(); index++) {
@@ -345,16 +353,16 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
   }
   
   @Override
-  public List subList(int i1, int i2) {
+  public List<MappingNode> subList(int i1, int i2) {
     return nodes.subList(i1,i2);
   }
 
   @Override
-  public ListIterator listIterator(int index) {
+  public ListIterator<MappingNode> listIterator(int index) {
     throw new UnsupportedOperationException("this method is not implemented");
   }
   @Override
-  public ListIterator listIterator() {
+  public ListIterator<MappingNode> listIterator() {
     throw new UnsupportedOperationException("this method is not implemented");
   }
 
@@ -374,7 +382,7 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
 
   /**Provides means for safe iteration over
    * the entries of the Mapping Definition  */
-  private class SafeIterator implements Iterator {
+  private class SafeIterator implements Iterator<MappingNode> {
     private int index = 0;
     private boolean removeCalled = false;
 
@@ -384,7 +392,7 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     }
 
     @Override
-    public Object next() {
+    public MappingNode next() {
       removeCalled = false;
       return nodes.get(index++);
     }
