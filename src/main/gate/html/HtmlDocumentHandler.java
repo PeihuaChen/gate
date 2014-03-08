@@ -16,19 +16,27 @@
 
 package gate.html;
 
-import java.util.*;
-
-import javax.swing.text.BadLocationException;
-import javax.swing.text.MutableAttributeSet;
-import javax.swing.text.html.HTML;
-import javax.swing.text.html.HTMLEditorKit.ParserCallback;
-
-import gate.*;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.GateConstants;
 import gate.corpora.DocumentContentImpl;
 import gate.corpora.RepositioningInfo;
 import gate.event.StatusListener;
 import gate.util.Err;
 import gate.util.InvalidOffsetException;
+
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+
+import javax.swing.text.BadLocationException;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.html.HTML;
+import javax.swing.text.html.HTMLEditorKit.ParserCallback;
 
 
 /** Implements the behaviour of the HTML reader.
@@ -40,9 +48,6 @@ import gate.util.InvalidOffsetException;
   * new one containing anly text from the HTML document.
   */
 public class HtmlDocumentHandler extends ParserCallback {
-
-  /** Debug flag */
-  private static final boolean DEBUG = false;
 
   /** Constructor initialises all the private memeber data.
     * This will use the default annotation set taken from the gate document.
@@ -65,14 +70,14 @@ public class HtmlDocumentHandler extends ParserCallback {
                              Map                 aMarkupElementsMap,
                              gate.AnnotationSet  anAnnotationSet) {
     // init stack
-    stack = new java.util.Stack();
+    stack = new Stack<CustomObject>();
 
     // this string contains the plain text (the text without markup)
     tmpDocContent = new StringBuffer(aDocument.getContent().size().intValue());
 
     // colector is used later to transform all custom objects into
     // annotation objects
-    colector = new LinkedList();
+    colector = new LinkedList<CustomObject>();
 
     // the Gate document
     doc = aDocument;
@@ -142,7 +147,7 @@ public class HtmlDocumentHandler extends ParserCallback {
 
     // Take all the attributes an put them into the feature map
     if (0 != a.getAttributeCount()){
-      Enumeration enumeration = a.getAttributeNames();
+      Enumeration<?> enumeration = a.getAttributeNames();
       while (enumeration.hasMoreElements()){
         Object attribute = enumeration.nextElement();
         fm.put(attribute.toString(),(a.getAttribute(attribute)).toString());
@@ -190,7 +195,7 @@ public class HtmlDocumentHandler extends ParserCallback {
 
     // If the stack is not empty then we get the object from the stack
     if (!stack.isEmpty()){
-      obj = (CustomObject) stack.pop();
+      obj = stack.pop();
       // Before adding it to the colector, we need to check if is an
       // emptyAndSpan one. See CustomObject's isEmptyAndSpan field.
       if (obj.getStart().equals(obj.getEnd())){
@@ -224,7 +229,7 @@ public class HtmlDocumentHandler extends ParserCallback {
       Collections.sort(colector);
       // iterate through colector and construct annotations
       while (!colector.isEmpty()){
-        obj = (CustomObject) colector.getFirst();
+        obj = colector.getFirst();
         colector.remove(obj);
           // Construct an annotation from this obj
           try{
@@ -274,7 +279,7 @@ public class HtmlDocumentHandler extends ParserCallback {
     if (0 != a.getAttributeCount ()){
 
        // Out.println("HAS  attributes = " + a.getAttributeCount ());
-        Enumeration enumeration = a.getAttributeNames ();
+        Enumeration<?> enumeration = a.getAttributeNames ();
         while (enumeration.hasMoreElements ()){
           Object attribute = enumeration.nextElement ();
           fm.put ( attribute.toString(),(a.getAttribute(attribute)).toString());
@@ -351,10 +356,10 @@ public class HtmlDocumentHandler extends ParserCallback {
     CustomObject obj = null;
     // Iterate through stack to modify the End index of the existing elements
 
-    java.util.Iterator anIterator = stack.iterator();
+    Iterator<CustomObject> anIterator = stack.iterator();
     while (anIterator.hasNext ()){
       // get the object and move to the next one
-      obj = (CustomObject) anIterator.next ();
+      obj = anIterator.next ();
       if (incrementStartIndex && obj.getStart().equals(obj.getEnd())){
         obj.setStart(new Long(obj.getStart().longValue() + 1));
       }// End if
@@ -430,10 +435,10 @@ public class HtmlDocumentHandler extends ParserCallback {
     }// End if
     if (modification == true){
       Long end = new Long (tmpDocContent.length());
-      java.util.Iterator anIterator = stack.iterator();
+      Iterator<CustomObject> anIterator = stack.iterator();
       while (anIterator.hasNext ()){
         // get the object and move to the next one
-        CustomObject obj = (CustomObject) anIterator.next();
+        CustomObject obj = anIterator.next();
         // sets its End index
         obj.setEnd(end);
       }// End while
@@ -455,10 +460,10 @@ public class HtmlDocumentHandler extends ParserCallback {
     }// End if
     if (modification == true){
       Long end = new Long (tmpDocContent.length());
-      java.util.Iterator anIterator = stack.iterator();
+      Iterator<CustomObject> anIterator = stack.iterator();
       while (anIterator.hasNext ()){
         // get the object and move to the next one
-        CustomObject obj = (CustomObject) anIterator.next();
+        CustomObject obj = anIterator.next();
         // sets its End index
         obj.setEnd(end);
       }// End while
@@ -493,10 +498,10 @@ public class HtmlDocumentHandler extends ParserCallback {
 
     if (modification == true){
       Long end = new Long (tmpDocContent.length());
-      java.util.Iterator anIterator = stack.iterator();
+      Iterator<CustomObject> anIterator = stack.iterator();
       while (anIterator.hasNext ()){
         // get the object and move to the next one
-        CustomObject obj = (CustomObject) anIterator.next();
+        CustomObject obj = anIterator.next();
         // sets its End index
         obj.setEnd(end);
       }// End while
@@ -537,9 +542,9 @@ public class HtmlDocumentHandler extends ParserCallback {
   }
 
   protected void fireStatusChangedEvent(String text) {
-    Iterator listenersIter = myStatusListeners.iterator();
+    Iterator<StatusListener> listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())
-      ((StatusListener)listenersIter.next()).statusChanged(text);
+      listenersIter.next().statusChanged(text);
   }
 
   /**
@@ -576,7 +581,7 @@ public class HtmlDocumentHandler extends ParserCallback {
   private StringBuffer tmpDocContent = null;
 
   // a stack used to remember elements and to keep the order
-  private java.util.Stack stack = null;
+  private Stack<CustomObject> stack = null;
 
   // a gate document
   private gate.Document doc = null;
@@ -585,7 +590,7 @@ public class HtmlDocumentHandler extends ParserCallback {
   private gate.AnnotationSet basicAS;
 
   // listeners for status report
-  protected List myStatusListeners = new LinkedList();
+  protected List<StatusListener> myStatusListeners = new LinkedList<StatusListener>();
 
   // this reports the the number of elements that have beed processed so far
   private int elements = 0;
@@ -594,14 +599,14 @@ public class HtmlDocumentHandler extends ParserCallback {
   // we need a colection to retain all the CustomObjects that will be
   // transformed into annotation over the gate document...
   // the transformation will take place inside onDocumentEnd() method
-  private LinkedList colector = null;
+  private LinkedList<CustomObject> colector = null;
 
   // Inner class
   /**
     * The objects belonging to this class are used inside the stack.
     * This class is for internal needs
     */
-  class  CustomObject implements Comparable {
+  class  CustomObject implements Comparable<CustomObject> {
 
     // constructor
     public CustomObject(String anElemName, FeatureMap aFm,
@@ -615,8 +620,7 @@ public class HtmlDocumentHandler extends ParserCallback {
 
     // Methos implemented as required by Comparable interface
     @Override
-    public int compareTo(Object o){
-      CustomObject obj = (CustomObject) o;
+    public int compareTo(CustomObject obj){
       return this.id.compareTo(obj.getId());
     }// compareTo();
 

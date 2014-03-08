@@ -29,6 +29,9 @@ import gate.ProcessingResource;
  * @author Johann Petrak
  */
 public class DefaultActionContext implements ActionContext {
+
+  private static final long serialVersionUID = -6337282565397213344L;
+
   protected Corpus corpus;
   protected FeatureMap prfeatures;
   protected String prname;

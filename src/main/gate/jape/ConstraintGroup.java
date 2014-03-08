@@ -17,11 +17,13 @@
 
 package gate.jape;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.HashSet;
-
 import gate.util.Strings;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -29,15 +31,14 @@ import gate.util.Strings;
   * disjunction.
   */
 public class ConstraintGroup
-extends PatternElement implements JapeConstants, java.io.Serializable
+extends PatternElement implements JapeConstants, Serializable
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = -4671488370557996554L;
 
   /** Anonymous constructor. */
   public ConstraintGroup() {
-    patternElementDisjunction1 = new ArrayList();
-    currentConjunction = new ArrayList();
+    patternElementDisjunction1 = new ArrayList<List<PatternElement>>();
+    currentConjunction = new ArrayList<PatternElement>();
     patternElementDisjunction1.add(currentConjunction);
   } // Anonymous constructor
 
@@ -51,10 +52,10 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     // created by createDisjunction
     newPE.currentConjunction = null;
 
-    newPE.patternElementDisjunction1 = new ArrayList();
+    newPE.patternElementDisjunction1 = new ArrayList<List<PatternElement>>();
     // for each (conjunction) member of the pattern element discjunction
     for(
-      Iterator disjunction = patternElementDisjunction1.iterator();
+      Iterator<List<PatternElement>> disjunction = patternElementDisjunction1.iterator();
       disjunction.hasNext();
 
     ) {
@@ -62,13 +63,13 @@ extends PatternElement implements JapeConstants, java.io.Serializable
       newPE.createDisjunction();
       // for each pattern element making up this conjunction
       for(
-        Iterator conjunction = ((ArrayList) disjunction.next()).iterator();
+        Iterator<PatternElement> conjunction = disjunction.next().iterator();
         conjunction.hasNext();
 
       ) {
-        PatternElement pat = (PatternElement) conjunction.next();
+        PatternElement pat = conjunction.next();
 
-        newPE.addPatternElement((PatternElement) pat.clone());
+        newPE.addPatternElement((PatternElement)pat.clone());
       } // for each element of the conjunction
     } // for each conjunction (element of the disjunction)
 
@@ -81,7 +82,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     * or'd, in the same way as expressions around "||" in C and
     * Java.) Set during parsing; replaced by finish().
     */
-  private ArrayList patternElementDisjunction1;
+  private List<List<PatternElement>> patternElementDisjunction1;
 
   /** The pattern element disjunction for transduction - Java arrays. */
   private PatternElement[][] patternElementDisjunction2;
@@ -90,11 +91,11 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     * patternElementDisjunction. This is the one we're adding to
     * at present. Used during parsing, not matching.
     */
-  private ArrayList currentConjunction;
+  private List<PatternElement> currentConjunction;
 
   /** Make a new disjunction at this point. */
   public void createDisjunction() {
-    currentConjunction = new ArrayList();
+    currentConjunction = new ArrayList<PatternElement>();
     patternElementDisjunction1.add(currentConjunction);
   } // createDisjunction
 
@@ -104,28 +105,28 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   } // addPatternElement
 
   /** Get an list of CPEs that we contain. */
-  public Iterator getCPEs() {
-    ArrayList cpes = new ArrayList();
+  public Iterator<ComplexPatternElement> getCPEs() {
+    List<ComplexPatternElement> cpes = new ArrayList<ComplexPatternElement>();
 
     // for each (conjunction) member of the pattern element discjunction
     for(
-      Iterator disjunction = patternElementDisjunction1.iterator();
+      Iterator<List<PatternElement>> disjunction = patternElementDisjunction1.iterator();
       disjunction.hasNext();
     ) {
       // for each pattern element making up this conjunction
       for(
-        Iterator conjunction = ((ArrayList) disjunction.next()).iterator();
+        Iterator<PatternElement> conjunction = (disjunction.next()).iterator();
         conjunction.hasNext();
       ) {
-        PatternElement pat = (PatternElement) conjunction.next();
+        PatternElement pat = conjunction.next();
 
-        Iterator i = null;
+        Iterator<ComplexPatternElement> i = null;
         if(pat instanceof ComplexPatternElement) {
-          cpes.add(pat);
-          i = ((ComplexPatternElement) pat).getCPEs();
+          cpes.add((ComplexPatternElement)pat);
+          i = ((ComplexPatternElement)pat).getCPEs();
         }
         else if(pat instanceof ConstraintGroup)
-          i = ((ConstraintGroup) pat).getCPEs();
+          i = ((ConstraintGroup)pat).getCPEs();
 
         if(i != null)
           for( ; i.hasNext(); )
@@ -143,17 +144,17 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   public void getContainedAnnotationTypes(HashSet<String> set) {
     // for each (conjunction) member of the pattern element discjunction
     for(
-      Iterator disjunction = patternElementDisjunction1.iterator();
+      Iterator<List<PatternElement>> disjunction = patternElementDisjunction1.iterator();
       disjunction.hasNext();
       ) {
       // for each pattern element making up this conjunction
       for(
-        Iterator conjunction = ((ArrayList) disjunction.next()).iterator();
+        Iterator<PatternElement> conjunction = disjunction.next().iterator();
         conjunction.hasNext();
       ) {
-        PatternElement pat = (PatternElement) conjunction.next();
+        PatternElement pat = conjunction.next();
         if(pat instanceof BasicPatternElement) {
-          ArrayList<Constraint> constraints = 
+          List<Constraint> constraints = 
             ((BasicPatternElement)pat).getUnfinishedConstraints();
           for (Constraint c : constraints) {
             set.add(c.getAnnotType());
@@ -186,21 +187,21 @@ extends PatternElement implements JapeConstants, java.io.Serializable
 
     // for each (conjunction) member of the pattern element discjunction
     for(
-      Iterator disjuncIter = patternElementDisjunction1.iterator();
+      Iterator<List<PatternElement>> disjuncIter = patternElementDisjunction1.iterator();
       disjuncIter.hasNext();
       i++
     ) {
-      ArrayList conjunction = (ArrayList) disjuncIter.next();
+      List<PatternElement> conjunction = disjuncIter.next();
       patternElementDisjunction2[i] = new PatternElement[conjunction.size()];
       j = 0;
 
       // for each pattern element making up this conjunction
       for(
-        Iterator conjIter = conjunction.iterator();
+        Iterator<PatternElement> conjIter = conjunction.iterator();
         conjIter.hasNext();
         j++
       ) {
-        patternElementDisjunction2[i][j] = (PatternElement) conjIter.next();
+        patternElementDisjunction2[i][j] = conjIter.next();
         patternElementDisjunction2[i][j].finish();
       } // loop on conjunction
 
@@ -229,7 +230,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     if(patternElementDisjunction1 != null) { // before finish()
       // for each (conjunction) member of the pattern element discjunction
       for(
-        Iterator disjunction = patternElementDisjunction1.iterator();
+        Iterator<List<PatternElement>> disjunction = patternElementDisjunction1.iterator();
         disjunction.hasNext();
       ) {
         if(firstTime) firstTime = false;
@@ -237,11 +238,10 @@ extends PatternElement implements JapeConstants, java.io.Serializable
 
         // for each pattern element making up this conjunction
         for(
-          Iterator conjunction = ((ArrayList) disjunction.next()).iterator();
+          Iterator<PatternElement> conjunction = disjunction.next().iterator();
           conjunction.hasNext();
         ) {
-          buf.append(
-            ((PatternElement) conjunction.next()).toString(newPad) + newline
+          buf.append(conjunction.next().toString(newPad) + newline
           );
         } // for each element of the conjunction
       } // for each conjunction (element of the disjunction)

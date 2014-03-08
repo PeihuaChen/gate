@@ -30,27 +30,25 @@ import gate.util.Strings;
   */
 public class LeftHandSide implements JapeConstants, Serializable
 {
-
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = -188265607327929863L;
 
   /** The constraint group making up this LHS. */
   private ConstraintGroup constraintGroup;
 
   /** Mapping of binding names to ComplexPatternElements */
-  private HashMap bindingTable;
+  private Map<String, ComplexPatternElement> bindingTable;
 
   /** Construction from a ConstraintGroup */
   public LeftHandSide(ConstraintGroup constraintGroup) {
     this.constraintGroup = constraintGroup;
-    bindingTable = new HashMap();
+    bindingTable = new HashMap<String,ComplexPatternElement>();
   } // construction from ConstraintGroup
 
   /** Add a binding record. */
   public void addBinding(
     String bindingName,
     ComplexPatternElement binding,
-    HashSet bindingNameSet
+    Set<String> bindingNameSet
   ) throws JapeException {
     if(bindingTable.get(bindingName) != null)
       throw new JapeException(
@@ -83,10 +81,9 @@ public class LeftHandSide implements JapeConstants, Serializable
       "); bindingTable(" + newline + pad
     );
 
-    for(Iterator i = bindingTable.keySet().iterator(); i.hasNext(); ) {
-      String bName = ((String) i.next());
-      ComplexPatternElement cpe = ((ComplexPatternElement)
-                                        bindingTable.get(bName));
+    for(Iterator<String> i = bindingTable.keySet().iterator(); i.hasNext(); ) {
+      String bName = i.next();
+      ComplexPatternElement cpe = (bindingTable.get(bName));
       buf.append(
         pad + "bT.bn(" + bName + "), cpe.bn(" + cpe.getBindingName() + ")"
       );

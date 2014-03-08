@@ -19,6 +19,7 @@ package gate.jape;
 
 import gate.util.Strings;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 
@@ -27,8 +28,10 @@ import java.util.Iterator;
   * ConstraintGroup, optional Kleene operator and optional binding name.
   */
 public class ComplexPatternElement extends PatternElement
-implements JapeConstants, java.io.Serializable
+implements JapeConstants, Serializable
 {
+  private static final long serialVersionUID = -1660335210282070151L;
+
   /** Kleene operator (defaults to none). Other values: KLEENE_STAR (*);
     * KLEENE_PLUS (+); KLEENE_QUERY (?) */
   private KleeneOperator kleeneOp = null;

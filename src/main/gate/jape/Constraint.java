@@ -16,12 +16,22 @@
 
 package gate.jape;
 
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Factory;
+import gate.FeatureMap;
 import gate.creole.ontology.Ontology;
-import gate.jape.constraint.*;
+import gate.jape.constraint.AnnotationFeatureAccessor;
+import gate.jape.constraint.ConstraintPredicate;
+import gate.jape.constraint.EqualPredicate;
 import gate.util.SimpleFeatureMapImpl;
 
-import java.util.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A set of predicates/expressions that apply to a single
@@ -44,7 +54,10 @@ import java.util.*;
  * annotations rather than to an individual annotation.
  */
 public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
-                       java.io.Serializable, Cloneable {
+                       Serializable, Cloneable {
+
+  private static final long serialVersionUID = -7856281017609822483L;
+
   /** Construction from annot type string */
   public Constraint(String annotType) {
     this.annotType = annotType;
@@ -178,7 +191,7 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
       throw (new InternalError(e.toString()));
     }
     newC.annotType = annotType;
-    newC.predicates = (List<ConstraintPredicate>)((ArrayList)predicates).clone();
+    newC.predicates = new ArrayList<ConstraintPredicate>(predicates);
     return newC;
   } // clone
 

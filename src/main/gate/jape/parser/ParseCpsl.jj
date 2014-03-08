@@ -50,32 +50,34 @@ import org.apache.log4j.Logger;
   */
 public class ParseCpsl implements JapeConstants {
 
+  private static final long serialVersionUID = -2754817550046808372L;
+
   private static final Logger log = Logger.getLogger(ParseCpsl.class);
 
   /** Construct from a URL and an encoding
     */
   public ParseCpsl(URL url, String encoding) throws IOException {
-    this(url, encoding, new HashMap());
+    this(url, encoding, new HashMap<String,Object>());
   }
 
   /** Construct from a URL and an encoding
     */
-  public ParseCpsl(URL url, String encoding, HashMap existingMacros) throws IOException {
-    this(url, encoding, existingMacros, new HashMap());
+  public ParseCpsl(URL url, String encoding, Map<String,Object> existingMacros) throws IOException {
+    this(url, encoding, existingMacros, new HashMap<String,Pair>());
   }
 
-  public ParseCpsl(URL url, String encoding, HashMap existingMacros, HashMap existingTemplates) throws IOException {
+  public ParseCpsl(URL url, String encoding, Map<String,Object> existingMacros, Map<String,Pair> existingTemplates) throws IOException {
     this(new BomStrippingInputStreamReader(url.openStream(), encoding), 
          existingMacros, existingTemplates);
     baseURL = url;
     this.encoding = encoding;
   }
 
-  public ParseCpsl(java.io.Reader stream, HashMap existingMacros) {
-    this(stream, existingMacros, new HashMap());
+  public ParseCpsl(java.io.Reader stream, Map<String,Object> existingMacros) {
+    this(stream, existingMacros, new HashMap<String,Pair>());
   }
   
-  public ParseCpsl(java.io.Reader stream, HashMap existingMacros, HashMap existingTemplates) {
+  public ParseCpsl(java.io.Reader stream, Map<String,Object> existingMacros, Map<String,Pair> existingTemplates) {
     this(stream);
     macrosMap = existingMacros;
     templatesMap = existingTemplates;
@@ -89,16 +91,16 @@ public class ParseCpsl implements JapeConstants {
     myStatusListeners.remove(listener);
   }
   protected void fireStatusChangedEvent(String text){
-    java.util.Iterator listenersIter = myStatusListeners.iterator();
+    Iterator<StatusListener> listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())
-      ((StatusListener)listenersIter.next()).statusChanged(text);
+      listenersIter.next().statusChanged(text);
   }
 
   protected SinglePhaseTransducer createSinglePhaseTransducer(String name){
     try {
       Constructor<? extends SinglePhaseTransducer> c = sptClass.getConstructor
           (String.class);
-      return (SinglePhaseTransducer) c.newInstance(name);
+      return c.newInstance(name);
     } catch (NoSuchMethodException e) { // Shouldn't happen
       throw new RuntimeException(e);
     } catch (IllegalArgumentException e) { // Shouldn't happen
@@ -252,7 +254,7 @@ public class ParseCpsl implements JapeConstants {
    */
   protected Pair substituteTemplate(Token templateNameTok,
           Map<String, Object> values) throws ParseException {
-    Pair template = (Pair)templatesMap.get(templateNameTok.image);
+    Pair template = templatesMap.get(templateNameTok.image);
     if(template == null) {
       throw new ParseException(errorMsgPrefix(templateNameTok) +
               "unknown template name " + templateNameTok.image);
@@ -318,7 +320,7 @@ public class ParseCpsl implements JapeConstants {
           ":"+t.beginLine+":"+t.beginColumn+": ");
    }
 
-  private transient java.util.List myStatusListeners = new java.util.LinkedList();
+  private transient List<StatusListener> myStatusListeners = new LinkedList<StatusListener>();
 
   /** Position of the current rule */
   private int ruleNumber;
@@ -326,17 +328,17 @@ public class ParseCpsl implements JapeConstants {
   /** A list of all the bindings we made this time, for checking
     * the RHS during parsing.
     */
-  private HashSet bindingNameSet = null;
+  private Set<String> bindingNameSet = null;
 
   /** A table of macro definitions. */
-  protected HashMap macrosMap;
+  protected Map<String,Object> macrosMap;
   
   /**
    * A table of template definitions. Keys are template names,
    * values are Pairs of token kind and value, as returned by
    * AttrVal.
    */
-  protected HashMap templatesMap;
+  protected Map<String,Pair> templatesMap;
 
   protected URL baseURL;
   protected String encoding;
@@ -639,7 +641,7 @@ MultiPhaseTransducer _MultiPhaseTransducer() :
 
           // adding the resultant spt to m
           if(parser != null) {
-          	ArrayList phases = parser.MultiPhaseTransducer().getPhases();
+          	List phases = parser.MultiPhaseTransducer().getPhases();
 
             //s = parser.SinglePhaseTransducer();
             //if(s != null)

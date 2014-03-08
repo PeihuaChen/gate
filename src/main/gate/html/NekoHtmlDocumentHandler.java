@@ -697,10 +697,10 @@ public class NekoHtmlDocumentHandler
 
     if(modification == true) {
       Long end = new Long(tmpDocContent.length());
-      java.util.Iterator anIterator = stack.iterator();
+      Iterator<CustomObject> anIterator = stack.iterator();
       while(anIterator.hasNext()) {
         // get the object and move to the next one
-        CustomObject obj = (CustomObject)anIterator.next();
+        CustomObject obj = anIterator.next();
         // sets its End index
         obj.setEnd(end);
       }// End while

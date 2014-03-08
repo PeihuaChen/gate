@@ -1306,7 +1306,7 @@ private final AnnotationCreator annoCreator817Contexts = new BaseAnnotationCreat
    */
   protected static void parseJapeString(String japeRules) throws ParseException {
     StringReader sr = new StringReader(japeRules);
-    ParseCpsl parser = Factory.newJapeParser(sr, new HashMap<Object, Object>());
+    ParseCpsl parser = Factory.newJapeParser(sr, new HashMap<String, Object>());
     Transducer transducer = parser.MultiPhaseTransducer();
     transducer.finish(Gate.getClassLoader());
   }

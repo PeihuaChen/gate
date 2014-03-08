@@ -21,8 +21,7 @@ import gate.util.GateException;
 /** Superclass of all JAPE exceptions. */
 public class JapeException extends GateException {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = -1036038431324812585L;
 
   public JapeException(Throwable cause) {
     super(cause);

@@ -47,8 +47,7 @@ import java.util.Vector;
  */
 public class Batch implements JapeConstants, Benchmarkable {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = -5787362511680231837L;
 
   /** The URL that points to a .jape file */
   private URL japeURL;
