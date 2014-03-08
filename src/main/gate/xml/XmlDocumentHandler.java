@@ -15,6 +15,7 @@
  */
 package gate.xml;
 
+import gate.AnnotationSet;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
@@ -109,7 +110,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
    * added to the text contained by the key element.
    */
   public XmlDocumentHandler(gate.Document aDocument, Map aMarkupElementsMap,
-          Map anElement2StringMap) {
+          Map<String,String> anElement2StringMap) {
     this(aDocument, aMarkupElementsMap, anElement2StringMap, null);
   } // XmlDocumentHandler
 
@@ -125,8 +126,8 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
    */
   public XmlDocumentHandler(gate.Document aDocument,
           Map aMarkupElementsMap,
-          Map anElement2StringMap,
-          gate.AnnotationSet anAnnotationSet) {
+          Map<String,String> anElement2StringMap,
+          AnnotationSet anAnnotationSet) {
     // init parent
     super();
     // init stack
@@ -392,7 +393,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
 
       // test to see if element is inside the map
       // if it is then get the string value and add it to the document content
-      stringFromMap = (String) element2StringMap.get(elemName);
+      stringFromMap = element2StringMap.get(elemName);
       if (stringFromMap != null) {
         tmpDocContent.append(stringFromMap);
       }
@@ -707,7 +708,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
   // this map contains the string that we want to insert iside the document
   // content, when a certain element is found
   // if the map is null then no string is added
-  private Map element2StringMap = null;
+  private Map<String,String> element2StringMap = null;
   /**This object inducates what to do when the parser encounts an error*/
   private SimpleErrorHandler _seh = new SimpleErrorHandler();
   /**The content of the XML document, without any tag for internal use*/

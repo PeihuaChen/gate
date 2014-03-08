@@ -43,8 +43,7 @@ import gate.util.InvalidOffsetException;
     autoinstances = {@AutoInstance(hidden = true)})
 public class EmailDocumentFormat extends TextualDocumentFormat
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = 5738598679165395119L;
 
   /** Default construction */
   public EmailDocumentFormat() { super();}

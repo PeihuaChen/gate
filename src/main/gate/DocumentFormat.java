@@ -51,8 +51,8 @@ import org.apache.commons.io.IOUtils;
   */
 public abstract class DocumentFormat
 extends AbstractLanguageResource implements LanguageResource{
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  
+  private static final long serialVersionUID = 4147880563349143923L;
 
   /** The MIME type of this format. */
   private MimeType mimeType = null;
@@ -91,7 +91,7 @@ extends AbstractLanguageResource implements LanguageResource{
     * When an element from the map is encounted, The corresponding string
     * element is added to the document content
     */
-  protected Map element2StringMap = null;
+  protected Map<String,String> element2StringMap = null;
 
   /** The features of this resource */
   private FeatureMap features = null;
@@ -561,7 +561,7 @@ extends AbstractLanguageResource implements LanguageResource{
   public Map getMarkupElementsMap() { return markupElementsMap; }
 
    /** Get the element 2 string map */
-  public Map getElement2StringMap() { return element2StringMap; }
+  public Map<String,String> getElement2StringMap() { return element2StringMap; }
 
   /** Set the markup elements map */
   public void setMarkupElementsMap(Map markupElementsMap) {
@@ -569,7 +569,7 @@ extends AbstractLanguageResource implements LanguageResource{
   }
 
   /** Set the element 2 string map */
-  public void setElement2StringMap(Map anElement2StringMap) {
+  public void setElement2StringMap(Map<String,String> anElement2StringMap) {
    element2StringMap = anElement2StringMap;
   }
 

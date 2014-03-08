@@ -23,9 +23,6 @@ import gate.util.Out;
 
 public class SimpleErrorHandler implements ErrorHandler {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /**
     * SimpleErrorHandler constructor comment.
     */

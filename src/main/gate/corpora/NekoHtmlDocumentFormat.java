@@ -56,6 +56,9 @@ import org.cyberneko.html.HTMLConfiguration;
 @CreoleResource(name = "GATE HTML Document Format", isPrivate = true,
     autoinstances = {@AutoInstance(hidden = true)})
 public class NekoHtmlDocumentFormat extends TextualDocumentFormat {
+ 
+  private static final long serialVersionUID = -3163147687966075651L;
+ 
   /** Debug flag */
   private static final boolean DEBUG = false;
 
