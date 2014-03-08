@@ -22,7 +22,7 @@ import java.util.List;
 
 /**
  * ANNIE VP Chunker module. It is actually a JAPE grammar; this class is here
- * so we can have a separate entry in creol.xml inorder to point to the default
+ * so we can have a separate entry in creol.xml in order to point to the default
  * VP chunking grammar.
  */
 @CreoleResource(name = "ANNIE VP Chunker",
@@ -31,6 +31,8 @@ import java.util.List;
   icon = "pr"
   )
 public class VPChunker extends Transducer {
+
+  private static final long serialVersionUID = 5829148669995600034L;
 
   @HiddenCreoleParameter
   @Override

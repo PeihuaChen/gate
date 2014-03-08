@@ -35,6 +35,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
+
 /**
  * This plugin allows the names of annotations and features to be
  * changed as well as transfered from one annotation set to another.
@@ -47,6 +49,8 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
                                                                    implements
                                                                    ProcessingResource,
                                                                    Serializable {
+
+  private static final long serialVersionUID = 3502991817151932971L;
 
   private String tagASName = GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME;
 
@@ -81,8 +85,9 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     // TODO clean this up so we don't have to repeat ourselves
     if(configURL != null) {
 
+      BufferedReader in = null;
       try {
-        BufferedReader in = new BomStrippingInputStreamReader(configURL
+        in = new BomStrippingInputStreamReader(configURL
                 .openStream());
 
         String line = in.readLine();
@@ -98,6 +103,9 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
       }
       catch(IOException ioe) {
         ioe.printStackTrace();
+      }
+      finally {
+        IOUtils.closeQuietly(in);
       }
     }
     else if(annotationTypes != null) {

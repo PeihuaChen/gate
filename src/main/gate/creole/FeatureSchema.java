@@ -25,8 +25,7 @@ import java.util.*;
  */
 public class FeatureSchema implements Serializable {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = 2705192644986091866L;
 
   /** The name of this feature. */
   String featureName = null;

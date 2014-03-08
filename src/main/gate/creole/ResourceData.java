@@ -50,6 +50,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
   */
 public class ResourceData extends AbstractFeatureBearer implements Serializable
 {
+  private static final long serialVersionUID = -1275311260404979762L;
 
   /** Debug flag */
   protected static final boolean DEBUG = false;

@@ -34,8 +34,8 @@ import gate.util.GateException;
   * </UL>
   */
 public class ResourceInstantiationException extends GateException {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+
+  private static final long serialVersionUID = -6422639187321570896L;
 
   public ResourceInstantiationException() {
     super();

@@ -60,7 +60,7 @@ public class ProfilePRs {
     Out.prln("processing command line arguments");
 
     // check we have a directory name or list of files
-    List inputFiles = null;
+    List<File> inputFiles = null;
     if(args.length < 1) throw new GateException(usage);
     if(args[0].equals("-dir")) { // list all the files in the dir
       if(args.length < 2) throw new GateException(usage);
@@ -72,7 +72,7 @@ public class ProfilePRs {
         );
       inputFiles = Arrays.asList(filesArray);
     } else { // all args should be file names
-      inputFiles = new ArrayList();
+      inputFiles = new ArrayList<File>();
       for(int i = 0; i < args.length; i++)
         inputFiles.add(new File(args[i]));
     }
@@ -135,11 +135,11 @@ public class ProfilePRs {
     //   dump output from the doc
     //   delete the doc
     Out.prln("\nLooping on input files list");
-    Iterator filesIter = inputFiles.iterator();
+    Iterator<File> filesIter = inputFiles.iterator();
     docs = inputFiles.size();
     int fileNo=0;
     while(filesIter.hasNext()) {
-      File inFile = (File) filesIter.next(); // the current file
+      File inFile = filesIter.next(); // the current file
       fileNo++;
 
       // set the source URL parameter to a "file:..." URL string

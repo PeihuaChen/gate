@@ -16,14 +16,31 @@
 
 package gate.creole.dumpingPR;
 
-import java.io.*;
-import java.net.URL;
-import java.util.*;
-
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Gate;
+import gate.ProcessingResource;
+import gate.Resource;
 import gate.corpora.DocumentImpl;
-import gate.creole.*;
-import gate.util.*;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
+import gate.util.Files;
+import gate.util.GateRuntimeException;
+import gate.util.InvalidOffsetException;
+import gate.util.Out;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class implements a DumpingPR which exports a given set of annotation
@@ -35,6 +52,8 @@ import gate.util.*;
  */
 public class DumpingPR extends AbstractLanguageAnalyser
   implements ProcessingResource {
+
+  private static final long serialVersionUID = -5279930527247392922L;
 
   public static final String
     DPR_DOCUMENT_PARAMETER_NAME = "document";
@@ -65,7 +84,7 @@ public class DumpingPR extends AbstractLanguageAnalyser
   /**
    * A list of annotation types, which are to be dumped into the output file
    */
-  protected List annotationTypes;
+  protected List<String> annotationTypes;
 
   /**
    * A list of strings specifying new names to be used instead of the original
@@ -74,7 +93,7 @@ public class DumpingPR extends AbstractLanguageAnalyser
    * [Place, Date-expr], then the labels <Place> and <Date-expr> will be inserted
    * instead of <Location> and <Date>.
    */
-  protected List dumpTypes;
+  protected List<String> dumpTypes;
 
   /**the name of the annotation set
    * from which to take the annotations for dumping
@@ -165,7 +184,7 @@ public class DumpingPR extends AbstractLanguageAnalyser
 
     //first transfer the annotation types from a list to a set
     //don't I just hate this!
-    Set types2Export = new HashSet(annotationTypes);
+    Set<String> types2Export = new HashSet<String>(annotationTypes);
 
     //then get the annotations for export
     AnnotationSet annots2Export = allAnnots.get(types2Export);
@@ -173,7 +192,7 @@ public class DumpingPR extends AbstractLanguageAnalyser
     //check whether we want the annotations to be renamed before
     //export (that's what dumpTypes is for)
     if (dumpTypes != null && !dumpTypes.isEmpty()) {
-      HashMap renameMap = new HashMap();
+      Map<String,String> renameMap = new HashMap<String,String>();
       for(int i=0; i<dumpTypes.size() && i<annotationTypes.size(); i++) {
         //check if we have a corresponding annotationType and if yes,
         //then add to the hash map for renaming
@@ -311,7 +330,7 @@ public class DumpingPR extends AbstractLanguageAnalyser
   }
 
   protected AnnotationSet renameAnnotations(AnnotationSet annots2Export,
-                                   HashMap renameMap){
+                                   Map<String,String> renameMap){
     Iterator<Annotation> iter = annots2Export.iterator();
     AnnotationSet as = document.getAnnotations(DUMPING_PR_SET);
     if (!as.isEmpty())
@@ -346,19 +365,19 @@ public class DumpingPR extends AbstractLanguageAnalyser
     this.annotationSetName = newAnnotationSetName;
   }//setAnnotationSetName
 
-  public List getAnnotationTypes() {
+  public List<String> getAnnotationTypes() {
     return this.annotationTypes;
   }
 
-  public void setAnnotationTypes(List newTypes) {
+  public void setAnnotationTypes(List<String> newTypes) {
     this.annotationTypes = newTypes;
   }
 
-  public List getDumpTypes() {
+  public List<String> getDumpTypes() {
     return this.dumpTypes;
   }
 
-  public void setDumpTypes(List newTypes) {
+  public void setDumpTypes(List<String> newTypes) {
     dumpTypes = newTypes;
   }
 

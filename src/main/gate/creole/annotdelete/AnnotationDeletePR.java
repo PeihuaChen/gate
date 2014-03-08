@@ -16,15 +16,26 @@
 
 package gate.creole.annotdelete;
 
-import java.util.*;
-
-import gate.*;
-import gate.creole.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.GateConstants;
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.creole.ANNIEConstants;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
 import gate.util.GateRuntimeException;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class is the implementation of a processing resource which
@@ -37,6 +48,8 @@ import gate.util.GateRuntimeException;
         helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:reset")
 public class AnnotationDeletePR extends AbstractLanguageAnalyser
   implements ProcessingResource {
+
+  private static final long serialVersionUID = 4738446480871610387L;
 
   public static final String
     TRANSD_DOCUMENT_PARAMETER_NAME = "document";
@@ -51,8 +64,8 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     TRANSD_SETS_KEEP_ORIGIANL_MARKUPS_ANNOT_SET = "keppOriginalMarkupsAS";
   
   protected String markupSetName = GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME;
-  protected List annotationTypes;
-  protected List setsToKeep;
+  protected List<String> annotationTypes;
+  protected List<String> setsToKeep;
   protected List<String> setsToRemove = null;
   protected Boolean keepOriginalMarkupsAS;
   
@@ -107,11 +120,13 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
       throw new GateRuntimeException("No document to process!");
     
     
-    Map matchesMap = null;
+    
     Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
-    if(matchesMapObject instanceof Map) {
-      matchesMap = (Map) matchesMapObject;
-    }
+    @SuppressWarnings("unchecked")
+    Map<String, List<List<Integer>>> matchesMap =
+            matchesMapObject instanceof Map
+                    ? (Map<String, List<List<Integer>>>)matchesMapObject
+                    : null;
 
     if(setsToRemove != null && !setsToRemove.isEmpty()) {
       // just remove or empty the sets in this list and ignore
@@ -147,7 +162,7 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
       // the other parameters
       
       // determine which sets to keep
-      List keepSets = new ArrayList();
+      List<String> keepSets = new ArrayList<String>();
       if(setsToKeep != null) keepSets.addAll(setsToKeep);
       if(keepOriginalMarkupsAS.booleanValue() && 
          !keepSets.contains(markupSetName)) {
@@ -168,17 +183,17 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
       }
 
       //get the names of all sets
-      Map namedSets = document.getNamedAnnotationSets();
+      Map<String,AnnotationSet> namedSets = document.getNamedAnnotationSets();
       //nothing left to do if there are no named sets
       if (namedSets != null && !namedSets.isEmpty()) {
         //loop through the sets and delete them all unless
         //we've been asked to keep them
-        List setNames = new ArrayList(namedSets.keySet());
-        Iterator iter = setNames.iterator();
+        List<String> setNames = new ArrayList<String>(namedSets.keySet());
+        Iterator<String> iter = setNames.iterator();
         String setName;
     
         while (iter.hasNext()) {
-          setName = (String) iter.next();
+          setName = iter.next();
           //check first whether this is the original markups or one of the sets
           //that we want to keep
           if (setName != null) {
@@ -203,20 +218,20 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     } // if(setsToRemove != null && !setsToRemove.isEmpty())
   } // execute()
 
-  // method to undate the Document-Coref-data
-  private void removeFromDocumentCorefData(String currentSet, Map matchesMap) {
+  // method to update the Document-Coref-data
+  private void removeFromDocumentCorefData(String currentSet, Map<String,List<List<Integer>>> matchesMap) {
     if(matchesMap == null)
       return;
 
     // if this is defaultAnnotationSet, we cannot remove this
     if(currentSet == null) {
-      java.util.List matches = (java.util.List) matchesMap.get(currentSet);
+      List<List<Integer>> matches = matchesMap.get(currentSet);
       if (matches == null || matches.size() == 0) {
         // do nothing
         return;
       }
       else {
-        matchesMap.put(currentSet, new java.util.ArrayList());
+        matchesMap.put(currentSet, new ArrayList<List<Integer>>());
       }
     } else {
       // we remove this set from the Coref Data
@@ -225,25 +240,25 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
   }
 
   // method to update the Document-Coref-data
-  private void removeAnnotationsFromCorefData(AnnotationSet annotations, String setName, Map matchesMap) {
+  private void removeAnnotationsFromCorefData(AnnotationSet annotations, String setName, Map<String,List<List<Integer>>> matchesMap) {
     if(matchesMap == null) {
       return;
     }
 
-    java.util.List matches = (java.util.List) matchesMap.get(setName);
+    List<List<Integer>> matches = matchesMap.get(setName);
     if(matches == null)
       return;
 
     // each element in the matches is a group of annotation IDs
     // so for each annotation we will have to traverse through all the lists and
     // find out the annotation and remove it
-    ArrayList<Annotation> annots = new ArrayList<Annotation>(annotations);
+    List<Annotation> annots = new ArrayList<Annotation>(annotations);
     for(int i=0; i<annots.size(); i++) {
       Annotation toRemove = annots.get(i);
-      Iterator idIters = matches.iterator();
-      ArrayList ids = new ArrayList();
+      Iterator<List<Integer>> idIters = matches.iterator();
+      List<Integer> ids = new ArrayList<Integer>();
       while(idIters.hasNext()) {
-        ids = (ArrayList) idIters.next();
+        ids = idIters.next();
         if(ids.remove(toRemove.getId())) {
           // yes removed
           break;
@@ -261,8 +276,8 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
 
   /* End */
 
-  private void removeSubSet(AnnotationSet theSet, Map matchMap) {
-    AnnotationSet toRemove = theSet.get(new HashSet(annotationTypes));
+  private void removeSubSet(AnnotationSet theSet, Map<String,List<List<Integer>>> matchMap) {
+    AnnotationSet toRemove = theSet.get(new HashSet<String>(annotationTypes));
     if (toRemove == null || toRemove.isEmpty())
       return;
     theSet.removeAll(toRemove);
@@ -277,30 +292,30 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     return markupSetName;
   }
 
-  public List getAnnotationTypes() {
+  public List<String> getAnnotationTypes() {
     return this.annotationTypes;
   }
 
   @RunTime
   @Optional
   @CreoleParameter(comment="The annotation types to delete otherwise delete all")
-  public void setAnnotationTypes(List newTypes) {
+  public void setAnnotationTypes(List<String> newTypes) {
     annotationTypes = newTypes;
   }
 
-  public List getSetsToKeep() {
+  public List<String> getSetsToKeep() {
     return this.setsToKeep;
   }
 
   @RunTime
   @Optional
   @CreoleParameter(comment="The annotation sets to keep otherwise delete all", defaultValue="Key")
-  public void setSetsToKeep(List newSetNames) {
+  public void setSetsToKeep(List<String> newSetNames) {
     //we need to modify this list sometimes, so to make sure it's not some
     //unmodifiable version, we'll create our own
     setsToKeep = newSetNames != null ?
-            new ArrayList(newSetNames):
-            new ArrayList();
+            new ArrayList<String>(newSetNames):
+            new ArrayList<String>();
   }
 
   public Boolean getKeepOriginalMarkupsAS() {

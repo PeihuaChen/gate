@@ -35,18 +35,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 @CreoleResource(name="ANNIE Nominal Coreferencer", comment="Nominal Coreference resolution component", helpURL="http://gate.ac.uk/userguide/sec:annie:pronom-coref", icon="nominal-coreferencer")
 public class NominalCoref extends AbstractCoreferencer
     implements ProcessingResource, ANNIEConstants {
 
+  private static final long serialVersionUID = 1497388811557744017L;
+
   public static final String COREF_DOCUMENT_PARAMETER_NAME = "document";
 
   public static final String COREF_ANN_SET_PARAMETER_NAME = "annotationSetName";
-
-  /** --- */
-  private static final boolean DEBUG = false;
 
   //annotation features
   private static final String PERSON_CATEGORY = "Person";
@@ -64,7 +64,7 @@ public class NominalCoref extends AbstractCoreferencer
   /** --- */
   private AnnotationSet defaultAnnotations;
   /** --- */
-  private HashMap anaphor2antecedent;
+  private HashMap<Annotation,Annotation> anaphor2antecedent;
 
     /*  static {
     ANNOTATION_OFFSET_COMPARATOR = new AnnotationOffsetComparator();
@@ -73,7 +73,7 @@ public class NominalCoref extends AbstractCoreferencer
   /** --- */
   public NominalCoref() {
     super("NOMINAL");
-    this.anaphor2antecedent = new HashMap();
+    this.anaphor2antecedent = new HashMap<Annotation,Annotation>();
   }
 
   /** Initialise this resource, and return it. */
@@ -92,7 +92,7 @@ public class NominalCoref extends AbstractCoreferencer
   */
   @Override
   public void reInit() throws ResourceInstantiationException {
-    this.anaphor2antecedent = new HashMap();
+    this.anaphor2antecedent = new HashMap<Annotation,Annotation>();
     init();
   } // reInit()
 
@@ -164,7 +164,7 @@ public class NominalCoref extends AbstractCoreferencer
     //FeatureMap personConstraint = new SimpleFeatureMapImpl();
     //personConstraint.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME,
     //                          PERSON_CATEGORY);
-    HashSet personConstraint = new HashSet();
+    Set<String> personConstraint = new HashSet<String>();
     personConstraint.add(PERSON_CATEGORY);
     AnnotationSet people =
       this.defaultAnnotations.get(personConstraint);
@@ -172,7 +172,7 @@ public class NominalCoref extends AbstractCoreferencer
     // get all JobTitle entities
     //FeatureMap constraintJobTitle = new SimpleFeatureMapImpl();
     //constraintJobTitle.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME, JOBTITLE_CATEGORY);
-    HashSet jobTitleConstraint = new HashSet();
+    Set<String> jobTitleConstraint = new HashSet<String>();
     jobTitleConstraint.add(JOBTITLE_CATEGORY);
     
     AnnotationSet jobTitles = 
@@ -184,14 +184,14 @@ public class NominalCoref extends AbstractCoreferencer
     AnnotationSet orgNouns =
       this.defaultAnnotations.get(LOOKUP_CATEGORY, orgNounConstraint);
 
-    HashSet orgConstraint = new HashSet();
+    Set<String> orgConstraint = new HashSet<String>();
     orgConstraint.add(ORGANIZATION_CATEGORY);
 
     AnnotationSet organizations =
       this.defaultAnnotations.get(orgConstraint);
 
     // combine them into a list of nominals
-    Set<Annotation> nominals = new HashSet();
+    Set<Annotation> nominals = new HashSet<Annotation>();
     if (people != null) {
       nominals.addAll(people);
     }
@@ -527,7 +527,7 @@ public class NominalCoref extends AbstractCoreferencer
   }
 	
   /** --- */
-  public HashMap getResolvedAnaphora() {
+  public Map<Annotation,Annotation> getResolvedAnaphora() {
     return this.anaphor2antecedent;
   }
 

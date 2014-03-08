@@ -16,17 +16,41 @@
 
 package gate.creole.coref;
 
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.FeatureMap;
+import gate.Node;
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.creole.ANNIEConstants;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.Transducer;
+import gate.util.Benchmark;
+import gate.util.Benchmarkable;
+import gate.util.Err;
+import gate.util.Files;
+import gate.util.SimpleFeatureMapImpl;
+
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
-
-import gate.*;
-import gate.creole.*;
-import gate.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class PronominalCoref extends AbstractLanguageAnalyser
                               implements ProcessingResource, ANNIEConstants,
                               Benchmarkable {
+
+  private static final long serialVersionUID = 3860815557386683264L;
 
   public static final String COREF_DOCUMENT_PARAMETER_NAME = "document";
 
@@ -68,9 +92,9 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   /** --- */
   private Annotation[] pleonasticIt;
   /** --- */
-  private HashMap personGender;
+  private Map<Annotation,String> personGender;
   /** --- */
-  private HashMap anaphor2antecedent;
+  private HashMap<Annotation,Annotation> anaphor2antecedent;
   /** --- */
   private static final FeatureMap PRP_RESTRICTION;
 
@@ -93,11 +117,13 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   /** --- */
   public PronominalCoref() {
 
-    this.personGender = new HashMap();
-    this.anaphor2antecedent = new HashMap();
+    this.personGender = new HashMap<Annotation,String>();
+    this.anaphor2antecedent = new HashMap<Annotation,Annotation>();
+    this.inanimatedSet = new HashSet<String>();
+    
+    //TODO fix to do this properly
     this.qtTransducer = new gate.creole.Transducer();
     this.pleonTransducer = new gate.creole.Transducer();
-    this.inanimatedSet = new HashSet();
   }
 
   /** Initialise this resource, and return it. */
@@ -131,8 +157,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     this.pleonTransducer.setEncoding("UTF-8");
     this.pleonTransducer.init();
 
-    //3. delegate
-    return super.init();
+    return this;
   } // init()
 
   /**
@@ -199,6 +224,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
    * This method runs the coreferencer. It assumes that all the needed parameters
    * are set. If they are not, an exception will be fired.
    */
+  @SuppressWarnings("unchecked")
   @Override
   public void execute() throws ExecutionException{
 
@@ -230,7 +256,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     AnnotationSet possesivePronouns = this.defaultAnnotations.get(TOKEN_ANNOTATION_TYPE,constraintPRP$);
 
     //5.combine them
-    List pronouns = new ArrayList();
+    List<Annotation> pronouns = new ArrayList<Annotation>();
     if (personalPronouns != null && !personalPronouns.isEmpty()) {
       pronouns.addAll(personalPronouns);
     }
@@ -246,8 +272,8 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     }
 
     //7.sort them according to offset
-    Object[] arrPronouns = pronouns.toArray();
-    java.util.Arrays.sort(arrPronouns,ANNOTATION_OFFSET_COMPARATOR);
+    Annotation[] arrPronouns = pronouns.toArray(new Annotation[pronouns.size()]);
+    Arrays.sort(arrPronouns,ANNOTATION_OFFSET_COMPARATOR);
 
     //8.cleanup - ease the GC
     pronouns = null;
@@ -259,7 +285,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
     //10. process all pronouns
     for (int i=0; i< arrPronouns.length; i++) {
-      Annotation currPronoun = (Annotation)arrPronouns[i];
+      Annotation currPronoun = arrPronouns[i];
       while (this.textSentences[prnSentIndex].getEndOffset().longValue() <
                                       currPronoun.getEndNode().getOffset().longValue()) {
         prnSentIndex++;
@@ -281,7 +307,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
 
   /** --- */
-  public HashMap getResolvedAnaphora() {
+  public Map<Annotation,Annotation> getResolvedAnaphora() {
     return this.anaphor2antecedent;
   }
 
@@ -344,7 +370,8 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     }
 
     //2. find closest pleonasm index
-    int closestPleonasmIndex = java.util.Arrays.binarySearch(this.pleonasticIt,
+    @SuppressWarnings("unchecked")
+    int closestPleonasmIndex = Arrays.binarySearch(this.pleonasticIt,
                                                              pronoun,
                                                              ANNOTATION_OFFSET_COMPARATOR);
     //normalize index
@@ -397,10 +424,10 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       Sentence currSentence = this.textSentences[currSentenceIndex];
       AnnotationSet persons = currSentence.getPersons();
 
-      Iterator it = persons.iterator();
+      Iterator<Annotation> it = persons.iterator();
       while (it.hasNext()) {
-        Annotation currPerson = (Annotation)it.next();
-        String gender = (String)this.personGender.get(currPerson);
+        Annotation currPerson = it.next();
+        String gender = this.personGender.get(currPerson);
 
         if (null == gender ||
             gender.equalsIgnoreCase("MALE") ||
@@ -448,10 +475,10 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       Sentence currSentence = this.textSentences[currSentenceIndex];
       AnnotationSet persons = currSentence.getPersons();
 
-      Iterator it = persons.iterator();
+      Iterator<Annotation> it = persons.iterator();
       while (it.hasNext()) {
-        Annotation currPerson = (Annotation)it.next();
-        String gender = (String)this.personGender.get(currPerson);
+        Annotation currPerson = it.next();
+        String gender = this.personGender.get(currPerson);
 
         if (null == gender ||
             gender.equalsIgnoreCase("FEMALE") ||
@@ -510,9 +537,9 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       Sentence currSentence = this.textSentences[currSentenceIndex];
       Set<Annotation> org_loc = currSentence.getInanimated();
 
-      Iterator it = org_loc.iterator();
+      Iterator<Annotation> it = org_loc.iterator();
       while (it.hasNext()) {
-        Annotation currOrgLoc = (Annotation)it.next();
+        Annotation currOrgLoc = it.next();
 
         if (null == bestAntecedent) {
           //discard cataphoric references
@@ -558,7 +585,8 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     //1.
     Annotation bestAntecedent = null;
 
-    int closestQuoteIndex = java.util.Arrays.binarySearch(this.quotedText,pronoun,ANNOTATION_OFFSET_COMPARATOR);
+    @SuppressWarnings("unchecked")
+    int closestQuoteIndex = Arrays.binarySearch(this.quotedText,pronoun,ANNOTATION_OFFSET_COMPARATOR);
     //normalize index
     if (closestQuoteIndex < 0) {
       closestQuoteIndex = -closestQuoteIndex -1 -1;
@@ -600,10 +628,10 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     Set<Annotation> succCandidates = quoteContext.getAntecedentCandidates(Quote.ANTEC_AFTER);
     if (false == succCandidates.isEmpty()) {
       //cool, we have candidates, pick up the one closest to the end quote
-      Iterator it = succCandidates.iterator();
+      Iterator<Annotation> it = succCandidates.iterator();
 
       while (it.hasNext()) {
-        Annotation currCandidate = (Annotation)it.next();
+        Annotation currCandidate = it.next();
         if (null == bestAntecedent || ANNOTATION_OFFSET_COMPARATOR.compare(bestAntecedent,currCandidate) > 0) {
           //wow, we have a candidate that is closer to the quote
           bestAntecedent = currCandidate;
@@ -617,10 +645,10 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       Set<Annotation> precCandidates = quoteContext.getAntecedentCandidates(Quote.ANTEC_BEFORE);
       if (false == precCandidates.isEmpty()) {
         //cool, we have candidates, pick up the one closest to the end quote
-        Iterator it = precCandidates.iterator();
+        Iterator<Annotation> it = precCandidates.iterator();
 
         while (it.hasNext()) {
-          Annotation currCandidate = (Annotation)it.next();
+          Annotation currCandidate = it.next();
           if (null == bestAntecedent || ANNOTATION_OFFSET_COMPARATOR.compare(bestAntecedent,currCandidate) < 0) {
             //wow, we have a candidate that is closer to the quote
             bestAntecedent = currCandidate;
@@ -635,10 +663,10 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       Set<Annotation> precCandidates = quoteContext.getAntecedentCandidates(Quote.ANTEC_BACK);
       if (false == precCandidates.isEmpty()) {
         //cool, we have candidates, pick up the one closest to the end quote
-        Iterator it = precCandidates.iterator();
+        Iterator<Annotation> it = precCandidates.iterator();
 
         while (it.hasNext()) {
-          Annotation currCandidate = (Annotation)it.next();
+          Annotation currCandidate = it.next();
           if (null == bestAntecedent || ANNOTATION_OFFSET_COMPARATOR.compare(bestAntecedent,currCandidate) > 0) {
             //wow, we have a candidate that is closer to the quote
             bestAntecedent = currCandidate;
@@ -652,6 +680,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
 
   /** --- */
+  @SuppressWarnings("unchecked")
   private void preprocess() throws ExecutionException {
 
     //0.5 cleanup
@@ -705,13 +734,13 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     AnnotationSet sentenceAnnotations = this.defaultAnnotations.get(SENTENCE_ANNOTATION_TYPE);
 
     this.textSentences = new Sentence[sentenceAnnotations.size()];
-    Object[]  sentenceArray = sentenceAnnotations.toArray();
-
-    java.util.Arrays.sort(sentenceArray,ANNOTATION_OFFSET_COMPARATOR);
+    
+    Annotation[]  sentenceArray = sentenceAnnotations.toArray(new Annotation[sentenceAnnotations.size()]);
+    Arrays.sort(sentenceArray,ANNOTATION_OFFSET_COMPARATOR);
 
     for (int i=0; i< sentenceArray.length; i++) {
 
-      Annotation currSentence = (Annotation)sentenceArray[i];
+      Annotation currSentence = sentenceArray[i];
       Long sentStartOffset = currSentence.getStartNode().getOffset();
       Long sentEndOffset = currSentence.getEndNode().getOffset();
       
@@ -736,9 +765,9 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
       //4.6. for all PERSONs in the sentence - find their gender using the
       //orthographic coreferences if the gender of some entity is unknown
-      Iterator itPersons = sentPersons.iterator();
+      Iterator<Annotation> itPersons = sentPersons.iterator();
       while (itPersons.hasNext()) {
-        Annotation currPerson = (Annotation)itPersons.next();
+        Annotation currPerson = itPersons.next();
         String gender = this.findPersonGender(currPerson);
         this.personGender.put(currPerson,gender);
       }
@@ -754,11 +783,11 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     else {
       this.quotedText = new Quote[sentQuotes.size()];
 
-      Object[] quotesArray = sentQuotes.toArray();
-      java.util.Arrays.sort(quotesArray,ANNOTATION_OFFSET_COMPARATOR);
+      Annotation[] quotesArray = sentQuotes.toArray(new Annotation[sentQuotes.size()]);
+      Arrays.sort(quotesArray,ANNOTATION_OFFSET_COMPARATOR);
 
       for (int i =0; i < quotesArray.length; i++) {
-        this.quotedText[i] = new Quote((Annotation)quotesArray[i],i);
+        this.quotedText[i] = new Quote(quotesArray[i],i);
       }
     }
 
@@ -771,11 +800,11 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     else {
       this.pleonasticIt = new Annotation[plaonasticSet.size()];
 
-      Object[] quotesArray = plaonasticSet.toArray();
-      java.util.Arrays.sort(quotesArray,ANNOTATION_OFFSET_COMPARATOR);
+      Annotation[] quotesArray = plaonasticSet.toArray(new Annotation[plaonasticSet.size()]);
+      Arrays.sort(quotesArray,ANNOTATION_OFFSET_COMPARATOR);
 
       for (int i=0; i< this.pleonasticIt.length; i++) {
-        this.pleonasticIt[i] = (Annotation)quotesArray[i];
+        this.pleonasticIt[i] = quotesArray[i];
       }
     }
 
@@ -789,13 +818,14 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
     if (null==result) {
       //gender is unknown - try to find it from the ortho coreferences
-      List orthoMatches  = (List)person.getFeatures().get(ANNOTATION_COREF_FEATURE_NAME);
+      @SuppressWarnings("unchecked")
+      List<Integer> orthoMatches  = (List<Integer>)person.getFeatures().get(ANNOTATION_COREF_FEATURE_NAME);
 
       if (null != orthoMatches) {
-        Iterator itMatches = orthoMatches.iterator();
+        Iterator<Integer> itMatches = orthoMatches.iterator();
 
         while (itMatches.hasNext()) {
-          Integer correferringID = (Integer)itMatches.next();
+          Integer correferringID = itMatches.next();
           Annotation coreferringEntity = this.defaultAnnotations.get(correferringID);
           if (coreferringEntity != null) {
             assert (coreferringEntity.getType().equalsIgnoreCase(PERSON_ANNOTATION_TYPE));
@@ -813,8 +843,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     return result;
   }
 
-
-  /** --- */
+  @SuppressWarnings("rawtypes")
   private static class AnnotationOffsetComparator implements Comparator {
 
     private int _getOffset(Object o) {
@@ -1014,7 +1043,8 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       //1. generate the precPersons set
 
       //1.1 locate the sentece containing the opening quote marks
-      int quoteStartPos = java.util.Arrays.binarySearch(textSentences,
+      @SuppressWarnings("unchecked")
+      int quoteStartPos = Arrays.binarySearch(textSentences,
                                                         this.quoteAnnotation.getStartNode(),
                                                         ANNOTATION_OFFSET_COMPARATOR);
 
@@ -1043,7 +1073,8 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
       //2. generate the succ  Persons set
       //2.1 locate the sentece containing the closing quote marks
-      int quoteEndPos = java.util.Arrays.binarySearch(textSentences,
+      @SuppressWarnings("unchecked")
+      int quoteEndPos = Arrays.binarySearch(textSentences,
                                                         this.quoteAnnotation.getEndNode(),
                                                         ANNOTATION_OFFSET_COMPARATOR);
 
@@ -1108,9 +1139,9 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
         if (null != pronouns) {
 
-          Iterator it = pronouns.iterator();
+          Iterator<Annotation> it = pronouns.iterator();
           while (it.hasNext()) {
-            Annotation currPronoun = (Annotation)it.next();
+            Annotation currPronoun = it.next();
             //add to succPersons only if HE/SHE
             String pronounString = (String)currPronoun.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
 
@@ -1138,10 +1169,10 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       //...and we want to get the entities from the s1s1 part - they *succeed* the #previous# quote
       //Note that the cirrent sentence is the first one, not the second
       //
-      Iterator itPersons = antecedents.iterator();
+      Iterator<Annotation> itPersons = antecedents.iterator();
 
       while (itPersons.hasNext()) {
-        Annotation currPerson = (Annotation)itPersons.next();
+        Annotation currPerson = itPersons.next();
 
         //cut
         if (Quote.ANTEC_BEFORE == mode &&
