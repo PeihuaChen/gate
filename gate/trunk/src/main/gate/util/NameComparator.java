@@ -19,12 +19,10 @@ import java.util.Comparator;
 /**
  * Compares {@link NameBearer}s by name (string comparation)
  */
-public class NameComparator implements Comparator {
+public class NameComparator implements Comparator<NameBearer> {
 
   @Override
-  public int compare(Object o1, Object o2){
-    NameBearer nb1 = (NameBearer)o1;
-    NameBearer nb2 = (NameBearer)o2;
+  public int compare(NameBearer nb1, NameBearer nb2){
     return nb1.getName().compareTo(nb2.getName());
   }
 }

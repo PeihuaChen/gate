@@ -1,7 +1,14 @@
 package gate.util;
 
-import java.lang.management.*;
-import java.util.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * http://www.javaspecialists.eu/archive/Issue093.html
@@ -24,7 +31,7 @@ public class ThreadWarningSystem {
   private static final int THREAD_NUMBER_CHECK_PERIOD = 20;
   private static final int MAX_STACK_DEPTH = 30;
   private boolean threadThresholdNotified = false;
-  private Set deadlockedThreads = new HashSet();
+  private Set<Long> deadlockedThreads = new HashSet<Long>();
 
   /**
    * Monitor only deadlocks.

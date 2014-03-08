@@ -16,16 +16,19 @@
 
 package gate.util;
 
+import gate.Gate;
+
 import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.net.JarURLConnection;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
-
-import gate.Gate;
 
 public class Tools {
 
@@ -70,9 +73,9 @@ public class Tools {
    * @param parentClass the class for which subclasses are sought
    * @return a list of {@link Class} objects.
    */
-  static public List findSubclasses(Class parentClass){
+  static public List<Class<?>> findSubclasses(Class<?> parentClass){
     Package[] packages = Package.getPackages();
-    List result = new ArrayList();
+    List<Class<?>> result = new ArrayList<Class<?>>();
     for(int i = 0; i < packages.length; i++){
       String packageDir = packages[i].getName();
       //look in the file system
@@ -90,7 +93,7 @@ public class Tools {
               String classname = files[j].substring(0, files[j].length() - 6);
               try {
                 // Try to create an instance of the object
-                Class aClass = Class.forName(packages[i] + "." + classname,
+                Class<?> aClass = Class.forName(packages[i] + "." + classname,
                                              true, Gate.getClassLoader());
                 if(parentClass.isAssignableFrom(aClass)) result.add(aClass);
               }catch(ClassNotFoundException cnfex){}
@@ -102,9 +105,9 @@ public class Tools {
             JarURLConnection conn = (JarURLConnection)packageURL.openConnection();
             String starts = conn.getEntryName();
             JarFile jFile = conn.getJarFile();
-            Enumeration e = jFile.entries();
+            Enumeration<JarEntry> e = jFile.entries();
             while (e.hasMoreElements()){
-              String entryname = ((ZipEntry)e.nextElement()).getName();
+              String entryname = e.nextElement().getName();
               if (entryname.startsWith(starts) &&
                   //not sub dir
                   (entryname.lastIndexOf('/')<=starts.length()) &&
@@ -114,7 +117,7 @@ public class Tools {
                 classname = classname.replace('/','.');
                 try {
                   // Try to create an instance of the object
-                  Class aClass = Class.forName(packages[i] + "." + classname,
+                  Class<?> aClass = Class.forName(packages[i] + "." + classname,
                                                true, Gate.getClassLoader());
                   if(parentClass.isAssignableFrom(aClass)) result.add(aClass);
                 }catch(ClassNotFoundException cnfex){}
@@ -168,19 +171,19 @@ public class Tools {
    * @throws NoSuchMethodException if there are no applicable constructors,
    *         or if there is no single most-specific one.
    */
-  public static Constructor getMostSpecificConstructor(Class targetClass,
-          Class paramClass) throws NoSuchMethodException {
+  public static Constructor<?> getMostSpecificConstructor(Class<?> targetClass,
+          Class<?> paramClass) throws NoSuchMethodException {
     if(targetClass.isInterface()) {
       throw new NoSuchMethodException(targetClass.getName() +
               " is an interface, so cannot have constructors");
     }
-    Constructor[] targetClassConstructors =
+    Constructor<?>[] targetClassConstructors =
         targetClass.getConstructors();
-    List<Constructor> applicableConstructors =
-        new ArrayList<Constructor>();
+    List<Constructor<?>> applicableConstructors =
+        new ArrayList<Constructor<?>>();
     // find all applicable constructors
-    for(Constructor c : targetClassConstructors) {
-      Class[] constructorParams = c.getParameterTypes();
+    for(Constructor<?> c : targetClassConstructors) {
+      Class<?>[] constructorParams = c.getParameterTypes();
       if(constructorParams.length == 1
               && constructorParams[0].isAssignableFrom(paramClass)) {
         applicableConstructors.add(c);
@@ -193,7 +196,7 @@ public class Tools {
               + targetClass.getName() + "("
               + paramClass.getName() + ")");
     }
-    Constructor mostSpecificConstructor = null;
+    Constructor<?> mostSpecificConstructor = null;
     // other simple case - only one applicable
     if(applicableConstructors.size() == 1) {
       mostSpecificConstructor = applicableConstructors.get(0);
@@ -203,10 +206,10 @@ public class Tools {
       // since the constructor parameter types are all assignable
       // from paramType there can be at most one that is assignable
       // from *all* others
-      C1: for(Constructor c1 : applicableConstructors) {
-        Class c1ParamType = c1.getParameterTypes()[0];
-        C2: for(Constructor c2 : applicableConstructors) {
-          Class c2ParamType = c2.getParameterTypes()[0];
+      C1: for(Constructor<?> c1 : applicableConstructors) {
+        Class<?> c1ParamType = c1.getParameterTypes()[0];
+        for(Constructor<?> c2 : applicableConstructors) {
+          Class<?> c2ParamType = c2.getParameterTypes()[0];
           if(!c2ParamType.isAssignableFrom(c1ParamType)) {
             continue C1;
           }

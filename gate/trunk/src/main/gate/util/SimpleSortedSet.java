@@ -72,6 +72,7 @@ public class SimpleSortedSet {
  * @param o the annotation instance to be placed in the list
  * @return true if the offset is already in the map false otherwise
  */
+    @SuppressWarnings("unchecked")
     public boolean add(long elValue, Object o)
     {
 // get the list by offset
@@ -80,11 +81,11 @@ public class SimpleSortedSet {
         {
 // there is no such offset in the map
 // create one empty list
-            f = new ArrayList();
+            f = new ArrayList<Object>();
 // put it in the map
             m.put(elValue, f);
 // add the annotation to it
-            ((List)f).add(o);
+            ((List<Object>)f).add(o);
 // update the size of the offsets array if necessery
             if (theArray.length == size)
             {
@@ -104,7 +105,7 @@ public class SimpleSortedSet {
         }
         // yes we already have an annotation liss for this offset
         // add the annotation to it
-        ((List)f).add(o);
+        ((List<Object>)f).add(o);
 
         return true;
     } // add

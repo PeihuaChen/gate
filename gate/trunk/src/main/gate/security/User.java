@@ -43,7 +43,7 @@ public interface User {
 
   /** returns a list with the groups that the
    *  user is member of  */
-  public List getGroups();
+  public List<Group> getGroups();
 
   /** changes user name
    *  Only members of the ADMIN group have sufficient privileges.

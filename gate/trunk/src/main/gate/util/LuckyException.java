@@ -30,8 +30,7 @@ package gate.util;
   */
 public class LuckyException extends RuntimeException {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = -8051339390451934567L;
 
   /** Default constructor, creates a new execption with the default message */
   public LuckyException() {

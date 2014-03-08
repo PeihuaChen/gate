@@ -39,7 +39,7 @@ import java.util.Vector;
    locked, it is simply removed from the pool.
  */
 public class ObjectPool {
-   private Vector   objects;
+   private Vector<Object>   objects;
    private int      size;
 
 /**
@@ -49,7 +49,7 @@ public class ObjectPool {
  */
    public ObjectPool(int size) {
       this.size = size;
-      objects = new Vector(this.size);
+      objects = new Vector<Object>(this.size);
    } // ObjectPool
 
 /**

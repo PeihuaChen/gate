@@ -16,14 +16,41 @@
 
 package gate.util;
 
-import java.io.*;
-import java.util.*;
-
-import gate.*;
-import gate.util.AnnotationDiffer;
-import gate.creole.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Controller;
+import gate.Corpus;
+import gate.CorpusController;
+import gate.DataStore;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.LanguageResource;
+import gate.ProcessingResource;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
 import gate.persist.SerialDataStore;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 public class CorpusBenchmarkTool {
   private static final String MARKED_DIR_NAME = "marked";
@@ -31,8 +58,6 @@ public class CorpusBenchmarkTool {
   private static final String CVS_DIR_NAME = "Cvs";
   private static final String PROCESSED_DIR_NAME = "processed";
   private static final String ERROR_DIR_NAME = "err";
-
-  private static final boolean DEBUG = true;
 
   public CorpusBenchmarkTool() {}
 
@@ -64,9 +89,9 @@ public class CorpusBenchmarkTool {
         @Override
         public void run() {
 
-          Iterator iter = new ArrayList(application.getPRs()).iterator();
+          Iterator<ProcessingResource> iter = new ArrayList<ProcessingResource>(application.getPRs()).iterator();
           while (iter.hasNext())
-            Factory.deleteResource( (Resource) iter.next());
+            Factory.deleteResource(iter.next());
 
           Factory.deleteResource(application);
         }
@@ -111,12 +136,12 @@ public class CorpusBenchmarkTool {
           types=types.trim();
           Out.prln("Using annotation types from the properties file. <P>\n");
           StringTokenizer strTok = new StringTokenizer(types, ";");
-          annotTypes = new ArrayList();
+          annotTypes = new ArrayList<String>();
           while (strTok.hasMoreTokens())
             annotTypes.add(strTok.nextToken());
         }
         else {
-          annotTypes = new ArrayList();
+          annotTypes = new ArrayList<String>();
           annotTypes.add("Organization");
           annotTypes.add("Person");
           annotTypes.add("Date");
@@ -128,7 +153,7 @@ public class CorpusBenchmarkTool {
           annotTypes.add("Facility");
         }
         String features = this.configs.getProperty("annotFeatures");
-        HashSet result = new HashSet();
+        Set<String> result = new HashSet<String>();
         if (features != null && !features.equals("")) {
           features=features.trim();
           Out.pr("Using annotation features from the properties file. \n");
@@ -171,7 +196,7 @@ public class CorpusBenchmarkTool {
     File markedDir = null;
     File errorDir = null;
 
-    ArrayList subDirs = new ArrayList();
+    List<File> subDirs = new ArrayList<File>();
     File[] dirArray = currDir.listFiles();
     if (dirArray == null)return;
     for (int i = 0; i < dirArray.length; i++) {
@@ -203,7 +228,7 @@ public class CorpusBenchmarkTool {
 
     //there are more subdirectories to traverse, so iterate through
     for (int j = 0; j < subDirs.size(); j++)
-      execute( (File) subDirs.get(j));
+      execute(subDirs.get(j));
 
   } //execute(dir)
 
@@ -221,7 +246,6 @@ public class CorpusBenchmarkTool {
 
     CorpusBenchmarkTool corpusTool = new CorpusBenchmarkTool();
 
-    List inputFiles = null;
     if (args.length < 1)throw new GateException(usage);
     int i = 0;
     while (i < args.length && args[i].startsWith("-")) {
@@ -330,11 +354,11 @@ public class CorpusBenchmarkTool {
     return isMoreInfoMode;
   } // getMoreInfo
 
-  public void setDiffFeaturesList(Set features) {
+  public void setDiffFeaturesList(Set<String> features) {
     diffFeaturesSet = features;
   } // setDiffFeaturesList
 
-  public Set getDiffFeaturesList() {
+  public Set<String> getDiffFeaturesList() {
     return diffFeaturesSet;
   } // getDiffFeaturesList
 
@@ -568,9 +592,9 @@ public class CorpusBenchmarkTool {
                       ("gate.persist.SerialDataStore",
                        processedDir.toURI().toURL().toExternalForm());
 
-      List lrIDs = sds.getLrIds("gate.corpora.DocumentImpl");
+      List<String> lrIDs = sds.getLrIds("gate.corpora.DocumentImpl");
       for (int i = 0; i < lrIDs.size(); i++) {
-        String docID = (String) lrIDs.get(i);
+        String docID = lrIDs.get(i);
 
         //read the stored document
         FeatureMap features = Factory.newFeatureMap();
@@ -646,12 +670,12 @@ public class CorpusBenchmarkTool {
                            ("gate.persist.SerialDataStore",
                             markedDir.toURI().toURL().toExternalForm());
 
-          List lrIDs1 = sds1.getLrIds("gate.corpora.DocumentImpl");
+          List<String> lrIDs1 = sds1.getLrIds("gate.corpora.DocumentImpl");
           boolean found = false;
           int k = 0;
           //search for the marked doc with the same name
           while (k < lrIDs1.size() && !found) {
-            String docID1 = (String) lrIDs1.get(k);
+            String docID1 = lrIDs1.get(k);
 
             //read the stored document
             FeatureMap features1 = Factory.newFeatureMap();
@@ -734,9 +758,9 @@ public class CorpusBenchmarkTool {
                       ("gate.persist.SerialDataStore",
                        storedDir.toURI().toURL().toExternalForm());
 
-      List lrIDs = sds.getLrIds("gate.corpora.DocumentImpl");
+      List<String> lrIDs = sds.getLrIds("gate.corpora.DocumentImpl");
       for (int i = 0; i < lrIDs.size(); i++) {
-        String docID = (String) lrIDs.get(i);
+        String docID = lrIDs.get(i);
 
         //read the stored document
         FeatureMap features = Factory.newFeatureMap();
@@ -795,12 +819,12 @@ public class CorpusBenchmarkTool {
                              ("gate.persist.SerialDataStore",
                               markedDir.toURI().toURL().toExternalForm());
 
-            List lrIDs1 = sds1.getLrIds("gate.corpora.DocumentImpl");
+            List<String> lrIDs1 = sds1.getLrIds("gate.corpora.DocumentImpl");
             boolean found = false;
             int k = 0;
             //search for the marked doc with the same name
             while (k < lrIDs1.size() && !found) {
-              String docID1 = (String) lrIDs1.get(k);
+              String docID1 = lrIDs1.get(k);
 
               //read the stored document
               FeatureMap features1 = Factory.newFeatureMap();
@@ -973,12 +997,12 @@ public class CorpusBenchmarkTool {
                            ("gate.persist.SerialDataStore",
                             markedDir.toURI().toURL().toExternalForm());
 
-          List lrIDs1 = sds1.getLrIds("gate.corpora.DocumentImpl");
+          List<String> lrIDs1 = sds1.getLrIds("gate.corpora.DocumentImpl");
           boolean found = false;
           int k = 0;
           //search for the marked doc with the same name
           while (k < lrIDs1.size() && !found) {
-            String docID1 = (String) lrIDs1.get(k);
+            String docID1 = lrIDs1.get(k);
 
             //read the stored document
             FeatureMap features1 = Factory.newFeatureMap();
@@ -1058,9 +1082,9 @@ public class CorpusBenchmarkTool {
         tempCorpus = null;
       }
       else {
-        Iterator iter = application.getPRs().iterator();
+        Iterator<ProcessingResource> iter = application.getPRs().iterator();
         while (iter.hasNext())
-          ( (ProcessingResource) iter.next()).setParameterValue("document", doc);
+          iter.next().setParameterValue("document", doc);
         application.execute();
       }
     }
@@ -1149,7 +1173,7 @@ public class CorpusBenchmarkTool {
           docName.length(),
           ".err");
       File errFile = new File(errDir, docName.toString());
-      String encoding = ( (gate.corpora.DocumentImpl) cleanDoc).getEncoding();
+      //String encoding = ( (gate.corpora.DocumentImpl) cleanDoc).getEncoding();
       try {
         errWriter = new FileWriter(errFile, false);
         /*
@@ -1169,7 +1193,7 @@ public class CorpusBenchmarkTool {
     }
 
     for (int jj = 0; jj < annotTypes.size(); jj++) {
-      String annotType = (String) annotTypes.get(jj);
+      String annotType = annotTypes.get(jj);
 
       AnnotationDiffer annotDiffer = measureDocs(markedDoc, cleanDoc, annotType);
       //we don't have this annotation type in this document
@@ -1383,7 +1407,7 @@ public class CorpusBenchmarkTool {
           docName.length(),
           ".err");
       File errFile = new File(errDir, docName.toString());
-      String encoding = ( (gate.corpora.DocumentImpl) keyDoc).getEncoding();
+      //String encoding = ( (gate.corpora.DocumentImpl) keyDoc).getEncoding();
       try {
         errWriter = new FileWriter(errFile, false);
         /*
@@ -1403,7 +1427,7 @@ public class CorpusBenchmarkTool {
     }
 
     for (int jj = 0; jj < annotTypes.size(); jj++) {
-      String annotType = (String) annotTypes.get(jj);
+      String annotType = annotTypes.get(jj);
 
       AnnotationDiffer annotDiff = measureDocs(keyDoc, respDoc, annotType);
       //we don't have this annotation type in this document
@@ -1493,47 +1517,47 @@ public class CorpusBenchmarkTool {
     if (Double.isNaN(fMeasureAverage)) fMeasureAverage = 0.0;
     fMeasureSum += fMeasureAverage;
 
-    Double oldPrecision = (Double) precisionByType.get(annotType);
+    Double oldPrecision = precisionByType.get(annotType);
     if (oldPrecision == null)
       precisionByType.put(annotType, new Double(precisionAverage));
     else
       precisionByType.put(annotType,
                           new Double(oldPrecision.doubleValue() + precisionAverage));
 
-    Integer precCount = (Integer) prCountByType.get(annotType);
+    Integer precCount = prCountByType.get(annotType);
     if (precCount == null)
       prCountByType.put(annotType, new Integer(1));
     else
       prCountByType.put(annotType, new Integer(precCount.intValue() + 1));
 
-    Double oldFMeasure = (Double) fMeasureByType.get(annotType);
+    Double oldFMeasure = fMeasureByType.get(annotType);
     if (oldFMeasure == null)
       fMeasureByType.put(annotType, new Double(fMeasureAverage));
     else
       fMeasureByType.put(annotType,
                          new Double(oldFMeasure.doubleValue() + fMeasureAverage));
 
-    Integer fCount = (Integer) fMeasureCountByType.get(annotType);
+    Integer fCount = fMeasureCountByType.get(annotType);
     if (fCount == null)
       fMeasureCountByType.put(annotType, new Integer(1));
     else
       fMeasureCountByType.put(annotType, new Integer(fCount.intValue() + 1));
 
-    Double oldRecall = (Double) recallByType.get(annotType);
+    Double oldRecall = recallByType.get(annotType);
     if (oldRecall == null)
       recallByType.put(annotType, new Double(recallAverage));
     else
       recallByType.put(annotType,
                        new Double(oldRecall.doubleValue() + recallAverage));
 
-    Integer recCount = (Integer) recCountByType.get(annotType);
+    Integer recCount = recCountByType.get(annotType);
     if (recCount == null)
       recCountByType.put(annotType, new Integer(1));
     else
       recCountByType.put(annotType, new Integer(recCount.intValue() + 1));
 
       //Update the missing, spurious, correct, and partial counts
-    Long oldMissingNo = (Long) missingByType.get(annotType);
+    Long oldMissingNo = missingByType.get(annotType);
     if (oldMissingNo == null)
       missingByType.put(annotType, new Long(annotDiffer.getMissing()));
     else
@@ -1541,7 +1565,7 @@ public class CorpusBenchmarkTool {
                         new Long(oldMissingNo.longValue() +
                                  annotDiffer.getMissing()));
 
-    Long oldCorrectNo = (Long) correctByType.get(annotType);
+    Long oldCorrectNo = correctByType.get(annotType);
     if (oldCorrectNo == null)
       correctByType.put(annotType, new Long(annotDiffer.getCorrectMatches()));
     else
@@ -1549,7 +1573,7 @@ public class CorpusBenchmarkTool {
                         new Long(oldCorrectNo.longValue() +
                                  annotDiffer.getCorrectMatches()));
 
-    Long oldPartialNo = (Long) partialByType.get(annotType);
+    Long oldPartialNo = partialByType.get(annotType);
     if (oldPartialNo == null)
       partialByType.put(annotType,
                         new Long(annotDiffer.getPartiallyCorrectMatches()));
@@ -1558,7 +1582,7 @@ public class CorpusBenchmarkTool {
                         new Long(oldPartialNo.longValue() +
                                  annotDiffer.getPartiallyCorrectMatches()));
 
-    Long oldSpuriousNo = (Long) spurByType.get(annotType);
+    Long oldSpuriousNo = spurByType.get(annotType);
     if (oldSpuriousNo == null)
       spurByType.put(annotType, new Long(annotDiffer.getSpurious()));
     else
@@ -1592,20 +1616,20 @@ public class CorpusBenchmarkTool {
     if (Double.isNaN(fMeasureAverage)) fMeasureAverage = 0.0;
     proc_fMeasureSum += fMeasureAverage;
 
-    Double oldPrecision = (Double) proc_precisionByType.get(annotType);
+    Double oldPrecision = proc_precisionByType.get(annotType);
     if (oldPrecision == null)
       proc_precisionByType.put(annotType, new Double(precisionAverage));
     else
       proc_precisionByType.put(annotType,
                                new Double(oldPrecision.doubleValue() +
                                           precisionAverage));
-    Integer precCount = (Integer) proc_prCountByType.get(annotType);
+    Integer precCount = proc_prCountByType.get(annotType);
     if (precCount == null)
       proc_prCountByType.put(annotType, new Integer(1));
     else
       proc_prCountByType.put(annotType, new Integer(precCount.intValue() + 1));
 
-    Double oldFMeasure = (Double) proc_fMeasureByType.get(annotType);
+    Double oldFMeasure = proc_fMeasureByType.get(annotType);
     if (oldFMeasure == null)
       proc_fMeasureByType.put(annotType,
                               new Double(fMeasureAverage));
@@ -1613,13 +1637,13 @@ public class CorpusBenchmarkTool {
       proc_fMeasureByType.put(annotType,
                               new Double(oldFMeasure.doubleValue() +
                                          fMeasureAverage));
-    Integer fCount = (Integer) proc_fMeasureCountByType.get(annotType);
+    Integer fCount = proc_fMeasureCountByType.get(annotType);
     if (fCount == null)
       proc_fMeasureCountByType.put(annotType, new Integer(1));
     else
       proc_fMeasureCountByType.put(annotType, new Integer(fCount.intValue() + 1));
 
-    Double oldRecall = (Double) proc_recallByType.get(annotType);
+    Double oldRecall = proc_recallByType.get(annotType);
     if (oldRecall == null)
       proc_recallByType.put(annotType,
                             new Double(recallAverage));
@@ -1627,14 +1651,14 @@ public class CorpusBenchmarkTool {
       proc_recallByType.put(annotType,
                             new Double(oldRecall.doubleValue() +
                                        recallAverage));
-    Integer recCount = (Integer) proc_recCountByType.get(annotType);
+    Integer recCount = proc_recCountByType.get(annotType);
     if (recCount == null)
       proc_recCountByType.put(annotType, new Integer(1));
     else
       proc_recCountByType.put(annotType, new Integer(recCount.intValue() + 1));
 
       //Update the missing, spurious, correct, and partial counts
-    Long oldMissingNo = (Long) proc_missingByType.get(annotType);
+    Long oldMissingNo = proc_missingByType.get(annotType);
     if (oldMissingNo == null)
       proc_missingByType.put(annotType, new Long(annotDiffer.getMissing()));
     else
@@ -1642,7 +1666,7 @@ public class CorpusBenchmarkTool {
                              new Long(oldMissingNo.longValue() +
                                       annotDiffer.getMissing()));
 
-    Long oldCorrectNo = (Long) proc_correctByType.get(annotType);
+    Long oldCorrectNo = proc_correctByType.get(annotType);
     if (oldCorrectNo == null)
       proc_correctByType.put(annotType, new Long(annotDiffer.getCorrectMatches()));
     else
@@ -1650,7 +1674,7 @@ public class CorpusBenchmarkTool {
                              new Long(oldCorrectNo.longValue() +
                                       annotDiffer.getCorrectMatches()));
 
-    Long oldPartialNo = (Long) proc_partialByType.get(annotType);
+    Long oldPartialNo = proc_partialByType.get(annotType);
     if (oldPartialNo == null)
       proc_partialByType.put(annotType,
                              new Long(annotDiffer.getPartiallyCorrectMatches()));
@@ -1659,7 +1683,7 @@ public class CorpusBenchmarkTool {
                              new Long(oldPartialNo.longValue() +
                                       annotDiffer.getPartiallyCorrectMatches()));
 
-    Long oldSpuriousNo = (Long) proc_spurByType.get(annotType);
+    Long oldSpuriousNo = proc_spurByType.get(annotType);
     if (oldSpuriousNo == null)
       proc_spurByType.put(annotType, new Long(annotDiffer.getSpurious()));
     else
@@ -1714,21 +1738,25 @@ public class CorpusBenchmarkTool {
              "<TD><B>Recall</B></TD> <TD><B>F-Measure</B></TD> </TR>");
     String annotType;
     for (int i = 0; i < annotTypes.size(); i++) {
-      annotType = (String) annotTypes.get(i);
+      annotType = annotTypes.get(i);
       printStatsForType(annotType);
     } //for
     Out.prln("</table>");
   } // updateStatisticsProc
 
   protected void printStatsForType(String annotType) {
-    long correct = (correctByType.get(annotType) == null) ? 0 :
-                   ( (Long) correctByType.get(annotType)).longValue();
-    long partial = (partialByType.get(annotType) == null) ? 0 :
-                   ( (Long) partialByType.get(annotType)).longValue();
-    long spurious = (spurByType.get(annotType) == null) ? 0 :
-                    ( (Long) spurByType.get(annotType)).longValue();
-    long missing = (missingByType.get(annotType) == null) ? 0 :
-                   ( (Long) missingByType.get(annotType)).longValue();
+    long correct =
+            (correctByType.get(annotType) == null) ? 0 : correctByType.get(
+                    annotType).longValue();
+    long partial =
+            (partialByType.get(annotType) == null) ? 0 : partialByType.get(
+                    annotType).longValue();
+    long spurious =
+            (spurByType.get(annotType) == null) ? 0 : spurByType.get(annotType)
+                    .longValue();
+    long missing =
+            (missingByType.get(annotType) == null) ? 0 : missingByType.get(
+                    annotType).longValue();
     long actual = correct + partial + spurious;
     long possible = correct + partial + missing;
     //precision strict is correct/actual
@@ -1764,13 +1792,13 @@ public class CorpusBenchmarkTool {
     if (hasProcessed) {
       // calculate values for processed
       proc_correct = (proc_correctByType.get(annotType) == null) ? 0 :
-                     ( (Long) proc_correctByType.get(annotType)).longValue();
+                     proc_correctByType.get(annotType).longValue();
       proc_partial = (proc_partialByType.get(annotType) == null) ? 0 :
-                     ( (Long) proc_partialByType.get(annotType)).longValue();
+                     proc_partialByType.get(annotType).longValue();
       proc_spurious = (proc_spurByType.get(annotType) == null) ? 0 :
-                      ( (Long) proc_spurByType.get(annotType)).longValue();
+                      proc_spurByType.get(annotType).longValue();
       proc_missing = (proc_missingByType.get(annotType) == null) ? 0 :
-                     ( (Long) proc_missingByType.get(annotType)).longValue();
+                     proc_missingByType.get(annotType).longValue();
       proc_actual = proc_correct + proc_partial + proc_spurious;
       proc_possible = proc_correct + proc_partial + proc_missing;
       //precision strict is correct/actual
@@ -1894,21 +1922,25 @@ public class CorpusBenchmarkTool {
     correctSum = partialSum = spuriousSum = missingSum = 0;
 
     String annotType;
-    for (int i = 0; i < annotTypes.size(); i++) {
-      annotType = (String) annotTypes.get(i);
-      correct = (correctByType.get(annotType) == null) ? 0 :
-                ( (Long) correctByType.get(annotType)).longValue();
-      partial = (partialByType.get(annotType) == null) ? 0 :
-                ( (Long) partialByType.get(annotType)).longValue();
-      spurious = (spurByType.get(annotType) == null) ? 0 :
-                 ( (Long) spurByType.get(annotType)).longValue();
-      missing = (missingByType.get(annotType) == null) ? 0 :
-                ( (Long) missingByType.get(annotType)).longValue();
+    for(int i = 0; i < annotTypes.size(); i++) {
+      annotType = annotTypes.get(i);
+      correct =
+              (correctByType.get(annotType) == null) ? 0 : correctByType.get(
+                      annotType).longValue();
+      partial =
+              (partialByType.get(annotType) == null) ? 0 : partialByType.get(
+                      annotType).longValue();
+      spurious =
+              (spurByType.get(annotType) == null) ? 0 : spurByType.get(
+                      annotType).longValue();
+      missing =
+              (missingByType.get(annotType) == null) ? 0 : missingByType.get(
+                      annotType).longValue();
       correctSum += correct;
       partialSum += partial;
       spuriousSum += spurious;
       missingSum += missing;
-    } //for
+    } // for
 
     long actual = correctSum + partialSum + spuriousSum;
     long possible = correctSum + partialSum + missingSum;
@@ -1969,7 +2001,8 @@ public class CorpusBenchmarkTool {
     }
 
     // we have annotation sets so call the annotationDiffer
-    List pairings = annotDiffer.calculateDiff(keys, responses);
+    annotDiffer.calculateDiff(keys, responses);
+    
     return annotDiffer;
   } // measureDocs
 
@@ -1980,19 +2013,19 @@ public class CorpusBenchmarkTool {
 
     try {
       // extract and store annotations
-      Comparator comp = new OffsetComparator();
-      TreeSet sortedSet = new TreeSet(comp);
-      Set missingSet =
+      Comparator<Annotation> comp = new OffsetComparator();
+      Set<Annotation> sortedSet = new TreeSet<Annotation>(comp);
+      Set<Annotation> missingSet =
           annotDiffer.getAnnotationsOfType(AnnotationDiffer.MISSING_TYPE);
       sortedSet.clear();
       sortedSet.addAll(missingSet);
       storeAnnotations(type + ".miss", sortedSet, keyDoc, errFileWriter);
-      Set spuriousSet =
+      Set<Annotation> spuriousSet =
           annotDiffer.getAnnotationsOfType(AnnotationDiffer.SPURIOUS_TYPE);
       sortedSet.clear();
       sortedSet.addAll(spuriousSet);
       storeAnnotations(type + ".spur", sortedSet, respDoc, errFileWriter);
-      Set partialSet =
+      Set<Annotation> partialSet =
           annotDiffer.getAnnotationsOfType(AnnotationDiffer.
                                            PARTIALLY_CORRECT_TYPE);
       sortedSet.clear();
@@ -2005,16 +2038,16 @@ public class CorpusBenchmarkTool {
     }
   } // storeAnnotations
 
-  protected void storeAnnotations(String type, Set set, Document doc,
+  protected void storeAnnotations(String type, Set<Annotation> set, Document doc,
                                   Writer file) throws IOException {
 
     if (set == null || set.isEmpty())
       return;
 
-    Iterator iter = set.iterator();
+    Iterator<Annotation> iter = set.iterator();
     Annotation ann;
     while (iter.hasNext()) {
-      ann = (Annotation) iter.next();
+      ann = iter.next();
       file.write(type);
       file.write(".");
       file.write(doc.getContent().toString().substring(
@@ -2031,30 +2064,30 @@ public class CorpusBenchmarkTool {
   protected void printAnnotations(AnnotationDiffer annotDiff,
                                   Document keyDoc, Document respDoc) {
     Out.pr("MISSING ANNOTATIONS in the automatic texts: ");
-    Set missingSet =
+    Set<Annotation> missingSet =
         annotDiff.getAnnotationsOfType(AnnotationDiffer.MISSING_TYPE);
     printAnnotations(missingSet, keyDoc);
     Out.prln("<BR>");
 
     Out.pr("SPURIOUS ANNOTATIONS in the automatic texts: ");
-    Set spuriousSet =
+    Set<Annotation> spuriousSet =
         annotDiff.getAnnotationsOfType(AnnotationDiffer.SPURIOUS_TYPE);
     printAnnotations(spuriousSet, respDoc);
     Out.prln("</BR>");
 
     Out.pr("PARTIALLY CORRECT ANNOTATIONS in the automatic texts: ");
-    Set partialSet =
+    Set<Annotation> partialSet =
         annotDiff.getAnnotationsOfType(AnnotationDiffer.PARTIALLY_CORRECT_TYPE);
     printAnnotations(partialSet, respDoc);
   }
 
-  protected void printAnnotations(Set set, Document doc) {
+  protected void printAnnotations(Set<Annotation> set, Document doc) {
     if (set == null || set.isEmpty())
       return;
 
-    Iterator iter = set.iterator();
+    Iterator<Annotation> iter = set.iterator();
     while (iter.hasNext()) {
-      Annotation ann = (Annotation) iter.next();
+      Annotation ann = iter.next();
       Out.prln(
           "<B>" +
           doc.getContent().toString().substring(
@@ -2072,7 +2105,7 @@ public class CorpusBenchmarkTool {
    */
   private File startDir;
   private File currDir;
-  private static List annotTypes;
+  private static List<String> annotTypes;
 
   private Controller application = null;
   private File applicationFile = null;
@@ -2083,34 +2116,34 @@ public class CorpusBenchmarkTool {
   private double precisionSum = 0.0;
   private double recallSum = 0.0;
   private double fMeasureSum = 0.0;
-  private HashMap precisionByType = new HashMap();
-  private HashMap prCountByType = new HashMap();
-  private HashMap recallByType = new HashMap();
-  private HashMap recCountByType = new HashMap();
-  private HashMap fMeasureByType = new HashMap();
-  private HashMap fMeasureCountByType = new HashMap();
+  private Map<String,Double> precisionByType = new HashMap<String,Double>();
+  private Map<String,Integer> prCountByType = new HashMap<String,Integer>();
+  private Map<String,Double> recallByType = new HashMap<String,Double>();
+  private Map<String,Integer> recCountByType = new HashMap<String,Integer>();
+  private Map<String,Double> fMeasureByType = new HashMap<String,Double>();
+  private Map<String,Integer> fMeasureCountByType = new HashMap<String,Integer>();
 
-  private HashMap missingByType = new HashMap();
-  private HashMap spurByType = new HashMap();
-  private HashMap correctByType = new HashMap();
-  private HashMap partialByType = new HashMap();
+  private Map<String,Long> missingByType = new HashMap<String,Long>();
+  private Map<String,Long> spurByType = new HashMap<String,Long>();
+  private Map<String,Long> correctByType = new HashMap<String,Long>();
+  private Map<String,Long> partialByType = new HashMap<String,Long>();
 
   // statistic for processed
   static boolean hasProcessed = false;
   private double proc_precisionSum = 0;
   private double proc_recallSum = 0;
   private double proc_fMeasureSum = 0;
-  private HashMap proc_precisionByType = new HashMap();
-  private HashMap proc_prCountByType = new HashMap();
-  private HashMap proc_recallByType = new HashMap();
-  private HashMap proc_recCountByType = new HashMap();
-  private HashMap proc_fMeasureByType = new HashMap();
-  private HashMap proc_fMeasureCountByType = new HashMap();
+  private Map<String,Double> proc_precisionByType = new HashMap<String,Double>();
+  private Map<String,Integer> proc_prCountByType = new HashMap<String,Integer>();
+  private Map<String,Double> proc_recallByType = new HashMap<String,Double>();
+  private Map<String,Integer> proc_recCountByType = new HashMap<String,Integer>();
+  private Map<String,Double> proc_fMeasureByType = new HashMap<String,Double>();
+  private Map<String,Integer> proc_fMeasureCountByType = new HashMap<String,Integer>();
 
-  private HashMap proc_missingByType = new HashMap();
-  private HashMap proc_spurByType = new HashMap();
-  private HashMap proc_correctByType = new HashMap();
-  private HashMap proc_partialByType = new HashMap();
+  private Map<String,Long> proc_missingByType = new HashMap<String,Long>();
+  private Map<String,Long> proc_spurByType = new HashMap<String,Long>();
+  private Map<String,Long> proc_correctByType = new HashMap<String,Long>();
+  private Map<String,Long> proc_partialByType = new HashMap<String,Long>();
 
   double beta = 1;
 
@@ -2136,7 +2169,7 @@ public class CorpusBenchmarkTool {
    * The list of features used in the AnnotationDiff separated by comma
    * Example: "class;inst"
    */
-  private Set diffFeaturesSet;
+  private Set<String> diffFeaturesSet;
 
   /**
    * If true, the corpus tool will evaluate stored against the human-marked

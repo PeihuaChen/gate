@@ -1084,7 +1084,7 @@ public class Gate implements GateConstants {
       }
 
       // update the config element of the file
-      Files.updateXmlElement(configFile, userConfigElement, userConfig);
+      Files.updateXmlElement(configFile, userConfigElement, userConfig.getStringMap());
 
     }
     catch(IOException e) {

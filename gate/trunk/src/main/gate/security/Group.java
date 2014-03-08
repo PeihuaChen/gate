@@ -34,7 +34,7 @@ public interface Group {
   public String getName();
 
   /** --- */
-  public List getUsers();
+  public List<User> getUsers();
 
   /** --- */
   public void setName(String newName, Session s)

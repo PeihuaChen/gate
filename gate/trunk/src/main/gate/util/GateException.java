@@ -24,6 +24,8 @@ package gate.util;
   */
 public class GateException extends Exception {
 
+  private static final long serialVersionUID = 4291966688486937340L;
+
   public GateException() {
     super();
   }

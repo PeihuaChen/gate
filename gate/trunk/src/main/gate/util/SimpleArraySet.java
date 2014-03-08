@@ -29,27 +29,31 @@ import java.util.Collection;
  */
 public class SimpleArraySet<T> implements Serializable, Iterable<T>
 {
+
+  private static final long serialVersionUID = 7356655846408155644L;
+
   /**
    * The array storing the elements
    */
-  Object[] theArray = null;
+  T[] theArray = null;
 
   public int size()
   {
       return theArray == null ? 0 : theArray.length;
   }
 
-  public Collection asCollection()
+  public Collection<T> asCollection()
   {
-      if (theArray == null) return new ArrayList();
+      if (theArray == null) return new ArrayList<T>();
       return Arrays.asList(theArray);
   }
 
+  @SuppressWarnings("unchecked")
   public boolean add(T tr)
   {
     if (theArray == null)
     {
-      theArray = new Object[1];
+      theArray = (T[])new Object[1];
       theArray[0] = tr;
     } else {
       int newsz = theArray.length+1;
@@ -57,7 +61,7 @@ public class SimpleArraySet<T> implements Serializable, Iterable<T>
       if (index < 0)
       {
         index = ~index;
-        Object[] temp = new Object[newsz];
+        T[] temp = (T[])new Object[newsz];
         int i;
         for (i = 0; i < index; i++)
         {
@@ -107,7 +111,7 @@ public class SimpleArraySet<T> implements Serializable, Iterable<T>
           public T next() {
             if (theArray == null)
               throw new RuntimeException("");
-            return (T) theArray[count++];
+            return theArray[count++];
           }
           @Override
           public void remove() {}

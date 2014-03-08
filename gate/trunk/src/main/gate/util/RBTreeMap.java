@@ -34,8 +34,6 @@ import java.util.SortedSet;
 public class RBTreeMap<K,V> extends AbstractMap<K,V>
                implements SortedMap<K,V>, Cloneable, java.io.Serializable
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
 
   /** Freeze the serialization UID. */
   static final long serialVersionUID = -1454324265766936618L;

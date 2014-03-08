@@ -21,6 +21,8 @@ package gate.util;
  */
 public class GateRuntimeException extends RuntimeException {
 
+  private static final long serialVersionUID = 2605697923542827933L;
+
   public GateRuntimeException() {
   }
 

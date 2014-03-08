@@ -17,9 +17,6 @@ package gate.util;
 
 public class Coordinates {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   int x1, x2, y1, y2;
 
   public Coordinates(int x1, int y1, int x2, int y2) {

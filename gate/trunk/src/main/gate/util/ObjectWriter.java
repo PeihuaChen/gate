@@ -28,16 +28,13 @@ import java.util.LinkedList;
   */
 public class ObjectWriter extends Thread {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   public ObjectWriter(Object obj) throws IOException {
     size = 0;
     Writer writer = new Writer(obj);
     InputStream is = writer.getInputStream();
     writer.start();
     boolean over = false;
-    buffer = new LinkedList();
+    buffer = new LinkedList<byte[]>();
 
     //how much space is available in lastBuff
     int space = buffSize;
@@ -100,9 +97,9 @@ public class ObjectWriter extends Thread {
   @Override
   public void run() {
     try{
-      Iterator buffIter = buffer.iterator();
+      Iterator<byte[]> buffIter = buffer.iterator();
       while(buffIter.hasNext()){
-        byte currentBuff[] = (byte[])buffIter.next();
+        byte currentBuff[] = buffIter.next();
         if(buffIter.hasNext()) {
           // is not the last buffer
           outputStream.write(currentBuff,0,buffSize);
@@ -162,8 +159,6 @@ public class ObjectWriter extends Thread {
 
   }
 
-  private Object object;
-
   private InputStream inputStream ;
 
   private PipedOutputStream outputStream;
@@ -172,7 +167,7 @@ public class ObjectWriter extends Thread {
 
   private int lastOffset;
 
-  private LinkedList buffer;
+  private LinkedList<byte[]> buffer;
 
   private int buffSize = 1024;
 

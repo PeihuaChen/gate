@@ -16,29 +16,34 @@
 
 package gate.util;
 
-import java.io.*;
-import java.util.*;
-import java.util.jar.*;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
 
 /** This class is used to merge a set of Jar/Zip Files in a Jar File
   * It is ignored the manifest.
   */
 public class JarFiles {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
   private StringBuffer dbgString = new StringBuffer();
   private boolean warning = false;
   String buggyJar = null;
 
   private final static int BUFF_SIZE = 65000;
 
-  private Set directorySet = null;
+  private Set<String> directorySet = null;
 
   private byte buffer[] = null;
 
   public JarFiles(){
-    directorySet = new HashSet();
+    directorySet = new HashSet<String>();
     buffer = new byte[BUFF_SIZE];
   }
 
@@ -49,7 +54,7 @@ public class JarFiles {
     * @param destinationJarName is the name of the file which contains all the
     * classes of jarFilesNames
     */
-  public void merge(Set jarFileNames, String destinationJarName)
+  public void merge(Set<String> jarFileNames, String destinationJarName)
                                                       throws GateException {
     String sourceJarName = null;
     JarOutputStream jarFileDestination = null;
@@ -62,10 +67,10 @@ public class JarFiles {
 
       dbgString.append("Creating " + destinationJarName + " from these JARs:\n");
       // iterate through the Jar files set
-      Iterator jarFileNamesIterator = jarFileNames.iterator();
+      Iterator<String> jarFileNamesIterator = jarFileNames.iterator();
 
       while (jarFileNamesIterator.hasNext()) {
-        sourceJarName = (String) jarFileNamesIterator.next();
+        sourceJarName = jarFileNamesIterator.next();
 
         // create the new input jar files based on the file name
         jarFileSource = new JarFile(sourceJarName);
@@ -104,13 +109,13 @@ public class JarFiles {
     try {
 
       // get an enumeration of all entries from the sourceJar
-      Enumeration jarFileEntriesEnum = sourceJar.entries();
+      Enumeration<JarEntry> jarFileEntriesEnum = sourceJar.entries();
 
       JarEntry currentJarEntry = null;
       while (jarFileEntriesEnum.hasMoreElements()) {
 
         // get a JarEntry
-        currentJarEntry = (JarEntry) jarFileEntriesEnum.nextElement();
+        currentJarEntry = jarFileEntriesEnum.nextElement();
 
         // if current entry is manifest then it is skipped
         if(currentJarEntry.getName().equalsIgnoreCase("META-INF/") ||
@@ -190,7 +195,7 @@ public class JarFiles {
                    //System.exit(1);
     } else {
       JarFiles jarFiles = new JarFiles();
-      Set filesToMerge = new HashSet();
+      Set<String> filesToMerge = new HashSet<String>();
       for (int i=1; i<args.length; i++) {
         filesToMerge.add(args[i]);
     }

@@ -27,10 +27,6 @@ import gate.event.ProgressListener;
  */
 public class ProgressPrinter implements ProgressListener {
 
-  /** Debug flag
-   */
-  private static final boolean DEBUG = false;
-
   /**
    * Constructor.
    *

@@ -22,9 +22,6 @@ import org.xml.sax.*;
 
 public abstract class LaxErrorHandler implements ErrorHandler {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /**
    * LaxErrorHandler constructor comment.
    */
