@@ -169,10 +169,8 @@ public class BootStrap {
         }// else
 
         // add the package to the list
-        if (!allPackages.contains(currentClass.getPackage())){
-          allPackages.add(currentClass.getPackage().getName()+".*");
-        }
-
+        allPackages.add(currentClass.getPackage().getName()+".*");
+        
         interfacesAndClass = interfacesAndClass + nameClass + ", ";
 
         methodsInterfaces = featuresClass(currentClass,methodsInterfaces);
