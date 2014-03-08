@@ -18,9 +18,6 @@ import gate.util.GateRuntimeException;
 public class InvalidURIException extends GateRuntimeException {
   private static final long serialVersionUID = 4121418405812712500L;
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /**
    * Constructor
    */
