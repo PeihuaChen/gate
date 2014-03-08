@@ -20,9 +20,6 @@ import gate.util.GateException;
 public class InvalidValueException extends GateException {
   private static final long serialVersionUID = 3833465093706036789L;
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /**
    * Constructor
    */

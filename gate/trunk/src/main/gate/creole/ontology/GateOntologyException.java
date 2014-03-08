@@ -24,6 +24,8 @@ import gate.util.GateRuntimeException;
  */
 public class GateOntologyException extends GateRuntimeException {
 
+  private static final long serialVersionUID = -1627354204193778290L;
+
   public GateOntologyException() {
   }
 
