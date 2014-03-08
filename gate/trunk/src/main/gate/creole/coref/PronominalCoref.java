@@ -19,9 +19,10 @@ package gate.creole.coref;
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Document;
+import gate.Factory;
 import gate.FeatureMap;
+import gate.Gate;
 import gate.Node;
-import gate.ProcessingResource;
 import gate.Resource;
 import gate.creole.ANNIEConstants;
 import gate.creole.AbstractLanguageAnalyser;
@@ -47,7 +48,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class PronominalCoref extends AbstractLanguageAnalyser
-                              implements ProcessingResource, ANNIEConstants,
+                              implements ANNIEConstants,
                               Benchmarkable {
 
   private static final long serialVersionUID = 3860815557386683264L;
@@ -114,36 +115,36 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     PRP_RESTRICTION.put(TOKEN_CATEGORY_FEATURE_NAME,PRP_CATEGORY);
   }
 
-  /** --- */
-  public PronominalCoref() {
-
-    this.personGender = new HashMap<Annotation,String>();
-    this.anaphor2antecedent = new HashMap<Annotation,Annotation>();
-    this.inanimatedSet = new HashSet<String>();
-    
-    //TODO fix to do this properly
-    this.qtTransducer = new gate.creole.Transducer();
-    this.pleonTransducer = new gate.creole.Transducer();
-  }
-
   /** Initialise this resource, and return it. */
   @Override
   public Resource init() throws ResourceInstantiationException {
 
-    //0. preconditions
-    assert (null != this.qtTransducer);
-
+    personGender = new HashMap<Annotation,String>();
+    anaphor2antecedent = new HashMap<Annotation,Annotation>();
+    inanimatedSet = new HashSet<String>();
+    
     //1. initialise quoted text transducer
     URL qtGrammarURL = null;
     try {
       qtGrammarURL = new URL(QT_GRAMMAR_URL);
-    }
-    catch(MalformedURLException mue) {
+    } catch(MalformedURLException mue) {
       throw new ResourceInstantiationException(mue);
     }
-    this.qtTransducer.setGrammarURL(qtGrammarURL);
-    this.qtTransducer.setEncoding("UTF-8");
-    this.qtTransducer.init();
+    FeatureMap params = Factory.newFeatureMap();
+    params.put(Transducer.TRANSD_GRAMMAR_URL_PARAMETER_NAME, qtGrammarURL);
+    params.put(Transducer.TRANSD_ENCODING_PARAMETER_NAME, "UTF-8");
+    if (qtTransducer == null) {
+      features = Factory.newFeatureMap();
+      Gate.setHiddenAttribute(features, true);
+      qtTransducer = (Transducer)Factory.createResource("gate.creole.Transducer",
+              params, features);
+      qtTransducer.setName("PronominalCoref-QT " + System.currentTimeMillis());
+    }
+    else {
+      qtTransducer.setParameterValues(params);
+      qtTransducer.reInit();
+    }
+    
 
     //2. initialise pleonastic transducer
     URL pleonGrammarURL = null;
@@ -153,35 +154,30 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     catch(MalformedURLException mue) {
       throw new ResourceInstantiationException(mue);
     }
-    this.pleonTransducer.setGrammarURL(pleonGrammarURL);
-    this.pleonTransducer.setEncoding("UTF-8");
-    this.pleonTransducer.init();
-
+    params = Factory.newFeatureMap();
+    params.put(Transducer.TRANSD_GRAMMAR_URL_PARAMETER_NAME, pleonGrammarURL);
+    params.put(Transducer.TRANSD_ENCODING_PARAMETER_NAME, "UTF-8");
+    if (pleonTransducer == null) {
+      features = Factory.newFeatureMap();
+      Gate.setHiddenAttribute(features, true);
+      pleonTransducer = (Transducer)Factory.createResource("gate.creole.Transducer",
+              params, features);
+      pleonTransducer.setName("PronominalCoref-Pleon " + System.currentTimeMillis());
+    }
+    else {
+      pleonTransducer.setParameterValues(params);
+      pleonTransducer.reInit();
+    }
+    
     return this;
   } // init()
 
-  /**
-   * Reinitialises the processing resource. After calling this method the
-   * resource should be in the state it is after calling init.
-   * If the resource depends on external resources (such as rules files) then
-   * the resource will re-read those resources. If the data used to create
-   * the resource has changed since the resource has been created then the
-   * resource will change too after calling reInit().
-  */
   @Override
-  public void reInit() throws ResourceInstantiationException {
-
-    if (null != this.qtTransducer) {
-      this.qtTransducer.reInit();
-    }
-
-    if (null != this.pleonTransducer) {
-      this.pleonTransducer.reInit();
-    }
-
-    init();
-  } // reInit()
-
+  public void cleanup() {
+    super.cleanup();
+    Factory.deleteResource(qtTransducer);
+    Factory.deleteResource(pleonTransducer);
+  }
 
   /** Set the document to run on. */
   @Override
@@ -191,8 +187,8 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 //    assert (null != newDocument);
 
     //1. set doc for aggregated components
-    this.qtTransducer.setDocument(newDocument);
-    this.pleonTransducer.setDocument(newDocument);
+    qtTransducer.setDocument(newDocument);
+    pleonTransducer.setDocument(newDocument);
 
     //3. delegate
     super.setDocument(newDocument);

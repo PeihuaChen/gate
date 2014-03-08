@@ -71,12 +71,10 @@ public class Coreferencer extends AbstractLanguageAnalyser implements
   @Override
   public Resource init() throws ResourceInstantiationException {
 
-    Resource result = super.init();
-
     // load all submodules
-    this.pronominalModule.init();
+    pronominalModule.init();
 
-    return result;
+    return this;
   } // init()
 
   /**
@@ -100,6 +98,12 @@ public class Coreferencer extends AbstractLanguageAnalyser implements
 
     this.pronominalModule.setDocument(newDocument);
     super.setDocument(newDocument);
+  }
+  
+  @Override
+  public void cleanup() {
+    super.cleanup();
+    pronominalModule.cleanup();
   }
 
   /** --- */
