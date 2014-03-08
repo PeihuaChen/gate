@@ -22,6 +22,9 @@ import gate.ProcessingResource;
  * Events fired by controllers.
  */
 public class ControllerEvent extends GateEvent{
+
+  private static final long serialVersionUID = 7881276383734235706L;
+
   public ControllerEvent(Object source, int type, ProcessingResource pr){
     super(source, type);
     this.pr = pr;

@@ -22,8 +22,7 @@ import java.util.*;
     */
 class FSMState implements java.io.Serializable {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = -8044319707799787043L;
 
   /** Creates a new FSMState belonging to a specified tokeniser
     * @param owner the tokeniser that contains this new state
@@ -38,7 +37,7 @@ class FSMState implements java.io.Serializable {
     * As this state can belong to a non-deterministic automaton, the result
     * will be a set.
     */
-  Set nextSet(UnicodeType type) {
+  Set<FSMState> nextSet(UnicodeType type) {
     if(null == type) return transitionFunction[SimpleTokeniser.maxTypeId];
     else return transitionFunction[type.type];
   } // nextSet(UnicodeType type)
@@ -48,7 +47,7 @@ class FSMState implements java.io.Serializable {
     * As this state can belong to a non-deterministic automaton, the result
     * will be a set.
     */
-  Set nextSet(int type) {
+  Set<FSMState> nextSet(int type) {
     return transitionFunction[type];
   } // nextSet(int type)
 
@@ -69,7 +68,7 @@ class FSMState implements java.io.Serializable {
     */
   void put(int index, FSMState state) {
     if(null == transitionFunction[index])
-      transitionFunction[index] = new HashSet();
+      transitionFunction[index] = new HashSet<FSMState>();
     transitionFunction[index].add(state);
   } // put(int index, FSMState state)
 
@@ -90,8 +89,8 @@ class FSMState implements java.io.Serializable {
   String getEdgesGML() {
 ///    String res = "";
     StringBuffer res = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
-    Set nextSet;
-    Iterator nextSetIter;
+    Set<FSMState> nextSet;
+    Iterator<FSMState> nextSetIter;
     FSMState nextState;
 
     for(int i = 0; i <= SimpleTokeniser.maxTypeId; i++){
@@ -99,7 +98,7 @@ class FSMState implements java.io.Serializable {
       if(null != nextSet){
         nextSetIter = nextSet.iterator();
         while(nextSetIter.hasNext()){
-          nextState = (FSMState)nextSetIter.next();
+          nextState = nextSetIter.next();
 /*          res += "edge [ source " + myIndex +
           " target " + nextState.getIndex() +
           " label \"";
@@ -127,7 +126,8 @@ class FSMState implements java.io.Serializable {
     * (the ids used internally by the tokeniser for the Unicode types) to sets
     * of states.
     */
-  Set[] transitionFunction = new Set[SimpleTokeniser.maxTypeId + 1];
+  @SuppressWarnings("unchecked")
+  Set<FSMState>[] transitionFunction = new Set[SimpleTokeniser.maxTypeId + 1];
 
   /** The RHS string value from which the annotation associated to
     * final states is constructed.

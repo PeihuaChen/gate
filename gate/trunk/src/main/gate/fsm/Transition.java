@@ -16,12 +16,13 @@
 
 package gate.fsm;
 
-import java.io.Serializable;
-import java.util.LinkedList;
-
 import gate.Annotation;
 import gate.jape.BasicPatternElement;
 import gate.jape.Constraint;
+
+import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
   * This class implements a Finite State Machine transition.
@@ -36,11 +37,11 @@ import gate.jape.Constraint;
 public class Transition implements Serializable {
 */
 // >>> DAM, TransArray optimzation, now implements the Comparable interface
-public class Transition implements Serializable, Comparable {
-// >>> DAM, end
+public class Transition implements Serializable, Comparable<Transition> {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = 5970884178025357306L;
+
+// >>> DAM, end
 
   /**
     * Default constructor. Creates a new transition with a new unique index.
@@ -57,7 +58,7 @@ public class Transition implements Serializable, Comparable {
     * @param state the target state of this transition
     */
   public Transition(BasicPatternElement constraints, State state) {
-    this(constraints, state, new LinkedList());
+    this(constraints, state, new LinkedList<String>());
   }
 
   /**
@@ -66,7 +67,7 @@ public class Transition implements Serializable, Comparable {
     * (aka annotations).
     */
   public Transition(BasicPatternElement constraints, State state,
-                    LinkedList bindings) {
+                    List<String> bindings) {
     this();
     this.constraints = constraints;
     target = state;
@@ -174,7 +175,7 @@ public class Transition implements Serializable, Comparable {
   /**
     *  Returns the list of bindings associated to this transition
     */
-  public LinkedList getBindings(){ return bindings; }
+  public List<String> getBindings(){ return bindings; }
 
   /**
     * The constraints on this transition.
@@ -189,10 +190,8 @@ public class Transition implements Serializable, Comparable {
   /**
     * A list with all the labels associated to the annotations recognized by
     * this transition.
-    * We need to use the actual object and not the interface (java.util.List)
-    * because we need this object to be cloneable
     */
-  private LinkedList bindings;
+  private List<String> bindings;
 
   /** The unique index of this transition. This value is not used by any of
     * the algorithms. It is only provided as a convenient method of identifying
@@ -207,11 +206,10 @@ public class Transition implements Serializable, Comparable {
 
 // >>> DAM, TransArray optimzation, now implements the Comparable interface
   @Override
-  public int compareTo(Object o)
+  public int compareTo(Transition t)
   throws ClassCastException
   {
-    if (!(o instanceof Transition)) throw new ClassCastException("gate.frm.Transition(compareTo)");
-    return myIndex - ((Transition)o).myIndex;
+    return myIndex - t.myIndex;
   }
 // >>> DAM, end
 } // Transition

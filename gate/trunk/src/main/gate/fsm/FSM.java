@@ -29,9 +29,11 @@ import static gate.jape.KleeneOperator.Type.*;
   */
 public class FSM implements JapeConstants {
   
-  private ArrayList<RuleTime> ruleTimes = new ArrayList<RuleTime>();
+  private static final long serialVersionUID = -7088856970776558801L;
   
-  public ArrayList<RuleTime> getRuleTimes() {
+  private List<RuleTime> ruleTimes = new ArrayList<RuleTime>();
+  
+  public List<RuleTime> getRuleTimes() {
     return ruleTimes;
   }
 
@@ -75,10 +77,10 @@ public class FSM implements JapeConstants {
    * Do the work involved in creating an FSM from a PrioritisedRuleList.
    */
   protected void addRules(PrioritisedRuleList rules) {
-    Iterator rulesEnum = rules.iterator();
+    Iterator<Rule> rulesEnum = rules.iterator();
 
     while(rulesEnum.hasNext()){
-      FSM ruleFSM = spawn((Rule) rulesEnum.next());
+      FSM ruleFSM = spawn(rulesEnum.next());
 
       //added by Karter start -> JapeDebugger
       ruleHash.putAll(ruleFSM.ruleHash);
@@ -343,6 +345,7 @@ public class FSM implements JapeConstants {
   private State generateStates(State startState, ComplexPatternElement cpe,
           LinkedList<String> labels) {
     //create a copy
+    @SuppressWarnings("unchecked")
     LinkedList<String> newBindings = (LinkedList<String>)labels.clone();
     String localLabel = cpe.getBindingName ();
 
@@ -425,8 +428,8 @@ public class FSM implements JapeConstants {
   public void eliminateVoidTransitions() {
 
     dStates.clear(); //kalina: replaced from new HashSet()
-    LinkedList<AbstractSet<State>> unmarkedDStates = new LinkedList<AbstractSet<State>>();
-    AbstractSet<State> currentDState = new HashSet<State>();
+    LinkedList<Set<State>> unmarkedDStates = new LinkedList<Set<State>>();
+    Set<State> currentDState = new HashSet<State>();
     //kalina: prefer clear coz faster than init()
     newStates.clear();
 
@@ -441,11 +444,11 @@ public class FSM implements JapeConstants {
     newStates.put(currentDState, initialState);
 
     // find out if the new state is a final one
-    Iterator innerStatesIter = currentDState.iterator();
+    Iterator<State> innerStatesIter = currentDState.iterator();
     RightHandSide action = null;
 
     while(innerStatesIter.hasNext()){
-      State currentInnerState = (State)innerStatesIter.next();
+      State currentInnerState = innerStatesIter.next();
       if(currentInnerState.isFinal()){
         action = currentInnerState.getAction();
         initialState.setAction(action);
@@ -457,18 +460,18 @@ public class FSM implements JapeConstants {
 
     while(!unmarkedDStates.isEmpty()) {
       currentDState = unmarkedDStates.removeFirst();
-      Iterator insideStatesIter = currentDState.iterator();
+      Iterator<State> insideStatesIter = currentDState.iterator();
 
       while(insideStatesIter.hasNext()) {
-        State innerState = (State)insideStatesIter.next();
-        Iterator transIter = innerState.getTransitions().iterator();
+        State innerState = insideStatesIter.next();
+        Iterator<Transition> transIter = innerState.getTransitions().iterator();
 
         while(transIter.hasNext()) {
-          Transition currentTrans = (Transition)transIter.next();
+          Transition currentTrans = transIter.next();
 
           if(currentTrans.getConstraints() !=null) {
             State target = currentTrans.getTarget();
-            AbstractSet<State> newDState = new HashSet<State>();
+            Set<State> newDState = new HashSet<State>();
             newDState.add(target);
             newDState = lambdaClosure(newDState);
 
@@ -481,7 +484,7 @@ public class FSM implements JapeConstants {
               //find out if the new state is a final one
               innerStatesIter = newDState.iterator();
               while(innerStatesIter.hasNext()) {
-                State currentInnerState = (State)innerStatesIter.next();
+                State currentInnerState = innerStatesIter.next();
 
                 if(currentInnerState.isFinal()) {
                   newState.setAction(
@@ -535,14 +538,14 @@ public class FSM implements JapeConstants {
     * @return a set containing all the states accessible from this state via
     * transitions that bear no restrictions.
     */
-  private AbstractSet<State> lambdaClosure(AbstractSet<State> s) {
+  private Set<State> lambdaClosure(Set<State> s) {
     // the stack/queue used by the algorithm
     LinkedList<State> list = new LinkedList<State>(s);
 
     // the set to be returned
-    AbstractSet<State> lambdaClosure = new HashSet<State>(s);
+    Set<State> lambdaClosure = new HashSet<State>(s);
     State top;
-    Iterator transIter;
+    Iterator<Transition> transIter;
     Transition currentTransition;
     State currentState;
     while(!list.isEmpty()){
@@ -550,7 +553,7 @@ public class FSM implements JapeConstants {
       transIter = top.getTransitions().iterator();
 
       while(transIter.hasNext()){
-        currentTransition = (Transition)transIter.next();
+        currentTransition = transIter.next();
 
         if(currentTransition.getConstraints() == null){
           currentState = currentTransition.getTarget();
@@ -717,9 +720,9 @@ public class FSM implements JapeConstants {
     StringBuffer nodes = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE),
                  edges = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
 
-    Iterator stateIter = allStates.iterator();
+    Iterator<State> stateIter = allStates.iterator();
     while (stateIter.hasNext()){
-      State currentState = (State)stateIter.next();
+      State currentState = stateIter.next();
       int stateIndex = currentState.getIndex();
         nodes.append("node[ id ");
         nodes.append(stateIndex);
@@ -742,7 +745,7 @@ public class FSM implements JapeConstants {
   @Override
   public String toString(){
     String res = "Starting from:" + initialState.getIndex() + "\n";
-    Iterator stateIter = allStates.iterator();
+    Iterator<State> stateIter = allStates.iterator();
     while (stateIter.hasNext()){
       res += "\n\n" + stateIter.next();
     }
@@ -762,11 +765,11 @@ public class FSM implements JapeConstants {
   /**
     * The set of states for this FSM
     */
-  private transient Collection allStates =  new HashSet();
+  private transient Collection<State> allStates =  new HashSet<State>();
 
   //kalina: added this member here to minimise HashMap allocation
-  private transient Map<AbstractSet,State> newStates = new HashMap<AbstractSet,State>();
-  private transient Set<AbstractSet> dStates = new HashSet<AbstractSet>();
+  private transient Map<Set<State>,State> newStates = new HashMap<Set<State>,State>();
+  private transient Set<Set<State>> dStates = new HashSet<Set<State>>();
 
 
   //added by Karter start

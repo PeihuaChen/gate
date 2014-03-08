@@ -22,6 +22,8 @@ import gate.*;
  */
 public class CreoleEvent extends GateEvent {
 
+  private static final long serialVersionUID = -6834347398037784548L;
+
   /**
    * Constructor
    * @param res the {@link gate.Resource} that has been (un)loaded

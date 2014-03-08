@@ -22,6 +22,8 @@ import gate.Resource;
  */
 public class DatastoreEvent extends GateEvent {
 
+  private static final long serialVersionUID = 1807421127920552348L;
+
   /**
    * Constructor.
    * @param source the datastore that originated the event.

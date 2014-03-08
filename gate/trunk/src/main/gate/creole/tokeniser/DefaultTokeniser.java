@@ -28,6 +28,8 @@ import gate.util.Out;
 @CreoleResource(name = "ANNIE English Tokeniser", comment = "A customisable English tokeniser.", helpURL = "http://gate.ac.uk/userguide/sec:annie:tokeniser", icon = "tokeniser")
 public class DefaultTokeniser extends AbstractLanguageAnalyser implements Benchmarkable {
 
+  private static final long serialVersionUID = 3860943928124433852L;
+
   public static final String
     DEF_TOK_DOCUMENT_PARAMETER_NAME = "document";
 

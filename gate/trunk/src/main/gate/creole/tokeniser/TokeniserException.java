@@ -20,8 +20,8 @@ import gate.util.GateException;
 
 /** The top level exception for all the exceptions fired by the tokeniser */
 public class TokeniserException extends GateException {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+
+  private static final long serialVersionUID = 4372777620099537935L;
 
   public TokeniserException(String text){ super(text); }
 

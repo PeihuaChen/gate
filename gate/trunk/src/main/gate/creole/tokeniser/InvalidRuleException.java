@@ -19,8 +19,8 @@ package gate.creole.tokeniser;
 /** Fired when an invalid tokeniser rule is found
   */
 public class InvalidRuleException extends TokeniserException {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+
+  private static final long serialVersionUID = 171132971054225662L;
 
   public InvalidRuleException(String s) {
     super(s);

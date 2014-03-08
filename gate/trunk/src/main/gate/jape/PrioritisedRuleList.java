@@ -33,15 +33,14 @@ import java.util.Iterator;
   * insertion of elements at any point. The highest priority rule is the
   * first in the list, which may be accessed by <CODE>front()</CODE>.
   */
-public class PrioritisedRuleList extends ArrayList implements java.io.Serializable
+public class PrioritisedRuleList extends ArrayList<Rule> implements java.io.Serializable
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = 1603854971047597460L;
 
   /** Adds a rule in order. Used for non-matched rules. Implements the
     * ordering based on priority/position.
     */
-  public synchronized void add(Rule newRule) {
+  public synchronized boolean add(Rule newRule) {
     /* for each rule,
      *   if it is higher priority, continue;
      *   else if it is same priority
@@ -50,10 +49,10 @@ public class PrioritisedRuleList extends ArrayList implements java.io.Serializab
      *   else (it is lower priority) break
      * insert newRule before current position (which may be finish)
      */
-    Iterator iterator = this.iterator();
+    Iterator<Rule> iterator = this.iterator();
     int i = 0;
     for(  ; iterator.hasNext(); i++) {
-      Rule rule	=	(Rule) iterator.next();
+      Rule rule	=	iterator.next();
       int rulePriority =	rule.getPriority();
       int newRulePriority =	newRule.getPriority();
       int rulePosition =	rule.getPosition();
@@ -74,6 +73,8 @@ public class PrioritisedRuleList extends ArrayList implements java.io.Serializab
 
 
     this.add(i, newRule);
+    
+    return true;
   } // add(Rule)
 
 
