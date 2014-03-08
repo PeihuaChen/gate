@@ -25,6 +25,8 @@ import gate.util.InvalidOffsetException;
 /** Represents a single named entity */
 public class EntityDescriptor implements Serializable{
 
+  private static final long serialVersionUID = 3651574462048131137L;
+
   /** Constructs a new entity descriptor */
   public EntityDescriptor(String string, String category, int start, int end) {
     this.string = normaliseString(string);

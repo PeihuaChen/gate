@@ -1,6 +1,7 @@
 package gate.creole.morph;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>Title: StringSet </p>
@@ -13,13 +14,13 @@ import java.util.ArrayList;
 public class StringSet extends Variable {
 
   private String varName;
-  private ArrayList variables;
+  private List<String> variables;
 
   /**
    * Constructor
    */
   public StringSet() {
-    variables = new ArrayList();
+    variables = new ArrayList<String>();
   }
 
   /**
@@ -43,7 +44,7 @@ public class StringSet extends Variable {
   public String next() {
     if(pointer<variables.size()) {
       pointer++;
-      return (String)(variables.get(pointer-1));
+      return variables.get(pointer-1);
     } else {
       return null;
     }

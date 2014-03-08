@@ -5,6 +5,7 @@ import gate.creole.ResourceInstantiationException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 
 public class PatternParser {
 
@@ -107,10 +108,10 @@ public class PatternParser {
 		varInst.resetPointer();
 	}
 
-	public static ArrayList parsePattern(String q1) {
+	public static List<String> parsePattern(String q1) {
 
 		// arraylist to return - will contain all the OR normalized queries
-		ArrayList patterns = new ArrayList();
+		List<String> patterns = new ArrayList<String>();
 
 		// remove all extra spaces from the query
 		q1 = q1.trim();
@@ -123,7 +124,7 @@ public class PatternParser {
 
 		for (int index = 0; index < patterns.size(); index++) {
 			// get the query to be parsed
-			String query = (String) patterns.get(index);
+			String query = patterns.get(index);
 
 			// current character and the previous character
 			char ch = ' ', pre = ' ';
@@ -153,7 +154,7 @@ public class PatternParser {
 					int brClPos = findBracketClosingPosition(i + 1, query);
 
 					// see if there are any OR operators in it
-					ArrayList orTokens = findOrTokens(query.substring(i + 1,
+					List<String> orTokens = findOrTokens(query.substring(i + 1,
 							brClPos));
 
 					// orTokens will have
@@ -179,7 +180,7 @@ public class PatternParser {
 								// text as ""
 								text = "";
 							} else {
-								text = (String) patterns
+								text = patterns
 										.get(patterns.size() - 1);
 							}
 						}
@@ -255,9 +256,9 @@ public class PatternParser {
 			}
 		}
 
-		ArrayList queriesToReturn = new ArrayList();
+		List<String> queriesToReturn = new ArrayList<String>();
 		for (int i = 0; i < patterns.size(); i++) {
-			String q = (String) patterns.get(i);
+			String q = patterns.get(i);
 			if (q.trim().length() == 0) {
 				continue;
 			} else if (queriesToReturn.contains(q.trim())) {
@@ -268,7 +269,7 @@ public class PatternParser {
 		}
 
 		for (int i = 0; i < queriesToReturn.size(); i++) {
-			String s = (String) queriesToReturn.get(i);
+			String s = queriesToReturn.get(i);
 			s = s.replaceAll("<", "(");
 			s = s.replaceAll(">", ")");
 			s = s.substring(1, s.length() - 1);
@@ -314,19 +315,19 @@ public class PatternParser {
 		return false;
 	}
 
-	public static ArrayList writeTokens(ArrayList tokens, ArrayList queries,
+	public static List<String> writeTokens(List<String> tokens, List<String> queries,
 			int dupliSize) {
 		if (dupliSize == 0)
 			dupliSize = 1;
 
-		ArrayList qToRemove = new ArrayList();
+		List<String> qToRemove = new ArrayList<String>();
 		for (int j = 0; j < dupliSize; j++) {
 			for (int i = 1; i <= tokens.size(); i++) {
-				String token = (String) tokens.get(i - 1);
+				String token = tokens.get(i - 1);
 				if (token.trim().equals("{__o__}")) {
 					token = " ";
 				}
-				String s = (String) queries.get(queries.size()
+				String s = queries.get(queries.size()
 						- (j * tokens.size() + i));
 				qToRemove.add(s);
 				s += token;
@@ -342,12 +343,12 @@ public class PatternParser {
 		return queries;
 	}
 
-	public static ArrayList duplicate(ArrayList queries, String s,
+	public static List<String> duplicate(List<String> queries, String s,
 			int dupliSize, int no) {
 		if (s == null)
 			s = "";
 
-		ArrayList strings = new ArrayList();
+		List<String> strings = new ArrayList<String>();
 		if (dupliSize == 0) {
 			strings.add(s);
 		} else {
@@ -365,11 +366,11 @@ public class PatternParser {
 		return queries;
 	}
 
-	public static ArrayList findOrTokens(String query) {
+	public static List<String> findOrTokens(String query) {
 		int balance = 0;
 		char pre = ' ';
 		char ch = ' ';
-		ArrayList ors = new ArrayList();
+		List<String> ors = new ArrayList<String>();
 
 		String s = "";
 		for (int i = 0; i < query.length(); i++) {
@@ -430,18 +431,18 @@ public class PatternParser {
 		return -1;
 	}
 
-	public static ArrayList writeCharInAll(char c, int no, ArrayList queries) {
+	public static List<String> writeCharInAll(char c, int no, List<String> queries) {
 		for (int i = 0; i < no; i++) {
-			String s = (String) queries.get(queries.size() - (i + 1));
+			String s = queries.get(queries.size() - (i + 1));
 			s += "" + c;
 			queries.set(queries.size() - (i + 1), s);
 		}
 		return queries;
 	}
 
-	public static ArrayList writeStringInAll(String c, int no, ArrayList queries) {
+	public static List<String> writeStringInAll(String c, int no, List<String> queries) {
 		for (int i = 0; i < no; i++) {
-			String s = (String) queries.get(queries.size() - (i + 1));
+			String s = queries.get(queries.size() - (i + 1));
 			s += "" + c;
 			queries.set(queries.size() - (i + 1), s);
 		}

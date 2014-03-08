@@ -24,13 +24,15 @@ import gate.*;
 /** Representing a set of entities found in a single text file.
   * Each member a the set is an EntityDescriptor
   */
-public class EntitySet extends AbstractSet implements Set, Serializable {
+public class EntitySet extends AbstractSet<EntityDescriptor> implements Serializable {
+
+  private static final long serialVersionUID = -4507459923659885322L;
 
   /** Constructs an entity set from a Gate annotation set*/
   public EntitySet(String fileName, Document document,
                    AnnotationSet annotationSet) {
     this.fileName = fileName;
-    myEntities = new HashSet();
+    myEntities = new HashSet<EntityDescriptor>();
     if(annotationSet != null){
       Iterator<Annotation> annIter = annotationSet.iterator();
       while(annIter.hasNext()){
@@ -59,7 +61,7 @@ public class EntitySet extends AbstractSet implements Set, Serializable {
     res.append(fileName);
     res.append("\n");
 
-    Iterator entIter = myEntities.iterator();
+    Iterator<EntityDescriptor> entIter = myEntities.iterator();
     while(entIter.hasNext()){
 ///      res += entIter.next().toString() + "\n";
       res.append(entIter.next().toString());
@@ -72,8 +74,8 @@ public class EntitySet extends AbstractSet implements Set, Serializable {
   public int size(){ return myEntities.size();}
 
   @Override
-  public Iterator iterator() {return myEntities.iterator();}
+  public Iterator<EntityDescriptor> iterator() {return myEntities.iterator();}
 
   String fileName;
-  Set myEntities;
+  Set<EntityDescriptor> myEntities;
 }

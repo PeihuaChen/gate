@@ -410,7 +410,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
    * when reading the list.
    * 
    * @param index
-   * @param o
+   * @param ln
    */
   @Override
   public void add(int index, LinearNode ln) {
