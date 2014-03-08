@@ -20,6 +20,8 @@ package gate.creole.gazetteer;
 public abstract class AbstractOntoGazetteer
 extends AbstractGazetteer implements OntoGazetteer {
 
+  private static final long serialVersionUID = 4883216941890639412L;
+
   /** the url of the mapping definition */
   protected java.net.URL mappingURL;
 

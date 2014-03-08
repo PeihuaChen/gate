@@ -37,17 +37,16 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 
-/** Represents a Linear Definition [lists.def] file <br>
- *  The normal usage of the class will be
- *  * construct it
- *  * setURL
- *  * load
- *  * change
- *  * store
+/**
+ * Represents a Linear Definition [lists.def] file <br>
+ * The normal usage of the class will be * construct it * setURL * load
+ * * change * store
  */
 public class LinearDefinition extends gate.creole.AbstractLanguageResource
-                              implements List {
+                                                                          implements
+                                                                          List<LinearNode> {
 
   private static final long serialVersionUID = 4050479036709221175L;
 
@@ -55,151 +54,178 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   private final static String ENCODING = "UTF-8";
 
   /** the list of nodes */
-  private List nodes = new ArrayList();
+  private List<LinearNode> nodes = new ArrayList<LinearNode>();
 
   /** the URL of the definition */
   private URL url;
 
-  /** set of lists as strings*/
-  private List lists = new ArrayList();
+  /** set of lists as strings */
+  private List<String> lists = new ArrayList<String>();
 
-  /**the encoding of the list */
+  /** the encoding of the list */
   private String encoding = "UTF-8";
 
   /** a mapping between a list and a node */
-  private Map nodesByList = new HashMap();
+  private Map<String, LinearNode> nodesByList =
+          new HashMap<String, LinearNode>();
 
-  /** a map of gazetteer lists by nodes. this is loaded on loadLists*/
-  private Map gazListsByNode = new HashMap();
+  /** a map of gazetteer lists by nodes. this is loaded on loadLists */
+  private Map<LinearNode, GazetteerList> gazListsByNode =
+          new HashMap<LinearNode, GazetteerList>();
 
   /** flag whether the definition has been modified after loading */
   private boolean isModified = false;
 
-  /** the separator used to delimit feature name-value pairs in gazetteer lists */
+  /**
+   * the separator used to delimit feature name-value pairs in gazetteer
+   * lists
+   */
   private String separator;
 
   public LinearDefinition() {
   }
 
-  /** Sets the encoding of the linear def
-   *  @param encod the encoding to be set */
+  /**
+   * Sets the encoding of the linear def
+   * 
+   * @param encod the encoding to be set
+   */
   public void setEncoding(String encod) {
     encoding = encod;
   }
 
-  /** Gets the encoding of the linear def
-   *  @return the encoding of the list*/
+  /**
+   * Gets the encoding of the linear def
+   * 
+   * @return the encoding of the list
+   */
   public String getEncoding() {
     return encoding;
   }
 
   /**
    * Loads the gazetteer lists and maps them to the nodes
+   * 
    * @return a map of nodes vs GazetteerLists
-   * @throws ResourceInstantiationException when the resource cannot be created
+   * @throws ResourceInstantiationException when the resource cannot be
+   *           created
    */
-  public Map loadLists()
-      throws ResourceInstantiationException {
+  public Map<LinearNode, GazetteerList> loadLists()
+          throws ResourceInstantiationException {
     return loadLists(false);
   }
 
   /**
    * Loads the gazetteer lists and maps them to the nodes
+   * 
    * @return a map of nodes vs GazetteerLists
    * @param isOrdered true if the feature maps used should be ordered
-   * @throws ResourceInstantiationException when the resource cannot be created
+   * @throws ResourceInstantiationException when the resource cannot be
+   *           created
    */
-  public Map loadLists(boolean isOrdered)
-      throws ResourceInstantiationException {
+  public Map<LinearNode, GazetteerList> loadLists(boolean isOrdered)
+          throws ResourceInstantiationException {
     try {
-      gazListsByNode = new HashMap();
-      Iterator inodes = nodes.iterator();
-      while (inodes.hasNext()) {
-        LinearNode node = (LinearNode)inodes.next();
+      gazListsByNode = new HashMap<LinearNode, GazetteerList>();
+      Iterator<LinearNode> inodes = nodes.iterator();
+      while(inodes.hasNext()) {
+        LinearNode node = inodes.next();
 
         GazetteerList list = new GazetteerList();
         list.setSeparator(separator);
-        URL lurl = new URL(url,node.getList());
+        URL lurl = new URL(url, node.getList());
         list.setURL(lurl);
         list.setEncoding(encoding);
         list.load(isOrdered);
 
-        gazListsByNode.put(node,list);
+        gazListsByNode.put(node, list);
       } // while inodes
-    } catch (Exception ex) {
+    } catch(Exception ex) {
       throw new ResourceInstantiationException(ex);
     }
     return gazListsByNode;
-  }  // loadLists()
+  } // loadLists()
 
-  /** Loads a single gazetteer list given a name
-   *  @param listName the name of the list to be loaded
-   *  @return the loaded gazetteer list
-   *  @throws ResourceInstantiationException*/
+  /**
+   * Loads a single gazetteer list given a name
+   * 
+   * @param listName the name of the list to be loaded
+   * @return the loaded gazetteer list
+   * @throws ResourceInstantiationException
+   */
   public GazetteerList loadSingleList(String listName)
-  throws ResourceInstantiationException {
+          throws ResourceInstantiationException {
     return loadSingleList(listName, false);
   }
 
-  /** Loads a single gazetteer list given a name
-   *  @param listName the name of the list to be loaded
-   *  @param isOrdered true if the feature maps used should be ordered
-   *  @return the loaded gazetteer list
-   *  @throws ResourceInstantiationException*/
+  /**
+   * Loads a single gazetteer list given a name
+   * 
+   * @param listName the name of the list to be loaded
+   * @param isOrdered true if the feature maps used should be ordered
+   * @return the loaded gazetteer list
+   * @throws ResourceInstantiationException
+   */
   public GazetteerList loadSingleList(String listName, boolean isOrdered)
-  throws ResourceInstantiationException {
+          throws ResourceInstantiationException {
     GazetteerList list = new GazetteerList();
     list.setSeparator(separator);
     try {
-      
+
       try {
-        URL lurl = new URL(url,listName);
+        URL lurl = new URL(url, listName);
         list.setURL(lurl);
         list.load(isOrdered);
-      } catch (Exception x) {
+      } catch(Exception x) {
         String path = url.getPath();
         int slash = path.lastIndexOf("/");
-        if (-1 != slash ) {
-          path = path.substring(0,slash+1);
+        if(-1 != slash) {
+          path = path.substring(0, slash + 1);
         }
 
-        File f = new File(path+listName);
+        File f = new File(path + listName);
 
-        if (!f.exists())
-          f.createNewFile();
+        if(!f.exists()) f.createNewFile();
 
-        URL lurl = new URL(url,listName);
+        URL lurl = new URL(url, listName);
         list.setURL(lurl);
         list.load(isOrdered);
 
       }
 
-
-
-    } catch (MalformedURLException murle ) {
+    } catch(MalformedURLException murle) {
       throw new ResourceInstantiationException(murle);
-    } catch (IOException ioex) {
+    } catch(IOException ioex) {
       throw new ResourceInstantiationException(ioex);
     }
     return list;
   } // loadSingleList
 
-  /**Gets the lists by node map
-   * @return a map of nodes vs lists*/
-  public Map getListsByNode(){
+  /**
+   * Gets the lists by node map
+   * 
+   * @return a map of nodes vs lists
+   */
+  public Map<LinearNode, GazetteerList> getListsByNode() {
     return gazListsByNode;
   }
 
-  /** Gets a map of lists names vs nodes
-   *  @return a map of lists names vs nodes*/
-  public Map getNodesByListNames() {
-     return nodesByList;
+  /**
+   * Gets a map of lists names vs nodes
+   * 
+   * @return a map of lists names vs nodes
+   */
+  public Map<String, LinearNode> getNodesByListNames() {
+    return nodesByList;
   }
 
-  /**Gets the value of the isModified flag.
-   * @return true if the definition has been modified    */
+  /**
+   * Gets the value of the isModified flag.
+   * 
+   * @return true if the definition has been modified
+   */
   @Override
-  public boolean  isModified() {
+  public boolean isModified() {
     return isModified;
   }
 
@@ -207,15 +233,20 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     isModified = modified;
   }
 
-  /**Gets the url of this linear definition
-   * @return the url of this linear definition   */
+  /**
+   * Gets the url of this linear definition
+   * 
+   * @return the url of this linear definition
+   */
   public URL getURL() {
     return url;
   }
 
-
-  /**Sets the url of this linear definition
-   * @param aUrl the url of this linear definition   */
+  /**
+   * Sets the url of this linear definition
+   * 
+   * @param aUrl the url of this linear definition
+   */
   public void setURL(URL aUrl) {
     url = aUrl;
   }
@@ -224,55 +255,49 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
    * Loads linear definition if url is set
    */
   public void load() throws ResourceInstantiationException {
-    if (null == url) {
+    if(null == url) {
       throw new ResourceInstantiationException("URL not set (null).");
     }
+    BufferedReader defReader = null;
     try {
       if("file".equals(url.getProtocol())) {
         File definitionFile = Files.fileFromURL(url);
         // create an new definition file only if not existing
         definitionFile.createNewFile();
       }
-      BufferedReader defReader =
-      new BomStrippingInputStreamReader((url).openStream(), ENCODING);
+      defReader =
+              new BomStrippingInputStreamReader((url).openStream(), ENCODING);
 
       String line;
       LinearNode node;
-      while (null != (line = defReader.readLine())) {
+      while(null != (line = defReader.readLine())) {
         node = new LinearNode(line);
-        try {
-          this.add(node);
-        } catch (GateRuntimeException ex) {
-          // The add method cannot throw a checked exception because
-          // it implements the List interface. Therefore it throws
-          // a GateRuntimeException which we re-throw as a 
-          // ResourceInstnatiationException here
-          throw new ResourceInstantiationException(ex);
-        }
-      } //while
 
-      defReader.close();
+        this.add(node);
+
+      } // while
       isModified = false;
-    } catch (Exception x){
+    } catch(Exception x) {
       throw new ResourceInstantiationException(x);
+    } finally {
+      IOUtils.closeQuietly(defReader);
     }
   } // load();
 
   /**
    * Stores this to a definition file.
    */
-  public void store() throws ResourceInstantiationException{
-    if (null == url) {
+  public void store() throws ResourceInstantiationException {
+    if(null == url) {
       throw new ResourceInstantiationException("URL not set.(null)");
     }
     try {
-      
 
       File fileo = Files.fileFromURL(url);
       fileo.delete();
       BufferedWriter defWriter = new BufferedWriter(new FileWriter(fileo));
-      Iterator inodes = nodes.iterator();
-      while (inodes.hasNext()) {
+      Iterator<LinearNode> inodes = nodes.iterator();
+      while(inodes.hasNext()) {
         defWriter.write(inodes.next().toString());
         defWriter.newLine();
       }
@@ -285,75 +310,81 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   } // store();
 
   /**
-   * Gets gazetteer lists of this definition.
-   * note that a new list is created so the adding and removing of lists will
-   * not affect the internal members. Also there is no setLists method since the leading
-   * member of the class is nodes, and lists cannot be added individually without being
-   * associated with a node.
+   * Gets gazetteer lists of this definition. note that a new list is
+   * created so the adding and removing of lists will not affect the
+   * internal members. Also there is no setLists method since the
+   * leading member of the class is nodes, and lists cannot be added
+   * individually without being associated with a node.
+   * 
    * @return a list of the gazetteer lists names
    */
-  public List getLists() {
-    return new ArrayList(lists);
+  public List<String> getLists() {
+    return new ArrayList<String>(lists);
   }
 
-  /** get the nodes of the definition as a list
-   *  @return the list of nodes */
-  public List getNodes() {
-    return new ArrayList(nodes);
+  /**
+   * get the nodes of the definition as a list
+   * 
+   * @return the list of nodes
+   */
+  public List<LinearNode> getNodes() {
+    return new ArrayList<LinearNode>(nodes);
   }
 
-
-  /** Gets the set of all major types in this definition
-   * @return the set of all major types present in this definition*/
-  public Set getMajors() {
-    Set result = new HashSet();
-    for ( int i = 0 ; i < nodes.size() ; i++ )
-    {
-      String maj = ((LinearNode)nodes.get(i)).getMajorType();
-      if (null!= maj)
-        result.add(maj);
+  /**
+   * Gets the set of all major types in this definition
+   * 
+   * @return the set of all major types present in this definition
+   */
+  public Set<String> getMajors() {
+    Set<String> result = new HashSet<String>();
+    for(int i = 0; i < nodes.size(); i++) {
+      String maj = nodes.get(i).getMajorType();
+      if(null != maj) result.add(maj);
     }
     return result;
   } // getMajors
 
-  /** Gets the set of all minor types in this definition
-   * @return the set of all minor types present in this definition*/
-  public Set getMinors() {
-    Set result = new HashSet();
-    for ( int i = 0 ; i < nodes.size() ; i++ ) {
-      String min = ((LinearNode)nodes.get(i)).getMinorType();
-      if (null!=min)
-        result.add(min);
+  /**
+   * Gets the set of all minor types in this definition
+   * 
+   * @return the set of all minor types present in this definition
+   */
+  public Set<String> getMinors() {
+    Set<String> result = new HashSet<String>();
+    for(int i = 0; i < nodes.size(); i++) {
+      String min = nodes.get(i).getMinorType();
+      if(null != min) result.add(min);
     }
     result.add("");
     return result;
   } // getMinors()
 
-  /** Gets the set of all languages in this definition
-   * @return the set of all languages present in this definition*/
-  public Set getLanguages() {
-    Set result = new HashSet();
-    for ( int i = 0 ; i < nodes.size() ; i++ ) {
-      String lang = ((LinearNode)nodes.get(i)).getLanguage();
-      if (null!=lang)
-        result.add(lang);
+  /**
+   * Gets the set of all languages in this definition
+   * 
+   * @return the set of all languages present in this definition
+   */
+  public Set<String> getLanguages() {
+    Set<String> result = new HashSet<String>();
+    for(int i = 0; i < nodes.size(); i++) {
+      String lang = nodes.get(i).getLanguage();
+      if(null != lang) result.add(lang);
     }
     result.add("");
     return result;
   } // getMinors()
-
 
   /*---implementation of interface java.util.List---*/
   @Override
-  public boolean addAll(int index, Collection c) {
+  public boolean addAll(int index, Collection<? extends LinearNode> c) {
     int size = nodes.size();
-    Iterator iter = c.iterator();
-    Object o;
-    while (iter.hasNext()) {
+    Iterator<? extends LinearNode> iter = c.iterator();
+    LinearNode o;
+    while(iter.hasNext()) {
       o = iter.next();
-      if (o instanceof LinearNode)  {
-        add(index,o);
-      } // instance of linearnode
+      add(index, o);
+      // instance of linearnode
     } // while
 
     boolean result = (size != nodes.size());
@@ -362,50 +393,50 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   }
 
   @Override
-  public Object get(int index) {
+  public LinearNode get(int index) {
     return nodes.get(index);
   }
 
   @Override
-  public Object set(int index, Object element) {
-    throw new UnsupportedOperationException("this method has not been implemented");
+  public LinearNode set(int index, LinearNode element) {
+    throw new UnsupportedOperationException(
+            "this method has not been implemented");
   }
 
   /**
-   * Add a node to this LinearDefinition. 
+   * Add a node to this LinearDefinition.
    * <p>
-   * NOTE: this will throw a GateRuntimeException if anything goes
-   * wrong when reading the list.
+   * NOTE: this will throw a GateRuntimeException if anything goes wrong
+   * when reading the list.
+   * 
    * @param index
-   * @param o 
+   * @param o
    */
   @Override
-  public void add(int index, Object o) {
-    if (o instanceof LinearNode) {
-      String list = ((LinearNode)o).getList();
-      if (!nodesByList.containsKey(list)) {
-        try {
-          GazetteerList gl = loadSingleList(list);
-          gazListsByNode.put(o,gl);
-          nodes.add(index,o);
-          nodesByList.put(list,o);
-          lists.add(list);
-          isModified = true;
-        } catch (ResourceInstantiationException x) {
-          throw new GateRuntimeException("Error loading list: "+
-            list+": "+x.getMessage(),x);
-        }
-      } // if unique
-    } // if a linear node
+  public void add(int index, LinearNode ln) {
+    String list = ln.getList();
+    if(!nodesByList.containsKey(list)) {
+      try {
+        GazetteerList gl = loadSingleList(list);
+        gazListsByNode.put(ln, gl);
+        nodes.add(index, ln);
+        nodesByList.put(list, ln);
+        lists.add(list);
+        isModified = true;
+      } catch(ResourceInstantiationException x) {
+        throw new GateRuntimeException("Error loading list: " + list + ": "
+                + x.getMessage(), x);
+      }
+    } // if unique
   }
 
   @Override
-  public Object remove(int index) {
-    Object result = null;
+  public LinearNode remove(int index) {
+    LinearNode result = null;
     int size = nodes.size();
     result = nodes.remove(index);
-    if (null!=result) {
-      String list = ((LinearNode)result).getList();
+    if(null != result) {
+      String list = result.getList();
       lists.remove(list);
       nodesByList.remove(list);
       gazListsByNode.remove(result);
@@ -425,18 +456,18 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   }
 
   @Override
-  public ListIterator listIterator() {
+  public ListIterator<LinearNode> listIterator() {
     throw new UnsupportedOperationException("this method is not implemented");
   }
 
   @Override
-  public ListIterator listIterator(int index) {
+  public ListIterator<LinearNode> listIterator(int index) {
     throw new UnsupportedOperationException("this method is not implemented");
   }
 
   @Override
-  public List subList(int fromIndex, int toIndex) {
-    return nodes.subList(fromIndex,toIndex);
+  public List<LinearNode> subList(int fromIndex, int toIndex) {
+    return nodes.subList(fromIndex, toIndex);
   } // class SafeIterator
 
   @Override
@@ -455,7 +486,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   }
 
   @Override
-  public Iterator iterator() {
+  public Iterator<LinearNode> iterator() {
     return new SafeIterator();
   }
 
@@ -465,39 +496,39 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   }
 
   @Override
-  public Object[] toArray(Object[] a) {
+  public <T> T[] toArray(T[] a) {
     return nodes.toArray(a);
   }
 
   /**
-   * Adds a new node, only if its list is new and uniquely mapped to this node.
+   * Adds a new node, only if its list is new and uniquely mapped to
+   * this node.
    * <p>
    * NOTE: this will throw a GateRuntimeException if anything goes wrong
    * reading the list.
    * 
    * @param o a node
-   * @return true if the list of node is not already mapped with another node.
+   * @return true if the list of node is not already mapped with another
+   *         node.
    */
   @Override
-  public boolean add(Object o) {
+  public boolean add(LinearNode o) {
     boolean result = false;
-    if (o instanceof LinearNode) {
-      String list = ((LinearNode)o).getList();
-      if (!nodesByList.containsKey(list)) {
-        try {
-          GazetteerList gl = loadSingleList(list);
-          gazListsByNode.put(o,gl);
-          result = nodes.add(o);
-          nodesByList.put(list,o);
-          lists.add(list);
-          isModified=true;
-        } catch (ResourceInstantiationException x) {
-          throw new GateRuntimeException("Error loading list: "+
-            list+": "+x.getMessage(),x);
-          //result = false;
-        }
-      } // if unique
-    } // if a linear node
+    String list = o.getList();
+    if(!nodesByList.containsKey(list)) {
+      try {
+        GazetteerList gl = loadSingleList(list);
+        gazListsByNode.put(o, gl);
+        result = nodes.add(o);
+        nodesByList.put(list, o);
+        lists.add(list);
+        isModified = true;
+      } catch(ResourceInstantiationException x) {
+        throw new GateRuntimeException("Error loading list: " + list + ": "
+                + x.getMessage(), x);
+        // result = false;
+      }
+    } // if unique
     return result;
   } // add()
 
@@ -505,7 +536,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   public boolean remove(Object o) {
     boolean result = false;
     int size = nodes.size();
-    if (o instanceof LinearNode) {
+    if(o instanceof LinearNode) {
       result = nodes.remove(o);
       String list = ((LinearNode)o).getList();
       lists.remove(list);
@@ -517,57 +548,52 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   }// remove
 
   @Override
-  public boolean containsAll(Collection c) {
+  public boolean containsAll(Collection<?> c) {
     return nodes.containsAll(c);
   }
 
   @Override
-  public boolean addAll(Collection c) {
+  public boolean addAll(Collection<? extends LinearNode> c) {
     boolean result = false;
-    Iterator iter = c.iterator();
-    Object o;
-    while (iter.hasNext()) {
+    Iterator<? extends LinearNode> iter = c.iterator();
+    LinearNode o;
+    while(iter.hasNext()) {
       o = iter.next();
-      if (o instanceof LinearNode)  {
-        result |= add(o);
-      } // instance of linearnode
+      result |= add(o);
     } // while
     return result;
   } // addAll()
 
-
   @Override
-  public boolean removeAll(Collection c) {
+  public boolean removeAll(Collection<?> c) {
     boolean result = false;
-    Iterator iter = c.iterator();
+    Iterator<?> iter = c.iterator();
     Object o;
-    while (iter.hasNext()) {
+    while(iter.hasNext()) {
       o = iter.next();
       result |= remove(o);
     }
     return result;
   }// removeAll()
 
-
   @Override
-  public boolean retainAll(Collection c) {
+  public boolean retainAll(Collection<?> c) {
     int aprioriSize = nodes.size();
-    List scrap = new ArrayList();
+    List<LinearNode> scrap = new ArrayList<LinearNode>();
 
     LinearNode node;
-    Iterator inodes = nodes.iterator();
+    Iterator<LinearNode> inodes = nodes.iterator();
     while(inodes.hasNext()) {
-      node = (LinearNode) inodes.next();
-      if (c.contains(node)) {
+      node = inodes.next();
+      if(c.contains(node)) {
         scrap.add(node);
       }
-    } //for
+    } // for
 
     removeAll(scrap);
     isModified |= (aprioriSize != nodes.size());
     return (aprioriSize != nodes.size());
   }
-
 
   @Override
   public void clear() {
@@ -577,7 +603,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     gazListsByNode.clear();
     isModified = true;
   }
-  
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -606,21 +632,22 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
       if(other.nodesByList != null) return false;
     } else if(!nodesByList.equals(other.nodesByList)) return false;
     return true;
-  }  
+  }
 
- /*---end of implementation of interface java.util.List---*/
+  /*---end of implementation of interface java.util.List---*/
 
+  /*-----------internal classes -------------*/
 
+  /**
+   * SafeIterator class provides an iterator which is safe to be
+   * iterated and objects removed from it
+   */
+  private class SafeIterator implements Iterator<LinearNode> {
+    private Iterator<LinearNode> iter = LinearDefinition.this.nodes.iterator();
 
-
-
- /*-----------internal classes -------------*/
-
-/**SafeIterator class provides an iterator which is safe to be iterated and objects removed from it*/
-  private class SafeIterator implements Iterator {
-    private Iterator iter = LinearDefinition.this.nodes.iterator();
     private boolean removeCalled = false;
-    private Object last = null;
+
+    private LinearNode last = null;
 
     @Override
     public boolean hasNext() {
@@ -628,7 +655,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     }
 
     @Override
-    public Object next() {
+    public LinearNode next() {
       removeCalled = false;
       last = iter.next();
       return last;
@@ -636,7 +663,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
 
     @Override
     public void remove() {
-      if (!removeCalled && null!=last ) {
+      if(!removeCalled && null != last) {
         LinearDefinition.this.remove(last);
       }// if possible remove
       removeCalled = true;
@@ -657,6 +684,5 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   public void setSeparator(String separator) {
     this.separator = separator;
   }
-
 
 } // class LinearDefinition

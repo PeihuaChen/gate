@@ -21,8 +21,14 @@ import gate.util.GateException;
 /** Used to signal Gazetteer specific exceptions */
 public class GazetteerException extends GateException {
 
+  private static final long serialVersionUID = -8985924931103162693L;
+
   public GazetteerException(String s) {
     super(s);
+  }
+  
+  public GazetteerException(String s, Throwable cause) {
+    super(s,cause);
   }
 
 } // GazetteerException

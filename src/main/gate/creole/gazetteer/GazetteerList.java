@@ -21,18 +21,24 @@ import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
+
 import gate.creole.ResourceInstantiationException;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.Files;
 import gate.util.GateRuntimeException;
 
-
-/** Gazetteer List provides the means for uploading, managing and
- *  storing the data in the gazetteer list files. */
+/**
+ * Gazetteer List provides the means for uploading, managing and storing
+ * the data in the gazetteer list files.
+ */
 public class GazetteerList extends gate.creole.AbstractLanguageResource
-implements List {
+                                                                       implements
+                                                                       List<GazetteerNode> {
 
-  /** indicates list representation of the gazetteer list*/
+  private static final long serialVersionUID = -812795422822719315L;
+
+  /** indicates list representation of the gazetteer list */
   public final static int LIST_MODE = 0;
 
   /** indicates representation of the gaz list as a single string */
@@ -41,85 +47,111 @@ implements List {
   /** the url of this list */
   private URL url;
 
-  /**the encoding of the list */
+  /** the encoding of the list */
   private String encoding = "UTF-8";
 
-  /** indicates the current mode
-   *of the gazetteer list(e.g. STRING_MODE,LIST_MODE) */
-  private int mode = 0 ;
+  /**
+   * indicates the current mode of the gazetteer list(e.g.
+   * STRING_MODE,LIST_MODE)
+   */
+  private int mode = 0;
 
-  /** flag indicating whether the list has been modified after loading/storing */
+  /**
+   * flag indicating whether the list has been modified after
+   * loading/storing
+   */
   private boolean isModified = false;
 
   /** the entries of this list */
-  private List entries = new ArrayList();
+  private List<GazetteerNode> entries = new ArrayList<GazetteerNode>();
 
   /** the content of this list */
   private String content = null;
 
-  /** the separator used to delimit feature name-value pairs in gazetteer lists */
+  /**
+   * the separator used to delimit feature name-value pairs in gazetteer
+   * lists
+   */
   private String separator;
 
   /** create a new gazetteer list */
   public GazetteerList() {
   }
 
-  /** @return true if the list has been modified after load/store  */
+  /** @return true if the list has been modified after load/store */
   @Override
   public boolean isModified() {
     return isModified;
   }
 
-  /**Sets the modified status of the current list
-   * @param modified is modified flag   */
+  /**
+   * Sets the modified status of the current list
+   * 
+   * @param modified is modified flag
+   */
   public void setModified(boolean modified) {
     isModified = modified;
   }
 
-  /** Retrieves the current mode of the gaz list
-   *  @return the current mode   */
-  public int getMode() { return mode; }
+  /**
+   * Retrieves the current mode of the gaz list
+   * 
+   * @return the current mode
+   */
+  public int getMode() {
+    return mode;
+  }
 
-  /**Sets mode of the gazetteer list
-   * @param m the mode to be set    */
+  /**
+   * Sets mode of the gazetteer list
+   * 
+   * @param m the mode to be set
+   */
   public void setMode(int m) {
-    if (m!=mode) {
-    switch (m){
-        case LIST_MODE :{
+    if(m != mode) {
+      switch(m) {
+        case LIST_MODE: {
           mode = m;
           updateContent(content);
           break;
         } // LIST_MODE
-        case STRING_MODE:{
+        case STRING_MODE: {
           content = this.toString();
           mode = m;
           break;
-        } //STRING_MODE
-        default:{
-          throw new gate.util.GateRuntimeException("Invalid Mode ="+mode
-          +"\nValid modes are:\nLIST_MODE = "+LIST_MODE
-          +"\nSTRING_MODE = "+STRING_MODE);
+        } // STRING_MODE
+        default: {
+          throw new gate.util.GateRuntimeException("Invalid Mode =" + mode
+                  + "\nValid modes are:\nLIST_MODE = " + LIST_MODE
+                  + "\nSTRING_MODE = " + STRING_MODE);
         } // default
       } // switch
     } // only if different from the current
   } // setMode(int)
 
-
-  /** Sets the encoding of the list
-   *  @param encod the encoding to be set */
+  /**
+   * Sets the encoding of the list
+   * 
+   * @param encod the encoding to be set
+   */
   public void setEncoding(String encod) {
     encoding = encod;
   }
 
-  /** Gets the encoding of the list
-   *  @return the encoding of the list*/
+  /**
+   * Gets the encoding of the list
+   * 
+   * @return the encoding of the list
+   */
   public String getEncoding() {
     return encoding;
   }
 
   /**
    * Loads a gazetteer list
-   * @throws ResourceInstantiationException when the resource cannot be created
+   * 
+   * @throws ResourceInstantiationException when the resource cannot be
+   *           created
    */
   public void load() throws ResourceInstantiationException {
     load(false);
@@ -127,77 +159,91 @@ implements List {
 
   /**
    * Loads a gazetteer list
+   * 
    * @param isOrdered true if the feature maps used should be ordered
-   * @throws ResourceInstantiationException when the resource cannot be created
+   * @throws ResourceInstantiationException when the resource cannot be
+   *           created
    */
+  @SuppressWarnings("resource")
   public void load(boolean isOrdered) throws ResourceInstantiationException {
+    BufferedReader listReader = null;
+    
     try {
-      if (null == url) {
+      if(null == url) {
         throw new ResourceInstantiationException("URL not specified (null).");
       }
 
-      BufferedReader listReader;
+      
 
-      listReader = new BomStrippingInputStreamReader(
-                              (url).openStream(), encoding);
+      listReader =
+              new BomStrippingInputStreamReader((url).openStream(), encoding);
       String line;
       int linenr = 0;
       Pattern emptyPattern = Pattern.compile("\\s*");
-      while (null != (line = listReader.readLine())) {
+      while(null != (line = listReader.readLine())) {
         linenr++;
-        if (emptyPattern.matcher(line).matches()) {
+        if(emptyPattern.matcher(line).matches()) {
           // skip empty line
           continue;
         }
         GazetteerNode node = null;
         try {
           node = new GazetteerNode(line, separator, isOrdered);
-        } catch (Exception ex) {
-          throw new GateRuntimeException("Could not read gazetteer entry "+
-            linenr+" from URL "+getURL()+": "+ex.getMessage(),ex);
+        } catch(Exception ex) {
+          throw new GateRuntimeException("Could not read gazetteer entry "
+                  + linenr + " from URL " + getURL() + ": " + ex.getMessage(),
+                  ex);
         }
-        entries.add(new GazetteerNode(line, separator, isOrdered));
-      } //while
+        
+        entries.add(node);
+      } // while
 
       listReader.close();
-    } catch (Exception x) {
-      throw new ResourceInstantiationException(x.getClass()+":"+x.getMessage());
+    } catch(Exception x) {
+      throw new ResourceInstantiationException(x.getClass() + ":"
+              + x.getMessage(),x);
+    }
+    finally {
+      IOUtils.closeQuietly(listReader);
     }
     isModified = false;
   } // load ()
 
   /**
    * Stores the list to the specified url
+   * 
    * @throws ResourceInstantiationException
    */
-  public void store() throws ResourceInstantiationException{
+  public void store() throws ResourceInstantiationException {
     try {
-      if (null == url) {
+      if(null == url) {
         throw new ResourceInstantiationException("URL not specified (null)");
       }
-      
+
       File fileo = Files.fileFromURL(url);
 
       fileo.delete();
-      OutputStreamWriter listWriter  = new OutputStreamWriter(
-                    new FileOutputStream(fileo), encoding);
-//      BufferedWriter listWriter = new BufferedWriter(new FileWriter(fileo));
-      Iterator iter = entries.iterator();
-      while (iter.hasNext()) {
+      OutputStreamWriter listWriter =
+              new OutputStreamWriter(new FileOutputStream(fileo), encoding);
+      // BufferedWriter listWriter = new BufferedWriter(new
+      // FileWriter(fileo));
+      Iterator<GazetteerNode> iter = entries.iterator();
+      while(iter.hasNext()) {
         listWriter.write(iter.next().toString());
         listWriter.write(13);
         listWriter.write(10);
       }
       listWriter.close();
-    } catch (Exception x) {
-      throw new ResourceInstantiationException(x.getClass()+":"+x.getMessage());
+    } catch(Exception x) {
+      throw new ResourceInstantiationException(x.getClass() + ":"
+              + x.getMessage());
     }
     isModified = false;
   } // store()
 
-
   /**
    * Sets the URL of the list
+   * 
    * @param theUrl the URL of the List
    */
   public void setURL(URL theUrl) {
@@ -207,12 +253,12 @@ implements List {
 
   /**
    * Gets the URL of the list
+   * 
    * @return the URL of the list
    */
   public URL getURL() {
     return url;
   }
-
 
   /**
    * @return the seperator
@@ -228,8 +274,7 @@ implements List {
     this.separator = separator;
   }
 
-
-/*--------------implementation of java.util.List--------------------*/
+  /*--------------implementation of java.util.List--------------------*/
   @Override
   public int size() {
     return entries.size();
@@ -245,10 +290,13 @@ implements List {
     return entries.contains(o);
   } // contains()
 
-  /**Gets an iterator over the list. It is not dangerous if the iterator is modified since there
-  are no dependencies of entries to other members  */
+  /**
+   * Gets an iterator over the list. It is not dangerous if the iterator
+   * is modified since there are no dependencies of entries to other
+   * members
+   */
   @Override
-  public Iterator iterator() {
+  public Iterator<GazetteerNode> iterator() {
     return entries.iterator();
   }
 
@@ -258,16 +306,13 @@ implements List {
   }
 
   @Override
-  public Object[] toArray(Object[] a) {
+  public <T> T[] toArray(T[] a) {
     return entries.toArray(a);
   }
 
   @Override
-  public boolean add(Object o) {
-    boolean result = false;
-    if (o instanceof GazetteerNode) {
-      result = entries.add(o);
-    }
+  public boolean add(GazetteerNode o) {
+    boolean result = entries.add(o);
     isModified |= result;
     return result;
   } // add()
@@ -280,26 +325,26 @@ implements List {
   }
 
   @Override
-  public boolean containsAll(Collection c) {
+  public boolean containsAll(Collection<?> c) {
     return entries.containsAll(c);
   }
 
   /**
    * Adds entire collection
+   * 
    * @param c a collection to be addded
-   * @return true if all the elements where Strings and all are sucessfully added
+   * @return true if all the elements where Strings and all are
+   *         sucessfully added
    */
   @Override
-  public boolean addAll(Collection c) {
-    Iterator iter = c.iterator();
-    Object o;
+  public boolean addAll(Collection<? extends GazetteerNode> c) {
+    Iterator<? extends GazetteerNode> iter = c.iterator();
+    GazetteerNode o;
     boolean result = false;
 
-    while (iter.hasNext()) {
+    while(iter.hasNext()) {
       o = iter.next();
-      if (o instanceof GazetteerNode) {
-        result |= entries.add(o);
-      }
+      result |= entries.add(o);
     } // while
     isModified |= result;
 
@@ -307,22 +352,21 @@ implements List {
   } // addAll(Collection)
 
   @Override
-  public boolean addAll(int index, Collection c) {
-    boolean result = entries.addAll(index,c);
+  public boolean addAll(int index, Collection<? extends GazetteerNode> c) {
+    boolean result = entries.addAll(index, c);
     isModified |= result;
     return result;
-  } //addAll(int,Collection)
-
+  } // addAll(int,Collection)
 
   @Override
-  public boolean removeAll(Collection c) {
+  public boolean removeAll(Collection<?> c) {
     boolean result = entries.removeAll(c);
     isModified |= result;
     return result;
   }
 
   @Override
-  public boolean retainAll(Collection c) {
+  public boolean retainAll(Collection<?> c) {
     boolean result = entries.retainAll(c);
     isModified |= result;
     return result;
@@ -330,8 +374,7 @@ implements List {
 
   @Override
   public void clear() {
-    if (0 < entries.size())
-      isModified = true;
+    if(0 < entries.size()) isModified = true;
     entries.clear();
   }
 
@@ -356,27 +399,27 @@ implements List {
   }
 
   @Override
-  public Object get(int index) {
+  public GazetteerNode get(int index) {
     return entries.get(index);
   }
 
   @Override
-  public Object set(int index, Object element) {
-    isModified=true;
-    return entries.set(index,element);
-  }
-
-  @Override
-  public void add(int index, Object element) {
+  public GazetteerNode set(int index, GazetteerNode element) {
     isModified = true;
-    entries.add(index,element);
+    return entries.set(index, element);
   }
 
   @Override
-  public Object remove(int index) {
+  public void add(int index, GazetteerNode element) {
+    isModified = true;
+    entries.add(index, element);
+  }
+
+  @Override
+  public GazetteerNode remove(int index) {
     int size = entries.size();
-    Object result = entries.remove(index);
-    isModified |= (size!=entries.size());
+    GazetteerNode result = entries.remove(index);
+    isModified |= (size != entries.size());
     return result;
   }
 
@@ -391,41 +434,41 @@ implements List {
   }
 
   @Override
-  public ListIterator listIterator() {
+  public ListIterator<GazetteerNode> listIterator() {
     return entries.listIterator();
   }
 
   @Override
-  public ListIterator listIterator(int index) {
+  public ListIterator<GazetteerNode> listIterator(int index) {
     return entries.listIterator(index);
   }
 
   @Override
-  public List subList(int fromIndex, int toIndex) {
-    return entries.subList(fromIndex,toIndex);
+  public List<GazetteerNode> subList(int fromIndex, int toIndex) {
+    return entries.subList(fromIndex, toIndex);
   }
 
-
-  /** Retrieves the string representation of the gaz list
-   *  according to its mode. If
-   *  {@link #LIST_MODE} then all
-   *  the entries are dumped sequentially to a string. If
-   *  {@link #STRING_MODE} then
-   *  the content (a string) of the gaz list is retrieved.
-   *  @return the string representation of the gaz list*/
+  /**
+   * Retrieves the string representation of the gaz list according to
+   * its mode. If {@link #LIST_MODE} then all the entries are dumped
+   * sequentially to a string. If {@link #STRING_MODE} then the content
+   * (a string) of the gaz list is retrieved.
+   * 
+   * @return the string representation of the gaz list
+   */
   @Override
   public String toString() {
     String stres = null;
-    switch (mode) {
-      case LIST_MODE : {
+    switch(mode) {
+      case LIST_MODE: {
         StringBuffer result = new StringBuffer();
         String entry = null;
         for(int i = 0; i < entries.size(); i++) {
-          GazetteerNode node = (GazetteerNode)entries.get(i);
+          GazetteerNode node = entries.get(i);
           entry = node.getEntry().trim();
           if(entry.length() > 0) {
             result.append(entry);
-            Map featureMap = node.getFeatureMap();
+            Map<String,Object> featureMap = node.getFeatureMap();
             if(featureMap != null && (featureMap.size() > 0)) {
               result.append(node.featureMapToString(featureMap));
             }
@@ -435,46 +478,48 @@ implements List {
         stres = result.toString();
         break;
       }
-      case STRING_MODE : {
+      case STRING_MODE: {
         stres = content;
         break;
       }
       default: {
-        throw new gate.util.GateRuntimeException("Invalid Mode ="+mode
-        +"\nValid modes are:\nLIST_MODE = "+LIST_MODE
-        +"\nSTRING_MODE = "+STRING_MODE);
+        throw new gate.util.GateRuntimeException("Invalid Mode =" + mode
+                + "\nValid modes are:\nLIST_MODE = " + LIST_MODE
+                + "\nSTRING_MODE = " + STRING_MODE);
       }
     } // switch
     return stres;
-  }//toString()
+  }// toString()
 
-  /** Updates the content of the gaz list with the given parameter.
-   *  Depends on the mode of the gaz list.
-   *  In the case of {@link #LIST_MODE}
-   *  the new content is parsed and loaded as single nodes through the
-   *  {@link java.util.List} interface. In the case of
-   *  {@link #STRING_MODE} the new content
-   *  is stored as a String and is not parsed.
-   *  @param newContent the new content of the gazetteer list */
+  /**
+   * Updates the content of the gaz list with the given parameter.
+   * Depends on the mode of the gaz list. In the case of
+   * {@link #LIST_MODE} the new content is parsed and loaded as single
+   * nodes through the {@link java.util.List} interface. In the case of
+   * {@link #STRING_MODE} the new content is stored as a String and is
+   * not parsed.
+   * 
+   * @param newContent the new content of the gazetteer list
+   */
   public void updateContent(String newContent) {
-    switch (mode) {
-      case STRING_MODE : {
+    switch(mode) {
+      case STRING_MODE: {
         content = newContent;
         break;
       }
-      case LIST_MODE : {
+      case LIST_MODE: {
         BufferedReader listReader;
         listReader = new BufferedReader(new StringReader(newContent));
         String line;
-        List tempEntries = new ArrayList();
+        List<GazetteerNode> tempEntries = new ArrayList<GazetteerNode>();
         try {
-          while (null != (line = listReader.readLine())) {
-            tempEntries.add(new GazetteerNode(line,separator));
-          } //while
+          while(null != (line = listReader.readLine())) {
+            tempEntries.add(new GazetteerNode(line, separator));
+          } // while
           listReader.close();
-        } catch (IOException x) {
-          /**should never be thrown*/
-          throw new gate.util.LuckyException("IOException :"+x.getMessage());
+        } catch(IOException x) {
+          /** should never be thrown */
+          throw new gate.util.LuckyException("IOException :" + x.getMessage());
         }
 
         isModified = !tempEntries.equals(entries);
@@ -483,12 +528,11 @@ implements List {
         break;
       } // LIST_MODE
       default: {
-        throw new gate.util.GateRuntimeException("Invalid Mode ="+mode
-        +"\nValid modes are:\nLIST_MODE = "+LIST_MODE
-        +"\nSTRING_MODE = "+STRING_MODE);
+        throw new gate.util.GateRuntimeException("Invalid Mode =" + mode
+                + "\nValid modes are:\nLIST_MODE = " + LIST_MODE
+                + "\nSTRING_MODE = " + STRING_MODE);
       }// default
     } // switch mode
   } // updateContent(String)
-
 
 } // Class GazetteerList

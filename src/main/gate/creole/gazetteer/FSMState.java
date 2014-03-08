@@ -27,9 +27,7 @@ import gate.creole.gazetteer.DefaultGazetteer.CharMap;
  */
 public class FSMState implements Serializable {
 
-  /** Debug flag
-   */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = -3339572027660481558L;
 
   /** Constructs a new FSMState object and adds it to the list of
    * states of the {@link DefaultGazetteer} provided as owner.
@@ -121,7 +119,7 @@ public class FSMState implements Serializable {
   /** Returns a set of {@link Lookup} objects describing the types of lookups
    * the phrase for which this state is the final one belongs to
    */
-  public Set getLookupSet(){return lookupSet;}
+  public Set<Lookup> getLookupSet(){return lookupSet;}
 
   /** Adds a new looup description to this state's lookup descriptions set
    */
@@ -129,7 +127,7 @@ public class FSMState implements Serializable {
 // >>> was nothing
 // >>> BOBI, Lookup opitimization
     if (lookupSet == null)
-        lookupSet = new HashSet(4);
+        lookupSet = new HashSet<Lookup>(4);
 // >>> end
 
     lookupSet.add(lookup);
@@ -163,7 +161,7 @@ public class FSMState implements Serializable {
 // >>> NASO, hash4 optimization
 //  Set lookupSet = new HashSet(4);
 // >>> BOBI, Lookup opitimization
-  protected Set lookupSet;
+  protected Set<Lookup> lookupSet;
 // >>> end
 
   /**

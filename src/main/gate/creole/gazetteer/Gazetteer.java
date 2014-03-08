@@ -15,6 +15,8 @@
  */
  package gate.creole.gazetteer;
 
+import java.util.Set;
+
 /**The Gazetteer interface defines the mandatory methods of a gazetteer PR. */
 public interface Gazetteer extends gate.LanguageAnalyser,gate.ProcessingResource {
 
@@ -22,7 +24,7 @@ public interface Gazetteer extends gate.LanguageAnalyser,gate.ProcessingResource
    * @param singleItem the string
    * @return set of Lookups
    */
-  public java.util.Set lookup(String singleItem);
+  public Set<Lookup> lookup(String singleItem);
 
   /**
    * Sets the AnnotationSet that will be used at the next run for the newly

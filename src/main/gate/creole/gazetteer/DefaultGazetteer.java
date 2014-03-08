@@ -67,9 +67,7 @@ import java.util.Set;
 public class DefaultGazetteer extends AbstractGazetteer
                               implements CustomDuplication {
 
-  /** Debug flag
-   */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = -8976141132455436099L;
 
   public static final String
     DEF_GAZ_DOCUMENT_PARAMETER_NAME = "document";
@@ -96,7 +94,7 @@ public class DefaultGazetteer extends AbstractGazetteer
   protected String gazetteerFeatureSeparator;
   
   /** a map of nodes vs gaz lists */
-  protected Map listsByNode;
+  protected Map<LinearNode,GazetteerList> listsByNode;
 
   /** 
    * Build a gazetteer using the default lists from the gate resources
@@ -109,7 +107,7 @@ public class DefaultGazetteer extends AbstractGazetteer
    */
   @Override
   public Resource init()throws ResourceInstantiationException{
-    fsmStates = new HashSet();
+    fsmStates = new HashSet<FSMState>();
     initialState = new FSMState(this);
     if(listsURL == null){
       throw new ResourceInstantiationException (
@@ -121,12 +119,12 @@ public class DefaultGazetteer extends AbstractGazetteer
     definition.load();
     int linesCnt = definition.size();
     listsByNode = definition.loadLists();
-    Iterator inodes = definition.iterator();
+    Iterator<LinearNode> inodes = definition.iterator();
 
     int nodeIdx = 0;
     LinearNode node;
     while (inodes.hasNext()) {
-      node = (LinearNode) inodes.next();
+      node = inodes.next();
       fireStatusChanged("Reading " + node.toString());
       fireProgressChanged(++nodeIdx * 100 / linesCnt);
       readList(node,true);
@@ -156,12 +154,12 @@ public class DefaultGazetteer extends AbstractGazetteer
     minorType = node.getMinorType();
     languages = node.getLanguage();
     annotationType = node.getAnnotationType();
-    GazetteerList gazList = (GazetteerList)listsByNode.get(node);
+    GazetteerList gazList = listsByNode.get(node);
     if (null == gazList) {
       throw new ResourceInstantiationException("gazetteer list not found by node");
     }
 
-    Iterator iline = gazList.iterator();
+    Iterator<GazetteerNode> iline = gazList.iterator();
     
     // create default lookup for entries with no arbitrary features
     Lookup defaultLookup = new Lookup(listName,majorType, minorType, languages,annotationType);
@@ -177,10 +175,10 @@ public class DefaultGazetteer extends AbstractGazetteer
     Lookup lookup;
     String entry; // the actual gazetteer entry text
     while(iline.hasNext()){
-      GazetteerNode gazNode = (GazetteerNode)iline.next();
+      GazetteerNode gazNode = iline.next();
       entry = gazNode.getEntry();
       
-      Map features = gazNode.getFeatureMap();
+      Map<String,Object> features = gazNode.getFeatureMap();
       if (features == null) {
         lookup = defaultLookup;
       } else {
@@ -212,7 +210,6 @@ public class DefaultGazetteer extends AbstractGazetteer
     char currentChar;
     FSMState currentState = initialState;
     FSMState nextState;
-    Lookup oldLookup;
     boolean isSpace;
 
     for(int i = 0; i< text.length(); i++) {
@@ -245,7 +242,6 @@ public class DefaultGazetteer extends AbstractGazetteer
     char currentChar;
     FSMState currentState = initialState;
     FSMState nextState;
-    Lookup oldLookup;
 
     for(int i = 0; i< text.length(); i++) {
         currentChar = text.charAt(i);
@@ -264,9 +260,9 @@ public class DefaultGazetteer extends AbstractGazetteer
     String res = "graph[ \ndirected 1\n";
     StringBuffer nodes = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE),
                 edges = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
-    Iterator fsmStatesIter = fsmStates.iterator();
+    Iterator<FSMState> fsmStatesIter = fsmStates.iterator();
     while (fsmStatesIter.hasNext()){
-      FSMState currentState = (FSMState)fsmStatesIter.next();
+      FSMState currentState = fsmStatesIter.next();
       int stateIndex = currentState.getIndex();
       nodes.append("node[ id ");
       nodes.append(stateIndex);
@@ -327,8 +323,6 @@ public class DefaultGazetteer extends AbstractGazetteer
     int matchedRegionStart = 0;
     int charIdx = 0;
     int oldCharIdx = 0;
-    FeatureMap fm;
-    Lookup currentLookup;
 
     while(charIdx < length) {
       currentChar = content.charAt(charIdx);
@@ -419,9 +413,9 @@ public class DefaultGazetteer extends AbstractGazetteer
    */
   protected void createLookups(FSMState matchingState, long matchedRegionStart, 
           long matchedRegionEnd, AnnotationSet annotationSet){
-    Iterator lookupIter = matchingState.getLookupSet().iterator();
+    Iterator<Lookup> lookupIter = matchingState.getLookupSet().iterator();
     while(lookupIter.hasNext()) {
-      Lookup currentLookup = (Lookup)lookupIter.next();
+      Lookup currentLookup = lookupIter.next();
       FeatureMap fm = Factory.newFeatureMap();
       fm.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME, currentLookup.majorType);
       if (null!= currentLookup.oClass && null!=currentLookup.ontology){
@@ -460,15 +454,15 @@ public class DefaultGazetteer extends AbstractGazetteer
 
   /** A set containing all the states of the FSM backing the gazetteer
    */
-  protected Set fsmStates;
+  protected Set<FSMState> fsmStates;
 
   /**lookup <br>
    * @param singleItem a single string to be looked up by the gazetteer
    * @return set of the Lookups associated with the parameter*/
   @Override
-  public Set lookup(String singleItem) {
+  public Set<Lookup> lookup(String singleItem) {
     char currentChar;
-    Set set = new HashSet();
+    Set<Lookup> set = new HashSet<Lookup>();
     FSMState currentState = initialState;
     FSMState nextState;
 
@@ -490,7 +484,6 @@ public class DefaultGazetteer extends AbstractGazetteer
     char currentChar;
     FSMState currentState = initialState;
     FSMState nextState;
-    Lookup oldLookup;
 
     for(int i = 0; i< singleItem.length(); i++) {
         currentChar = singleItem.charAt(i);
@@ -501,7 +494,7 @@ public class DefaultGazetteer extends AbstractGazetteer
         }//nothing to remove
         currentState = nextState;
     } //for(int i = 0; i< text.length(); i++)
-    currentState.lookupSet = new HashSet();
+    currentState.lookupSet = new HashSet<Lookup>();
     return true;
   }
 
@@ -539,7 +532,9 @@ public class DefaultGazetteer extends AbstractGazetteer
    */
   public static class CharMap implements Serializable
   {
-      char[] itemsKeys = null;
+    private static final long serialVersionUID = 4192829422957074447L;
+
+    char[] itemsKeys = null;
       Object[] itemsObjs = null;
 
       /**

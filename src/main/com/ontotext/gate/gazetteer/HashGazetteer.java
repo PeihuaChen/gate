@@ -452,7 +452,6 @@ public class HashGazetteer extends AbstractGazetteer {
     lookup1.list = s;
     categoryList.add(lookup1);
 
-    @SuppressWarnings("unchecked")
     Iterator<GazetteerNode> iterator = gazetteerlist.iterator();
     String normalisedWord = null;
 
