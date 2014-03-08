@@ -44,6 +44,8 @@ import org.apache.log4j.Logger;
 public class Coreferencer extends AbstractLanguageAnalyser implements
                                                           ProcessingResource {
 
+  private static final long serialVersionUID = -2343178168872843239L;
+
   public static final String COREF_DOCUMENT_PARAMETER_NAME = "document";
 
   public static final String COREF_ANN_SET_PARAMETER_NAME = "annotationSetName";
@@ -144,7 +146,7 @@ public class Coreferencer extends AbstractLanguageAnalyser implements
   private void generateCorefChains() throws GateRuntimeException {
 
     // 1. get the resolved corefs
-    HashMap ana2ant = this.pronominalModule.getResolvedAnaphora();
+    Map<Annotation,Annotation> ana2ant = this.pronominalModule.getResolvedAnaphora();
 
     // 2. get the outout annotation set
     String asName = getAnnotationSetName();
@@ -158,11 +160,11 @@ public class Coreferencer extends AbstractLanguageAnalyser implements
     }
 
     // 3. generate new annotations
-    Iterator it = ana2ant.entrySet().iterator();
+    Iterator<Map.Entry<Annotation, Annotation>> it = ana2ant.entrySet().iterator();
     while(it.hasNext()) {
-      Map.Entry currLink = (Map.Entry)it.next();
-      Annotation anaphor = (Annotation)currLink.getKey();
-      Annotation antecedent = (Annotation)currLink.getValue();
+      Map.Entry<Annotation,Annotation> currLink = it.next();
+      Annotation anaphor = currLink.getKey();
+      Annotation antecedent = currLink.getValue();
 
       if(DEBUG) {
         AnnotationSet corefSet = getDocument().getAnnotations("COREF");
@@ -184,38 +186,39 @@ public class Coreferencer extends AbstractLanguageAnalyser implements
       }
 
       // get the ortho-matches of the antecedent
-      List matches = null;
-      Object matchesObj = antecedent.getFeatures().get(
-          ANNOTATION_COREF_FEATURE_NAME);
-      if(matchesObj != null) {
-        if(matchesObj instanceof List) {
-          matches = (List)matchesObj;  
-        } else {
-          log.warn("Illegal value for " + ANNOTATION_COREF_FEATURE_NAME + 
-              " feature was ignored.");
-        }
+      
+      Object matchesObj =
+              antecedent.getFeatures().get(ANNOTATION_COREF_FEATURE_NAME);
+      @SuppressWarnings("unchecked")
+      List<Integer> matches =
+              matchesObj instanceof List ? (List<Integer>)matchesObj : null;
+      if(matchesObj != null && matches == null) {
+        log.warn("Illegal value for " + ANNOTATION_COREF_FEATURE_NAME
+                + " feature was ignored.");
+
       }
         
       if(null == matches) {
-        matches = new ArrayList();
+        matches = new ArrayList<Integer>();
         matches.add(antecedent.getId());
         antecedent.getFeatures().put(ANNOTATION_COREF_FEATURE_NAME, matches);
         // check if the document has a list of matches
         // if yes, simply add the new list to it
         // if not, create it and add the list of matches to it
         if(document.getFeatures().containsKey(DOCUMENT_COREF_FEATURE_NAME)) {
-          Map matchesMap = (Map)document.getFeatures().get(
+          @SuppressWarnings("unchecked")
+          Map<String,List<List<Integer>>> matchesMap = (Map<String,List<List<Integer>>>)document.getFeatures().get(
                   DOCUMENT_COREF_FEATURE_NAME);
-          List matchesList = (List)matchesMap.get(getAnnotationSetName());
+          List<List<Integer>> matchesList = matchesMap.get(getAnnotationSetName());
           if(matchesList == null) {
-            matchesList = new ArrayList();
+            matchesList = new ArrayList<List<Integer>>();
             matchesMap.put(getAnnotationSetName(), matchesList);
           }
           matchesList.add(matches);
         }
         else {
-          Map matchesMap = new HashMap();
-          List matchesList = new ArrayList();
+          Map<String,List<List<Integer>>> matchesMap = new HashMap<String,List<List<Integer>>>();
+          List<List<Integer>> matchesList = new ArrayList<List<Integer>>();
           matchesMap.put(getAnnotationSetName(), matchesList);
           matchesList.add(matches);
         }// if else

@@ -31,6 +31,8 @@ import gate.event.StatusListener;
 abstract public class AbstractProcessingResource
 extends AbstractResource implements ProcessingResource, ANNIEConstants
 {
+  private static final long serialVersionUID = -5919543745701986862L;
+
   /** Initialise this resource, and return it. */
   @Override
   public Resource init() throws ResourceInstantiationException {

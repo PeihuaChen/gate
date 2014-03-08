@@ -47,6 +47,9 @@ import gate.util.*;
 public class SerialAnalyserController extends SerialController 
        implements CorpusController, LanguageAnalyser, ControllerAwarePR {
 
+  private static final long serialVersionUID = -7736138658476400031L;
+
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -319,9 +322,14 @@ public class SerialAnalyserController extends SerialController
    * Sets the current document to the memeber PRs
    */
   protected void setDocToPrs(Document doc) {
-    Iterator prIter = getPRs().iterator();
+    Iterator<ProcessingResource> prIter = getPRs().iterator();
     while(prIter.hasNext()) {
-      ((LanguageAnalyser)prIter.next()).setDocument(doc);
+      ProcessingResource pr = prIter.next();
+      
+      // Not all PRs are LRs so we need to check carefully before
+      // assuming they are
+      if (pr instanceof LanguageAnalyser)
+        ((LanguageAnalyser)pr).setDocument(doc);
     }
   }
 
@@ -340,27 +348,27 @@ public class SerialAnalyserController extends SerialController
    *           for a parameter.
    */
   @Override
-  public List getOffendingPocessingResources()
+  public List<ProcessingResource> getOffendingPocessingResources()
     throws ResourceInstantiationException {
     // take all the contained PRs
-    ArrayList badPRs = new ArrayList(getPRs());
+    List<ProcessingResource> badPRs = new ArrayList<ProcessingResource>(getPRs());
     // remove the ones that no parameters problems
-    Iterator prIter = getPRs().iterator();
+    Iterator<ProcessingResource> prIter = getPRs().iterator();
     while(prIter.hasNext()) {
-      ProcessingResource pr = (ProcessingResource)prIter.next();
+      ProcessingResource pr = prIter.next();
       ResourceData rData =
         Gate.getCreoleRegister().get(pr.getClass().getName());
       // this is a list of lists
-      List parameters = rData.getParameterList().getRuntimeParameters();
+      List<List<Parameter>> parameters = rData.getParameterList().getRuntimeParameters();
       // remove corpus and document
-      List newParameters = new ArrayList();
-      Iterator pDisjIter = parameters.iterator();
+      List<List<Parameter>> newParameters = new ArrayList<List<Parameter>>();
+      Iterator<List<Parameter>> pDisjIter = parameters.iterator();
       while(pDisjIter.hasNext()) {
-        List aDisjunction = (List)pDisjIter.next();
-        List newDisjunction = new ArrayList(aDisjunction);
-        Iterator internalParIter = newDisjunction.iterator();
+        List<Parameter> aDisjunction = pDisjIter.next();
+        List<Parameter> newDisjunction = new ArrayList<Parameter>(aDisjunction);
+        Iterator<Parameter> internalParIter = newDisjunction.iterator();
         while(internalParIter.hasNext()) {
-          Parameter parameter = (Parameter)internalParIter.next();
+          Parameter parameter = internalParIter.next();
           if(parameter.getName().equals("corpus")
             || parameter.getName().equals("document"))
             internalParIter.remove();

@@ -48,6 +48,8 @@ public class Transducer
   extends AbstractLanguageAnalyser
   implements gate.gui.ActionsPublisher, Benchmarkable, ControllerAwarePR
 {
+  private static final long serialVersionUID = -8789395272116846595L;
+
   public static final String TRANSD_DOCUMENT_PARAMETER_NAME = "document";
 
   public static final String TRANSD_INPUT_AS_PARAMETER_NAME = "inputASName";
@@ -278,6 +280,9 @@ public class Transducer
    * @author niraj
    */
   protected class SerializeTransducerAction extends javax.swing.AbstractAction {
+
+    private static final long serialVersionUID = 4248612378452393237L;
+
     public SerializeTransducerAction() {
       super("Serialize Transducer");
       putValue(SHORT_DESCRIPTION, "Serializes the Transducer as binary file");

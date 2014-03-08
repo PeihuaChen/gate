@@ -128,10 +128,7 @@ public class POSTagger extends AbstractLanguageAnalyser {
     }
 
     if(outputASName != null && outputASName.equals("")) outputASName = null;
-    AnnotationSet outputAS = (outputASName == null) ?
-                            document.getAnnotations() :
-                            document.getAnnotations(outputASName);
-    
+        
     if(baseSentenceAnnotationType == null || baseSentenceAnnotationType.trim().length()==0) {
         throw new ExecutionException("No base Sentence Annotation Type provided!");
     }
@@ -148,23 +145,23 @@ public class POSTagger extends AbstractLanguageAnalyser {
       fireStatusChanged("POS tagging " + document.getName());
       fireProgressChanged(0);
       //prepare the input for HepTag
-      List sentenceForTagger = new ArrayList();
-      List sentencesForTagger = new ArrayList(1);
+      List<String> sentenceForTagger = new ArrayList<String>();
+      List<List<String>> sentencesForTagger = new ArrayList<List<String>>(1);
       sentencesForTagger.add(sentenceForTagger);
 
       //define a comparator for annotations by start offset
-      Comparator offsetComparator = new OffsetComparator();
+      Comparator<Annotation> offsetComparator = new OffsetComparator();
 
       //read all the tokens and all the sentences
-      List<Annotation> sentencesList = new ArrayList(sentencesAS);
+      List<Annotation> sentencesList = new ArrayList<Annotation>(sentencesAS);
       Collections.sort(sentencesList, offsetComparator);
-      List<Annotation> tokensList = new ArrayList(tokensAS);
+      List<Annotation> tokensList = new ArrayList<Annotation>(tokensAS);
       Collections.sort(tokensList, offsetComparator);
 
       Iterator<Annotation> sentencesIter = sentencesList.iterator();
       ListIterator<Annotation> tokensIter = tokensList.listIterator();
 
-      List<Annotation> tokensInCurrentSentence = new ArrayList();
+      List<Annotation> tokensInCurrentSentence = new ArrayList<Annotation>();
       Annotation currentToken = tokensIter.next();
       int sentIndex = 0;
       int sentCnt = sentencesAS.size();
@@ -179,16 +176,16 @@ public class POSTagger extends AbstractLanguageAnalyser {
           // If we're only POS tagging Tokens within baseSentenceAnnotationType, don't add the sentence if the Tokens aren't within the span of baseSentenceAnnotationType
           if (posTagAllTokens || currentToken.withinSpanOf(currentSentence)) {
             tokensInCurrentSentence.add(currentToken);
-            sentenceForTagger.add(currentToken.getFeatures().
+            sentenceForTagger.add((String)currentToken.getFeatures().
                                 get(TOKEN_STRING_FEATURE_NAME));
           }
           currentToken = (tokensIter.hasNext() ?
                                      tokensIter.next() : null);
         }
         //run the POS tagger
-        List taggerList = tagger.runTagger(sentencesForTagger);
+        List<List<String[]>> taggerList = tagger.runTagger(sentencesForTagger);
         if(taggerList != null && taggerList.size() > 0){
-          List taggerResults = (List) taggerList.get(0);
+          List<String[]> taggerResults = taggerList.get(0);
           //add the results
           //make sure no malfunction occurred
           if(taggerResults.size() != tokensInCurrentSentence.size())
@@ -197,11 +194,11 @@ public class POSTagger extends AbstractLanguageAnalyser {
                 taggerResults.size() +
                 ") is different from the input size (" +
                 tokensInCurrentSentence.size() + ")!");
-          Iterator resIter = taggerResults.iterator();
+          Iterator<String[]> resIter = taggerResults.iterator();
           Iterator<Annotation> tokIter = tokensInCurrentSentence.iterator();
           while(resIter.hasNext()){
               Annotation annot = tokIter.next();
-              addFeatures(annot, TOKEN_CATEGORY_FEATURE_NAME, ((String[])resIter.next())[1]);
+              addFeatures(annot, TOKEN_CATEGORY_FEATURE_NAME, resIter.next()[1]);
           }
         }
         fireProgressChanged(sentIndex++ * 100 / sentCnt);
@@ -213,13 +210,13 @@ public class POSTagger extends AbstractLanguageAnalyser {
         sentenceForTagger.clear();
         while(currentToken != null){
           tokensInCurrentSentence.add(currentToken);
-          sentenceForTagger.add(currentToken.getFeatures().
+          sentenceForTagger.add((String)currentToken.getFeatures().
                                 get(TOKEN_STRING_FEATURE_NAME));
           currentToken = (tokensIter.hasNext() ?
                                       tokensIter.next() : null);
         }
         //run the POS tagger
-        List taggerResults = tagger.runTagger(sentencesForTagger).get(0);
+        List<String[]> taggerResults = tagger.runTagger(sentencesForTagger).get(0);
         //add the results
         //make sure no malfunction occurred
         if(taggerResults.size() != tokensInCurrentSentence.size())
@@ -228,11 +225,11 @@ public class POSTagger extends AbstractLanguageAnalyser {
               taggerResults.size() +
               ") is different from the input size (" +
               tokensInCurrentSentence.size() + ")!");
-        Iterator resIter = taggerResults.iterator();
+        Iterator<String[]> resIter = taggerResults.iterator();
         Iterator<Annotation> tokIter = tokensInCurrentSentence.iterator();
         while(resIter.hasNext()){
             Annotation annot = tokIter.next();
-            addFeatures(annot, TOKEN_CATEGORY_FEATURE_NAME, ((String[])resIter.next())[1]);
+            addFeatures(annot, TOKEN_CATEGORY_FEATURE_NAME, resIter.next()[1]);
         }
       }//if(currentToken != null)
       fireProcessFinished();
@@ -357,10 +354,10 @@ Out.prln("POS after execution time:" + postTime);
               }
           } else {
               // search for the annotation if there is one with the same start and end offsets
-              ArrayList tempList = new ArrayList(annotations.get());
+              List<Annotation> tempList = new ArrayList<Annotation>(annotations.get());
               boolean found = false;
               for(int i=0;i<tempList.size();i++) {
-                  Annotation annotation = (Annotation) tempList.get(i);
+                  Annotation annotation = tempList.get(i);
                   if(annotation.getStartNode().getOffset().intValue() == start && annotation.getEndNode().getOffset().intValue() == end) {
                       // this is the one
                       annotation.getFeatures().put(featureName, featureValue);

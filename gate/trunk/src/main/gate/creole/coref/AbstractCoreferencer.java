@@ -14,16 +14,27 @@
 
 package gate.creole.coref;
 
-import java.util.*;
-
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.FeatureMap;
+import gate.ProcessingResource;
+import gate.Resource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ResourceInstantiationException;
 import gate.util.GateRuntimeException;
 import gate.util.SimpleFeatureMapImpl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 public abstract class AbstractCoreferencer extends AbstractLanguageAnalyser
     implements ProcessingResource{
+
+  private static final long serialVersionUID = 7077378848676784207L;
 
   public static final String COREF_DOCUMENT_PARAMETER_NAME = "document";
 
@@ -79,7 +90,7 @@ public abstract class AbstractCoreferencer extends AbstractLanguageAnalyser
   public abstract String getAnnotationSetName();
 
   /** --- */
-  protected void generateCorefChains(HashMap ana2ant)
+  protected void generateCorefChains(Map<Annotation, Annotation> ana2ant)
       throws GateRuntimeException{
 
     String asName = getAnnotationSetName();
@@ -93,11 +104,11 @@ public abstract class AbstractCoreferencer extends AbstractLanguageAnalyser
     }
 
     //3. generate new annotations
-    Iterator it = ana2ant.entrySet().iterator();
+    Iterator<Map.Entry<Annotation, Annotation>> it = ana2ant.entrySet().iterator();
     while (it.hasNext()) {
-      Map.Entry currLink = (Map.Entry)it.next();
-      Annotation anaphor = (Annotation)currLink.getKey();
-      Annotation antecedent = (Annotation)currLink.getValue();
+      Map.Entry<Annotation, Annotation> currLink = it.next();
+      Annotation anaphor = currLink.getKey();
+      Annotation antecedent = currLink.getValue();
 
       if (DEBUG) {
         AnnotationSet corefSet = getDocument().getAnnotations("COREF");
@@ -118,10 +129,11 @@ public abstract class AbstractCoreferencer extends AbstractLanguageAnalyser
       }
 
       //get the ortho-matches of the antecedent
-      List matches = (List)antecedent.getFeatures().
+      @SuppressWarnings("unchecked")
+      List<Integer> matches = (List<Integer>)antecedent.getFeatures().
         get(ANNOTATION_COREF_FEATURE_NAME);
       if (null == matches) {
-        matches = new ArrayList();
+        matches = new ArrayList<Integer>();
         matches.add(antecedent.getId());
         antecedent.getFeatures().
           put(ANNOTATION_COREF_FEATURE_NAME,matches);
@@ -130,17 +142,18 @@ public abstract class AbstractCoreferencer extends AbstractLanguageAnalyser
         //if not, create it and add the list of matches to it
         if (document.getFeatures().containsKey(
             DOCUMENT_COREF_FEATURE_NAME)) {
-          Map matchesMap = (Map) document.getFeatures().get(
+          @SuppressWarnings("unchecked")
+          Map<String,List<List<Integer>>> matchesMap = (Map<String,List<List<Integer>>>)document.getFeatures().get(
                                 DOCUMENT_COREF_FEATURE_NAME);
-          List matchesList = (List) matchesMap.get(getAnnotationSetName());
+          List<List<Integer>> matchesList = matchesMap.get(getAnnotationSetName());
           if (matchesList == null) {
-            matchesList = new ArrayList();
+            matchesList = new ArrayList<List<Integer>>();
             matchesMap.put(getAnnotationSetName(), matchesList);
           }
           matchesList.add(matches);
         } else {
-          Map matchesMap = new HashMap();
-            List matchesList = new ArrayList();
+          Map<String,List<List<Integer>>> matchesMap = new HashMap<String,List<List<Integer>>>();
+            List<List<Integer>> matchesList = new ArrayList<List<Integer>>();
             matchesMap.put(getAnnotationSetName(), matchesList);
             matchesList.add(matches);
         }//if else

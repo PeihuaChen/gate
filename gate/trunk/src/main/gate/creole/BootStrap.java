@@ -44,21 +44,21 @@ public class BootStrap {
     * directories of the empty project to the variants of the names of the
     * files and the directories the new project
     */
-  protected Map names = null;
+  protected Map<String,String> names = null;
 
-  protected Map oldNames = null;
+  protected Map<String,String> oldNames = null;
 
   /** the methods from the class that implements the resource*/
-  protected List listMethodsResource = null;
+  protected List<String> listMethodsResource = null;
 
   /** the list with the packages name where the main class can be find*/
-  protected List listPackages;
+  protected List<String> listPackages;
 
   /** the packages used by the class which creates the resources */
-  protected Set allPackages = null;
+  protected Set<String> allPackages = null;
 
   /** the enumeration of the variables from main class*/
-  protected Map fields = null;
+  protected Map<Integer,String> fields = null;
 
   /** a buffer in order to read an array of char */
   protected char cbuffer[] = null;
@@ -69,31 +69,31 @@ public class BootStrap {
 
   public BootStrap() {
 
-    names = new HashMap();
+    names = new HashMap<String,String>();
 
-    oldNames = new HashMap();
+    oldNames = new HashMap<String,String>();
 
-    listMethodsResource = new ArrayList();
+    listMethodsResource = new ArrayList<String>();
 
-    listPackages = new ArrayList();
+    listPackages = new ArrayList<String>();
 
     cbuffer = new char[BUFF_SIZE];
 
-    allPackages = new HashSet();
+    allPackages = new HashSet<String>();
 
-    fields = new HashMap();
+    fields = new HashMap<Integer,String>();
   }
 
   /** Determines all the keys from the map "names" in the text and replaces them
     * with their values
     */
-  public String changeKeyValue ( String text, Map map ){
+  public String changeKeyValue ( String text, Map<String,String> map ){
 
-    Set keys = map.keySet();
-    Iterator iteratorKeys = keys.iterator();
+    Set<String> keys = map.keySet();
+    Iterator<String> iteratorKeys = keys.iterator();
     while (iteratorKeys.hasNext()) {
-      String key = (String) iteratorKeys.next();
-      String value = (String)map.get(key);
+      String key = iteratorKeys.next();
+      String value = map.get(key);
       text = text.replaceAll(key,value);
     } // while
     return text;
@@ -131,14 +131,14 @@ public class BootStrap {
   /** returns the string with the interfaces that implement the main class and
     *  the class that extends it
     */
-  public String getInterfacesAndClass (String typeResource, Set interfacesList)
+  public String getInterfacesAndClass (String typeResource, Set<String> interfacesList)
                                     throws ClassNotFoundException {
 
     String abstractClass = null;
     // add the class that it extends
     String interfacesAndClass = null;
     // the class corresponding to the current interface from list interfaces.
-    Class currentClass = null;
+    Class<?> currentClass = null;
 
     // determine the abstract class
     if (typeResource.equals("ProcessingResource")) {
@@ -152,12 +152,12 @@ public class BootStrap {
 
     // a map from all the methods from interfaces to the lists which contains
     // the features of every method
-    List methodsInterfaces = new ArrayList();
+    List<FeatureMethod> methodsInterfaces = new ArrayList<FeatureMethod>();
     if (interfacesList!=null) {
       interfacesAndClass = interfacesAndClass+ newLine+ "  implements ";
-      Iterator iter = interfacesList.iterator();
+      Iterator<String> iter = interfacesList.iterator();
       while (iter.hasNext()) {
-        String nameInterface =(String)iter.next();
+        String nameInterface = iter.next();
         String nameClass = null;
         int index = nameInterface.lastIndexOf(".");
         if (index != -1) {
@@ -187,8 +187,8 @@ public class BootStrap {
                                             (0,interfacesAndClass.length()-2);
 
     // methods from the class that extends the resource
-    List methodsClassExtend = new ArrayList();
-    Class currentClassExtend = Class.forName("gate.creole."+abstractClass);
+    List<FeatureMethod> methodsClassExtend = new ArrayList<FeatureMethod>();
+    Class<?> currentClassExtend = Class.forName("gate.creole."+abstractClass);
     methodsClassExtend = featuresClass(currentClassExtend, methodsClassExtend);
 
     // get the methods and fields for the main class
@@ -198,7 +198,7 @@ public class BootStrap {
   } // getInterfacesAndClass
 
   /**go through all methods and determines return type, parameters, exceptions*/
-  public List featuresClass (Class currentClass, List methodsList){
+  public List<FeatureMethod> featuresClass (Class<?> currentClass, List<FeatureMethod> methodsList){
 
     // go through all the methods
     Method[] listMethodsCurrentClass = currentClass.getMethods();
@@ -208,19 +208,19 @@ public class BootStrap {
       featureMethod.setValueReturn(
                           listMethodsCurrentClass[i].getReturnType().getName());
 
-      Class[] parameters = (
+      Class<?>[] parameters = (
                                 listMethodsCurrentClass[i].getParameterTypes());
-      Class[] exceptions = (
+      Class<?>[] exceptions = (
                                 listMethodsCurrentClass[i].getExceptionTypes());
 
       // determine the parameters for the current method
-      List aux = new ArrayList();
+      List<String> aux = new ArrayList<String>();
       for (int k=0;k<parameters.length;k++)
         aux.add(parameters[k].getName());
       featureMethod.setParameterTypes(aux);
 
       // determine the exceptions for the current method
-      aux = new ArrayList();
+      aux = new ArrayList<String>();
       for (int k=0;k<exceptions.length;k++)
         aux.add(exceptions[k].getName());
       featureMethod.setExceptionTypes(aux);
@@ -238,27 +238,27 @@ public class BootStrap {
     * @param methodsInterfacesList is the list with all methods from the interfaces
     * that implement the resource
     */
-  public void getMethodsAndFields(List methodsExtendList,
-                                                  List methodsInterfacesList){
+  public void getMethodsAndFields(List<FeatureMethod> methodsExtendList,
+                                                  List<FeatureMethod> methodsInterfacesList){
     // determine all the methods from the interfaces which are not among the
     // methods of the class that extends the resource
 
     int j = 0;
     for (int i=0;i<methodsInterfacesList.size();i++) {
-      FeatureMethod featureMethod = (FeatureMethod)methodsInterfacesList.get(i);
+      FeatureMethod featureMethod = methodsInterfacesList.get(i);
       if (methodsExtendList.contains(featureMethod) == false) {
         // the name of the method
         String nameMethod = (featureMethod.getNameMethod());
 
         // the types of the parameters of the method
-        List valTypes = (featureMethod.getParameterTypes());
+        List<String> valTypes = (featureMethod.getParameterTypes());
 
         // the value which the method returns
         String typeReturn = determineTypePackage(
                                       (featureMethod.getValueReturn()));
 
         // get the list of exceptions for the current method
-        List valException = (featureMethod.getExceptionTypes());
+        List<String> valException = (featureMethod.getExceptionTypes());
 
         String declaration = "public "+ typeReturn +" "+
                              nameMethod +"(";
@@ -267,14 +267,14 @@ public class BootStrap {
           declaration = declaration+")";
         else
           for (int k=0;k<valTypes.size();k++) {
-            String type = (String)valTypes.get(k);
+            String type = valTypes.get(k);
             if (type.endsWith("[]"))
               declaration = declaration +
                   determineTypePackage(type.substring(0,type.length()-2)) +
                   " parameter"+ k;
             else
               declaration = declaration +
-                            determineTypePackage((String)valTypes.get(k)) +
+                            determineTypePackage(valTypes.get(k)) +
                             " parameter"+ k;
 
             if (k==valTypes.size()-1)
@@ -303,8 +303,7 @@ public class BootStrap {
         else {
           declaration = declaration + newLine+ "                throws ";
           for (int k=0;k<valException.size();k++) {
-            declaration = declaration + determineTypePackage((String)
-                                                    valException.get(k));
+            declaration = declaration + determineTypePackage(valException.get(k));
 
             if (k == valException.size()-1) {
               if (!typeReturn.equals("void")){
@@ -338,22 +337,21 @@ public class BootStrap {
   /**
     * write the methods and the fields in the right form
     */
-  public String displayMethodsAndFields(List methods, Map fields) {
+  public String displayMethodsAndFields(List<String> methods, Map<Integer,String> fields) {
 
     String methodsFields = "";
 
     // go through all methods
-    Iterator iterator = listMethodsResource.iterator();
+    Iterator<String> iterator = listMethodsResource.iterator();
     while (iterator.hasNext()) {
-      methodsFields = methodsFields + newLine + (String)iterator.next()+newLine;
+      methodsFields = methodsFields + newLine + iterator.next()+newLine;
     }
 
     // go through all fields
-    Iterator iter = fields.keySet().iterator();
-    int i=0;
+    Iterator<Integer> iter = fields.keySet().iterator();
     while (iter.hasNext()) {
-      Integer index = (Integer)iter.next();
-      String type = (String)fields.get(index);
+      Integer index = iter.next();
+      String type = fields.get(index);
       if (type.endsWith("[]"))
         methodsFields = methodsFields + newLine + "protected " + type +" " +
                        type.substring(0,type.length()-2).toLowerCase() +
@@ -362,14 +360,13 @@ public class BootStrap {
       else
         methodsFields = methodsFields + newLine + "protected " + type +" " +
                         type.toLowerCase() + index.toString() +";";
-        i+=1;
     }
     return methodsFields;
   }// displayMethodsAndFields(List methods, List fields)
 
 
   /** create the map with variants of the names... */
-  public Map createNames ( String packageName,
+  public Map<String,String> createNames ( String packageName,
                            String resourceName,
                            String className,
                            String stringPackages,
@@ -438,11 +435,11 @@ public class BootStrap {
   }// End createNames()
 
   /** determine all the packages */
-  public String namesPackages (Set listPackages) {
-    Iterator iterator = listPackages.iterator();
+  public String namesPackages (Set<String> listPackages) {
+    Iterator<String> iterator = listPackages.iterator();
     String packages = new String();
     while (iterator.hasNext()) {
-      String currentPackage = (String)iterator.next();
+      String currentPackage = iterator.next();
       if ((!currentPackage.equals("gate.*"))&&
          (!currentPackage.equals("gate.creole.*"))&&
          (!currentPackage.equals("gate.util.*"))&&
@@ -454,8 +451,8 @@ public class BootStrap {
 
   /** determines the name of the packages and adds them to a list
     */
-  public List determinePath (String packageName)throws IOException {
-    List list = new ArrayList();
+  public List<String> determinePath (String packageName)throws IOException {
+    List<String> list = new ArrayList<String>();
     StringTokenizer token = new StringTokenizer(packageName,".");
     //if (token.countTokens()>1) {
       while (token.hasMoreTokens()) {
@@ -474,7 +471,6 @@ public class BootStrap {
     // class name contains only letters and digits
     char[] classNameChars = className.toCharArray();
     for (int i=0;i<classNameChars.length;i++){
-      Character classNameCharacter = new Character(classNameChars[i]);
       if (!Character.isLetterOrDigit(classNameChars[i]))
         throw new GateException("Only letters and digits in the class name");
     }
@@ -514,7 +510,7 @@ public class BootStrap {
     */
   public void createResource( String resourceName,String packageName,
                               String typeResource,String className,
-                              Set interfacesList,String pathNewProject)
+                              Set<String> interfacesList,String pathNewProject)
                               throws
                               IOException,ClassNotFoundException,
                               GateException,InterruptedException {
@@ -545,7 +541,7 @@ public class BootStrap {
     if (!pathNewProject.endsWith("/")) pathNewProject = pathNewProject + "/";
 
     // determine the path of the main class
-    String stringPackages = (String)listPackages.get(0);
+    String stringPackages = listPackages.get(0);
     for (int i=1;i<listPackages.size();i++) {
       stringPackages = stringPackages + "/"+listPackages.get(i);
     }
@@ -589,7 +585,7 @@ public class BootStrap {
     }// while
 
     // secondly, create the files
-    Enumeration keyProperties = properties.propertyNames();
+    Enumeration<?> keyProperties = properties.propertyNames();
     // goes through all the files from the template project
     while (keyProperties.hasMoreElements()) {
       String key = (String)keyProperties.nextElement();
@@ -649,7 +645,7 @@ public class BootStrap {
     System.out.println("intre");
     System.out.println(System.getProperty("java.class.path"));
     BootStrap bootStrap = new BootStrap();
-    Set interfaces = new HashSet();
+    Set<String> interfaces = new HashSet<String>();
     interfaces.add("gate.Document");
     interfaces.add("gate.ProcessingResource");
     try{
@@ -681,16 +677,16 @@ class FeatureMethod {
   protected String valueReturn;
 
   /** the list with the types of the parameters */
-  protected List parameterTypes;
+  protected List<String> parameterTypes;
 
   /** the list with the types of the exceptions */
-  protected List exceptionTypes;
+  protected List<String> exceptionTypes;
 
   FeatureMethod() {
     nameMethod = new String();
     valueReturn = new String();
-    parameterTypes = new ArrayList();
-    exceptionTypes = new ArrayList();
+    parameterTypes = new ArrayList<String>();
+    exceptionTypes = new ArrayList<String>();
   }
 
   public String getNameMethod() {
@@ -701,11 +697,11 @@ class FeatureMethod {
     return valueReturn;
   }//getValueReturn
 
-  public List getParameterTypes() {
+  public List<String> getParameterTypes() {
     return parameterTypes;
   }//getParameterTypes
 
-  public List getExceptionTypes() {
+  public List<String> getExceptionTypes() {
     return exceptionTypes;
   }//getExceptionTypes
 
@@ -717,11 +713,11 @@ class FeatureMethod {
     valueReturn = newValueReturn;
   }//setValueReturn
 
-  public void setParameterTypes(List newParameterTypes) {
+  public void setParameterTypes(List<String> newParameterTypes) {
     parameterTypes = newParameterTypes;
   }//setParameterTypes
 
-  public void setExceptionTypes(List newExceptionTypes) {
+  public void setExceptionTypes(List<String> newExceptionTypes) {
     exceptionTypes = newExceptionTypes;
   }//setExceptionTypes
 
