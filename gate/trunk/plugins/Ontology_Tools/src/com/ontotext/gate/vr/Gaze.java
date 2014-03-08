@@ -536,7 +536,7 @@ public class Gaze extends AbstractVisualResource
   private void performLinearAction(int action, int index, LinearNode node ) {
     switch (action) {
       case LDA_EDIT : {
-        Object bkp = linear.get(index);
+        LinearNode bkp = linear.get(index);
         linear.remove(index);
         int size = linear.size();
         linear.add(index,node);
