@@ -3,6 +3,7 @@ package gate.creole.morph;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
@@ -123,19 +124,20 @@ public class ParsingFunctions {
 
 	
 	public static String[] normlizePattern(String line) {
-		ArrayList patterns = PatternParser.parsePattern(line);
-		String[] pats = new String[patterns.size()];
+		List<String> patterns = PatternParser.parsePattern(line);
+		/*String[] pats = new String[patterns.size()];
 		for(int i=0;i<patterns.size();i++) {
-			pats[i] = (String) patterns.get(i);
+			pats[i] = patterns.get(i);
 		}
-		return pats;
+		return pats;*/
+		return patterns.toArray(new String[patterns.size()]);
 	}
 	
 	
 	public static PatternPart[] getPatternParts(String line) {
 		// the first thing we do is replace all variables with their respective
 		// values
-		ArrayList patterns = new ArrayList();
+		List<PatternPart> patterns = new ArrayList<PatternPart>();
 		line = line.replaceAll("[\\(]+","(");
 		line = line.replaceAll("[\\)]+",")");
 		line = line.replaceAll("[\\[]+","[");
@@ -263,7 +265,7 @@ public class ParsingFunctions {
 
 		PatternPart[] parts = new PatternPart[patterns.size()];
 		for(int i=0;i<patterns.size();i++) {
-			parts[i] = (PatternPart) patterns.get(i);
+			parts[i] = patterns.get(i);
 		}
 		return parts;
 	}
@@ -379,12 +381,12 @@ public class ParsingFunctions {
 		return parameters;
 	}
 	
-	public static Set createFSMs(String string, int type, Set initStates, Interpret owner) {
-		Set result = new HashSet();
+	public static Set<Set<FSMState>> createFSMs(String string, int type, Set<Set<FSMState>> initStates, Interpret owner) {
+		Set<Set<FSMState>> result = new HashSet<Set<FSMState>>();
 		// we create different groups for states 
-		Iterator iter = initStates.iterator();
+		Iterator<Set<FSMState>> iter = initStates.iterator();
 		while(iter.hasNext()) {
-			HashSet states = (HashSet) iter.next();
+			Set<FSMState> states = iter.next();
 			switch (type) {
 			case OR:
 				result.addAll(orFSMs(string, states, owner));
@@ -411,10 +413,10 @@ public class ParsingFunctions {
 	}
 
 	
-	private static FSMState next(char ch, HashSet states) {
-		Iterator iter = states.iterator();
+	private static FSMState next(char ch, Set<FSMState> states) {
+		Iterator<FSMState> iter = states.iterator();
 		while(iter.hasNext()) {
-			FSMState state = (FSMState) iter.next();
+			FSMState state = iter.next();
 			FSMState nextState = state.next(ch, FSMState.CHILD_STATE);
 			if(nextState != null)
 				return nextState;
@@ -422,10 +424,10 @@ public class ParsingFunctions {
 		return null;
 	}
 	
-	private static int getIndex(HashSet states) {
-		Iterator iter = states.iterator();
+	private static int getIndex(Set<FSMState> states) {
+		Iterator<FSMState> iter = states.iterator();
 		while(iter.hasNext()) {
-			FSMState state = (FSMState) iter.next();
+			FSMState state = iter.next();
 			return state.getIndex();
 		}
 		return -1;
@@ -435,7 +437,7 @@ public class ParsingFunctions {
 	/**
 	 * (abc) -> a -> b -> c ->
 	 */
-	public static ArrayList andFSMs(String line, HashSet initStates, Interpret owner) {
+	public static List<Set<FSMState>> andFSMs(String line, Set<FSMState> initStates, Interpret owner) {
 		// for the first inital State
 		// we need to find out if any of the parent contains referece to it
 		char ch = line.charAt(0);
@@ -450,9 +452,9 @@ public class ParsingFunctions {
 		
 		// currentState contains the first state
 		// this should be added as a child state to all initStates
-		Iterator iter = initStates.iterator();
+		Iterator<FSMState> iter = initStates.iterator();
 		while(iter.hasNext()) {
-			FSMState state = (FSMState) iter.next();
+			FSMState state = iter.next();
 			state.put(ch, currentState, FSMState.CHILD_STATE);
 		}
 		
@@ -474,8 +476,8 @@ public class ParsingFunctions {
 		    }			
 			currentState = nextState;
 		}
-		ArrayList nextStates = new ArrayList();
-		HashSet newSet = new HashSet();
+		List<Set<FSMState>> nextStates = new ArrayList<Set<FSMState>>();
+		Set<FSMState> newSet = new HashSet<FSMState>();
 		newSet.add(nextState);
 		nextStates.add(newSet);
 		return nextStates;
@@ -486,11 +488,11 @@ public class ParsingFunctions {
 	 * 		 -> b, 
 	 * 		 -> c
 	 */ 
-	public static ArrayList orFSMs(String line, HashSet initStates, Interpret owner) {
+	public static List<Set<FSMState>> orFSMs(String line, Set<FSMState> initStates, Interpret owner) {
 		// for each character in the line
 		// we need to find out if any of the initStates contain reference to it
 		// if so that should be assigned to all initStates
-		HashSet nextStates = new HashSet();
+		Set<FSMState> nextStates = new HashSet<FSMState>();
 		for(int i=0;i<line.length();i++) {
 			// for the current character
 			// we need to find out if any of the parent contains referece to it
@@ -509,14 +511,14 @@ public class ParsingFunctions {
 			
 			// currentState contains refenrece for the current character
 			// this should be added as a child state to all initStates
-			Iterator iter = initStates.iterator();
+			Iterator<FSMState> iter = initStates.iterator();
 			while(iter.hasNext()) {
-				FSMState state = (FSMState) iter.next();
+				FSMState state = iter.next();
 				state.put(ch, currentState, FSMState.CHILD_STATE);
 			}
 			
 		}
-		ArrayList newList = new ArrayList();
+		List<Set<FSMState>> newList = new ArrayList<Set<FSMState>>();
 		newList.add(nextStates);
 		return newList;
 	}
@@ -525,11 +527,11 @@ public class ParsingFunctions {
 	 * [abc]+ 
 	 * each element can travel to itself and can travel to next one
 	 */
-	public static ArrayList orPlusFSMs(String line, HashSet initStates, Interpret owner) {
+	public static List<Set<FSMState>> orPlusFSMs(String line, Set<FSMState> initStates, Interpret owner) {
 		// for each character in the line
 		// we need to find out if any of the initStates contain reference to it
 		// if so that should be assigned to all initStates
-		ArrayList nextStates = new ArrayList();
+		List<FSMState> nextStates = new ArrayList<FSMState>();
 		for(int i=0;i<line.length();i++) {
 			// for the current character
 			// we need to find out if any of the parent contains referece to it
@@ -548,25 +550,25 @@ public class ParsingFunctions {
 			
 			// currentState contains refenrece for the current character
 			// this should be added as a child state to all initStates
-			Iterator iter = initStates.iterator();
+			Iterator<FSMState> iter = initStates.iterator();
 			while(iter.hasNext()) {
-				FSMState state = (FSMState) iter.next();
+				FSMState state = iter.next();
 				state.put(ch, currentState, FSMState.CHILD_STATE);
 			}
 		}
 
 		for(int i=0;i<nextStates.size();i++) {
-			FSMState from = (FSMState) nextStates.get(i);
+			FSMState from = nextStates.get(i);
 			for(int j=0;j<nextStates.size();j++) {
-				FSMState to = (FSMState) nextStates.get(j);
+				FSMState to = nextStates.get(j);
 				char ch = line.charAt(j);
 				from.put(ch, to, FSMState.ADJ_STATE);
 			}
 		}
 
-		HashSet newSet = new HashSet();
+		Set<FSMState> newSet = new HashSet<FSMState>();
 		newSet.addAll(nextStates);
-		ArrayList newList = new ArrayList();
+		List<Set<FSMState>> newList = new ArrayList<Set<FSMState>>();
 		newList.add(newSet);
 		return newList;
 	}
@@ -576,7 +578,7 @@ public class ParsingFunctions {
 	 * -> a -> b -> c -> null 
 	 * -> a -> b -> c -> a
 	 */
-	public static ArrayList andPlusFSMs(String line, HashSet initStates, Interpret owner) {
+	public static List<Set<FSMState>> andPlusFSMs(String line, Set<FSMState> initStates, Interpret owner) {
 		// for the first inital State
 		// we need to find out if any of the parent contains referece to it
 		char ch = line.charAt(0);
@@ -593,9 +595,9 @@ public class ParsingFunctions {
 		
 		// currentState contains the first state
 		// this should be added as a child state to all initStates
-		Iterator iter = initStates.iterator();
+		Iterator<FSMState> iter = initStates.iterator();
 		while(iter.hasNext()) {
-			FSMState state = (FSMState) iter.next();
+			FSMState state = iter.next();
 			state.put(ch, currentState, FSMState.CHILD_STATE);
 		}
 		
@@ -618,8 +620,8 @@ public class ParsingFunctions {
 		}
 			
 		nextState.put(line.charAt(0), firstState,  FSMState.ADJ_STATE);
-		ArrayList nextStates = new ArrayList();
-		HashSet newSet = new HashSet();
+		List<Set<FSMState>> nextStates = new ArrayList<Set<FSMState>>();
+		Set<FSMState> newSet = new HashSet<FSMState>();
 		newSet.add(nextState);
 		nextStates.add(newSet);
 		return nextStates;
@@ -629,11 +631,11 @@ public class ParsingFunctions {
 	 * [abc]* 
 	 * each element can have reference to adjecent ones and to itself
 	 */
-	public static ArrayList orStarFSMs(String line, HashSet initStates, Interpret owner) {
+	public static List<Set<FSMState>> orStarFSMs(String line, Set<FSMState> initStates, Interpret owner) {
 		// for each character in the line
 		// we need to find out if any of the initStates contain reference to it
 		// if so that should be assigned to all initStates
-		ArrayList nextStates = new ArrayList();
+		List<FSMState> nextStates = new ArrayList<FSMState>();
 		for(int i=0;i<line.length();i++) {
 			// for the current character
 			// we need to find out if any of the parent contains referece to it
@@ -652,26 +654,26 @@ public class ParsingFunctions {
 			
 			// currentState contains refenrece for the current character
 			// this should be added as a child state to all initStates
-			Iterator iter = initStates.iterator();
+			Iterator<FSMState> iter = initStates.iterator();
 			while(iter.hasNext()) {
-				FSMState state = (FSMState) iter.next();
+				FSMState state = iter.next();
 				state.put(ch, currentState, FSMState.CHILD_STATE);
 			}
 		}
 
 		for(int i=0;i<nextStates.size();i++) {
-			FSMState from = (FSMState) nextStates.get(i);
+			FSMState from = nextStates.get(i);
 			for(int j=0;j<nextStates.size();j++) {
-				FSMState to = (FSMState) nextStates.get(j);
+				FSMState to = nextStates.get(j);
 				char ch = line.charAt(j);
 				from.put(ch, to, FSMState.ADJ_STATE);
 			}
 		}
 
-		HashSet newSet = new HashSet();
+		Set<FSMState> newSet = new HashSet<FSMState>();
 		newSet.addAll(nextStates);
 		
-		ArrayList newList = new ArrayList();
+		List<Set<FSMState>> newList = new ArrayList<Set<FSMState>>();
 		newList.add(newSet);
 		newList.add(initStates);
 		return newList;
@@ -680,7 +682,7 @@ public class ParsingFunctions {
 	/**
 	 * (abc)*
 	 */
-	public static ArrayList andStarFSMs(String line, HashSet initStates, Interpret owner) {
+	public static List<Set<FSMState>> andStarFSMs(String line, Set<FSMState> initStates, Interpret owner) {
 		// for the first inital State
 		// we need to find out if any of the parent contains referece to it
 		char ch = line.charAt(0);
@@ -697,9 +699,9 @@ public class ParsingFunctions {
 		
 		// currentState contains the first state
 		// this should be added as a child state to all initStates
-		Iterator iter = initStates.iterator();
+		Iterator<FSMState> iter = initStates.iterator();
 		while(iter.hasNext()) {
-			FSMState state = (FSMState) iter.next();
+			FSMState state = iter.next();
 			state.put(ch, currentState, FSMState.CHILD_STATE);
 		}
 		
@@ -724,8 +726,8 @@ public class ParsingFunctions {
 		
 		nextState.put(line.charAt(0), firstState,  FSMState.ADJ_STATE);
 		
-		ArrayList nextStates = new ArrayList();
-		HashSet newSet = new HashSet();
+		List<Set<FSMState>> nextStates = new ArrayList<Set<FSMState>>();
+		Set<FSMState> newSet = new HashSet<FSMState>();
 		newSet.add(nextState);
 		nextStates.add(newSet);
 		nextStates.add(initStates);
@@ -758,8 +760,8 @@ public class ParsingFunctions {
 		// if the value found between the bracket is an integer value
 		// we won't replace those brackets
 		StringBuffer newExpr = new StringBuffer(line);
-		Stack stack = new Stack();
-		Stack bracketIndexes = new Stack();
+		Stack<String> stack = new Stack<String>();
+		Stack<Integer> bracketIndexes = new Stack<Integer>();
 
 		for (int i = 0; i < newExpr.length(); i++) {
 			if (newExpr.charAt(i) == '{') {
@@ -781,7 +783,7 @@ public class ParsingFunctions {
 				// before adding it to the stack, check if this is the closing
 				// one
 				if (stack.isEmpty()
-						|| !(((String) (stack.get(stack.size() - 1)))
+						|| !((stack.get(stack.size() - 1))
 								.equals("\""))) {
 					// yes this is the opening one
 					// add it to the stack
@@ -790,15 +792,15 @@ public class ParsingFunctions {
 				} else {
 					// this is the closing one
 					stack.pop();
-					int index = ((Integer) (bracketIndexes.pop())).intValue();
+					int index = (bracketIndexes.pop()).intValue();
 					newExpr.setCharAt(index, '(');
 					newExpr.setCharAt(i, ')');
 				}
 			} else if (newExpr.charAt(i) == '}') {
 				// remove the element from the stack
 				// it must be '{', otherwise generate the error
-				String bracket = (String) (stack.pop());
-				int index = ((Integer) (bracketIndexes.pop())).intValue();
+				String bracket = (stack.pop());
+				int index = (bracketIndexes.pop()).intValue();
 				if (!bracket.equals("{")) {
 					return null;
 				}
@@ -821,7 +823,7 @@ public class ParsingFunctions {
 			} else if (newExpr.charAt(i) == ')') {
 				// remove the element from the stack
 				// it must be ')', otherwise generate the error
-				String bracket = (String) (stack.pop());
+				String bracket = (stack.pop());
 				bracketIndexes.pop();
 				if (!bracket.equals("(")) {
 					return null;
@@ -830,7 +832,7 @@ public class ParsingFunctions {
 			} else if (newExpr.charAt(i) == ']') {
 				// remove the element from the stack
 				// it must be '[', otherwise generate the error
-				String bracket = (String) (stack.pop());
+				String bracket = (stack.pop());
 				bracketIndexes.pop();
 				if (!bracket.equals("[")) {
 					return null;

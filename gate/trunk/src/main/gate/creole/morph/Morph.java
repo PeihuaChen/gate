@@ -54,6 +54,8 @@ public class Morph
     extends AbstractLanguageAnalyser
     implements ProcessingResource, CustomDuplication {
 
+  private static final long serialVersionUID = 6964689654685956128L;
+
   /** File which contains rules to be processed */
   protected URL rulesFile;
 

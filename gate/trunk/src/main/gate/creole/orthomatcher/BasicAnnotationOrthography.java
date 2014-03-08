@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 /*
@@ -336,46 +337,52 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
     return true;
   } // isUnknownGender
 
-  protected Map<String, Set<String>> initNicknames(
-      String nicknameFileEncoding, java.net.URL fileURL) throws IOException {
+  protected Map<String, Set<String>> initNicknames(String nicknameFileEncoding,
+          java.net.URL fileURL) throws IOException {
     Pattern spacePat = Pattern.compile("(\\s+)");
     nicknameMap = new HashMap<String, Set<String>>();
     // create the relative URL
-    BufferedReader reader =
-        new BomStrippingInputStreamReader(fileURL.openStream(),
-            nicknameFileEncoding);
-    String lineRead = null;
-    
-    while((lineRead = reader.readLine()) != null) {
-      if(lineRead.length() == 0 || lineRead.charAt(0) == '#') {
-        continue;
+    BufferedReader reader = null;
+    try {
+      reader = new BomStrippingInputStreamReader(fileURL.openStream(),
+              nicknameFileEncoding);
+      String lineRead = null;
+
+      while((lineRead = reader.readLine()) != null) {
+        if(lineRead.length() == 0 || lineRead.charAt(0) == '#') {
+          continue;
+        }
+        List<String> nickNameLine =
+                Arrays.asList(spacePat.split(lineRead
+                        .toLowerCase().trim()));
+        if(nickNameLine.size() != 3
+                && (nickNameLine.size() != 4 && ((nickNameLine.get(3) != "M") || nickNameLine
+                        .get(3) != "F"))) {
+          continue;
+        }
+        if(round2Places(Double.valueOf(nickNameLine.get(2))) < OrthoMatcherHelper
+                .round2Places(minimumNicknameLikelihood)) {
+          continue;
+        }
+        if(nicknameMap.containsKey(nickNameLine.get(0))) {
+          /*
+           * System.out.println("Adding to existing nickname of " +
+           * nickNameLine.get(0) + " " + nickNameLine.get(1));
+           */
+          nicknameMap.get(nickNameLine.get(0)).add(nickNameLine.get(1));
+        } else {
+          /*
+           * System.out.println("Adding new nickname of " +
+           * nickNameLine.get(0) + " " + nickNameLine.get(1));
+           */
+          nicknameMap.put(
+                  nickNameLine.get(0),
+                  new HashSet<String>(
+                          Collections.singleton(nickNameLine.get(1))));
+        }
       }
-      ArrayList<String> nickNameLine =
-          new ArrayList<String>(Arrays.asList(spacePat.split(lineRead
-              .toLowerCase().trim())));
-      if(nickNameLine.size() != 3
-          && (nickNameLine.size() != 4 && ((nickNameLine.get(3) != "M") || nickNameLine
-              .get(3) != "F"))) {
-        continue;
-      }
-      if(round2Places(Double.valueOf(nickNameLine.get(2))) < OrthoMatcherHelper
-          .round2Places(minimumNicknameLikelihood)) {
-        continue;
-      }
-      if(nicknameMap.containsKey(nickNameLine.get(0))) {
-        /*
-         * System.out.println("Adding to existing nickname of " +
-         * nickNameLine.get(0) + " " + nickNameLine.get(1));
-         */
-        nicknameMap.get(nickNameLine.get(0)).add(nickNameLine.get(1));
-      } else {
-        /*
-         * System.out.println("Adding new nickname of " + nickNameLine.get(0) +
-         * " " + nickNameLine.get(1));
-         */
-        nicknameMap.put(nickNameLine.get(0),
-            new HashSet<String>(Collections.singleton(nickNameLine.get(1))));
-      }
+    } finally {
+      IOUtils.closeQuietly(reader);
     }
     return nicknameMap;
   }

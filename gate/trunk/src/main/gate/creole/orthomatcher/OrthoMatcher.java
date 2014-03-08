@@ -60,6 +60,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 @CreoleResource(name="ANNIE OrthoMatcher", comment="ANNIE orthographical coreference component.", helpURL="http://gate.ac.uk/userguide/sec:annie:orthomatcher", icon="ortho-matcher")
 public class OrthoMatcher extends AbstractLanguageAnalyser {
@@ -224,6 +225,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
   }
 
   /** Initialise this resource, and return it. */
+  @SuppressWarnings("resource")
   @Override
   public Resource init() throws ResourceInstantiationException {
     //initialise the list of annotations which we will match
@@ -232,10 +234,10 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
       "No URL provided for the definition file!");
     }
     String nicknameFile = null;
-
+    BufferedReader reader = null;
     //at this point we have the definition file
     try{
-      BufferedReader reader = new BomStrippingInputStreamReader(
+      reader = new BomStrippingInputStreamReader(
           definitionFileURL.openStream(), encoding);
       String lineRead = null;
       //boolean foundANickname = false;
@@ -269,6 +271,9 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
 
     }catch(IOException ioe){
       throw new ResourceInstantiationException(ioe);
+    }
+    finally {
+      IOUtils.closeQuietly(reader);
     }
 
 
@@ -993,48 +998,50 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
   }
 
   /** creates the lookup tables */
-  protected void createAnnotList(String nameFile,String nameList)
-  throws IOException{
-    //create the relative URL
+  protected void createAnnotList(String nameFile, String nameList)
+          throws IOException {
+    // create the relative URL
     URL fileURL = new URL(definitionFileURL, nameFile);
-    BufferedReader bufferedReader =
-      new BomStrippingInputStreamReader(fileURL.openStream(),
-              encoding);
+    BufferedReader bufferedReader = null;
+    try {
+      bufferedReader =
+              new BomStrippingInputStreamReader(fileURL.openStream(), encoding);
 
-    String lineRead = null;
-    while ((lineRead = bufferedReader.readLine()) != null){
-      if (nameList.compareTo(CDGLISTNAME)==0){
-        Matcher matcher = punctPat.matcher(lineRead.toLowerCase().trim());
-        lineRead = matcher.replaceAll(" ").trim();
-        if (caseSensitive)
-          cdg.add(lineRead);
-        else
-          cdg.add(lineRead.toLowerCase());
-      }// if
-      else {
-        int index = lineRead.indexOf("£");
-        if (index != -1){
-          String  expr = lineRead.substring(0,index);
-          //if not case-sensitive, we need to downcase all strings
-          if (!caseSensitive)
-            expr = expr.toLowerCase();
-          String code = lineRead.substring(index+1,lineRead.length());
-          if (nameList.equals(ALIASLISTNAME)) {
-            alias.put(expr, code);
-          } else if (nameList.equals(ARTLISTNAME)) {
-            def_art.put(expr, code);
-          } else if (nameList.equals(PREPLISTNAME)) {
-            prepos.put(expr, code);
-          } else if (nameList.equals(CONNECTORLISTNAME)) {
-            connector.put(expr, code);
-          } else if (nameList.equals(SPURLISTNAME)){
-            spur_match.put(expr, code);
-          }
-        }//if
-      }// else
+      String lineRead = null;
+      while((lineRead = bufferedReader.readLine()) != null) {
+        if(nameList.compareTo(CDGLISTNAME) == 0) {
+          Matcher matcher = punctPat.matcher(lineRead.toLowerCase().trim());
+          lineRead = matcher.replaceAll(" ").trim();
+          if(caseSensitive)
+            cdg.add(lineRead);
+          else cdg.add(lineRead.toLowerCase());
+        }// if
+        else {
+          int index = lineRead.indexOf("£");
+          if(index != -1) {
+            String expr = lineRead.substring(0, index);
+            // if not case-sensitive, we need to downcase all strings
+            if(!caseSensitive) expr = expr.toLowerCase();
+            String code = lineRead.substring(index + 1, lineRead.length());
+            if(nameList.equals(ALIASLISTNAME)) {
+              alias.put(expr, code);
+            } else if(nameList.equals(ARTLISTNAME)) {
+              def_art.put(expr, code);
+            } else if(nameList.equals(PREPLISTNAME)) {
+              prepos.put(expr, code);
+            } else if(nameList.equals(CONNECTORLISTNAME)) {
+              connector.put(expr, code);
+            } else if(nameList.equals(SPURLISTNAME)) {
+              spur_match.put(expr, code);
+            }
+          }// if
+        }// else
 
-    }//while
-  }//createAnnotList
+      }// while
+    } finally {
+      IOUtils.closeQuietly(bufferedReader);
+    }
+  }// createAnnotList
 
 
   /**

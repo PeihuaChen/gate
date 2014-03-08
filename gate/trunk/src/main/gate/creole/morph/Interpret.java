@@ -52,8 +52,8 @@ public class Interpret {
 
 	MorphFunctions morphInst;
 
-	List patterns = new ArrayList();
-	List fsms = new ArrayList();
+	List<Pattern> patterns = new ArrayList<Pattern>();
+	List<List<CharClass>> fsms = new ArrayList<List<CharClass>>();
 	
 	/**
 	 * The initial state of the FSM that backs this morpher
@@ -108,12 +108,12 @@ public class Interpret {
 	
 	public void addState(char ch, FSMState fsm, int index) {
 		if(index == fsms.size()) {
-			fsms.add(new ArrayList());
+			fsms.add(new ArrayList<CharClass>());
 		}
 		
-		List fs = (List) fsms.get(index);
+		List<CharClass> fs = fsms.get(index);
 		for(int i=0;i<fs.size();i++) {
-			CharClass cc = (CharClass) fs.get(i);
+			CharClass cc = fs.get(i);
 			if(cc.ch == ch)
 				return;
 		}
@@ -127,20 +127,20 @@ public class Interpret {
 	
 	public FSMState getState(char ch, int index) {
 		if(index >= fsms.size()) return null;
-		List fs = (List) fsms.get(index);
+		List<CharClass> fs = fsms.get(index);
 		for(int i=0;i<fs.size();i++) {
-			CharClass cc = (CharClass) fs.get(i);
+			CharClass cc = fs.get(i);
 			if(cc.ch == ch)
 				return cc.st;
 		}
 		return null;
 	}
 	
-	private Set getStates(char ch, Set states) {
-		Set newStates = new HashSet();
-		Iterator iter = states.iterator();
+	private Set<FSMState> getStates(char ch, Set<FSMState> states) {
+		Set<FSMState> newStates = new HashSet<FSMState>();
+		Iterator<FSMState> iter = states.iterator();
 		while (iter.hasNext()) {
-			FSMState st = (FSMState) iter.next();
+			FSMState st = iter.next();
 			FSMState chState = st.next(ch, FSMState.CHILD_STATE);
 			if (chState != null) {
 				newStates.add(chState);
@@ -175,7 +175,7 @@ public class Interpret {
 		}
 		
 		foundRule = false;
-		Set states = new HashSet();
+		Set<FSMState> states = new HashSet<FSMState>();
 		states.add(initialState);
 		for (int i = 0; i < word.length(); i++) {
 			char ch = word.charAt(i);
@@ -195,9 +195,9 @@ public class Interpret {
       }
     });
     
-		Iterator iter = states.iterator();
+		Iterator<FSMState> iter = states.iterator();
 		while (iter.hasNext()) {
-			FSMState st = (FSMState) iter.next();
+			FSMState st = iter.next();
 			rhses.addAll(st.getRHSes());
 		}
 
@@ -213,13 +213,13 @@ public class Interpret {
 	  return patternIndex;
 	}
 	
-	protected String executeRHSes(SortedSet rhses, String word, String category) {
+	protected String executeRHSes(SortedSet<RHS> rhses, String word, String category) {
     foundRule = false;
     // rhses are in sorted order
     // we need to check if the word is compatible with pattern
-    Iterator rhsiter = rhses.iterator();
+    Iterator<RHS> rhsiter = rhses.iterator();
     while (rhsiter.hasNext()){
-      RHS r1 = (RHS) rhsiter.next();
+      RHS r1 = rhsiter.next();
       String answer = executeRHS(word, category, r1);
       
       if (foundRule) {
@@ -244,7 +244,7 @@ public class Interpret {
 	}
 
 	private String executeRule(String word, RHS rhs) {
-		Pattern p = (Pattern) patterns.get(rhs.getPatternIndex());
+		Pattern p = patterns.get(rhs.getPatternIndex());
 
 		short methodIndex = rhs.getMethodIndex();
 		if (!p.matcher(word).matches()) {
@@ -525,9 +525,9 @@ public class Interpret {
 		patterns.add(Pattern.compile(regExp));
 		String[] rules = ParsingFunctions.normlizePattern(regExp);
 		for (int m = 0; m < rules.length; m++) {
-			Set lss = new HashSet();
+			Set<Set<FSMState>> lss = new HashSet<Set<FSMState>>();
 			lss.clear();
-			Set newSet = new HashSet();
+			Set<FSMState> newSet = new HashSet<FSMState>();
 			newSet.add(initialState);
 			lss.add(newSet);
 			PatternPart parts[] = ParsingFunctions
@@ -535,12 +535,12 @@ public class Interpret {
 			for (int j = 0; j < parts.length; j++) {
 				lss = ParsingFunctions.createFSMs(parts[j].getPartString(), parts[j].getType(), lss, this);
 			}
-			Iterator iter = lss.iterator();
+			Iterator<Set<FSMState>> iter = lss.iterator();
 			while (iter.hasNext()) {
-				Set set = (HashSet) iter.next();
-				Iterator subIter = set.iterator();
+				Set<FSMState> set = iter.next();
+				Iterator<FSMState> subIter = set.iterator();
 				while (subIter.hasNext()) {
-					FSMState st = (FSMState) subIter.next();
+					FSMState st = subIter.next();
 					st.addRHS(rhs);
 				}
 			}
@@ -548,8 +548,8 @@ public class Interpret {
 		//drawFSM();
 	}
 
-	private Set intersect(Set a, Set b) {
-		Set result = new HashSet();
+	private Set<FSMState> intersect(Set a, Set b) {
+		Set<FSMState> result = new HashSet<FSMState>();
 		Iterator iter = a.iterator();
 		while (iter.hasNext()) {
 			FSMState st = (FSMState) iter.next();

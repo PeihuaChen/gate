@@ -1,13 +1,14 @@
 package gate.creole.morph; 
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FSMState {
 	private CharMap transitionFunction = new CharMap();
 	public static final byte CHILD_STATE = 0;
 	public static final byte ADJ_STATE = 1;
 	private int index = 0;
-	private ArrayList rhses = new ArrayList();
+	private List<RHS> rhses = new ArrayList<RHS>();
 	
 	public FSMState(int index) {
 		this.index = index;
@@ -25,7 +26,7 @@ public class FSMState {
 		transitionFunction.put(chr, state, type);
 	}
 
-	public ArrayList getRHSes() {
+	public List<RHS> getRHSes() {
 		return rhses;
 	}
 

@@ -23,7 +23,7 @@ public class ReadFile {
   private int pointer = 0;
 
   /** Stores each line of the file as a separate String in the ArrayList */
-  private List data;
+  private List<String> data;
 
   /**
    * Constructor - Initialise the buffered Reader instance
@@ -31,7 +31,7 @@ public class ReadFile {
    */
   public ReadFile(URL fileURL) {
 
-    data = new ArrayList();
+    data = new ArrayList<String>();
 
     try {
       br = new BomStrippingInputStreamReader(fileURL.openStream(),
@@ -87,7 +87,7 @@ public class ReadFile {
    */
   public String getNext() {
     if(data.size()>pointer) {
-      String value = (String)(data.get(pointer));
+      String value = data.get(pointer);
       pointer++;
       return value;
     } else {
