@@ -345,7 +345,7 @@ public class DumpingPR extends AbstractLanguageAnalyser
         as.add(annot.getId(),
             annot.getStartNode().getOffset(),
             annot.getEndNode().getOffset(),
-            (String) renameMap.get(annot.getType()),
+            renameMap.get(annot.getType()),
             annot.getFeatures());
       } catch (InvalidOffsetException ex) {
         throw new GateRuntimeException("DumpingPR: " + ex.getMessage());
