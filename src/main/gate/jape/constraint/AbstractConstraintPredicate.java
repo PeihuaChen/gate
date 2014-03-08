@@ -15,18 +15,21 @@
  */
 package gate.jape.constraint;
 
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
 import gate.jape.JapeException;
 
 /**
  * Base class for most {@link ConstraintPredicate}s. Contains standard
  * getters/setters and other routines.
  *
- * @version $Revision$
  * @author esword
  */
 public abstract class AbstractConstraintPredicate implements
                                                  ConstraintPredicate {
+
+  private static final long serialVersionUID = -4564142595796620686L;
+
   protected AnnotationAccessor accessor;
   protected Object value;
 

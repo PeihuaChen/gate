@@ -24,6 +24,8 @@ import gate.AnnotationSet;
  */
 public class LengthAccessor extends MetaPropertyAccessor {
 
+  private static final long serialVersionUID = -7632284854801892163L;
+
   /**
    * Return the length of the span of the annotation.
    */

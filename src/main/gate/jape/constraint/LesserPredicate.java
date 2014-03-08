@@ -19,6 +19,8 @@ import gate.jape.JapeException;
 
 public class LesserPredicate extends ComparablePredicate {
 
+  private static final long serialVersionUID = 7526887952184973246L;
+
   @Override
   public String getOperator() {
     return LESSER;

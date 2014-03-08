@@ -24,6 +24,8 @@ import java.util.regex.Matcher;
  */
 public class RegExpFindPredicate extends AbstractRegExpPredicate {
 
+  private static final long serialVersionUID = -5086396660307583088L;
+
   @Override
   protected boolean matcherResult(Matcher m) {
     return m.find();

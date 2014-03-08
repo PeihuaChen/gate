@@ -17,6 +17,7 @@
 
 package gate.jape;
 
+import java.io.Serializable;
 import java.util.Stack;
 
 
@@ -27,10 +28,9 @@ import java.util.Stack;
   * multilevel rollback of those caches. Stores the match history.
   */
 abstract public class PatternElement implements Cloneable, 
-		      JapeConstants, java.io.Serializable
+		      JapeConstants, Serializable
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = -3721781489731606247L;
 
   /** Match history stack, for use in rollback. In BasicPatternElements
     * the objects on the stack are Integers giving the number of annots that
@@ -40,11 +40,11 @@ abstract public class PatternElement implements Cloneable,
     * elements are arrays representing conjunctions of PatternElement that
     * succeeded at that point in the history.
     */
-  protected Stack matchHistory;
+  protected Stack<Object> matchHistory;
 
   /** Anonymous construction. */
   public PatternElement() {
-    matchHistory = new Stack();
+    matchHistory = new Stack<Object>();
   } // Anonymous constructor.
 
   /** Cloning for processing of macro references. Note that it doesn't
@@ -57,7 +57,7 @@ abstract public class PatternElement implements Cloneable,
   public Object clone() {
     try {
       PatternElement newPE = (PatternElement) super.clone();
-      newPE.matchHistory = new Stack();
+      newPE.matchHistory = new Stack<Object>();
       return newPE;
     } catch(CloneNotSupportedException e) {
       throw(new InternalError(e.toString()));

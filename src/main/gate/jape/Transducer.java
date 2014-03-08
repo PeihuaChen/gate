@@ -39,8 +39,7 @@ import java.util.Vector;
   */
 public abstract class Transducer implements Serializable, Benchmarkable
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = -5607520609825899179L;
 
   /** Name of this transducer. */
   protected String name;
@@ -125,13 +124,15 @@ public abstract class Transducer implements Serializable, Benchmarkable
   }
   public synchronized void removeProgressListener(ProgressListener l) {
     if (progressListeners != null && progressListeners.contains(l)) {
-      Vector v = (Vector) progressListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<ProgressListener> v = (Vector<ProgressListener>) progressListeners.clone();
       v.removeElement(l);
       progressListeners = v;
     }
   }
   public synchronized void addProgressListener(ProgressListener l) {
-    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
+    @SuppressWarnings("unchecked")
+    Vector<ProgressListener> v = progressListeners == null ? new Vector<ProgressListener>(2) : (Vector<ProgressListener>)progressListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       progressListeners = v;
@@ -171,8 +172,8 @@ public abstract class Transducer implements Serializable, Benchmarkable
   
   private URL baseURL;
 
-  private transient Vector progressListeners;
-  private transient Vector statusListeners;
+  private transient Vector<ProgressListener> progressListeners;
+  private transient Vector<StatusListener> statusListeners;
 
   /**
    * Switch used to activate the JAPE debugger
@@ -186,31 +187,33 @@ public abstract class Transducer implements Serializable, Benchmarkable
    */
   protected void fireProgressChanged(int e) {
     if (progressListeners != null  && !progressListeners.isEmpty()) {
-      Vector listeners = progressListeners;
+      Vector<ProgressListener> listeners = progressListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
+        listeners.elementAt(i).progressChanged(e);
       }
     }
   }
   protected void fireProcessFinished() {
     if (progressListeners != null) {
-      Vector listeners = progressListeners;
+      Vector<ProgressListener> listeners = progressListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).processFinished();
+        listeners.elementAt(i).processFinished();
       }
     }
   }
   public synchronized void removeStatusListener(StatusListener l) {
     if (statusListeners != null && statusListeners.contains(l)) {
-      Vector v = (Vector) statusListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<StatusListener> v = (Vector<StatusListener>)statusListeners.clone();
       v.removeElement(l);
       statusListeners = v;
     }
   }
   public synchronized void addStatusListener(StatusListener l) {
-    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    @SuppressWarnings("unchecked")
+    Vector<StatusListener> v = statusListeners == null ? new Vector<StatusListener>(2) : (Vector<StatusListener>) statusListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       statusListeners = v;
@@ -218,10 +221,10 @@ public abstract class Transducer implements Serializable, Benchmarkable
   }
   protected void fireStatusChanged(String e) {
     if (statusListeners != null) {
-      Vector listeners = statusListeners;
+      Vector<StatusListener> listeners = statusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+        listeners.elementAt(i).statusChanged(e);
       }
     }
   }

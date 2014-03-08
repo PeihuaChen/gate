@@ -15,7 +15,9 @@
  */
 package gate.jape.constraint;
 
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Document;
 
 import java.io.Serializable;
 
@@ -25,7 +27,6 @@ import java.io.Serializable;
  * length of text it spans or the text itself if the associated document
  * is available).
  *
- * @version $Revision$
  * @author esword
  */
 public interface AnnotationAccessor extends Serializable {

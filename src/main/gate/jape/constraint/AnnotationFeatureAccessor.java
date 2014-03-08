@@ -21,10 +21,11 @@ import gate.AnnotationSet;
 /**
  * Accessor that returns a named feature value.
  *
- * @version $Revision$
  * @author esword
  */
 public class AnnotationFeatureAccessor implements AnnotationAccessor {
+
+  private static final long serialVersionUID = 9118181222280392932L;
 
   protected String featureName;
 

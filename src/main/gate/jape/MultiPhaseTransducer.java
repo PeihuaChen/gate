@@ -58,16 +58,16 @@ implements JapeConstants, java.io.Serializable
   @Override
   public synchronized void interrupt(){
     interrupted = true;
-    Iterator phasesIter = phases.iterator();
+    Iterator<Transducer> phasesIter = phases.iterator();
     while(phasesIter.hasNext()){
-      ((Transducer)phasesIter.next()).interrupt();
+      phasesIter.next().interrupt();
     }
   }
 
 
   /** Anonymous construction */
   public MultiPhaseTransducer() {
-    phases = new ArrayList();
+    phases = new ArrayList<Transducer>();
   } // anon construction
 
   /** Set the name. */
@@ -76,7 +76,7 @@ implements JapeConstants, java.io.Serializable
   /** The SinglePhaseTransducers that make up this one.
     * Keyed by their phase names.
     */
-  private List phases;
+  private List<Transducer> phases;
 
 
   /**
@@ -86,9 +86,9 @@ implements JapeConstants, java.io.Serializable
   @Override
   public void setOntology(Ontology ontology) {
     super.setOntology(ontology);
-    Iterator phasesIter = phases.iterator();
+    Iterator<Transducer> phasesIter = phases.iterator();
     while(phasesIter.hasNext()){
-      ((Transducer)phasesIter.next()).setOntology(ontology);
+      phasesIter.next().setOntology(ontology);
     }
   }
 
@@ -125,8 +125,8 @@ implements JapeConstants, java.io.Serializable
     */
   @Override
   public void finish(GateClassLoader classloader){
-    for(Iterator i = phases.iterator(); i.hasNext(); )
-      ((Transducer) i.next()).finish(classloader);
+    for(Iterator<Transducer> i = phases.iterator(); i.hasNext(); )
+      i.next().finish(classloader);
   } // finish
 
 
@@ -162,8 +162,8 @@ implements JapeConstants, java.io.Serializable
       }
     };
 
-    for(Iterator i = phases.iterator(); i.hasNext(); ) {
-      Transducer t = (Transducer) i.next();
+    for(Iterator<Transducer> i = phases.iterator(); i.hasNext(); ) {
+      Transducer t = i.next();
 
       if(isInterrupted()) throw new ExecutionInterruptedException(
         "The execution of the \"" + getName() +
@@ -208,7 +208,7 @@ implements JapeConstants, java.io.Serializable
     this.enableDebugging = enableDebugging;
     //propagate
     for(int i = 0; i < phases.size(); i++){
-      ((Transducer)phases.get(i)).setEnableDebugging(enableDebugging);
+      phases.get(i).setEnableDebugging(enableDebugging);
     }
   }
 
@@ -217,8 +217,8 @@ implements JapeConstants, java.io.Serializable
   @Override
   public void cleanUp() {
 
-    for(Iterator i = phases.iterator(); i.hasNext(); )
-      ((Transducer) i.next()).cleanUp();
+    for(Iterator<Transducer> i = phases.iterator(); i.hasNext(); )
+      i.next().cleanUp();
     
     benchmarkFeatures.remove(Benchmark.DOCUMENT_NAME_FEATURE);
 
@@ -237,9 +237,9 @@ implements JapeConstants, java.io.Serializable
       pad + "MPT: name(" + name + "); phases(" + newline + pad
     );
 
-    for(Iterator i = phases.iterator(); i.hasNext(); )
+    for(Iterator<Transducer> i = phases.iterator(); i.hasNext(); )
       buf.append(
-        ((Transducer) i.next()).toString(
+        i.next().toString(
             Strings.addPadding(pad, INDENT_PADDING)
         ) + " "
       );
@@ -250,37 +250,37 @@ implements JapeConstants, java.io.Serializable
   } // toString
 
   //needed by FSM
-  public List getPhases(){ return phases; }
+  public List<Transducer> getPhases(){ return phases; }
   
   /**
    * Sets the phases
    * @param phases
    */
-  public void setPhases(ArrayList phases) {
+  public void setPhases(List<Transducer> phases) {
 	  this.phases = phases;
   }
 
   @Override
   public void runControllerExecutionStartedBlock(
     ActionContext ac, Controller c, Ontology o) throws ExecutionException {
-    for(Iterator i = phases.iterator(); i.hasNext(); ) {
-      Transducer t = (Transducer) i.next();
+    for(Iterator<Transducer> i = phases.iterator(); i.hasNext(); ) {
+      Transducer t = i.next();
       t.runControllerExecutionStartedBlock(ac, c, o);
     }
   }
   @Override
   public void runControllerExecutionFinishedBlock(
     ActionContext ac, Controller c, Ontology o) throws ExecutionException {
-    for(Iterator i = phases.iterator(); i.hasNext(); ) {
-      Transducer t = (Transducer) i.next();
+    for(Iterator<Transducer> i = phases.iterator(); i.hasNext(); ) {
+      Transducer t = i.next();
       t.runControllerExecutionFinishedBlock(ac, c, o);
     }
   }
   @Override
   public void runControllerExecutionAbortedBlock(
     ActionContext ac, Controller c, Throwable throwable, Ontology o) throws ExecutionException {
-    for(Iterator i = phases.iterator(); i.hasNext(); ) {
-      Transducer t = (Transducer) i.next();
+    for(Iterator<Transducer> i = phases.iterator(); i.hasNext(); ) {
+      Transducer t = i.next();
       t.runControllerExecutionAbortedBlock(ac, c,throwable, o);
     }
   }

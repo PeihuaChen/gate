@@ -20,6 +20,8 @@ import gate.jape.JapeException;
 
 public class EqualPredicate extends AbstractConstraintPredicate {
 
+  private static final long serialVersionUID = 3833632644179230280L;
+
   @Override
   public String getOperator() {
     return EQUAL;

@@ -24,6 +24,8 @@ import java.util.regex.Matcher;
  */
 public class NotRegExpFindPredicate extends AbstractRegExpPredicate {
 
+  private static final long serialVersionUID = -2958686314966008138L;
+
   @Override
   public String getOperator() {
     return NOT_REGEXP_FIND;

@@ -13,19 +13,23 @@
  */
 package gate.jape.constraint;
 
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.Utils;
 
 /**
- * Accessor that returns the underlying string of an annotation in a document.
- * The string is cleaned up a bit as follows:
- * <code>
+ * Accessor that returns the underlying string of an annotation in a
+ * document. The string is cleaned up a bit as follows: <code>
  * cleanString = string.replaceAll("\\s+", " ").trim();
  * </code>
- *
- * @version $Revision$
+ * 
  * @author esword
  */
 public class CleanStringAccessor extends StringAccessor {
+
+  private static final long serialVersionUID = -4213321436300709066L;
+
   /**
    * Return the cleaned up underlying string for the annotation. Context
    * must be a {@link Document} or an {@link AnnotationSet} which points
@@ -37,8 +41,8 @@ public class CleanStringAccessor extends StringAccessor {
   }
 
   /**
-   * Always returns "cleanString", the name of the meta-property which this
-   * accessor provides.
+   * Always returns "cleanString", the name of the meta-property which
+   * this accessor provides.
    */
   @Override
   public Object getKey() {

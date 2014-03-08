@@ -20,10 +20,12 @@ import org.apache.log4j.Logger;
  * Accessor which returns a particular property or meta-property of an
  * annotation, such as length or string.
  *
- * @version $Revision$
  * @author esword
  */
 public abstract class MetaPropertyAccessor implements AnnotationAccessor {
+
+  private static final long serialVersionUID = 2736859945392088458L;
+
   protected static final Logger log = Logger.getLogger(MetaPropertyAccessor.class);
 
   public MetaPropertyAccessor() {

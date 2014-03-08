@@ -22,11 +22,13 @@ import gate.jape.JapeException;
  * Base class for those predicates which use <code>compareTo</code> to
  * compare values.
  *
- * @version $Revision$
  * @author esword
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked","rawtypes"})
 public abstract class ComparablePredicate extends AbstractConstraintPredicate {
+
+  private static final long serialVersionUID = -5667456294601338967L;
+  
   protected Comparable comparableValue;
 
   /**

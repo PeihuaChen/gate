@@ -25,6 +25,8 @@ import java.util.Collection;
  */
 public class NotContainsPredicate extends ContainsPredicate {
 
+  private static final long serialVersionUID = -6988665289497332784L;
+
   public static final String OPERATOR = "notContains";
 
   @Override
