@@ -17,9 +17,14 @@
 
 package gate.jape;
 
-import java.util.*;
+import gate.util.Pair;
+import gate.util.Strings;
 
-import gate.util.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -28,19 +33,18 @@ import gate.util.*;
   * matched at.
   */
 public class BasicPatternElement
-extends PatternElement implements JapeConstants, java.io.Serializable
+extends PatternElement implements JapeConstants, Serializable
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = -6515011025898779462L;
 
   /** A set of Constraint. Used during parsing. */
-  private ArrayList<Constraint> constraints1;
+  private List<Constraint> constraints1;
 
   /** A set of Constraint. Used during matching. */
   private Constraint[] constraints2;
 
   /** A map of constraint annot type to constraint. Used during parsing. */
-  private HashMap<Object, Constraint> constraintsMap;
+  private Map<Object, Constraint> constraintsMap;
 
   /** Cache of the last position we failed at (-1 when none). */
   private int lastFailurePoint = -1;
@@ -66,7 +70,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   @Override
   public Object clone() {
     BasicPatternElement newPE = (BasicPatternElement) super.clone();
-    newPE.constraintsMap = (HashMap<Object, Constraint>) constraintsMap.clone();
+    newPE.constraintsMap = new HashMap<Object, Constraint>(constraintsMap);
     newPE.constraints1 = new ArrayList<Constraint>();
     int consLen = constraints1.size();
     for(int i = 0; i < consLen; i++)
@@ -197,7 +201,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
    * @return the array list of constraint objects. Will be null after
    * the finish() method has been used.
    */
-  public ArrayList<Constraint> getUnfinishedConstraints() {
+  public List<Constraint> getUnfinishedConstraints() {
     return constraints1;
   }
 

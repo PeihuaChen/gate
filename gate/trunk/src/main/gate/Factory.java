@@ -41,6 +41,7 @@ import gate.util.SimpleFeatureMapImpl;
 import gate.util.Strings;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -822,10 +823,10 @@ public abstract class Factory {
       japeParserClass = newClass;
   }
 
-  public static ParseCpsl newJapeParser(java.io.Reader stream, Map existingMacros) {
+  public static ParseCpsl newJapeParser(java.io.Reader stream, Map<String,Object> existingMacros) {
       try {
           Constructor<? extends ParseCpsl> c = japeParserClass.getConstructor
-              (new Class[] {java.io.Reader.class, existingMacros.getClass()});
+              (new Class[] {Reader.class, Map.class});
           return c.newInstance(new Object[] {stream, existingMacros});
       } catch (NoSuchMethodException e) { // Shouldn't happen
           throw new RuntimeException(e);
@@ -844,7 +845,7 @@ public abstract class Factory {
     // the stripping stream is buffered, no need to buffer the URL stream.
       java.io.Reader stream = new BomStrippingInputStreamReader(japeURL.openStream(), encoding);
 
-      ParseCpsl parser = newJapeParser(stream, new HashMap());
+      ParseCpsl parser = newJapeParser(stream, new HashMap<String,Object>());
       parser.setBaseURL(japeURL);
       parser.setEncoding(encoding);
       return parser;

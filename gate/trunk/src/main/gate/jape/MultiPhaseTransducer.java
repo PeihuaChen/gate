@@ -32,6 +32,7 @@ import gate.util.Strings;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -44,9 +45,6 @@ public class MultiPhaseTransducer extends Transducer
 implements JapeConstants, java.io.Serializable
 {
   private static final long serialVersionUID = -1817675404943909246L;
-
-  /** Debug flag */
-  private static final boolean DEBUG = false;
 
   /** Construction from name. */
   public MultiPhaseTransducer(String name) {
@@ -78,7 +76,7 @@ implements JapeConstants, java.io.Serializable
   /** The SinglePhaseTransducers that make up this one.
     * Keyed by their phase names.
     */
-  private ArrayList phases;
+  private List phases;
 
 
   /**
@@ -252,7 +250,7 @@ implements JapeConstants, java.io.Serializable
   } // toString
 
   //needed by FSM
-  public ArrayList getPhases(){ return phases; }
+  public List getPhases(){ return phases; }
   
   /**
    * Sets the phases

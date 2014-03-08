@@ -30,6 +30,9 @@ import java.io.Serializable;
  * @author esword
  */
 public class KleeneOperator implements Serializable {
+
+  private static final long serialVersionUID = 5590283708947918804L;
+
   protected static final Logger log = Logger.getLogger(KleeneOperator.class);
 
   /**
