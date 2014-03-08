@@ -19,9 +19,12 @@ import gate.annotation.AnnotationSetImpl;
 import gate.creole.ConditionalSerialController;
 import gate.creole.RunningStrategy;
 import gate.util.FeatureBearer;
+import gate.util.GateException;
 import gate.util.GateRuntimeException;
 import gate.util.InvalidOffsetException;
 import gate.util.OffsetComparator;
+import java.io.File;
+import java.net.MalformedURLException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1165,6 +1168,34 @@ public class Utils {
   }
   static private Pattern varnamePattern = Pattern.compile("(\\$\\$?)([a-zA-Z]*)\\{([^}]+)\\}");
   
+  /**
+   * Load a plugin from the default GATE plugins directory.
+   * 
+   * This will load the plugin with the specified directory name from the
+   * default GATE plugins path, if GATE knows its own location. 
+   * 
+   */
+  public static void loadPlugin(String dirName) {
+    File gatehome = Gate.getGateHome();
+    if(gatehome == null) {
+      throw new GateRuntimeException("Cannot load Plugin, Gate home location not known");
+    }
+    File pluginDir = new File(new File(gatehome,"plugins"),dirName);
+    loadPlugin(pluginDir);
+  }
   
-  
+  /**
+   * Load a plugin from the specified directory.
+   * 
+   * This will load the plugin from the directory path specified as a File object.
+   * 
+   */
+  public static void loadPlugin(File pluginDir) {
+    try {
+      Gate.getCreoleRegister().registerDirectories(pluginDir.toURI().toURL());
+    } catch (Exception ex) {
+      throw new GateRuntimeException("Could not register plugin directory "+pluginDir,ex);
+    }
+  }
+ 
 }
