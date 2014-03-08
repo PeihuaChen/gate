@@ -45,8 +45,7 @@ import gate.xml.XmlDocumentHandler;
     autoinstances = {@AutoInstance(hidden = true)})
 public class SgmlDocumentFormat extends TextualDocumentFormat
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = -3596255263987343560L;
 
   /** Default construction */
   public SgmlDocumentFormat() { super(); }

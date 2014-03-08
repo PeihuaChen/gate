@@ -39,9 +39,7 @@ import gate.util.DocumentFormatException;
     autoinstances = {@AutoInstance(hidden = true)})
 public class TextualDocumentFormat extends DocumentFormat
 {
-
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = -5630380244338599927L;
 
   /** Default construction */
   public TextualDocumentFormat() { super(); }

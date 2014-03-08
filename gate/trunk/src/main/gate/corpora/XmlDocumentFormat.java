@@ -60,8 +60,8 @@ import org.xml.sax.SAXException;
 @CreoleResource(name = "GATE XML Document Format", isPrivate = true,
     autoinstances = {@AutoInstance(hidden = true)})
 public class XmlDocumentFormat extends TextualDocumentFormat {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+
+  private static final long serialVersionUID = 3205973554326782116L;
 
   /**
    * InputFactory for the StAX parser used for GATE format XML.
