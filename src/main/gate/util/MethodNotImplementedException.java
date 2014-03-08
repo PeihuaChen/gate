@@ -19,6 +19,8 @@ package gate.util;
 
 public class MethodNotImplementedException extends GateRuntimeException {
 
+  private static final long serialVersionUID = 6273189553052866276L;
+
   public MethodNotImplementedException() {
   }
 

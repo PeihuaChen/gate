@@ -235,6 +235,7 @@ class SimpleMapImpl implements Map<Object, Object>,
   /**
    * put all the elements from a map
    */
+  @SuppressWarnings("unchecked")
   @Override
   public void putAll(Map<? extends Object, ? extends Object> t)
   {
@@ -251,10 +252,10 @@ class SimpleMapImpl implements Map<Object, Object>,
         put(key, sfm.theValues[i]);
       } //for
     } else { // if (t instanceof SimpleMapImpl)
-      Iterator entries = t.entrySet().iterator();
-      Map.Entry e;
+      Iterator<?> entries = t.entrySet().iterator();
+      Map.Entry<Object,Object> e;
       while (entries.hasNext()) {
-        e = (Map.Entry)entries.next();
+        e = (Map.Entry<Object,Object>)entries.next();
         put(e.getKey(), e.getValue());
       } // while
     } // if(t instanceof SimpleMapImpl)
@@ -400,7 +401,8 @@ class SimpleMapImpl implements Map<Object, Object>,
       return false;
     }
 
-    Map m = (Map)o;
+    @SuppressWarnings("unchecked")
+    Map<Object,Object> m = (Map<Object,Object>)o;
     if (m.size() != count) {
       return false;
     }

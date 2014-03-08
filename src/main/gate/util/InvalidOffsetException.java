@@ -22,8 +22,7 @@ package gate.util;
   */
 public class InvalidOffsetException extends GateException {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = -2556783648232304356L;
 
   public InvalidOffsetException() {
   }
@@ -31,5 +30,4 @@ public class InvalidOffsetException extends GateException {
   public InvalidOffsetException(String s) {
     super(s);
   }
-
 } // InvalidOffsetException

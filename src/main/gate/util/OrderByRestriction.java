@@ -13,8 +13,12 @@
  */
 package gate.util;
 
+import java.io.Serializable;
 
-public class OrderByRestriction implements java.io.Serializable{
+
+public class OrderByRestriction implements Serializable{
+
+  private static final long serialVersionUID = -8295746692769442286L;
 
   /* Type of operator for cmarision in query*/
   public static final int OPERATOR_ASCENDING = 100;

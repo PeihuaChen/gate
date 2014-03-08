@@ -31,9 +31,6 @@ import org.xml.sax.SAXParseException;
 // modify the class name the way you want
 public class TemplateLaxErrorHandler extends LaxErrorHandler {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /**
     * TemplateLaxErrorHandler constructor comment.
     */

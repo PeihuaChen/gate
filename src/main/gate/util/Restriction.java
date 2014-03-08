@@ -16,9 +16,13 @@
 
 package gate.util;
 
-public class Restriction implements java.io.Serializable{
+import java.io.Serializable;
 
-  /* Type of operator for cmarision in query*/
+public class Restriction implements Serializable{
+
+  private static final long serialVersionUID = -1266771900567902681L;
+
+  /* Type of operator for comparision in query*/
   public static final int OPERATOR_EQUATION = 100;
   public static final int OPERATOR_LESS = 101;
   public static final int OPERATOR_BIGGER = 102;

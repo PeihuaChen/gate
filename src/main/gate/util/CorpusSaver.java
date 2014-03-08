@@ -26,8 +26,6 @@ import gate.creole.ResourceInstantiationException;
 
 public class CorpusSaver {
 
-  private static final boolean DEBUG = true;
-
   public CorpusSaver() {
   }
 
@@ -80,9 +78,9 @@ public class CorpusSaver {
           ds.close();
       }
       if (application != null) {
-        Iterator iter = new ArrayList(application.getPRs()).iterator();
+        Iterator<ProcessingResource> iter = new ArrayList<ProcessingResource>(application.getPRs()).iterator();
         while (iter.hasNext())
-          Factory.deleteResource((Resource) iter.next());
+          Factory.deleteResource(iter.next());
       }
     } catch (Exception ex) {
       throw new GateRuntimeException(ex.getMessage());
@@ -96,8 +94,8 @@ public class CorpusSaver {
     currDir = dir;
     Out.prln("Processing directory: " + currDir);
 
-    ArrayList files = new ArrayList();
-    ArrayList dirs = new ArrayList();
+    List<File> files = new ArrayList<File>();
+    List<File> dirs = new ArrayList<File>();
     File[] dirArray = currDir.listFiles();
     for (int i = 0; i < dirArray.length; i++) {
       if (dirArray[i].isDirectory())
@@ -114,7 +112,7 @@ public class CorpusSaver {
 
     //there are more subdirectories to traverse, so iterate through
     for (int j = 0; j < dirs.size(); j++)
-      execute((File) dirs.get(j));
+      execute(dirs.get(j));
 
   }//execute(dir)
 
@@ -216,15 +214,15 @@ public class CorpusSaver {
   }
 
 
-  protected void saveFiles(List files) {
+  protected void saveFiles(List<File> files) {
     if (files==null || files.isEmpty() ||
         (saveMode && (theCorpus == null || ds == null)))
       return;
 
     for(int i=0; i<files.size(); i++) {
       try {
-        Document doc = Factory.newDocument(((File)files.get(i)).toURI().toURL());
-        doc.setName(Files.getLastPathComponent(((File)files.get(i)).toURI().toURL().toString()));
+        Document doc = Factory.newDocument(files.get(i).toURI().toURL());
+        doc.setName(Files.getLastPathComponent(files.get(i).toURI().toURL().toString()));
         Out.prln("Storing document: " + doc.getName());
         //first process it with ANNIE if in process mode
         if (processMode)
@@ -256,9 +254,9 @@ public class CorpusSaver {
         Factory.deleteResource(tempCorpus);
         tempCorpus = null;
       } else {
-        Iterator iter = application.getPRs().iterator();
+        Iterator<ProcessingResource> iter = application.getPRs().iterator();
         while (iter.hasNext())
-          ((ProcessingResource) iter.next()).setParameterValue("document", doc);
+          iter.next().setParameterValue("document", doc);
         application.execute();
       }
     } catch (ResourceInstantiationException ex) {
@@ -279,7 +277,6 @@ public class CorpusSaver {
 
   private DataStore ds;
   private Corpus theCorpus;
-  private String annotSetName = "NE";
   private String dsPath = "d:\\bnc";
   private Controller application = null;
   private File applicationFile = null;

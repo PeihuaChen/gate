@@ -26,9 +26,6 @@ import java.util.Set;
 /** Some utilities for use with Strings. */
 public class Strings {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /** What character to pad with. */
   private static char padChar = ' ';
 

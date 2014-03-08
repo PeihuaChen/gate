@@ -118,14 +118,15 @@ public class ExpandCreoleXmls extends Task {
           }
           
           // strip out SCAN="true" attributes as scanning has now been done
-          Iterator scannedJars = creoleDoc.getDescendants(new ElementFilter("JAR").and(new Filter() {
+          @SuppressWarnings({"unchecked", "serial"})
+          Iterator<Element> scannedJars = creoleDoc.getDescendants(new ElementFilter("JAR").and(new Filter() {
             @Override
             public boolean matches(Object o) {
               return "true".equalsIgnoreCase(((Element)o).getAttributeValue("SCAN"));
             }
           }));
           while(scannedJars.hasNext()) {
-            ((Element)scannedJars.next()).removeAttribute("SCAN");
+            scannedJars.next().removeAttribute("SCAN");
           }
           
           destPlugin.mkdirs();

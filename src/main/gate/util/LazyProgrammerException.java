@@ -25,8 +25,7 @@ package gate.util;
   */
 public class LazyProgrammerException extends RuntimeException {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = -2698792997757384311L;
 
   /** In a fit of complete laziness we didn't even document this
     * class properly.

@@ -60,9 +60,6 @@ import gate.util.Files;
 
 public class Sgml2Xml{
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /**
     * The constructor initialises some member fields
     * @param SgmlDoc the content of the Sgml document that will be modified
@@ -72,8 +69,8 @@ public class Sgml2Xml{
     m_modifier = new StringBuffer(SgmlDoc);
     // create a new dobiousElements list
     // se the explanatin at the end of the class
-    dubiousElements = new ArrayList();
-    stack = new Stack();
+    dubiousElements = new ArrayList<CustomObject>();
+    stack = new Stack<CustomObject>();
   }
 
   /**
@@ -89,8 +86,8 @@ public class Sgml2Xml{
 
     // create a new dobiousElements list
     // se the explanatin at the end of the class
-    dubiousElements = new ArrayList();
-    stack = new Stack();
+    dubiousElements = new ArrayList<CustomObject>();
+    stack = new Stack<CustomObject>();
 
   }
 
@@ -120,7 +117,7 @@ public class Sgml2Xml{
       m_currState = 2;
       if (!stack.isEmpty()){
         // peek the element from the top of the stack
-        CustomObject o = (CustomObject) stack.peek();
+        CustomObject o = stack.peek();
         // set some properties for this element
         // first test to find out if text folows this element charPos > 0
         if (charPos > 0){
@@ -466,7 +463,7 @@ public class Sgml2Xml{
     // put all the elements from the stack into the dubiousElements list
     // we do that in order to colect all the dubious elements
     while (!stack.isEmpty()) {
-      CustomObject obj = (CustomObject) stack.pop();
+      CustomObject obj = stack.pop();
       dubiousElements.add(obj);
     }
 
@@ -479,9 +476,9 @@ public class Sgml2Xml{
 
     //here we resolve all the dubious Elements...
     // see the description of makeFinalModifications() method
-    ListIterator listIterator = dubiousElements.listIterator();
+    ListIterator<CustomObject> listIterator = dubiousElements.listIterator();
     while (listIterator.hasNext()){
-      CustomObject obj = (CustomObject) listIterator.next();
+      CustomObject obj = listIterator.next();
       makeFinalModifications(obj);
     }
 
@@ -558,7 +555,7 @@ public class Sgml2Xml{
     while (!stack.isEmpty() && !stop){
 
       // eliminate the object from the stack
-      obj = (CustomObject) stack.pop();
+      obj = stack.pop();
 
       //if its elemName is equal with the param elemName we stop the itteration
       if (obj.getElemName().equalsIgnoreCase(elemName)) stop = true;
@@ -616,11 +613,11 @@ public class Sgml2Xml{
   private StringBuffer m_modifier = null;
 
   // we need the stack to be able to remember the order of the tags
-  private Stack stack = null;
+  private Stack<CustomObject> stack = null;
 
   // this is a list with all the tags that are not colsed...
   // some of them are empty tags and some of them are not...
-  private List dubiousElements = null;
+  private List<CustomObject> dubiousElements = null;
 
   // this is tre current position inside the modifier
   private int m_cursor = 0;
@@ -730,18 +727,14 @@ class  CustomObject {
 
 } // CustomObject
 
-class MyComparator implements Comparator {
+class MyComparator implements Comparator<CustomObject> {
 
   public MyComparator() {
   }
 
   @Override
-  public int compare(Object o1, Object o2) {
-    if ( !(o1 instanceof CustomObject) ||
-         !(o2 instanceof CustomObject)) return 0;
+  public int compare(CustomObject co1, CustomObject co2) {
 
-    CustomObject co1 = (CustomObject) o1;
-    CustomObject co2 = (CustomObject) o2;
     int result = 0;
     if (co1.getClosePos() <   co2.getClosePos())  result = -1;
     if (co1.getClosePos() ==  co2.getClosePos())  result =  0;

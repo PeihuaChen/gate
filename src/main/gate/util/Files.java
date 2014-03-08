@@ -190,27 +190,29 @@ public class Files {
     * with the file name...
     */
   public static File writeTempFile(InputStream contentStream)
-    throws IOException {
+          throws IOException {
 
-    File resourceFile  = null;
+    File resourceFile = null;
     FileOutputStream resourceFileOutputStream = null;
 
-    // create a temporary file name
-    resourceFile = File.createTempFile ("gateResource", ".tmp");
-    resourceFileOutputStream = new FileOutputStream(resourceFile);
-    resourceFile.deleteOnExit ();
+    try {
+      // create a temporary file name
+      resourceFile = File.createTempFile("gateResource", ".tmp");
+      resourceFileOutputStream = new FileOutputStream(resourceFile);
+      resourceFile.deleteOnExit();
 
-    if (contentStream == null)
-      return resourceFile;
+      if(contentStream == null) return resourceFile;
 
-    int bytesRead = 0;
-    final int readSize = 1024;
-    byte[] bytes = new byte[readSize];
-    while( (bytesRead = contentStream.read(bytes,0,readSize) ) != -1 )
-      resourceFileOutputStream.write(bytes,0, bytesRead);
+      int bytesRead = 0;
+      final int readSize = 1024;
+      byte[] bytes = new byte[readSize];
+      while((bytesRead = contentStream.read(bytes, 0, readSize)) != -1)
+        resourceFileOutputStream.write(bytes, 0, bytesRead);
+    } finally {
+      IOUtils.closeQuietly(resourceFileOutputStream);
+      IOUtils.closeQuietly(contentStream);
+    }
 
-    resourceFileOutputStream.close();
-    contentStream.close ();
     return resourceFile;
   }// writeTempFile()
 
@@ -508,7 +510,7 @@ public class Files {
    * @return A string of the whole XML source, with the element updated.
    */
   public static String updateXmlElement(
-    BufferedReader xml, String elementName, Map newAttrs
+    BufferedReader xml, String elementName, Map<String,String> newAttrs
   ) throws IOException {
     String line = null;
     String nl = Strings.getNl();
@@ -536,11 +538,11 @@ public class Files {
     newElement.append(elementName);
 
     // add in the new attributes
-    Iterator iter = newAttrs.entrySet().iterator();
+    Iterator<Map.Entry<String,String>> iter = newAttrs.entrySet().iterator();
     while(iter.hasNext()) {
-      Map.Entry entry = (Map.Entry) iter.next();
-      String key =   (String) entry.getKey();
-      String value = (String) entry.getValue();
+      Map.Entry<String,String> entry = iter.next();
+      String key =   entry.getKey();
+      String value = entry.getValue();
 
       newElement.append(" ");
       newElement.append(DocumentXmlUtils.combinedNormalisation(key));
@@ -575,7 +577,7 @@ public class Files {
    *   file is also overwritten).
    */
   public static String updateXmlElement(
-    File xmlFile, String elementName, Map newAttrs
+    File xmlFile, String elementName, Map<String,String> newAttrs
   ) throws IOException {
     String newXml = null;
     BufferedReader utfFileReader = null;

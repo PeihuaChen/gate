@@ -22,8 +22,6 @@ import java.io.PrintWriter;
   * methods.
   */
 public class Out {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
 
   /** A printwriter to delegate to */
   private static PrintWriter out = new PrintWriter(System.out,true);

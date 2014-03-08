@@ -24,11 +24,12 @@ import java.util.Comparator;
  * and the String values are compared.
  * This utility is useful for GUI components that need to sort their contents.
  */
-public class ObjectComparator implements Comparator{
+public class ObjectComparator implements Comparator<Object>{
 
   /**
    * Compares two objects.
    */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
   public int compare(Object o1, Object o2){
     // If both values are null, return 0.

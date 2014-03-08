@@ -27,8 +27,7 @@ import javax.swing.text.*;
   */
 public class RawEditorKit extends StyledEditorKit {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = -6218608206355483812L;
 
   /**
     * Inserts content from the given stream, which will be

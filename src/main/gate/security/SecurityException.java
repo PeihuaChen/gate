@@ -23,8 +23,8 @@ import gate.util.GateException;
 /** This exception indicates security violation.
   */
 public class SecurityException extends GateException {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+
+  private static final long serialVersionUID = -5576039285860962770L;
 
   /** Default construction */
   public SecurityException() { super(); }

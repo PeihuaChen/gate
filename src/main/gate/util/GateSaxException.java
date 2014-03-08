@@ -20,8 +20,8 @@ package gate.util;
   * to catch any internal exception thrown by the GATE SAX libraries.
   */
 public class GateSaxException extends org.xml.sax.SAXException {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+
+  private static final long serialVersionUID = 1355352302306968618L;
 
   public GateSaxException(String aMessage, Exception anException) {
     super(aMessage,anException);

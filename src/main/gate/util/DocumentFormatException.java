@@ -21,8 +21,8 @@ package gate.util;
   * DocumentFormat class and its subbclasses.
   */
 public class DocumentFormatException extends GateException {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+
+  private static final long serialVersionUID = 3148554558608939860L;
 
   public DocumentFormatException(){
     super();

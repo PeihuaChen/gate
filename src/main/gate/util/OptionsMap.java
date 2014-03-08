@@ -31,6 +31,8 @@ import java.util.TreeMap;
  */
 public class OptionsMap extends TreeMap<Object, Object> {
 
+  private static final long serialVersionUID = 1005431810071035036L;
+
   /**
    * Converts the value to string using {@link Strings#toString(Object)}
    * method and then stores it.
@@ -47,15 +49,15 @@ public class OptionsMap extends TreeMap<Object, Object> {
       boolean bold = font.isBold();
       value = family + "#" + size + "#" + italic + "#" + bold;
     }
-    return super.put(key, Strings.toString(value));
+    return super.put(key.toString(), Strings.toString(value));
   }
 
   public Object put(Object key, LinkedHashSet<String> value) {
-    return super.put(key, Strings.toString(value));
+    return super.put(key.toString(), Strings.toString(value));
   }
 
   public Object put(Object key, Map<String, String> value) {
-    return super.put(key, Strings.toString(value));
+    return super.put(key.toString(), Strings.toString(value));
   }
 
   /**
@@ -190,5 +192,19 @@ public class OptionsMap extends TreeMap<Object, Object> {
    */
   public Map<String, String> getMap(Object key) {
       return Strings.toMap((String) get(key));
+  }
+  
+  /**
+   * Returns a String based view of the data. All the keys and values
+   * are stored as strings in the underlying map, but because we want to
+   * allow the addition of Object, which is then converted to a String,
+   * we aren't ourselves typed as String to String.
+   */
+  public Map<String, String> getStringMap() {
+    Map<String, String> data = new HashMap<String, String>();
+    for(Map.Entry<Object, Object> entry : this.entrySet()) {
+      data.put((String)entry.getKey(), (String)entry.getValue());
+    }
+    return data;
   }
 }

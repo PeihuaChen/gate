@@ -15,8 +15,10 @@ package gate.util;
 
 import gate.Annotation;
 import gate.AnnotationSet;
+
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 /**
  * Merging the annotations from different annotators. The input
@@ -42,7 +44,8 @@ public class AnnotationMerging {
     HashMap<Annotation, String> mergeAnns, int numMinK, boolean isTheSameInstances) {
     int numA = annsArr.length;
     // First copy the annotatioin sets into a temp array
-    HashSet<Annotation>[] annsArrTemp = new HashSet[numA];
+    @SuppressWarnings("unchecked")
+    Set<Annotation>[] annsArrTemp = new Set[numA];
     for(int i = 0; i < numA; ++i) {
       if(annsArr[i] != null) {
         annsArrTemp[i] = new HashSet<Annotation>();
@@ -115,7 +118,8 @@ public class AnnotationMerging {
     }
       
     // First copy the annotatioin sets into a temp array
-    HashSet<Annotation>[] annsArrTemp = new HashSet[numA];
+    @SuppressWarnings("unchecked")
+    Set<Annotation>[] annsArrTemp = new Set[numA];
     for(int i = 0; i < numA; ++i) {
       if(annsArr[i] != null) {
         annsArrTemp[i] = new HashSet<Annotation>();
@@ -208,7 +212,8 @@ public class AnnotationMerging {
     HashMap<Annotation, String> mergeAnns, boolean isTheSameInstances) {
     int numA = annsArr.length;
     // First copy the annotatioin sets into a temp array
-    HashSet<Annotation>[] annsArrTemp = new HashSet[numA];
+    @SuppressWarnings("unchecked")
+    Set<Annotation>[] annsArrTemp = new Set[numA];
     for(int i = 0; i < numA; ++i) {
       if(annsArr[i] != null) {
         annsArrTemp[i] = new HashSet<Annotation>();
