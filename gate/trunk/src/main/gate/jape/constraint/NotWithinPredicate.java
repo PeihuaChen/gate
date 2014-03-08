@@ -27,7 +27,9 @@ import java.util.Collection;
  */
 public class NotWithinPredicate extends WithinPredicate {
 
-    public static final String OPERATOR = "notWithin";
+  private static final long serialVersionUID = 4478339733567901830L;
+
+  public static final String OPERATOR = "notWithin";
 
     @Override
     public String getOperator() {

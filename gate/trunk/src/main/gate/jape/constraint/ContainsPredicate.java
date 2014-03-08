@@ -25,6 +25,8 @@ import gate.AnnotationSet;
  */
 public class ContainsPredicate extends EmbeddedConstraintPredicate {
 
+  private static final long serialVersionUID = 2129108867232668824L;
+
   public static final String OPERATOR = "contains";
 
   @Override

@@ -20,6 +20,8 @@ import gate.jape.JapeException;
 
 public class NotEqualPredicate extends EqualPredicate {
 
+  private static final long serialVersionUID = 4065258361559210239L;
+
   @Override
   public String getOperator() {
     return NOT_EQUAL;

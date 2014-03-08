@@ -13,15 +13,17 @@
  */
 package gate.jape.constraint;
 
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
 
 /**
  * Accessor that returns the annotation itself
  *
- * @version $Revision$
  * @author esword
  */
 public class SimpleAnnotationAccessor extends MetaPropertyAccessor {
+
+  private static final long serialVersionUID = 5875035087239642161L;
 
   @Override
   public Object getValue(Annotation annot, AnnotationSet context) {

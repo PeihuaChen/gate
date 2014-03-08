@@ -22,6 +22,9 @@ import gate.*;
  * @author esword
  */
 public class StringAccessor extends MetaPropertyAccessor {
+
+  private static final long serialVersionUID = 2694222663341694646L;
+
   /**
    * Return the underlying string for the annotation. Context
    * must be a {@link Document} or an {@link AnnotationSet} which

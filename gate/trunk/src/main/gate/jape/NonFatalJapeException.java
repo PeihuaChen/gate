@@ -16,6 +16,8 @@ package gate.jape;
 
 public class NonFatalJapeException extends JapeException {
 
+  private static final long serialVersionUID = -4395817316344064153L;
+
   public NonFatalJapeException() {
     super();
   }

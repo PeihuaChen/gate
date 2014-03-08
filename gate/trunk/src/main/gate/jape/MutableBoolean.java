@@ -26,10 +26,6 @@ package gate.jape;
   */
 public class MutableBoolean
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   public boolean value = false;
-
 } // class MutableBoolean
 

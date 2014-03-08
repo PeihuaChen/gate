@@ -25,12 +25,16 @@ import gate.util.GateClassLoader;
 import gate.util.Out;
 import gate.util.Strings;
 
+import java.io.Serializable;
+
 /**
   * A CPSL rule. Has an LHS, RHS and a name, and a priority.
   */
 public class Rule extends Transducer
-implements JapeConstants, java.io.Serializable
+implements JapeConstants, Serializable
 {
+  private static final long serialVersionUID = 564304936210127542L;
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 

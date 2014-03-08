@@ -34,6 +34,8 @@ public abstract class AbstractRegExpPredicate
                                              extends
                                                AbstractConstraintPredicate {
 
+  private static final long serialVersionUID = 8218973149540251171L;
+
   @Override
   public String toString() {
     String val = ((Pattern)getValue()).pattern();

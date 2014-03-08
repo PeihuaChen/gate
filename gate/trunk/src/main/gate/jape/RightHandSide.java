@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
@@ -43,18 +44,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RightHandSide implements JapeConstants, java.io.Serializable
 {
   private static final long serialVersionUID = -4359589687308736378L;
-  
-  /** Debug flag */
-  private static final boolean DEBUG = false;
 
   /** An instance of theActionClass. */
   transient private Object theActionObject;
 
   /** The string we use to create the action class. */
   private StringBuffer actionClassString;
-
-  /** The bytes of the compiled action class. */
-  private byte[] actionClassBytes;
 
   /** The name of the action class. */
   private String actionClassName;
@@ -96,7 +91,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   private LeftHandSide lhs;
 
   /** A list of the files and directories we create. */
-  static private ArrayList tempFiles = new ArrayList();
+  static private List<File> tempFiles = new ArrayList<File>();
 
   /** Local fashion for newlines. */
   private final String nl = Strings.getNl();
@@ -105,8 +100,6 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   static final boolean debug = false;
   private String phaseName;
   private String ruleName;
-  
-  private static Set<StackTraceElement> warnings = new HashSet<StackTraceElement>();
 
   /** Construction from the transducer name, rule name and the LHS. */
   public RightHandSide(
@@ -253,10 +246,10 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
     // traverse the list in reverse order, coz any directories we
     // created were done first
-    for(ListIterator i = tempFiles.listIterator(tempFiles.size()-1);
+    for(ListIterator<File> i = tempFiles.listIterator(tempFiles.size()-1);
         i.hasPrevious();
        ) {
-      File tempFile = (File) i.previous();
+      File tempFile = i.previous();
       tempFile.delete();
     } // for each tempFile
 
@@ -268,7 +261,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     out.defaultWriteObject();
     //now we need to save the class for the action
     try{
-		Class class1 = Gate.getClassLoader().loadClass(actionClassQualifiedName);
+		Class<?> class1 = Gate.getClassLoader().loadClass(actionClassQualifiedName);
 		//System.out.println(class1.getName());
 		out.writeObject(class1);
     }catch(ClassNotFoundException cnfe){

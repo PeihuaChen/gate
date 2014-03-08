@@ -16,20 +16,46 @@
 
 package gate.jape;
 
-import java.util.*;
-
-import org.apache.log4j.Logger;
-
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Controller;
+import gate.Corpus;
+import gate.CorpusController;
+import gate.Document;
+import gate.Gate;
+import gate.Node;
 import gate.annotation.AnnotationSetImpl;
 import gate.creole.ExecutionException;
 import gate.creole.ExecutionInterruptedException;
 import gate.creole.ontology.Ontology;
 import gate.event.ProgressListener;
-import gate.fsm.*;
-import gate.util.*;
+import gate.fsm.FSM;
+import gate.fsm.FSMInstance;
+import gate.fsm.RuleTime;
+import gate.fsm.State;
+import gate.fsm.Transition;
+import gate.util.Benchmark;
+import gate.util.GateClassLoader;
+import gate.util.GateRuntimeException;
+import gate.util.SimpleSortedSet;
+import gate.util.Strings;
+
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.log4j.Logger;
 
 /**
  * Represents a complete CPSL grammar, with a phase name, options and
@@ -37,7 +63,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * method taking a Document as input. Constructs from String or File.
  */
 public class SinglePhaseTransducer extends Transducer implements JapeConstants,
-                                                     java.io.Serializable {
+                                                     Serializable {
 
   private static final long serialVersionUID = -2749474684496896114L;
 
@@ -186,10 +212,10 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   // private void addAnnotationsByOffset(Map map, SortedSet keys, Set
   // annotations){
   private void addAnnotationsByOffset(/* Map map, */SimpleSortedSet keys,
-          Set annotations) {
-    Iterator annIter = annotations.iterator();
+          Set<Annotation> annotations) {
+    Iterator<Annotation> annIter = annotations.iterator();
     while(annIter.hasNext()) {
-      Annotation ann = (Annotation)annIter.next();
+      Annotation ann = annIter.next();
       // ignore empty annotations
       long offset = ann.getStartNode().getOffset().longValue();
       if(offset == ann.getEndNode().getOffset().longValue()) continue;
@@ -228,10 +254,10 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       addAnnotationsByOffset(offsets, inputAS);
     }
     else {
-      Iterator typesIter = input.iterator();
+      Iterator<String> typesIter = input.iterator();
       AnnotationSet ofOneType = null;
       while(typesIter.hasNext()) {
-        ofOneType = inputAS.get((String)typesIter.next());
+        ofOneType = inputAS.get(typesIter.next());
         if(ofOneType != null) {
           addAnnotationsByOffset(offsets, ofOneType);
         }
@@ -259,8 +285,8 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     List<FSMInstance> acceptingFSMInstances = new LinkedList<FSMInstance>();
 
     // find the first node of the document
-    Node startNode = ((Annotation)((List)annotationsByOffset.get(offsets
-            .first())).get(0)).getStartNode();
+    Node startNode = ((List<Annotation>)annotationsByOffset.get(offsets
+            .first())).get(0).getStartNode();
 
     // used to calculate the percentage of processing done
     long lastNodeOff = doc.getContent().size().longValue();
@@ -396,12 +422,12 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
             .getAGPosition().getOffset().longValue());
     long theFirst = offsetsTailSet.first();
     List<Annotation> paths = (theFirst >= 0 ) ?
-            (List)annotationsByOffset.get(theFirst) : null;
+            (List<Annotation>)annotationsByOffset.get(theFirst) : null;
 
     if(paths != null && !paths.isEmpty()) {
       // get the transitions for the current state of the FSM
       State currentState = currentClone.getFSMPosition();
-      Iterator transitionsIter = currentState.getTransitions().iterator();
+      Iterator<Transition> transitionsIter = currentState.getTransitions().iterator();
       
       // A flag used to indicate when advancing the current instance requires 
       // the creation of a clone (i.e. when there are more than 1 ways to advance).
@@ -411,7 +437,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       // current node (the "paths") that match each constraint of the
       // transition.
       transitionsWhile: while(transitionsIter.hasNext()) {
-        Transition currentTransition = (Transition)transitionsIter.next();
+        Transition currentTransition = transitionsIter.next();
   
         // There will only be multiple constraints if this transition is
         // over
@@ -502,7 +528,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         }
         
         List<List<Annotation>> combinations = combine(matchLists, matchLists
-                .size(), new LinkedList());
+                .size(), new LinkedList<Annotation>());
         // Create a new FSM for every tuple of annot
         
         for(List<Annotation> tuple : combinations) {
@@ -533,14 +559,13 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
           newFSMI.setFSMPosition(currentTransition.getTarget());
     
           // bindings
-          java.util.Map binds = newFSMI.getBindings();
-          java.util.Iterator labelsIter = currentTransition.getBindings()
-                  .iterator();
+          Map<String,AnnotationSet> binds = newFSMI.getBindings();
+          Iterator<String> labelsIter = currentTransition.getBindings().iterator();
           String oneLabel;
           AnnotationSet boundAnnots, newSet;
           while(labelsIter.hasNext()) {
-            oneLabel = (String)labelsIter.next();
-            boundAnnots = (AnnotationSet)binds.get(oneLabel);
+            oneLabel = labelsIter.next();
+            boundAnnots = binds.get(oneLabel);
             if(boundAnnots != null)
               newSet = new AnnotationSetImpl(boundAnnots);
             else newSet = new AnnotationSetImpl(document);
@@ -616,7 +641,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       // use for loop instead of ListIterator to increase speed
       // (critical here)
       for(int i = 0; i < currentSourceList.size(); i++) {
-        List<Annotation> augmentedTuple = (List<Annotation>)((LinkedList<Annotation>)incompleteTuple).clone();
+        List<Annotation> augmentedTuple = new LinkedList<Annotation>(incompleteTuple);
         augmentedTuple.add(currentSourceList.get(i));
         newTupleList.addAll(combine(sourceLists, maxTupleSize, augmentedTuple));
       }
@@ -785,8 +810,8 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       fireProcessFinished();
     } else {
       long nextKey = theFirst;
-      startNode = ((Annotation)((List)annotationsByOffset.get(nextKey))
-              .get(0)). // nextKey
+      startNode = ((List<Annotation>)annotationsByOffset.get(nextKey))
+              .get(0). // nextKey
               getStartNode();
       startNodeOff = startNode.getOffset().longValue();
 
@@ -803,8 +828,8 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         }
         else {
           nextKey = theFirst;
-          startNode = ((Annotation)((List)annotationsByOffset.get(theFirst))
-                  .get(0)).getStartNode();
+          startNode = ((List<Annotation>)annotationsByOffset.get(theFirst))
+                  .get(0).getStartNode();
           startNodeOff = startNode.getOffset().longValue();
         }
       }// if(oldStartNodeOff == startNodeOff)
@@ -868,9 +893,9 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
     buf.append("rules(" + newline);
     if(rules != null) {
-      Iterator rulesIterator = rules.iterator();
+      Iterator<Rule> rulesIterator = rules.iterator();
         while(rulesIterator.hasNext())
-          buf.append(((Rule)rulesIterator.next()).toString(newPad) + " ");
+          buf.append(rulesIterator.next().toString(newPad) + " ");
     }
     buf.append(newline + pad + ")." + newline);
 
@@ -920,7 +945,8 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   @Override
   public synchronized void removeProgressListener(ProgressListener l) {
     if(progressListeners != null && progressListeners.contains(l)) {
-      Vector v = (Vector)progressListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<ProgressListener> v = (Vector<ProgressListener>)progressListeners.clone();
       v.removeElement(l);
       progressListeners = v;
     }
@@ -928,9 +954,10 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
   @Override
   public synchronized void addProgressListener(ProgressListener l) {
-    Vector v = progressListeners == null
-            ? new Vector(2)
-            : (Vector)progressListeners.clone();
+    @SuppressWarnings("unchecked")
+    Vector<ProgressListener> v = progressListeners == null
+            ? new Vector<ProgressListener>(2)
+            : (Vector<ProgressListener>)progressListeners.clone();
     if(!v.contains(l)) {
       v.addElement(l);
       progressListeners = v;
@@ -944,19 +971,19 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
    * list ignoring all other types of annotations.
    */
   // by Shafirin Andrey start (modifier changed to public)
-  public java.util.Set input = new java.util.HashSet();
+  public Set<String> input = new HashSet<String>();
 
   // java.util.Set input = new java.util.HashSet();
   // by Shafirin Andrey end
-  private transient Vector progressListeners;
+  private transient Vector<ProgressListener> progressListeners;
 
   @Override
   protected void fireProgressChanged(int e) {
     if(progressListeners != null) {
-      Vector listeners = progressListeners;
+      Vector<ProgressListener> listeners = progressListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((ProgressListener)listeners.elementAt(i)).progressChanged(e);
+        listeners.elementAt(i).progressChanged(e);
       }
     }
   }
@@ -964,10 +991,10 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   @Override
   protected void fireProcessFinished() {
     if(progressListeners != null) {
-      Vector listeners = progressListeners;
+      Vector<ProgressListener> listeners = progressListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((ProgressListener)listeners.elementAt(i)).processFinished();
+        listeners.elementAt(i).processFinished();
       }
     }
   }

@@ -27,10 +27,11 @@ import gate.jape.JapeException;
  * Predicate whose {@link #getValue()} property may be set to a
  * Constraint itself, allowing for recursive evaluations.
  *
- * @version $Revision$
  * @author esword
  */
 public abstract class EmbeddedConstraintPredicate extends AbstractConstraintPredicate {
+
+  private static final long serialVersionUID = 7472456256804424432L;
 
   protected Constraint valueConstraint;
   protected String annotType;
