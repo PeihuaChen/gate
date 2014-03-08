@@ -41,9 +41,6 @@ import junit.framework.Assert;
   */
 public class EmailDocumentHandler {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   private String content = null;
   private long documentSize = 0;
 
@@ -130,7 +127,6 @@ public class EmailDocumentHandler {
 
     boolean insideAnEmail   = false;
     boolean insideHeader    = false;
-    boolean insideBody      = false;
     boolean emailReadBefore = false;
     boolean fieldReadBefore = false;
 
@@ -562,7 +558,7 @@ public class EmailDocumentHandler {
     * Initialises the collections with data used by method lineBeginsMessage()
     */
   private void setUp(){
-    day = new HashSet();
+    day = new HashSet<String>();
     day.add("Mon");
     day.add("Tue");
     day.add("Wed");
@@ -571,7 +567,7 @@ public class EmailDocumentHandler {
     day.add("Sat");
     day.add("Sun");
 
-    month = new HashSet();
+    month = new HashSet<String>();
     month.add("Jan");
     month.add("Feb");
     month.add("Mar");
@@ -585,7 +581,7 @@ public class EmailDocumentHandler {
     month.add("Nov");
     month.add("Dec");
 
-    zone = new HashSet();
+    zone = new HashSet<String>();
     zone.add("UT");
     zone.add("GMT");
     zone.add("EST");
@@ -629,16 +625,12 @@ public class EmailDocumentHandler {
     * about an event.
     */
   protected void fireStatusChangedEvent(String text){
-    Iterator listenersIter = myStatusListeners.iterator();
+    Iterator<StatusListener> listenersIter = myStatusListeners.iterator();
     while(listenersIter.hasNext())
-      ((StatusListener)listenersIter.next()).statusChanged(text);
+      listenersIter.next().statusChanged(text);
   }
 
   private static final int EMAILS_RATE = 16;
-
-  // the content of the e-mail document, without any tag
-  // for internal use
-  private String tmpDocContent = null;
 
   // a gate document
   private gate.Document gateDocument = null;
@@ -653,7 +645,7 @@ public class EmailDocumentHandler {
   private Map element2StringMap = null;
 
   // listeners for status report
-  protected List myStatusListeners = new LinkedList();
+  protected List<StatusListener> myStatusListeners = new LinkedList<StatusListener>();
 
   // this reports the the number of emails that have beed processed so far
   private int emails = 0;
@@ -663,9 +655,9 @@ public class EmailDocumentHandler {
   // in this member.
   private String fieldName = null;
 
-  private Collection day = null;
-  private Collection month = null;
-  private Collection zone = null;
+  private Collection<String> day = null;
+  private Collection<String> month = null;
+  private Collection<String> zone = null;
 
 
  // TEST SECTION

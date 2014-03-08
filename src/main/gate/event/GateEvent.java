@@ -20,6 +20,8 @@ import java.util.EventObject;
  */
 public class GateEvent extends EventObject {
 
+  private static final long serialVersionUID = 7914516539094860389L;
+
   public static final int FEATURES_UPDATED = 701;
 
   /**

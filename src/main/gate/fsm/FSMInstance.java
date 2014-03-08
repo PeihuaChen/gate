@@ -34,10 +34,9 @@ import gate.util.InvalidOffsetException;
   *  note that a set of bindings is an object of type Map that maps names
   * (java.lang.String) to bags of annotations (gate.AnnotationSet)
   */
-public class FSMInstance implements Comparable, Cloneable, Serializable {
+public class FSMInstance implements Comparable<FSMInstance>, Cloneable, Serializable {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = -2081096002552818621L;
 
   /** Creates a new FSMInstance object.
     * @param supportGraph the transition graph of the FSM
@@ -125,7 +124,7 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     * process this FSM instance performed.
     * @return a HashMap object
     */
-  public HashMap<String, AnnotationSet> getBindings() { return bindings; }
+  public Map<String, AnnotationSet> getBindings() { return bindings; }
 
   /** Returns the length of the parsed region in the document under scrutiny.
     * More precisely this is the distnace between the Node in the annotation
@@ -171,7 +170,7 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     //do a classic clone except for bindings which need to be cloned themselves
     try {
       FSMInstance clone = (FSMInstance)super.clone();
-      clone.bindings = (HashMap)bindings.clone();
+      clone.bindings = new HashMap<String,AnnotationSet>(bindings);
       return clone;
     } catch (CloneNotSupportedException cnse) {
       cnse.printStackTrace(Err.getPrintWriter());
@@ -201,20 +200,15 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     * multiple match.
     */
   @Override
-  public int compareTo(Object obj) {
-    if (obj instanceof FSMInstance) {
-      if(obj == this) return 0;
-      FSMInstance other = (FSMInstance)obj;
-      if(length < other.getLength()) return -1;
+  public int compareTo(FSMInstance other) {
+      if(other == this) return 0;
+            if(length < other.getLength()) return -1;
       else if(length > other.getLength()) return 1;
       //equal length
       else if(priority < other.priority) return -1;
       else if(priority > other.priority) return 1;
       //equal priority
       else return other.fileIndex - fileIndex;
-    } else throw new ClassCastException(
-                    "Attempt to compare a FSMInstance object to an object " +
-                    "of type " + obj.getClass()+"!");
   }
 
   /** Returns a textual representation of this FSM instance.
@@ -278,7 +272,7 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     * bindings that took place during matching.
     * needs to be HashMap instead of simply Map in order to cloneable
     */
-  private HashMap<String, AnnotationSet> bindings;
+  private Map<String, AnnotationSet> bindings;
 
   /** The size of the matched region in the Annotation Set*/
   private long length = 0;
@@ -311,7 +305,7 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
                                                     startNode, AGPosition,
                                                     bindings, doc);
     else {
-      res = (FSMInstance)myInstances.removeFirst();
+      res = myInstances.removeFirst();
       res.supportGraph = supportGraph;
       res.FSMPosition = FSMPosition;
       res.startNode = startNode;
@@ -329,15 +323,15 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
 
   /** Release all the FSMInstances that are not currently in use */
   public static void clearInstances() {
-    myInstances = new LinkedList();
+    myInstances = new LinkedList<FSMInstance>();
   }
 
   /** The list of existing instances of type FSMInstance */
-  private static LinkedList myInstances;
+  private static LinkedList<FSMInstance> myInstances;
 
   /** The offset in the input List where the last matched annotation was*/
   static{
-    myInstances = new LinkedList();
+    myInstances = new LinkedList<FSMInstance>();
   }
 
 } // FSMInstance

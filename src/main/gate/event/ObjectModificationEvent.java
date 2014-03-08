@@ -18,6 +18,8 @@ package gate.event;
 
 public class ObjectModificationEvent extends GateEvent {
 
+  private static final long serialVersionUID = 317108345148607338L;
+
   public static final int OBJECT_CREATED  = 1000;
   public static final int OBJECT_MODIFIED = 1001;
   public static final int OBJECT_DELETED  = 1002;

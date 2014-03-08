@@ -18,6 +18,8 @@ import java.net.URL;
 import java.util.*;
 import java.util.regex.*;
 
+import org.apache.commons.io.IOUtils;
+
 import gate.*;
 import gate.creole.*;
 import gate.creole.metadata.CreoleParameter;
@@ -101,22 +103,30 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
   protected Pattern nonSplitsPattern;
 
   protected Pattern compilePattern(URL paternsListUrl, String encoding)
-    throws UnsupportedEncodingException, IOException{
-    BufferedReader reader = new BomStrippingInputStreamReader(paternsListUrl.openStream(), encoding);
+          throws UnsupportedEncodingException, IOException {
+    BufferedReader reader = null;
     StringBuffer patternString = new StringBuffer();
+    
+    try {
+      reader =
+              new BomStrippingInputStreamReader(paternsListUrl.openStream(),
+                      encoding);
+      
+      String line = reader.readLine();
+      while(line != null) {
+        line = line.trim();
 
-    String line = reader.readLine();
-    while(line != null){
-      line = line.trim();
-
-      if(line.length() == 0 || line.startsWith("//")){
-        //ignore empty lines and comments
-      }else{
-        if(patternString.length() > 0) patternString.append("|");
-        patternString.append("(?:" + line + ")");
+        if(line.length() == 0 || line.startsWith("//")) {
+          // ignore empty lines and comments
+        } else {
+          if(patternString.length() > 0) patternString.append("|");
+          patternString.append("(?:" + line + ")");
+        }
+        // move to next line
+        line = reader.readLine();
       }
-      //move to next line
-      line = reader.readLine();
+    } finally {
+      IOUtils.closeQuietly(reader);
     }
     return Pattern.compile(patternString.toString());
   }

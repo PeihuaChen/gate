@@ -20,9 +20,6 @@ package gate.event;
   */
 public class ProgressListenerAdaptor implements ProgressListener {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   @Override
   public void progressChanged(int i){}
 

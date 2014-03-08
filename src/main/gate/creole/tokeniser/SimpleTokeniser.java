@@ -16,18 +16,41 @@
 
 package gate.creole.tokeniser;
 
-import java.io.*;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.*;
-
-import gate.*;
-import gate.creole.*;
+import gate.AnnotationSet;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.Resource;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ExecutionInterruptedException;
+import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
-import gate.util.*;
+import gate.util.BomStrippingInputStreamReader;
+import gate.util.Err;
+import gate.util.GateRuntimeException;
+import gate.util.InvalidOffsetException;
+import gate.util.LuckyException;
+
+import java.io.BufferedReader;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.AbstractSet;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+
+import org.apache.commons.io.IOUtils;
 
 /** Implementation of a Unicode rule based tokeniser.
  * The tokeniser gets its rules from a file an {@link java.io.InputStream
@@ -97,6 +120,9 @@ import gate.util.*;
  */
 @CreoleResource(name="GATE Unicode Tokeniser", comment="A customisable Unicode tokeniser.", helpURL="http://gate.ac.uk/userguide/sec:annie:tokeniser", icon="tokeniser")
 public class SimpleTokeniser extends AbstractLanguageAnalyser{
+
+  private static final long serialVersionUID = 1411111968361716069L;
+
   public static final String
     SIMP_TOK_DOCUMENT_PARAMETER_NAME = "document";
 
@@ -108,10 +134,6 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
 
   public static final String
     SIMP_TOK_ENCODING_PARAMETER_NAME = "encoding";
-
-  /** Debug flag
-   */
-  private static final boolean DEBUG = false;
 
   /**
    * Creates a tokeniser
@@ -127,17 +149,16 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
    */
   @Override
   public Resource init() throws ResourceInstantiationException{
-    Reader rulesReader;
+    BufferedReader bRulesReader = null;
     try{
       if(rulesURL != null){
-        rulesReader = new BomStrippingInputStreamReader(rulesURL.openStream(), encoding);
+        bRulesReader = new BufferedReader(new BomStrippingInputStreamReader(rulesURL.openStream(), encoding));
       }else{
         //no init data, Scream!
         throw new ResourceInstantiationException(
           "No URL provided for the rules!");
       }
       initialState = new FSMState(this);
-      BufferedReader bRulesReader = new BufferedReader(rulesReader);
       String line = bRulesReader.readLine();
       ///String toParse = "";
       StringBuffer toParse = new StringBuffer(Gate.STRINGBUFFER_SIZE);
@@ -162,6 +183,9 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
       throw new ResourceInstantiationException(ioe);
     }catch(TokeniserException te){
       throw new ResourceInstantiationException(te);
+    }
+    finally {
+      IOUtils.closeQuietly(bRulesReader);
     }
     return this;
   }
@@ -376,8 +400,8 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
 
     FSMState top;
     FSMState currentState;
-    Set nextStates;
-    Iterator statesIter;
+    Set<FSMState> nextStates;
+    Iterator<FSMState> statesIter;
 
     while(!list.isEmpty()) {
       top = list.removeFirst();
@@ -387,7 +411,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
         statesIter = nextStates.iterator();
 
         while(statesIter.hasNext()) {
-          currentState = (FSMState)statesIter.next();
+          currentState = statesIter.next();
           if(!lambdaClosure.contains(currentState)){
             lambdaClosure.add(currentState);
             list.addFirst(currentState);
@@ -406,8 +430,8 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
 
     //kalina:clear() faster than init() which is called with init()
     newStates.clear();
-    Set<Set> sdStates = new HashSet<Set>();
-    LinkedList<Set> unmarkedDStates = new LinkedList<Set>();
+    Set<Set<FSMState>> sdStates = new HashSet<Set<FSMState>>();
+    LinkedList<Set<FSMState>> unmarkedDStates = new LinkedList<Set<FSMState>>();
     DFSMState dCurrentState = new DFSMState(this);
     Set<FSMState> sdCurrentState = new HashSet<FSMState>();
 
@@ -510,9 +534,9 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
     StringBuffer nodes = new StringBuffer(Gate.STRINGBUFFER_SIZE),
                  edges = new StringBuffer(Gate.STRINGBUFFER_SIZE);
 
-    Iterator fsmStatesIter = fsmStates.iterator();
+    Iterator<FSMState> fsmStatesIter = fsmStates.iterator();
     while (fsmStatesIter.hasNext()){
-      FSMState currentState = (FSMState)fsmStatesIter.next();
+      FSMState currentState = fsmStatesIter.next();
       int stateIndex = currentState.getIndex();
       /*nodes += "node[ id " + stateIndex +
                " label \"" + stateIndex;
@@ -544,9 +568,9 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
     StringBuffer nodes = new StringBuffer(Gate.STRINGBUFFER_SIZE),
                  edges = new StringBuffer(Gate.STRINGBUFFER_SIZE);
 
-    Iterator dfsmStatesIter = dfsmStates.iterator();
+    Iterator<DFSMState> dfsmStatesIter = dfsmStates.iterator();
     while (dfsmStatesIter.hasNext()) {
-      DFSMState currentState = (DFSMState)dfsmStatesIter.next();
+      DFSMState currentState = dfsmStatesIter.next();
       int stateIndex = currentState.getIndex();
 /*      nodes += "node[ id " + stateIndex +
                " label \"" + stateIndex;
@@ -767,7 +791,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
 
   /** A set containng all the states of the non deterministic machine
    */
-  protected Set fsmStates = new HashSet();
+  protected Set<FSMState> fsmStates = new HashSet<FSMState>();
 
   /** The initial state of the deterministic machine
    */
@@ -775,7 +799,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
 
   /** A set containng all the states of the deterministic machine
    */
-  protected Set dfsmStates = new HashSet();
+  protected Set<DFSMState> dfsmStates = new HashSet<DFSMState>();
 
   /** The separator from LHS to RH
    */
@@ -817,9 +841,9 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
   private String rulesResourceName;
   private java.net.URL rulesURL;
   private String encoding;
-  private transient Vector progressListeners;
+
   //kalina: added this as method to minimise too many init() calls
-  protected transient Map<Set, DFSMState> newStates = new HashMap<Set, DFSMState>();
+  protected transient Map<Set<FSMState>, DFSMState> newStates = new HashMap<Set<FSMState>, DFSMState>();
 
 
   /** The static initialiser will inspect the class {@link java.lang.Character}

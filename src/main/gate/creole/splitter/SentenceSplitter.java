@@ -46,6 +46,8 @@ import gate.util.InvalidOffsetException;
 @CreoleResource(name="ANNIE Sentence Splitter", comment="ANNIE sentence splitter.", helpURL="http://gate.ac.uk/userguide/sec:annie:splitter", icon="sentence-splitter")
 public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchmarkable{
 
+  private static final long serialVersionUID = -5335682060379173111L;
+
   public static final String
     SPLIT_DOCUMENT_PARAMETER_NAME = "document";
 
@@ -314,9 +316,6 @@ public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchm
     this.benchmarkId = benchmarkId;
   }
 
-
-
-  private static final boolean DEBUG = false;
   private String inputASName;
   private String outputASName;
 }//public class SentenceSplitter extends Nerc

@@ -20,6 +20,8 @@ import gate.Document;
  */
 public class DocumentEvent extends GateEvent {
 
+  private static final long serialVersionUID = 2315324967342557414L;
+
   /**Event type used to mark the addition of an {@link gate.AnnotationSet}*/
   public static final int ANNOTATION_SET_ADDED = 101;
 

@@ -21,6 +21,8 @@ import gate.*;
  */
 public class AnnotationSetEvent extends GateEvent{
 
+  private static final long serialVersionUID = 6618095991726447858L;
+
   /**Event type used for situations when a new annotation has been added*/
   public static final int ANNOTATION_ADDED = 201;
 

@@ -33,8 +33,7 @@ import java.util.*;
   */
 class DFSMState implements java.io.Serializable { //extends FSMState{
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final long serialVersionUID = 7584872407097617987L;
 
   /** Constructs a new DFSMState object and adds it to the list of deterministic
     * states of the {@link DefaultTokeniser DefaultTokeniser} provided as owner.
@@ -78,8 +77,7 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
     ///String res = "";
     //OT
     StringBuffer res = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
-    Set nextSet;
-    Iterator nextSetIter;
+
     DFSMState nextState;
 
     for(int i = 0; i< transitionFunction.length; i++){
@@ -123,12 +121,11 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
     StringBuffer prefix = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
     StringBuffer read = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
 
-    LinkedList attributes = new LinkedList(),
-               values = new LinkedList();
+    LinkedList<String> attributes = new LinkedList<String>(),
+               values = new LinkedList<String>();
     StringTokenizer mainSt =
       new StringTokenizer(rhs, ignorables + "\\\";=", true);
 
-    int descIndex = 0;
     //phase means:
     //0 == looking for type;
     //1 == looking for attribute;
@@ -212,8 +209,8 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
     tokenDesc = new String[attributes.size()][2];
 
     for(int i = 0; i < attributes.size(); i++) {
-      tokenDesc[i][0] = (String)attributes.get(i);
-      tokenDesc[i][1] = (String)values.get(i);
+      tokenDesc[i][0] = attributes.get(i);
+      tokenDesc[i][1] = values.get(i);
     }
 
     // for(int i = 0; i < attributes.size(); i++){

@@ -20,8 +20,6 @@ package gate.creole.tokeniser;
   * the static member of java.lang.Character).
   */
 class UnicodeType {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
 
   int type;
   

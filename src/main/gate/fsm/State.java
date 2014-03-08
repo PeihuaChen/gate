@@ -16,12 +16,14 @@
 
 package gate.fsm;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-
-import gate.jape.*;
+import gate.jape.BasicPatternElement;
+import gate.jape.JapeConstants;
+import gate.jape.RightHandSide;
 import gate.util.SimpleArraySet;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class implements a Finite State Machine state.
@@ -29,11 +31,8 @@ import gate.util.SimpleArraySet;
  */
 public class State implements JapeConstants {
 
-  /** Debug flag
-   */
+  private static final long serialVersionUID = 1733852753275942428L;
 
-  private static final boolean DEBUG = false;
-  
   public static final int UNKNOWN_INDEX = 1;
   public static final int VISITED_INDEX = -2;
   public static final int UNVISITED_INDEX = 2;
@@ -66,7 +65,7 @@ public class State implements JapeConstants {
    * Determines the appropriate rule by recursively searching this state's outbound transitions until
    * we reach a final state.  Record this state in the ruleTimes and ruleNameToIndexMap structures
    */
-  public int getRuleForState(HashMap<String,Integer> ruleNameToIndexMap,ArrayList<RuleTime>ruleTimes) {
+  public int getRuleForState(Map<String,Integer> ruleNameToIndexMap, List<RuleTime>ruleTimes) {
     if (this.getIndexInRuleList() != UNVISITED_INDEX) {
       return this.getIndexInRuleList();  
     }
@@ -235,11 +234,11 @@ public class State implements JapeConstants {
 ///    String res = "";
     StringBuffer res = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
 
-    Iterator transIter = transitions.iterator();
+    Iterator<Transition> transIter = transitions.iterator();
     BasicPatternElement bpe;
 
     while(transIter.hasNext()) {
-      Transition currentTrans = (Transition)transIter.next();
+      Transition currentTrans = transIter.next();
 /*      res += "edge [ source " + myIndex +
              " target " + currentTrans.getTarget().getIndex() +
              " label \"" + currentTrans.shortDesc() + ":";
@@ -281,7 +280,7 @@ public class State implements JapeConstants {
     ///res += "\nTransitions:\n";
     res.append("\nTransitions:\n");
 
-    Iterator transIter = transitions.iterator();
+    Iterator<Transition> transIter = transitions.iterator();
     while(transIter.hasNext()){
       ///res += transIter.next().toString();
       res.append(transIter.next().toString());

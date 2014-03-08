@@ -22,6 +22,8 @@ import gate.Document;
  */
 public class CorpusEvent extends GateEvent {
 
+  private static final long serialVersionUID = -1499954680735513011L;
+
   /**
    * Event type that is fired when a new document is added to a corpus
    */
