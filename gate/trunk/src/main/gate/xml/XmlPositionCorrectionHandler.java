@@ -34,9 +34,6 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class XmlPositionCorrectionHandler extends DefaultHandler {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /**
    * Variables for correction of 16K parser limit for offset
    */
