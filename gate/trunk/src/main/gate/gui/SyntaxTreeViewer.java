@@ -1327,7 +1327,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
 
     Integer id = new Integer(button.getActionCommand());
     STreeNode node = nonTerminals.get(id);
-    nonTerminals.remove(node);
+    nonTerminals.remove(id);
     node.removeAnnotation(document);
 
     //fix the STreeNodes involved
@@ -1335,7 +1335,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     removeNodesAbove(node);
 
     //remove button from everywhere
-    buttons.remove(button);
+    buttons.remove(id);
     button.setVisible(false);
     this.remove(button);
 
