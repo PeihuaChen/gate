@@ -30,6 +30,8 @@ import java.net.URL;
   )
 public class ANNIETransducer extends Transducer {
 
+  private static final long serialVersionUID = 7443615855994597034L;
+
   /**
    * The ontology parameter is not used for this PR and therefore hidden.
    * 

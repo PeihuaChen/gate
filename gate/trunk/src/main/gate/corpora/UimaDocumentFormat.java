@@ -16,7 +16,12 @@
 
 package gate.corpora;
 
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Resource;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.CreoleResource;
@@ -24,7 +29,13 @@ import gate.util.DocumentFormatException;
 import gate.util.InvalidOffsetException;
 import gate.util.Out;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * UIMA XCAS and XMICAS document formats.
@@ -32,8 +43,8 @@ import java.util.*;
 @CreoleResource(name = "UIMA Document Format", isPrivate = true,
     autoinstances = {@AutoInstance(hidden = true)})
 public class UimaDocumentFormat extends XmlDocumentFormat {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+
+  private static final long serialVersionUID = -3804187336078120808L;
 
   @Override
   public void unpackMarkup(Document doc, RepositioningInfo repInfo,

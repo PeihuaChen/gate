@@ -48,21 +48,22 @@ public class FeatureSchema implements Serializable {
   /** The default or fixed value for that feature */
 
   /** Permisible value set, if appropriate. */
-  Set featurePermissibleValuesSet = null;
+  Set<Object> featurePermissibleValuesSet = null;
 
   /**
    * Construction given a name of an feature and a feature value class
    * name
    */
+  @SuppressWarnings("unchecked")
   public FeatureSchema(String aFeatureName, Class<?> aFeatureValueClass,
           String aFeatureValue, String aFeatureUse,
-          Set aFeaturePermissibleValuesSet) {
+          Set<? extends Object> aFeaturePermissibleValuesSet) {
 
     featureName = aFeatureName;
     featureValueClass = aFeatureValueClass;
     featureValue = aFeatureValue;
     featureUse = aFeatureUse;
-    featurePermissibleValuesSet = aFeaturePermissibleValuesSet;
+    featurePermissibleValuesSet = (Set<Object>)aFeaturePermissibleValuesSet;
   }
 
   /** Tests whether the values are an enumeration or not. */
@@ -83,7 +84,7 @@ public class FeatureSchema implements Serializable {
   }
 
   /** Returns the permissible values as a Set */
-  public Set getPermittedValues() {
+  public Set<Object> getPermittedValues() {
     return featurePermissibleValuesSet;
   }// getPermissibleValues()
 
@@ -93,7 +94,7 @@ public class FeatureSchema implements Serializable {
    * the feature value is the same as the the elements of the given set.
    * Returns true if the set has been assigned.
    */
-  public boolean setPermissibleValues(Set aPermisibleValuesSet) {
+  public boolean setPermissibleValues(Set<? extends Object> aPermisibleValuesSet) {
     featurePermissibleValuesSet.clear();
     return featurePermissibleValuesSet.addAll(aPermisibleValuesSet);
   }// setPermissibleValues()
@@ -110,7 +111,7 @@ public class FeatureSchema implements Serializable {
     if(obj == null) return false;
     if(!obj.getClass().getName().equals(featureValueClass.getName())) return false;
     if(featurePermissibleValuesSet == null)
-      featurePermissibleValuesSet = new HashSet();
+      featurePermissibleValuesSet = new HashSet<Object>();
     return featurePermissibleValuesSet.add(obj);
   }// addPermissibleValue()
 
@@ -122,7 +123,7 @@ public class FeatureSchema implements Serializable {
    *          in XSchema
    * @return a String containing the XSchema representation
    */
-  public String toXSchema(Map aJava2XSchemaMap) {
+  public String toXSchema(Map<Class<?>,String> aJava2XSchemaMap) {
 
     StringBuffer schemaString = new StringBuffer();
     schemaString.append("   <attribute name=\"" + featureName + "\" ");
@@ -132,17 +133,17 @@ public class FeatureSchema implements Serializable {
     // be specified as an attribute for the attribute element
     if(!isEnumeration())
       schemaString.append(" type=\""
-              + (String)aJava2XSchemaMap.get(featureValueClass) + "\"/>\n");
+              + aJava2XSchemaMap.get(featureValueClass) + "\"/>\n");
     else {
       schemaString.append(">\n    <simpleType>\n");
       schemaString.append("     <restriction base=\""
-              + (String)aJava2XSchemaMap.get(featureValueClass) + "\">\n");
-      Iterator featurePermissibleValuesSetIterator = featurePermissibleValuesSet
+              + aJava2XSchemaMap.get(featureValueClass) + "\">\n");
+      Iterator<Object> featurePermissibleValuesSetIterator = featurePermissibleValuesSet
               .iterator();
 
       while(featurePermissibleValuesSetIterator.hasNext()) {
-        String featurePermissibleValue = (String)featurePermissibleValuesSetIterator
-                .next();
+        String featurePermissibleValue = featurePermissibleValuesSetIterator
+                .next().toString();
         schemaString.append("      <enumeration value=\""
                 + featurePermissibleValue + "\"/>\n");
       }// end while

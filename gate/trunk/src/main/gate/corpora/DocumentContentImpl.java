@@ -33,9 +33,6 @@ import org.apache.commons.io.IOUtils;
   */
 public class DocumentContentImpl implements DocumentContent
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /** Buffer size for reading
    *  16k is 4 times the block size on most filesystems
    *  so it should be efficient for most cases

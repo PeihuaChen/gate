@@ -16,7 +16,9 @@
 
 package gate.creole;
 
-import gate.*;
+import gate.Corpus;
+import gate.Document;
+import gate.LanguageAnalyser;
 
 /**
  * A parent implementation of language analysers with some default code.
@@ -25,6 +27,9 @@ abstract public class AbstractLanguageAnalyser
                       extends AbstractProcessingResource
                       implements LanguageAnalyser
 {
+
+  private static final long serialVersionUID = -3921596570474645540L;
+
   /** Set the document property for this analyser. */
   @Override
   public void setDocument(Document document) {
