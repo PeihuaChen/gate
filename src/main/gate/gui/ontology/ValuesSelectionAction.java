@@ -122,6 +122,7 @@ public class ValuesSelectionAction {
     this.allowValueOutsideDropDownList = allowValueOutsideDropDownList;
     domainBox.setModel(new DefaultComboBoxModel(inDropDownList));
     list.setModel(new DefaultComboBoxModel(alreadySelected));
+    @SuppressWarnings("serial")
     JOptionPane pane = new JOptionPane(panel, JOptionPane.QUESTION_MESSAGE,
      JOptionPane.OK_CANCEL_OPTION, icon) {
       @Override

@@ -229,9 +229,9 @@ public class AnnotationSetsView extends AbstractDocumentView
   @Override
   protected void initGUI(){
     //get a pointer to the textual view used for highlights
-    Iterator centralViewsIter = owner.getCentralViews().iterator();
+    Iterator<DocumentView> centralViewsIter = owner.getCentralViews().iterator();
     while(textView == null && centralViewsIter.hasNext()){
-      DocumentView aView = (DocumentView)centralViewsIter.next();
+      DocumentView aView = centralViewsIter.next();
       if(aView instanceof TextualDocumentView) 
         textView = (TextualDocumentView)aView;
     }
@@ -239,16 +239,16 @@ public class AnnotationSetsView extends AbstractDocumentView
             .getViewport().getView();
     
     //get a pointer to the list view
-    Iterator horizontalViewsIter = owner.getHorizontalViews().iterator();
+    Iterator<DocumentView> horizontalViewsIter = owner.getHorizontalViews().iterator();
     while(listView == null && horizontalViewsIter.hasNext()){
-      DocumentView aView = (DocumentView)horizontalViewsIter.next();
+      DocumentView aView = horizontalViewsIter.next();
       if(aView instanceof AnnotationListView) 
         listView = (AnnotationListView)aView;
     }
     //get a pointer to the stack view
     horizontalViewsIter = owner.getHorizontalViews().iterator();
     while(stackView == null && horizontalViewsIter.hasNext()){
-      DocumentView aView = (DocumentView)horizontalViewsIter.next();
+      DocumentView aView = horizontalViewsIter.next();
       if(aView instanceof AnnotationStackView)
         stackView = (AnnotationStackView)aView;
     }

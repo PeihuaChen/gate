@@ -21,6 +21,9 @@ package gate.util.reporting.exceptions;
  * 
  */
 public class BenchmarkReportExecutionException extends RuntimeException {
+
+  private static final long serialVersionUID = -8652052369571503815L;
+
   public BenchmarkReportExecutionException(String message) {
     super(message);
   }

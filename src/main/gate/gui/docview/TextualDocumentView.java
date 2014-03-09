@@ -13,16 +13,6 @@
  */
 package gate.gui.docview;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import java.util.List;
-
-import javax.swing.*;
-import javax.swing.Timer;
-import javax.swing.text.*;
-
-
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Document;
@@ -30,13 +20,45 @@ import gate.corpora.DocumentContentImpl;
 import gate.event.DocumentEvent;
 import gate.event.DocumentListener;
 import gate.gui.annedit.AnnotationData;
-import gate.util.*;
+import gate.util.Err;
+import gate.util.GateRuntimeException;
+import gate.util.InvalidOffsetException;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.ComponentOrientation;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.swing.AbstractAction;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultCaret;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Highlighter;
 
 
 /**
  * This class provides a central view for a textual document.
  */
 
+@SuppressWarnings("serial")
 public class TextualDocumentView extends AbstractDocumentView {
 
   public TextualDocumentView(){

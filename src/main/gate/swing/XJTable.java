@@ -49,6 +49,7 @@ import gate.util.ObjectComparator;
  * user and the GUI component. This middle model is responsible for sorting the
  * rows.
  */
+@SuppressWarnings("serial")
 public class XJTable extends JTable{
 
   public XJTable(){

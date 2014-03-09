@@ -55,6 +55,7 @@ import java.util.regex.Pattern;
  * You can filter the instances table, delete instances and set properties
  * that are defined in the ontology as object properties.
  */
+@SuppressWarnings("serial")
 public class OntologyInstanceView extends AbstractDocumentView {
 
   public OntologyInstanceView() {

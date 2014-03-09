@@ -1063,6 +1063,7 @@ public class OntologyEditor extends AbstractVisualResource
     });
   }
 
+  @SuppressWarnings("serial")
   protected class AnnotationPropertyValueAction extends AbstractAction {
     public AnnotationPropertyValueAction(String name, OResource oResource,
                                          AnnotationProperty property) {
@@ -1091,6 +1092,7 @@ public class OntologyEditor extends AbstractVisualResource
     private AnnotationProperty property;
   }
 
+  @SuppressWarnings("serial")
   protected class DatatypePropertyValueAction extends AbstractAction {
     public DatatypePropertyValueAction(String name, OResource oResource,
                                        DatatypeProperty property) {

@@ -28,6 +28,7 @@ import javax.swing.*;
  * Just set an instance of this class as the glassPane
  * of your JFrame and call <code>block()</code> as needed.
  */
+@SuppressWarnings("serial")
 public class BlockingGlassPane extends JPanel {
 
   private int        blockCount = 0;

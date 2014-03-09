@@ -134,6 +134,7 @@ public class InputOutputAnnotationSetsDialog {
    * Panel representing the list of annotation set names for either
    * input or output.
    */
+  @SuppressWarnings("serial")
   class AnnotationSetsList extends JPanel {
     private JList annotationSetsList;
 
