@@ -16,6 +16,7 @@ import gate.swing.XJEditorPane;
  * A frame used by Gate to display Help information.
  * It is a basic HTML browser.
  */
+@SuppressWarnings("serial")
 public class HelpFrame extends JFrame implements StatusListener {
 
   public HelpFrame(){

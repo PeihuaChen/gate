@@ -13,22 +13,33 @@
  */
 package gate.gui;
 
-import java.awt.*;
+import gate.Gate;
+
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.*;
-
-import gate.Gate;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 
 /**
  * A simple component that allows the user to select a directory and a list of
  * permitted extensions for populating a corpus
  */
 
+@SuppressWarnings("serial")
 public class CorpusFillerComponent extends JPanel {
 
   /**
@@ -44,7 +55,7 @@ public class CorpusFillerComponent extends JPanel {
    * Inits local variables to default values
    */
   protected void initLocalData(){
-    extensions = new ArrayList();
+    extensions = new ArrayList<String>();
   }
 
 
@@ -184,7 +195,8 @@ public class CorpusFillerComponent extends JPanel {
       public void actionPerformed(ActionEvent e) {
         ListEditorDialog listEditor = new ListEditorDialog(
           CorpusFillerComponent.this, extensions, String.class.getName());
-        List answer = listEditor.showDialog();
+        @SuppressWarnings("unchecked")
+        List<String> answer = listEditor.showDialog();
         if(answer != null){
           extensions.clear();
           extensions.addAll(answer);
@@ -239,7 +251,7 @@ public class CorpusFillerComponent extends JPanel {
   /**
    * Sets the current value for the list of permitted extensions.
    */
-  public void setExtensions(java.util.List extensions) {
+  public void setExtensions(List<String> extensions) {
     this.extensions = extensions;
     extensionsTextField.setText(extensions.toString());
   }
@@ -248,7 +260,7 @@ public class CorpusFillerComponent extends JPanel {
   /**
    * Gets the current list of permitted extensions
    */
-  public java.util.List getExtensions() {
+  public List<String> getExtensions() {
     return extensions;
   }
 
@@ -322,5 +334,5 @@ public class CorpusFillerComponent extends JPanel {
   /**
    * The list of permitted extensions.
    */
-  private java.util.List extensions;
+  private List<String> extensions;
 }

@@ -30,6 +30,7 @@ import gate.util.*;
 /**
  * A simple editor for Collection values.
  */
+@SuppressWarnings("serial")
 public class ListEditorDialog extends JDialog {
 
   /**
@@ -41,7 +42,7 @@ public class ListEditorDialog extends JDialog {
    * @param itemType the type of the elements in the collection in the form of a
    * fully qualified class name
    */
-  public ListEditorDialog(Component owner, Collection data, String itemType) {
+  public ListEditorDialog(Component owner, Collection<?> data, String itemType) {
     this(owner, data, null, itemType);
   }
   
@@ -57,8 +58,8 @@ public class ListEditorDialog extends JDialog {
    * @param itemType the type of the elements in the collection in the form of a
    * fully qualified class name
    */
-  public ListEditorDialog(Component owner, Collection data,
-          Class<? extends Collection> collectionType, String itemType) {
+  public ListEditorDialog(Component owner, Collection<?> data,
+          Class<?> collectionType, String itemType) {
     super(MainFrame.getInstance());
     if(collectionType == null) {
       if(data != null) {
@@ -75,8 +76,8 @@ public class ListEditorDialog extends JDialog {
     initListeners();
   }
 
-  protected void initLocalData(Collection data,
-          Class<? extends Collection> collectionType){
+  protected void initLocalData(Collection<?> data,
+          Class<?> collectionType){
     try{
       ResourceData rData = Gate.getCreoleRegister().get(itemType);
       itemTypeClass = rData == null ?

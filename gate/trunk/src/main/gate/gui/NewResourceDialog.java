@@ -48,6 +48,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellEditor;
 
+@SuppressWarnings("serial")
 public class NewResourceDialog extends JDialog {
 
   public NewResourceDialog(Frame frame, String title, boolean modal) {
@@ -227,7 +228,6 @@ public class NewResourceDialog extends JDialog {
           //create the new resource
           FeatureMap params = parametersEditor.getParameterValues();
 
-          Resource res;
           gate.event.StatusListener sListener =
             (gate.event.StatusListener)Gate.getListeners().
                                        get("gate.event.StatusListener");
@@ -247,7 +247,7 @@ public class NewResourceDialog extends JDialog {
             FeatureMap features = Factory.newFeatureMap();
             String name = nameField.getText();
             if(name == null || name.length() == 0) name = null;
-            res = Factory.createResource(resourceData.getClassName(), params,
+            Factory.createResource(resourceData.getClassName(), params,
                                          features, name);
             long endTime = System.currentTimeMillis();
             if(sListener != null) sListener.statusChanged(
@@ -262,7 +262,7 @@ public class NewResourceDialog extends JDialog {
                                           rie.toString(),
                                           "GATE", JOptionPane.ERROR_MESSAGE);
             rie.printStackTrace(Err.getPrintWriter());
-            res = null;
+            
             if(sListener != null) sListener.statusChanged("Error loading " +
                                                           nameField.getText() +
                                                           "!");
@@ -274,7 +274,6 @@ public class NewResourceDialog extends JDialog {
                     thr.toString(),
                     "GATE", JOptionPane.ERROR_MESSAGE);
             thr.printStackTrace(Err.getPrintWriter());
-            res = null;
             if(sListener != null) sListener.statusChanged("Error loading " +
                                                 nameField.getText() +
                                                 "!");

@@ -18,6 +18,7 @@ package gate.gui.docview;
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Gate;
+import gate.LanguageResource;
 import gate.Resource;
 import gate.creole.AbstractVisualResource;
 import gate.creole.AnnotationSchema;
@@ -92,10 +93,9 @@ import javax.swing.text.BadLocationException;
  * speed up the annotation process (e.g. by pre-populating sets of choices) but
  * does not enforce the schemas, allowing the user full control.
  */
+@SuppressWarnings("serial")
 public class AnnotationEditor extends AbstractVisualResource implements
                                                             OwnedAnnotationEditor {
-  private static final long serialVersionUID = 1L;
-
   /*
    * (non-Javadoc)
    * 
@@ -113,9 +113,9 @@ public class AnnotationEditor extends AbstractVisualResource implements
 
   protected void initData() {
     schemasByType = new HashMap<String, AnnotationSchema>();
-    java.util.List schemas =
+    java.util.List<LanguageResource> schemas =
         Gate.getCreoleRegister().getLrInstances("gate.creole.AnnotationSchema");
-    for(Iterator schIter = schemas.iterator(); schIter.hasNext();) {
+    for(Iterator<LanguageResource> schIter = schemas.iterator(); schIter.hasNext();) {
       AnnotationSchema aSchema = (AnnotationSchema)schIter.next();
       schemasByType.put(aSchema.getAnnotationName(), aSchema);
     }

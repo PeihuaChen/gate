@@ -571,7 +571,7 @@ public class AnnotationDiffer {
    * significant. 
    * @param significantFeaturesSet a Set of String values or <tt>null<tt>.
    */
-  public void setSignificantFeaturesSet(java.util.Set<?> significantFeaturesSet) {
+  public void setSignificantFeaturesSet(Set<String> significantFeaturesSet) {
     this.significantFeaturesSet = significantFeaturesSet;
   }
 

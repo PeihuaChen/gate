@@ -43,7 +43,7 @@ public class ParameterDisjunction implements CreoleListener {
    * @param parameters a list containing the parameters in this paramater d
    * isjunction; each element is a {@link gate.creole.Parameter}.
    */
-  public ParameterDisjunction(Resource resource, List parameters){
+  public ParameterDisjunction(Resource resource, List<Parameter> parameters){
     Gate.getCreoleRegister().addCreoleListener(this);
     this.resource = resource;
     params = new Parameter[parameters.size()];
@@ -54,7 +54,7 @@ public class ParameterDisjunction implements CreoleListener {
     required = new Boolean[parameters.size()];
 
     for(int i = 0; i < parameters.size(); i++){
-      params[i] = (Parameter)parameters.get(i);
+      params[i] = parameters.get(i);
       names[i] = params[i].getName();
       comments[i] = params[i].getComment();
       types[i] = params[i].getTypeName();

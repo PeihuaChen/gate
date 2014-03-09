@@ -14,26 +14,50 @@
  */
 package gate.gui;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.*;
-import java.util.List;
-
-import javax.swing.*;
-import javax.swing.plaf.FontUIResource;
-
 import gate.Gate;
 import gate.GateConstants;
 import gate.swing.JFontChooser;
 import gate.util.GateRuntimeException;
 import gate.util.OptionsMap;
 
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.LookAndFeel;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.plaf.FontUIResource;
+
 /**
  * The options dialog for Gate.
  */
+@SuppressWarnings("serial")
 public class OptionsDialog extends JDialog {
   public OptionsDialog(Frame owner){
     super(owner, "GATE Options", true);
@@ -69,7 +93,7 @@ public class OptionsDialog extends JDialog {
     UIManager.LookAndFeelInfo[] lnfs = UIManager.getInstalledLookAndFeels();
     for (UIManager.LookAndFeelInfo lnf : lnfs) {
       try {
-        Class lnfClass = Class.forName(lnf.getClassName());
+        Class<?> lnfClass = Class.forName(lnf.getClassName());
         if (((LookAndFeel) (lnfClass.newInstance())).isSupportedLookAndFeel()) {
           if (lnf.getName().equals(UIManager.getLookAndFeel().getName())) {
             supportedLNFs.add(currentLNF =
@@ -474,10 +498,10 @@ public class OptionsDialog extends JDialog {
           throw new GateRuntimeException(
                   "Error while setting the look and feel", e);
         }
-        Iterator rootsIter = MainFrame.getGuiRoots().iterator();
+        Iterator<Component> rootsIter = MainFrame.getGuiRoots().iterator();
         while(rootsIter.hasNext()){
           try{
-            SwingUtilities.updateComponentTreeUI((Component)rootsIter.next());
+            SwingUtilities.updateComponentTreeUI(rootsIter.next());
           }catch(Exception e){
             throw new GateRuntimeException(
                     "Error while updating the graphical interface", e);

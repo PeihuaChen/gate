@@ -42,7 +42,6 @@ import java.beans.Introspector;
 import java.text.NumberFormat;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
@@ -57,6 +56,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 
+@SuppressWarnings("serial")
 @CreoleResource(name = "Serial Datastore Viewer", guiType = GuiType.LARGE,
     resourceDisplayed = "gate.persist.SerialDataStore", mainViewer = true)
 public class SerialDatastoreViewer extends JScrollPane implements
@@ -211,9 +211,9 @@ public class SerialDatastoreViewer extends JScrollPane implements
           if (dsType.expanded) return;
           node.removeAllChildren();
           try {
-            Iterator lrIDsIter = datastore.getLrIds(dsType.type).iterator();
+            Iterator<String> lrIDsIter = datastore.getLrIds(dsType.type).iterator();
             while(lrIDsIter.hasNext()) {
-              String id = (String)lrIDsIter.next();
+              String id = lrIDsIter.next();
               DSEntry entry =
                   new DSEntry(datastore.getLrName(id), id, dsType.type);
               DefaultMutableTreeNode lrNode =
@@ -230,10 +230,10 @@ public class SerialDatastoreViewer extends JScrollPane implements
     });
     
     try {
-      Iterator lrTypesIter = datastore.getLrTypes().iterator();
+      Iterator<String> lrTypesIter = datastore.getLrTypes().iterator();
       CreoleRegister cReg = Gate.getCreoleRegister();
       while(lrTypesIter.hasNext()) {
-        String type = (String)lrTypesIter.next();
+        String type = lrTypesIter.next();
         ResourceData rData = cReg.get(type);
         DSType dsType = new DSType(rData.getName(), type);
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(dsType);
@@ -398,7 +398,7 @@ public class SerialDatastoreViewer extends JScrollPane implements
                   params.put(DataStore.DATASTORE_FEATURE_NAME, datastore);
                   params.put(DataStore.LR_ID_FEATURE_NAME, entry.id);
                   FeatureMap features = Factory.newFeatureMap();
-                  Resource res = Factory.createResource(entry.type, params, features,
+                  Factory.createResource(entry.type, params, features,
                           entry.name);
                   // project.frame.resourcesTreeModel.treeChanged();
                   fireProgressChanged(0);
@@ -511,11 +511,7 @@ public class SerialDatastoreViewer extends JScrollPane implements
   protected JPopupMenu popup;
 
   protected FeatureMap features;
-
-  private transient Vector progressListeners;
-
-  private transient Vector statusListeners;
-
+  
   @Override
   public void resourceAdopted(DatastoreEvent e) {
     // do nothing; SerialDataStore does actually nothing on adopt()
@@ -526,7 +522,7 @@ public class SerialDatastoreViewer extends JScrollPane implements
   public void resourceDeleted(DatastoreEvent e) {
     String resID = (String)e.getResourceID();
     DefaultMutableTreeNode node = null;
-    Enumeration nodesEnum = treeRoot.depthFirstEnumeration();
+    Enumeration<?> nodesEnum = treeRoot.depthFirstEnumeration();
     boolean found = false;
     while(nodesEnum.hasMoreElements() && !found) {
       node = (DefaultMutableTreeNode)nodesEnum.nextElement();
@@ -550,7 +546,7 @@ public class SerialDatastoreViewer extends JScrollPane implements
     DefaultMutableTreeNode parent = treeRoot;
     DefaultMutableTreeNode node = null;
     // first look for the type node
-    Enumeration childrenEnum = parent.children();
+    Enumeration<?> childrenEnum = parent.children();
     boolean found = false;
     while(childrenEnum.hasMoreElements() && !found) {
       node = (DefaultMutableTreeNode)childrenEnum.nextElement();

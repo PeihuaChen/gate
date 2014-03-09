@@ -27,6 +27,7 @@ import javax.swing.*;
 /** This class visually selects some items from a collection and returns
   * a collection with the items selected by the user.
   */
+@SuppressWarnings("serial")
 public class CollectionSelectionDialog extends JDialog {
 
   // Local data
@@ -76,7 +77,7 @@ public class CollectionSelectionDialog extends JDialog {
     this(null, true);
   }// CollectionSelectionDialog
 
-  /** Init local data from a sorce collection
+  /** Init local data from a source collection
     * @param aSourceData is the collection from what the user will choose
     */
   protected void initLocalData(Collection aSourceData){

@@ -16,13 +16,15 @@
 
 package gate.gui.docview;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import gate.Document;
 import gate.creole.AbstractResource;
 import gate.gui.Handle;
 import gate.gui.annedit.AnnotationData;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.Action;
 
 /**
  * A convenience implementation of {@link gate.gui.docview.DocumentView} that
@@ -31,6 +33,7 @@ import gate.gui.annedit.AnnotationData;
  * provide implementations for the three abstract methods:
  * {@link #initGUI()}, {@link #registerHooks()} and {@link #unregisterHooks()}.
  */
+@SuppressWarnings("serial")
 public abstract class AbstractDocumentView extends AbstractResource
                                            implements DocumentView {
 
@@ -72,8 +75,8 @@ public abstract class AbstractDocumentView extends AbstractResource
    * @return an empty list.
    */
   @Override
-  public List getActions() {
-    return new ArrayList();
+  public List<Action> getActions() {
+    return new ArrayList<Action>();
   }
   
   /* 

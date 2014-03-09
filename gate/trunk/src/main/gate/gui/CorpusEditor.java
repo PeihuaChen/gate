@@ -48,6 +48,7 @@ import gate.util.GateRuntimeException;
  * list of documents inside a corpus along with their features.
  * It will also allow addition and removal of documents.
  */
+@SuppressWarnings("serial")
 @CreoleResource(name = "Corpus editor", guiType = GuiType.LARGE,
     resourceDisplayed = "gate.Corpus", mainViewer = true)
 public class CorpusEditor extends AbstractVisualResource

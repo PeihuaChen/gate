@@ -35,6 +35,7 @@ import javax.swing.UIManager;
  * A simple component that allows the user to select a trec web file and
  * encoding
  */
+@SuppressWarnings("serial")
 public class SingleConcatenatedFileInputDialog extends JPanel {
 
   public SingleConcatenatedFileInputDialog() {

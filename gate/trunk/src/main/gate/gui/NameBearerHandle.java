@@ -1522,7 +1522,7 @@ public class NameBearerHandle implements Handle, StatusListener,
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      corpusFiller.setExtensions(new ArrayList());
+      corpusFiller.setExtensions(new ArrayList<String>());
       corpusFiller.setEncoding("");
       final boolean answer = OkCancelDialog.showDialog(window, corpusFiller,
               "Select a directory and allowed extensions");
@@ -1534,16 +1534,16 @@ public class NameBearerHandle implements Handle, StatusListener,
             URL url;
             try {
               url = new URL(corpusFiller.getUrlString());
-              List extensions = corpusFiller.getExtensions();
+              List<String> extensions = corpusFiller.getExtensions();
               ExtensionFileFilter filter;
               if(extensions == null || extensions.isEmpty()) {
                 filter = null;
               }
               else {
                 filter = new ExtensionFileFilter();
-                Iterator extIter = corpusFiller.getExtensions().iterator();
+                Iterator<String> extIter = corpusFiller.getExtensions().iterator();
                 while(extIter.hasNext()) {
-                  filter.addExtension((String)extIter.next());
+                  filter.addExtension(extIter.next());
                 }
               }
               String encoding = corpusFiller.getEncoding();
@@ -1768,9 +1768,9 @@ public class NameBearerHandle implements Handle, StatusListener,
                   false));
         }
         // add all the features
-        Iterator featIter = createIndexGui.getFeaturesList().iterator();
+        Iterator<String> featIter = createIndexGui.getFeaturesList().iterator();
         while(featIter.hasNext()) {
-          String featureName = (String)featIter.next();
+          String featureName = featIter.next();
           did.addIndexField(new IndexField(featureName, new FeatureReader(
                   featureName), false));
         }

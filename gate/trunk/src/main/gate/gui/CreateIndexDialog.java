@@ -15,16 +15,35 @@
 
 package gate.gui;
 
-import java.awt.*;
+import gate.creole.ir.DefaultIndexDefinition;
+import gate.creole.ir.DocumentContentReader;
+import gate.creole.ir.IndexException;
+import gate.creole.ir.IndexField;
+import gate.creole.ir.IndexedCorpus;
+
+import java.awt.BorderLayout;
+import java.awt.Dialog;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 
-import gate.creole.ir.*;
-
+@SuppressWarnings("serial")
 public class CreateIndexDialog extends JDialog {
 
   private IndexedCorpus ic;
@@ -45,7 +64,7 @@ public class CreateIndexDialog extends JDialog {
     protected JButton cancelButton = new JButton();
     protected GridBagLayout gridBagLayout1 = new GridBagLayout();
 
-    private Vector fields = new Vector();
+    private Vector<String> fields = new Vector<String>();
 
   public CreateIndexDialog(Frame owner, IndexedCorpus ic){
     super(owner, true);

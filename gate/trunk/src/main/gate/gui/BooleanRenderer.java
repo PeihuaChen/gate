@@ -22,6 +22,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 /**
  * A {@link javax.swing.table.TableCellRenderer} used for Booleans
  */
+@SuppressWarnings("serial")
 public class BooleanRenderer extends DefaultTableCellRenderer {
   @Override
   public Component getTableCellRendererComponent(JTable table,
@@ -30,10 +31,10 @@ public class BooleanRenderer extends DefaultTableCellRenderer {
                                                  boolean hasFocus,
                                                  int row,
                                                  int column){
-    Component comp = super.getTableCellRendererComponent(table,
+    /*Component comp = super.getTableCellRendererComponent(table,
                                                          "",
                                                          isSelected, hasFocus,
-                                                         row, column);
+                                                         row, column);*/
     if(value instanceof Boolean &&
        value != null &&
        ((Boolean)value).booleanValue()){

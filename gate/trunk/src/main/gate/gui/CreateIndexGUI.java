@@ -14,19 +14,33 @@
  */
 package gate.gui;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.util.*;
-import java.util.List;
-
-import javax.swing.*;
-
 import gate.Gate;
 import gate.creole.ir.IREngine;
+
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import javax.swing.AbstractAction;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 /**
  * Provides a gui for creating a IR index on a corpus.
  */
+@SuppressWarnings("serial")
 public class CreateIndexGUI extends JPanel {
 
   public CreateIndexGUI() {
@@ -36,8 +50,8 @@ public class CreateIndexGUI extends JPanel {
   }
 
   protected void initLocalData(){
-    featuresList = new ArrayList();
-    engineByName = new TreeMap();
+    featuresList = new ArrayList<String>();
+    engineByName = new TreeMap<String, IREngine>();
   }
 
   protected void initGUIComponents(){
@@ -87,12 +101,12 @@ public class CreateIndexGUI extends JPanel {
     //populate engine names combo
     String oldIREngineName = (String)irEngineCombo.getSelectedItem();
 
-    List irEngines = new ArrayList(Gate.getRegisteredIREngines());
+    List<String> irEngines = new ArrayList<String>(Gate.getRegisteredIREngines());
     engineByName.clear();
     for(int i = 0; i < irEngines.size(); i++){
-      String anIREngineClassName = (String)irEngines.get(i);
+      String anIREngineClassName = irEngines.get(i);
       try{
-        Class aClass =
+        Class<?> aClass =
           Class.forName(anIREngineClassName, true, Gate.getClassLoader());
         IREngine engine = (IREngine)aClass.newInstance();
         engineByName.put(engine.getName(), engine);
@@ -104,9 +118,9 @@ public class CreateIndexGUI extends JPanel {
 
     String[] names = new String[engineByName.size()];
     int i = 0;
-    Iterator namesIter = engineByName.keySet().iterator();
+    Iterator<String> namesIter = engineByName.keySet().iterator();
     while(namesIter.hasNext()){
-      names[i++] = (String)namesIter.next();
+      names[i++] = namesIter.next();
     }
     irEngineCombo.setModel(new DefaultComboBoxModel(names));
     if(oldIREngineName != null && engineByName.containsKey(oldIREngineName)){
@@ -147,7 +161,8 @@ public class CreateIndexGUI extends JPanel {
       ListEditorDialog listEditor = new ListEditorDialog(CreateIndexGUI.this,
                                                          featuresList,
                                                          "java.lang.String");
-      List result = listEditor.showDialog();
+      @SuppressWarnings("unchecked")
+      List<String> result = listEditor.showDialog();
       if(result != null){
         featuresList.clear();
         featuresList.addAll(result);
@@ -169,7 +184,7 @@ public class CreateIndexGUI extends JPanel {
     return useContentChk.isSelected();
   }
 
-  public List getFeaturesList(){
+  public List<String> getFeaturesList(){
     return featuresList;
   }
 
@@ -178,7 +193,7 @@ public class CreateIndexGUI extends JPanel {
   }
 
   public IREngine getIREngine(){
-    return (IREngine)engineByName.get(irEngineCombo.getSelectedItem());
+    return engineByName.get(irEngineCombo.getSelectedItem());
   }
 
   /**
@@ -204,11 +219,11 @@ public class CreateIndexGUI extends JPanel {
   /**
    * The list of features.
    */
-  List featuresList;
+  List<String> featuresList;
 
   /**
    * A map from IREngine name to IREngine class name.
    */
-  SortedMap engineByName;
+  SortedMap<String,IREngine> engineByName;
 
 }

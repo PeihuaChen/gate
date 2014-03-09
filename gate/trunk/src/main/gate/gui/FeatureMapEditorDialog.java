@@ -31,6 +31,7 @@ import gate.util.*;
 /**
  * A simple editor for List values.
  */
+@SuppressWarnings("serial")
 public class FeatureMapEditorDialog extends JDialog {
 
   /**

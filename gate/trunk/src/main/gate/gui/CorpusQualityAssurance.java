@@ -76,6 +76,7 @@ import gate.util.Strings;
  * globally for each annotation and for each document inside a corpus
  * with different measures notably precision, recall and F1-score.
  */
+@SuppressWarnings("serial")
 @CreoleResource(name = "Corpus Quality Assurance", guiType = GuiType.LARGE,
     resourceDisplayed = "gate.Corpus", mainViewer = false,
     helpURL = "http://gate.ac.uk/userguide/sec:eval:corpusqualityassurance")
