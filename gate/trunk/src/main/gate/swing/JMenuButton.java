@@ -27,6 +27,7 @@ import javax.swing.event.PopupMenuListener;
 /**
  * A toggle button that shows a pop-up menu.
  */
+@SuppressWarnings("serial")
 public class JMenuButton extends JToggleButton {
   public JMenuButton(JMenu menu) {
     this(menu.getPopupMenu());

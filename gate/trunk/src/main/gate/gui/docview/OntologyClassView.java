@@ -60,6 +60,7 @@ import java.util.List;
  * load lazily the ontology trees
  * context menu for classes to hide/show them, saved in user configuration
  */
+@SuppressWarnings("serial")
 public class OntologyClassView extends AbstractDocumentView
     implements CreoleListener, OntologyModificationListener {
 

@@ -91,11 +91,10 @@ import javax.swing.text.JTextComponent;
  * {@link DocumentView} interface. Contains a search dialog and an option menu
  * button.
  */
+@SuppressWarnings("serial")
 @CreoleResource(name = "Document Editor", guiType = GuiType.LARGE, resourceDisplayed = "gate.Document", mainViewer = true)
 public class DocumentEditor extends AbstractVisualResource implements
                                                           ActionsPublisher {
-  private static final long serialVersionUID = 1L;
-
   /**
    * Save the layout of the views and selected annotations.
    */

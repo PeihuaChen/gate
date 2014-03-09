@@ -57,6 +57,7 @@ public class AnnotationPropertyAction extends AbstractAction {
     mainPanel.add(propertyName = new JTextField(30), gbc);
   }
 
+  @SuppressWarnings("serial")
   @Override
   public void actionPerformed(ActionEvent actionevent) {
     nameSpace.setText(ontology.getDefaultNameSpace() == null

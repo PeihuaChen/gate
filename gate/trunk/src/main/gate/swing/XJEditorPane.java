@@ -20,6 +20,7 @@ import gate.util.Err;
  * An enhanced version of {@link javax.swing.JEditorPane} that is able of
  * handling hyperlinks from the HTML document displayed.
  */
+@SuppressWarnings("serial")
 public class XJEditorPane extends JEditorPane {
 
   public XJEditorPane(){

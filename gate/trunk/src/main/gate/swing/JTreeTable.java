@@ -30,6 +30,7 @@ import javax.swing.tree.*;
  * A TreeTable component. That is a component that looks like a table apart
  * from the first column that contains a tree.
  */
+@SuppressWarnings("serial")
 public class JTreeTable extends XJTable {
 
   /**The tree used to render the first column*/

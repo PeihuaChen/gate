@@ -20,6 +20,9 @@ package gate.util.reporting.exceptions;
  * that the calling application might want to catch.
  */
 public class BenchmarkReportException extends Exception {
+
+  private static final long serialVersionUID = 7985671419407663629L;
+
   public BenchmarkReportException(String message) {
     super(message);
   }

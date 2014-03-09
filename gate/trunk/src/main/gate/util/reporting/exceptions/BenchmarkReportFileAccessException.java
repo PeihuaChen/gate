@@ -31,6 +31,9 @@ package gate.util.reporting.exceptions;
  */
 public class BenchmarkReportFileAccessException extends
     BenchmarkReportException {
+
+  private static final long serialVersionUID = -1095399127391838299L;
+
   public BenchmarkReportFileAccessException(String message) {
     super(message);
   }

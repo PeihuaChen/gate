@@ -40,6 +40,7 @@ import java.awt.*;
  * stackPanel.addAnnotation(...);<br>
  * stackPanel.drawStack();</code>
  */
+@SuppressWarnings("serial")
 public class AnnotationStack extends JPanel {
 
   public AnnotationStack() {

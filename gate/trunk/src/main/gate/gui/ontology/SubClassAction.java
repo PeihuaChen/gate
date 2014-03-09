@@ -63,6 +63,7 @@ public class SubClassAction extends AbstractAction implements
 
     nameSpace.setText(ontology.getDefaultNameSpace() == null ?
       "http://gate.ac.uk/example#" : ontology.getDefaultNameSpace());
+    @SuppressWarnings("serial")
     JOptionPane pane = new JOptionPane(mainPanel, JOptionPane.QUESTION_MESSAGE,
       JOptionPane.OK_CANCEL_OPTION, MainFrame.getIcon("ontology-subclass")) {
       @Override

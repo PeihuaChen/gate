@@ -77,6 +77,7 @@ import javax.swing.tree.TreePath;
  * highlight co-references in the document, allow creating
  * co-references from existing annotations, editing and deleting co-references.
  */
+@SuppressWarnings("serial")
 public class CorefEditor
     extends AbstractDocumentView
     implements ActionListener, gate.event.FeatureMapListener,

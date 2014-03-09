@@ -6,6 +6,7 @@ import java.awt.Font;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 
+@SuppressWarnings("serial")
 class AnnotationSetNameCellRenderer extends DefaultListCellRenderer {
 
   public static final String DEFAULT_SET_TEXT = "<Default annotation set>";

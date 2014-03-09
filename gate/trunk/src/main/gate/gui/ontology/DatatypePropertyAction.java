@@ -118,6 +118,7 @@ public class DatatypePropertyAction extends AbstractAction implements
   public void actionPerformed(ActionEvent actionevent) {
     nameSpace.setText(ontology.getDefaultNameSpace() == null ?
       "http://gate.ac.uk/example#" : ontology.getDefaultNameSpace());
+    @SuppressWarnings("serial")
     JOptionPane pane = new JOptionPane(mainPanel, JOptionPane.QUESTION_MESSAGE,
       JOptionPane.OK_CANCEL_OPTION,
       MainFrame.getIcon("ontology-datatype-property")) {
