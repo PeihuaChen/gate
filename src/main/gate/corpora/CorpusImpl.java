@@ -65,9 +65,6 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
                                                         CreoleListener,
                                                         CustomDuplication {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   public CorpusImpl() {
     supportList = Collections.synchronizedList(new VerboseList());
     Gate.getCreoleRegister().addCreoleListener(this);

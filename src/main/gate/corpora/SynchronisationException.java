@@ -21,6 +21,8 @@ import gate.util.GateRuntimeException;
 
 public class SynchronisationException extends GateRuntimeException {
 
+  private static final long serialVersionUID = -2741385209392213036L;
+
   /** Default construction */
   public SynchronisationException() { super(); }
 

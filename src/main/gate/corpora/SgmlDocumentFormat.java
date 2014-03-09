@@ -131,13 +131,6 @@ public class SgmlDocumentFormat extends TextualDocumentFormat
 
   }// unpackMarkup
 
-  /** This method converts the document's content from SGML 2 XML.*/
-  private String sgml2Xml(Document doc) {
-    String xmlUri = doc.getSourceUrl().toString ();
-
-    return xmlUri;
-  }// sgml2Xml()
-
   /** Initialise this resource, and return it. */
   @Override
   public Resource init() throws ResourceInstantiationException{

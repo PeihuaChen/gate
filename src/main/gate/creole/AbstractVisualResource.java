@@ -29,6 +29,8 @@ import gate.util.Strings;
 public abstract class AbstractVisualResource extends JPanel
                                              implements VisualResource{
 
+  private static final long serialVersionUID = -3561399635284613196L;
+
   /**
    * Package access constructor to stop normal initialisation.
    * This kind of resources should only be created by the Factory class
