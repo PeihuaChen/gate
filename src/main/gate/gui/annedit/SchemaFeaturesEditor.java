@@ -47,6 +47,7 @@ import javax.swing.event.DocumentListener;
 /**
  * A GUI component for editing a feature map based on a feature schema object.
  */
+@SuppressWarnings("serial")
 public class SchemaFeaturesEditor extends JPanel{
 
   protected static enum FeatureType{
@@ -454,7 +455,7 @@ public class SchemaFeaturesEditor extends JPanel{
         if(defaultValue != null && defaultValue.length() == 0) 
           defaultValue = null;
         String[] valuesArray = null;
-        Set values = aFeatureSchema.getPermittedValues();
+        Set <Object>values = aFeatureSchema.getPermittedValues();
         if(values != null && values.size() > 0){
           valuesArray = new String[values.size()];
           int i = 0;

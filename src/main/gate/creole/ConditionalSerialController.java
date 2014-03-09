@@ -44,7 +44,7 @@ public class ConditionalSerialController extends SerialController
   }
 
   @Override
-  public Collection<RunningStrategy> getRunningStrategies(){
+  public List<RunningStrategy> getRunningStrategies(){
     return Collections.unmodifiableList(strategiesList);
   }
 

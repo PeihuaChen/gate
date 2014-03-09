@@ -112,6 +112,7 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
+@SuppressWarnings("serial")
 @CreoleResource(name = "Serial Application Editor", guiType = GuiType.LARGE,
     resourceDisplayed = "gate.creole.SerialController", mainViewer = true)
 public class SerialControllerEditor extends AbstractVisualResource
@@ -612,8 +613,8 @@ public class SerialControllerEditor extends AbstractVisualResource
       protected void processMouseEvent(MouseEvent e) {
         int row = loadedPRsTable.rowAtPoint(e.getPoint());
         if(row == -1) { return; }
-        ProcessingResource pr = (ProcessingResource) loadedPRsTable
-          .getValueAt(row, loadedPRsTable.convertColumnIndexToView(0));
+        //ProcessingResource pr = (ProcessingResource) loadedPRsTable
+        //  .getValueAt(row, loadedPRsTable.convertColumnIndexToView(0));
 
         if(e.isPopupTrigger()) {
           // context menu
@@ -714,8 +715,8 @@ public class SerialControllerEditor extends AbstractVisualResource
             if (!(root instanceof MainFrame)) { return; }
             final MainFrame mainFrame = (MainFrame) root;
             if(controller != null) {
-              ProcessingResource res = (ProcessingResource)
-                  ((List)controller.getPRs()).get(row);
+              ProcessingResource res = 
+                  controller.getPRs().get(row);
               if(res != null) mainFrame.select(res);
             }
           }
@@ -974,7 +975,7 @@ public class SerialControllerEditor extends AbstractVisualResource
   }//protected void initListeners()
   
   @Override
-  public List getActions(){
+  public List<Action> getActions(){
     return actionList;
   }
 
@@ -1025,7 +1026,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     //find the new PR 
     ProcessingResource pr = null;
     if(index >= 0 && index < controller.getPRs().size()){
-      pr = (ProcessingResource)((java.util.List)controller.getPRs()).get(index);
+      pr = controller.getPRs().get(index);
     }
     if(pr != null){
       //update the GUI for the new PR
@@ -1067,9 +1068,8 @@ public class SerialControllerEditor extends AbstractVisualResource
         //strategy object, which can lead to a race condition. 
         //So we used a cached value instead.
         selectedPRRunStrategy = null;
-        RunningStrategy newStrategy = (RunningStrategy)
-                                   ((List)((ConditionalController)controller).
-                                            getRunningStrategies()).get(index);
+        RunningStrategy newStrategy = ((ConditionalController)controller).
+                                            getRunningStrategies().get(index);
         if(newStrategy instanceof AnalyserRunningStrategy){
           featureNameTextField.setEnabled(true);
           featureValueTextField.setEnabled(true);
@@ -1191,7 +1191,8 @@ public class SerialControllerEditor extends AbstractVisualResource
   }
   public synchronized void removeStatusListener(StatusListener l) {
     if (statusListeners != null && statusListeners.contains(l)) {
-      Vector<StatusListener> v = (Vector) statusListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<StatusListener> v = (Vector<StatusListener>) statusListeners.clone();
       v.removeElement(l);
       statusListeners = v;
     }
@@ -1216,8 +1217,9 @@ public class SerialControllerEditor extends AbstractVisualResource
   }
 
   public synchronized void addStatusListener(StatusListener l) {
+    @SuppressWarnings("unchecked")
     Vector<StatusListener> v = statusListeners == null ?
-      new Vector(2) : (Vector) statusListeners.clone();
+      new Vector<StatusListener>(2) : (Vector<StatusListener>) statusListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       statusListeners = v;
@@ -1252,9 +1254,9 @@ public class SerialControllerEditor extends AbstractVisualResource
       if(controller != null) {
         loadedPRs.removeAll(controller.getPRs());
       }
-      Iterator prsIter = loadedPRs.iterator();
+      Iterator<ProcessingResource> prsIter = loadedPRs.iterator();
       while(prsIter.hasNext()){
-        ProcessingResource aPR = (ProcessingResource)prsIter.next();
+        ProcessingResource aPR = prsIter.next();
         if(Gate.getHiddenAttribute(aPR.getFeatures())
        || ( aPR instanceof Controller
          && firstIncludesOrEqualsSecond((Controller)aPR, controller)) ) {
@@ -1272,9 +1274,9 @@ public class SerialControllerEditor extends AbstractVisualResource
       if(controller != null) {
         loadedPRs.removeAll(controller.getPRs());
       }
-      Iterator prsIter = loadedPRs.iterator();
+      Iterator<ProcessingResource> prsIter = loadedPRs.iterator();
       while(prsIter.hasNext()){
-        ProcessingResource aPR = (ProcessingResource)prsIter.next();
+        ProcessingResource aPR = prsIter.next();
         if(Gate.getHiddenAttribute(aPR.getFeatures())
        || ( aPR instanceof Controller
          && firstIncludesOrEqualsSecond((Controller)aPR, controller)) ) {
@@ -1311,7 +1313,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     }
 
     @Override
-    public Class getColumnClass(int columnIndex){
+    public Class<?> getColumnClass(int columnIndex){
       switch(columnIndex){
         case 0 : return ProcessingResource.class;
         case 1 : return String.class;
@@ -1338,7 +1340,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     @Override
     public int getSize(){
       //get all corpora regardless of their actual type
-      java.util.List loadedCorpora = null;
+      List<Resource> loadedCorpora = null;
       try{
         loadedCorpora = Gate.getCreoleRegister().
                                getAllInstances("gate.Corpus");
@@ -1354,7 +1356,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       if(index == 0) return "<none>";
       else{
         //get all corpora regardless of their actual type
-        java.util.List loadedCorpora = null;
+        List<Resource> loadedCorpora = null;
         try{
           loadedCorpora = Gate.getCreoleRegister().
                                  getAllInstances("gate.Corpus");
@@ -1439,14 +1441,13 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     @Override
     public Object getValueAt(int row, int column){
-      ProcessingResource pr = (ProcessingResource)
-                              ((List)controller.getPRs()).get(row);
+      ProcessingResource pr = controller.getPRs().get(row);
       switch(column){
         case 0 : {
           if(conditionalMode){
-            RunningStrategy strategy = (RunningStrategy)
-                                 ((List)((ConditionalController)controller).
-                                          getRunningStrategies()).get(row);
+            RunningStrategy strategy = 
+                                 ((ConditionalController)controller).
+                                          getRunningStrategies().get(row);
             switch(strategy.getRunMode()){
               case RunningStrategy.RUN_ALWAYS : return green;
               case RunningStrategy.RUN_NEVER : return red;
@@ -1483,7 +1484,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     }
 
     @Override
-    public Class getColumnClass(int columnIndex){
+    public Class<?> getColumnClass(int columnIndex){
       switch(columnIndex){
         case 0 : return Icon.class;
         case 1 : return ProcessingResource.class;
@@ -1647,7 +1648,7 @@ public class SerialControllerEditor extends AbstractVisualResource
               ((CorpusController)controller).setCorpus(corpus);
           }
           //check the runtime parameters
-          List badPRs;
+          List<ProcessingResource> badPRs;
           try{
             badPRs = controller.getOffendingPocessingResources();
           }catch(ResourceInstantiationException rie){
@@ -1927,14 +1928,16 @@ public class SerialControllerEditor extends AbstractVisualResource
   }
   public synchronized void removeProgressListener(ProgressListener l) {
     if (progressListeners != null && progressListeners.contains(l)) {
-      Vector<ProgressListener> v = (Vector) progressListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<ProgressListener> v = (Vector<ProgressListener>) progressListeners.clone();
       v.removeElement(l);
       progressListeners = v;
     }
   }
   public synchronized void addProgressListener(ProgressListener l) {
+    @SuppressWarnings("unchecked")
     Vector<ProgressListener> v = progressListeners == null ?
-      new Vector(2) : (Vector) progressListeners.clone();
+      new Vector<ProgressListener>(2) : (Vector<ProgressListener>) progressListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       progressListeners = v;

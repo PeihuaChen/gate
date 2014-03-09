@@ -14,25 +14,54 @@
  */
 package gate.gui;
 
-import java.awt.*;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Resource;
+import gate.creole.AbstractResource;
+import gate.creole.AnnotationSchema;
+import gate.creole.FeatureSchema;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.GuiType;
+import gate.event.FeatureMapListener;
+import gate.swing.XJTable;
+import gate.util.FeatureBearer;
+import gate.util.GateRuntimeException;
+import gate.util.ObjectComparator;
+import gate.util.Strings;
+
+import java.awt.AWTKeyStroke;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.KeyboardFocusManager;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import javax.swing.*;
+import java.util.Set;
+
+import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
-import gate.*;
-import gate.creole.*;
-import gate.creole.metadata.*;
-import gate.event.FeatureMapListener;
-import gate.swing.XJTable;
-import gate.util.*;
 
 /**
  */
+@SuppressWarnings("serial")
 @CreoleResource(name = "Resource Features", guiType = GuiType.SMALL,
     resourceDisplayed = "gate.util.FeatureBearer")
 public class FeaturesSchemaEditor extends XJTable
@@ -526,30 +555,30 @@ public class FeaturesSchemaEditor extends XJTable
       comboModel.removeAllElements();
       switch(column){
         case NAME_COL:
-          List fNames = new ArrayList();
+          List<String> fNames = new ArrayList<String>();
           if(schema != null && schema.getFeatureSchemaSet() != null){
-            Iterator fSchemaIter = schema.getFeatureSchemaSet().iterator();
+            Iterator<FeatureSchema> fSchemaIter = schema.getFeatureSchemaSet().iterator();
             while(fSchemaIter.hasNext())
-              fNames.add(((FeatureSchema)fSchemaIter.next()).getFeatureName());
+              fNames.add(fSchemaIter.next().getFeatureName());
           }
           if(!fNames.contains(feature.name))fNames.add(feature.name);
           Collections.sort(fNames);
-          for(Iterator nameIter = fNames.iterator(); 
+          for(Iterator<String> nameIter = fNames.iterator(); 
               nameIter.hasNext(); 
               comboModel.addElement(nameIter.next()));
           combo.getEditor().getEditorComponent().setBackground(defaultBackground);          
           combo.setSelectedItem(feature.name);
           break;
         case VALUE_COL:
-          List fValues = new ArrayList();
+          List<Object> fValues = new ArrayList<Object>();
           if(feature.isSchemaFeature()){
-            Set permValues = schema.getFeatureSchema(feature.name).
+            Set<Object> permValues = schema.getFeatureSchema(feature.name).
               getPermittedValues();
             if(permValues != null) fValues.addAll(permValues);
           }
           if(!fValues.contains(feature.value)) fValues.add(feature.value);
           Collections.sort(fValues, defaultComparator);
-          for(Iterator valIter = fValues.iterator(); 
+          for(Iterator<Object> valIter = fValues.iterator(); 
               valIter.hasNext(); 
               comboModel.addElement(valIter.next()));
           combo.getEditor().getEditorComponent().setBackground(feature.isCorrect() ?

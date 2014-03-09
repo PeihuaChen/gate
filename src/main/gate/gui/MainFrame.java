@@ -197,6 +197,7 @@ import org.apache.log4j.PatternLayout;
 /**
  * The main Gate GUI frame.
  */
+@SuppressWarnings("serial")
 public class MainFrame extends JFrame implements ProgressListener,
                                      StatusListener, CreoleListener {
 
@@ -386,7 +387,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   protected Handle findHandleForResource(Resource res){
     Handle handle = null;
     // go through all the nodes
-    Enumeration nodesEnum = resourcesTreeRoot.breadthFirstEnumeration();
+    Enumeration<?> nodesEnum = resourcesTreeRoot.breadthFirstEnumeration();
     while(nodesEnum.hasMoreElements() && handle == null) {
       Object node = nodesEnum.nextElement();
       if(node instanceof DefaultMutableTreeNode) {
@@ -1538,7 +1539,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         // find the handle in the resources tree for the main view
         JComponent largeView =
           (JComponent)mainTabbedPane.getSelectedComponent();
-        Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
+        Enumeration<?> nodesEnum = resourcesTreeRoot.preorderEnumeration();
         boolean done = false;
         DefaultMutableTreeNode node = resourcesTreeRoot;
         while(!done && nodesEnum.hasMoreElements()) {
@@ -1601,7 +1602,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           int index = mainTabbedPane.getIndexAt(e.getPoint());
           if(index != -1) {
             JComponent view = (JComponent)mainTabbedPane.getComponentAt(index);
-            Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
+            Enumeration<?> nodesEnum = resourcesTreeRoot.preorderEnumeration();
             boolean done = false;
             DefaultMutableTreeNode node = resourcesTreeRoot;
             while(!done && nodesEnum.hasMoreElements()) {
@@ -1744,11 +1745,11 @@ public class MainFrame extends JFrame implements ProgressListener,
     // depend on Apple classes.
     try {
       // load the Apple classes
-      final Class eawtApplicationClass =
+      final Class<?> eawtApplicationClass =
         Gate.getClassLoader().loadClass("com.apple.eawt.Application");
-      final Class eawtApplicationListenerInterface =
+      final Class<?> eawtApplicationListenerInterface =
         Gate.getClassLoader().loadClass("com.apple.eawt.ApplicationListener");
-      final Class eawtApplicationEventClass =
+      final Class<?> eawtApplicationEventClass =
         Gate.getClassLoader().loadClass("com.apple.eawt.ApplicationEvent");
 
       // method used in the InvocationHandler
@@ -1966,7 +1967,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           parent = languageResourcesRoot;
         }
         if(parent != null) {
-          Enumeration children = parent.children();
+          Enumeration<?> children = parent.children();
           while(children.hasMoreElements()) {
             node = (DefaultMutableTreeNode)children.nextElement();
             if(((NameBearerHandle)node.getUserObject()).getTarget() == res) {
@@ -2062,7 +2063,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     DefaultMutableTreeNode node;
     DefaultMutableTreeNode parent = datastoresRoot;
     if(parent != null) {
-      Enumeration children = parent.children();
+      Enumeration<?> children = parent.children();
       while(children.hasMoreElements()) {
         node = (DefaultMutableTreeNode)children.nextElement();
         if(((NameBearerHandle)node.getUserObject()).getTarget() == ds) {
@@ -2142,7 +2143,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             JOptionPane.DEFAULT_OPTION, null, options, null);
 
         // build the dialog
-        Component parentComp = (Component)((ArrayList)getGuiRoots()).get(0);
+        Component parentComp = ((List<Component>)getGuiRoots()).get(0);
         JDialog dialog;
         Window parentWindow;
         if(parentComp instanceof Window)
@@ -2365,7 +2366,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     @Override
     public void actionPerformed(ActionEvent e) {
       // find the handle in the resource tree for the displayed view
-      Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
+      Enumeration<?> nodesEnum = resourcesTreeRoot.preorderEnumeration();
       DefaultMutableTreeNode node;
       Handle handle = null;
       while(nodesEnum.hasMoreElements()) {
@@ -2822,6 +2823,7 @@ public class MainFrame extends JFrame implements ProgressListener,
               
               controller.getFeatures().put("gate.gui.icon", icon);
 
+              @SuppressWarnings("unchecked")
               Enumeration<TreeNode> items =
                   applicationsRoot.depthFirstEnumeration();
               while(items.hasMoreElements()) {
@@ -2982,7 +2984,8 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void actionPerformed(ActionEvent ae) {
           ListEditorDialog listEditor =
             new ListEditorDialog(instance, inputASList, "java.lang.String");
-          List result = listEditor.showDialog();
+          @SuppressWarnings("unchecked")
+          List<String> result = listEditor.showDialog();
           if(result != null) {
             inputASList.clear();
             inputASList.addAll(result);
@@ -3024,7 +3027,8 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void actionPerformed(ActionEvent ae) {
           ListEditorDialog listEditor =
             new ListEditorDialog(instance, fteList, "java.lang.String");
-          List result = listEditor.showDialog();
+          @SuppressWarnings("unchecked")
+          List<String> result = listEditor.showDialog();
           if(result != null) {
             fteList.clear();
             fteList.addAll(result);
@@ -3324,9 +3328,9 @@ public class MainFrame extends JFrame implements ProgressListener,
                 dsLocation.getText());
     
             // we need to set Indexer
-            Class[] consParam = new Class[1];
+            Class<?>[] consParam = new Class[1];
             consParam[0] = URL.class;
-            Constructor constructor =
+            Constructor<?> constructor =
               Class.forName("gate.creole.annic.lucene.LuceneIndexer", true,
                 Gate.getClassLoader()).getConstructor(consParam);
             Object indexer =
@@ -3394,7 +3398,7 @@ public class MainFrame extends JFrame implements ProgressListener,
                 .put(Constants.FEATURES_TO_INCLUDE, new ArrayList<String>());
             }
     
-            Class[] params = new Class[2];
+            Class<?>[] params = new Class[2];
             params[0] =
               Class.forName("gate.creole.annic.Indexer", true, Gate
                 .getClassLoader());
@@ -3403,11 +3407,11 @@ public class MainFrame extends JFrame implements ProgressListener,
             indexerMethod.invoke(ds, indexer, parameters);
     
             // Class[] searchConsParams = new Class[0];
-            Constructor searcherConst =
+            Constructor<?> searcherConst =
               Class.forName("gate.creole.annic.lucene.LuceneSearcher", true,
                 Gate.getClassLoader()).getConstructor();
             Object searcher = searcherConst.newInstance();
-            Class[] searchParams = new Class[1];
+            Class<?>[] searchParams = new Class[1];
             searchParams[0] =
               Class.forName("gate.creole.annic.Searcher", true, Gate
                 .getClassLoader());
@@ -3776,7 +3780,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     public void actionPerformed(ActionEvent e) {
       // for each element in the tree look if it is in the tab panel
       // if yes, remove it from the tab panel
-      Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
+      Enumeration<?> nodesEnum = resourcesTreeRoot.preorderEnumeration();
       DefaultMutableTreeNode node;
       while(nodesEnum.hasMoreElements()) {
         node = (DefaultMutableTreeNode)nodesEnum.nextElement();
@@ -3918,10 +3922,10 @@ public class MainFrame extends JFrame implements ProgressListener,
           if(userConfig.getBoolean(GateConstants.SAVE_SESSION_ON_EXIT)) {
             // save all the open applications
             try {
-              ArrayList<Resource> appList = new ArrayList<Resource>(
+              List<Resource> appList = new ArrayList<Resource>(
                 Gate.getCreoleRegister().getAllInstances("gate.Controller"));
               // remove all hidden instances
-              Iterator appIter = appList.iterator();
+              Iterator<Resource> appIter = appList.iterator();
               while(appIter.hasNext()) {
                 if(Gate.getHiddenAttribute(((Controller)appIter.next())
                   .getFeatures())) { appIter.remove(); }
@@ -3992,12 +3996,10 @@ public class MainFrame extends JFrame implements ProgressListener,
 
             // close all the opened datastores
             if(Gate.getDataStoreRegister() != null) {
-              Set dataStores = new HashSet(Gate.getDataStoreRegister());
-              for(Object aDs : dataStores) {
+              Set<DataStore> dataStores = new HashSet<DataStore>(Gate.getDataStoreRegister());
+              for(DataStore aDs : dataStores) {
                 try {
-                  if(aDs instanceof DataStore) {
-                    ((DataStore)aDs).close();
-                  }
+                  aDs.close();
                 }
                 catch(Throwable e) {
                   log.error(
@@ -4891,7 +4893,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       JComponent largeView = (JComponent)
         mainTabbedPane.getSelectedComponent();
       if (largeView == null) { return; }
-      Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
+      Enumeration<?> nodesEnum = resourcesTreeRoot.preorderEnumeration();
       boolean done = false;
       DefaultMutableTreeNode node = resourcesTreeRoot;
       while(!done && nodesEnum.hasMoreElements()) {

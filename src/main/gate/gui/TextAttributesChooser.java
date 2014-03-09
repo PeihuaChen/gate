@@ -30,6 +30,7 @@ import gate.util.Out;
  * includes font family, size, foreground and background colours, italic,
  * bold, etc.
  */
+@SuppressWarnings("serial")
 public class TextAttributesChooser extends JDialog {
 
   JComboBox fontFamilyCombo;

@@ -13,28 +13,43 @@
  */
 package gate.gui;
 
-import java.awt.*;
+import gate.Corpus;
+import gate.DataStore;
+import gate.Document;
+import gate.Resource;
+import gate.creole.AbstractVisualResource;
+import gate.creole.ir.QueryResult;
+import gate.creole.ir.QueryResultList;
+import gate.creole.ir.SearchPR;
+import gate.event.ProgressListener;
+import gate.swing.XJTable;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
-
-import gate.*;
-import gate.creole.AbstractVisualResource;
-import gate.creole.ir.*;
-import gate.event.ProgressListener;
-import gate.swing.XJTable;
 
 
 /**
  * Shows the results of a IR query. This VR is associated to
  * {@link gate.creole.ir.SearchPR}.
  */
+@SuppressWarnings("serial")
 public class SearchPRViewer extends AbstractVisualResource
                             implements ProgressListener{
 

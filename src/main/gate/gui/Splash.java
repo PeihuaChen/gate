@@ -29,6 +29,7 @@ import javax.swing.border.EtchedBorder;
  * as content or an image.
  * When clicked it is hidden.
  */
+@SuppressWarnings("serial")
 public class Splash extends JWindow {
 
   /**

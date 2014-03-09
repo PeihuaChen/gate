@@ -100,10 +100,10 @@ import javax.swing.text.JTextComponent;
  * completed until the annotation complies with the schema for that annotation
  * type.
  */
+@SuppressWarnings("serial")
 public class SchemaAnnotationEditor extends AbstractVisualResource implements
                                                                   OwnedAnnotationEditor {
-  private static final long serialVersionUID = 1L;
-
+  
   @Override
   public void editAnnotation(Annotation ann, AnnotationSet set) {
     // the external components we listen to (the text and the list view) can

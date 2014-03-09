@@ -40,6 +40,7 @@ import javax.swing.text.JTextComponent;
  * Used as part of the document viewer to display all the annotation currently
  * highlighted.
  */
+@SuppressWarnings("serial")
 public class AnnotationListView extends AbstractDocumentView
   implements AnnotationListener, AnnotationList, AnnotationEditorOwner{
 
@@ -124,9 +125,9 @@ public class AnnotationListView extends AbstractDocumentView
 
      //get a pointer to the text view used to display
      //the selected annotations
-     Iterator centralViewsIter = owner.getCentralViews().iterator();
+     Iterator<DocumentView> centralViewsIter = owner.getCentralViews().iterator();
      while(textView == null && centralViewsIter.hasNext()){
-       DocumentView aView = (DocumentView)centralViewsIter.next();
+       DocumentView aView = centralViewsIter.next();
        if(aView instanceof TextualDocumentView)
          textView = (TextualDocumentView)aView;
      }
@@ -712,9 +713,9 @@ public class AnnotationListView extends AbstractDocumentView
   public JTextComponent getTextComponent() {
      //get a pointer to the text view used to display
      //the selected annotations
-     Iterator centralViewsIter = owner.getCentralViews().iterator();
+     Iterator<DocumentView> centralViewsIter = owner.getCentralViews().iterator();
      while(textView == null && centralViewsIter.hasNext()){
-       DocumentView aView = (DocumentView)centralViewsIter.next();
+       DocumentView aView = centralViewsIter.next();
        if(aView instanceof TextualDocumentView)
          textView = (TextualDocumentView)aView;
      }
@@ -761,7 +762,7 @@ public class AnnotationListView extends AbstractDocumentView
        }
 
        @Override
-      public Class getColumnClass(int column){
+      public Class<?> getColumnClass(int column){
          switch(column){
            case TYPE_COL: return String.class;
            case SET_COL: return String.class;
@@ -778,7 +779,8 @@ public class AnnotationListView extends AbstractDocumentView
          return false;
        }
 
-       @Override
+       @SuppressWarnings("unchecked")
+      @Override
       public Object getValueAt(int row, int column){
          if(row >= annDataList.size()) return null;
          AnnotationData aData = annDataList.get(row);
@@ -791,10 +793,11 @@ public class AnnotationListView extends AbstractDocumentView
            case FEATURES_COL:
              //sort the features by name
              FeatureMap features = aData.getAnnotation().getFeatures();
-             List keyList = new ArrayList(features.keySet());
+             @SuppressWarnings("rawtypes")
+            List keyList = new ArrayList(features.keySet());
              Collections.sort(keyList);
              StringBuffer strBuf = new StringBuffer("{");
-             Iterator keyIter = keyList.iterator();
+             Iterator<Object> keyIter = keyList.iterator();
              boolean first = true;
              while(keyIter.hasNext()){
                Object key = keyIter.next();

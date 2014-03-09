@@ -17,16 +17,55 @@
 package gate.gui;
 
 //java imports
-import java.awt.*;
-import java.awt.event.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.CreoleRegister;
+import gate.Document;
+import gate.Gate;
+import gate.LanguageResource;
+import gate.Node;
+import gate.creole.ANNIEConstants;
+import gate.creole.AbstractVisualResource;
+import gate.creole.AnnotationSchema;
+import gate.creole.AnnotationVisualResource;
+import gate.creole.FeatureSchema;
+import gate.util.Coordinates;
+import gate.util.Err;
+import gate.util.GateException;
+import gate.util.InvalidOffsetException;
+import gate.util.Out;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
-import javax.swing.*;
-
-import gate.*;
-import gate.creole.*;
-import gate.util.*;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.Scrollable;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 
 /**
@@ -118,6 +157,7 @@ import gate.util.*;
   * the API, e-mail gate@dcs.shef.ac.uk.
   */
 
+@SuppressWarnings("serial")
 public class SyntaxTreeViewer extends AbstractVisualResource
     implements  Scrollable, ActionListener, MouseListener,
                 AnnotationVisualResource {
@@ -152,7 +192,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   Color selectedNodeColor = Color.red.darker();
 
   // the HashSet with the coordinates of the lines to draw
-  HashSet lines = new HashSet();
+  Set<Coordinates> lines = new HashSet<Coordinates>();
 
   // The utterance to be annotated as a sentence. It's not used if the tree
   // is passed
@@ -180,16 +220,16 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   protected String textAnnotationType = ANNIEConstants.SENTENCE_ANNOTATION_TYPE;
 
   // all leaf nodes
-  protected HashMap leaves = new HashMap();
+  protected HashMap<Integer, STreeNode> leaves = new HashMap<Integer, STreeNode>();
 
   // all non-terminal nodes
-  protected HashMap nonTerminals = new HashMap();
+  protected HashMap<Integer, STreeNode> nonTerminals = new HashMap<Integer, STreeNode>();
 
   // all buttons corresponding to any node
-  protected HashMap buttons = new HashMap();
+  protected HashMap<Integer, JButton> buttons = new HashMap<Integer, JButton>();
 
   // all selected buttons
-  protected Vector selection = new Vector();
+  protected Vector<JButton> selection = new Vector<JButton>();
 
   // all annotations to be displayed
   protected AnnotationSet treeAnnotations;
@@ -496,8 +536,8 @@ public class SyntaxTreeViewer extends AbstractVisualResource
 
   private void drawLines(Graphics g) {
 
-    for (Iterator i = lines.iterator(); i.hasNext(); ) {
-      Coordinates coords = (Coordinates) i.next();
+    for (Iterator<Coordinates> i = lines.iterator(); i.hasNext(); ) {
+      Coordinates coords = i.next();
 
       g.drawLine( coords.getX1(),
                   coords.getY1(),
@@ -578,16 +618,17 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     // sort them from left to right first
     // Should work as
     // annotation implements Comparable
-    java.util.List nodeAnnots = new ArrayList(treeAnnotations);
+    java.util.List<Annotation> nodeAnnots = new ArrayList<Annotation>(treeAnnotations);
     Collections.sort(nodeAnnots, new gate.util.OffsetComparator());
 
     //find all annotations with no children
-    Iterator i = nodeAnnots.iterator();
+    Iterator<Annotation> i = nodeAnnots.iterator();
     while (i.hasNext()) {
-      Annotation annot = (Annotation) i.next();
+      Annotation annot = i.next();
 
-      java.util.List children =
-        (java.util.List) annot.getFeatures().get(NODE_CONSISTS_FEATURE_NAME);
+      @SuppressWarnings("unchecked")
+      java.util.List<Integer> children =
+        (java.util.List<Integer>) annot.getFeatures().get(NODE_CONSISTS_FEATURE_NAME);
       //check if it's a leaf
       if (children == null ||
           children.isEmpty())
@@ -598,7 +639,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
           throw new NullPointerException("Can't find leaf node for annotation: " + annot);
         }
 
-        JButton button = (JButton) buttons.get(new Integer(leaf.getID()));
+        JButton button = buttons.get(new Integer(leaf.getID()));
         selection.clear();
         selection.add(button);
 
@@ -619,9 +660,9 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     } //loop through children
 
     //loop through the rest of the nodes
-    Iterator i1 = nodeAnnots.iterator();
+    Iterator<Annotation> i1 = nodeAnnots.iterator();
     while (i1.hasNext()) {
-      Annotation annotNode = (Annotation) i1.next();
+      Annotation annotNode = i1.next();
       if (processed.containsKey(annotNode.getId()))
         continue;
       processChildrenAnnots(annotNode, processed);
@@ -634,14 +675,16 @@ public class SyntaxTreeViewer extends AbstractVisualResource
         (int) getVisibleRect().getWidth(), (int) getVisibleRect().getHeight()));
   } //annotations2Trees
 
+  @SuppressWarnings("unchecked")
   private JButton processChildrenAnnots(Annotation annot, Map<Integer, JButton> processed) {
     selection.clear();
-    Vector childrenButtons = new Vector();
-    java.util.List children =
-      (java.util.List) annot.getFeatures().get(NODE_CONSISTS_FEATURE_NAME);
+    Vector<JButton> childrenButtons = new Vector<JButton>();
 
-    for (Iterator i = children.iterator(); i.hasNext(); ) {
-      Integer childId = (Integer) i.next();
+    java.util.List<Integer> children =
+      (java.util.List<Integer>) annot.getFeatures().get(NODE_CONSISTS_FEATURE_NAME);
+
+    for (Iterator<Integer> i = children.iterator(); i.hasNext(); ) {
+      Integer childId = i.next();
       Annotation child = treeAnnotations.get(childId);
       JButton childButton;
 
@@ -653,7 +696,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
       childrenButtons.add(childButton);
     }
 
-    selection = (Vector) childrenButtons.clone();
+    selection = (Vector<JButton>) childrenButtons.clone();
     STreeNode parent = createParentNode(
                           (String) annot.getFeatures().get(NODE_CAT_FEATURE_NAME),
                           annot);
@@ -667,8 +710,8 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   }// private JButton processChildrenAnnots
 
   private STreeNode findLeaf(Node start, Node end) {
-    for (Iterator i = leaves.values().iterator(); i.hasNext(); ) {
-      STreeNode node = (STreeNode) i.next();
+    for (Iterator<STreeNode> i = leaves.values().iterator(); i.hasNext(); ) {
+      STreeNode node = i.next();
       if (node.getStart() == start.getOffset().intValue() &&
           node.getEnd() == end.getOffset().intValue()
          )
@@ -717,7 +760,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     // the starting Y position
     int buttonY = this.getHeight() - 20 - insets.bottom;
 
-    java.util.List tokens = new ArrayList(tokensAS);
+    java.util.List<Annotation> tokens = new ArrayList<Annotation>(tokensAS);
     //if no tokens to match, do nothing
     if (tokens.isEmpty())
        return;
@@ -725,7 +768,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
 
     //loop through the tokens
     for (int i= 0; i< tokens.size(); i++) {
-      Annotation tokenAnnot = (Annotation) tokens.get(i);
+      Annotation tokenAnnot = tokens.get(i);
       Long tokenBegin = tokenAnnot.getStartNode().getOffset();
       Long tokenEnd = tokenAnnot.getEndNode().getOffset();
 
@@ -888,8 +931,8 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     int left = this.getWidth(), right =0 , top = this.getHeight();
 
     // determine the left, right, top
-    for (Iterator i = selection.iterator(); i.hasNext(); ) {
-      JButton childButton = (JButton) i.next();
+    for (Iterator<JButton> i = selection.iterator(); i.hasNext(); ) {
+      JButton childButton = i.next();
 
       if (left > childButton.getX())
         left = childButton.getX();
@@ -930,16 +973,16 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   }// private JButton createCentralButton(STreeNode newNode)
 
   private void shiftButtonsDown(int offset) {
-    for (Iterator i = buttons.values().iterator(); i.hasNext(); ) {
-      JButton button = (JButton) i.next();
+    for (Iterator<JButton> i = buttons.values().iterator(); i.hasNext(); ) {
+      JButton button = i.next();
       button.setBounds(		button.getX(),
                           button.getY() + offset,
                           button.getWidth(),
                           button.getHeight());
     } // for loop through buttons
 
-    for (Iterator k = lines.iterator(); k.hasNext(); ) {
-      Coordinates coords = (Coordinates) k.next();
+    for (Iterator<Coordinates> k = lines.iterator(); k.hasNext(); ) {
+      Coordinates coords = k.next();
       coords.setY1(coords.getY1() + offset);
       coords.setY2(coords.getY2() + offset);
     }
@@ -959,10 +1002,10 @@ public class SyntaxTreeViewer extends AbstractVisualResource
         Integer id = new Integer(e.getActionCommand());
 
 //        clearSelection();
-        JButton button = (JButton) buttons.get(id);
+        JButton button = buttons.get(id);
         selection.add(button);
 
-        STreeNode leaf = (STreeNode) leaves.get(id);
+        STreeNode leaf = leaves.get(id);
 
         // create parent with the same span as leaf
         // using createParentNode here is not a good idea coz it works only
@@ -998,7 +1041,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
         Integer id = new Integer(e.getActionCommand());
 
         //locate button from buttons hashMap and add to selection
-        JButton button = (JButton) buttons.get(id);
+        JButton button = buttons.get(id);
         selection.add(button);
 
         //create the new parent
@@ -1106,7 +1149,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     } else { //we have a non-terminal node
 
       //check if it has been annotated already
-      if ( ((STreeNode) nonTerminals.get(id)).getParent() != null) {
+      if ( nonTerminals.get(id).getParent() != null) {
         clearSelection();
         JOptionPane.showMessageDialog(this, "Node already annotated. To delete"+
                           " the existing annotation, select it and press <DEL>.",
@@ -1127,12 +1170,12 @@ public class SyntaxTreeViewer extends AbstractVisualResource
 
   private void addLines(STreeNode newNode) {
 
-    JButton newButton = (JButton) buttons.get(new Integer(newNode.getID()));
+    JButton newButton = buttons.get(new Integer(newNode.getID()));
     int nbX = newButton.getX() + newButton.getWidth()/2;
     int nbY = newButton.getY() + newButton.getHeight();
 
-    for (Iterator i = selection.iterator(); i.hasNext(); ) {
-      JButton selButton = (JButton) i.next();
+    for (Iterator<JButton> i = selection.iterator(); i.hasNext(); ) {
+      JButton selButton = i.next();
 
       //I create it a rect but it will in fact be used as x1, y1, x2, y2 for the
       //draw line. see drawLines.
@@ -1148,8 +1191,8 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   } // addLines
 
   private void clearSelection() {
-    for (Enumeration enumeration = selection.elements(); enumeration.hasMoreElements(); ) {
-      JButton selButton = (JButton) enumeration.nextElement();
+    for (Enumeration<JButton> enumeration = selection.elements(); enumeration.hasMoreElements(); ) {
+      JButton selButton = enumeration.nextElement();
       selButton.setBackground(buttonBackground);
     }
 
@@ -1163,11 +1206,11 @@ public class SyntaxTreeViewer extends AbstractVisualResource
 
     //fetch the valid categories from the stereotype
     CreoleRegister creoleReg = Gate.getCreoleRegister();
-    java.util.List currentAnnotationSchemaList =
+    java.util.List<LanguageResource> currentAnnotationSchemaList =
                       creoleReg.getLrInstances("gate.creole.AnnotationSchema");
     if (currentAnnotationSchemaList.isEmpty()) return;
 
-    Iterator iter = currentAnnotationSchemaList.iterator();
+    Iterator<LanguageResource> iter = currentAnnotationSchemaList.iterator();
     while (iter.hasNext()){
       AnnotationSchema annotSchema = (AnnotationSchema) iter.next();
       //we have found the right schema
@@ -1175,7 +1218,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
         found = true;
         FeatureSchema categories = annotSchema.getFeatureSchema(NODE_CAT_FEATURE_NAME);
         //iterate through all categories
-        for (Iterator i =
+        for (Iterator<Object> i =
                 categories.getPermittedValues().iterator(); i.hasNext(); ) {
 
           JMenuItem menuItem = new JMenuItem( (String) i.next() );
@@ -1212,11 +1255,11 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     STreeNode  parentNode = new STreeNode();
 
     long begin =  2147483647, end = 0, level= -1;
-    for (Iterator i = selection.iterator(); i.hasNext(); ) {
-      JButton button = (JButton) i.next();
+    for (Iterator<JButton> i = selection.iterator(); i.hasNext(); ) {
+      JButton button = i.next();
       Integer id = new Integer(button.getActionCommand());
 
-      STreeNode child = (STreeNode) nonTerminals.get(id);
+      STreeNode child = nonTerminals.get(id);
 
       if (begin > child.getStart())
         begin = child.getStart();
@@ -1249,11 +1292,11 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     STreeNode  parentNode = new STreeNode(annot);
 
     long level = -1;
-    for (Iterator i = selection.iterator(); i.hasNext(); ) {
-      JButton button = (JButton) i.next();
+    for (Iterator<JButton> i = selection.iterator(); i.hasNext(); ) {
+      JButton button = i.next();
       Integer id = new Integer(button.getActionCommand());
 
-      STreeNode child = (STreeNode) nonTerminals.get(id);
+      STreeNode child = nonTerminals.get(id);
 
       if (level < child.getLevel())
         level = child.getLevel();
@@ -1283,7 +1326,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   void removeNode(JButton button) {
 
     Integer id = new Integer(button.getActionCommand());
-    STreeNode node = (STreeNode) nonTerminals.get(id);
+    STreeNode node = nonTerminals.get(id);
     nonTerminals.remove(node);
     node.removeAnnotation(document);
 
@@ -1306,7 +1349,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
 
   //set parent node to null for all children of the given node
   private void resetChildren(STreeNode node) {
-    for (Enumeration e = node.children(); e.hasMoreElements(); )
+    for (Enumeration<?> e = node.children(); e.hasMoreElements(); )
       ((STreeNode) e.nextElement()).setParent(null);
 
     node.disconnectChildren();
@@ -1324,7 +1367,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
 
       nonTerminals.remove(id);
 
-      JButton button = (JButton) buttons.get(id);
+      JButton button = buttons.get(id);
       this.remove(button);
       buttons.remove(id);
 
@@ -1335,8 +1378,8 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   private void recalculateLines() {
     lines.clear();
     //go through all non-terminals and recalculate their lines to their children
-    for (Iterator i = nonTerminals.values().iterator(); i.hasNext(); )
-      recalculateLines((STreeNode) i.next());
+    for (Iterator<STreeNode> i = nonTerminals.values().iterator(); i.hasNext(); )
+      recalculateLines(i.next());
 
   }
 
@@ -1345,15 +1388,15 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     */
   private void recalculateLines(STreeNode node) {
     Integer id = new Integer(node.getID());
-    JButton button = (JButton) buttons.get(id);
+    JButton button = buttons.get(id);
 
     int bX = button.getX() + button.getWidth()/2;
     int bY = button.getY() + button.getHeight();
 
-    for (Enumeration e = node.children(); e.hasMoreElements(); ) {
+    for (Enumeration<?> e = node.children(); e.hasMoreElements(); ) {
       STreeNode subNode = (STreeNode) e.nextElement();
       Integer sid = new Integer(subNode.getID());
-      JButton subButton = (JButton) buttons.get(sid);
+      JButton subButton = buttons.get(sid);
 
       Coordinates coords = new Coordinates(
                                 bX,

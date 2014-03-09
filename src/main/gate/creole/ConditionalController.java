@@ -17,6 +17,7 @@ package gate.creole;
 import gate.Controller;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * A Conditional controller is a controller that keeps a running strategy for
@@ -32,7 +33,7 @@ public interface ConditionalController extends Controller{
    * sync with the iterator for the getPRs() method of {@link Controller}.
    * @return a Collection object.
    */
-  public Collection<RunningStrategy> getRunningStrategies();
+  public List<RunningStrategy> getRunningStrategies();
 
   /**
    * Populates this controller with the appropiate running strategies from a

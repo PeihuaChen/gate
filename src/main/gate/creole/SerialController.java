@@ -64,7 +64,7 @@ public class SerialController extends AbstractController implements
    * controller as an unmodifiable list.
    */
   @Override
-  public Collection<ProcessingResource> getPRs() {
+  public List<ProcessingResource> getPRs() {
     return Collections.unmodifiableList(prList);
   }
 

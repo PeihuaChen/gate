@@ -158,6 +158,7 @@ import javax.swing.text.BadLocationException;
  * very big values, export of results in a file, 16 types of statistics,
  * store display settings in gate config.
  */
+@SuppressWarnings("serial")
 @CreoleResource(name = "Lucene Datastore Searcher", guiType = GuiType.LARGE, resourceDisplayed = "gate.creole.annic.SearchableDataStore", comment = "GUI allowing to write a query with a JAPE derived syntax for querying\n"
         + " a Lucene Datastore and display the results with a stacked view of the\n"
         + " annotations and their values.", helpURL = "http://gate.ac.uk/userguide/chap:annic")
@@ -4477,7 +4478,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
       try {
         // get the corpus names from the datastore
-        java.util.List corpusPIds =
+        java.util.List<String> corpusPIds =
                 ((LuceneDataStoreImpl)target).getLrIds(SerialCorpusImpl.class
                         .getName());
         if(corpusIds != null) {

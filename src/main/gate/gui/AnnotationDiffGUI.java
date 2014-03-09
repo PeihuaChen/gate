@@ -42,6 +42,7 @@ import gate.util.*;
  * Annotations offsets and features can be edited by modifying cells.
  * Selected annotations can be copied to another annotation set.
  */
+@SuppressWarnings("serial")
 public class AnnotationDiffGUI extends JFrame{
 
   public AnnotationDiffGUI(String title){
@@ -312,11 +313,9 @@ public class AnnotationDiffGUI extends JFrame{
     diffTable.setDefaultRenderer(String.class, new DiffTableCellRenderer());
     diffTable.setDefaultRenderer(Boolean.class, new DiffTableCellRenderer());
     diffTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-    diffTable.setComparator(DiffTableModel.COL_MATCH, new Comparator(){
+    diffTable.setComparator(DiffTableModel.COL_MATCH, new Comparator<String>(){
       @Override
-      public int compare(Object o1, Object o2){
-        String label1 = (String)o1;
-        String label2 = (String)o2;
+      public int compare(String label1, String label2){
         int match1 = 0;
         while(!label1.equals(matchLabel[match1])) match1++;
         int match2 = 0;
@@ -332,11 +331,9 @@ public class AnnotationDiffGUI extends JFrame{
     diffTable.hideColumn(DiffTableModel.COL_KEY_COPY);
     diffTable.hideColumn(DiffTableModel.COL_RES_COPY);
 
-    Comparator startEndComparator = new Comparator() {
+    Comparator<String> startEndComparator = new Comparator<String>() {
       @Override
-      public int compare(Object o1, Object o2) {
-        String no1 = (String) o1;
-        String no2 = (String) o2;
+      public int compare(String no1, String no2) {
         if (no1.trim().equals("") && no2.trim().equals("")) {
           return 0;
         }
@@ -758,10 +755,10 @@ public class AnnotationDiffGUI extends JFrame{
           List<String> featureList = new ArrayList<String>(featureSet);
           Collections.sort(featureList);
           featureslistModel.clear();
-          Iterator featIter = featureList.iterator();
+          Iterator<String> featIter = featureList.iterator();
           int index = 0;
           while(featIter.hasNext()){
-            String aFeature = (String)featIter.next();
+            String aFeature = featIter.next();
             featureslistModel.addElement(aFeature);
             if(significantFeatures.contains(aFeature))
               featuresList.addSelectionInterval(index, index);
@@ -1112,7 +1109,7 @@ public class AnnotationDiffGUI extends JFrame{
           differ.setSignificantFeaturesSet(significantFeatures);
         else if(allFeaturesBtn.isSelected())
           differ.setSignificantFeaturesSet(null);
-        else differ.setSignificantFeaturesSet(new HashSet());
+        else differ.setSignificantFeaturesSet(new HashSet<String>());
         pairings.clear();
         pairings.addAll(differ.calculateDiff(keys, responses));
         keyCopyValueRows.clear();
@@ -1696,7 +1693,7 @@ public class AnnotationDiffGUI extends JFrame{
     }
 
     @Override
-    public Class getColumnClass(int columnIndex){
+    public Class<?> getColumnClass(int columnIndex){
       switch (columnIndex){
         case COL_KEY_COPY: return Boolean.class;
         case COL_RES_COPY: return Boolean.class;

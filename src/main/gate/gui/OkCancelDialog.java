@@ -41,6 +41,7 @@ import javax.swing.SwingUtilities;
  * A simple modal dialog that displays a component provided by the user along
  * with two buttons ("OK" and "Cancel").
  */
+@SuppressWarnings("serial")
 public class OkCancelDialog extends JDialog {
 
   protected OkCancelDialog(Frame owner, String title, Component contents){

@@ -82,6 +82,7 @@ import javax.swing.table.TableCellEditor;
  * actually a list of lists of strings representing parameter
  * disjunctions.
  */
+@SuppressWarnings("serial")
 public class ResourceParametersEditor extends XJTable implements CreoleListener {
 
   public ResourceParametersEditor() {
@@ -124,7 +125,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
    * @param parameters a list of lists of {@link Parameter} representing
    *          parameter disjunctions.
    */
-  public void init(Resource resource, List parameters) {
+  public void init(Resource resource, List<List<Parameter>> parameters) {
     init(resource, null, parameters);
   }
 
@@ -298,7 +299,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     }
 
     @Override
-    public Class getColumnClass(int columnIndex) {
+    public Class<?> getColumnClass(int columnIndex) {
       switch(columnIndex) {
         case 0:
           return ParameterDisjunction.class;
@@ -510,7 +511,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
         }
       }
       else {
-        Class typeClass = null;
+        Class<?> typeClass = null;
         try {
           // load type class through GATE classloader
           typeClass = Class.forName(type, true, Gate.getClassLoader());
@@ -548,7 +549,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
                 && Collection.class.isAssignableFrom(typeClass)) {
           // List value
           // setText(textForList((List)value));
-          textField.setText(textForList((Collection)value));
+          textField.setText(textForList((Collection<?>)value));
           if(ResourceParametersEditor.this.isEditable()) {
             textButtonBox.removeAll();
             // textButtonBox.add(this);
@@ -606,11 +607,9 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     JTextField textField;
   }// class ObjectRenderer extends DefaultTableCellRenderer
 
-  class ParameterDisjunctionComparator implements Comparator {
+  class ParameterDisjunctionComparator implements Comparator<ParameterDisjunction> {
     @Override
-    public int compare(Object o1, Object o2) {
-      ParameterDisjunction pDisj1 = (ParameterDisjunction)o1;
-      ParameterDisjunction pDisj2 = (ParameterDisjunction)o2;
+    public int compare(ParameterDisjunction pDisj1, ParameterDisjunction pDisj2) {
       return pDisj1.getName().compareTo(pDisj2.getName());
     }
   }
@@ -737,7 +736,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       listButton.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          List returnedList = listEditor.showDialog();
+          List<?> returnedList = listEditor.showDialog();
           if(returnedList != null) {
             listValue = returnedList;
             fireEditingStopped();
@@ -842,7 +841,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       }
       else {
         // non Gate type
-        Class typeClass = null;
+        Class<?> typeClass = null;
         try {
           // load type class through GATE classloader
           typeClass = Class.forName(type, true, Gate.getClassLoader());
@@ -901,13 +900,13 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
           listUsed = true;
           Parameter param = pDisj.getParameter();
 
-          listValue = (Collection)value;
+          listValue = (Collection<?>)value;
           listEditor = new ListEditorDialog(SwingUtilities.getAncestorOfClass(
                   Window.class, ResourceParametersEditor.this),
-                  (Collection)value, typeClass, param.getItemClassName());
+                  (Collection<?>)value, typeClass, param.getItemClassName());
 
           textField.setEditable(false);
-          textField.setText(textForList((Collection)value));
+          textField.setText(textForList((Collection<?>)value));
           textButtonBox.removeAll();
           textButtonBox.add(textField);
           textButtonBox.add(Box.createHorizontalStrut(5));
@@ -1015,7 +1014,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
 
     ListEditorDialog listEditor = null;
 
-    Collection listValue;
+    Collection<?> listValue;
 
     FeatureMapEditorDialog fmEditor = null;
 
@@ -1040,10 +1039,10 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
   /**
    * Gets a string representation for a list value
    */
-  protected String textForList(Collection list) {
+  protected String textForList(Collection<?> list) {
     if(list == null || list.isEmpty()) return "[]";
     StringBuilder res = new StringBuilder("[");
-    Iterator elemIter = list.iterator();
+    Iterator<?> elemIter = list.iterator();
     while(elemIter.hasNext()) {
       Object elem = elemIter.next();
       if(elem != null)

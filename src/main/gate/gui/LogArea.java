@@ -77,6 +77,7 @@ import javax.swing.text.StyledDocument;
  * {@link gate.util.Err}. The output from Err is written with <font
  * color="red">red</font> and the one from Out is written in <b>black</b>.
  */
+@SuppressWarnings("serial")
 public class LogArea extends XJTextPane {
 
   /** Field needed in inner classes */

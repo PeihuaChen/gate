@@ -32,6 +32,7 @@ import gate.creole.ResourceData;
  * the icon info from the creole register, the name of the resource as
  * the rendered string and the type of the resource as the tooltip.
  */
+@SuppressWarnings("serial")
 public class ResourceRenderer extends JLabel implements ListCellRenderer,
                                             TableCellRenderer, TreeCellRenderer {
 

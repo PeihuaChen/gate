@@ -14,7 +14,6 @@
 
 package gate.gui;
 
-import gate.Factory;
 import gate.Resource;
 import gate.creole.AbstractVisualResource;
 import gate.creole.ResourceInstantiationException;
@@ -125,6 +124,7 @@ import javax.swing.text.JTextComponent;
 - remove feature/value columns when containing only spaces or empty
 </pre>
 */
+@SuppressWarnings("serial")
 @CreoleResource(name="Gazetteer Editor", comment="Gazetteer viewer and editor.", helpURL="http://gate.ac.uk/userguide/sec:gazetteers:anniegazeditor", guiType=GuiType.LARGE, mainViewer=true, resourceDisplayed="gate.creole.gazetteer.AbstractGazetteer")
 public class GazetteerEditor extends AbstractVisualResource
     implements GazetteerListener, ActionsPublisher {
@@ -866,7 +866,7 @@ public class GazetteerEditor extends AbstractVisualResource
       // read all the features maps to find the biggest one
       for (Object object : gazetteerListFiltered) {
         GazetteerNode node = (GazetteerNode) object;
-        Map map = node.getFeatureMap();
+        Map<String,Object> map = node.getFeatureMap();
         if (map != null && columnCount < 2*map.size()+1) {
           columnCount = 2*map.size() + 1;
         }
@@ -899,7 +899,7 @@ public class GazetteerEditor extends AbstractVisualResource
       if (column == 0) {
         return node.getEntry();
       } else {
-        Map featureMap = node.getFeatureMap();
+        Map<String,Object> featureMap = node.getFeatureMap();
         if (featureMap == null
          || featureMap.size()*2 < column) {
           return "";
@@ -955,7 +955,7 @@ public class GazetteerEditor extends AbstractVisualResource
         gazetteerNode.setEntry((String) value);
       } else {
         // update the whole feature map
-        Map newFeatureMap = new LinkedHashMap();
+        Map<String,Object> newFeatureMap = new LinkedHashMap<String,Object>();
         for (int col = 1; col+1 < getColumnCount(); col += 2) {
           String feature = (String) ((col == column) ?
             value : getValueAt(row, col));
@@ -1015,10 +1015,10 @@ public class GazetteerEditor extends AbstractVisualResource
       for (Object object : gazetteerList) {
         GazetteerNode node = (GazetteerNode) object;
         boolean match = false;
-        Map map = node.getFeatureMap();
+        Map<String,Object> map = node.getFeatureMap();
         if (map != null && !onlyValueCheckBox.isSelected()) {
-          for (Object key : map.keySet()) {
-            if (pattern.matcher((String) key).find()
+          for (String key : map.keySet()) {
+            if (pattern.matcher(key).find()
              || pattern.matcher((String) map.get(key)).find()) { 
               match = true;
               break;
@@ -1043,7 +1043,7 @@ public class GazetteerEditor extends AbstractVisualResource
       } else {
         for (Object object : gazetteerListFiltered) {
           GazetteerNode node = (GazetteerNode) object;
-          Map map = node.getFeatureMap();
+          Map<String,Object> map = node.getFeatureMap();
           if (map != null
           && (2*map.size()+1) == getColumnCount()) {
             map.put("", "");

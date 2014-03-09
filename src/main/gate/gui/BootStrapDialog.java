@@ -28,6 +28,7 @@ import gate.util.Err;
 /**
   * This class is used to handle BootStrap wizard with the Gate GUI interface.
   */
+@SuppressWarnings("serial")
 public class BootStrapDialog extends JDialog{
 
   MainFrame mainFrame = null;
@@ -37,9 +38,9 @@ public class BootStrapDialog extends JDialog{
   String resourceName = null;
   String packageName = null;
   String resourceType = null;
-  Map    resourceTypes = null;
+  Map<String,String>    resourceTypes = null;
   String className = null;
-  Set    resourceInterfaces = null;
+  Set<String>    resourceInterfaces = null;
   String possibleInterfaces = null;
   String pathNewProject = null;
 
@@ -143,12 +144,12 @@ public class BootStrapDialog extends JDialog{
   /**Initialises the data (the loaded resources)*/
   public void initLocalData(){
     pathNewProject = new String(".");
-    resourceTypes = new HashMap();
+    resourceTypes = new HashMap<String,String>();
     resourceTypes.put("LanguageResource","gate.LanguageResource");
     resourceTypes.put("VisualResource","gate.VisualResource");
     resourceTypes.put("ProcessingResource","gate.ProcessingResource");
 
-    possibleInterfaces = (String) resourceTypes.get("LanguageResource");
+    possibleInterfaces = resourceTypes.get("LanguageResource");
     if (possibleInterfaces == null)
       possibleInterfaces = new String();
   }// initLocalData
@@ -197,7 +198,7 @@ public class BootStrapDialog extends JDialog{
     resourceTypesLabel.setToolTipText("Resources must be LRs, PRs or VRs");
     resourceTypesLabel.setOpaque(true);
     resourceTypesLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-    Vector comboCont = new Vector(resourceTypes.keySet());
+    Vector<String> comboCont = new Vector<String>(resourceTypes.keySet());
     Collections.sort(comboCont);
     resourceTypesComboBox = new JComboBox(comboCont);
     resourceTypesComboBox.setEditable(false);
@@ -400,7 +401,7 @@ public class BootStrapDialog extends JDialog{
       @Override
       public void actionPerformed(ActionEvent e){
         String selectedItem =(String) resourceTypesComboBox.getSelectedItem();
-        possibleInterfaces = (String)resourceTypes.get(selectedItem);
+        possibleInterfaces = resourceTypes.get(selectedItem);
         interfacesTextField.setText(possibleInterfaces);
       }
    });
@@ -449,9 +450,9 @@ public class BootStrapDialog extends JDialog{
 
 
   /** It returns the interfaces the resource implements*/
-  public Set getSelectedInterfaces(){
+  public Set<String> getSelectedInterfaces(){
     String interfaces = interfacesTextField.getText();
-    resourceInterfaces = new HashSet();
+    resourceInterfaces = new HashSet<String>();
     if (interfaces == null || "".equals(interfaces))
         return resourceInterfaces;
     StringTokenizer tokenizer = new StringTokenizer(interfaces,",");

@@ -13,24 +13,6 @@
  */
 package gate.gui.docview;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.*;
-import java.net.URISyntaxException;
-import java.util.*;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-
-import javax.swing.*;
-import javax.swing.Timer;
-import javax.swing.border.Border;
-import javax.swing.event.*;
-import javax.swing.table.*;
-import javax.swing.text.*;
-
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Factory;
@@ -39,20 +21,102 @@ import gate.GateConstants;
 import gate.TextualDocument;
 import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
-import gate.event.*;
+import gate.event.AnnotationSetEvent;
+import gate.event.AnnotationSetListener;
 import gate.event.DocumentEvent;
 import gate.event.DocumentListener;
-import gate.gui.*;
-import gate.gui.annedit.*;
+import gate.event.GateEvent;
+import gate.event.StatusListener;
+import gate.gui.MainFrame;
+import gate.gui.annedit.AnnotationData;
+import gate.gui.annedit.AnnotationDataImpl;
+import gate.gui.annedit.AnnotationEditorOwner;
+import gate.gui.annedit.OwnedAnnotationEditor;
 import gate.swing.ColorGenerator;
-import gate.swing.XJTable;
 import gate.swing.XJFileChooser;
-import gate.util.*;
+import gate.swing.XJTable;
+import gate.util.Err;
+import gate.util.ExtensionFileFilter;
+import gate.util.GateRuntimeException;
+import gate.util.InvalidOffsetException;
+import gate.util.Out;
+import gate.util.Strings;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.ComponentOrientation;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EventObject;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import javax.swing.AbstractAction;
+import javax.swing.AbstractCellEditor;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JColorChooser;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+import javax.swing.border.Border;
+import javax.swing.event.MouseInputListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.JTextComponent;
 
 /**
  * Display document annotation sets and types in a tree view like with a table.
  * Allow the selection of annotation type and modification of their color.
  */
+@SuppressWarnings("serial")
 public class AnnotationSetsView extends AbstractDocumentView 
 		                        implements DocumentListener,
 		                                   AnnotationSetListener, 
@@ -140,7 +204,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     setHandlers = new ArrayList<SetHandler>();
     tableRows = new ArrayList();
     visibleAnnotationTypes = new LinkedBlockingQueue<TypeSpec>();
-    actions = new ArrayList();
+    actions = new ArrayList<Action>();
     actions.add(new SavePreserveFormatAction());
     pendingEvents = new LinkedBlockingQueue<GateEvent>();
     eventMinder = new Timer(EVENTS_HANDLE_DELAY, 
@@ -150,7 +214,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   }
   
   @Override
-  public List getActions() {
+  public List<Action> getActions() {
     return actions;
   }  
 
@@ -2329,7 +2393,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   
   protected String lastAnnotationType = "_New_";
   
-  protected List actions;
+  protected List<Action> actions;
 
   protected ComponentOrientation currentOrientation;
   

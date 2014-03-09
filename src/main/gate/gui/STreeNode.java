@@ -16,19 +16,26 @@
 
 package gate.gui;
 
-import java.util.*;
-
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
 import gate.util.InvalidOffsetException;
 import gate.util.Out;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
+
+@SuppressWarnings("serial")
 public class STreeNode extends DefaultMutableTreeNode {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
   private static final String ADDEDSET = "TreeViewerTempAdded";
   private static final String REMOVEDSET = "TreeViewerTempRemoved";
 
@@ -114,7 +121,7 @@ public class STreeNode extends DefaultMutableTreeNode {
   }// public Annotation getAnnotation()
 
   public void disconnectChildren() {
-    for (Iterator i = this.children.iterator(); i.hasNext(); )
+    for (Iterator<?> i = this.children.iterator(); i.hasNext(); )
       ((STreeNode) i.next()).setParent(null);
     this.children.clear();
   }// public void disconnectChildren()
@@ -146,7 +153,7 @@ public class STreeNode extends DefaultMutableTreeNode {
     // the text spanned by the annotation is stored as the userObject of the
     // tree node
     // comes from the default Swing tree node
-    List consists = new ArrayList();
+    List<Integer> consists = new ArrayList<Integer>();
 
     Long lStart = new Long(start), lEnd = new Long(end);
 //    try {
@@ -163,7 +170,7 @@ public class STreeNode extends DefaultMutableTreeNode {
     attribs.put("consists", consists);
 
     // children comes from DefaultMutableTreeNode
-    for (Iterator i = children.iterator(); i.hasNext(); ) {
+    for (Iterator<?> i = children.iterator(); i.hasNext(); ) {
       STreeNode child = (STreeNode) i.next();
       if (child.getAnnotation() == null) {
         if (child.getAllowsChildren())
@@ -198,13 +205,13 @@ public class STreeNode extends DefaultMutableTreeNode {
     if (doc == null || targetAS == null)
       return false;
 
-    HashMap tempId2permId = new HashMap();
-    List newAnnots = new ArrayList();
+    Map<Integer,Integer> tempId2permId = new HashMap<Integer,Integer>();
+    List<Annotation> newAnnots = new ArrayList<Annotation>();
     AnnotationSet addedSet = doc.getAnnotations(ADDEDSET);
     if (addedSet != null && !addedSet.isEmpty()) {
-      Iterator addedIter = addedSet.iterator();
+      Iterator<Annotation> addedIter = addedSet.iterator();
       while (addedIter.hasNext()) {
-        Annotation annot = (Annotation) addedIter.next();
+        Annotation annot = addedIter.next();
         try {
           Integer permId =
               targetAS.add(annot.getStartNode().getOffset(),
@@ -222,16 +229,17 @@ public class STreeNode extends DefaultMutableTreeNode {
 
       //now update the consists Ids, because they have the old Ids in them
       for (int i=0; i < newAnnots.size(); i++) {
-        Annotation newAnnot = (Annotation) newAnnots.get(i);
-        List children = (List) newAnnot.getFeatures().get(
+        Annotation newAnnot = newAnnots.get(i);
+        @SuppressWarnings("unchecked")
+        List<Integer> children = (List<Integer>)newAnnot.getFeatures().get(
             SyntaxTreeViewer.NODE_CONSISTS_FEATURE_NAME);
         if (children == null || children.size()== 0) {
           continue;
         }
         else {
-          List newList = new ArrayList();
+          List<Integer> newList = new ArrayList<Integer>();
           for (int k=0; k< children.size(); k++) {
-            Integer oldId = (Integer) children.get(k);
+            Integer oldId = children.get(k);
             if (tempId2permId.get(oldId) != null)
               newList.add(tempId2permId.get(oldId));
             else
