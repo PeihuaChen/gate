@@ -681,6 +681,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
   /** Also a workaround for URI identifier. If the QName is gate it will return
    *  GATE's. Otherwhise it will return the empty string
    */
+  @SuppressWarnings("unused")
   private String getMyURI(String aQName) {
     if (aQName == null) {
       return "";

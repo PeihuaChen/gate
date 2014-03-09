@@ -47,7 +47,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -240,15 +239,15 @@ public class POSTagger {
   /**
    * Reads the rules from the rules input file
    */
+  @SuppressWarnings("resource")
   public void readRules(URL rulesURL) throws IOException, InvalidRuleException{
     BufferedReader rulesReader = null;
-    InputStream rulesStream = null;
+    
     try {
-      rulesStream = rulesURL.openStream();
       if(encoding == null) {
-        rulesReader = new BomStrippingInputStreamReader(rulesStream);
+        rulesReader = new BomStrippingInputStreamReader(rulesURL.openStream());
       } else {
-        rulesReader = new BomStrippingInputStreamReader(rulesStream, this.encoding);
+        rulesReader = new BomStrippingInputStreamReader(rulesURL.openStream(), this.encoding);
       }
   
       String line;
@@ -275,7 +274,6 @@ public class POSTagger {
     }
     finally {
       IOUtils.closeQuietly(rulesReader);
-      IOUtils.closeQuietly(rulesStream);
     }
   }//public void readRules()
 
@@ -462,6 +460,7 @@ public class POSTagger {
    * Reads one input file and creates the structure needed by the tagger
    * for input.
    */
+  @SuppressWarnings("unused")
   private static List<List<String>> readInput(String file) throws IOException{
     BufferedReader reader = null;
     
