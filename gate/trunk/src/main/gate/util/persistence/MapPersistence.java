@@ -14,10 +14,13 @@
  */
 package gate.util.persistence;
 
-import java.util.*;
-
 import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
+
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class MapPersistence implements Persistence {
   /**
@@ -35,18 +38,17 @@ public class MapPersistence implements Persistence {
     }
     mapType = source.getClass();
 
-    Map map = (Map)source;
+    Map<?,?> map = (Map<?,?>)source;
     
-    localMap = new HashMap(map.size());
+    localMap = new HashMap<Serializable,Serializable>(map.size());
     //collect the keys in the order given by the entrySet().iterator();
-    Iterator keyIter = map.keySet().iterator();
+    Iterator<?> keyIter = map.keySet().iterator();
     while(keyIter.hasNext()){
       Object key = keyIter.next();
       Object value = map.get(key);
 
-      key = PersistenceManager.getPersistentRepresentation(key);
-      value = PersistenceManager.getPersistentRepresentation(value);
-      localMap.put(key, value);
+      localMap.put(PersistenceManager.getPersistentRepresentation(key),
+              PersistenceManager.getPersistentRepresentation(value));
     }
   }
 
@@ -54,19 +56,20 @@ public class MapPersistence implements Persistence {
    * Creates a new object from the data contained. This new object is supposed
    * to be a copy for the original object used as source for data extraction.
    */
+  @SuppressWarnings("unchecked")
   @Override
   public Object createObject()throws PersistenceException,
                                      ResourceInstantiationException{
     //let's try to create a map of the same type as the original
-    Map result = null;
+    Map<Object,Object> result = null;
     try{
-      result = (Map)mapType.newInstance();
+      result = (Map<Object,Object>)mapType.newInstance();
     }catch(Exception e){
     }
-    if(result == null) result = new HashMap(localMap.size());
+    if(result == null) result = new HashMap<Object,Object>(localMap.size());
 
     //now we have a map let's populate it
-    Iterator keyIter = localMap.keySet().iterator();
+    Iterator<Serializable> keyIter = localMap.keySet().iterator();
     while(keyIter.hasNext()){
       Object key = keyIter.next();
       Object value = localMap.get(key);
@@ -79,7 +82,7 @@ public class MapPersistence implements Persistence {
     return result;
   }
 
-  protected Class mapType;
-  protected HashMap localMap;
+  protected Class<?> mapType;
+  protected Map<Serializable,Serializable> localMap;
   static final long serialVersionUID = 1835776085941379996L;
 }

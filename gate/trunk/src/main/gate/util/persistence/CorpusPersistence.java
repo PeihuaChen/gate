@@ -16,13 +16,15 @@
 package gate.util.persistence;
 
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import gate.Corpus;
 import gate.Document;
 import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 
 public class CorpusPersistence extends LRPersistence {
@@ -45,8 +47,8 @@ public class CorpusPersistence extends LRPersistence {
     super.extractDataFromSource(source);
     if(dsData == null){
       //transient corpus; we still need to save the docs
-      docList = new ArrayList();
-      Iterator docIter = corpus.iterator();
+      docList = new ArrayList<Serializable>();
+      Iterator<Document> docIter = corpus.iterator();
       while(docIter.hasNext()){
         docList.add(PersistenceManager.
                     getPersistentRepresentation(docIter.next()));
@@ -70,7 +72,7 @@ public class CorpusPersistence extends LRPersistence {
     if(docList != null){
       //transient corpus; we need to recreate the docs
       if(!docList.isEmpty() && corpus.isEmpty()){
-        Iterator docIter = docList.iterator();
+        Iterator<Serializable> docIter = docList.iterator();
         while(docIter.hasNext()){
           corpus.add((Document) PersistenceManager.
                      getTransientRepresentation(docIter.next()));
@@ -82,6 +84,6 @@ public class CorpusPersistence extends LRPersistence {
   }
 
 
-  protected ArrayList docList;
+  protected List<Serializable> docList;
   static final long serialVersionUID = 6181534551802883626L;
 }

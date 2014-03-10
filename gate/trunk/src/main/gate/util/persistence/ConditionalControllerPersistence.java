@@ -1,10 +1,13 @@
 package gate.util.persistence;
 
-import java.util.*;
-
 import gate.creole.ConditionalController;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.RunningStrategy;
 import gate.persist.PersistenceException;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 /**
  * Persistence handler for {@link gate.creole.ConditionalController}s
  */
@@ -27,10 +30,11 @@ public class ConditionalControllerPersistence extends ControllerPersistence {
 
     ConditionalController controller = (ConditionalController)source;
 
-    strategiesList = new ArrayList(controller.getRunningStrategies().size());
+    /*strategiesList = new ArrayList<RunningStrategy>(controller.getRunningStrategies().size());
 
-    Iterator stratIter = controller.getRunningStrategies().iterator();
-    while(stratIter.hasNext()) ((List)strategiesList).add(stratIter.next());
+    Iterator<RunningStrategy> stratIter = controller.getRunningStrategies().iterator();
+    while(stratIter.hasNext()) ((List)strategiesList).add(stratIter.next());*/
+    strategiesList = new ArrayList<RunningStrategy>(controller.getRunningStrategies());
 
     strategiesList = PersistenceManager.
                      getPersistentRepresentation(strategiesList);
@@ -40,6 +44,7 @@ public class ConditionalControllerPersistence extends ControllerPersistence {
    * Creates a new object from the data contained. This new object is supposed
    * to be a copy for the original object used as source for data extraction.
    */
+  @SuppressWarnings("unchecked")
   @Override
   public Object createObject()throws PersistenceException,
                                      ResourceInstantiationException{
@@ -47,12 +52,12 @@ public class ConditionalControllerPersistence extends ControllerPersistence {
         (ConditionalController)super.createObject();
 //    if(controller.getRunningStrategies().isEmpty()){
     controller.setRunningStrategies(
-          (Collection)PersistenceManager.
+          (Collection<RunningStrategy>)PersistenceManager.
           getTransientRepresentation(strategiesList));
 //    }
     return controller;
   }
-  protected Object strategiesList;
+  protected Serializable strategiesList;
 
   /**
    * Serialisation ID

@@ -14,11 +14,13 @@
  */
 package gate.util.persistence;
 
-import java.util.*;
-
 import gate.Controller;
+import gate.ProcessingResource;
 import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class ControllerPersistence extends ResourcePersistence {
   /**
@@ -37,12 +39,15 @@ public class ControllerPersistence extends ResourcePersistence {
     Controller controller = (Controller)source;
 
     super.extractDataFromSource(source);
-    prList = new ArrayList(controller.getPRs().size());
+    /*prList = new ArrayList(controller.getPRs().size());
     Iterator prIter = controller.getPRs().iterator();
 
     while(prIter.hasNext()){
       ((List)prList).add(prIter.next());
-    }
+    }*/
+    
+    prList = new ArrayList<ProcessingResource>(controller.getPRs());
+    
     prList = PersistenceManager.getPersistentRepresentation(prList);
   }
 
@@ -50,6 +55,7 @@ public class ControllerPersistence extends ResourcePersistence {
    * Creates a new object from the data contained. This new object is supposed
    * to be a copy for the original object used as source for data extraction.
    */
+  @SuppressWarnings("unchecked")
   @Override
   public Object createObject()throws PersistenceException,
                                      ResourceInstantiationException{
@@ -58,7 +64,7 @@ public class ControllerPersistence extends ResourcePersistence {
 
     if(controller.getPRs().isEmpty()){
       prList = PersistenceManager.getTransientRepresentation(prList);
-      controller.setPRs((Collection)prList);
+      controller.setPRs((Collection<ProcessingResource>)prList);
     }
 
     return controller;

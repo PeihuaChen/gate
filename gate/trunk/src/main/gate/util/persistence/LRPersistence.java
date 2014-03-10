@@ -58,6 +58,7 @@ public class LRPersistence extends ResourcePersistence {
    * Creates a new object from the data contained. This new object is supposed
    * to be a copy for the original object used as source for data extraction.
    */
+  @SuppressWarnings("unchecked")
   @Override
   public Object createObject()throws PersistenceException,
                                      ResourceInstantiationException{
@@ -68,8 +69,8 @@ public class LRPersistence extends ResourcePersistence {
 
       DataStore ds = (DataStore)PersistenceManager.
                      getTransientRepresentation(dsData);
-      ((Map)initParams).put(DataStore.DATASTORE_FEATURE_NAME, ds);
-      ((Map)initParams).put(DataStore.LR_ID_FEATURE_NAME, persistenceID);
+      ((Map<Object,Object>)initParams).put(DataStore.DATASTORE_FEATURE_NAME, ds);
+      ((Map<Object,Object>)initParams).put(DataStore.LR_ID_FEATURE_NAME, persistenceID);
       return super.createObject();
     }
   }

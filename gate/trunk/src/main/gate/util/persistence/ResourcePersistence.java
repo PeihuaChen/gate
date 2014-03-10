@@ -14,12 +14,19 @@
  */
 package gate.util.persistence;
 
-import java.util.*;
-
-import gate.*;
-import gate.creole.*;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.Resource;
+import gate.creole.Parameter;
+import gate.creole.ParameterList;
+import gate.creole.ResourceData;
+import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
 import gate.util.NameBearer;
+
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Holds the data needed to serialise and recreate a {@link Resource}.
@@ -50,14 +57,14 @@ class ResourcePersistence implements Persistence{
       //get the values for the init time parameters
       initParams = Factory.newFeatureMap();
       //this is a list of lists
-      Iterator parDisjIter = ((List)params.getInitimeParameters()).iterator();
+      Iterator<List<Parameter>> parDisjIter = params.getInitimeParameters().iterator();
       while(parDisjIter.hasNext()){
-        Iterator parIter = ((List)parDisjIter.next()).iterator();
+        Iterator<Parameter> parIter = parDisjIter.next().iterator();
         while(parIter.hasNext()){
-          Parameter parameter = (Parameter)parIter.next();
+          Parameter parameter = parIter.next();
           String parName = parameter.getName();
           Object parValue = res.getParameterValue(parName);
-          ((Map)initParams).put(parName, parValue);
+          ((FeatureMap)initParams).put(parName, parValue);
         }
       }
       initParams = PersistenceManager.getPersistentRepresentation(initParams);
@@ -65,7 +72,7 @@ class ResourcePersistence implements Persistence{
       //get the features
       if(res.getFeatures() != null){
         features = Factory.newFeatureMap();
-        ((Map)features).putAll(res.getFeatures());
+        ((FeatureMap)features).putAll(res.getFeatures());
         features = PersistenceManager.getPersistentRepresentation(features);
       }
     }catch(ResourceInstantiationException rie){
