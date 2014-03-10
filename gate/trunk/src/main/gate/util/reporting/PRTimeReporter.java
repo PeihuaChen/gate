@@ -36,6 +36,8 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
+
 import gate.util.reporting.exceptions.BenchmarkReportExecutionException;
 import gate.util.reporting.exceptions.BenchmarkReportInputFileFormatException;
 import gnu.getopt.Getopt;
@@ -253,6 +255,7 @@ public class PRTimeReporter implements BenchmarkReportable {
    * @param bTime
    *          time(in milliseconds) of the benchmarkID token being processed.
    */
+  @SuppressWarnings("unchecked")
   private void organizeEntries(LinkedHashMap<String, Object> store,
                                String[] tokens, String bTime) {
       if (tokens.length > 0 && store.containsKey(tokens[0])) {
@@ -316,6 +319,7 @@ public class PRTimeReporter implements BenchmarkReportable {
    *         processing elements sorted in descending order of processing time
    *         taken.
    */
+  @SuppressWarnings("unchecked")
   private LinkedHashMap<String, Object> sortReport(
     LinkedHashMap<String, Object> gStore) {
     Iterator<String> i = gStore.keySet().iterator();
@@ -375,21 +379,21 @@ public class PRTimeReporter implements BenchmarkReportable {
    *
    * @return An Object containing the sorted LinkedHashMap.
    */
-  private LinkedHashMap sortHashMapByValues(LinkedHashMap passedMap) {
-      List mapKeys = new ArrayList(passedMap.keySet());
-      List mapValues = new ArrayList(passedMap.values());
+  private LinkedHashMap<String,String> sortHashMapByValues(LinkedHashMap<String,String> passedMap) {
+      List<String> mapKeys = new ArrayList<String>(passedMap.keySet());
+      List<String> mapValues = new ArrayList<String>(passedMap.values());
 
       Collections.sort(mapValues, new ValueComparator());
       Collections.sort(mapKeys);
       Collections.reverse(mapValues);
-      LinkedHashMap sortedMap = new LinkedHashMap();
+      LinkedHashMap<String,String> sortedMap = new LinkedHashMap<String,String>();
 
-      Iterator<Integer> valueIt = mapValues.iterator();
+      Iterator<String> valueIt = mapValues.iterator();
       while (valueIt.hasNext()) {
-        Object val = valueIt.next();
+        String val = valueIt.next();
         Iterator<String> keyIt = mapKeys.iterator();
         while (keyIt.hasNext()) {
-          Object key = keyIt.next();
+          String key = keyIt.next();
           String comp1 = passedMap.get(key).toString();
           String comp2 = val.toString();
 
@@ -415,6 +419,7 @@ public class PRTimeReporter implements BenchmarkReportable {
    * @return An Object containing modified hierarchical structure of processing
    *         elements with totals and All others embedded in it.
    */
+  @SuppressWarnings("unchecked")
   @Override
   public Object calculate(Object reportContainer) {
     LinkedHashMap<String, Object> globalStore =
@@ -442,6 +447,7 @@ public class PRTimeReporter implements BenchmarkReportable {
    * @return An integer containing the sub total.
    */
 
+  @SuppressWarnings("unchecked")
   private int getTotal(LinkedHashMap<String, Object> reportContainer) {
     int total = 0;
     int diff = 0;
@@ -482,6 +488,7 @@ public class PRTimeReporter implements BenchmarkReportable {
    * @param outputFile
    *          Path where to save the report.
    */
+  @SuppressWarnings("unchecked")
   @Override
   public void printReport(Object reportSource, File outputFile) {
     if (printMedia.equalsIgnoreCase(MEDIA_TEXT)) {
@@ -504,6 +511,7 @@ public class PRTimeReporter implements BenchmarkReportable {
    * @param suppressZeroTimeEntries
    *          Indicate whether or not to show 0 millisecond entries.
    */
+  @SuppressWarnings("unchecked")
   private void printToText(Object reportContainer, File outputFile,
                            boolean suppressZeroTimeEntries) {
     LinkedHashMap<String, Object> globalStore =
@@ -541,6 +549,7 @@ public class PRTimeReporter implements BenchmarkReportable {
    * @param suppressZeroTimeEntries
    *          Indicate whether or not to show 0 millisecond entries.
    */
+  @SuppressWarnings("unchecked")
   private void prettyPrint(LinkedHashMap<String, Object> gStore,
                            String separator, boolean suppressZeroTimeEntries) {
 
@@ -707,6 +716,7 @@ public class PRTimeReporter implements BenchmarkReportable {
    * @param suppressZeroTimeEntries
    *          Indicate whether or not to show 0 millisecond entries.
    */
+  @SuppressWarnings("unchecked")
   private void generateCollapsibleHTMLTree(LinkedHashMap<String, Object> gStore,
                                            boolean suppressZeroTimeEntries) {
     Iterator<String> i = gStore.keySet().iterator();
@@ -824,8 +834,9 @@ public class PRTimeReporter implements BenchmarkReportable {
    */
   private long tail(File fileToBeRead, int chunkSize)
       throws BenchmarkReportInputFileFormatException {
+    RandomAccessFile raf = null;
     try {
-      RandomAccessFile raf = new RandomAccessFile(fileToBeRead, "r");
+      raf = new RandomAccessFile(fileToBeRead, "r");
       Vector<String> lastNlines = new Vector<String>();
       int delta = 0;
       long curPos = raf.length() - 1;
@@ -865,6 +876,9 @@ public class PRTimeReporter implements BenchmarkReportable {
     } catch (IOException e) {
       e.printStackTrace();
       return -1;
+    }
+    finally {
+      IOUtils.closeQuietly(raf);
     }
   }
 
@@ -1027,6 +1041,7 @@ public class PRTimeReporter implements BenchmarkReportable {
   /**
    * Calls store, calculate and printReport for generating the actual report.
    */
+  @SuppressWarnings("unchecked")
   private void generateReport()
       throws BenchmarkReportInputFileFormatException {
     Timer timer = null;
@@ -1208,7 +1223,7 @@ public class PRTimeReporter implements BenchmarkReportable {
  * A Comparator class to compare the values of the LinkedHashMaps containing
  * processing elements and time taken by them.
  */
-class ValueComparator implements Comparator {
+class ValueComparator implements Comparator<String> {
   /**
    * Provides the comparison logic between the processing time taken by
    * processing elements
@@ -1223,9 +1238,9 @@ class ValueComparator implements Comparator {
    *         obj1)
    */
   @Override
-  public int compare(Object obj1, Object obj2) {
-    int i1 = Integer.parseInt((String) obj1);
-    int i2 = Integer.parseInt((String) obj2);
+  public int compare(String obj1, String obj2) {
+    int i1 = Integer.parseInt(obj1);
+    int i2 = Integer.parseInt(obj2);
     return i1 - i2;
   }
 }
