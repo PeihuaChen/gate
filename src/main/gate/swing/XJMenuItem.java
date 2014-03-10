@@ -16,18 +16,22 @@
 
 package gate.swing;
 
-import java.awt.event.*;
-
-import javax.swing.*;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
-
 import gate.event.StatusListener;
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.Action;
+import javax.swing.Icon;
+import javax.swing.JMenuItem;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * Extension of a JMenuItem that adds a description and a StatusListener
  * as parameters. The description is used in the statusListener.
  */
+@SuppressWarnings("serial")
 public class XJMenuItem extends JMenuItem {
 
   public XJMenuItem(Icon icon, String description, StatusListener listener){

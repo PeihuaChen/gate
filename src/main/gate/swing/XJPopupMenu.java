@@ -15,12 +15,16 @@
 package gate.swing;
 
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Dimension;
+
+import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
 
 /**
  * A modified version of JPopupMenu that uses {@link MenuLayout} as its layout.
  */
+@SuppressWarnings("serial")
 public class XJPopupMenu extends JPopupMenu {
   public XJPopupMenu() {
     super();

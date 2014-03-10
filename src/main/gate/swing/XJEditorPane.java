@@ -1,20 +1,22 @@
 package gate.swing;
 
+import gate.event.StatusListener;
+import gate.gui.MainFrame;
+import gate.util.Err;
+
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JEditorPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLFrameHyperlinkEvent;
-
-import gate.event.StatusListener;
-import gate.gui.MainFrame;
-import gate.util.Err;
 
 /**
  * An enhanced version of {@link javax.swing.JEditorPane} that is able of
@@ -44,8 +46,8 @@ public class XJEditorPane extends JEditorPane {
   }//protected void init()
 
   protected void initLocalData(){
-    backUrls = new LinkedList();
-    forwardUrls = new LinkedList();
+    backUrls = new LinkedList<URL>();
+    forwardUrls = new LinkedList<URL>();
     try{
       backAction = new BackAction();
       forwardAction = new ForwardAction();
@@ -110,7 +112,7 @@ public class XJEditorPane extends JEditorPane {
     public void actionPerformed(ActionEvent e){
       backUrls.addLast(getPage());
       try{
-        setPage((URL)forwardUrls.removeFirst());
+        setPage(forwardUrls.removeFirst());
       }catch(IOException ioe){
         ioe.printStackTrace(Err.getPrintWriter());
       }
@@ -126,7 +128,7 @@ public class XJEditorPane extends JEditorPane {
     public void actionPerformed(ActionEvent e){
       forwardUrls.addFirst(getPage());
       try{
-        setPage((URL)backUrls.removeLast());
+        setPage(backUrls.removeLast());
       }catch(IOException ioe){
         ioe.printStackTrace(Err.getPrintWriter());
       }
@@ -143,30 +145,32 @@ public class XJEditorPane extends JEditorPane {
   }
   public synchronized void removeStatusListener(StatusListener l) {
     if (statusListeners != null && statusListeners.contains(l)) {
-      Vector v = (Vector) statusListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<StatusListener> v = (Vector<StatusListener>) statusListeners.clone();
       v.removeElement(l);
       statusListeners = v;
     }
   }
   public synchronized void addStatusListener(StatusListener l) {
-    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    @SuppressWarnings("unchecked")
+    Vector<StatusListener> v = statusListeners == null ? new Vector<StatusListener>(2) : (Vector<StatusListener>) statusListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       statusListeners = v;
     }
   }
 
-  protected LinkedList backUrls;
-  protected LinkedList forwardUrls;
+  protected LinkedList<URL> backUrls;
+  protected LinkedList<URL> forwardUrls;
   protected Action backAction;
   protected Action forwardAction;
-  private transient Vector statusListeners;
+  private transient Vector<StatusListener> statusListeners;
   protected void fireStatusChanged(String e) {
     if (statusListeners != null) {
-      Vector listeners = statusListeners;
+      Vector<StatusListener> listeners = statusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+        listeners.elementAt(i).statusChanged(e);
       }
     }
   }

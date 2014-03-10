@@ -16,9 +16,15 @@
 
 package gate.swing;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Frame;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.Icon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JWindow;
 
 /**
  * A small window used to show messages to the user during processing.
@@ -27,11 +33,8 @@ import javax.swing.*;
  * The window has its own thread for updating the animated pictures displayed.
  *
  */
+@SuppressWarnings("serial")
 public class WaitDialog extends JWindow implements Runnable {
-
-  /** Debug flag
-   */
-  private static final boolean DEBUG = false;
 
   /**    *
    */
@@ -112,7 +115,6 @@ public class WaitDialog extends JWindow implements Runnable {
   /**    */
   void jbInit() throws Exception {
     JPanel centerPanel = new JPanel();
-    Container content = getContentPane();
     centerBox = Box.createVerticalBox();
     centerPanel.setLayout(borderLayout1);
     //centerPanel.setBorder(new LineBorder(Color.darkGray, 2));

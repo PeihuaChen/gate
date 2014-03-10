@@ -498,7 +498,7 @@ public class XJTable extends JTable{
    * @param column the column index.
    * @param comparator the comparator to be used.
    */
-  public void setComparator(int column, Comparator comparator){
+  public void setComparator(int column, Comparator<?> comparator){
     columnData.get(column).comparator = comparator;
   }
     
@@ -559,9 +559,10 @@ public class XJTable extends JTable{
       }
     }
     
+    @SuppressWarnings({"rawtypes","unchecked"})
     protected class ValueHolderComparator implements Comparator<ValueHolder>{
       private Comparator comparator;
-      
+            
       protected Comparator getComparator() {
         return comparator;
       }
@@ -693,7 +694,7 @@ public class XJTable extends JTable{
       return sourceModel.getColumnName(columnIndex);
     }
     @Override
-    public Class getColumnClass(int columnIndex){
+    public Class<?> getColumnClass(int columnIndex){
       return sourceModel.getColumnClass(columnIndex);
     }
     
@@ -747,7 +748,7 @@ public class XJTable extends JTable{
         }
         
         //get an appropriate comparator
-        Comparator comparator = columnData.get(sortedColumn).comparator;
+        Comparator<?> comparator = columnData.get(sortedColumn).comparator;
         if(comparator == null){
           //use the default comparator
           if(defaultComparator == null) defaultComparator = new ObjectComparator();
@@ -902,7 +903,7 @@ public class XJTable extends JTable{
     
     int column;
     int columnWidth;
-    Comparator comparator;
+    Comparator<?> comparator;
   }
 
   @Override

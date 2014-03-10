@@ -13,10 +13,30 @@
  */
 package gate.swing;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Insets;
+import java.awt.ItemSelectable;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.EventListener;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.swing.AbstractButton;
+import javax.swing.Box;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 import javax.swing.event.ListDataListener;
 
 /**
@@ -26,6 +46,7 @@ import javax.swing.event.ListDataListener;
  * set of buttons in a flow layout. If more options are available, a
  * simple {@link JComboBox} is used instead.
  */
+@SuppressWarnings("serial")
 public class JChoice extends JPanel implements ItemSelectable{
 
   @Override

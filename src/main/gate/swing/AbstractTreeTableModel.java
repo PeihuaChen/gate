@@ -14,7 +14,9 @@
  */
 package gate.swing;
 
-import javax.swing.event.*;
+import javax.swing.event.EventListenerList;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreePath;
 
 /**
@@ -201,7 +203,7 @@ public abstract class AbstractTreeTableModel implements TreeTableModel {
   public void setValueAt(Object aValue, Object node, int column){}
 
   @Override
-  abstract public Class getColumnClass(int column);
+  abstract public Class<?> getColumnClass(int column);
   @Override
   abstract public boolean isCellEditable(Object node, int column);
   @Override
