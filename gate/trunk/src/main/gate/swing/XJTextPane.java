@@ -28,6 +28,7 @@ import javax.swing.text.*;
  * changes. This is needed by applications that want to be able to change the
  * font in the entire application by changing the UI defaults table.
  */
+@SuppressWarnings("serial")
 public class XJTextPane extends JTextPane {
 
   public XJTextPane() {

@@ -27,6 +27,7 @@ import java.awt.*;
  * Adds also a description and a StatusListener as parameters.
  * The description is used in the statusListener.
  */
+@SuppressWarnings("serial")
 public class XJMenu extends JMenu {
   public XJMenu(){
     super();

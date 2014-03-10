@@ -326,7 +326,7 @@ public class JTreeTable extends XJTable {
     }
 
     @Override
-    public Class getColumnClass(int column) {
+    public Class<?> getColumnClass(int column) {
       if(column == 0) return TreeTableModel.class;
       else return treeTableModel.getColumnClass(column);
     }

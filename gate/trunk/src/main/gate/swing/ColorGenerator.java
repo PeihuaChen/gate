@@ -25,16 +25,12 @@ import java.util.LinkedList;
  */
 public class ColorGenerator {
 
-  /** Debug flag
-   */
-  private static final boolean DEBUG = false;
-
   /**
    * Creates a new ColorGenerator
    *
    */
   public ColorGenerator() {
-    for(int i = 0; i < 8; i++)availableSpacesList[i] = new LinkedList();
+    for(int i = 0; i < 8; i++)availableSpacesList[i] = new LinkedList<ColorSpace>();
     ColorSpace usedCS = new ColorSpace(0,0,0,255);
     availableSpacesList[0].addLast(new ColorSpace(usedCS.baseR +
                                                usedCS.radius/2,
@@ -84,7 +80,7 @@ public class ColorGenerator {
     listToRead = listToRead % 8;
 
     if(availableSpacesList[listToRead].isEmpty()){
-      usedCS = (ColorSpace)usedSpacesList.removeFirst();
+      usedCS = usedSpacesList.removeFirst();
       availableSpacesList[listToRead].addLast(new ColorSpace(usedCS.baseR,
                                                  usedCS.baseG,
                                                  usedCS.baseB,
@@ -124,7 +120,7 @@ public class ColorGenerator {
                                                  usedCS.radius/2));
 
     }
-    usedCS = (ColorSpace)availableSpacesList[listToRead].removeFirst();
+    usedCS = availableSpacesList[listToRead].removeFirst();
     Color res = new Color(usedCS.baseR + usedCS.radius/2,
                           usedCS.baseG + usedCS.radius/2,
                           usedCS.baseB + usedCS.radius/2);
@@ -163,10 +159,11 @@ public class ColorGenerator {
   }
 
   /**    */
-  LinkedList[] availableSpacesList = new LinkedList[8];
+  @SuppressWarnings("unchecked")
+  LinkedList<ColorSpace>[] availableSpacesList = new LinkedList[8];
 
   /**    */
-  LinkedList usedSpacesList = new LinkedList();
+  LinkedList<ColorSpace> usedSpacesList = new LinkedList<ColorSpace>();
 
   /**    */
   int listToRead = 0;

@@ -25,25 +25,19 @@ import javax.swing.table.DefaultTableCellRenderer;
 @SuppressWarnings("serial")
 public class BooleanRenderer extends DefaultTableCellRenderer {
   @Override
-  public Component getTableCellRendererComponent(JTable table,
-                                                 Object value,
-                                                 boolean isSelected,
-                                                 boolean hasFocus,
-                                                 int row,
-                                                 int column){
-    /*Component comp = super.getTableCellRendererComponent(table,
-                                                         "",
-                                                         isSelected, hasFocus,
-                                                         row, column);*/
-    if(value instanceof Boolean &&
-       value != null &&
-       ((Boolean)value).booleanValue()){
+  public Component getTableCellRendererComponent(JTable table, Object value,
+          boolean isSelected, boolean hasFocus, int row, int column) {
+    super.getTableCellRendererComponent(table, "", isSelected, hasFocus, row,
+            column);
+    if(value instanceof Boolean && value != null
+            && ((Boolean)value).booleanValue()) {
       setIcon(MainFrame.getIcon("tick"));
-//      setIcon(MainFrame.getIcon((isSelected) ? "tick_white" : "tick"));
+      // setIcon(MainFrame.getIcon((isSelected) ? "tick_white" :
+      // "tick"));
     } else {
       setIcon(null);
     }
 
     return this;
-  }//public Component getTableCellRendererComponent
-}//class BooleanRenderer extends DefaultTableCellRenderer
+  }// public Component getTableCellRendererComponent
+}// class BooleanRenderer extends DefaultTableCellRenderer

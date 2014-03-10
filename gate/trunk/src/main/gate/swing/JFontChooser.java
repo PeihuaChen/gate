@@ -16,14 +16,35 @@
 
 package gate.swing;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Component;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GraphicsEnvironment;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.font.TextAttribute;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
+@SuppressWarnings("serial")
 public class JFontChooser extends JPanel {
 
   public JFontChooser(){
@@ -170,7 +191,7 @@ public class JFontChooser extends JPanel {
   }// initListeners()
 
   protected void updateFont(){
-    Map fontAttrs = new HashMap();
+    Map<TextAttribute, Object> fontAttrs = new HashMap<TextAttribute, Object>();
     fontAttrs.put(TextAttribute.FAMILY, familyCombo.getSelectedItem());
     fontAttrs.put(TextAttribute.SIZE, new Float((String)sizeCombo.getSelectedItem()));
 

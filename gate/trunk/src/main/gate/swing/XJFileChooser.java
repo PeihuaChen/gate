@@ -41,6 +41,7 @@ import java.util.Map;
  * <br><br>
  * Resource paths are saved in the user config file.
  */
+@SuppressWarnings("serial")
 public class XJFileChooser extends JFileChooser {
   /** key used when saving the file location to be retrieved later */
   private String resource;

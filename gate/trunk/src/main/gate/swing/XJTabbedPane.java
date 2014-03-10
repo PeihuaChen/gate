@@ -25,6 +25,7 @@ import javax.swing.Icon;
 /**
  * An extended version of {@link javax.swing.JTabbedPane}.
  */
+@SuppressWarnings("serial")
 public class XJTabbedPane extends JTabbedPane {
 
   public XJTabbedPane(int tabPlacement){
