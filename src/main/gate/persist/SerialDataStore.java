@@ -67,6 +67,8 @@ import java.util.zip.GZIPOutputStream;
 public class SerialDataStore
 extends AbstractFeatureBearer implements DataStore {
 
+  private static final long serialVersionUID = -2109852254191554517L;
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -807,6 +809,7 @@ extends AbstractFeatureBearer implements DataStore {
   }
 
   /** Get a list of LRs that satisfy some set or restrictions */
+  @SuppressWarnings("rawtypes")
   @Override
   public List findLrIds(List constraints) throws PersistenceException {
     throw new UnsupportedOperationException(
@@ -817,6 +820,7 @@ extends AbstractFeatureBearer implements DataStore {
    *  Get a list of LRs that satisfy some set or restrictions and are
    *  of a particular type
    */
+  @SuppressWarnings("rawtypes")
   @Override
   public List findLrIds(List constraints, String lrType) throws PersistenceException {
     throw new UnsupportedOperationException(

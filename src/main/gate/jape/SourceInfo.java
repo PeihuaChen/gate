@@ -149,6 +149,7 @@ public class SourceInfo {
       return (startLine <= lineNumber && lineNumber <= endLine);
     }
 
+    @SuppressWarnings("unused")
     public String getNumberedSource(String source) {
       return Strings.addLineNumbers(getSource(source), japeLine);
     }

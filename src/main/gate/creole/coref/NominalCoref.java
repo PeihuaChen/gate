@@ -502,6 +502,7 @@ public class NominalCoref extends AbstractCoreferencer
   }
 	
   /** Get the text of an annotation */
+  @SuppressWarnings("unused")
   private String stringValue(Annotation ann) {
     Object[] tokens = getSortedTokens(ann);
 	

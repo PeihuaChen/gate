@@ -238,7 +238,7 @@ public class Parser {
 
     // rootElement is HITS
     // this will internally contains instances of HIT
-    List hitsChildren = rootElement.getChildren(HIT);
+    List<?> hitsChildren = rootElement.getChildren(HIT);
     Hit[] hits = new Hit[hitsChildren.size()];
 
     for(int i = 0; i < hitsChildren.size(); i++) {
@@ -255,7 +255,7 @@ public class Parser {
         continue;
       }
 
-      List patAnnots = patternAnnotations.getChildren(PATTERN_ANNOTATION);
+      List<?> patAnnots = patternAnnotations.getChildren(PATTERN_ANNOTATION);
       List<PatternAnnotation> patAnnotsList = new ArrayList<PatternAnnotation>();
       for(int j = 0; j < patAnnots.size(); j++) {
         Element patAnnot = (Element)patAnnots.get(j);
@@ -269,7 +269,7 @@ public class Parser {
         // we need to find out its features
         Element featuresElem = patAnnot.getChild(FEATURES);
         // more than one features possible
-        List featuresElemsList = featuresElem.getChildren(FEATURE);
+        List<?> featuresElemsList = featuresElem.getChildren(FEATURE);
         for(int k = 0; k < featuresElemsList.size(); k++) {
           Element featureElem = (Element)featuresElemsList.get(k);
           String key = featureElem.getChildText(KEY);

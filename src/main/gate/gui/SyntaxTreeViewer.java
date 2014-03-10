@@ -253,6 +253,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   }
 
   //CONSTRUCTORS
+  @SuppressWarnings("unused")
   private SyntaxTreeViewer(String annotType) {
 
     treeNodeAnnotationType = annotType;
@@ -1466,14 +1467,17 @@ public class SyntaxTreeViewer extends AbstractVisualResource
       super(text);
     }
   
+    @SuppressWarnings("unused")
     public FocusButton() {
       super();
     }
   
+    @SuppressWarnings("unused")
     public FocusButton(Icon icon) {
       super(icon);
     }
   
+    @SuppressWarnings("unused")
     public FocusButton(String text, Icon icon) {
       super(text, icon);
     }// public FocusButton

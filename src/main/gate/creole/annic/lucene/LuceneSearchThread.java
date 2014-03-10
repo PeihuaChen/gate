@@ -146,6 +146,7 @@ public class LuceneSearchThread {
    *          instance of SearchThread is invoked
    * @return true iff search was successful false otherwise
    */
+  @SuppressWarnings("unchecked")
   public boolean search(String query, int patternWindow, String indexLocation,
           String corpusToSearchIn, String annotationSetToSearchIn,
           LuceneSearcher luceneSearcher) throws SearchException {
@@ -213,14 +214,14 @@ public class LuceneSearchThread {
       java.io.FileReader fileReader = new java.io.FileReader(indexLocation
               + "LuceneIndexDefinition.xml");
 
-      HashMap indexInformation = null;
+      Map<String,Object> indexInformation = null;
       try {
         // other wise read this file
         com.thoughtworks.xstream.XStream xstream = new com.thoughtworks.xstream.XStream(
                 new com.thoughtworks.xstream.io.xml.StaxDriver());
   
         // Saving was accomplished by using XML serialization of the map.
-        indexInformation = (HashMap)xstream.fromXML(fileReader);
+        indexInformation = (Map<String,Object>)xstream.fromXML(fileReader);
       }
       finally {
         fileReader.close();
@@ -283,7 +284,7 @@ public class LuceneSearchThread {
            * returned results. first term position is the position of the
            * first term in the found pattern
            */
-          ArrayList[] firstTermPositions = searcher.getFirstTermPositions();
+          List<?>[] firstTermPositions = searcher.getFirstTermPositions();
           // if no result available, set null to our scores
           if(firstTermPositions[0].size() == 0) {
             // do nothing
@@ -300,7 +301,7 @@ public class LuceneSearchThread {
   
             // we fetch all the first term positions for the query
             // issued
-            ArrayList ftp = (ArrayList)firstTermPositions[1].get(index);
+            List<?> ftp = (List<?>)firstTermPositions[1].get(index);
 
             /*
              * pattern length (in terms of total number of annotations
@@ -367,7 +368,7 @@ public class LuceneSearchThread {
   /**
    * First term positions.
    */
-  private List ftp;
+  private List<?> ftp;
 
   /**
    * This method returns a list containing instances of Pattern
@@ -496,7 +497,7 @@ public class LuceneSearchThread {
   private List<Pattern> createAnnicPatterns(LuceneQueryResult aResult) {
     // get the result from search engine
     List<Pattern> annicPatterns = new ArrayList<Pattern>();
-    List firstTermPositions = aResult.getFirstTermPositions();
+    List<?> firstTermPositions = aResult.getFirstTermPositions();
     if(firstTermPositions != null && firstTermPositions.size() > 0) {
       List<Integer> patternLength = aResult.patternLength();
       // locate Pattern
@@ -523,12 +524,12 @@ public class LuceneSearchThread {
    */
   private List<Pattern> locatePatterns(String docID, String annotationSetName,
           List<List<PatternAnnotation>> gateAnnotations,
-          List firstTermPositions, List<Integer> patternLength,
+          List<?> firstTermPositions, List<Integer> patternLength,
           String queryString) {
 
     // patterns
     List<Pattern> pats = new ArrayList<Pattern>();
-    outer: for(int i = 0; i < gateAnnotations.size(); i++) {
+    for(int i = 0; i < gateAnnotations.size(); i++) {
 
       // each element in the tokens stream is a pattern
       List<PatternAnnotation> annotations = gateAnnotations.get(i);
@@ -671,6 +672,7 @@ public class LuceneSearchThread {
     ObjectInput input = new ObjectInputStream(buffer);
 
     // deserialize the List
+    @SuppressWarnings("unchecked")
     List<gate.creole.annic.apache.lucene.analysis.Token> recoveredTokenStream = 
       (List<gate.creole.annic.apache.lucene.analysis.Token>)input.readObject();
     if(input != null) {
@@ -765,6 +767,7 @@ public class LuceneSearchThread {
    * @param query String
    * @return PatternResult
    */
+  @SuppressWarnings({"rawtypes", "unchecked"})
   private PatternResult getPatternResult(
           List<gate.creole.annic.apache.lucene.analysis.Token> subTokens,
           String annotationSetName, int patLen, int patWindow, String query,
@@ -1061,6 +1064,7 @@ public class LuceneSearchThread {
     
     String annotationSetName;
 
+    @SuppressWarnings("rawtypes")
     List firstTermPositions;
 
     List<Integer> patternLegths;
@@ -1073,18 +1077,22 @@ public class LuceneSearchThread {
    * 
    */
   private class QueryItem {
+    @SuppressWarnings("unused")
     float score;
 
+    @SuppressWarnings("unused")
     int id;
 
     String documentID;
     
+    @SuppressWarnings("rawtypes")
     List ftp;
 
     int patLen;
 
     int qType;
 
+    @SuppressWarnings("unused")
     Query query;
 
     String queryString;
@@ -1124,6 +1132,7 @@ public class LuceneSearchThread {
   /**
    * Checks if two first term positions are identical. 
    */
+  @SuppressWarnings({"unused", "rawtypes"})
   private boolean areTheyEqual(List ftp, List ftp1, int qType) {
     if(qType == 1) {
       if(ftp.size() == ftp1.size()) {

@@ -64,7 +64,6 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 
 /**
  * Implementation of AnnotationSet. Has a number of indices, all bar one of
@@ -86,7 +85,6 @@ import org.apache.log4j.Logger;
  */
 public class AnnotationSetImpl extends AbstractSet<Annotation> implements
                                                               AnnotationSet {
-  private static final Logger log = Logger.getLogger(AnnotationSetImpl.class);
   /** Freeze the serialization UID. */
   static final long serialVersionUID = 1479426765310434166L;
   /** The name of this set */

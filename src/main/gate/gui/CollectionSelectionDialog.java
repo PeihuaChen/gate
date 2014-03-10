@@ -16,12 +16,28 @@
 
 package gate.gui;
 
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
 
 
 /** This class visually selects some items from a collection and returns
@@ -80,11 +96,12 @@ public class CollectionSelectionDialog extends JDialog {
   /** Init local data from a source collection
     * @param aSourceData is the collection from what the user will choose
     */
+  @SuppressWarnings({"rawtypes", "unchecked"})
   protected void initLocalData(Collection aSourceData){
     targetListModel = new DefaultListModel();
     sourceListModel = new DefaultListModel();
     if (aSourceData == null) return;
-    ArrayList source = new ArrayList(aSourceData);
+    List source = new ArrayList(aSourceData);
     Collections.sort(source);
     Iterator iter = source.iterator();
     while(iter.hasNext()){
@@ -234,8 +251,9 @@ public class CollectionSelectionDialog extends JDialog {
     }// end for
   }// doAdd();
   /** Returns the target collection*/
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public Collection getSelectedCollection(){
-    ArrayList resultsList = new ArrayList();
+    List resultsList = new ArrayList();
     for (int i=0; i<targetListModel.getSize(); i++){
       resultsList.add(targetListModel.getElementAt(i));
     }// End for
@@ -243,6 +261,7 @@ public class CollectionSelectionDialog extends JDialog {
   }// getSelectedCollection()
 
   /** This method displays the CollectionSelectionDialog*/
+  @SuppressWarnings("rawtypes")
   public int show(String aTitle,Collection aSourceData){
     if (aTitle == null){
       JOptionPane.showMessageDialog(mainFrame,

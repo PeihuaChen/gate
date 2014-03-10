@@ -50,7 +50,7 @@ public class LuceneIndexer implements Indexer {
   /**
    * Various parameters such as location of the Index etc.
    */
-  protected Map parameters;
+  protected Map<String,Object> parameters;
 
   /**
    * Constructor
@@ -67,7 +67,7 @@ public class LuceneIndexer implements Indexer {
   /**
    * Checks the Index Parameters to see if they are all compatible
    */
-  protected void checkIndexParameters(Map parameters) throws IndexException {
+  protected void checkIndexParameters(Map<String,Object> parameters) throws IndexException {
     this.parameters = parameters;
 
     if(parameters == null) {
@@ -123,7 +123,7 @@ public class LuceneIndexer implements Indexer {
   /**
    * Returns the indexing parameters
    */
-  protected Map getIndexParameters() {
+  protected Map<String,Object> getIndexParameters() {
     return this.parameters;
   }
 
@@ -148,7 +148,7 @@ public class LuceneIndexer implements Indexer {
    * 
    */
   @Override
-  public void createIndex(Map indexParameters) throws IndexException {
+  public void createIndex(Map<String,Object> indexParameters) throws IndexException {
     checkIndexParameters(indexParameters);
     URL indexLocation = (URL)parameters.get(Constants.INDEX_LOCATION_URL);
 
@@ -324,7 +324,7 @@ public class LuceneIndexer implements Indexer {
    * @throws Exception
    */
   @Override
-  public void remove(List removedIDs) throws IndexException {
+  public void remove(List<Object> removedIDs) throws IndexException {
 
     String location = null;
     try {
@@ -404,15 +404,19 @@ public class LuceneIndexer implements Indexer {
     String indexUnitAnnotationType = (String)parameters
             .get(Constants.INDEX_UNIT_ANNOTATION_TYPE);
 
+    @SuppressWarnings("unchecked")
     List<String> featuresToExclude = new ArrayList<String>((List<String>)parameters
             .get(Constants.FEATURES_TO_EXCLUDE));
 
+    @SuppressWarnings("unchecked")
     List<String> featuresToInclude = new ArrayList<String>((List<String>)parameters
             .get(Constants.FEATURES_TO_INCLUDE));
 
+    @SuppressWarnings("unchecked")
     List<String> annotationSetsToExclude = new ArrayList<String>((List<String>)parameters
             .get(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE));
 
+    @SuppressWarnings("unchecked")
     List<String> annotationSetsToInclude = new ArrayList<String>((List<String>)parameters
             .get(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE));
 
@@ -461,6 +465,7 @@ public class LuceneIndexer implements Indexer {
    * @param indexLocationUrl
    * @throws IOException
    */
+  @SuppressWarnings("unchecked")
   private void readParametersFromDisk(URL indexLocationUrl) throws IOException {
     // we create a hashmap to store index definition in the index
     // directory
@@ -482,7 +487,7 @@ public class LuceneIndexer implements Indexer {
               new com.thoughtworks.xstream.io.xml.StaxDriver());
   
       // Saving is accomplished just using XML serialization of the map.
-      this.parameters = (Map)xstream.fromXML(fileReader);
+      this.parameters = (Map<String,Object>)xstream.fromXML(fileReader);
       // setting the index location URL
       this.parameters.put(Constants.INDEX_LOCATION_URL, indexLocationUrl);
     }
@@ -509,10 +514,10 @@ public class LuceneIndexer implements Indexer {
     }
 
     java.io.FileWriter fileWriter = new java.io.FileWriter(file);
-    Map indexInformation = new HashMap();
-    Iterator iter = parameters.keySet().iterator();
+    Map<String,Object> indexInformation = new HashMap<String,Object>();
+    Iterator<String> iter = parameters.keySet().iterator();
     while(iter.hasNext()) {
-      Object key = iter.next();
+      String key = iter.next();
       if(key.equals(Constants.INDEX_LOCATION_URL)) continue;
       indexInformation.put(key, parameters.get(key));
     }
@@ -540,7 +545,7 @@ public class LuceneIndexer implements Indexer {
    * Returns the set parameters
    */
   @Override
-  public Map getParameters() {
+  public Map<String,Object> getParameters() {
     return this.parameters;
   }
 

@@ -21,8 +21,8 @@ import gate.util.GateException;
 /** This exception indicates failure during persistence operations.
   */
 public class PersistenceException extends GateException {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+
+  private static final long serialVersionUID = 3021649267577030175L;
 
   /** Default construction */
   public PersistenceException() { super(); }

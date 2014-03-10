@@ -51,6 +51,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.io.IOUtils;
+
 public class LuceneDataStoreImpl extends SerialDataStore implements
                                                         SearchableDataStore,
                                                         CorpusListener,
@@ -109,7 +111,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   /**
    * Index Parameters
    */
-  protected Map indexParameters;
+  protected Map<String,Object> indexParameters;
 
   /**
    * URL of the index
@@ -124,7 +126,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   /**
    * This is where we store the search parameters
    */
-  protected Map searchParameters;
+  protected Map<String,Object> searchParameters;
 
   /** Close the data store. */
   @Override
@@ -173,9 +175,9 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
      * want to support old style: String versionInVersionFile = "1.0";
      * (but this means it will open *any* directory)
      */
+    BufferedReader isr = null;
     try {
-      FileReader fis = new FileReader(getVersionFile());
-      BufferedReader isr = new BufferedReader(fis);
+      isr = new BufferedReader(new FileReader(getVersionFile()));
       currentProtocolVersion = isr.readLine();
       String indexDirRelativePath = isr.readLine();
 
@@ -196,10 +198,12 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
         this.searcher = new LuceneSearcher();
         ((LuceneSearcher)this.searcher).setLuceneDatastore(this);
       }
-      isr.close();
     } catch(IOException e) {
       throw new PersistenceException("Invalid storage directory: " + e);
+    } finally {
+      IOUtils.closeQuietly(isr);
     }
+    
     if(!isValidProtocolVersion(currentProtocolVersion))
       throw new PersistenceException("Invalid protocol version number: "
               + currentProtocolVersion);
@@ -439,7 +443,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    * Sets the Indexer to be used for indexing Datastore
    */
   @Override
-  public void setIndexer(Indexer indexer, Map indexParameters)
+  public void setIndexer(Indexer indexer, Map<String,Object> indexParameters)
           throws IndexException {
 
     this.indexer = indexer;
@@ -504,7 +508,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    * Search the datastore
    */
   @Override
-  public boolean search(String query, Map searchParameters)
+  public boolean search(String query, Map<String,Object> searchParameters)
           throws SearchException {
     return this.searcher.search(query, searchParameters);
   }
@@ -701,7 +705,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
              * belongs to one easy way is to check all instances of
              * serial corpus loaded in memory
              */
-            List scs =
+            List<LanguageResource> scs =
                     Gate.getCreoleRegister().getLrInstances(
                             SerialCorpusImpl.class.getName());
             if(scs != null) {
@@ -709,7 +713,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
                * we need to check which corpus the deleted class
                * belonged to
                */
-              Iterator iter = scs.iterator();
+              Iterator<LanguageResource> iter = scs.iterator();
               while(iter.hasNext()) {
                 SerialCorpusImpl sci = (SerialCorpusImpl)iter.next();
                 if(sci != null) {
@@ -728,7 +732,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
              * relevant corpus won't exist in memory
              */
             if(corpusPID == null) {
-              List corpusPIDs = getLrIds(SerialCorpusImpl.class.getName());
+              List<String> corpusPIDs = getLrIds(SerialCorpusImpl.class.getName());
               if(corpusPIDs != null) {
                 for(int i = 0; i < corpusPIDs.size(); i++) {
                   Object corpusID = corpusPIDs.get(i);

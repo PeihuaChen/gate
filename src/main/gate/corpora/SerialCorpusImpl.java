@@ -147,8 +147,8 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    * @return a {@link List} of Objects representing the persistent IDs
    *         of the documents in this corpus.
    */
-  public List getDocumentPersistentIDs() {
-    List docsIDs = new ArrayList();
+  public List<Object> getDocumentPersistentIDs() {
+    List<Object> docsIDs = new ArrayList<Object>();
     if(docDataList == null) return docsIDs;
     Iterator<DocumentData> iter = docDataList.iterator();
     while(iter.hasNext()) {

@@ -27,7 +27,7 @@ public interface Indexer {
    *          depend on the implementing IndexManager
    * @throws IndexException
    */
-  public void createIndex(Map parameters) throws IndexException;
+  public void createIndex(Map<String,Object> parameters) throws IndexException;
 
   /** Optimize the existing index */
   public void optimizeIndex() throws IndexException;
@@ -51,7 +51,7 @@ public interface Indexer {
    * @param removedDocumentPersistenceIds
    * @throws Exception
    */
-  public void remove(List removedDocumentPersistenceIds) throws IndexException;
+  public void remove(List<Object> removedDocumentPersistenceIds) throws IndexException;
 
   /**
    * Set the corpus to be indexed
@@ -68,5 +68,5 @@ public interface Indexer {
   /**
    * Returns the parameters
    */
-  public Map getParameters();
+  public Map<String,Object> getParameters();
 }
