@@ -14,11 +14,16 @@
  */
 package gate.util.persistence;
 
-import java.util.*;
-
 import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
 import gate.util.Err;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 
 public class CollectionPersistence implements Persistence {
@@ -38,11 +43,11 @@ public class CollectionPersistence implements Persistence {
     }
     collectionType = source.getClass();
 
-    Collection coll = (Collection)source;
+    Collection<?> coll = (Collection<?>)source;
 
     //get the values in the iterator's order
-    localList = new ArrayList(coll.size());
-    Iterator elemIter = coll.iterator();
+    localList = new ArrayList<Serializable>(coll.size());
+    Iterator<?> elemIter = coll.iterator();
     while(elemIter.hasNext()){
       localList.add(PersistenceManager.
                     getPersistentRepresentation(elemIter.next()));
@@ -53,14 +58,15 @@ public class CollectionPersistence implements Persistence {
    * Creates a new object from the data contained. This new object is supposed
    * to be a copy for the original object used as source for data extraction.
    */
+  @SuppressWarnings("unchecked")
   @Override
   public Object createObject()throws PersistenceException,
                                      ResourceInstantiationException{
     List<String> exceptionsOccurred = new ArrayList<String>();
     //let's try to create a collection of the same type as the original
-    Collection result = null;
+    Collection<Object> result = null;
     try{
-      result = (Collection)collectionType.newInstance();
+      result = (Collection<Object>)collectionType.newInstance();
     }catch(Exception e){
       // ignore - if we can't create a collection of the original type
       // for any reason, just create an ArrayList as a fallback.  The
@@ -68,7 +74,7 @@ public class CollectionPersistence implements Persistence {
       // GATE resources, and GATE can convert an ArrayList to any type
       // required by a resource parameter.
     }
-    if(result == null) result = new ArrayList(localList.size());
+    if(result == null) result = new ArrayList<Object>(localList.size());
 
     //now we have the collection let's populate it
     for(Object local : localList) {
@@ -96,7 +102,7 @@ public class CollectionPersistence implements Persistence {
   }
 
 
-  protected List localList;
-  protected Class collectionType;
+  protected List<Serializable> localList;
+  protected Class<?> collectionType;
   static final long serialVersionUID = 7908364068699089834L;
 }

@@ -65,9 +65,9 @@ public class DSPersistence implements Persistence{
     }
 
     //check if the same datastore is not already open
-    Iterator dsIter = Gate.getDataStoreRegister().iterator();
+    Iterator<DataStore> dsIter = Gate.getDataStoreRegister().iterator();
     while(dsIter.hasNext()){
-      DataStore aDS = (DataStore)dsIter.next();
+      DataStore aDS = dsIter.next();
       if(aDS.getStorageUrl().equals(storageUrlString)) {
         return aDS;
       }

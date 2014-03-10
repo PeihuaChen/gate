@@ -14,11 +14,19 @@
  */
 package gate.util.persistence;
 
-import java.util.*;
-
-import gate.*;
-import gate.creole.*;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.creole.Parameter;
+import gate.creole.ParameterList;
+import gate.creole.ResourceData;
+import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
+
+import java.util.Iterator;
+import java.util.List;
 
 
 public class PRPersistence extends ResourcePersistence {
@@ -50,14 +58,14 @@ public class PRPersistence extends ResourcePersistence {
       //get the values for the init time parameters
       runtimeParams = Factory.newFeatureMap();
       //this is a list of lists
-      Iterator parDisjIter = ((List)params.getRuntimeParameters()).iterator();
+      Iterator<List<Parameter>> parDisjIter = params.getRuntimeParameters().iterator();
       while(parDisjIter.hasNext()){
-        Iterator parIter = ((List)parDisjIter.next()).iterator();
+        Iterator<Parameter> parIter = parDisjIter.next().iterator();
         while(parIter.hasNext()){
-          Parameter parameter = (Parameter)parIter.next();
+          Parameter parameter = parIter.next();
           String parName = parameter.getName();
           Object parValue = res.getParameterValue(parName);
-          ((Map)runtimeParams).put(parName,parValue);
+          ((FeatureMap)runtimeParams).put(parName,parValue);
         }
       }
       runtimeParams = PersistenceManager.

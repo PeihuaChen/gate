@@ -734,7 +734,6 @@ public class PersistenceManager {
       }
 
       // always write the list of creole URLs first
-      @SuppressWarnings("unchecked")
       List<URL> urlList = new ArrayList<URL>(Gate.getCreoleRegister().getDirectories());
       Object persistentList = getPersistentRepresentation(urlList);
 
