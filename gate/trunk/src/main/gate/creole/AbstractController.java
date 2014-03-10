@@ -51,7 +51,7 @@ public abstract class AbstractController extends AbstractResource
   /**
    * Shared featureMap
    */
-  protected Map<String,String> benchmarkFeatures = new HashMap<String,String>();
+  protected Map<Object,Object> benchmarkFeatures = new HashMap<Object,Object>();
 
   // executable code
   /**

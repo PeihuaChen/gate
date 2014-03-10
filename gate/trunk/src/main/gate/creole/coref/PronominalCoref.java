@@ -1246,8 +1246,10 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   private class Sentence {
 
     /** --- */
+    @SuppressWarnings("unused")
     private int sentNumber;
     /** --- */
+    @SuppressWarnings("unused")
     private int paraNumber;
     /** --- */
     private Long startOffset;

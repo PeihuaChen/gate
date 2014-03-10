@@ -20,7 +20,7 @@ import java.util.*;
 public class LuceneTokenizer extends TokenStream {
 	Document document;
 	List<Token> tokens;
-	List featuresToExclude;
+	//List featuresToExclude;
 	int pointer = 0;
 
   /**

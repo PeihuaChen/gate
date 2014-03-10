@@ -32,9 +32,6 @@ import gate.util.FeatureBearer;
 public class AnnotationImpl extends AbstractFeatureBearer
                             implements Annotation, FeatureBearer {
 
-  /** Debug flag
-   */
-  private static final boolean DEBUG = false;
   /** Freeze the serialization UID. */
   static final long serialVersionUID = -5658993256574857725L;
 

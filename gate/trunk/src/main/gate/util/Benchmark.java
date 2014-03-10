@@ -155,7 +155,7 @@ public class Benchmark {
    *          invoked on the objects.
    */
   public static void checkPoint(long startTime, String benchmarkID,
-          Object objectInvokingThisCheckPoint, Map benchmarkingFeatures) {
+          Object objectInvokingThisCheckPoint, Map<Object,Object> benchmarkingFeatures) {
 
     // check if logging is disabled
     if(!benchmarkingEnabled) return;
@@ -181,7 +181,7 @@ public class Benchmark {
    *          invoked on the objects.
    */
   public static void checkPointWithDuration(long totalTime, String benchmarkID,
-          Object objectInvokingThisCheckPoint, Map benchmarkingFeatures) {
+          Object objectInvokingThisCheckPoint, Map<Object,Object> benchmarkingFeatures) {
 
     // check if logging is disabled
     if(!benchmarkingEnabled) return;
@@ -197,7 +197,7 @@ public class Benchmark {
    * @see #checkPoint(long, String, Object, Map)
    */
   public static void checkPoint(String benchmarkID,
-          Object objectInvokingThisCheckPoint, Map benchmarkingFeatures) {
+          Object objectInvokingThisCheckPoint, Map<Object,Object> benchmarkingFeatures) {
     if(!benchmarkingEnabled) return;
     logCheckPoint("END", benchmarkID, objectInvokingThisCheckPoint,
             benchmarkingFeatures);
@@ -211,7 +211,7 @@ public class Benchmark {
    */
   private static void logCheckPoint(String processingTimeOrFlag,
           String benchmarkID, Object objectInvokingThisCheckPoint,
-          Map benchmarkingFeatures) {
+          Map<Object,Object> benchmarkingFeatures) {
     // finally build the string to be logged
     StringBuilder messageToLog = new StringBuilder();
     messageToLog.append("" + System.currentTimeMillis() + " ");
@@ -286,7 +286,7 @@ public class Benchmark {
    */
   public static void executeWithBenchmarking(Executable executable,
           String benchmarkID, Object objectInvokingThisCheckPoint,
-          Map benchmarkingFeatures) throws ExecutionException {
+          Map<Object,Object> benchmarkingFeatures) throws ExecutionException {
     if(!benchmarkingEnabled) {
       executable.execute();
     }
@@ -302,7 +302,7 @@ public class Benchmark {
         executable.execute();
       }
       catch(Exception e) {
-        Map tempFeatures = new HashMap();
+        Map<Object,Object> tempFeatures = new HashMap<Object,Object>();
         if(benchmarkingFeatures != null) {
           tempFeatures.putAll(benchmarkingFeatures);
         }

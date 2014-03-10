@@ -198,6 +198,7 @@ public class FeaturesSchemaEditor extends XJTable
    * Fire a table data changed event for the feature table whith featureList
    * used as data model.
    */
+  @SuppressWarnings({"rawtypes", "unchecked"})
   protected void populate(){
     featureList.clear();
     //get all the existing features

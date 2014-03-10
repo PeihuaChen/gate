@@ -49,7 +49,7 @@ public abstract class Transducer implements Serializable, Benchmarkable
   /**
    * Shared featureMap
    */
-  protected Map benchmarkFeatures = new HashMap();
+  protected Map<Object,Object> benchmarkFeatures = new HashMap<Object,Object>();
 
   /**
    * Benchmark ID of this transducer.

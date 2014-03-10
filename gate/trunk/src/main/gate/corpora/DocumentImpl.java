@@ -957,6 +957,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * @return The XML document obtained from raw text + the information from the
    *         dump annotation set.
    */
+  @SuppressWarnings("unused")
   private String saveAnnotationSetAsXml(AnnotationSet aDumpAnnotSet,
           boolean includeFeatures) {
     String content = null;
@@ -1770,6 +1771,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    *          The annotation set possibly containing the root annotation.
    * @return The root annotation or null is it fails
    */
+  @SuppressWarnings("unused")
   private Annotation identifyTheRootAnnotation(AnnotationSet anAnnotationSet) {
     if(anAnnotationSet == null) return null;
     // If the starting node of this annotation is not null, then the annotation
@@ -2038,20 +2040,6 @@ public class DocumentImpl extends AbstractLanguageResource implements
     return DocumentStaxUtils.toXml(this);
     //return DocumentXmlUtils.toXml(this);
   }// toXml
-
-  /**
-   * This method saves an AnnotationSet as XML.
-   * May be removed once GLEAM doc-service is updated.
-   * 
-   * @param anAnnotationSet
-   *          The annotation set that has to be saved as XML.
-   * @return a String like this: <AnnotationSet> <Annotation>....
-   *         </AnnotationSet>
-   */
-  private void annotationSetToXml(AnnotationSet anAnnotationSet,
-          StringBuffer buffer) {
-    DocumentXmlUtils.annotationSetToXml(anAnnotationSet, buffer);
-  }// annotationSetToXml
 
   /**
    * Returns a map (possibly empty) with the named annotation sets. It returns <code>null</code>

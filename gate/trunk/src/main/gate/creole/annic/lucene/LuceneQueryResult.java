@@ -23,7 +23,7 @@ public class LuceneQueryResult {
   
   private String annotationSetName;
 
-  private List firstTermPositions;
+  private List<?> firstTermPositions;
 
   private List<Integer> patternLength;
 
@@ -43,7 +43,7 @@ public class LuceneQueryResult {
    * @param gateAnnotations
    * @param query
    */
-  public LuceneQueryResult(Object docID, String annotationSetName, List firstTermPositions,
+  public LuceneQueryResult(Object docID, String annotationSetName, List<?> firstTermPositions,
           List<Integer> patternLength, int queryType, List<List<PatternAnnotation>> gateAnnotations,
           String query) {
     this.docID = docID;
@@ -81,7 +81,7 @@ public class LuceneQueryResult {
    *         Integer values indicating positions of first annotations of
    *         found patterns in the token stream.
    */
-  public List getFirstTermPositions() {
+  public List<?> getFirstTermPositions() {
     return firstTermPositions;
   }
 

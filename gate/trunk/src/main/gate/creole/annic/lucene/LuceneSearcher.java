@@ -191,6 +191,7 @@ public class LuceneSearcher implements Searcher {
   /**
    * Method retunrs true/false indicating whether results were found or not.
    */
+  @SuppressWarnings("unchecked")
   @Override
   public boolean search(String query, Map<String, Object> parameters)
       throws SearchException {

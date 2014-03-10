@@ -285,6 +285,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     List<FSMInstance> acceptingFSMInstances = new LinkedList<FSMInstance>();
 
     // find the first node of the document
+    @SuppressWarnings("unchecked")
     Node startNode = ((List<Annotation>)annotationsByOffset.get(offsets
             .first())).get(0).getStartNode();
 
@@ -656,6 +657,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
    * @return true if processing should keep going, false otherwise.
    */
 
+  @SuppressWarnings("unchecked")
   protected boolean fireRule(List<FSMInstance> acceptingFSMInstances,
           SearchState state, long lastNodeOff, SimpleSortedSet offsets,
           AnnotationSet inputAS, AnnotationSet outputAS, Document doc,

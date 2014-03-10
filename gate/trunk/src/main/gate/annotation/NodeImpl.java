@@ -23,10 +23,6 @@ import gate.Node;
  */
 public class NodeImpl implements Node, Comparable<Node>
 {
-  /** Debug flag
-   */
-  private static final boolean DEBUG = false;
-
   /** Freeze the serialization UID. */
   static final long serialVersionUID = -8240414984367916298L;
 

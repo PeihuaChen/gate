@@ -27,7 +27,7 @@ public interface Searchable {
    *          implementation of provided indexer
    * @throws IndexException
    */
-  public void setIndexer(Indexer indexer, Map parameters) throws IndexException;
+  public void setIndexer(Indexer indexer, Map<String,Object> parameters) throws IndexException;
 
   /**
    * Returns the Indexer
@@ -55,7 +55,7 @@ public interface Searchable {
    * @return true if the search was successful
    * @throws SearchException
    */
-  public boolean search(String query, Map searchParameters)
+  public boolean search(String query, Map<String,Object> searchParameters)
           throws SearchException;
 
   /**

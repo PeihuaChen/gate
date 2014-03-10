@@ -30,7 +30,7 @@ import gate.util.*;
 /**
  * A simple editor for Collection values.
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial","rawtypes","unchecked"})
 public class ListEditorDialog extends JDialog {
 
   /**
@@ -108,7 +108,7 @@ public class ListEditorDialog extends JDialog {
       
       if(SortedSet.class.isAssignableFrom(collectionType)
               && data != null) {
-        comparator = ((SortedSet)data).comparator();
+        comparator = ((SortedSet<?>)data).comparator();
       }
       if(comparator == null) {
         comparator = new NaturalComparator();

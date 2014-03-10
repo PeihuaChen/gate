@@ -156,6 +156,7 @@ public class TextualDocumentFormat extends DocumentFormat
   } // setNewLineProperty()
 
   /** Delete '\r' in combination CRLF or LFCR in document content */
+  @SuppressWarnings("unused")
   private void removeExtraNewLine(Document doc) {
     String content = doc.getContent().toString();
     StringBuffer buff = new StringBuffer(content);
