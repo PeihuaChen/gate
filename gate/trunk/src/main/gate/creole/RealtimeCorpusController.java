@@ -470,9 +470,5 @@ public class RealtimeCorpusController extends SerialAnalyserController {
   }
   
   protected boolean suppressExceptions = true;
-  
-  /**
-   * Sleep time in milliseconds while waiting for worker thread to finish.
-   */
-  private static final int POLL_INTERVAL = 50;
+
 }
