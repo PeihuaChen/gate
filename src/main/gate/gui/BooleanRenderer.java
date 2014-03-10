@@ -16,6 +16,7 @@ package gate.gui;
 
 import java.awt.Component;
 
+import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
@@ -27,15 +28,15 @@ public class BooleanRenderer extends DefaultTableCellRenderer {
   @Override
   public Component getTableCellRendererComponent(JTable table, Object value,
           boolean isSelected, boolean hasFocus, int row, int column) {
-    super.getTableCellRendererComponent(table, "", isSelected, hasFocus, row,
+    JLabel component = (JLabel)super.getTableCellRendererComponent(table, "", isSelected, hasFocus, row,
             column);
     if(value instanceof Boolean && value != null
             && ((Boolean)value).booleanValue()) {
-      setIcon(MainFrame.getIcon("tick"));
+      component.setIcon(MainFrame.getIcon("tick"));
       // setIcon(MainFrame.getIcon((isSelected) ? "tick_white" :
       // "tick"));
     } else {
-      setIcon(null);
+      component.setIcon(null);
     }
 
     return this;
