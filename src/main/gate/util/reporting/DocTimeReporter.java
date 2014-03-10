@@ -35,6 +35,8 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.IOUtils;
+
 import gate.util.reporting.exceptions.BenchmarkReportExecutionException;
 import gate.util.reporting.exceptions.BenchmarkReportFileAccessException;
 import gate.util.reporting.exceptions.BenchmarkReportInputFileFormatException;
@@ -72,7 +74,7 @@ public class DocTimeReporter implements BenchmarkReportable {
   /** Total time taken by the given pipeline for the current logical run. */
   private float globalTotal = 0;
   /** A LinkedHashMap containing the documents matching the given PRs. */
-  private LinkedHashMap<String, Object> docContainer = new LinkedHashMap<String, Object>();
+  private LinkedHashMap<String, String> docContainer = new LinkedHashMap<String, String>();
   /**
    * Folder where the benchmark.txt files are created for specific pipeline log
    * entries.
@@ -160,6 +162,7 @@ public class DocTimeReporter implements BenchmarkReportable {
    * @return An Object containing modified hierarchical structure of processing
    *         elements with totals and All others embedded in it.
    */
+  @SuppressWarnings("unchecked")
   @Override
   public Object calculate(Object reportContainer) {
     return sortHashMapByValues(
@@ -174,22 +177,22 @@ public class DocTimeReporter implements BenchmarkReportable {
    *          An Object of type LinkedHashMap to be sorted by its values.
    * @return An Object containing the sorted LinkedHashMap.
    */
-  private LinkedHashMap sortHashMapByValues(LinkedHashMap passedMap) {
-    List mapKeys = new ArrayList(passedMap.keySet());
-    List mapValues = new ArrayList(passedMap.values());
+  private LinkedHashMap<?,?> sortHashMapByValues(LinkedHashMap<String,String> passedMap) {
+    List<String> mapKeys = new ArrayList<String>(passedMap.keySet());
+    List<String> mapValues = new ArrayList<String>(passedMap.values());
 
     Collections.sort(mapValues, new ValueComparator());
     Collections.sort(mapKeys);
     // Reversing the collection to sort the values in descending order
     Collections.reverse(mapValues);
-    LinkedHashMap sortedMap = new LinkedHashMap();
+    LinkedHashMap<String,String> sortedMap = new LinkedHashMap<String,String>();
 
-    Iterator<Integer> valueIt = mapValues.iterator();
+    Iterator<String> valueIt = mapValues.iterator();
     while (valueIt.hasNext()) {
-      Object val = valueIt.next();
+      String val = valueIt.next();
       Iterator<String> keyIt = mapKeys.iterator();
       while (keyIt.hasNext()) {
-        Object key = keyIt.next();
+        String key = keyIt.next();
         String comp1 = passedMap.get(key).toString();
         String comp2 = val.toString();
 
@@ -214,24 +217,25 @@ public class DocTimeReporter implements BenchmarkReportable {
    * @return An Object containing the LinkedHashMap with the element values
    *         totaled.
    */
-  private LinkedHashMap<String, Object> doTotal(
+  @SuppressWarnings("unchecked")
+  private LinkedHashMap<String, String> doTotal(
     LinkedHashMap<String, Object> reportContainer) {
     LinkedHashMap<String, Object> myHash =
       reportContainer;
     Iterator<String> i = myHash.keySet().iterator();
     while (i.hasNext()) {
-      Object key = i.next();
+      String key = i.next();
       if (myHash.get(key) instanceof LinkedHashMap) {
         docContainer = doTotal((LinkedHashMap<String, Object>) (myHash
             .get(key)));
       } else {
         if (docContainer.get(key) == null) {
-          docContainer.put((String) key, myHash.get(key));
+          docContainer.put(key, (String)myHash.get(key));
         } else {
           // Do total if value already exists
-          int val = Integer.parseInt((String) docContainer.get(key))
+          int val = Integer.parseInt(docContainer.get(key))
               + Integer.parseInt((String) myHash.get(key));
-          docContainer.put((String) key, Integer.toString(val));
+          docContainer.put(key, Integer.toString(val));
         }
       }
     }
@@ -248,6 +252,7 @@ public class DocTimeReporter implements BenchmarkReportable {
    * @param outputFile
    *          Path where to save the report.
    */
+  @SuppressWarnings("unchecked")
   @Override
   public void printReport(Object reportSource, File outputFile) {
     if (printMedia.equalsIgnoreCase(MEDIA_TEXT)) {
@@ -269,6 +274,7 @@ public class DocTimeReporter implements BenchmarkReportable {
    */
   private void printToText(Object reportContainer, File outputFile) {
     ArrayList<String> printLines = new ArrayList<String>();
+    @SuppressWarnings("unchecked")
     LinkedHashMap<String, Object> rcHash =
       (LinkedHashMap<String, Object>) reportContainer;
     String docs = "";
@@ -473,6 +479,7 @@ public class DocTimeReporter implements BenchmarkReportable {
    * @param docName
    *          Name of the document being processed.
    */
+  @SuppressWarnings("unchecked")
   private void organizeEntries(LinkedHashMap<String, Object> store,
                                String matchedPR, String bTime, String docName) {
     allDocs.add(docName);
@@ -956,8 +963,9 @@ public class DocTimeReporter implements BenchmarkReportable {
    */
   private long tail(File fileToBeRead, int chunkSize)
       throws BenchmarkReportInputFileFormatException {
+    RandomAccessFile raf = null;
     try {
-      RandomAccessFile raf = new RandomAccessFile(fileToBeRead, "r");
+      raf = new RandomAccessFile(fileToBeRead, "r");
       Vector<String> lastNlines = new Vector<String>();
       int delta = 0;
       long curPos = 0;
@@ -997,6 +1005,9 @@ public class DocTimeReporter implements BenchmarkReportable {
     } catch (IOException e) {
       e.printStackTrace();
       return -1;
+    }
+    finally {
+      IOUtils.closeQuietly(raf);
     }
   }
 
