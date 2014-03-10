@@ -39,6 +39,6 @@ public class BooleanRenderer extends DefaultTableCellRenderer {
       component.setIcon(null);
     }
 
-    return this;
+    return component;
   }// public Component getTableCellRendererComponent
 }// class BooleanRenderer extends DefaultTableCellRenderer
