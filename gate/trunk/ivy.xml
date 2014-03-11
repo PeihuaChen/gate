@@ -38,7 +38,7 @@
     <dependency org="log4j" name="log4j" rev="1.2.17" />
 
     <!-- used extensively throughout GATE for processing XML files -->
-    <dependency org="jdom" name="jdom" rev="1.0"/>
+    <dependency org="org.jdom" name="jdom" rev="1.1.3"/>
 
     <!-- used to parse and load HTML documents into GATE -->
     <dependency org="net.sourceforge.nekohtml" name="nekohtml" rev="1.9.14" />
