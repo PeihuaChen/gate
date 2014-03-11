@@ -176,7 +176,7 @@
         <dependency>
             <groupId>com.thoughtworks.xstream</groupId>
             <artifactId>xstream</artifactId>
-            <version>1.4.4</version>
+            <version>1.4.7</version>
             <scope>compile</scope>
             <exclusions>
                 <!-- we will pull in the full xpp3 so we don't need these -->                
@@ -203,7 +203,7 @@
         <dependency>
             <groupId>jaxen</groupId>
             <artifactId>jaxen</artifactId>
-            <version>1.1</version>
+            <version>1.1.6</version>
             <scope>runtime</scope>
             <exclusions>
                 <!-- we don't need any of these dependencies -->
