@@ -98,7 +98,7 @@
     <dependency org="org.apache.lucene" name="lucene-core" rev="3.5.0" />
     
     <!-- required for the new controller metadata viewer -->
-    <dependency org="org.xhtmlrenderer" name="flying-saucer-core" rev="9.0.1" />
+    <dependency org="org.xhtmlrenderer" name="flying-saucer-core" rev="9.0.4" />
 
     <!-- Used for comparing XML files during some of the GATE tests -->
     <dependency org="xmlunit" name="xmlunit" rev="1.2" conf="required->master" />
