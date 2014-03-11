@@ -73,7 +73,7 @@
     <dependency org="org.apache.ivy" name="ivy" rev="2.3.0" />
 
     <!-- ANT is used internally by GATE for some tasks, such as the export for GATECloud.net -->
-    <dependency org="org.apache.ant" name="ant" rev="1.8.1" />
+    <dependency org="org.apache.ant" name="ant" rev="1.9.3" />
         
     <!--required for loading and saving .gapp files and by sime plugins.
         we pull in the full XPP3 so we only need XStream's master artifact -->
