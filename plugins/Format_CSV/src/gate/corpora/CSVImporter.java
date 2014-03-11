@@ -77,6 +77,8 @@ public class CSVImporter extends ResourceHelper {
   private static JTextField txtSeparator = new JTextField(",", 3);
 
   private static JTextField txtQuoteChar = new JTextField("\"", 3);
+  
+  private static JTextField txtEncoding = new JTextField("UTF-8");
 
   private static FileFilter CSV_FILE_FILTER = new ExtensionFileFilter(
       "CSV Files (*.csv)", "csv");
@@ -115,7 +117,23 @@ public class CSVImporter extends ResourceHelper {
     constraints = new GridBagConstraints();
     constraints.gridx = GridBagConstraints.RELATIVE;
     constraints.gridy = 1;
-    constraints.gridwidth = 2;
+    constraints.gridwidth = 1;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.insets = new Insets(0, 0, 15, 5);
+    dialog.add(new JLabel("Encoding:"), constraints);
+    
+    constraints = new GridBagConstraints();
+    constraints.gridx = GridBagConstraints.RELATIVE;
+    constraints.gridy = 1;
+    constraints.gridwidth = 1;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.insets = new Insets(0, 15, 15, 10);
+    dialog.add(txtEncoding, constraints);
+    
+    constraints = new GridBagConstraints();
+    constraints.gridx = GridBagConstraints.RELATIVE;
+    constraints.gridy = 1;
+    constraints.gridwidth = 1;
     constraints.fill = GridBagConstraints.HORIZONTAL;
     constraints.insets = new Insets(0, 0, 15, 5);
     dialog.add(new JLabel("Column Separator:"), constraints);
@@ -260,7 +278,7 @@ public class CSVImporter extends ResourceHelper {
                         // file
                         // then call the populate method passing through all the
                         // options from the GUI
-                        populate((Corpus)handle.getTarget(), f.toURI().toURL(),
+                        populate((Corpus)handle.getTarget(), f.toURI().toURL(), txtEncoding.getText(),
                             (Integer)textColModel.getValue(),
                             cboFeatures.isSelected(), separator, quote);
                       } else {
@@ -270,7 +288,7 @@ public class CSVImporter extends ResourceHelper {
                         // the
                         // options from the GUI
                         createDoc((Corpus)handle.getTarget(),
-                            f.toURI().toURL(),
+                            f.toURI().toURL(), txtEncoding.getText(),
                             (Integer)textColModel.getValue(),
                             cboFeatures.isSelected(), separator, quote);
                       }
@@ -283,7 +301,7 @@ public class CSVImporter extends ResourceHelper {
                       // then call the populate method passing through all the
                       // options from the GUI
                       populate((Corpus)handle.getTarget(),
-                          new URL(txtURL.getText()),
+                          new URL(txtURL.getText()), txtEncoding.getText(),
                           (Integer)textColModel.getValue(),
                           cboFeatures.isSelected(), separator, quote);
                     } else {
@@ -291,7 +309,7 @@ public class CSVImporter extends ResourceHelper {
                       // then call the createDoc method passing through all the
                       // options from the GUI
                       createDoc((Corpus)handle.getTarget(),
-                          new URL(txtURL.getText()),
+                          new URL(txtURL.getText()), txtEncoding.getText(),
                           (Integer)textColModel.getValue(),
                           cboFeatures.isSelected(), separator, quote);
                     }
@@ -315,9 +333,9 @@ public class CSVImporter extends ResourceHelper {
     return actions;
   }
 
-  public static void populate(Corpus corpus, URL csv, int column,
+  public static void populate(Corpus corpus, URL csv, String encoding, int column,
       boolean colLabels) {
-    populate(corpus, csv, column, colLabels, ',', '"');
+    populate(corpus, csv, encoding, column, colLabels, ',', '"');
   }
 
   /**
@@ -337,13 +355,13 @@ public class CSVImporter extends ResourceHelper {
    *          the character used to quote data that includes the column
    *          separator (usually ")
    */
-  public static void populate(Corpus corpus, URL csv, int column,
+  public static void populate(Corpus corpus, URL csv, String encoding, int column,
       boolean colLabels, char separator, char quote) {
     CSVReader reader = null;
     try {
       // open a CSVReader over the URL
       reader =
-          new CSVReader(new InputStreamReader(csv.openStream()), separator,
+          new CSVReader(new InputStreamReader(csv.openStream(),encoding), separator,
               quote);
 
       // if we are adding features read the first line
@@ -406,9 +424,9 @@ public class CSVImporter extends ResourceHelper {
     }
   }
 
-  public static void createDoc(Corpus corpus, URL csv, int column,
+  public static void createDoc(Corpus corpus, URL csv, String encoding, int column,
       boolean colLabels) {
-    createDoc(corpus, csv, column, colLabels, ',', '"');
+    createDoc(corpus, csv, encoding, column, colLabels, ',', '"');
   }
 
   /**
@@ -428,14 +446,14 @@ public class CSVImporter extends ResourceHelper {
    *          the character used to quote data that includes the column
    *          separator (usually ")
    */
-  public static void createDoc(Corpus corpus, URL csv, int column,
+  public static void createDoc(Corpus corpus, URL csv, String encoding, int column,
       boolean colLabels, char separator, char quote) {
     CSVReader reader = null;
     Document doc = null;
     try {
       // open a CSVReader over the URL
       reader =
-          new CSVReader(new InputStreamReader(csv.openStream()), separator,
+          new CSVReader(new InputStreamReader(csv.openStream(),encoding), separator,
               quote);
 
       // if we are adding features read the first line
