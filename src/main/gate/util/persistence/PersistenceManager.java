@@ -70,7 +70,7 @@ import org.apache.log4j.Logger;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.reflection.FieldDictionary;
-import com.thoughtworks.xstream.converters.reflection.Sun14ReflectionProvider;
+import com.thoughtworks.xstream.converters.reflection.SunUnsafeReflectionProvider;
 import com.thoughtworks.xstream.converters.reflection.XStream12FieldKeySorter;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
@@ -718,7 +718,7 @@ public class PersistenceManager {
         // Just create the xstream and the filewriter that will later be
         // used to serialize objects.
         xstream = new XStream(
-          new Sun14ReflectionProvider(new FieldDictionary(new XStream12FieldKeySorter())),
+          new SunUnsafeReflectionProvider(new FieldDictionary(new XStream12FieldKeySorter())),
           new StaxDriver(new XStream11NameCoder())) {
           @Override
           protected boolean useXStream11XmlFriendlyMapper() {
