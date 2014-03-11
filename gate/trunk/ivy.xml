@@ -92,7 +92,7 @@
     <dependency org="org.springframework" name="spring-aop" rev="2.0.8" />
     
     <!-- required for outputting documents as JSON -->
-    <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.2.3" />
+    <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.3.2" />
 
     <!-- required for indexing datastores (not used by ANNIC) -->
     <dependency org="org.apache.lucene" name="lucene-core" rev="3.5.0" />
