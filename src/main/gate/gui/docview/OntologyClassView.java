@@ -20,7 +20,12 @@ import gate.FeatureMap;
 import gate.Gate;
 import gate.LanguageResource;
 import gate.Resource;
-import gate.creole.ontology.*;
+import gate.creole.ontology.OClass;
+import gate.creole.ontology.OConstants;
+import gate.creole.ontology.OResource;
+import gate.creole.ontology.Ontology;
+import gate.creole.ontology.OntologyModificationListener;
+import gate.creole.ontology.RDFProperty;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
 import gate.gui.MainFrame;
@@ -30,8 +35,50 @@ import gate.gui.ontology.OntologyItemComparator;
 import gate.util.LuckyException;
 import gate.util.OptionsMap;
 
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.EventObject;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+
+import javax.swing.AbstractAction;
+import javax.swing.AbstractCellEditor;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTree;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.event.TreeExpansionEvent;
@@ -39,11 +86,13 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.text.BadLocationException;
-import javax.swing.tree.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import java.util.List;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.ExpandVetoException;
+import javax.swing.tree.TreeCellEditor;
+import javax.swing.tree.TreeCellRenderer;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
 /**
  * Document view that displays an ontology class tree to annotate a document.
@@ -68,7 +117,7 @@ public class OntologyClassView extends AbstractDocumentView
 
     colorByClassMap = new HashMap<OClass, Color>();
     highlightedClasses = new HashSet<OClass>();
-    highlightsDataByClassMap = new HashMap<OClass, List>();
+    highlightsDataByClassMap = new HashMap<OClass, List<TextualDocumentView.HighlightData>>();
     treeByOntologyMap = new HashMap<Ontology, JTree>();
     String prefix = getClass().getName() + '.';
     hiddenClassesSet = userConfig.getSet(prefix + "hiddenclasses");
@@ -80,17 +129,17 @@ public class OntologyClassView extends AbstractDocumentView
 
     // get a pointer to the text view used to display
     // the selected annotations
-    Iterator centralViewsIter = owner.getCentralViews().iterator();
+    Iterator<DocumentView> centralViewsIter = owner.getCentralViews().iterator();
     while(textView == null && centralViewsIter.hasNext()){
-      DocumentView aView = (DocumentView) centralViewsIter.next();
+      DocumentView aView = centralViewsIter.next();
       if(aView instanceof TextualDocumentView)
         textView = (TextualDocumentView) aView;
     }
     textArea = textView.getTextView();
     // get a pointer to the instance view
-    Iterator horizontalViewsIter = owner.getHorizontalViews().iterator();
+    Iterator<DocumentView> horizontalViewsIter = owner.getHorizontalViews().iterator();
     while(instanceView == null && horizontalViewsIter.hasNext()){
-      DocumentView aView = (DocumentView)horizontalViewsIter.next();
+      DocumentView aView = horizontalViewsIter.next();
       if (aView instanceof OntologyInstanceView) {
         instanceView = (OntologyInstanceView) aView;
       }
@@ -323,7 +372,7 @@ public class OntologyClassView extends AbstractDocumentView
       final JTree tree = treeByOntologyMap.get(ontology);
       DefaultMutableTreeNode node =
         (DefaultMutableTreeNode) tree.getModel().getRoot();
-      final Enumeration enumeration = node.preorderEnumeration();
+      final Enumeration<?> enumeration = node.preorderEnumeration();
       SwingUtilities.invokeLater(new Runnable() { @Override
       public void run() {
         // traverse the expanded class tree and update all the nodes
@@ -605,7 +654,7 @@ public class OntologyClassView extends AbstractDocumentView
       tree.setCellEditor(new ClassTreeCellEditor(tree));
       DefaultMutableTreeNode node = (DefaultMutableTreeNode)
         tree.getModel().getRoot();
-      Enumeration enumeration = node.children();
+      Enumeration<?> enumeration = node.children();
       // expand tree until second level
       while (enumeration.hasMoreElements()) {
         node = (DefaultMutableTreeNode) enumeration.nextElement();
@@ -764,7 +813,7 @@ public class OntologyClassView extends AbstractDocumentView
               final JTree tree = treeByOntologyMap.get(ontology);
               DefaultMutableTreeNode node =
                 (DefaultMutableTreeNode) tree.getModel().getRoot();
-              Enumeration nodesEnum = node.preorderEnumeration();
+              Enumeration<?> nodesEnum = node.preorderEnumeration();
               boolean done = false;
               // traverse the class tree
               while(!done && nodesEnum.hasMoreElements()) {
@@ -881,8 +930,8 @@ public class OntologyClassView extends AbstractDocumentView
   public void highlightInstance(AnnotationSet set, Annotation annotation,
                                 final OClass oClass, final JTree tree) {
     final AnnotationData annotationData = new AnnotationDataImpl(set, annotation);
-    final List highlightsData = highlightsDataByClassMap.containsKey(oClass) ?
-      highlightsDataByClassMap.get(oClass) : new ArrayList();
+    final List<TextualDocumentView.HighlightData> highlightsData = highlightsDataByClassMap.containsKey(oClass) ?
+      highlightsDataByClassMap.get(oClass) : new ArrayList<TextualDocumentView.HighlightData>();
     highlightedClasses.add(oClass);
     final Color color;
     if (colorByClassMap.containsKey(oClass)) {
@@ -1043,7 +1092,7 @@ public class OntologyClassView extends AbstractDocumentView
   /** Colors for class and their instances only if the latter exist. */
   protected Map<OClass, Color> colorByClassMap;
   /** HighlightData list for each class. */
-  protected Map<OClass, List> highlightsDataByClassMap;
+  protected Map<OClass, List<TextualDocumentView.HighlightData>> highlightsDataByClassMap;
   /** Link trees with their ontologies. */
   protected Map<Ontology, JTree> treeByOntologyMap;
   /** Classes to hide in the trees. */

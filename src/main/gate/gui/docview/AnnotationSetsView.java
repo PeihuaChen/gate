@@ -18,6 +18,7 @@ import gate.AnnotationSet;
 import gate.Factory;
 import gate.Gate;
 import gate.GateConstants;
+import gate.Resource;
 import gate.TextualDocument;
 import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
@@ -202,7 +203,7 @@ public class AnnotationSetsView extends AbstractDocumentView
 
   public AnnotationSetsView(){
     setHandlers = new ArrayList<SetHandler>();
-    tableRows = new ArrayList();
+    tableRows = new ArrayList<Object>();
     visibleAnnotationTypes = new LinkedBlockingQueue<TypeSpec>();
     actions = new ArrayList<Action>();
     actions.add(new SavePreserveFormatAction());
@@ -337,7 +338,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     for(String aVrType : vrTypes) {
       ResourceData rData = Gate.getCreoleRegister().get(aVrType);
       try {
-        Class resClass = rData.getResourceClass();
+        Class<? extends Resource> resClass = rData.getResourceClass();
         if(OwnedAnnotationEditor.class.isAssignableFrom(resClass)) {
           OwnedAnnotationEditor newEditor = (OwnedAnnotationEditor)resClass
                   .newInstance();
@@ -368,14 +369,14 @@ public class AnnotationSetsView extends AbstractDocumentView
   
   protected void populateUI(){
     setHandlers.add(new SetHandler(document.getAnnotations()));
-    List setNames = document.getNamedAnnotationSets() == null ?
-            new ArrayList() :
-            new ArrayList(document.getNamedAnnotationSets().keySet());
+    List<String> setNames = document.getNamedAnnotationSets() == null ?
+            new ArrayList<String>() :
+            new ArrayList<String>(document.getNamedAnnotationSets().keySet());
     Collections.sort(setNames);
-    Iterator setsIter = setNames.iterator();
+    Iterator<String> setsIter = setNames.iterator();
     while(setsIter.hasNext()){
       setHandlers.add(new SetHandler(document.
-              getAnnotations((String)setsIter.next())));
+              getAnnotations(setsIter.next())));
     }
     tableRows.addAll(setHandlers);
   }
@@ -769,12 +770,12 @@ public class AnnotationSetsView extends AbstractDocumentView
   @Override
   public void contentEdited(DocumentEvent e){
     //go through all the type handlers and propagate the event
-    Iterator setIter = setHandlers.iterator();
+    Iterator<SetHandler> setIter = setHandlers.iterator();
     while(setIter.hasNext()){
-      SetHandler sHandler = (SetHandler)setIter.next();
-      Iterator typeIter = sHandler.typeHandlers.iterator();
+      SetHandler sHandler = setIter.next();
+      Iterator<TypeHandler> typeIter = sHandler.typeHandlers.iterator();
       while(typeIter.hasNext()){
-        TypeHandler tHandler = (TypeHandler)typeIter.next();
+        TypeHandler tHandler = typeIter.next();
         if(tHandler.isSelected()) 
           tHandler.repairHighlights(e.getEditStart().intValue(), 
                   e.getEditEnd().intValue());
@@ -1234,12 +1235,12 @@ public class AnnotationSetsView extends AbstractDocumentView
     SetHandler(AnnotationSet set){
       this.set = set;
       typeHandlers = new ArrayList<TypeHandler>();
-      typeHandlersByType = new HashMap();
-      List typeNames = new ArrayList(set.getAllTypes());
+      typeHandlersByType = new HashMap<String,TypeHandler>();
+      List<String> typeNames = new ArrayList<String>(set.getAllTypes());
       Collections.sort(typeNames);
-      Iterator typIter = typeNames.iterator();
+      Iterator<String> typIter = typeNames.iterator();
       while(typIter.hasNext()){
-        String name = (String)typIter.next();
+        String name = typIter.next();
         TypeHandler tHandler = new TypeHandler(this, name);
         tHandler.annotationCount = set.get(name).size();
         typeHandlers.add(tHandler);
@@ -1311,11 +1312,11 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
     
     public void removeType(String type){
-      removeType((TypeHandler)typeHandlersByType.get(type));
+      removeType(typeHandlersByType.get(type));
     }
 
     public TypeHandler getTypeHandler(String type){
-      return (TypeHandler)typeHandlersByType.get(type);
+      return typeHandlersByType.get(type);
     }
     
     public void setExpanded(boolean expanded){
@@ -1345,7 +1346,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     
     AnnotationSet set;
     List<TypeHandler> typeHandlers;
-    Map typeHandlersByType;
+    Map<String, TypeHandler> typeHandlersByType;
     private boolean expanded = false;
   }
   
@@ -1354,8 +1355,8 @@ public class AnnotationSetsView extends AbstractDocumentView
       this.setHandler = setHandler;
       this.name = name;
       colour = getColor(setHandler.set.getName(),name);
-      hghltTagsForAnnId = new HashMap<Integer, Object>();
-      annListTagsForAnn = new HashMap();
+      hghltTagsForAnnId = new HashMap<Integer, TextualDocumentView.HighlightData>();
+      annListTagsForAnn = new HashMap<Integer,AnnotationData>();
       changeColourAction = new ChangeColourAction();
       annotationCount = 0;
     }
@@ -1383,7 +1384,7 @@ public class AnnotationSetsView extends AbstractDocumentView
         for(Annotation ann : annots){
           aDataList.add(new AnnotationDataImpl(setHandler.set, ann));
         }
-        List tags = textView.addHighlights(aDataList, TypeHandler.this.colour);
+        List<TextualDocumentView.HighlightData> tags = textView.addHighlights(aDataList, TypeHandler.this.colour);
         for(int i = 0; i < annots.size(); i++){
           hghltTagsForAnnId.put(annots.get(i).getId(), tags.get(i));
         }
@@ -1411,7 +1412,7 @@ public class AnnotationSetsView extends AbstractDocumentView
         //show highlights
         hghltTagsForAnnId.clear();
 //        List tags = textView.addHighlights(annots, setHandler.set, colour);
-        List tags = textView.addHighlights(listTags, colour);
+        List<TextualDocumentView.HighlightData> tags = textView.addHighlights(listTags, colour);
         for(int i = 0; i < annots.size(); i++){
           hghltTagsForAnnId.put(annots.get(i).getId(), tags.get(i));
         }
@@ -1468,7 +1469,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       annotationCount--;
       if(selected){
         //single annotation removal
-        Object tag = hghltTagsForAnnId.remove(ann.getId());
+        TextualDocumentView.HighlightData tag = hghltTagsForAnnId.remove(ann.getId());
         if(tag != null) textView.removeHighlight(tag);
         AnnotationData listTag = annListTagsForAnn.remove(ann.getId());
         if(tag != null) listView.removeAnnotation(listTag);
@@ -1484,11 +1485,11 @@ public class AnnotationSetsView extends AbstractDocumentView
     
     protected void repairHighlights(int start, int end){
       //map from tag to annotation
-      List tags = new ArrayList(hghltTagsForAnnId.size());
+      List<Object> tags = new ArrayList<Object>(hghltTagsForAnnId.size());
       List<Annotation> annots = new ArrayList<Annotation>(hghltTagsForAnnId.size());
-      Iterator annIter = hghltTagsForAnnId.keySet().iterator();
+      Iterator<Integer> annIter = hghltTagsForAnnId.keySet().iterator();
       while(annIter.hasNext()){
-        Annotation ann = setHandler.set.get((Integer)annIter.next());
+        Annotation ann = setHandler.set.get(annIter.next());
         // editing the text sometimes leads to annotations being deleted 
         if(ann == null) continue;
         int annStart = ann.getStartNode().getOffset().intValue();
@@ -1540,7 +1541,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     /**
      * Map from annotation ID (which is immutable) to highlight tag
      */
-    Map<Integer, Object> hghltTagsForAnnId;
+    Map<Integer, TextualDocumentView.HighlightData> hghltTagsForAnnId;
 
     /**
      * Map from annotation ID (which is immutable) to AnnotationListView tag
@@ -1686,7 +1687,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       if(name != null && name.length() > 0){
         AnnotationSet set = document.getAnnotations(name);
         //select the newly added set
-        Iterator rowsIter = tableRows.iterator();
+        
         int row = -1;
         for(int i = 0; i < tableRows.size() && row < 0; i++){
           if(tableRows.get(i) instanceof SetHandler &&
@@ -1812,13 +1813,13 @@ public class AnnotationSetsView extends AbstractDocumentView
             // This method construct a set with all annotations that need to be
             // dumped as Xml. If the set is null then only the original markups
             // are dumped.
-            Set annotationsToDump = new HashSet();
-            Iterator setIter = setHandlers.iterator();
+            Set<Annotation> annotationsToDump = new HashSet<Annotation>();
+            Iterator<SetHandler> setIter = setHandlers.iterator();
             while(setIter.hasNext()){
-              SetHandler sHandler = (SetHandler)setIter.next();
-              Iterator typeIter = sHandler.typeHandlers.iterator();
+              SetHandler sHandler = setIter.next();
+              Iterator<TypeHandler> typeIter = sHandler.typeHandlers.iterator();
               while(typeIter.hasNext()){
-                TypeHandler tHandler = (TypeHandler)typeIter.next();
+                TypeHandler tHandler = typeIter.next();
                 if(tHandler.isSelected()){
                   annotationsToDump.addAll(sHandler.set.get(tHandler.name));
                 }
@@ -1950,9 +1951,9 @@ public class AnnotationSetsView extends AbstractDocumentView
             if(sHandler != null){
               sHandler.set.removeAnnotationSetListener(AnnotationSetsView.this);
               //remove highlights if any
-              Iterator typeIter = sHandler.typeHandlers.iterator();
+              Iterator<TypeHandler> typeIter = sHandler.typeHandlers.iterator();
               while(typeIter.hasNext()){
-                TypeHandler tHandler = (TypeHandler)typeIter.next();
+                TypeHandler tHandler = typeIter.next();
                 tHandler.setSelected(false);
               }
               setHandlers.remove(sHandler);
@@ -2349,7 +2350,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   
   List<SetHandler> setHandlers;
   /** Contains the data of the main table. */
-  List tableRows; 
+  List<Object> tableRows; 
   XJTable mainTable;
   SetsTableModel tableModel;
   JScrollPane scroller;
