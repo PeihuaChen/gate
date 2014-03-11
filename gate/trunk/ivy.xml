@@ -104,7 +104,7 @@
     <dependency org="xmlunit" name="xmlunit" rev="1.5" conf="required->master" />
 
     <!-- Used for testing GATE -->
-    <dependency org="junit" name="junit" rev="4.10" conf="compile->master" />
+    <dependency org="junit" name="junit" rev="4.11" conf="compile->master,compile" />
 
     <!-- exclude stuff that is part of Java 6 core -->
     <exclude org="xml-apis" module="xml-apis" />

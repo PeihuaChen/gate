@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
   * This class implements the behaviour of the Email reader
