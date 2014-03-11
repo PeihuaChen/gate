@@ -101,7 +101,7 @@
     <dependency org="org.xhtmlrenderer" name="flying-saucer-core" rev="9.0.4" />
 
     <!-- Used for comparing XML files during some of the GATE tests -->
-    <dependency org="xmlunit" name="xmlunit" rev="1.2" conf="required->master" />
+    <dependency org="xmlunit" name="xmlunit" rev="1.5" conf="required->master" />
 
     <!-- Used for testing GATE -->
     <dependency org="junit" name="junit" rev="4.10" conf="compile->master" />
