@@ -77,13 +77,13 @@
         
     <!--required for loading and saving .gapp files and by sime plugins.
         we pull in the full XPP3 so we only need XStream's master artifact -->
-    <dependency org="com.thoughtworks.xstream" name="xstream" rev="1.4.4" conf="required->master" />
+    <dependency org="com.thoughtworks.xstream" name="xstream" rev="1.4.7" conf="required->master" />
 
     <!-- XPP3 provides the actual implementation under pinning our use of XStream -->
     <dependency org="xpp3" name="xpp3" rev="1.1.4c" conf="runtime->master,runtime" />
 
     <!-- needed by XSteam at runtime -->
-    <dependency org="jaxen" name="jaxen" rev="1.1" conf="runtime->master" />
+    <dependency org="jaxen" name="jaxen" rev="1.1.6" conf="runtime->master" />
 
     <!-- used to parse command line options passed to the GATE GUI -->
     <dependency org="urbanophile" name="java-getopt" rev="1.0.9" />
