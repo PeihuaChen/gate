@@ -71,16 +71,16 @@ public class OntologyInstanceView extends AbstractDocumentView {
 
     // get a pointer to the text view used to display
     // the selected annotations
-    Iterator centralViewsIter = owner.getCentralViews().iterator();
+    Iterator<DocumentView> centralViewsIter = owner.getCentralViews().iterator();
     while(textView == null && centralViewsIter.hasNext()){
-      DocumentView aView = (DocumentView) centralViewsIter.next();
+      DocumentView aView = centralViewsIter.next();
       if(aView instanceof TextualDocumentView)
         textView = (TextualDocumentView) aView;
     }
     // get a pointer to the class view
-    Iterator verticalViewsIter = owner.getVerticalViews().iterator();
+    Iterator<DocumentView> verticalViewsIter = owner.getVerticalViews().iterator();
     while(classView == null && verticalViewsIter.hasNext()){
-      DocumentView aView = (DocumentView)verticalViewsIter.next();
+      DocumentView aView = verticalViewsIter.next();
       if (aView instanceof OntologyClassView) {
         classView = (OntologyClassView) aView;
       }
@@ -585,7 +585,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
     instance.addAnnotationPropertyValue(annotationProperty,
       new Literal(selectedText));
     AnnotationSet set = document.getAnnotations(selectedSet);
-    Integer id;
+
     try {
       String ontology = selectedOntology.getDefaultNameSpace();
       // to be compatible with KIM and OAT which have
@@ -596,7 +596,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
       features.put(CLASS, selectedClass.getONodeID().toString());
       features.put(INSTANCE, instance.getONodeID().toString());
       // create a new annotation from the text selected
-      id = set.add((long) start, (long) end, ANNOTATION_TYPE, features);
+      set.add((long) start, (long) end, ANNOTATION_TYPE, features);
     } catch(InvalidOffsetException e) {
       throw new LuckyException(e);
     }

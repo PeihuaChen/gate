@@ -52,6 +52,7 @@ public class TeamwareUtils {
    * contain a <code>null</code> entry (denoting the default
    * annotation set).
    */
+  @SuppressWarnings("unchecked")
   public static Set<String> getInputAnnotationSets(Controller c) {
     Object setNamesObj = c.getFeatures().get(INPUT_ANNOTATION_SETS_FEATURE);
     if(setNamesObj != null && setNamesObj instanceof Set) {
@@ -149,6 +150,7 @@ public class TeamwareUtils {
    * contain a <code>null</code> entry (denoting the default
    * annotation set).
    */
+  @SuppressWarnings("unchecked")
   public static Set<String> getOutputAnnotationSets(Controller c) {
     Object setNamesObj = c.getFeatures().get(OUTPUT_ANNOTATION_SETS_FEATURE);
     if(setNamesObj != null && setNamesObj instanceof Set) {

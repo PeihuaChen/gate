@@ -213,8 +213,8 @@ public class DocumentEditor extends AbstractVisualResource implements
    * from the contained views.
    */
   @Override
-  public List getActions() {
-    List actions = new ArrayList();
+  public List<Action> getActions() {
+    List<Action> actions = new ArrayList<Action>();
     Iterator<DocumentView> viewIter;
     if(getCentralViews() != null) {
       viewIter = getCentralViews().iterator();

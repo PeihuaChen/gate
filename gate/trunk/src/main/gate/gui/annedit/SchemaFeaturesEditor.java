@@ -400,11 +400,6 @@ public class SchemaFeaturesEditor extends JPanel{
       if(gui == null) buildGui();
       return gui;
     }
-    /**
-     * The maximum number of values to be represented as a buttons flow (as 
-     * opposed to a combo-box). 
-     */
-    private static final int MAX_BUTTONS_FLOW = 10;
 
     /**
      * @return the required

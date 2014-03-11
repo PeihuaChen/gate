@@ -14,7 +14,6 @@
 package gate.gui.docview;
 
 import gate.Annotation;
-import gate.AnnotationSet;
 import gate.Document;
 import gate.corpora.DocumentContentImpl;
 import gate.event.DocumentEvent;
@@ -78,7 +77,7 @@ public class TextualDocumentView extends AbstractDocumentView {
     highlightsMinder.stop();
   }
 
-  public Object addHighlight(AnnotationData aData, Color colour){
+  public HighlightData addHighlight(AnnotationData aData, Color colour){
     HighlightData hData = new HighlightData(aData, colour);
     synchronized(TextualDocumentView.this) {
       highlightsToAdd.add(hData);
@@ -97,15 +96,15 @@ public class TextualDocumentView extends AbstractDocumentView {
    * elements corresponds to the order defined by the iterator of the
    * collection of annotations provided.
    */
-  public List addHighlights(Collection<AnnotationData> annotations, Color colour){
-    List<Object> tags = new ArrayList<Object>();
+  public List<HighlightData> addHighlights(Collection<AnnotationData> annotations, Color colour){
+    List<HighlightData> tags = new ArrayList<HighlightData>();
     for(AnnotationData aData : annotations) tags.add(addHighlight(aData, colour));
     return tags;
   }
 
-  public void removeHighlight(Object tag){
+  public void removeHighlight(HighlightData tag){
     synchronized(TextualDocumentView.this) {
-      highlightsToRemove.add((HighlightData)tag);
+      highlightsToRemove.add(tag);
     }
     highlightsMinder.restart();
   }
@@ -128,10 +127,10 @@ public class TextualDocumentView extends AbstractDocumentView {
    * Removes several highlights in one go.
    * @param tags the tags for the highlights to be removed
    */
-  public void removeHighlights(Collection tags){
+  public void removeHighlights(Collection<HighlightData> tags){
     //this might get an optimised implementation at some point,
     //for the time being this seems to work fine.
-    for(Object tag : tags) removeHighlight(tag);
+    for(HighlightData tag : tags) removeHighlight(tag);
   }
 
 
@@ -421,7 +420,7 @@ public class TextualDocumentView extends AbstractDocumentView {
       //finally switch the state of the current blinking highlights
       //get out as quickly as possible if nothing to do
       if(blinkingTagsForAnnotations.isEmpty()) return;
-      Iterator annIdIter = new ArrayList(blinkingTagsForAnnotations.keySet()).
+      Iterator<AnnotationData> annIdIter = new ArrayList<AnnotationData>(blinkingTagsForAnnotations.keySet()).
         iterator();
 
       if(highlightsShown){
@@ -505,15 +504,13 @@ public class TextualDocumentView extends AbstractDocumentView {
     protected boolean highlightsShown = false;
   }
 
-  private class HighlightData{
+  public static class HighlightData{
     Annotation annotation;
-    AnnotationSet set;
     Color colour;
     Object tag;
 
     public HighlightData(AnnotationData aData, Color colour) {
       this.annotation = aData.getAnnotation();
-      this.set = aData.getAnnotationSet();
       this.colour = colour;
     }
   }
