@@ -228,9 +228,9 @@
 
         <!-- used to parse command line options passed to the GATE GUI -->
         <dependency>
-            <groupId>urbanophile</groupId>
+            <groupId>gnu.getopt</groupId>
             <artifactId>java-getopt</artifactId>
-            <version>1.0.9</version>
+            <version>1.0.13</version>
             <scope>compile</scope>
         </dependency>
 
