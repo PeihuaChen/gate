@@ -444,14 +444,14 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     if(annotsByStartNode == null) indexByStartOffset();
     // find the next node at or after offset; get the annots starting
     // there
-    Node nextNode = (Node)nodesByOffset.getNextOf(offset);
+    Node nextNode = nodesByOffset.getNextOf(offset);
     if(nextNode == null) // no nodes at or beyond this offset
       return emptyAnnotationSet;
     Collection<Annotation> annotationsToAdd = getAnnotsByStartNode(nextNode
             .getId());
     // skip all the nodes that have no starting annotations
     while(annotationsToAdd == null) {
-      nextNode = (Node)nodesByOffset.getNextOf(new Long(nextNode.getOffset()
+      nextNode = nodesByOffset.getNextOf(new Long(nextNode.getOffset()
               .longValue() + 1));
       if (nextNode==null) return emptyAnnotationSet;
       annotationsToAdd = getAnnotsByStartNode(nextNode.getId());
@@ -753,7 +753,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   @Override
   public Node nextNode(Node node) {
     indexByStartOffset();
-    return (Node)nodesByOffset.getNextOf(new Long(
+    return nodesByOffset.getNextOf(new Long(
             node.getOffset().longValue() + 1));
   }
 

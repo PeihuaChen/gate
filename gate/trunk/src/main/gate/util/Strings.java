@@ -190,7 +190,7 @@ public class Strings {
     } else if (object instanceof Object[]) {
       return Arrays.deepToString((Object[])object);
     } else if (object instanceof Collection) {
-      return Arrays.deepToString(((Collection)object).toArray());
+      return Arrays.deepToString(((Collection<?>)object).toArray());
     } else {
       return object.toString();
     }
