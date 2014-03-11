@@ -15,13 +15,20 @@
 
 package gate.util;
 
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.*;
-
-import gate.*;
+import org.junit.Assert;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 public class TestDiffer extends TestCase{
   /** Construction */
