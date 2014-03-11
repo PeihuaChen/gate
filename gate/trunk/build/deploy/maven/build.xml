@@ -71,6 +71,8 @@
         <fileset dir="lib" id="onlyinmaven" includes="**/*.jar"> 
             <present present="srconly" targetdir="${top}/lib"/> 
         </fileset> 
+
+        <echo>to see dependency tree do 'mvn dependency:tree' on the pom</echo>
         <echo>these files are only in maven/lib : ${toString:onlyinmaven}</echo> 
 
         <fileset dir="${top}/lib" id="onlyingate" includes="**/*.jar"> 
