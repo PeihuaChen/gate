@@ -46,7 +46,7 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     */
   private Comparator<? super K> comparator = null;
 
-   private transient Entry root = null;
+   private transient Entry<K,V> root = null;
 
   /**
     * The number of entries in the tree
@@ -169,7 +169,7 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
               : valueSearchNonNull(root, value));
   }
 
-  private boolean valueSearchNull(Entry n) {
+  private boolean valueSearchNull(Entry<K,V> n) {
       if (n.value == null)
           return true;
 
@@ -178,7 +178,7 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
              (n.right != null && valueSearchNull(n.right));
   }
 
-  private boolean valueSearchNonNull(Entry n, Object value) {
+  private boolean valueSearchNonNull(Entry<K,V> n, Object value) {
       // Check this node for the value
       if (value.equals(n.value))
           return true;
@@ -201,22 +201,23 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     * map.
     * If the map is empty it returns (null,null).
     */
-  public Object[] getClosestMatch(Object key){
-    if (root==null)return new Object[]{null,null};
+  @SuppressWarnings("unchecked")
+  public V[] getClosestMatch(K key){
+    if (root==null)return (V[])(new Object[]{null,null});
 
-    Entry lub=getCeilEntry(key);
+    Entry<K,V> lub=getCeilEntry(key);
 
     if(lub==null){//greatest key in set is still smaller then parameter "key"
-      return new Object[]{lastEntry().value,null};
+      return (V[])new Object[]{lastEntry().value,null};
     };
 
     int cmp=compare(key,lub.key);
 
-    if (cmp==0){return new Object[]{lub.value,lub.value};}
+    if (cmp==0){return (V[])(new Object[]{lub.value,lub.value});}
     else {
-      Entry prec=getPrecedingEntry(lub.key);
-      if (prec == null) return new Object[]{null,lub.value};
-      else return new Object[]{prec.value,lub.value};
+      Entry<K,V> prec=getPrecedingEntry(lub.key);
+      if (prec == null) return (V[])(new Object[]{null,lub.value});
+      else return (V[])(new Object[]{prec.value,lub.value});
     }
   }
 
@@ -227,9 +228,9 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     * @return the value associated to the given key or the next available
     * value
     */
-  public Object getNextOf(Object key){
+  public V getNextOf(K key){
     if (root==null) return null;
-    Entry lub=getCeilEntry(key);
+    Entry<K,V> lub=getCeilEntry(key);
     if (lub == null) return null;
     return lub.value;
   }
@@ -253,11 +254,10 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     *
     * @see #containsKey(Object)
     */
-  @SuppressWarnings("unchecked")
   @Override
   public V get(Object key) {
-    Entry p = getEntry(key);
-    return (V)(p==null ? null : p.value);
+    Entry<K,V> p = getEntry(key);
+    return p==null ? null : p.value;
   }
 
   /**
@@ -340,8 +340,8 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     *		  natural order, or its comparator does not tolerate *
     *		  <tt>null</tt> keys.
     */
-  private Entry getEntry(Object key) {
-    Entry p = root;
+  private Entry<K,V> getEntry(Object key) {
+    Entry<K,V> p = root;
     while (p != null) {
         int cmp = compare(key,p.key);
         if (cmp == 0)
@@ -361,8 +361,8 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     * key; if no such entry exists (i.e., the greatest key in the Tree is less
     * than the specified key), returns <tt>null</tt>.
     */
-  private Entry getCeilEntry(Object key) {
-    Entry p = root;
+  private Entry<K,V> getCeilEntry(Object key) {
+    Entry<K,V> p = root;
     if (p==null)
         return null;
 
@@ -379,8 +379,8 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
       if (p.right != null) {
           p = p.right;
       } else {
-          Entry parent = p.parent;
-          Entry ch = p;
+          Entry<K,V> parent = p.parent;
+          Entry<K,V> ch = p;
           while (parent != null && ch == parent.right) {
         ch = parent;
         parent = parent.parent;
@@ -396,8 +396,8 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     * no such entry exists (i.e., the least key in the Tree is greater than
     * the specified key), returns <tt>null</tt>.
     */
-  private Entry getPrecedingEntry(Object key) {
-    Entry p = root;
+  private Entry<K,V> getPrecedingEntry(Object key) {
+    Entry<K,V> p = root;
     if (p==null)return null;
 
     while (true) {
@@ -409,8 +409,8 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
           if (p.left != null) {
             p = p.left;
           } else {
-            Entry parent = p.parent;
-            Entry ch = p;
+            Entry<K,V> parent = p.parent;
+            Entry<K,V> ch = p;
             while (parent != null && ch == parent.left) {
               ch = parent;
               parent = parent.parent;
@@ -425,7 +425,7 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     * Returns the key corresonding to the specified Entry.  Throw
     * NoSuchElementException if the Entry is <tt>null</tt>.
     */
-  private static Object key(Entry e) {
+  private static Object key(Entry<?,?> e) {
       if (e==null)
           throw new NoSuchElementException();
       return e.key;
@@ -449,27 +449,26 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     *		  natural order, or its comparator does not tolerate
     *		  <tt>null</tt> keys.
     */
-  @SuppressWarnings("unchecked")
   @Override
   public V put(K key, V value) {
-    Entry t = root;
+    Entry<K,V> t = root;
 
     if (t == null) {
         incrementSize();
-        root = new Entry(key, value, null);
+        root = new Entry<K,V>(key, value, null);
         return null;
     }
 
     while (true) {
         int cmp = compare(key, t.key);
         if (cmp == 0) {
-      return (V)t.setValue(value);
+      return t.setValue(value);
         } else if (cmp < 0) {
       if (t.left != null) {
           t = t.left;
       } else {
           incrementSize();
-          t.left = new Entry(key, value, t);
+          t.left = new Entry<K,V>(key, value, t);
           fixAfterInsertion(t.left);
           return null;
       }
@@ -478,7 +477,7 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
           t = t.right;
       } else {
           incrementSize();
-          t.right = new Entry(key, value, t);
+          t.right = new Entry<K,V>(key, value, t);
           fixAfterInsertion(t.right);
           return null;
       }
@@ -502,12 +501,11 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     */
   @Override
   public V remove(Object key) {
-    Entry p = getEntry(key);
+    Entry<K,V> p = getEntry(key);
     if (p == null)
         return null;
 
-    @SuppressWarnings("unchecked")
-    V oldValue = (V)p.value;
+    V oldValue = p.value;
     deleteEntry(p);
     return oldValue;
   }
@@ -620,7 +618,7 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
 
         @Override
         public boolean contains(Object o) {
-            for (Entry e = firstEntry(); e != null; e = successor(e))
+            for (Entry<K,V> e = firstEntry(); e != null; e = successor(e))
                 if (valEquals(e.getValue(), o))
                     return true;
             return false;
@@ -628,7 +626,7 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
 
         @Override
         public boolean remove(Object o) {
-          for (Entry e = firstEntry(); e != null; e = successor(e)) {
+          for (Entry<K,V> e = firstEntry(); e != null; e = successor(e)) {
             if (valEquals(e.getValue(), o)) {
                 deleteEntry(e);
                 return true;
@@ -675,7 +673,7 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
           @SuppressWarnings("unchecked")
           Map.Entry<K,V> entry = (Map.Entry<K,V>)o;
           Object value = entry.getValue();
-          Entry p = getEntry(entry.getKey());
+          Entry<K,V> p = getEntry(entry.getKey());
           return p != null && valEquals(p.getValue(), value);
         }
 
@@ -686,7 +684,7 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
           @SuppressWarnings("unchecked")
           Map.Entry<K,V> entry = (Map.Entry<K,V>)o;
           Object value = entry.getValue();
-          Entry p = getEntry(entry.getKey());
+          Entry<K,V> p = getEntry(entry.getKey());
           if (p != null && valEquals(p.getValue(), value)) {
               deleteEntry(p);
               return true;
@@ -1016,18 +1014,18 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
 
     private int expectedModCount = RBTreeMap.this.modCount;
 
-    private Entry lastReturned = null;
+    private Entry<K,V> lastReturned = null;
 
-    private Entry next;
+    private Entry<K,V> next;
 
-    private Entry firstExcluded = null;
+    private Entry<K,V> firstExcluded = null;
 
     Iterator(int type) {
       this.type = type;
       next = firstEntry();
     }
 
-    Iterator(Entry first, Entry firstExcluded) {
+    Iterator(Entry<K,V> first, Entry<K,V> firstExcluded) {
       type = ENTRIES;
       next = first;
       this.firstExcluded = firstExcluded;
@@ -1093,18 +1091,18 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     * user (see Map.Entry).
     */
 
-  private static class Entry implements Map.Entry {
-    Object key;
-    Object value;
-    Entry left = null;
-    Entry right = null;
-    Entry parent;
+  private static class Entry<M,N> implements Map.Entry<M,N> {
+    M key;
+    N value;
+    Entry<M,N> left = null;
+    Entry<M,N> right = null;
+    Entry<M,N> parent;
     boolean color = BLACK;
 
     /** Make a new cell with given key, value, and parent, and with
       * <tt>null</tt> child links, and BLACK color.
       */
-    Entry(Object key, Object value, Entry parent) {
+    Entry(M key, N value, Entry<M,N> parent) {
       this.key = key;
       this.value = value;
       this.parent = parent;
@@ -1116,7 +1114,7 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
       * @return the key.
       */
     @Override
-    public Object getKey() {
+    public M getKey() {
         return key;
     }
 
@@ -1126,7 +1124,7 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
       * @return the value associated with the key.
       */
     @Override
-    public Object getValue() {
+    public N getValue() {
         return value;
     }
 
@@ -1138,8 +1136,8 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
       * called.
       */
     @Override
-    public Object setValue(Object value) {
-        Object oldValue = this.value;
+    public N setValue(N value) {
+        N oldValue = this.value;
         this.value = value;
         return oldValue;
     }
@@ -1148,7 +1146,8 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     public boolean equals(Object o) {
         if (!(o instanceof Map.Entry))
       return false;
-        Map.Entry e = (Map.Entry)o;
+        @SuppressWarnings("unchecked")
+        Map.Entry<M,N> e = (Map.Entry<M,N>)o;
 
         return valEquals(key,e.getKey()) && valEquals(value,e.getValue());
     } // equals
@@ -1170,8 +1169,8 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     * Returns the first Entry in the RBTreeMap (according to the RBTreeMap's
     * key-sort function).  Returns null if the RBTreeMap is empty.
     */
-  private Entry firstEntry() {
-    Entry p = root;
+  private Entry<K,V> firstEntry() {
+    Entry<K,V> p = root;
     if (p != null)
       while (p.left != null)
         p = p.left;
@@ -1182,8 +1181,8 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     * Returns the last Entry in the RBTreeMap (according to the RBTreeMap's
     * key-sort function).  Returns null if the RBTreeMap is empty.
     */
-  private Entry lastEntry() {
-    Entry p = root;
+  private Entry<K,V> lastEntry() {
+    Entry<K,V> p = root;
     if (p != null)
       while (p.right != null)
         p = p.right;
@@ -1193,17 +1192,17 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
   /**
     * Returns the successor of the specified Entry, or null if no such.
     */
-  private Entry successor(Entry t) {
+  private Entry<K,V> successor(Entry<K,V> t) {
     if (t == null)
       return null;
     else if (t.right != null) {
-      Entry p = t.right;
+      Entry<K,V> p = t.right;
       while (p.left != null)
         p = p.left;
       return p;
     } else {
-      Entry p = t.parent;
-      Entry ch = t;
+      Entry<K,V> p = t.parent;
+      Entry<K,V> ch = t;
       while (p != null && ch == p.right) {
         ch = p;
         p = p.parent;
@@ -1222,29 +1221,29 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     * algorithms.
     */
 
-  private static boolean colorOf(Entry p) {
+  private static boolean colorOf(Entry<?,?> p) {
     return (p == null ? BLACK : p.color);
   }
 
-  private static Entry  parentOf(Entry p) {
+  private static <X,Y> Entry<X,Y> parentOf(Entry<X,Y> p) {
     return (p == null ? null: p.parent);
   }
 
-  private static void setColor(Entry p, boolean c) {
+  private static void setColor(Entry<?,?> p, boolean c) {
     if (p != null)  p.color = c;
   }
 
-  private static Entry  leftOf(Entry p) {
+  private static <X,Y> Entry<X,Y> leftOf(Entry<X,Y> p) {
     return (p == null)? null: p.left;
   }
 
-  private static Entry  rightOf(Entry p) {
+  private static <X,Y> Entry<X,Y> rightOf(Entry<X,Y> p) {
     return (p == null)? null: p.right;
   }
 
   /** From CLR **/
-  private void rotateLeft(Entry p) {
-    Entry r = p.right;
+  private void rotateLeft(Entry<K,V> p) {
+    Entry<K,V> r = p.right;
     p.right = r.left;
 
     if (r.left != null)
@@ -1262,8 +1261,8 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
   }
 
   /** From CLR **/
-  private void rotateRight(Entry p) {
-    Entry l = p.left;
+  private void rotateRight(Entry<K,V> p) {
+    Entry<K,V> l = p.left;
     p.left = l.right;
 
     if (l.right != null) l.right.parent = p;
@@ -1281,12 +1280,12 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
 
 
   /** From CLR **/
-  private void fixAfterInsertion(Entry x) {
+  private void fixAfterInsertion(Entry<K,V> x) {
     x.color = RED;
 
     while (x != null && x != root && x.parent.color == RED) {
       if (parentOf(x) == leftOf(parentOf(parentOf(x)))) {
-        Entry y = rightOf(parentOf(parentOf(x)));
+        Entry<K,V> y = rightOf(parentOf(parentOf(x)));
         if (colorOf(y) == RED) {
           setColor(parentOf(x), BLACK);
           setColor(y, BLACK);
@@ -1303,7 +1302,7 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
             rotateRight(parentOf(parentOf(x)));
         }
       } else {
-        Entry y = leftOf(parentOf(parentOf(x)));
+        Entry<K,V> y = leftOf(parentOf(parentOf(x)));
         if (colorOf(y) == RED) {
             setColor(parentOf(x), BLACK);
             setColor(y, BLACK);
@@ -1327,17 +1326,17 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
   /**
     * Delete node p, and then rebalance the tree.
     */
-  private void deleteEntry(Entry p) {
+  private void deleteEntry(Entry<K,V> p) {
     decrementSize();
 
     // If strictly internal, first swap position with successor.
     if (p.left != null && p.right != null) {
-        Entry s = successor(p);
+        Entry<K,V> s = successor(p);
         swapPosition(s, p);
     }
 
     // Start fixup at replacement node, if it exists.
-    Entry replacement = (p.left != null ? p.left : p.right);
+    Entry<K,V> replacement = (p.left != null ? p.left : p.right);
 
     if (replacement != null) {
       // Link replacement to parent
@@ -1372,10 +1371,10 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
   } // deleteEntry
 
   /** From CLR **/
-  private void fixAfterDeletion(Entry x) {
+  private void fixAfterDeletion(Entry<K,V> x) {
     while (x != root && colorOf(x) == BLACK) {
       if (x == leftOf(parentOf(x))) {
-        Entry sib = rightOf(parentOf(x));
+        Entry<K,V> sib = rightOf(parentOf(x));
 
         if (colorOf(sib) == RED) {
           setColor(sib, BLACK);
@@ -1402,7 +1401,7 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
           x = root;
         }
       } else { // symmetric
-        Entry sib = leftOf(parentOf(x));
+        Entry<K,V> sib = leftOf(parentOf(x));
 
         if (colorOf(sib) == RED) {
           setColor(sib, BLACK);
@@ -1436,10 +1435,10 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
   /**
     * Swap the linkages of two nodes in a tree.
     */
-  private void swapPosition(Entry x, Entry y) {
+  private void swapPosition(Entry<K,V> x, Entry<K,V> y) {
     // Save initial values.
-    Entry px = x.parent, lx = x.left, rx = x.right;
-    Entry py = y.parent, ly = y.left, ry = y.right;
+    Entry<K,V> px = x.parent, lx = x.left, rx = x.right;
+    Entry<K,V> py = y.parent, ly = y.left, ry = y.right;
     boolean xWasLeftChild = px != null && x == px.left;
     boolean yWasLeftChild = py != null && y == py.left;
 
@@ -1633,11 +1632,12 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     * @param redLevel the level at which nodes should be red.
     *        Must be equal to computeRedLevel for tree of this size.
     */
-  private static Entry buildFromSorted(int level, int lo, int hi,
+  @SuppressWarnings("unchecked")
+  private static <X,Y> Entry<X,Y> buildFromSorted(int level, int lo, int hi,
                                        int redLevel,
                                        java.util.Iterator<?> it,
                                        java.io.ObjectInputStream str,
-                                       Object defaultVal)
+                                       Y defaultVal)
     throws  java.io.IOException, ClassNotFoundException {
     /*
      * Strategy: The root is the middlemost element. To get to it, we
@@ -1655,31 +1655,31 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
 
     int mid = (lo + hi) / 2;
 
-    Entry left  = null;
+    Entry<X,Y> left  = null;
     if (lo < mid)
       left = buildFromSorted(level+1, lo, mid - 1, redLevel,
                                it, str, defaultVal);
 
     // extract key and/or value from iterator or stream
-    Object key;
-    Object value;
+    X key;
+    Y value;
 
     if (it != null) { // use iterator
 
       if (defaultVal==null) {
         Map.Entry<?,?> entry = (Map.Entry<?,?>)it.next();
-        key = entry.getKey();
-        value = entry.getValue();
+        key = (X)entry.getKey();
+        value = (Y)entry.getValue();
       } else {
-        key = it.next();
+        key = (X)it.next();
         value = defaultVal;
       }
     } else { // use stream
-      key = str.readObject();
-      value = (defaultVal != null ? defaultVal : str.readObject());
+      key = (X)str.readObject();
+      value = (defaultVal != null ? defaultVal : (Y)str.readObject());
     }
 
-    Entry middle =  new Entry(key, value, null);
+    Entry<X,Y> middle =  new Entry<X,Y>(key, value, null);
 
     // color nodes in non-full bottommost level red
     if (level == redLevel)
@@ -1691,7 +1691,7 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     }
 
     if (mid < hi) {
-      Entry right = buildFromSorted(level+1, mid+1, hi, redLevel,
+      Entry<X,Y> right = buildFromSorted(level+1, mid+1, hi, redLevel,
                                     it, str, defaultVal);
       middle.right = right;
       right.parent = middle;
