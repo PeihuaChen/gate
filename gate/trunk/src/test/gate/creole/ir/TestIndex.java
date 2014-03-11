@@ -15,16 +15,23 @@
 
 package gate.creole.ir;
 
+import gate.Corpus;
+import gate.DataStore;
+import gate.Document;
+import gate.Factory;
+import gate.Gate;
+import gate.corpora.TestDocument;
+import gate.creole.ir.lucene.LuceneSearch;
+import gate.util.GateException;
+
 import java.io.File;
 import java.net.URL;
 import java.util.Iterator;
 
-import junit.framework.*;
-
-import gate.*;
-import gate.corpora.TestDocument;
-import gate.creole.ir.lucene.LuceneSearch;
-import gate.util.GateException;
+import org.junit.Assert;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 public class TestIndex extends TestCase{
 

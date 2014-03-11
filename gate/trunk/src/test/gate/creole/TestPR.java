@@ -16,22 +16,41 @@
 
 package gate.creole;
 
-import java.net.URL;
-import java.util.*;
-
-import junit.framework.*;
-
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.DataStore;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
 import gate.corpora.TestDocument;
 import gate.creole.gazetteer.DefaultGazetteer;
 import gate.creole.orthomatcher.OrthoMatcher;
 import gate.creole.splitter.SentenceSplitter;
 import gate.creole.tokeniser.DefaultTokeniser;
 import gate.jape.JapeException;
-import gate.jape.constraint.*;
+import gate.jape.constraint.AbstractConstraintPredicate;
+import gate.jape.constraint.AnnotationAccessor;
+import gate.jape.constraint.ConstraintPredicate;
+import gate.jape.constraint.MetaPropertyAccessor;
 import gate.util.AnnotationDiffer;
 
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
+import org.junit.FixMethodOrder;
+import org.junit.runners.MethodSorters;
+
 /** Test the PRs on three documents */
+@FixMethodOrder(MethodSorters.JVM)
 public class TestPR extends TestCase
 {
   /** Debug flag */
@@ -100,7 +119,7 @@ public class TestPR extends TestCase
   public void tearDown() throws Exception {
   } // tearDown
 
-  public void testTokenizer() throws Exception {
+  public void test001Tokenizer() throws Exception {
     FeatureMap params = Factory.newFeatureMap();
     DefaultTokeniser tokeniser = (DefaultTokeniser) Factory.createResource(
                     "gate.creole.tokeniser.DefaultTokeniser", params);
@@ -143,7 +162,7 @@ public class TestPR extends TestCase
 
   }// testTokenizer
 
-  public void testGazetteer() throws Exception {
+  public void test002Gazetteer() throws Exception {
     FeatureMap params = Factory.newFeatureMap();
     DefaultGazetteer gaz = (DefaultGazetteer) Factory.createResource(
                           "gate.creole.gazetteer.DefaultGazetteer", params);
@@ -195,7 +214,7 @@ public class TestPR extends TestCase
             doc3.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size());
   }//testGazetteer
 
-  public void testSplitter() throws Exception {
+  public void test003Splitter() throws Exception {
     FeatureMap params = Factory.newFeatureMap();
     SentenceSplitter splitter = (SentenceSplitter) Factory.createResource(
                           "gate.creole.splitter.SentenceSplitter", params);
@@ -253,7 +272,7 @@ public class TestPR extends TestCase
       doc3.getAnnotations().get("Split").size()== 122);
   }//testSplitter
 
-  public void testTagger() throws Exception {
+  public void test004Tagger() throws Exception {
     FeatureMap params = Factory.newFeatureMap();
     POSTagger tagger = (POSTagger) Factory.createResource(
                           "gate.creole.POSTagger", params);
@@ -301,7 +320,7 @@ public class TestPR extends TestCase
       annots.size() == 1447);
   }//testTagger()
 
-  public void testTransducer() throws Exception {
+  public void test005Transducer() throws Exception {
     FeatureMap params = Factory.newFeatureMap();
     ANNIETransducer transducer = (ANNIETransducer) Factory.createResource(
                           "gate.creole.ANNIETransducer", params);
@@ -394,7 +413,7 @@ public class TestPR extends TestCase
             doc4.getAnnotations().get(ANNIEConstants.PERSON_ANNOTATION_TYPE).size());
   }//testTransducer
 
-  public void testCustomConstraintDefs() throws Exception {
+  public void test006CustomConstraintDefs() throws Exception {
     FeatureMap params = Factory.newFeatureMap();
 
     List<String> operators = new ArrayList<String>();
@@ -422,7 +441,7 @@ public class TestPR extends TestCase
     assertEquals("Accessor not set", testAccessor.getClass(), returnAccessor.getClass());
   }
 
-  public void testOrthomatcher() throws Exception {
+  public void test007Orthomatcher() throws Exception {
     FeatureMap params = Factory.newFeatureMap();
 
     OrthoMatcher orthomatcher = (OrthoMatcher) Factory.createResource(
@@ -486,7 +505,7 @@ public class TestPR extends TestCase
   }//testOrthomatcher
 
   /** A test for comparing the annotation sets*/
-  public void testAllPR() throws Exception {
+  public void test008AllPR() throws Exception {
 
     // verify if the saved data store is the same with the just processed file
     // first document
@@ -676,7 +695,7 @@ public class TestPR extends TestCase
     return new TestSuite(TestPR.class);
   } // suite
 
-  public static void main(String[] args) {
+  /*public static void main(String[] args) {
     try{
       Gate.init();
       TestPR testPR = new TestPR("");
@@ -692,5 +711,5 @@ public class TestPR extends TestCase
     } catch(Exception e) {
       e.printStackTrace();
     }
-  } // main
+  }*/ // main
 } // class TestPR
