@@ -505,7 +505,7 @@
 
   <target name="prepare.tests" depends="jar">
     <mkdir dir="${tests.outputDir}"/>
-    <javac srcdir="${tests.srcDir}" destdir="${tests.outputDir}" source="1.5" target="1.5" encoding="UTF-8" debug="true" deprecation="${deprecation}" debuglevel="lines,source" classpathref="run.class.path">
+    <javac srcdir="${tests.srcDir}" destdir="${tests.outputDir}" source="1.6" target="1.6" encoding="UTF-8" debug="true" deprecation="${deprecation}" debuglevel="lines,source" classpathref="run.class.path">
       <compilerarg value="-Xmaxwarns" />
       <compilerarg value="${gate.compile.maxwarnings}" />
     </javac>
@@ -518,10 +518,6 @@
     <makeurl property="creole.plugins" separator=";">
       <path>
         <pathelement location="${basedir}/plugins/ANNIE/" />
-        <pathelement location="${basedir}/plugins/Information_Retrieval/" />
-        <pathelement location="${basedir}/plugins/Ontology_Tools" />
-        <pathelement location="${basedir}/plugins/Tools/" />
-        <pathelement location="${basedir}/plugins/WordNet" />
       </path>
     </makeurl>
     <junit fork="true" showoutput="true" printsummary="yes" maxmemory="512m">
