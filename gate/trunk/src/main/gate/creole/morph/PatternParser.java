@@ -45,7 +45,7 @@ public class PatternParser {
 		String[] ruleParts = line.split("==>");
 		// now check if the method which has been called in this rule actually
 		// available in the MorphFunction Class
-		String methodCalled = ruleParts[1].trim();
+		//String methodCalled = ruleParts[1].trim();
 
 		// so RHS part is Ok
 		// now we need to check if LHS is written properly
@@ -138,7 +138,7 @@ public class PatternParser {
 			// here we need (A) to be duplicated two times
 			boolean duplicated = false;
 			int dupliSize = 0;
-			int lastBrClose = 0;
+			
 			String data = "";
 
 			// we need to look into one query at a time and parse it

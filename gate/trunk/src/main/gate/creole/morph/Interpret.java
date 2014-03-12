@@ -60,7 +60,7 @@ public class Interpret {
 	 */
 	protected FSMState initialState;
 
-	protected Set lastStates;
+	//protected Set lastStates;
 
 	/**
 	 * It starts the actual program
@@ -77,12 +77,12 @@ public class Interpret {
 		readProgram();
 		initialState = new FSMState(-1);
 		
-		lastStates = new HashSet();
+		//lastStates = new HashSet();
 		interpretProgram();
 
 		variables = null;
 		file = null;
-		lastStates = null;
+		//lastStates = null;
 	}
 	
 	/**
@@ -548,11 +548,12 @@ public class Interpret {
 		//drawFSM();
 	}
 
-	private Set<FSMState> intersect(Set a, Set b) {
+	@SuppressWarnings("unused")
+  private Set<FSMState> intersect(Set<FSMState> a, Set<FSMState> b) {
 		Set<FSMState> result = new HashSet<FSMState>();
-		Iterator iter = a.iterator();
+		Iterator<FSMState> iter = a.iterator();
 		while (iter.hasNext()) {
-			FSMState st = (FSMState) iter.next();
+			FSMState st = iter.next();
 			if (b.contains(st)) {
 				result.add(st);
 			}
@@ -560,7 +561,8 @@ public class Interpret {
 		return result;
 	}
 
-	private void drawFSM() {
+	@SuppressWarnings("unused")
+  private void drawFSM() {
 		// we start with initialState
 		System.out.println("Initial:");
 		String space = "";
@@ -644,11 +646,11 @@ public class Interpret {
 		// now parameters have been found, so check them with the available
 		// methods
 		// in the morph function
-		Outer: for (int i = 0; i < methods.length; i++) {
+		for (int i = 0; i < methods.length; i++) {
 			if (methods[i].getName().equals(methodName)) {
 				// yes method has found now check for the parameters
 				// compatibility
-				Class[] methodParams = methods[i].getParameterTypes();
+				Class<?>[] methodParams = methods[i].getParameterTypes();
 				// first check for the number of parameters
 				if (methods[i].getName().equals("null_stem")) {
 					return true;

@@ -23,6 +23,7 @@ import javax.swing.table.AbstractTableModel;
  * @author niraj
  * 
  */
+@SuppressWarnings("serial")
 public class PropertyDetailsTableModel extends AbstractTableModel {
   public PropertyDetailsTableModel() {
     resourceInfo = new DetailsGroup("Resource Information", true, null);
@@ -68,7 +69,7 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
   }
 
   @Override
-  public Class getColumnClass(int i) {
+  public Class<?> getColumnClass(int i) {
     switch(i) {
       case 0:
         return Boolean.class;
@@ -215,7 +216,7 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
     }
 
     @SuppressWarnings("deprecation")
-    Set set1 = property.getDomain();
+    Set<OResource> set1 = property.getDomain();
     if(set1 != null) {
       domain.getValues().addAll(set1);
       Collections.sort(domain.getValues(), itemComparator);
@@ -237,7 +238,7 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
     }
 
     @SuppressWarnings("deprecation")
-    Set set2 = property.getRange();
+    Set<OResource> set2 = property.getRange();
     if(set2 != null) {
       range.getValues().addAll(set2);
       Collections.sort(range.getValues(), itemComparator);

@@ -1135,6 +1135,7 @@ public class OntologyEditor extends AbstractVisualResource
     private DatatypeProperty property;
   }
 
+  @SuppressWarnings("serial")
   protected class ObjectPropertyValueAction extends AbstractAction {
     public ObjectPropertyValueAction(String name, OResource oResource,
                                      ObjectProperty property,
@@ -1540,8 +1541,8 @@ public class OntologyEditor extends AbstractVisualResource
 
   private void removeFromMap(DefaultTreeModel model, DefaultMutableTreeNode node) {
     if(!node.isLeaf()) {
-      Enumeration enumeration = node.children();
-      List children = new ArrayList();
+      Enumeration<?> enumeration = node.children();
+      List<Object> children = new ArrayList<Object>();
       while(enumeration.hasMoreElements()) {
         children.add(enumeration.nextElement());
       }
@@ -1704,7 +1705,7 @@ public class OntologyEditor extends AbstractVisualResource
           Utils.getOResourceFromMap(this.ontology,reverseMap.get(node).toString());
         firstTime = false;
         // find out which class is deleted
-        Enumeration e = node.children();
+        Enumeration<?> e = node.children();
         if(e != null) {
           while(e.hasMoreElements()) {
             DefaultMutableTreeNode aNode = (DefaultMutableTreeNode)e
@@ -1774,10 +1775,14 @@ public class OntologyEditor extends AbstractVisualResource
     // gui. Deleting a resource results in deleting other resources as
     // well. The last resource in the resources is the one which was
     // asked from a user to delete.
-    String deletedResourceURI = resources[resources.length - 1];
+    // MAG 12/3/2014: this code does nothing as there are no side
+    // effects to the calls and the variables filled by the calls are
+    // never used
+    /*String deletedResourceURI = resources[resources.length - 1];
     DefaultMutableTreeNode aNode = uri2TreeNodesListMap.get(deletedResourceURI)
             .get(0);
 
+    
     DefaultMutableTreeNode probableParentNode = null;
     if(aNode.getParent() == null) {
       OResource res = ((OResourceNode)aNode.getUserObject()).getResource();
@@ -1790,7 +1795,7 @@ public class OntologyEditor extends AbstractVisualResource
     }
     else {
       probableParentNode = (DefaultMutableTreeNode)aNode.getParent();
-    }
+    }*/
     
     SwingUtilities.invokeLater(new Runnable() {
       @Override
@@ -1854,7 +1859,7 @@ public class OntologyEditor extends AbstractVisualResource
                       List<RDFProperty> children = new ArrayList<RDFProperty>(
                               ((RDFProperty)parentResource)
                                       .getSubProperties(OConstants.Closure.DIRECT_CLOSURE));
-                      Enumeration en = parentNode.children();
+                      Enumeration<?> en = parentNode.children();
                       while(en.hasMoreElements()) {
                         DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode)en
                                 .nextElement();
@@ -1882,7 +1887,7 @@ public class OntologyEditor extends AbstractVisualResource
                       children.addAll(ontology
                               .getOInstances((OClass)parentResource,
                                       OConstants.Closure.DIRECT_CLOSURE));
-                      Enumeration en = parentNode.children();
+                      Enumeration<?> en = parentNode.children();
                       while(en.hasMoreElements()) {
                         DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode)en
                                 .nextElement();
@@ -1906,7 +1911,7 @@ public class OntologyEditor extends AbstractVisualResource
                       List<OResource> children = new ArrayList<OResource>(
                               ontology.getOClasses(true));
 
-                      Enumeration en = parentNode.children();
+                      Enumeration<?> en = parentNode.children();
                       while(en.hasMoreElements()) {
                         DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode)en
                                 .nextElement();
@@ -1947,7 +1952,7 @@ public class OntologyEditor extends AbstractVisualResource
                         }
                       }
                       Collections.sort(subList, itemComparator);
-                      Enumeration en = parentNode.children();
+                      Enumeration<?> en = parentNode.children();
                       while(en.hasMoreElements()) {
                         DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode)en
                                 .nextElement();
