@@ -68,8 +68,8 @@ public class Utils {
    * This method returns the details to be added.
    */
   @SuppressWarnings("deprecation")
-  public static List getDetailsToAdd(Object object) {
-    ArrayList<Object> toAdd = new ArrayList<Object>();
+  public static List<Object> getDetailsToAdd(Object object) {
+    List<Object> toAdd = new ArrayList<Object>();
     toAdd.add(object);
     if(object instanceof Restriction) {
       Restriction res = (Restriction)object;

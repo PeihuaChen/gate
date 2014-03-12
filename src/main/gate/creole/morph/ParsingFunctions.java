@@ -413,7 +413,8 @@ public class ParsingFunctions {
 	}
 
 	
-	private static FSMState next(char ch, Set<FSMState> states) {
+	@SuppressWarnings("unused")
+  private static FSMState next(char ch, Set<FSMState> states) {
 		Iterator<FSMState> iter = states.iterator();
 		while(iter.hasNext()) {
 			FSMState state = iter.next();

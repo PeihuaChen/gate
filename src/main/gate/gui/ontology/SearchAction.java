@@ -41,6 +41,7 @@ import javax.swing.tree.TreePath;
  * @author niraj
  * 
  */
+@SuppressWarnings("serial")
 public class SearchAction extends AbstractAction {
 
   /**

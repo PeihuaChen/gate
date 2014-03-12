@@ -25,6 +25,7 @@ import javax.swing.border.TitledBorder;
  * @author niraj
  * 
  */
+@SuppressWarnings("serial")
 public class RestrictionAction extends AbstractAction {
 
   public RestrictionAction(String s, Icon icon) {

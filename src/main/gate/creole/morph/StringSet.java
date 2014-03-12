@@ -98,4 +98,8 @@ public class StringSet extends Variable {
   public boolean contains(String value) {
     return variables.contains(value);
   }
+  
+  public String getVariableName() {
+    return varName;
+  }
 }

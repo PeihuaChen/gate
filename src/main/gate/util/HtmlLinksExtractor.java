@@ -66,8 +66,7 @@ public class HtmlLinksExtractor extends ParserCallback {
     currentTag = t;
     if (HTML.Tag.A == t){
       Out.pr("<LI><" + t);
-      String href = "";
-      Enumeration e = a.getAttributeNames();
+      Enumeration<?> e = a.getAttributeNames();
       while(e.hasMoreElements()) {
         HTML.Attribute name = (HTML.Attribute) e.nextElement();
         String value = (String) a.getAttribute(name);
@@ -100,7 +99,7 @@ public class HtmlLinksExtractor extends ParserCallback {
     if (a == null) return;
     // Take all the attributes an put them into the feature map
     if (0 != a.getAttributeCount()){
-      Enumeration enumeration = a.getAttributeNames();
+      Enumeration<?> enumeration = a.getAttributeNames();
       while (enumeration.hasMoreElements()){
         Object attribute = enumeration.nextElement();
         Out.pr(" "+ attribute.toString() + "=\"" +
@@ -189,9 +188,9 @@ public class HtmlLinksExtractor extends ParserCallback {
    * in that folder. It returns a list of strings representing the file
    * names
    */
-  private static List listAllFiles(File aFile, Set foldersToIgnore){
-    java.util.List sgmlFileNames = new ArrayList();
-    java.util.List foldersToExplore = new ArrayList();
+  private static List<String> listAllFiles(File aFile, Set<String> foldersToIgnore){
+    List<String> sgmlFileNames = new ArrayList<String>();
+    List<File> foldersToExplore = new ArrayList<File>();
     if (!aFile.isDirectory()){
       // add the file to the file list
       sgmlFileNames.add(aFile.getPath());
@@ -203,9 +202,9 @@ public class HtmlLinksExtractor extends ParserCallback {
 
   /** Helper method for listAllFiles */
   private static void listFilesRec(File aFile,
-                                  java.util.List fileNames,
-                                  java.util.List foldersToExplore,
-                                  Set foldersToIgnore){
+                                  List<String> fileNames,
+                                  List<File> foldersToExplore,
+                                  Set<String> foldersToIgnore){
 
     String[] fileList = aFile.list();
     for (int i=0; i< fileList.length; i++){
@@ -229,7 +228,7 @@ public class HtmlLinksExtractor extends ParserCallback {
     }// End for
 
     while(!foldersToExplore.isEmpty()){
-      File folder = (File)foldersToExplore.get(0);
+      File folder = foldersToExplore.get(0);
       foldersToExplore.remove(0);
       listFilesRec(folder,fileNames,foldersToExplore,foldersToIgnore);
     }//End while
@@ -250,15 +249,15 @@ public class HtmlLinksExtractor extends ParserCallback {
     }
     // Create a folder file File
     File htmlFolder = new File(args[0]);
-    Set foldersToIgnore = new HashSet();
+    Set<String> foldersToIgnore = new HashSet<String>();
     for(int i = 1; i<args.length; i++)
       foldersToIgnore.add(args[i]);
 
-    List htmlFileNames = listAllFiles(htmlFolder,foldersToIgnore);
+    List<String> htmlFileNames = listAllFiles(htmlFolder,foldersToIgnore);
     //Collections.sort(htmlFileNames);
     while (!htmlFileNames.isEmpty()){
       try{
-        String htmlFileName = (String) htmlFileNames.get(0);
+        String htmlFileName = htmlFileNames.get(0);
         currFile = htmlFileName;
         currPath = new File(currFile).getParent().toString();
         htmlFileNames.remove(0);
