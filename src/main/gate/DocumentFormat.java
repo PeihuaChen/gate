@@ -85,7 +85,7 @@ extends AbstractLanguageResource implements LanguageResource{
     * for annotation types. If it is non-null, only those elements specified
     * here will be converted.
     */
-  protected Map markupElementsMap = null;
+  protected Map<String,String> markupElementsMap = null;
 
   /** This map is used inside uppackMarkup() method...
     * When an element from the map is encounted, The corresponding string
@@ -441,6 +441,7 @@ extends AbstractLanguageResource implements LanguageResource{
     * Return the fileSuffix or null if the url doesn't have a file suffix
     * If the url is null then the file suffix will be null also
     */
+  @SuppressWarnings("unused")
   private static String getFileSuffix(URL url){
     String fileName = null;
     String fileSuffix = null;
@@ -558,13 +559,13 @@ extends AbstractLanguageResource implements LanguageResource{
   public FeatureMap getFeatures() { return features; }
 
    /** Get the markup elements map */
-  public Map getMarkupElementsMap() { return markupElementsMap; }
+  public Map<String,String> getMarkupElementsMap() { return markupElementsMap; }
 
    /** Get the element 2 string map */
   public Map<String,String> getElement2StringMap() { return element2StringMap; }
 
   /** Set the markup elements map */
-  public void setMarkupElementsMap(Map markupElementsMap) {
+  public void setMarkupElementsMap(Map<String,String> markupElementsMap) {
    this.markupElementsMap = markupElementsMap;
   }
 

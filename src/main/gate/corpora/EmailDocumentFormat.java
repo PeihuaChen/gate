@@ -16,10 +16,10 @@
 
 package gate.corpora;
 
-import java.io.IOException;
-import java.util.Iterator;
-
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.GateConstants;
+import gate.Resource;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.CreoleResource;
@@ -28,7 +28,8 @@ import gate.event.StatusListener;
 import gate.util.DocumentFormatException;
 import gate.util.InvalidOffsetException;
 
-//import org.w3c.www.mime.*;
+import java.io.IOException;
+import java.util.Iterator;
 
 /** The format of Documents. Subclasses of DocumentFormat know about
   * particular MIME types and how to unpack the information in any
