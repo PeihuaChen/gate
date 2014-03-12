@@ -29,6 +29,8 @@ import gate.Gate;
 public class SearchPR extends AbstractProcessingResource
                       implements ProcessingResource{
 
+  private static final long serialVersionUID = 1316224997021873795L;
+  
   private IndexedCorpus corpus = null;
   private String query  = null;
   private String searcherClassName = null;

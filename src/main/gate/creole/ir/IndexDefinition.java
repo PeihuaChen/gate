@@ -26,7 +26,7 @@ public interface IndexDefinition extends Serializable{
   public String getIndexLocation();
 
   /**  @return Iterator of IndexFields, fileds for indexing. */
-  public Iterator getIndexFields();
+  public Iterator<IndexField> getIndexFields();
 
 //  /**  @return int index type*/
 //  public int getIndexType();

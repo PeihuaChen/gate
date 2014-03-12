@@ -17,6 +17,8 @@ package gate.creole.ir;
 
 public class SearchException extends Exception{
 
+  private static final long serialVersionUID = 238378794456612672L;
+
   public SearchException(String msg){
     super(msg);
   }

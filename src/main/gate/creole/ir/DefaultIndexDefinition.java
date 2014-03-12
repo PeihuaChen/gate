@@ -15,19 +15,21 @@
 
 package gate.creole.ir;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 public class DefaultIndexDefinition implements IndexDefinition{
 
   /** List of IndexField - objects for indexing */
-  private List fields;
+  private List<IndexField> fields;
 
   /** Location (path) of the index store directory */
   private String location;
 
   /* Niraj */
   // Annic Specific Changes
-  private ArrayList featuresToExclude;
+  private List featuresToExclude;
   private String annotationSet;
   private String baseTokenAnnotationType;
   /* End */
@@ -51,11 +53,11 @@ public class DefaultIndexDefinition implements IndexDefinition{
 
   /* Niraj */
   // Annic specific changes
-  public void setFeaturesToExclude(ArrayList featuresToExclude) {
+  public void setFeaturesToExclude(List featuresToExclude) {
     this.featuresToExclude = featuresToExclude;
   }
 
-  public ArrayList getFeaturesToExclude() {
+  public List getFeaturesToExclude() {
     return featuresToExclude;
   }
 
@@ -91,14 +93,14 @@ public class DefaultIndexDefinition implements IndexDefinition{
 
   /**  @return Iterator of IndexFields, fileds for indexing. */
   @Override
-  public Iterator getIndexFields(){
+  public Iterator<IndexField> getIndexFields(){
     return fields.iterator();
   }
 
   /**  Add new IndexField object to fields list.*/
   public void addIndexField(IndexField fld){
     if (fields==null){
-      fields = new Vector();
+      fields = new Vector<IndexField>();
     }
     fields.add(fld);
   }
