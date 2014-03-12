@@ -278,10 +278,9 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     * @return the first (lowest) key currently in this sorted map.
     * @throws    NoSuchElementException Map is empty.
     */
-  @SuppressWarnings("unchecked")
   @Override
   public K firstKey() {
-      return (K)key(firstEntry());
+      return key(firstEntry());
   }
 
   /**
@@ -290,10 +289,9 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     * @return the last (highest) key currently in this sorted map.
     * @throws    NoSuchElementException Map is empty.
     */
-  @SuppressWarnings("unchecked")
   @Override
   public K lastKey() {
-      return (K)key(lastEntry());
+      return key(lastEntry());
   }
 
   /**
@@ -425,7 +423,7 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     * Returns the key corresonding to the specified Entry.  Throw
     * NoSuchElementException if the Entry is <tt>null</tt>.
     */
-  private static Object key(Entry<?,?> e) {
+  private static <X,Y> X key(Entry<X,Y> e) {
       if (e==null)
           throw new NoSuchElementException();
       return e.key;
@@ -748,7 +746,6 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     * @throws IllegalArgumentException if <tt>fromKey</tt> is greater than
     *            <tt>toKey</tt>.
     */
-  @SuppressWarnings("unchecked")
   @Override
   public SortedMap<K,V> subMap(Object fromKey, Object toKey) {
     return new SubMap(fromKey, toKey);
@@ -784,7 +781,6 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     *		  this map uses natural order, or its comparator does * not
     *		  tolerate <tt>null</tt> keys.
     */
-  @SuppressWarnings("unchecked")
   @Override
   public SortedMap<K,V> headMap(K toKey) {
     return new SubMap(toKey, true);
@@ -819,14 +815,13 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     *		  map uses natural ordering, or its comparator does
     *            not tolerate <tt>null</tt> keys.
     */
-  @SuppressWarnings("unchecked")
   @Override
   public SortedMap<K,V> tailMap(K fromKey) {
     return new SubMap(fromKey, false);
   }
 
-  private class SubMap extends AbstractMap
-         implements SortedMap, java.io.Serializable {
+  private class SubMap extends AbstractMap<K,V>
+         implements SortedMap<K,V>, java.io.Serializable {
 
     // fromKey is significant only if fromStart is false.  Similarly,
     // toKey is significant only if toStart is false.
@@ -868,50 +863,49 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     }
 
     @Override
-    public Object get(Object key) {
+    public V get(Object key) {
       if (!inRange(key))
         return null;
       return RBTreeMap.this.get(key);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Object put(Object key, Object value) {
+    public V put(K key, V value) {
       if (!inRange(key))
         throw new IllegalArgumentException("key out of range");
-      return RBTreeMap.this.put((K)key, (V)value);
+      return RBTreeMap.this.put(key, value);
     }
 
     @Override
-    public Comparator comparator() {
+    public Comparator<? super K> comparator() {
         return comparator;
     }
 
     @Override
-    public Object firstKey() {
+    public K firstKey() {
         return key(fromStart ? firstEntry() : getCeilEntry(fromKey));
     }
 
     @Override
-    public Object lastKey() {
+    public K lastKey() {
         return key(toEnd ? lastEntry() : getPrecedingEntry(toKey));
     }
 
-    private transient Set entrySet = new EntrySetView();
+    private transient Set<Map.Entry<K, V>> entrySet = new EntrySetView();
 
     @Override
-    public Set entrySet() {
+    public Set<Map.Entry<K, V>> entrySet() {
         return entrySet;
     }
 
-    private class EntrySetView extends AbstractSet {
+    private class EntrySetView extends AbstractSet<Map.Entry<K, V>> {
       private transient int size = -1, sizeModCount;
 
       @Override
       public int size() {
         if (size == -1 || sizeModCount != RBTreeMap.this.modCount) {
           size = 0;  sizeModCount = RBTreeMap.this.modCount;
-          java.util.Iterator i = iterator();
+          java.util.Iterator<Map.Entry<K,V>> i = iterator();
           while (i.hasNext()) {
             size++;
             i.next();
@@ -930,11 +924,12 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
         if (!(o instanceof Map.Entry))
           return false;
 
-        Map.Entry entry = (Map.Entry)o;
+        @SuppressWarnings("unchecked")
+        Map.Entry<K,V> entry = (Map.Entry<K,V>)o;
         Object key = entry.getKey();
         if (!inRange(key))
           return false;
-        RBTreeMap.Entry node = getEntry(key);
+        RBTreeMap.Entry<K,V> node = getEntry(key);
         return node != null &&
                  valEquals(node.getValue(), entry.getValue());
       } // contains
@@ -943,11 +938,13 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
       public boolean remove(Object o) {
         if (!(o instanceof Map.Entry))
           return false;
-        Map.Entry entry = (Map.Entry)o;
+        
+        @SuppressWarnings("unchecked")
+        Map.Entry<K,V> entry = (Map.Entry<K,V>)o;
         Object key = entry.getKey();
         if (!inRange(key))
           return false;
-        RBTreeMap.Entry node = getEntry(key);
+        RBTreeMap.Entry<K,V> node = getEntry(key);
         if (node!=null && valEquals(node.getValue(),entry.getValue())){
           deleteEntry(node);
           return true;
@@ -956,15 +953,15 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
       }
 
       @Override
-      public java.util.Iterator iterator() {
-        return new Iterator(
+      public java.util.Iterator<Map.Entry<K,V>> iterator() {
+        return new Iterator<Map.Entry<K,V>>(
                   (fromStart ? firstEntry() : getCeilEntry(fromKey)),
                   (toEnd     ? null	      : getCeilEntry(toKey)));
       }
     } // EntrySetView
 
     @Override
-    public SortedMap subMap(Object fromKey, Object toKey) {
+    public SortedMap<K,V> subMap(Object fromKey, Object toKey) {
       if (!inRange(fromKey))
         throw new IllegalArgumentException("fromKey out of range");
       if (!inRange2(toKey))
@@ -973,14 +970,14 @@ public class RBTreeMap<K,V> extends AbstractMap<K,V>
     }
 
     @Override
-    public SortedMap headMap(Object toKey) {
+    public SortedMap<K,V> headMap(Object toKey) {
       if (!inRange2(toKey))
         throw new IllegalArgumentException("toKey out of range");
       return new SubMap(fromStart, fromKey, false, toKey);
     }
 
     @Override
-    public SortedMap tailMap(Object fromKey) {
+    public SortedMap<K,V> tailMap(Object fromKey) {
       if (!inRange(fromKey))
         throw new IllegalArgumentException("fromKey out of range");
       return new SubMap(false, fromKey, toEnd, toKey);
