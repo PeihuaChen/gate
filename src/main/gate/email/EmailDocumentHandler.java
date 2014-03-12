@@ -56,7 +56,7 @@ public class EmailDocumentHandler {
     */
   public EmailDocumentHandler( gate.Document aGateDocument,
                                Map  aMarkupElementsMap,
-                               Map  anElement2StringMap
+                               Map<String,String>  anElement2StringMap
                               ) {
 
     gateDocument = aGateDocument;
@@ -642,7 +642,7 @@ public class EmailDocumentHandler {
   private Map  markupElementsMap = null;
 
   // this map marks the elements after we want to insert some strings
-  private Map element2StringMap = null;
+  private Map<String,String> element2StringMap = null;
 
   // listeners for status report
   protected List<StatusListener> myStatusListeners = new LinkedList<StatusListener>();
