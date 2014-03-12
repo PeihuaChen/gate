@@ -583,7 +583,7 @@ extends AbstractFeatureBearer implements DataStore {
   public String getLrName(Object lrId) {
     String sLRid = lrId.toString();
     int secondSeparator = sLRid.lastIndexOf("___");
-    lrId = sLRid.substring(0, secondSeparator);
+    sLRid = sLRid.substring(0, secondSeparator);
     int firstSeparator = sLRid.lastIndexOf("___");
     return sLRid.substring(0, firstSeparator);
   } // getLrName
