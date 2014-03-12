@@ -15,9 +15,10 @@
 
 package gate.creole.ir;
 
-import java.util.List;
-
 import gate.Corpus;
+import gate.Document;
+
+import java.util.List;
 
 public interface IndexManager{
 
@@ -58,7 +59,7 @@ public interface IndexManager{
 
   /** Reindexing changed documents, removing removed documents and
    *  add to the index new corpus documents. */
-  public void sync(List added, List removed, List changed) throws IndexException;
+  public void sync(List<Document> added, List<String> removed, List<Document> changed) throws IndexException;
 
 
 }

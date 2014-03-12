@@ -17,9 +17,10 @@ package gate.creole.ir;
 
 public class IndexException extends Exception{
 
+  private static final long serialVersionUID = -4883967531032963135L;
+
   /** Consructor of the class.*/
   public IndexException(String msg){
     super(msg);
   }
-
 }
