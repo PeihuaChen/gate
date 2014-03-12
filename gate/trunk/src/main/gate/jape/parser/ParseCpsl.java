@@ -450,6 +450,9 @@ ParseCpsl parser = null;
                 "Read error " + mue.toString()));}
             }
 
+            // sptURL can never be null at this point because the only way that could
+            // happen would be if an exception occurred above, but that would trigger
+            // the ParserException above
             if(sptURL == null){
               {if (true) throw(new ParseException(errorMsgPrefix(phaseNameTok)+
                 "Resource not found: base = " + baseURL.toString() +
@@ -471,7 +474,7 @@ ParseCpsl parser = null;
 
           // adding the resultant spt to m
           if(parser != null) {
-                List phases = parser.MultiPhaseTransducer().getPhases();
+                List<Transducer> phases = parser.MultiPhaseTransducer().getPhases();
 
             //s = parser.SinglePhaseTransducer();
             //if(s != null)
@@ -480,8 +483,8 @@ ParseCpsl parser = null;
             if(phases != null) {
               for(int i=0; i < phases.size(); i++) {
                 m.addPhase(
-                  ((Transducer)phases.get(i)).getName(),
-                  (Transducer)phases.get(i)
+                  phases.get(i).getName(),
+                  phases.get(i)
                   );
               }
             }
@@ -518,7 +521,7 @@ SinglePhaseTransducer SinglePhaseTransducer(String javaimportblock) throws Parse
   Token inputTok = null;
   SinglePhaseTransducer t = null;
   Rule newRule = null;
-  bindingNameSet = new HashSet();
+  bindingNameSet = new HashSet<String>();
   Token optionNameTok = null;
   Token optionValueTok = null;
     jj_consume_token(phase);
@@ -1119,7 +1122,6 @@ Constraint Constraint() throws ParseException {Token annotTypeTok = null;
   Token metaPropertyTok = null;
   AnnotationAccessor accessor = null;
   Token opTok = null;
-  Object attrValObj = null;
   Pair attrValPair = null;
   boolean negate = false;
   Constraint c = null;
@@ -1218,7 +1220,6 @@ accessor = Factory.getConstraintFactory().createDefaultAccessor(attrNameTok.imag
 // attribute values: strings, identifers (=strings), integers, floats,
 //                   booleans
   final public Pair AttrVal() throws ParseException {Token attrValTok = null;
-  String attrValString = null;
   Pair val = new Pair();
     switch (jj_nt.kind) {
     case integer:
@@ -1849,18 +1850,6 @@ appendAnnotationAdd(blockBuffer, newAnnotType, annotSetName);
     finally { jj_save(1, xla); }
   }
 
-  private boolean jj_3R_27()
- {
-    if (jj_scan_token(pling)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_26()
- {
-    if (jj_3R_15()) return true;
-    return false;
-  }
-
   private boolean jj_3R_25()
  {
     Token xsp;
@@ -1900,17 +1889,17 @@ appendAnnotationAdd(blockBuffer, newAnnotType, annotSetName);
     return false;
   }
 
+  private boolean jj_3R_18()
+ {
+    if (jj_3R_20()) return true;
+    return false;
+  }
+
   private boolean jj_3R_16()
  {
     if (jj_scan_token(colon)) return true;
     if (jj_scan_token(ident)) return true;
     if (jj_scan_token(leftBrace)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_18()
- {
-    if (jj_3R_20()) return true;
     return false;
   }
 
@@ -1920,16 +1909,16 @@ appendAnnotationAdd(blockBuffer, newAnnotType, annotSetName);
     return false;
   }
 
-  private boolean jj_3_2()
- {
-    if (jj_3R_16()) return true;
-    return false;
-  }
-
   private boolean jj_3R_22()
  {
     if (jj_scan_token(leftBrace)) return true;
     if (jj_3R_25()) return true;
+    return false;
+  }
+
+  private boolean jj_3_2()
+ {
+    if (jj_3R_16()) return true;
     return false;
   }
 
@@ -1959,6 +1948,18 @@ appendAnnotationAdd(blockBuffer, newAnnotType, annotSetName);
   }
 
   private boolean jj_3_1()
+ {
+    if (jj_3R_15()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_27()
+ {
+    if (jj_scan_token(pling)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_26()
  {
     if (jj_3R_15()) return true;
     return false;

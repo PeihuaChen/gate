@@ -620,6 +620,9 @@ MultiPhaseTransducer _MultiPhaseTransducer() :
                 "Read error " + mue.toString()));
             }
 
+            // sptURL can never be null at this point because the only way that could
+            // happen would be if an exception occurred above, but that would trigger
+            // the ParserException above
             if(sptURL == null){
               throw(new ParseException(errorMsgPrefix(phaseNameTok)+
                 "Resource not found: base = " + baseURL.toString() +
@@ -641,7 +644,7 @@ MultiPhaseTransducer _MultiPhaseTransducer() :
 
           // adding the resultant spt to m
           if(parser != null) {
-          	List phases = parser.MultiPhaseTransducer().getPhases();
+          	List<Transducer> phases = parser.MultiPhaseTransducer().getPhases();
 
             //s = parser.SinglePhaseTransducer();
             //if(s != null)
@@ -650,8 +653,8 @@ MultiPhaseTransducer _MultiPhaseTransducer() :
             if(phases != null) {
               for(int i=0; i < phases.size(); i++) {
                 m.addPhase(
-                  ((Transducer)phases.get(i)).getName(),
-                  (Transducer)phases.get(i)
+                  phases.get(i).getName(),
+                  phases.get(i)
                   );
               }
             }
@@ -677,7 +680,7 @@ SinglePhaseTransducer SinglePhaseTransducer(String javaimportblock) :
   Token inputTok = null;
   SinglePhaseTransducer t = null;
   Rule newRule = null;
-  bindingNameSet = new HashSet();
+  bindingNameSet = new HashSet<String>();
   Token optionNameTok = null;
   Token optionValueTok = null;
 }
@@ -1086,7 +1089,6 @@ Constraint Constraint() :
   Token metaPropertyTok = null;
   AnnotationAccessor accessor = null;
   Token opTok = null;
-  Object attrValObj = null;
   Pair attrValPair = null;
   boolean negate = false;
   Constraint c = null;
@@ -1170,7 +1172,6 @@ AnnotationAccessor accessor = null;
 Pair AttrVal() :
 {
   Token attrValTok = null;
-  String attrValString = null;
   Pair val = new Pair();
 }
 {
