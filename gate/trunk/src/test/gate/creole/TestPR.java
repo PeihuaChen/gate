@@ -50,7 +50,7 @@ import org.junit.FixMethodOrder;
 import org.junit.runners.MethodSorters;
 
 /** Test the PRs on three documents */
-@FixMethodOrder(MethodSorters.JVM)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestPR extends TestCase
 {
   /** Debug flag */
