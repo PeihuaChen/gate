@@ -55,7 +55,7 @@ public class EmailDocumentHandler {
     * Constructor initialises some private fields
     */
   public EmailDocumentHandler( gate.Document aGateDocument,
-                               Map  aMarkupElementsMap,
+                               Map<String,String>  aMarkupElementsMap,
                                Map<String,String>  anElement2StringMap
                               ) {
 
@@ -639,9 +639,11 @@ public class EmailDocumentHandler {
   private gate.AnnotationSet basicAS = null;
 
   // this map marks the elements that we don't want to create annotations
-  private Map  markupElementsMap = null;
+  @SuppressWarnings("unused")
+  private Map<String,String>  markupElementsMap = null;
 
   // this map marks the elements after we want to insert some strings
+  @SuppressWarnings("unused")
   private Map<String,String> element2StringMap = null;
 
   // listeners for status report

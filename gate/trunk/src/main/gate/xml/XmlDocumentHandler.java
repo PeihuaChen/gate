@@ -109,7 +109,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
    * @param anElement2StringMap this map contains the strings that will be
    * added to the text contained by the key element.
    */
-  public XmlDocumentHandler(gate.Document aDocument, Map aMarkupElementsMap,
+  public XmlDocumentHandler(gate.Document aDocument, Map<String,String> aMarkupElementsMap,
           Map<String,String> anElement2StringMap) {
     this(aDocument, aMarkupElementsMap, anElement2StringMap, null);
   } // XmlDocumentHandler
@@ -125,7 +125,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
    * document was processed
    */
   public XmlDocumentHandler(gate.Document aDocument,
-          Map aMarkupElementsMap,
+          Map<String,String> aMarkupElementsMap,
           Map<String,String> anElement2StringMap,
           AnnotationSet anAnnotationSet) {
     // init parent
@@ -232,7 +232,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
                   obj.getFM());
         } else {
           // get the type of the annotation from Map
-          String annotationType = (String) markupElementsMap.get(obj.getElemName());
+          String annotationType = markupElementsMap.get(obj.getElemName());
           if (annotationType != null) {
             basicAS.add(obj.getId(),
                     obj.getStart(),
@@ -664,6 +664,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
    * It receives a qualified name and returns its local name.
    * For eg. if it receives gate:gateId it will return gateId
    */
+  @SuppressWarnings("unused")
   private String getMyLocalName(String aQName) {
     if (aQName == null) {
       return "";
@@ -705,7 +706,7 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
   // if it's null all the elements from the XML documents will be transformed
   // into Gate annotation objects otherwise only the elements it contains will
   // be transformed
-  private Map markupElementsMap = null;
+  private Map<String,String> markupElementsMap = null;
   // this map contains the string that we want to insert iside the document
   // content, when a certain element is found
   // if the map is null then no string is added

@@ -55,7 +55,7 @@ public class HtmlDocumentHandler extends ParserCallback {
     * @param aMarkupElementsMap The map containing the elements that will
     * transform into annotations
     */
-  public HtmlDocumentHandler(gate.Document aDocument, Map aMarkupElementsMap) {
+  public HtmlDocumentHandler(gate.Document aDocument, Map<String,String> aMarkupElementsMap) {
     this(aDocument,aMarkupElementsMap,null);
   }
 
@@ -67,7 +67,7 @@ public class HtmlDocumentHandler extends ParserCallback {
     * resulted from the processing of the gate document
     */
   public HtmlDocumentHandler(gate.Document       aDocument,
-                             Map                 aMarkupElementsMap,
+                             Map<String,String>  aMarkupElementsMap,
                              gate.AnnotationSet  anAnnotationSet) {
     // init stack
     stack = new Stack<CustomObject>();
@@ -241,7 +241,7 @@ public class HtmlDocumentHandler extends ParserCallback {
                            );
             }else{
               String annotationType =
-                     (String) markupElementsMap.get(obj.getElemName());
+                     markupElementsMap.get(obj.getElemName());
               if (annotationType != null)
                  basicAS.add( obj.getStart(),
                               obj.getEnd(),
@@ -574,7 +574,7 @@ public class HtmlDocumentHandler extends ParserCallback {
   // if it's null all the elements from the HTML documents will be transformed
   // into Gate annotation objects otherwise only the elements it contains will
   // be transformed
-  private Map markupElementsMap = null;
+  private Map<String,String> markupElementsMap = null;
 
   // the content of the HTML document, without any tag
   // for internal use
