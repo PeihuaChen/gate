@@ -499,7 +499,7 @@ extends AbstractFeatureBearer implements DataStore {
     }
 
     // create a File to representing the resource storage file
-    File resourceFile = new File(resourceTypeDirectory, (String)lrPersistenceId);
+    File resourceFile = new File(resourceTypeDirectory, lrPersistenceId.toString());
     if(! resourceFile.exists() || ! resourceFile.isFile())
       throw new PersistenceException("Can't find file " + resourceFile);
 
@@ -581,11 +581,11 @@ extends AbstractFeatureBearer implements DataStore {
   /** Get the name of an LR from its ID. */
   @Override
   public String getLrName(Object lrId) {
-    int secondSeparator = ((String) lrId).lastIndexOf("___");
-    lrId = ((String) lrId).substring(0, secondSeparator);
-    int firstSeparator = ((String) lrId).lastIndexOf("___");
-
-    return ((String) lrId).substring(0, firstSeparator);
+    String sLRid = lrId.toString();
+    int secondSeparator = sLRid.lastIndexOf("___");
+    lrId = sLRid.substring(0, secondSeparator);
+    int firstSeparator = sLRid.lastIndexOf("___");
+    return sLRid.substring(0, firstSeparator);
   } // getLrName
 
   /** Set method for the autosaving behaviour of the data store.
