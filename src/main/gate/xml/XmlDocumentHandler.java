@@ -368,23 +368,23 @@ public class XmlDocumentHandler extends XmlPositionCorrectionHandler {
     // obj is for internal use
     CustomObject obj = null;
 
-    // if the stack is not empty, we extract the custom object and delete it
-    if (!stack.isEmpty()) {
+    // if the stack is not empty, we extract the custom object and
+    // delete it from the stack
+    if(!stack.isEmpty()) {
       obj = stack.pop();
+
+      // Before adding it to the colector, we need to check if is an
+      // emptyAndSpan one. See CustomObject's isEmptyAndSpan field.
+      if(obj.getStart().equals(obj.getEnd())) {
+        // The element had an end tag and its start was equal to its
+        // end. Hence it is anEmptyAndSpan one.
+        obj.getFM().put("isEmptyAndSpan", "true");
+      }// End iff
+
+      // Put the object into colector. Later, when the document ends
+      // we will use colector to create all the annotations
+      colector.add(obj);
     }// End if
-
-    // Before adding it to the colector, we need to check if is an
-    // emptyAndSpan one. See CustomObject's isEmptyAndSpan field.
-    if (obj.getStart().equals(obj.getEnd())) {
-      // The element had an end tag and its start was equal to its end. Hence
-      // it is anEmptyAndSpan one.
-      obj.getFM().put("isEmptyAndSpan", "true");
-    }// End iff
-
-    // Put the object into colector
-    // Later, when the document ends we will use colector to create all the
-    // annotations
-    colector.add(obj);
 
     // if element is found on Element2String map, then add the string to the
     // end of the document content

@@ -22,7 +22,7 @@ import java.util.Set;
 
 /** Represents the commonalities between all sorts of documents.
  */
-public interface SimpleDocument extends LanguageResource, Comparable {
+public interface SimpleDocument extends LanguageResource, Comparable<Object> {
 
   /**
    * The parameter name for the document URL

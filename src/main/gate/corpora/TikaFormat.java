@@ -21,6 +21,9 @@ import org.apache.log4j.Logger;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.Office;
+import org.apache.tika.metadata.Property;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.xml.sax.SAXException;
@@ -124,17 +127,17 @@ public class TikaFormat extends DocumentFormat {
 
   private void setDocumentFeatures(Metadata metadata, Document doc) {
     FeatureMap fmap = doc.getFeatures();
-    setTikaFeature(metadata, Metadata.TITLE, fmap);
-    setTikaFeature(metadata, Metadata.AUTHOR, fmap);
-    setTikaFeature(metadata, Metadata.COMMENTS, fmap);
-    setTikaFeature(metadata, Metadata.CREATOR, fmap);
+    setTikaFeature(metadata, TikaCoreProperties.TITLE, fmap);
+    setTikaFeature(metadata, Office.AUTHOR, fmap);
+    setTikaFeature(metadata, TikaCoreProperties.COMMENTS, fmap);
+    setTikaFeature(metadata, TikaCoreProperties.CREATOR, fmap);
     if (fmap.get("AUTHORS") == null && fmap.get("AUTHOR") != null)
-      fmap.put("AUTHORS", fmap.get(Metadata.AUTHOR));
+      fmap.put("AUTHORS", fmap.get(Office.AUTHOR));
     fmap.put("MimeType", metadata.get(Metadata.CONTENT_TYPE));
   }
 
-  private void setTikaFeature(Metadata metadata, String key, FeatureMap fmap) {
-    String value = metadata.get(key);
+  private void setTikaFeature(Metadata metadata, Property property, FeatureMap fmap) {
+    String value = metadata.get(property);
     if (value == null) {
       return;
     }
@@ -143,7 +146,7 @@ public class TikaFormat extends DocumentFormat {
     if (value.length() == 0) {
       return;
     }
-    key = key.toUpperCase();
+    String key = property.getName().toUpperCase();
     if (fmap.containsKey(key)) {
       fmap.put("TIKA_" + key, value);
     }

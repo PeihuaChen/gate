@@ -44,7 +44,7 @@
     <dependency org="net.sourceforge.nekohtml" name="nekohtml" rev="1.9.14" />
 
     <!-- we use Tika to handle most document formats other than XML, HTML and TXT -->
-    <dependency org="org.apache.tika" name="tika-parsers" rev="1.0" conf="runtime->master,runtime" >
+    <dependency org="org.apache.tika" name="tika-parsers" rev="1.5" conf="runtime->master,runtime" >
       <!-- we don't currently use the RSS/ATOM aspects of Tika so we don't need ROME -->
       <exclude org="rome" module="rome" />
 
@@ -56,11 +56,26 @@
 
       <!-- we don't use Tika to parse Java classes so we don't need ASM -->
       <exclude org="asm" module="asm" />
+      <exclude org="org.ow2.asm" module="asm-debug-all" />
+      
+      <!-- we aren't using any of the GUI aspects of tika so we don't need to be
+           able to do syntax highlighting -->
+      <exclude org="com.uwyn" module="jhighlight" />
 
       <!-- we exclude boilerpipe as it isn't required for Tika given the way we
            currently configure it, and it contains a copy of NekoHTML which causes
            HTML parsing in GATE to change, and the tests to break -->
       <exclude org="de.l3s.boilerpipe" module="boilerpipe" />
+      
+      <!-- we don't handle audio files so we don't need the following -->
+      <exclude org="org.gagravarr" module="vorbis-java-tika" />
+      <exclude org="org.gagravarr" module="vorbis-java-core" />
+      <exclude org="com.googlecode.mp4parser" module="isoparser" />
+      
+      <!-- no idea what these are used for internally to tika but we don't seem to need them -->
+      <exclude org="com.googlecode.juniversalchardet" module="juniversalchardet" />
+      <exclude org="org.tukaani" module="xz" />
+      <exclude org="com.adobe.xmp" module="xmpcore" />
     </dependency>
 
     <!-- We use Woodstox instead of the default Sun StAX implementation as it seems to behave better.
