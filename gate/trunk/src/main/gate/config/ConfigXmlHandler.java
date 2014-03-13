@@ -16,18 +16,25 @@
 
 package gate.config;
 
+import gate.CreoleRegister;
+import gate.DataStoreRegister;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.util.GateException;
+import gate.util.GateSaxException;
+import gate.util.Out;
+import gate.util.Strings;
+import gate.xml.SimpleErrorHandler;
+
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 import java.util.Stack;
 
-import org.xml.sax.*;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
-
-import gate.*;
-import gate.creole.ResourceInstantiationException;
-import gate.util.*;
-import gate.xml.SimpleErrorHandler;
 
 
 /** This is a SAX handler for processing <CODE>gate.xml</CODE> files.
@@ -40,9 +47,6 @@ public class ConfigXmlHandler extends DefaultHandler {
    *  I'm bald already and c) life is short.)
    */
   private Stack<String> contentStack = new Stack<String>();
-
-  /** The current resource data object */
-  private SystemData systemData;
 
   /** The current element's attribute list */
   private Attributes currentAttributes;
@@ -135,29 +139,13 @@ public class ConfigXmlHandler extends DefaultHandler {
     currentAttributes = atts;
     currentAttributeMap = attributeListToParameterList();
 
-    // if it's a SYSTEM, create a new one and set its name
-    if(elementName.toUpperCase().equals("SYSTEM")) {
-      systemData = new SystemData();
-      for(int i=0, len=currentAttributes.getLength(); i<len; i++) {
-        if(currentAttributes.getQName(i).toUpperCase().equals("NAME"))
-          systemData.systemName = currentAttributes.getValue(i);
-      }
-    } else if(elementName.toUpperCase().equals("DBCONFIG")) {
+    if(elementName.toUpperCase().equals("DBCONFIG")) {
       DataStoreRegister.addConfig(currentAttributeMap);
     } else if(elementName.toUpperCase().equals(Gate.getUserConfigElement())) {
       Gate.getUserConfig().putAll(currentAttributeMap);
     }
 
   } // startElement
-
-  /** Utility function to throw exceptions on stack errors. */
-  private void checkStack(String methodName, String elementName)
-  throws GateSaxException {
-    if(contentStack.isEmpty())
-      throw new GateSaxException(
-        methodName + " called for element " + elementName + " with empty stack"
-      );
-  } // checkStack
 
   /** Called when the SAX parser encounts the end of an XML element.
     * This is actions happen.
@@ -187,25 +175,6 @@ public class ConfigXmlHandler extends DefaultHandler {
       } catch(GateException e) {
         throw new GateSaxException("unable to register directory",e);
       }
-
-    //////////////////////////////////////////////////////////////////
-    } else if(elementName.toUpperCase().equals("SYSTEM")) {
-// check we got correct params on systemData?
-      systemData.createSystem();
-
-    //////////////////////////////////////////////////////////////////
-    } else if(elementName.toUpperCase().equals("CONTROLLER")) {
-      systemData.controllerTypeName = contentStack.pop();
-
-    //////////////////////////////////////////////////////////////////
-    } else if(elementName.toUpperCase().equals("LR")) {
-      // create an LR and add it to the SystemData
-      createResource(contentStack.pop(), systemData.lrList);
-
-    //////////////////////////////////////////////////////////////////
-    } else if(elementName.toUpperCase().equals("PR")) {
-      // create a PR and add it to the SystemData
-      createResource(contentStack.pop(), systemData.prList);
 
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("DBCONFIG")) {
@@ -251,28 +220,6 @@ public class ConfigXmlHandler extends DefaultHandler {
     contentStack.push(content);
     if(DEBUG) Out.println(content);
   } // characters
-
-  /** Utility method to create a resource and add to appropriate list.
-   *  Parameters for the resource are pulled out of the current attribute
-   *  list.
-   */
-  protected void createResource(String resourceTypeName, List resourceList)
-  throws GateSaxException
-  {
-    if(DEBUG) Out.prln(resourceTypeName + ": " + currentAttributeMap);
-    try {
-      resourceList.add(
-        Factory.createResource(
-          resourceTypeName, currentAttributeMap
-        )
-      );
-    } catch(ResourceInstantiationException e) {
-      throw new GateSaxException(
-        "Couldn't create resource for SYSTEM: " +
-        systemData.systemName + "; problem was: " + Strings.getNl() + e
-      );
-    }
-  } // createResource
 
   /** Utility method to convert the current SAX attribute list to a
    *  FeatureMap
