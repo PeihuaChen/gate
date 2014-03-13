@@ -29,7 +29,7 @@ import java.io.Serializable;
   * SimpleAnnotation was introduced to simplify the API of annotations
   */
 public interface SimpleAnnotation
-extends FeatureBearer, IdBearer, Comparable, Serializable {
+extends FeatureBearer, IdBearer, Comparable<Object>, Serializable {
 
   /** The type of the annotation (corresponds to TIPSTER "name"). */
   public String getType();
