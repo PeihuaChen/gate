@@ -731,6 +731,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    *         markup + dumped annotations form the aSourceAnnotationSet
    */
   @Override
+  @SuppressWarnings("unused")
   public String toXml(Set<Annotation> aSourceAnnotationSet, boolean includeFeatures) {
     if(hasOriginalContentFeatures()) { return saveAnnotationSetAsXmlInOrig(
             aSourceAnnotationSet, includeFeatures); } // if

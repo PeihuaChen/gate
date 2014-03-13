@@ -98,23 +98,6 @@ public class DataStoreRegister extends HashSet<DataStore> {
     } // while
   } // clear()
 
-  /** Configuration data such as driver names. */
-  private static Map<Object,Object> configData = new HashMap<Object,Object>();
-
-  /** Get the configuration data map. */
-  public static Map<Object,Object> getConfigData() {
-    return configData;
-  }
-
-  /**
-   * Adds configuration data (e.g. from <TT>gate.xml</TT> files) to the
-   * register. New key/value pairs are added to the existing set (this will
-   * overwrite existing pairs whose keys match new ones).
-   */
-  public static void addConfig(Map<Object,Object> configData) {
-    DataStoreRegister.configData.putAll(configData);
-  } // addConfig
-
   /** A hashmap from datastore to security data (current user and group) */
   private static Map<DataStore, Map<Object,Object>> securityData = new HashMap<DataStore, Map<Object,Object>>();
 
