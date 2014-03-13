@@ -200,7 +200,7 @@ public class FastInfosetExporter extends ResourceHelper {
                 while(docIter.hasNext()) {
                   boolean docWasLoaded =
                       corpus.isDocumentLoaded(currentDocIndex);
-                  Document currentDoc = (Document)docIter.next();
+                  Document currentDoc = docIter.next();
                   URL sourceURL = currentDoc.getSourceUrl();
                   String fileName = null;
                   if(sourceURL != null) {
