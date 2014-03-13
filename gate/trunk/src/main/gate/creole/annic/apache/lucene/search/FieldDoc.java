@@ -38,6 +38,7 @@ package gate.creole.annic.apache.lucene.search;
  * @see ScoreDoc
  * @see TopFieldDocs
  */
+@SuppressWarnings({"serial","rawtypes"})
 public class FieldDoc
 extends ScoreDoc {
 

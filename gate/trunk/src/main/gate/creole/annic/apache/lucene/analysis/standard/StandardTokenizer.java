@@ -11,6 +11,7 @@ import java.io.*;
  * not suit your application, please consider copying this source code
  * directory to your project and maintaining your own grammar-based tokenizer.
  */
+@SuppressWarnings({"unused","rawtypes","unchecked"})
 public class StandardTokenizer extends gate.creole.annic.apache.lucene.analysis.Tokenizer implements StandardTokenizerConstants {
 
   /** Constructs a tokenizer for this Reader. */

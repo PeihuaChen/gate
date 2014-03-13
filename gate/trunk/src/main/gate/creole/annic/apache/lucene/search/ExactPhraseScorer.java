@@ -19,6 +19,7 @@ package gate.creole.annic.apache.lucene.search;
 import java.io.IOException;
 import gate.creole.annic.apache.lucene.index.*;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 final class ExactPhraseScorer extends PhraseScorer {
 
   int patternSize = 0;

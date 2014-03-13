@@ -30,6 +30,7 @@ import gate.creole.annic.apache.lucene.search.Hits;             // for javadoc
   index, so that they may be returned with hits on the document.
   */
 
+@SuppressWarnings("serial")
 public final class Field implements java.io.Serializable {
   private String name = "body";
   private String stringValue = null;

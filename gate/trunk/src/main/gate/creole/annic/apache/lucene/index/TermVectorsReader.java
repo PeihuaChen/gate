@@ -7,6 +7,7 @@ import java.io.IOException;
 
 /** TODO: relax synchro!
  */
+@SuppressWarnings("unused")
 class TermVectorsReader {
   private FieldInfos fieldInfos;
 

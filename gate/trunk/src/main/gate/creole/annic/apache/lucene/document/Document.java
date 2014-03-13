@@ -39,6 +39,7 @@ import gate.creole.annic.apache.lucene.search.Hits;             // for javadoc
  * IndexReader#document(int)}.
  */
 
+@SuppressWarnings({"serial","rawtypes","unchecked"})
 public final class Document implements java.io.Serializable {
   List fields = new Vector();
   private float boost = 1.0f;

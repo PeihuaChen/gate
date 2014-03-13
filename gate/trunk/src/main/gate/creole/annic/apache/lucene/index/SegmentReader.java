@@ -35,6 +35,7 @@ import gate.creole.annic.apache.lucene.util.BitVector;
  *
  * @version $Id: SegmentReader.java 529 2004-10-05 11:55:26Z niraj $
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 final class SegmentReader extends IndexReader {
   private String segment;
 

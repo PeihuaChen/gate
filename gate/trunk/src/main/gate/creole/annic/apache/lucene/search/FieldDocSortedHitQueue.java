@@ -32,6 +32,7 @@ import java.util.Locale;
  * @since   lucene 1.4
  * @version $Id: FieldDocSortedHitQueue.java 529 2004-10-05 11:55:26Z niraj $
  */
+@SuppressWarnings("unchecked")
 class FieldDocSortedHitQueue
 extends PriorityQueue {
 

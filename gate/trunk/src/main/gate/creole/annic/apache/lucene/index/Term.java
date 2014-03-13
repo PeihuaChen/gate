@@ -7,7 +7,7 @@ package gate.creole.annic.apache.lucene.index;
 
   Note that terms may represent more than words from text fields, but also
   things like dates, email addresses, urls, etc.  */
-
+@SuppressWarnings({"rawtypes","unused","serial"})
 public final class Term implements Comparable, java.io.Serializable {
   String field;
   String text;

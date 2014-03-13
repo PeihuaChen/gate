@@ -30,6 +30,7 @@ import java.util.Vector;
  }
  </CODE>
  */
+@SuppressWarnings({"rawtypes","unchecked","unused"})
 final class TermVectorsWriter {
   public static final int FORMAT_VERSION = 1;
   //The size in bytes that the FORMAT_VERSION will take up at the beginning of each file

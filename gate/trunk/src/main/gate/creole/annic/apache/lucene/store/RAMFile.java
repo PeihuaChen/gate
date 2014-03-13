@@ -18,6 +18,7 @@ package gate.creole.annic.apache.lucene.store;
 
 import java.util.Vector;
 
+@SuppressWarnings("rawtypes")
 class RAMFile {
   Vector buffers = new Vector();
   long length;

@@ -38,6 +38,7 @@ import java.text.Collator;
  * @see Searchable#search(Query,Filter,int,Sort)
  * @see FieldCache
  */
+@SuppressWarnings("rawtypes")
 class FieldSortedHitQueue
 extends PriorityQueue {
 

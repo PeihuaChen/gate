@@ -27,6 +27,7 @@ package gate.creole.annic.apache.lucene.search;
  * @version $Id: TopFieldDocs.java 529 2004-10-05 11:55:26Z niraj $
  * @see Searchable#search(Query,Filter,int,Sort)
  */
+@SuppressWarnings("serial")
 public class TopFieldDocs
 extends TopDocs {
 

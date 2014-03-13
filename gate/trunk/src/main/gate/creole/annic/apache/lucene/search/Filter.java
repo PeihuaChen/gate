@@ -22,6 +22,7 @@ import gate.creole.annic.apache.lucene.index.IndexReader;
 
 /** Abstract base class providing a mechanism to restrict searches to a subset
  of an index. */
+@SuppressWarnings("serial")
 public abstract class Filter implements java.io.Serializable {
   /** Returns a BitSet with true for documents which should be permitted in
     search results, and false for those that should not. */

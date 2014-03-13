@@ -23,6 +23,7 @@ import gate.creole.annic.apache.lucene.index.IndexReader;
 /** A Query that matches documents matching boolean combinations of other
   queries, typically {@link TermQuery}s or {@link PhraseQuery}s.
   */
+@SuppressWarnings({"serial","rawtypes","unchecked"})
 public class BooleanQuery extends Query {
 
   /**

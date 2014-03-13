@@ -18,6 +18,7 @@ package gate.creole.annic.apache.lucene.search;
 
 /** Expert: Returned by low-level search implementations.
  * @see TopDocs */
+@SuppressWarnings("serial")
 public class ScoreDoc implements java.io.Serializable {
   /** Expert: The score of this document for the query. */
   public float score;

@@ -30,6 +30,7 @@ import gate.creole.annic.apache.lucene.store.OutputStream;
  *
  * @version $Id: RAMDirectory.java 529 2004-10-05 11:55:26Z niraj $
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public final class RAMDirectory extends Directory {
   Hashtable files = new Hashtable();
 

@@ -48,6 +48,7 @@ import java.io.IOException;
  * @author Dmitry Serebrennikov
  * @version $Id: CompoundFileWriter.java 529 2004-10-05 11:55:26Z niraj $
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 final class CompoundFileWriter {
 
     private static final class FileEntry {

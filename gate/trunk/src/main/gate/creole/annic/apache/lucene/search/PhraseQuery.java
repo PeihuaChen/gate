@@ -26,6 +26,7 @@ import gate.creole.annic.apache.lucene.index.IndexReader;
 /** A Query that matches documents containing a particular sequence of terms.
   This may be combined with other terms with a {@link BooleanQuery}.
   */
+@SuppressWarnings({"serial","rawtypes","unchecked"})
 public class PhraseQuery extends Query {
   private String field;
   private Vector terms = new Vector();

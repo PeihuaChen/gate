@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.*;
 
 /** Scorer for conjunctions, sets of queries, all of which are required. */
+@SuppressWarnings({"rawtypes","unchecked","unused"})
 final class ConjunctionScorer extends Scorer {
   private LinkedList scorers = new LinkedList();
   private boolean firstTime = true;

@@ -22,6 +22,7 @@ import gate.creole.annic.apache.lucene.store.Directory;
 import gate.creole.annic.apache.lucene.store.InputStream;
 import gate.creole.annic.apache.lucene.store.OutputStream;
 
+@SuppressWarnings({"rawtypes","unchecked","serial"})
 final class SegmentInfos extends Vector {
 
   /** The file format version, a negative number. */

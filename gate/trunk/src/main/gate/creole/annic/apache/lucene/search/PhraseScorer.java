@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import gate.creole.annic.apache.lucene.index.*;
 
+@SuppressWarnings("rawtypes")
 abstract class PhraseScorer extends Scorer {
   private Weight weight;
   protected byte[] norms;

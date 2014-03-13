@@ -16,15 +16,18 @@ package gate.creole.annic.apache.lucene.index;
  * limitations under the License.
  */
 
-import java.util.*;
-import java.io.IOException;
-
 import gate.creole.annic.apache.lucene.document.Document;
 import gate.creole.annic.apache.lucene.document.Field;
-
 import gate.creole.annic.apache.lucene.store.Directory;
-import gate.creole.annic.apache.lucene.store.OutputStream;
 import gate.creole.annic.apache.lucene.store.InputStream;
+import gate.creole.annic.apache.lucene.store.OutputStream;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Vector;
 
 /** Access to the Field Info file that describes document fields and whether or
  *  not they are indexed. Each segment has a separate Field Info file. Objects
@@ -32,6 +35,7 @@ import gate.creole.annic.apache.lucene.store.InputStream;
  *  be adding documents at a time, with no other reader or writer threads
  *  accessing this object.
  */
+@SuppressWarnings({"rawtypes","unchecked","unused"})
 final class FieldInfos {
   private Vector byNumber = new Vector();
   private Hashtable byName = new Hashtable();

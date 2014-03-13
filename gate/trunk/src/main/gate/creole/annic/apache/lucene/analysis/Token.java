@@ -34,6 +34,7 @@ package gate.creole.annic.apache.lucene.analysis;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public final class Token implements Serializable {
   String termText;				  // the text of the term
   int startOffset;				  // start in source text
