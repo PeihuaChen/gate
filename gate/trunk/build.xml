@@ -256,7 +256,6 @@
       <compilerarg value="-Xlint:all" />
       <compilerarg value="-Xlint:-rawtypes" />
       <compilerarg value="-Xlint:-unchecked" />
-      <compilerarg value="-Xlint:-serial" />
     </javac>
   </target>
 

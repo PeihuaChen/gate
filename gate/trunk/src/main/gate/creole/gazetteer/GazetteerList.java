@@ -173,8 +173,6 @@ public class GazetteerList extends gate.creole.AbstractLanguageResource
         throw new ResourceInstantiationException("URL not specified (null).");
       }
 
-      
-
       listReader =
               new BomStrippingInputStreamReader((url).openStream(), encoding);
       String line;

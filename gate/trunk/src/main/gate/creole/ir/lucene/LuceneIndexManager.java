@@ -226,7 +226,7 @@ public class LuceneIndexManager implements IndexManager{
   private org.apache.lucene.document.Document getLuceneDoc(gate.Document gateDoc){
     org.apache.lucene.document.Document luceneDoc =
                                      new org.apache.lucene.document.Document();
-    @SuppressWarnings("unchecked")
+    
     Iterator<IndexField> fields = indexDefinition.getIndexFields();
 
 //    luceneDoc.add(Field.Keyword(DOCUMENT_ID,
