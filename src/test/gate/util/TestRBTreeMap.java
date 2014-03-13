@@ -22,8 +22,6 @@ import junit.framework.*;
   */
 public class TestRBTreeMap extends TestCase
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
 
   /** Construction */
   public TestRBTreeMap(String name) { super(name); }
@@ -31,7 +29,7 @@ public class TestRBTreeMap extends TestCase
   /** Create a map  with sparse values as keys */
   @Override
   public void setUp() {
-    myTree=new RBTreeMap();
+    myTree=new RBTreeMap<Object,Object>();
     myTree.put(new Long(10),"Ten");
     myTree.put(new Long(20),"Twenty");
     myTree.put(new Long(30),"Thirty");
@@ -104,7 +102,7 @@ public class TestRBTreeMap extends TestCase
     assertNull("TestCM 8",result[1]);
 
     //empty the tree
-    myTree=new RBTreeMap();
+    myTree=new RBTreeMap<Object,Object>();
 
     //try glb=lub=null
     key=new Long(15);
@@ -143,7 +141,7 @@ public class TestRBTreeMap extends TestCase
     assertNull(result);
 
     //empty the tree
-    myTree=new RBTreeMap();
+    myTree=new RBTreeMap<Object,Object>();
     key=new Long(15);
     result=myTree.getNextOf(key);
     assertNull(result);
@@ -156,6 +154,6 @@ public class TestRBTreeMap extends TestCase
   } // suite
 
 
-  private RBTreeMap myTree;
+  private RBTreeMap<Object,Object> myTree;
   
 } // class TestRBTreeMap

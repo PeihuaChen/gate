@@ -19,13 +19,11 @@ import gate.annotation.AnnotationSetImpl;
 import gate.creole.ConditionalSerialController;
 import gate.creole.RunningStrategy;
 import gate.util.FeatureBearer;
-import gate.util.GateException;
 import gate.util.GateRuntimeException;
 import gate.util.InvalidOffsetException;
 import gate.util.OffsetComparator;
-import java.io.File;
-import java.net.MalformedURLException;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
