@@ -560,6 +560,6 @@ public class Main {
   } // help()
 
   /** The list of pending URLs to add to the CREOLE register */
-  private static final List<URL> pendingCreoleUrls = new ArrayList<URL>();
+  protected static final List<URL> pendingCreoleUrls = new ArrayList<URL>();
 
 } // class Main
