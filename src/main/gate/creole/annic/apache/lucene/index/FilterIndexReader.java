@@ -30,6 +30,7 @@ import gate.creole.annic.apache.lucene.document.Document;
  * further override some of these methods and may also provide additional
  * methods and fields.
  */
+@SuppressWarnings("rawtypes")
 public class FilterIndexReader extends IndexReader {
 
   /** Base class for filtering {@link TermDocs} implementations. */

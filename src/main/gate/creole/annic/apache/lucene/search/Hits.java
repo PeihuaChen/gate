@@ -22,6 +22,7 @@ import java.util.Vector;
 import gate.creole.annic.apache.lucene.document.Document;
 
 /** A ranked list of documents, used to hold search results. */
+@SuppressWarnings({"rawtypes","unchecked"})
 public final class Hits {
   private Query query;
   private Searcher searcher;

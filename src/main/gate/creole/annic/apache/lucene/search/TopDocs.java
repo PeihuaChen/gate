@@ -18,6 +18,7 @@ package gate.creole.annic.apache.lucene.search;
 
 /** Expert: Returned by low-level search implementations.
  * @see Searcher#search(Query,Filter,int) */
+@SuppressWarnings("serial")
 public class TopDocs implements java.io.Serializable {
   /** Expert: The total number of hits for the query.
    * @see Hits#length()

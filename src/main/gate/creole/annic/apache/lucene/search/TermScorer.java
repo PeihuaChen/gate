@@ -21,6 +21,7 @@ import java.io.IOException;
 import gate.creole.annic.apache.lucene.index.TermDocs;
 import gate.creole.annic.apache.lucene.index.Term;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 final class TermScorer extends Scorer {
   private Weight weight;
 

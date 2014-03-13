@@ -47,7 +47,7 @@ import gate.creole.annic.apache.lucene.analysis.Analyzer;
   performance is desired, then the <a href="#optimize"><b>optimize</b></a>
   method should be called before the index is closed.
   */
-
+@SuppressWarnings({"rawtypes","unchecked"})
 public class IndexWriter {
 
   /**

@@ -19,6 +19,7 @@ package gate.creole.annic.apache.lucene.search;
 import java.util.ArrayList;
 
 /** Expert: Describes the score computation for document and query. */
+@SuppressWarnings({"serial","rawtypes","unchecked"})
 public class Explanation implements java.io.Serializable {
   private float value;                            // the value of this node
   private String description;                     // what it represents

@@ -21,6 +21,7 @@ import java.io.IOException;
  * @version $Id: SortComparator.java 529 2004-10-05 11:55:26Z niraj $
  * @since   1.4
  */
+@SuppressWarnings({"serial","rawtypes","unchecked"})
 public abstract class SortComparator
 implements SortComparatorSource {
 

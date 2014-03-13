@@ -31,6 +31,7 @@ import gate.creole.annic.apache.lucene.util.PriorityQueue;
  * @author Anders Nielsen
  * @version 1.0
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class MultipleTermPositions
     implements TermPositions
 {

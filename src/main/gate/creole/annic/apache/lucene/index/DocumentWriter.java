@@ -32,6 +32,7 @@ import gate.creole.annic.apache.lucene.store.Directory;
 import gate.creole.annic.apache.lucene.store.OutputStream;
 import gate.creole.annic.apache.lucene.search.Similarity;
 
+@SuppressWarnings({"rawtypes","unchecked"})
 final class DocumentWriter {
   private Analyzer analyzer;
   private Directory directory;

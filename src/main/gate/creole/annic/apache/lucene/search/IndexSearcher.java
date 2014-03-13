@@ -31,6 +31,7 @@ import gate.creole.annic.apache.lucene.index.Term;
  * Applications usually need only call the inherited {@link #search(Query)} or
  * {@link #search(Query,Filter)} methods.
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class IndexSearcher extends Searcher {
 	IndexReader reader;
 

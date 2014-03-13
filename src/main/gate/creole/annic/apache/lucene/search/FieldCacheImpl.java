@@ -35,6 +35,7 @@ import java.util.WeakHashMap;
  * @since   lucene 1.4
  * @version $Id: FieldCacheImpl.java 529 2004-10-05 11:55:26Z niraj $
  */
+@SuppressWarnings("rawtypes")
 class FieldCacheImpl
 implements FieldCache {
 

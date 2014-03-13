@@ -24,6 +24,7 @@ import gate.creole.annic.apache.lucene.index.IndexReader;
 /** A Query that matches documents containing a term.
   This may be combined with other terms with a {@link BooleanQuery}.
   */
+@SuppressWarnings("serial")
 public class TermQuery extends Query {
   private Term term;
 

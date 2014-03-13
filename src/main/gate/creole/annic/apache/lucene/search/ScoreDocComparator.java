@@ -26,6 +26,7 @@ package gate.creole.annic.apache.lucene.search;
  * @since   lucene 1.4
  * @version $Id: ScoreDocComparator.java 529 2004-10-05 11:55:26Z niraj $
  */
+@SuppressWarnings("rawtypes")
 public interface ScoreDocComparator {
 
 	/** Special comparator for sorting hits according to computed relevance (document score). */

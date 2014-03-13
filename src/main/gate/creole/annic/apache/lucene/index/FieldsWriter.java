@@ -24,6 +24,7 @@ import gate.creole.annic.apache.lucene.store.OutputStream;
 import gate.creole.annic.apache.lucene.document.Document;
 import gate.creole.annic.apache.lucene.document.Field;
 
+@SuppressWarnings("rawtypes")
 final class FieldsWriter {
   private FieldInfos fieldInfos;
   private OutputStream fieldsStream;

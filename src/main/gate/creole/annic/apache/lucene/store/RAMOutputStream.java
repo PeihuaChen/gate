@@ -23,7 +23,7 @@ import java.io.IOException;
  *
  * @version $Id: RAMOutputStream.java 529 2004-10-05 11:55:26Z niraj $
  */
-
+@SuppressWarnings("unchecked")
 public class RAMOutputStream extends OutputStream {
   private RAMFile file;
   private int pointer = 0;

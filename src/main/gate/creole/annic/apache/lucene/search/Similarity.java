@@ -61,6 +61,7 @@ import gate.creole.annic.apache.lucene.document.Field;          // for javadoc
  * @see IndexWriter#setSimilarity(Similarity)
  * @see Searcher#setSimilarity(Similarity)
  */
+@SuppressWarnings("rawtypes")
 public abstract class Similarity {
   /** The Similarity implementation used by default. */
   private static Similarity defaultImpl = new DefaultSimilarity();

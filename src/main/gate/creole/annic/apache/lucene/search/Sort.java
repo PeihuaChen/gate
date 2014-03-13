@@ -97,6 +97,7 @@ import java.io.Serializable;
  * @since   lucene 1.4
  * @version $Id: Sort.java 529 2004-10-05 11:55:26Z niraj $
  */
+@SuppressWarnings("serial")
 public class Sort
 implements Serializable {
 

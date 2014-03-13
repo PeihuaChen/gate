@@ -26,6 +26,7 @@ import gate.creole.annic.apache.lucene.index.IndexReader;
 /**
  * The abstract base class for queries.
  */
+@SuppressWarnings({"serial","rawtypes","unchecked"})
 public abstract class Query implements java.io.Serializable, Cloneable {
   private float boost = 1.0f;                     // query boost factor
 

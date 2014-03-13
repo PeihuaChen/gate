@@ -36,6 +36,7 @@ import gate.creole.annic.apache.lucene.store.RAMOutputStream;
  * @see #merge
  * @see #add
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 final class SegmentMerger {
   private boolean useCompoundFile;
   private Directory directory;

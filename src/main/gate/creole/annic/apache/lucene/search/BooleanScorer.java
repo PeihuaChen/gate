@@ -18,6 +18,7 @@ package gate.creole.annic.apache.lucene.search;
 
 import java.io.IOException;
 
+@SuppressWarnings("unused")
 final class BooleanScorer extends Scorer {
   private SubScorer scorers = null;
 

@@ -30,6 +30,7 @@ import gate.creole.annic.apache.lucene.store.Directory;
  *
  * @version $Id: MultiReader.java 529 2004-10-05 11:55:26Z niraj $
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class MultiReader extends IndexReader {
   private IndexReader[] subReaders;
   private int[] starts;                           // 1st docno for each segment

@@ -17,6 +17,7 @@ package gate.creole.annic.apache.lucene.search;
  */
 
 /** A clause in a BooleanQuery. */
+@SuppressWarnings("serial")
 public class BooleanClause implements java.io.Serializable {
   /** The query whose matching documents are combined by the boolean query. */
   public Query query;

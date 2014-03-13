@@ -30,6 +30,7 @@ import java.util.Locale;
  * @version $Id: SortField.java 529 2004-10-05 11:55:26Z niraj $
  * @see Sort
  */
+@SuppressWarnings("serial")
 public class SortField
 implements Serializable {
 

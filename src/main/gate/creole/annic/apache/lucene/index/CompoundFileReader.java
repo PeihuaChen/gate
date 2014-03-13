@@ -32,6 +32,7 @@ import java.io.IOException;
  * @author Dmitry Serebrennikov
  * @version $Id: CompoundFileReader.java 529 2004-10-05 11:55:26Z niraj $
  */
+@SuppressWarnings({"rawtypes","unchecked","unused"})
 class CompoundFileReader extends Directory {
 
     private static final class FileEntry {

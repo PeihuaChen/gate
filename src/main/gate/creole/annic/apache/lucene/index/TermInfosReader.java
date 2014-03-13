@@ -23,7 +23,7 @@ import gate.creole.annic.apache.lucene.store.Directory;
 /** This stores a monotonically increasing set of <Term, TermInfo> pairs in a
  * Directory.  Pairs are accessed either by Term or by ordinal position the
  * set.  */
-
+@SuppressWarnings({"rawtypes","unchecked"})
 final class TermInfosReader {
   private Directory directory;
   private String segment;

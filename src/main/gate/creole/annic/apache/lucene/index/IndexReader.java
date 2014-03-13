@@ -43,6 +43,7 @@ import gate.creole.annic.apache.lucene.search.Similarity;
  @author Doug Cutting
  @version $Id: IndexReader.java 529 2004-10-05 11:55:26Z niraj $
 */
+@SuppressWarnings("rawtypes")
 public abstract class IndexReader {
 
   /**
