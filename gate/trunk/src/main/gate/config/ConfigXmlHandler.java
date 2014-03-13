@@ -17,7 +17,6 @@
 package gate.config;
 
 import gate.CreoleRegister;
-import gate.DataStoreRegister;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
@@ -139,9 +138,7 @@ public class ConfigXmlHandler extends DefaultHandler {
     currentAttributes = atts;
     currentAttributeMap = attributeListToParameterList();
 
-    if(elementName.toUpperCase().equals("DBCONFIG")) {
-      DataStoreRegister.addConfig(currentAttributeMap);
-    } else if(elementName.toUpperCase().equals(Gate.getUserConfigElement())) {
+    if(elementName.toUpperCase().equals(Gate.getUserConfigElement())) {
       Gate.getUserConfig().putAll(currentAttributeMap);
     }
 
@@ -177,11 +174,7 @@ public class ConfigXmlHandler extends DefaultHandler {
       }
 
     //////////////////////////////////////////////////////////////////
-    } else if(elementName.toUpperCase().equals("DBCONFIG")) {
-      // these are empty elements with attributes; nothing to do here
-
-    //////////////////////////////////////////////////////////////////
-    }else if(elementName.toUpperCase().equals("GATECONFIG")) {
+    } else if(elementName.toUpperCase().equals("GATECONFIG")) {
       // these are empty elements with attributes; nothing to do here
 
     //////////////////////////////////////////////////////////////////

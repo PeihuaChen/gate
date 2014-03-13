@@ -549,9 +549,6 @@ public class Gate implements GateConstants {
 
     // remember the init-time config options
     originalUserConfig.putAll(userConfig);
-
-    log.debug("user config loaded; DBCONFIG="
-        + DataStoreRegister.getConfigData());
   } // initConfigData()
 
   /**
