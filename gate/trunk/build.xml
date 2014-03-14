@@ -254,8 +254,6 @@
       <compilerarg value="-Xmaxwarns" />
       <compilerarg value="${gate.compile.maxwarnings}" />
       <compilerarg value="-Xlint:all" />
-      <compilerarg value="-Xlint:-rawtypes" />
-      <compilerarg value="-Xlint:-unchecked" />
     </javac>
   </target>
 
