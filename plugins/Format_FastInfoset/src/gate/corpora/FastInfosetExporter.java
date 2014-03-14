@@ -18,8 +18,6 @@ import gate.Corpus;
 import gate.Document;
 import gate.Factory;
 import gate.Gate;
-import gate.LanguageResource;
-import gate.Resource;
 import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.CreoleResource;
 import gate.gui.MainFrame;
@@ -50,6 +48,7 @@ import javax.swing.JOptionPane;
 
 import com.sun.xml.fastinfoset.stax.StAXDocumentSerializer;
 
+@SuppressWarnings("serial")
 @CreoleResource(name = "Fast Infoset Exporter", tool = true, autoinstances = @AutoInstance)
 public class FastInfosetExporter extends ResourceHelper {
 

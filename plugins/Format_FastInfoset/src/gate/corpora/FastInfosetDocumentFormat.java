@@ -29,8 +29,10 @@ import gate.xml.XmlDocumentHandler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Map;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -46,11 +48,14 @@ import com.sun.xml.fastinfoset.stax.StAXManager;
 @CreoleResource(name = "Fast Infoset Document Format", isPrivate = true, autoinstances = {@AutoInstance(hidden = true)})
 public class FastInfosetDocumentFormat extends TextualDocumentFormat {
 
+  private static final long serialVersionUID = -2394353168913311584L;
+  
   private static StAXManager staxManager;
 
   /** Default construction */
   public FastInfosetDocumentFormat() {
     super();
+    supportsExport = true;
   }
 
   /** We could collect repositioning information during XML parsing */
@@ -330,4 +335,13 @@ public class FastInfosetDocumentFormat extends TextualDocumentFormat {
     return this;
   }
 
+  @Override
+  public void export(Document doc, OutputStream out, Map<String,Object> options) throws IOException {
+   try {
+     FastInfosetExporter.export(doc, out); 
+   }
+   catch (Exception e) {
+     throw new IOException("Error exporting document",e);
+   }
+  }
 }
