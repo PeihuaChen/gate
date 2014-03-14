@@ -19,8 +19,6 @@ package gate.creole;
 import gate.DataStore;
 import gate.LanguageResource;
 import gate.persist.PersistenceException;
-import gate.security.SecurityException;
-
 
 /** A convenience implementation of LanguageResource with some default code.
   */

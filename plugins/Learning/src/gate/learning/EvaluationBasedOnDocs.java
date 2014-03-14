@@ -492,7 +492,7 @@ public class EvaluationBasedOnDocs {
       Corpus corpusTest;
       corpusTest = Factory.newCorpus("testCorpus");
       if(corpusOn.getDataStore() != null) {
-        Corpus corpusTestTemp = (Corpus)corpusOn.getDataStore().adopt(corpusTest, null);
+        Corpus corpusTestTemp = (Corpus)corpusOn.getDataStore().adopt(corpusTest);
         Factory.deleteResource(corpusTest);
         corpusTest = corpusTestTemp;
         corpusTest.getDataStore().sync(corpusTest);

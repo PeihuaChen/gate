@@ -27,9 +27,6 @@ import gate.corpora.SerialCorpusImpl;
 import gate.creole.ResourceData;
 import gate.event.DatastoreEvent;
 import gate.event.DatastoreListener;
-import gate.security.SecurityException;
-import gate.security.SecurityInfo;
-import gate.security.Session;
 import gate.util.AbstractFeatureBearer;
 import gate.util.Files;
 import gate.util.GateRuntimeException;
@@ -266,11 +263,11 @@ extends AbstractFeatureBearer implements DataStore {
       )
     );
   } // delete(lr)
-
-  /** Adopt a resource for persistence. */
+  
+  /** Adopt a resource for persistence. */  
   @Override
-  public LanguageResource adopt(LanguageResource lr,SecurityInfo secInfo)
-  throws PersistenceException,gate.security.SecurityException {
+  public LanguageResource adopt(LanguageResource lr)
+  throws PersistenceException {
 
     //ignore security info
 
@@ -425,7 +422,7 @@ extends AbstractFeatureBearer implements DataStore {
           //if the document is not already adopted, we need to do that first
           if (doc.getLRPersistenceId() == null) {
             if (DEBUG) Out.prln("Document adopted" + doc.getName());
-            doc = (Document) this.adopt(doc, null);
+            doc = (Document) this.adopt(doc);
             this.sync(doc);
             if (DEBUG) Out.prln("Document sync-ed");
             corpus.setDocumentPersistentID(i, doc.getLRPersistenceId());
@@ -722,7 +719,7 @@ extends AbstractFeatureBearer implements DataStore {
    */
   @Override
   public boolean canReadLR(Object lrID)
-    throws PersistenceException, gate.security.SecurityException{
+    throws PersistenceException{
 
     return true;
   }
@@ -732,7 +729,7 @@ extends AbstractFeatureBearer implements DataStore {
    */
   @Override
   public boolean canWriteLR(Object lrID)
-    throws PersistenceException, gate.security.SecurityException{
+    throws PersistenceException{
 
     return true;
   }
@@ -747,46 +744,6 @@ extends AbstractFeatureBearer implements DataStore {
   @Override
   public String getName(){
     return name;
-  }
-
-
-
-  /** get security information for LR . */
-  @Override
-  public SecurityInfo getSecurityInfo(LanguageResource lr)
-    throws PersistenceException {
-
-    throw new UnsupportedOperationException("security information is not supported "+
-                                            "for SerialDataStore");
-  }
-
-  /** set security information for LR . */
-  @Override
-  public void setSecurityInfo(LanguageResource lr,SecurityInfo si)
-    throws PersistenceException, gate.security.SecurityException {
-
-    throw new UnsupportedOperationException("security information is not supported "+
-                                            "for SerialDataStore");
-
-  }
-
-
-  /** identify user using this datastore */
-  @Override
-  public void setSession(Session s)
-    throws gate.security.SecurityException {
-
-    // do nothing
-  }
-
-
-
-  /** identify user using this datastore */
-  @Override
-  public Session getSession(Session s)
-    throws gate.security.SecurityException {
-
-    return null;
   }
 
   /**

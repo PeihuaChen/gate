@@ -72,7 +72,7 @@ public class TestIndex extends TestCase{
 
       Corpus corp = Factory.newCorpus("LuceneTestCorpus");
       corp.add(doc0);
-      corpus = (Corpus) sds.adopt(corp,null);
+      corpus = (Corpus) sds.adopt(corp);
       sds.sync(corpus);
 
     } catch (Exception e) {

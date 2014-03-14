@@ -52,10 +52,6 @@ import gate.event.ProgressListener;
 import gate.event.StatusListener;
 import gate.persist.LuceneDataStoreImpl;
 import gate.persist.PersistenceException;
-import gate.security.Group;
-import gate.security.SecurityException;
-import gate.security.SecurityInfo;
-import gate.security.User;
 import gate.swing.XJFileChooser;
 import gate.swing.XJMenuItem;
 import gate.swing.XJPopupMenu;
@@ -1342,19 +1338,7 @@ public class NameBearerHandle implements Handle, StatusListener,
                                   + " seconds");
               }
               else {
-                Map<Object,Object> securityData = DataStoreRegister
-                        .getSecurityData(ds);
-                SecurityInfo si = null;
-                // check whether the datastore supports security data
-                // serial ones do not for example
-                if(securityData != null) {
-                  // first get the type of access from the user
-                  if(!AccessRightsDialog.showDialog(window)) return;
-                  int accessType = AccessRightsDialog.getSelectedMode();
-                  if(accessType < 0) return;
-                  si = new SecurityInfo(accessType, (User)securityData
-                          .get("user"), (Group)securityData.get("group"));
-                }// if security info
+                
                 StatusListener sListener = (StatusListener)gate.Gate
                         .getListeners().get("gate.event.StatusListener");
                 MainFrame.lockGUI("Saving "
@@ -1364,7 +1348,7 @@ public class NameBearerHandle implements Handle, StatusListener,
                   sListener.statusChanged("Saving: "
                           + ((LanguageResource)target).getName());
                 double timeBefore = System.currentTimeMillis();
-                LanguageResource lr = ds.adopt((LanguageResource)target, si);
+                LanguageResource lr = ds.adopt((LanguageResource)target);
                 ds.sync(lr);
                 if(ds instanceof LuceneDataStoreImpl
                         && lr instanceof IndexedCorpus) {
@@ -1413,11 +1397,6 @@ public class NameBearerHandle implements Handle, StatusListener,
             MainFrame.unlockGUI();
             JOptionPane.showMessageDialog(getLargeView(), "Save failed!\n "
                     + pe.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
-          }
-          catch(gate.security.SecurityException se) {
-            MainFrame.unlockGUI();
-            JOptionPane.showMessageDialog(getLargeView(), "Save failed!\n "
-                    + se.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
           }
           finally {
             MainFrame.unlockGUI();

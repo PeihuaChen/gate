@@ -23,7 +23,6 @@ import gate.event.CorpusEvent;
 import gate.event.CorpusListener;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
-import gate.security.SecurityException;
 import gate.util.Files;
 import gate.util.GateRuntimeException;
 import gate.util.Strings;

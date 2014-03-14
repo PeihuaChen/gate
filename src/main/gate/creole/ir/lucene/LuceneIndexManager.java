@@ -115,8 +115,6 @@ public class LuceneIndexManager implements IndexManager{
       throw new IndexException(ioe.getMessage());
     } catch (gate.persist.PersistenceException pe){
       pe.printStackTrace();
-    } catch (gate.security.SecurityException se){
-      se.printStackTrace();
     }
   }
 

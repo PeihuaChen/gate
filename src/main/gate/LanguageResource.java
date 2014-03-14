@@ -17,7 +17,6 @@
 package gate;
 
 import gate.persist.PersistenceException;
-import gate.security.SecurityException;
 
 /** Models all sorts of language resources.
   */
