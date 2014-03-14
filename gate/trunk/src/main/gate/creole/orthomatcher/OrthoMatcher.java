@@ -1053,6 +1053,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
    * @param name2
    * @return  true if the two names indicate the same person
    */
+  @SuppressWarnings("unused")
   private boolean pairwise_person_name_match(String name1, String name2) {
     String shortName,longName;
     if (name1.length() > name2.length()) {
@@ -1315,6 +1316,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
    * and
    * Cynthia Morgan de Rothschild == Cynthia de Rothschild
    */
+  @SuppressWarnings("unused")
   public boolean noMatchRule2(String s1,String s2) {
     if (normalizedTokensLongAnnot.size()>2 && normalizedTokensShortAnnot.size()>2) {
       boolean retval = false;

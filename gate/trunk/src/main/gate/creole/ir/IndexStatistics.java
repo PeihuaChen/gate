@@ -27,6 +27,7 @@ public interface IndexStatistics{
 
   public Long getSpecificity(String term);
 
+  @SuppressWarnings("rawtypes")
   public Map getTermFrequency(Long docID, String fieldName);
 
 }

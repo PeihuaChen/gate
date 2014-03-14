@@ -17,6 +17,7 @@ the occasional update on Facebook :te.ac.uk/gate/licence.html).
 package gate.creole.ir.lucene;
 
 import gate.Corpus;
+import gate.Document;
 import gate.creole.ir.IndexDefinition;
 import gate.creole.ir.IndexException;
 import gate.creole.ir.IndexField;
@@ -172,7 +173,7 @@ public class LuceneIndexManager implements IndexManager{
   /** Reindexing changed documents, removing removed documents and
    *  add to the index new corpus documents. */
   @Override
-  public void sync(List added, List removedIDs, List changed) throws IndexException{
+  public void sync(List<Document> added, List<String> removedIDs, List<Document> changed) throws IndexException{
     String location = indexDefinition.getIndexLocation();
     try {
 
@@ -186,7 +187,7 @@ public class LuceneIndexManager implements IndexManager{
       }//for (remove all removed documents)
 
       for (int i = 0; i<changed.size(); i++) {
-        gate.Document gateDoc = (gate.Document) changed.get(i);
+        gate.Document gateDoc = changed.get(i);
         String id = gateDoc.getLRPersistenceId().toString();
         org.apache.lucene.index.Term term =
                                new org.apache.lucene.index.Term(DOCUMENT_ID,id);
@@ -208,12 +209,12 @@ public class LuceneIndexManager implements IndexManager{
                               .setOpenMode(OpenMode.APPEND));      
 
       for(int i = 0; i<added.size(); i++) {
-        gate.Document gateDoc = (gate.Document) added.get(i);
+        gate.Document gateDoc = added.get(i);
         writer.addDocument(getLuceneDoc(gateDoc));
       }//for (add all added documents)
 
       for(int i = 0; i<changed.size(); i++) {
-        gate.Document gateDoc = (gate.Document) changed.get(i);
+        gate.Document gateDoc = changed.get(i);
         writer.addDocument(getLuceneDoc(gateDoc));
       }//for (add all changed documents)
 

@@ -18,8 +18,12 @@ import java.util.Set;
  */
 public class SampleAnnotationOrthography implements gate.creole.orthomatcher.AnnotationOrthography {
     
+  @SuppressWarnings("unused")
   private final String personType;
+  
   private final AnnotationOrthography defaultOrthography;
+  
+  @SuppressWarnings("unused")
   private final boolean extLists;
   
   public SampleAnnotationOrthography(String personType, boolean extLists,

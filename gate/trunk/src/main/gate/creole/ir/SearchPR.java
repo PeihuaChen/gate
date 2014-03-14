@@ -36,7 +36,7 @@ public class SearchPR extends AbstractProcessingResource
   private String searcherClassName = null;
   private QueryResultList resultList = null;
   private int limit = -1;
-  private List fieldNames = null;
+  private List<String> fieldNames = null;
 
   private Search searcher = null;
 
@@ -155,11 +155,11 @@ public class SearchPR extends AbstractProcessingResource
     return new Integer(this.limit);
   }
 
-  public void setFieldNames(List fieldNames){
+  public void setFieldNames(List<String> fieldNames){
     this.fieldNames = fieldNames;
   }
 
-  public List getFieldNames(){
+  public List<String> getFieldNames(){
     return this.fieldNames;
   }
 

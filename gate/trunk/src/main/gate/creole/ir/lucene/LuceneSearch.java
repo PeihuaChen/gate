@@ -65,7 +65,7 @@ public class LuceneSearch implements Search {
    *  In each QueryResult will be added values of theise fields.
    *  Result length is limited by DEFAULTMAXRESULTS. */
   @Override
-  public QueryResultList search(String query, List fieldNames)
+  public QueryResultList search(String query, List<String> fieldNames)
                                          throws IndexException, SearchException{
     return search(query, DEFAULTMAXRESULTS, fieldNames);
   }
@@ -74,7 +74,7 @@ public class LuceneSearch implements Search {
    *  In each QueryResult will be added values of these fields.
    *  Result length is limited. */
   @Override
-  public QueryResultList search(String query, int limit, List fieldNames)
+  public QueryResultList search(String query, int limit, List<String> fieldNames)
                                          throws IndexException, SearchException{
     
     List<QueryResult> result = new Vector<QueryResult>();
@@ -107,8 +107,8 @@ public class LuceneSearch implements Search {
           fieldValues = new Vector<Term>();
           for (int j=0; j<fieldNames.size(); j++){
             fieldValues.add(new Term( 
-                    fieldNames.get(j).toString(), 
-                    searcher.doc(hits[i].doc).get(fieldNames.get(j).toString()))
+                    fieldNames.get(j), 
+                    searcher.doc(hits[i].doc).get(fieldNames.get(j)))
             );
           }
         }

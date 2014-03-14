@@ -48,6 +48,7 @@ public class LuceneIndexStatistics implements IndexStatistics {
     return null;
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
   public Map getTermFrequency(Long docID, String fieldName){
     //NOT IMPLEMENTED YET
