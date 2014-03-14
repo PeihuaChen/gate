@@ -29,7 +29,6 @@ import gate.creole.metadata.GuiType;
 import gate.event.DatastoreEvent;
 import gate.event.DatastoreListener;
 import gate.persist.PersistenceException;
-import gate.security.SecurityException;
 import gate.util.Err;
 import gate.util.GateRuntimeException;
 import gate.util.Strings;

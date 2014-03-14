@@ -99,7 +99,7 @@ public class TestPersist extends TestCase {
     doc.setDataStore(new SerialDataStore(new File("z:\\").toURI().toURL()
             .toString()));
     try {
-      sds.adopt(doc, null);
+      sds.adopt(doc);
     } catch(PersistenceException e) {
       cannotSync = true;
     }
@@ -109,7 +109,7 @@ public class TestPersist extends TestCase {
     doc.setName("Alicia Tonbridge, a Document");
 
     // save the document
-    Document persDoc = (Document)sds.adopt(doc, null);
+    Document persDoc = (Document)sds.adopt(doc);
     sds.sync(persDoc);
     Object lrPersistenceId = persDoc.getLRPersistenceId();
 
@@ -170,7 +170,7 @@ public class TestPersist extends TestCase {
             Factory.newFeatureMap());
 
     // save the document
-    Document persDoc = (Document)sds.adopt(doc, null);
+    Document persDoc = (Document)sds.adopt(doc);
     sds.sync(persDoc);
 
     // remember the persistence ID for reading back
@@ -225,7 +225,7 @@ public class TestPersist extends TestCase {
     Corpus corp = Factory.newCorpus("Hamish test corpus");
     corp.add(doc);
     corp.add(doc2);
-    LanguageResource persCorpus = sds.adopt(corp, null);
+    LanguageResource persCorpus = sds.adopt(corp);
     sds.sync(persCorpus);
 
     // read the documents back
@@ -303,7 +303,7 @@ public class TestPersist extends TestCase {
             Factory.newFeatureMap());
 
     // save the document
-    Document persDoc = (Document)sds.adopt(doc, null);
+    Document persDoc = (Document)sds.adopt(doc);
     sds.sync(persDoc);
 
     // remember the persistence ID for reading back
@@ -345,7 +345,7 @@ public class TestPersist extends TestCase {
             Factory.newFeatureMap());
 
     // save the document
-    Document persDoc = (Document)sds.adopt(doc, null);
+    Document persDoc = (Document)sds.adopt(doc);
     sds.sync(persDoc);
 
     // DSR should have one member

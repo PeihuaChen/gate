@@ -41,7 +41,6 @@ import gate.event.CreoleListener;
 import gate.event.DatastoreEvent;
 import gate.event.DatastoreListener;
 import gate.persist.PersistenceException;
-import gate.security.SecurityException;
 import gate.util.Err;
 import gate.util.GateRuntimeException;
 import gate.util.MethodNotImplementedException;
@@ -239,7 +238,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
         // if the document is not already adopted, we need to do that
         // first
         if(doc.getLRPersistenceId() == null) {
-          doc = (Document)this.getDataStore().adopt(doc, null);
+          doc = (Document)this.getDataStore().adopt(doc);
           this.getDataStore().sync(doc);
           this.setDocumentPersistentID(index, doc.getLRPersistenceId());
         }
@@ -249,10 +248,6 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       catch(PersistenceException ex) {
         throw new GateRuntimeException("Error unloading document from corpus"
                 + "because document sync failed: " + ex.getMessage(), ex);
-      }
-      catch(gate.security.SecurityException ex1) {
-        throw new GateRuntimeException("Error unloading document from corpus"
-                + "because of document access error: " + ex1.getMessage(),ex1);
       }
     }
     // 3. remove the document from the memory

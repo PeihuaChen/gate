@@ -34,7 +34,6 @@ import gate.jape.constraint.ConstraintFactory;
 import gate.jape.parser.ParseCpsl;
 import gate.persist.PersistenceException;
 import gate.persist.SerialDataStore;
-import gate.security.SecurityException;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.Out;
 import gate.util.SimpleFeatureMapImpl;

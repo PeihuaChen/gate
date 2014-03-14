@@ -16,14 +16,12 @@
 
 package gate;
 
-import java.util.List;
-
 import gate.event.DatastoreListener;
 import gate.persist.PersistenceException;
-import gate.security.*;
-import gate.security.SecurityException;
 import gate.util.FeatureBearer;
 import gate.util.NameBearer;
+
+import java.util.List;
 
 /** Models all sorts of data storage.
   */
@@ -86,10 +84,9 @@ public interface DataStore extends FeatureBearer, NameBearer {
 
   /** Get the autosaving behaviour of the LR. */
   public boolean isAutoSaving();
-
+  
   /** Adopt a resource for persistence. */
-  public LanguageResource adopt(LanguageResource lr, SecurityInfo secInfo)
-  throws PersistenceException, gate.security.SecurityException;
+  public LanguageResource adopt(LanguageResource lr) throws PersistenceException;
 
   /**
    * Get a resource from the persistent store.
@@ -153,30 +150,14 @@ public interface DataStore extends FeatureBearer, NameBearer {
    *  has read access to the LR
    */
   public boolean canReadLR(Object lrID)
-    throws PersistenceException, gate.security.SecurityException;
+    throws PersistenceException;
 
   /**
    * Checks if the user (identified by the sessionID)
    * has write access to the LR
    */
   public boolean canWriteLR(Object lrID)
-    throws PersistenceException, gate.security.SecurityException;
-
-  /** get security information for LR . */
-  public SecurityInfo getSecurityInfo(LanguageResource lr)
     throws PersistenceException;
-
-  /** set security information for LR . */
-  public void setSecurityInfo(LanguageResource lr,SecurityInfo si)
-    throws PersistenceException, gate.security.SecurityException;
-
-  /** identify user using this datastore */
-  public void setSession(Session s)
-    throws gate.security.SecurityException;
-
-  /** identify user using this datastore */
-  public Session getSession(Session s)
-    throws gate.security.SecurityException;
 
   /**
    * Try to acquire exlusive lock on a resource from the persistent store.

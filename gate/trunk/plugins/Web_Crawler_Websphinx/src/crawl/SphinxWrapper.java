@@ -12,21 +12,30 @@
  */
 package crawl;
 
-import websphinx.*;
-import gate.creole.*;
+import gate.Corpus;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.corpora.DocumentImpl;
+import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
-import gate.security.SecurityException;
-import gate.corpora.*;
-import gate.*;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.io.UnsupportedEncodingException;
-import java.net.*;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.mail.internet.ContentType;
 import javax.mail.internet.ParseException;
+
 import org.apache.commons.lang.StringUtils;
+
+import websphinx.Crawler;
+import websphinx.Link;
+import websphinx.Page;
 
 
 public class SphinxWrapper extends Crawler{

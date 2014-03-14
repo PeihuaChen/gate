@@ -41,7 +41,7 @@ public class CorpusSaver {
 
       try {
         Corpus corpus = Factory.newCorpus("bnc");
-        LanguageResource lr = ds.adopt(corpus, null);
+        LanguageResource lr = ds.adopt(corpus);
         ds.sync(lr);
         theCorpus = (Corpus) lr;
       } catch (Exception ex) {
@@ -230,7 +230,7 @@ public class CorpusSaver {
 
         //then store it in the DS and add to corpus
         if (saveMode) {
-          Document lr = (Document)ds.adopt(doc, null);
+          Document lr = (Document)ds.adopt(doc);
           theCorpus.add(lr);
           theCorpus.unloadDocument( lr);
 

@@ -22,7 +22,6 @@ import gate.creole.metadata.RunTime;
 import gate.persist.PersistenceException;
 import gate.qa.Measure;
 import gate.qa.QualityAssurancePR;
-import gate.security.SecurityException;
 import gate.util.OffsetComparator;
 
 import java.awt.Color;

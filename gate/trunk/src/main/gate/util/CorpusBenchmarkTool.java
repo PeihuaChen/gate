@@ -499,7 +499,7 @@ public class CorpusBenchmarkTool {
         doc.setName(files[i].getName());
         
         processDocument(doc);
-        final LanguageResource lr = sds.adopt(doc, null);
+        final LanguageResource lr = sds.adopt(doc);
         sds.sync(lr);
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
           @Override
@@ -525,11 +525,6 @@ public class CorpusBenchmarkTool {
       throw (GateRuntimeException)
         new GateRuntimeException("CorpusBenchmark: " + ex2.getMessage())
         .initCause(ex2);
-    }
-    catch (gate.security.SecurityException ex3) {
-      throw (GateRuntimeException)
-        new GateRuntimeException("CorpusBenchmark: " + ex3.getMessage())
-        .initCause(ex3);
     }
   } //generateCorpus
 
