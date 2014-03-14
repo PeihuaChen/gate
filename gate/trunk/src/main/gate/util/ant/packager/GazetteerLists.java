@@ -15,6 +15,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.DataType;
+import org.apache.tools.ant.types.Resource;
 import org.apache.tools.ant.types.ResourceCollection;
 import org.apache.tools.ant.types.resources.FileResourceIterator;
 
@@ -57,9 +58,9 @@ public class GazetteerLists extends DataType implements ResourceCollection {
    * ResourceCollection interface: returns an iterator over the list
    * files.
    */
-  @SuppressWarnings({"rawtypes","unchecked"})
+  @SuppressWarnings("unchecked")
   @Override
-  public Iterator iterator() {
+  public Iterator<Resource> iterator() {
     load();
 
     if(listNames.length == 0) {

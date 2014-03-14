@@ -441,6 +441,7 @@ public class TestPR extends TestCase
     assertEquals("Accessor not set", testAccessor.getClass(), returnAccessor.getClass());
   }
 
+  @SuppressWarnings("unchecked")
   public void test007Orthomatcher() throws Exception {
     FeatureMap params = Factory.newFeatureMap();
 
@@ -468,6 +469,10 @@ public class TestPR extends TestCase
 
     HashSet<String> fType = new HashSet<String>();
     fType.add(ANNIEConstants.ANNOTATION_COREF_FEATURE_NAME);
+
+    //TODO why do we get these annotation sets out without actually checking the sizes?
+    
+    @SuppressWarnings("unused")
     AnnotationSet annots =
                   doc1.getAnnotations().get(null,fType);
 
@@ -486,15 +491,15 @@ public class TestPR extends TestCase
     AnnotationSet personAnnots = doc4.getAnnotations().get("Person");
     Annotation sarahAnnot = personAnnots.get(new Long(806), new Long(811)).iterator().next();
     assertEquals("Wrong number of matches for second Sarah in document", 2,
-            ((java.util.ArrayList) sarahAnnot.getFeatures().get("matches")).size());
+            ((List<Integer>) sarahAnnot.getFeatures().get("matches")).size());
 
     Annotation robertQJones = personAnnots.get(new Long(300), new Long(315)).iterator().next();
     assertEquals("Wrong number of matches for Robert Q Jones in document", 3,
-            ((java.util.ArrayList) robertQJones.getFeatures().get("matches")).size());
+            ((List<Integer>) robertQJones.getFeatures().get("matches")).size());
 
     Annotation robertCJones = personAnnots.get(new Long(0), new Long(15)).iterator().next();
     assertEquals("Wrong number of matches for Robert C Jones in document", 3,
-            ((java.util.ArrayList) robertCJones.getFeatures().get("matches")).size());
+            ((List<Integer>) robertCJones.getFeatures().get("matches")).size());
 
     Annotation robertAnderson = personAnnots.get(new Long(1188), new Long(1203)).iterator().next();
     assertEquals("Found a match for Robert Anderson, but he should not have been matched.", false,
@@ -667,19 +672,26 @@ public class TestPR extends TestCase
      }// public void compareAnnots
 
    public static class TestConstraintPredicate extends AbstractConstraintPredicate {
+    
+     private static final long serialVersionUID = -8980180587795897947L;
+    
      @Override
      protected boolean doMatch(Object value, AnnotationSet context)
              throws JapeException {
        return false;
      }
+     
      @Override
-    public String getOperator() {
+     public String getOperator() {
        return "fooOp";
      }
    };
 
    public static class TestAnnotationAccessor extends MetaPropertyAccessor {
-     @Override
+  
+    private static final long serialVersionUID = 6967907751030807600L;
+
+    @Override
     public Object getValue(Annotation annot, AnnotationSet context) {
        return "foo";
      }

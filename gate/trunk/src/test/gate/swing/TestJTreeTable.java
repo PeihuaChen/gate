@@ -33,7 +33,7 @@ public class TestJTreeTable {
   private TreeTableModel treeTableModel;
   
   private class FileTTModel extends AbstractTreeTableModel{
-    private File root;
+    
     private String[] columnNames = {"NAME", "SIZE", "DATE"};
     private static final int NAME_COLUMN = 0;
     private static final int SIZE_COLUMN = 1;
@@ -82,7 +82,7 @@ public class TestJTreeTable {
     }
 
     @Override
-    public Class getColumnClass(int column) {
+    public Class<?> getColumnClass(int column) {
       return String.class;
     }
 

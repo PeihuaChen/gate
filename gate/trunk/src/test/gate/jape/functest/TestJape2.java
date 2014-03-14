@@ -18,15 +18,16 @@
 
 package gate.jape.functest;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import gate.*;
-import gate.annotation.AnnotationSetImpl;
+import gate.Corpus;
+import gate.Factory;
 import gate.creole.ResourceInstantiationException;
 import gate.util.Err;
 import gate.util.Out;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
   * Second test harness for JAPE.
@@ -35,9 +36,6 @@ import gate.util.Out;
   * @author Hamish Cunningham
   */
 public class TestJape2 {
-
-  /** Debug flag */
-  private static final boolean DEBUG = false;
 
   /** How much noise to make. */
   static private boolean verbose = false;
@@ -60,7 +58,7 @@ public class TestJape2 {
     // variables to parse the command line options into
     String collName = null;
     String japeName = null;
-    ArrayList fileNames = null;
+    List<String> fileNames = null;
 
     // process options
     for(int i=0; i<args.length; i++) {
@@ -71,7 +69,7 @@ public class TestJape2 {
       else if(args[i].equals("-v")) // -v = verbose
         verbose = true;
       else { // a list of files
-        fileNames = new ArrayList();
+        fileNames = new ArrayList<String>();
         do {
           fileNames.add(args[i++]);
         } while(i < args.length);
@@ -85,6 +83,7 @@ public class TestJape2 {
 
     // create a collection and run the tokeniser
     message("creating coll, tokenising and gazetteering");
+    @SuppressWarnings("unused")
     Corpus coll = null;
     try {
       coll = tokAndGaz(collName, fileNames);
@@ -123,7 +122,7 @@ public class TestJape2 {
   /**
     * Create a collection and put tokenised and gazetteered docs in it.
     */
-  static public Corpus tokAndGaz(String collName, ArrayList fileNames)
+  static public Corpus tokAndGaz(String collName, List<String> fileNames)
   throws ResourceInstantiationException {
 
     // create or overwrite the collection
@@ -134,15 +133,14 @@ public class TestJape2 {
     );
 
     // add all the documents
-    for(Iterator i = fileNames.iterator(); i.hasNext(); ) {
-      String fname = (String) i.next();
+    for(Iterator<String> i = fileNames.iterator(); i.hasNext(); ) {
+      String fname = i.next();
 
       File f = new File(fname);
-      FeatureMap attrs = Factory.newFeatureMap();
-      Document doc = null;
+      //Document doc = null;
 
       try {
-        AnnotationSet annots = new AnnotationSetImpl(doc);
+        //AnnotationSet annots = new AnnotationSetImpl(doc);
         collection.add(
           Factory.newDocument(f.getAbsolutePath())
         );

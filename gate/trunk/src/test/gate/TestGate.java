@@ -90,10 +90,8 @@ import com.ontotext.gate.gazetteer.TestHashGazetteer;
 
 public class TestGate {
 
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /** Status flag for normal exit. */
+  @SuppressWarnings("unused")
   private static final int STATUS_NORMAL = 0;
 
   /** Status flag for error exit. */
@@ -114,6 +112,7 @@ public class TestGate {
       if(configFile != null && configFile.length() > 0){
         File f = new File(configFile);
         try {
+          @SuppressWarnings("unused")
           URL u = f.toURI().toURL();
         } catch(MalformedURLException e) {
           Err.prln("Bad initialisation file: " + configFile);
@@ -139,7 +138,7 @@ public class TestGate {
       if(testName != null) {
         // single test class specified in a system property, so run just
         // that test
-        Class testClass = Class.forName(testName);
+        Class<?> testClass = Class.forName(testName);
         Method suiteMethod = testClass.getMethod("suite");
         Test theSuite = (Test)suiteMethod.invoke(null);
         suite.addTest(theSuite);

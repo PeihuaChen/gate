@@ -126,6 +126,7 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
     return null;
   }
 
+  @SuppressWarnings("unchecked")
   public void setItem(Object obj) {
     detailGroups = (new DetailsGroup[] {resourceInfo, directSuperProps, allSuperProps,
         directSubProps, allSubProps, equivalentProps, domain, range,

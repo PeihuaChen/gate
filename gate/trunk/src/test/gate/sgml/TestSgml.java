@@ -34,9 +34,6 @@ import junit.framework.TestSuite;
   */
 public class TestSgml extends TestCase
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /** Construction */
   public TestSgml(String name) { super(name); }
 
@@ -49,7 +46,7 @@ public class TestSgml extends TestCase
     assertTrue(true);
 
     // create the markupElementsMap map
-    Map markupElementsMap = null;
+    Map<String,String> markupElementsMap = null;
     gate.Document doc = null;
     /*
     markupElementsMap = new HashMap();

@@ -19,6 +19,8 @@ package gate.util;
 import java.io.*;
 import java.util.*;
 
+import org.apache.commons.io.IOUtils;
+
 import junit.framework.*;
 
 /** Files test class.
@@ -73,13 +75,20 @@ public class TestFiles extends TestCase
     String firstLine = "// testloc.jape";
 
     File f = Files.writeTempFile(Files.getGateResourceAsStream(japeResName));
-    BufferedReader bfr = new BufferedReader(new FileReader(f));
-
-    String firstLn = bfr.readLine();
-    assertTrue("first line from jape/combined/testloc.jape doesn't match",
-      firstLine.equals(firstLn));
-
-    f.delete ();
+    BufferedReader bfr = null;
+    
+    try {
+      bfr = new BufferedReader(new FileReader(f));
+  
+      String firstLn = bfr.readLine();
+      assertTrue("first line from jape/combined/testloc.jape doesn't match",
+        firstLine.equals(firstLn));
+  
+      f.delete ();
+    }
+    finally {
+      IOUtils.closeQuietly(bfr);
+    }
   } // testWriteTempFile()
 
   /** Test suite routine for the test runner */
@@ -101,7 +110,7 @@ public class TestFiles extends TestCase
   public void testJarFiles() throws Exception {
 
     JarFiles jarFiles = new JarFiles();
-    Set filesToMerge = new HashSet();
+    Set<String> filesToMerge = new HashSet<String>();
     String jarFilePathFirst = "jartest/ajartest.jar";
     String jarFilePathSecond ="jartest/bjartest.jar";
     String jarPathFirst = null;;
@@ -151,15 +160,14 @@ public class TestFiles extends TestCase
   public void testFind(){
     String regex = "z:/gate2/doc/.*.html";
     String filePath = "z:/gate2/doc";
-    Iterator iter;
-    Files files = new Files();
-    Set regfind = new HashSet();
-
-    regfind = Files.Find(regex,filePath);
+    Iterator<String> iter;
+    
+    Set<String> regfind = Files.Find(regex,filePath);
     iter = regfind.iterator();
     if (iter.hasNext()){
       while (iter.hasNext()){
-        String verif = iter.next().toString();
+        @SuppressWarnings("unused")
+        String verif = iter.next();
         //Out.println(verif);
       }
     }
@@ -188,7 +196,7 @@ public class TestFiles extends TestCase
     );
 
     // a map of values to place in the new element
-    Map newAttrs = new HashMap();
+    Map<String,String> newAttrs = new HashMap<String,String>();
     newAttrs.put("a", "1");
     newAttrs.put("b", "2");
     newAttrs.put("c", "3");

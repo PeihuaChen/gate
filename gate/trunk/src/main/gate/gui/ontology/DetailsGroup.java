@@ -18,6 +18,7 @@ import java.util.*;
  * @author niraj
  * 
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class DetailsGroup {
   public DetailsGroup(String groupName, boolean flag,
           Collection<OResource> collection) {

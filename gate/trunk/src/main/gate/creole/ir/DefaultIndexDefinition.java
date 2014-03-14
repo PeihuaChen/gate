@@ -29,7 +29,7 @@ public class DefaultIndexDefinition implements IndexDefinition{
 
   /* Niraj */
   // Annic Specific Changes
-  private List featuresToExclude;
+  private List<?> featuresToExclude;
   private String annotationSet;
   private String baseTokenAnnotationType;
   /* End */
@@ -53,11 +53,11 @@ public class DefaultIndexDefinition implements IndexDefinition{
 
   /* Niraj */
   // Annic specific changes
-  public void setFeaturesToExclude(List featuresToExclude) {
+  public void setFeaturesToExclude(List<?> featuresToExclude) {
     this.featuresToExclude = featuresToExclude;
   }
 
-  public List getFeaturesToExclude() {
+  public List<?> getFeaturesToExclude() {
     return featuresToExclude;
   }
 

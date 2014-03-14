@@ -56,7 +56,7 @@ public class TestCreole extends TestCase
     reg.registerDirectories(testUrl);
     
     if(DEBUG) {
-      Iterator iter = reg.values().iterator();
+      Iterator<ResourceData> iter = reg.values().iterator();
       while(iter.hasNext()) Out.println(iter.next());
     }
   } // setUp
@@ -73,17 +73,9 @@ public class TestCreole extends TestCase
   /** Test the getInstances methods on CreoleRegister */
   public void testInstanceLists() throws Exception {
     // misc locals
-    List l;
+    List<? extends Resource> l;
     CreoleRegister cr = Gate.getCreoleRegister();
-    Iterator iter;
-    ResourceData resData = null;
-    Resource res = null;
     int numLrInstances = 0;
-
-    // Get the lists of types
-    Set vrTypes = reg.getVrTypes();
-    Set prTypes = reg.getPrTypes();
-    Set lrTypes = reg.getLrTypes();
 
     // The only instances of any type should be autoloading ones
     l = cr.getVrInstances();
@@ -101,7 +93,7 @@ public class TestCreole extends TestCase
     FeatureMap params = Factory.newFeatureMap();
     params.put("features", Factory.newFeatureMap());
     params.put(Document.DOCUMENT_URL_PARAMETER_NAME, new URL(TestDocument.getTestServerName()+"tests/doc0.html"));
-    res = Factory.createResource("gate.corpora.DocumentImpl", params);
+    Factory.createResource("gate.corpora.DocumentImpl", params);
 
     // lr instances list should be one longer now
     if(! (cr.getLrInstances().size() == numLrInstances + 1))
@@ -111,7 +103,7 @@ public class TestCreole extends TestCase
     params = Factory.newFeatureMap();
     params.put("features", Factory.newFeatureMap());
     params.put(Document.DOCUMENT_URL_PARAMETER_NAME, new URL(TestDocument.getTestServerName()+"tests/doc0.html"));
-    res = Factory.createResource("gate.corpora.DocumentImpl", params);
+    Factory.createResource("gate.corpora.DocumentImpl", params);
 
     // lr instances list should be two longer now
     if(! (cr.getLrInstances().size() == numLrInstances + 2))
@@ -126,11 +118,11 @@ public class TestCreole extends TestCase
 
   /** Test view registration */
   public void testViews() throws Exception {
-    List smallViews1 =
+    List<String> smallViews1 =
                   reg.getSmallVRsForResource("gate.persist.SerialDataStore");
     String className1 = new String("");
     if (smallViews1!= null && smallViews1.size()>0)
-      className1 = (String)smallViews1.get(0);
+      className1 = smallViews1.get(0);
     assertTrue(
       "Found "+className1+
       " as small viewer for gate.persist.SerialDataStore, "+
@@ -139,7 +131,7 @@ public class TestCreole extends TestCase
       "gate.gui.SerialDatastoreViewer".equals(className1)
     );
 
-    List largeViews1 =
+    List<String> largeViews1 =
                   reg.getLargeVRsForResource("gate.Corpus");
     assertTrue(
       "Found "+largeViews1.size()+" wich are " +largeViews1 +
@@ -148,7 +140,7 @@ public class TestCreole extends TestCase
       largeViews1.size() == 1
     );
 
-    List largeViews2 =
+    List<String> largeViews2 =
                   reg.getLargeVRsForResource("gate.Document");
     assertTrue(
       "Found "+largeViews2.size()+" wich are " +largeViews2 +
@@ -157,7 +149,7 @@ public class TestCreole extends TestCase
       largeViews2.size() == 0
     );
 
-    List annotViews1 =
+    List<String> annotViews1 =
                   reg.getAnnotationVRs();
     assertTrue(
       "Found "+annotViews1.size()+" wich are " +annotViews1 +
@@ -170,14 +162,14 @@ public class TestCreole extends TestCase
   /** Utility method to check that a list of resources are all
     * auto-loading.
     */
-  protected boolean allAutoloaders(List l) {
+  protected boolean allAutoloaders(List<? extends Resource> l) {
     if(l != null) {
       Resource res = null;
       ResourceData resData = null;
       CreoleRegister cr = Gate.getCreoleRegister();
-      Iterator iter = l.iterator();
+      Iterator<? extends Resource> iter = l.iterator();
       while(iter.hasNext()) {
-        res = (Resource) iter.next();
+        res = iter.next();
         if(DEBUG) Out.prln(res);
         resData = cr.get(res.getClass().getName());
         if(DEBUG) Out.prln(resData);
@@ -194,7 +186,7 @@ public class TestCreole extends TestCase
 
     CreoleRegister reg = Gate.getCreoleRegister();
     if(DEBUG) {
-      Iterator iter = reg.values().iterator();
+      Iterator<ResourceData> iter = reg.values().iterator();
       while(iter.hasNext()) Out.println(iter.next());
     }
 
@@ -222,13 +214,13 @@ public class TestCreole extends TestCase
 
     // checks values of parameters of param0 in test pr 1
     assertTrue(pr1rd.getClassName().equals("testpkg.TestPR1"));
-    Iterator iter = pr1rd.getParameterList().getRuntimeParameters().iterator();
-    Iterator iter2 = null;
+    Iterator<List<Parameter>> iter = pr1rd.getParameterList().getRuntimeParameters().iterator();
+    Iterator<Parameter> iter2 = null;
     Parameter param = null;
     while(iter.hasNext()) {
-      iter2 = ((List) iter.next()).iterator();
+      iter2 = iter.next().iterator();
       while(iter2.hasNext()) {
-        param = (Parameter) iter2.next();
+        param = iter2.next();
         if(param.typeName.equals("param0"))
           break;
       }
@@ -320,7 +312,7 @@ public class TestCreole extends TestCase
       docRd.getInterfaceName().equals("gate.Document")
     );
 
-    Class docClass = docRd.getResourceClass();
+    Class<?> docClass = docRd.getResourceClass();
     assertNotNull("couldn't get doc class", docClass);
     LanguageResource docRes = (LanguageResource) docClass.newInstance();
     assertTrue(
@@ -333,9 +325,9 @@ public class TestCreole extends TestCase
 
   /** Test type lists */
   public void testTypeLists() throws Exception {
-    Set vrs = reg.getVrTypes();
-    Set prs = reg.getPrTypes();
-    Set lrs = reg.getLrTypes();
+    Set<String> vrs = reg.getVrTypes();
+    Set<String> prs = reg.getPrTypes();
+    Set<String> lrs = reg.getLrTypes();
 
     assertTrue("wrong number vrs in reg: " + vrs.size(), vrs.size() == 3);
     assertTrue("wrong number prs in reg: " + prs.size(), prs.size() == 5);
@@ -364,7 +356,7 @@ public class TestCreole extends TestCase
     if(DEBUG) Out.prln(docRd);
 
     // runtime params - none for a document
-    Iterator iter = paramList.getRuntimeParameters().iterator();
+    Iterator<List<Parameter>> iter = paramList.getRuntimeParameters().iterator();
     assertTrue("Document has runtime params: " + paramList, ! iter.hasNext());
 
     // init time params
@@ -372,12 +364,12 @@ public class TestCreole extends TestCase
     iter = paramList.getInitimeParameters().iterator();
     int paramDisjNumber = -1;
     while(iter.hasNext()) {
-      List paramDisj = (List) iter.next();
-      Iterator iter2 = paramDisj.iterator();
+      List<Parameter> paramDisj = iter.next();
+      Iterator<Parameter> iter2 = paramDisj.iterator();
       paramDisjNumber++;
 
-      for(int i=0; iter2.hasNext(); i++) {
-        param = (Parameter) iter2.next();
+      while(iter2.hasNext()) {
+        param = iter2.next();
 
         switch(paramDisjNumber) {
           case 0:
@@ -436,7 +428,7 @@ public class TestCreole extends TestCase
     if(DEBUG) Out.prln(rd);
 
     // init time params - none for this one
-    Iterator iter = paramList.getInitimeParameters().iterator();
+    Iterator<List<Parameter>> iter = paramList.getInitimeParameters().iterator();
     assertTrue("POT has initime params: " + paramList, ! iter.hasNext());
 
     // runtime params
@@ -444,12 +436,12 @@ public class TestCreole extends TestCase
     iter = paramList.getRuntimeParameters().iterator();
     int paramDisjNumber = -1;
     while(iter.hasNext()) {
-      List paramDisj = (List) iter.next();
-      Iterator iter2 = paramDisj.iterator();
+      List<Parameter> paramDisj = iter.next();
+      Iterator<Parameter> iter2 = paramDisj.iterator();
       paramDisjNumber++;
 
-      for(int i=0; iter2.hasNext(); i++) {
-        param = (Parameter) iter2.next();
+      while(iter2.hasNext()) {
+        param = iter2.next();
 
         switch(paramDisjNumber) {
           case 0:
@@ -482,7 +474,7 @@ public class TestCreole extends TestCase
 
     ParameterList paramList = rd.getParameterList();
     // runtime params - none for a document
-    List runTime = paramList.getRuntimeParameters();
+    List<List<Parameter>> runTime = paramList.getRuntimeParameters();
     assertTrue("PR3 should have 4 runtime params: " + paramList, runTime.size()==4);
   }// End testParamAsLists();
 
@@ -496,19 +488,19 @@ public class TestCreole extends TestCase
     if(DEBUG) Out.prln(docRd);
 
     // runtime params - none for a document
-    Iterator iter = paramList.getRuntimeParameters().iterator();
+    Iterator<List<Parameter>> iter = paramList.getRuntimeParameters().iterator();
     assertTrue("Document has runtime params: " + paramList, ! iter.hasNext());
 
     // init time params
     Parameter param = null;
-    List initimeParams = paramList.getInitimeParameters();
+    List<List<Parameter>> initimeParams = paramList.getInitimeParameters();
     // only check the four parameters we can control in tests/creole.xml
     // there are more parameters after the fourth, but these come from
     // @CreoleParameter annotations so we can't reliably control for them
     // in this test
     for(int paramDisjNumber = 0; paramDisjNumber < 4; paramDisjNumber++) {
-      List paramDisj = (List)initimeParams.get(paramDisjNumber);
-      Iterator iter2 = paramDisj.iterator();
+      List<Parameter> paramDisj = initimeParams.get(paramDisjNumber);
+      Iterator<Parameter> iter2 = paramDisj.iterator();
 
       int paramDisjLen = paramDisj.size();
       assertTrue(
@@ -516,8 +508,8 @@ public class TestCreole extends TestCase
         paramDisjLen == 1
       );
 
-      for(int i=0; iter2.hasNext(); i++) {
-        param = (Parameter) iter2.next();
+      while(iter2.hasNext()) {
+        param = iter2.next();
 
         switch(paramDisjNumber) {
           case 0:
@@ -564,6 +556,7 @@ public class TestCreole extends TestCase
 
   /** Test default run() on processing resources */
   public void testDefaultRun() throws Exception {
+    @SuppressWarnings("serial")
     ProcessingResource defaultPr = new AbstractProcessingResource() {
     };
     boolean gotExceptionAsExpected = false;
@@ -590,11 +583,12 @@ public class TestCreole extends TestCase
   } // testArbitraryMetadata()
 
   /** Test resource introspection */
+  @SuppressWarnings("unused")
   public void testIntrospection() throws Exception {
     // get the gate.Document resource and its class
     ResourceData docRd = reg.get("gate.corpora.DocumentImpl");
     assertNotNull("couldn't find document res data (2)", docRd);
-    Class resClass = docRd.getResourceClass();
+    Class<?> resClass = docRd.getResourceClass();
 
     // get the beaninfo and property descriptors for the resource
     BeanInfo docBeanInfo = Introspector.getBeanInfo(resClass, Object.class);
@@ -606,7 +600,7 @@ public class TestCreole extends TestCase
     for(int i = 0; i<propDescrs.length; i++) {
       Method getMethodDescr = null;
       Method setMethodDescr = null;
-      Class propClass = null;
+      Class<?> propClass = null;
 
       PropertyDescriptor propDescr = propDescrs[i];
       propClass = propDescr.getPropertyType();
@@ -644,13 +638,15 @@ public class TestCreole extends TestCase
     params.put(Document.DOCUMENT_URL_PARAMETER_NAME, new URL(TestDocument.getTestServerName()+"tests/doc0.html"));
     Resource res =
       Factory.createResource("gate.corpora.DocumentImpl", params);
+    
+    assertNotNull("unable to create document", res);
   } // testFactory
 
   /** Utility method to print out the values of a property descriptor
     * @see java.beans.PropertyDescriptor
     */
   public static void printProperty(PropertyDescriptor prop) {
-    Class propClass = prop.getPropertyType();
+    Class<?> propClass = prop.getPropertyType();
     Method getMethodDescr = prop.getReadMethod();
     Method setMethodDescr = prop.getWriteMethod();
     Out.pr("prop dispname= " + prop.getDisplayName() + "; ");

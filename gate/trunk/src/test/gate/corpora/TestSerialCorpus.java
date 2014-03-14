@@ -27,10 +27,6 @@ import gate.util.SimpleFeatureMapImpl;
   */
 public class TestSerialCorpus extends TestCase
 {
-
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /** Construction */
   public TestSerialCorpus(String name) { super(name); }
 

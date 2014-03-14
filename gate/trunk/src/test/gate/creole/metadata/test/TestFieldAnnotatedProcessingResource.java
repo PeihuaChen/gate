@@ -8,6 +8,9 @@ import java.net.URL;
 @CreoleResource(comment = "Field annotation comment",
         name = "Name from Annotation")
 public class TestFieldAnnotatedProcessingResource extends AbstractLanguageAnalyser {
+
+  private static final long serialVersionUID = 3714695512128601493L;
+
   @RunTime
   @CreoleParameter(comment = "First parameter comment")
   private URL firstParameter;

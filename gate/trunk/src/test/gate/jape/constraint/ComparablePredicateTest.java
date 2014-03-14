@@ -107,6 +107,8 @@ public class ComparablePredicateTest extends TestCase {
 
     public class ComparablePredicateImpl extends ComparablePredicate {
 
+      private static final long serialVersionUID = 1798408901473465705L;
+
         @Override
         public String getOperator() {
             return GREATER;

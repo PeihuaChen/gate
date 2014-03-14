@@ -47,7 +47,7 @@ public class TestXSchema extends TestCase
   /** A test */
   public void testFromAndToXSchema() throws Exception {
 
-    ResourceData resData = Gate.getCreoleRegister().get("gate.creole.AnnotationSchema");
+    //esourceData resData = Gate.getCreoleRegister().get("gate.creole.AnnotationSchema");
 
     FeatureMap parameters = Factory.newFeatureMap();
     parameters.put(

@@ -7,19 +7,25 @@
  */
 package gate.creole.annic.test;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import junit.framework.TestCase;
+import gate.Corpus;
+import gate.Document;
+import gate.Factory;
+import gate.Gate;
 import gate.creole.annic.Constants;
 import gate.creole.annic.Hit;
 import gate.creole.annic.Parser;
 import gate.creole.annic.lucene.LuceneSearcher;
-import java.io.*;
+import gate.creole.splitter.SentenceSplitter;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import gate.*;
-import gate.creole.splitter.SentenceSplitter;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 /**
  * A class to test ANNIC Functionalities.
@@ -36,6 +42,7 @@ public class TestAnnic extends TestCase {
   /**
    * ANNIC Home
    */
+  @SuppressWarnings("unused")
   private File annicHome;
 
   /**
@@ -123,12 +130,13 @@ public class TestAnnic extends TestCase {
    */
   public void testSearcher() throws Exception {
     LuceneSearcher searcher = new LuceneSearcher();
-    HashMap parameters = new HashMap();
-    ArrayList indexLocations = new ArrayList();
+    Map<String,Object> parameters = new HashMap<String,Object>();
+    List<String> indexLocations = new ArrayList<String>();
     indexLocations.add(indexURL.getAbsolutePath());
     parameters.put(Constants.INDEX_LOCATIONS, indexLocations);
     parameters.put(Constants.CONTEXT_WINDOW, new Integer(5));
     String query = "{Person}";
+    @SuppressWarnings("unused")
     boolean success = searcher.search(query, parameters);
     int noOfHits = searcher.next(-1).length;
     assertEquals(12, noOfHits);

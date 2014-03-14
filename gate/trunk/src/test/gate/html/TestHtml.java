@@ -21,7 +21,6 @@ import gate.corpora.MimeType;
 import gate.corpora.TestDocument;
 
 import java.net.URL;
-import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -32,9 +31,6 @@ import junit.framework.TestSuite;
   */
 public class TestHtml extends TestCase
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /** Construction */
   public TestHtml(String name) { super(name); }
 
@@ -45,8 +41,6 @@ public class TestHtml extends TestCase
 
   /** A test */
   public void testUnpackMarkup() throws Exception {
-    // create the markupElementsMap map
-    Map markupElementsMap = null;
 
     gate.Document doc = null;
     /*

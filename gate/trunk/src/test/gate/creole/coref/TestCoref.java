@@ -65,8 +65,9 @@ public class TestCoref extends TestCase {
   } // tearDown
 
 
+  @SuppressWarnings("unused")
   private void runANNIE(Document doc) throws Exception {
-System.out.println("starting ANNIE modules...");
+    System.out.println("starting ANNIE modules...");
     DefaultTokeniser englishTokeniser = (DefaultTokeniser)Factory.createResource("gate.creole.tokeniser.DefaultTokeniser");
     DefaultGazetteer gazeteer = (DefaultGazetteer)Factory.createResource("gate.creole.gazetteer.DefaultGazetteer");
     SentenceSplitter split = (SentenceSplitter)Factory.createResource("gate.creole.splitter.SentenceSplitter");
@@ -98,6 +99,7 @@ System.out.println("starting ANNIE modules...");
   }
 
 
+  @SuppressWarnings("unused")
   private Document loadDocument(String url)
     throws Exception {
 
@@ -121,7 +123,7 @@ System.out.println("starting use case 01...");
     DataStore sds = Factory.openDataStore("gate.persist.SerialDataStore", "file:/E:/gate2/serial/debug/");
     sds.open();
 
-    List lrIds = sds.getLrIds("gate.corpora.DocumentImpl");
+    List<String> lrIds = sds.getLrIds("gate.corpora.DocumentImpl");
     Object lrID = lrIds.get(0);
 
     Document doc = (Document) sds.getLr("gate.corpora.DocumentImpl", lrID);

@@ -32,10 +32,6 @@ import gate.util.SimpleFeatureMapImpl;
   */
 public class TestDocument extends TestCase
 {
-
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /** Construction */
   public TestDocument(String name) { super(name); setUp();}
 
@@ -186,18 +182,16 @@ public class TestDocument extends TestCase
    */
   public static void verifyNodeIdConsistency(gate.Document doc)throws Exception{
       if (doc == null) return;
-      Map offests2NodeId = new HashMap();
+      Map<Long,Integer> offests2NodeId = new HashMap<Long,Integer>();
       // Test the default annotation set
       AnnotationSet annotSet = doc.getAnnotations();
       verifyNodeIdConsistency(annotSet,offests2NodeId, doc);
       // Test all named annotation sets
       if (doc.getNamedAnnotationSets() != null){
-        Iterator namedAnnotSetsIter =
+        Iterator<AnnotationSet> namedAnnotSetsIter =
                               doc.getNamedAnnotationSets().values().iterator();
         while(namedAnnotSetsIter.hasNext()){
-         verifyNodeIdConsistency((gate.AnnotationSet) namedAnnotSetsIter.next(),
-                                                                 offests2NodeId,
-                                                                 doc);
+         verifyNodeIdConsistency(namedAnnotSetsIter.next(),offests2NodeId,doc);
         }// End while
       }// End if
       // Test suceeded. The map is not needed anymore.
@@ -211,7 +205,7 @@ public class TestDocument extends TestCase
    *  @param doc is used in composing the assert error messsage.
    */
   public static void verifyNodeIdConsistency(gate.AnnotationSet annotSet,
-                                             Map  offests2NodeId,
+                                             Map<Long,Integer>  offests2NodeId,
                                              gate.Document doc)
                                                               throws Exception{
 

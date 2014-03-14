@@ -59,7 +59,7 @@ public class SpringFactory {
    * For an easier way to achieve this see {@link FeatureMapFactoryBean},
    * to which this method delegates.
    */
-  public static FeatureMap createFeatureMap(Map sourceMap) throws IOException {
+  public static FeatureMap createFeatureMap(Map<Object,Object> sourceMap) throws IOException {
     FeatureMapFactoryBean factory = new FeatureMapFactoryBean();
     factory.setSourceMap(sourceMap);
 
