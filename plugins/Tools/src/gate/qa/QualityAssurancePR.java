@@ -50,6 +50,8 @@ import java.util.Set;
 public class QualityAssurancePR extends AbstractLanguageAnalyser implements
                                                                 ProcessingResource {
 
+  private static final long serialVersionUID = 806633306890012316L;
+
   /**
    * Key annotation set name
    */
@@ -119,7 +121,7 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
     }
 
     // check if we are processing the last document in the corpus
-    Document lastDocument = (Document)corpus.get(corpus.size() - 1);
+    Document lastDocument = corpus.get(corpus.size() - 1);
     if(lastDocument != document) {
       return;
     }
@@ -189,7 +191,7 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
       boolean documentWasLoaded = corpus.isDocumentLoaded(row);
 
       // obtain the document from corpus
-      Document document = (Document)corpus.get(row);
+      Document document = corpus.get(row);
       documentNames.add(document.getName());
 
       // get annotations from the selected key and response annotation
