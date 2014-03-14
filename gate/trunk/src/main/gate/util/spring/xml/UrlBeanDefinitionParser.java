@@ -26,7 +26,7 @@ public class UrlBeanDefinitionParser extends AbstractSingleBeanDefinitionParser 
   @Override
   protected void doParse(Element element, BeanDefinitionBuilder builder) {
     builder.setFactoryMethod("resourceToUrl");
-    builder.addConstructorArg(DomUtils.getTextValue(element));
+    builder.addConstructorArgValue(DomUtils.getTextValue(element));
   }
 
   @Override

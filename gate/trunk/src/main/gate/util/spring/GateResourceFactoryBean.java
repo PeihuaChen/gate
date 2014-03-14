@@ -106,7 +106,7 @@ public class GateResourceFactoryBean extends GateAwareObject implements
   }
 
   @Override
-  public Class getObjectType() {
+  public Class<?> getObjectType() {
     if(object != null) {
       return object.getClass();
     }
