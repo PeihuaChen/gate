@@ -605,7 +605,8 @@ extends AbstractLanguageResource implements LanguageResource{
    *         the MIME type does not have a registered DocumentFormat
    */
   public static DocumentFormat getDocumentFormat(MimeType mimeType) {
-    return mimeString2ClassHandlerMap.get(mimeType);
+    return mimeString2ClassHandlerMap.get(mimeType.getType() + "/"
+            + mimeType.getSubtype());
   }
 
   /**
