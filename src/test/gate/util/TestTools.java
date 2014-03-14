@@ -26,6 +26,7 @@ public class TestTools extends TestCase {
   private static interface SubInterfaceB extends InterfaceB {
   }
 
+  @SuppressWarnings("unused")
   private static class ClassA implements InterfaceA {
   }
 
@@ -44,7 +45,9 @@ public class TestTools extends TestCase {
   private static class DifferentClassAB implements InterfaceA, InterfaceB {
   }
 
+  @SuppressWarnings("unused")
   private static class ConstructorTest {
+    
     public ConstructorTest(InterfaceA a) {
       // applicable to InterfaceA, ClassA, ClassAB, SubClassOfAB
       // and DifferentClassAB
@@ -68,10 +71,10 @@ public class TestTools extends TestCase {
     // simple case - there is only one constructor of
     // ConstructorTest that is applicable to an argument of type ClassB
     // - the one taking an InterfaceB
-    Constructor expected =
+    Constructor<?> expected =
             ConstructorTest.class.getConstructor(InterfaceB.class);
 
-    Constructor result =
+    Constructor<?> result =
             Tools.getMostSpecificConstructor(ConstructorTest.class,
                     ClassB.class);
     assertEquals("Most specific constructor for ConstructorTest taking a "
@@ -82,10 +85,10 @@ public class TestTools extends TestCase {
     // more complex case - there are two applicable constructors taking
     // a ClassSubB - InterfaceB and SubInterfaceB - but the latter is
     // more specific than the former
-    Constructor expected =
+    Constructor<?> expected =
             ConstructorTest.class.getConstructor(SubInterfaceB.class);
 
-    Constructor result =
+    Constructor<?> result =
             Tools.getMostSpecificConstructor(ConstructorTest.class,
                     ClassSubB.class);
     assertEquals("Most specific constructor for ConstructorTest taking a "
@@ -98,9 +101,9 @@ public class TestTools extends TestCase {
     // taking a SubClassOfAB - InterfaceA, InterfaceB and ClassAB - but
     // the last is more specific than both the others, so should
     // be chosen
-    Constructor expected = ConstructorTest.class.getConstructor(ClassAB.class);
+    Constructor<?> expected = ConstructorTest.class.getConstructor(ClassAB.class);
 
-    Constructor result =
+    Constructor<?> result =
             Tools.getMostSpecificConstructor(ConstructorTest.class,
                     SubClassOfAB.class);
     assertEquals("Most specific constructor for ConstructorTest taking a "

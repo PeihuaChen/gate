@@ -114,14 +114,14 @@ public class TestPersist extends TestCase {
     Object lrPersistenceId = persDoc.getLRPersistenceId();
 
     // test the getLrTypes method
-    List lrTypes = sds.getLrTypes();
+    List<String> lrTypes = sds.getLrTypes();
     assertTrue("wrong number of types in SDS", lrTypes.size() == 1);
     assertTrue("wrong type LR in SDS",
             lrTypes.get(0).equals("gate.corpora.DocumentImpl"));
 
     // test the getLrNames method
-    Iterator iter = sds.getLrNames("gate.corpora.DocumentImpl").iterator();
-    String name = (String)iter.next();
+    Iterator<String> iter = sds.getLrNames("gate.corpora.DocumentImpl").iterator();
+    String name = iter.next();
     assertEquals(name, "Alicia Tonbridge, a Document");
 
     // read the document back
@@ -159,7 +159,8 @@ public class TestPersist extends TestCase {
                     .toURI().toURL().toString());
 
     // check we can get empty lists from empty data stores
-    List lrTypes = sds.getLrTypes();
+    @SuppressWarnings("unused")
+    List<String> lrTypes = sds.getLrTypes();
 
     // create a document with some annotations / features on it
     String server = TestDocument.getTestServerName();
@@ -228,12 +229,12 @@ public class TestPersist extends TestCase {
     sds.sync(persCorpus);
 
     // read the documents back
-    ArrayList lrsFromDisk = new ArrayList();
-    List lrIds = sds.getLrIds("gate.corpora.SerialCorpusImpl");
+    List<Resource> lrsFromDisk = new ArrayList<Resource>();
+    List<String> lrIds = sds.getLrIds("gate.corpora.SerialCorpusImpl");
 
-    Iterator idsIter = lrIds.iterator();
+    Iterator<String> idsIter = lrIds.iterator();
     while(idsIter.hasNext()) {
-      String lrId = (String)idsIter.next();
+      String lrId = idsIter.next();
       FeatureMap features = Factory.newFeatureMap();
       features.put(DataStore.DATASTORE_FEATURE_NAME, sds);
       features.put(DataStore.LR_ID_FEATURE_NAME, lrId);
@@ -265,10 +266,10 @@ public class TestPersist extends TestCase {
     assertTrue("doc from disk not equal to memory version",
             TestEqual.documentsEqual(doc, diskDoc));
 
-    Iterator corpusIter = diskCorp.iterator();
+    Iterator<Document> corpusIter = diskCorp.iterator();
     while(corpusIter.hasNext()) {
       if(DEBUG)
-        Out.prln(((Document)corpusIter.next()).getName());
+        Out.prln(corpusIter.next().getName());
       else corpusIter.next();
     }
 
@@ -362,9 +363,9 @@ public class TestPersist extends TestCase {
     assertTrue("DSR has wrong number elements: " + dsr.size(), dsr.size() == 2);
 
     // peek at the DSR members
-    Iterator dsrIter = dsr.iterator();
+    Iterator<DataStore> dsrIter = dsr.iterator();
     while(dsrIter.hasNext()) {
-      DataStore ds = (DataStore)dsrIter.next();
+      DataStore ds = dsrIter.next();
       assertNotNull("null ds in ds reg", ds);
       if(DEBUG) Out.prln(ds);
     }

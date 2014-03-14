@@ -98,7 +98,7 @@ public class DetailsTableModel extends AbstractTableModel {
   }
 
   @Override
-  public Class getColumnClass(int columnIndex) {
+  public Class<?> getColumnClass(int columnIndex) {
     switch(columnIndex) {
       case EXPANDED_COLUMN:
         return String.class;
@@ -272,6 +272,7 @@ public class DetailsTableModel extends AbstractTableModel {
     return null;
   }
 
+  @SuppressWarnings("unchecked")
   public void setItem(OResource oResource) {
     this.oResource = oResource;
     if(oResource instanceof OClass) {

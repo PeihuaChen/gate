@@ -54,9 +54,6 @@ import junit.framework.TestSuite;
   */
 public class TestXml extends TestCase
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /** The encoding used in our tests*/
   private static String workingEncoding="UTF-8";
 
@@ -70,8 +67,8 @@ public class TestXml extends TestCase
 
   public void testGateDocumentToAndFromXmlWithDifferentKindOfFormats()
                                                                throws Exception{
-    List urlList = new LinkedList();
-    List urlDescription = new LinkedList();
+    List<URL> urlList = new LinkedList<URL>();
+    List<String> urlDescription = new LinkedList<String>();
     URL url = null;
 
     url = new URL(TestDocument.getTestServerName()+"tests/xml/xces.xml");
@@ -95,10 +92,10 @@ public class TestXml extends TestCase
     urlList.add(url);
     urlDescription.add(" an EMAIL document ");
 
-    Iterator iter = urlList.iterator();
-    Iterator descrIter = urlDescription.iterator();
+    Iterator<URL> iter = urlList.iterator();
+    Iterator<String> descrIter = urlDescription.iterator();
     while(iter.hasNext()){
-      runCompleteTestWithAFormat((URL) iter.next(),(String)descrIter.next());
+      runCompleteTestWithAFormat(iter.next(), descrIter.next());
     }// End While
 
 
@@ -191,7 +188,7 @@ public class TestXml extends TestCase
   /** A test */
   public void testUnpackMarkup() throws Exception{
     // create the markupElementsMap map
-    Map markupElementsMap = null;
+    //Map markupElementsMap = null;
     gate.Document doc = null;
     /*
     markupElementsMap = new HashMap();
@@ -200,8 +197,8 @@ public class TestXml extends TestCase
     markupElementsMap.put ("s","Sentence");
     */
     // Create the element2String map
-    Map anElement2StringMap = null;
-    anElement2StringMap = new HashMap();
+    Map<String,String> anElement2StringMap = new HashMap<String,String>();
+
     // Populate it
     anElement2StringMap.put("S","\n");
     anElement2StringMap.put("s","\n");
@@ -261,32 +258,32 @@ public class TestXml extends TestCase
     verifyAnnotationIDGenerator(reloadedDoc);
 
     // Verify if the annotations are identical in the two docs.
-    Map origAnnotMap = buildID2AnnotMap(origDoc);
-    Map reloadedAnnMap = buildID2AnnotMap(reloadedDoc);
+    Map<Integer,Annotation> origAnnotMap = buildID2AnnotMap(origDoc);
+    Map<Integer,Annotation> reloadedAnnMap = buildID2AnnotMap(reloadedDoc);
 
     //Verifies if the reloaded annotations are the same as the original ones
     verifyIDConsistency(origAnnotMap, reloadedAnnMap);
 
     // Build the original Matches map
     // ID  -> List of IDs
-    Map origMatchesMap = buildMatchesMap(origDoc);
+    Map<Integer,List<Integer>> origMatchesMap = buildMatchesMap(origDoc);
     // Verify the consistency of matches
     // Compare every orig annotation pointed by the MatchesMap with the reloadedAnnot
     // extracted from the reloadedMAp
-    for(Iterator it = origMatchesMap.keySet().iterator(); it.hasNext();){
-      Integer id = (Integer)it.next();
-      Annotation origAnnot = (Annotation) origAnnotMap.get(id);
+    for(Iterator<Integer> it = origMatchesMap.keySet().iterator(); it.hasNext();){
+      Integer id = it.next();
+      Annotation origAnnot = origAnnotMap.get(id);
       assertTrue("Couldn't find an original annot with ID=" + id, origAnnot != null);
-      Annotation reloadedAnnot = (Annotation) reloadedAnnMap.get(id);
+      Annotation reloadedAnnot = reloadedAnnMap.get(id);
       assertTrue("Couldn't find a reloaded annot with ID=" + id, reloadedAnnot != null);
       compareAnnot(origAnnot,reloadedAnnot);
       // Iterate through the matches list and repeat the comparison
-      List matchesList = (List) origMatchesMap.get(id);
-      for (Iterator itList = matchesList.iterator(); itList.hasNext();){
-        Integer matchId = (Integer) itList.next();
-        Annotation origA = (Annotation) origAnnotMap.get(matchId);
+      List<Integer> matchesList = origMatchesMap.get(id);
+      for (Iterator<Integer> itList = matchesList.iterator(); itList.hasNext();){
+        Integer matchId = itList.next();
+        Annotation origA = origAnnotMap.get(matchId);
         assertTrue("Couldn't find an original annot with ID=" + matchId, origA != null);
-        Annotation reloadedA = (Annotation) reloadedAnnMap.get(matchId);
+        Annotation reloadedA = reloadedAnnMap.get(matchId);
         assertTrue("Couldn't find a reloaded annot with ID=" + matchId, reloadedA != null);
         compareAnnot(origA, reloadedA);
       }// End for
@@ -302,17 +299,17 @@ public class TestXml extends TestCase
    * @param doc The document of which annotations will be used to construct the map
    * @return A Map from Annot ID -> Lists of Annot IDs
    */
-  private Map buildMatchesMap(Document doc){
-    Map matchesMap = new HashMap();
+  private Map<Integer,List<Integer>> buildMatchesMap(Document doc){
+    Map<Integer,List<Integer>> matchesMap = new HashMap<Integer,List<Integer>>();
     // Scan the default annotation set
     AnnotationSet annotSet = doc.getAnnotations();
 
     helperBuildMatchesMap(annotSet, matchesMap);
     // Scan all named annotation sets
     if (doc.getNamedAnnotationSets() != null){
-      for ( Iterator namedAnnotSetsIter = doc.getNamedAnnotationSets().values().iterator();
+      for ( Iterator<AnnotationSet> namedAnnotSetsIter = doc.getNamedAnnotationSets().values().iterator();
                                                                 namedAnnotSetsIter.hasNext(); ){
-        helperBuildMatchesMap((gate.AnnotationSet) namedAnnotSetsIter.next(), matchesMap);
+        helperBuildMatchesMap(namedAnnotSetsIter.next(), matchesMap);
       }// End while
     }// End if
     return matchesMap;
@@ -324,15 +321,16 @@ public class TestXml extends TestCase
    * @param sourceAnnotSet  The annotation set investigated
    * @param aMap
    */
-  private void helperBuildMatchesMap(AnnotationSet sourceAnnotSet, Map aMap ){
+  private void helperBuildMatchesMap(AnnotationSet sourceAnnotSet, Map<Integer,List<Integer>> aMap ){
 
-    for (Iterator it = sourceAnnotSet.iterator(); it.hasNext();){
-      Annotation a = (Annotation) it.next();
+    for (Iterator<Annotation> it = sourceAnnotSet.iterator(); it.hasNext();){
+      Annotation a = it.next();
       FeatureMap aFeatMap = a.getFeatures();
       // Skip those annotations who don't have features
       if (aFeatMap == null) continue;
       // Extract the matches feat
-      List matchesVal = (List) aFeatMap.get("matches");
+      @SuppressWarnings("unchecked")
+      List<Integer> matchesVal = (List<Integer>) aFeatMap.get("matches");
       if (matchesVal == null) continue;
       Integer id = a.getId();
       aMap.put(id,matchesVal);
@@ -350,7 +348,7 @@ public class TestXml extends TestCase
   protected void verifyAnnotationIDGenerator(gate.Document aDoc){
     // Creates a MAP containing all the annotations of the document.
     // In doing so, it also tests if there are annotations with the same ID.
-    Map id2AnnotationMap = buildID2AnnotMap(aDoc);
+    Map<Integer,Annotation> id2AnnotationMap = buildID2AnnotMap(aDoc);
 
     if (id2AnnotationMap == null || id2AnnotationMap.isEmpty()){
       //System.out.println("No annotations found on the document! Nothing to test.");
@@ -358,10 +356,10 @@ public class TestXml extends TestCase
     }
 
     // Get the key set of the Map and sort them
-    Set keysSet = id2AnnotationMap.keySet();
-    TreeSet sortedSet = new TreeSet(keysSet);
+    Set<Integer> keysSet = id2AnnotationMap.keySet();
+    TreeSet<Integer> sortedSet = new TreeSet<Integer>(keysSet);
     // Get the highest Annotation ID
-    Integer maxAnnotId =  (Integer) sortedSet.last();
+    Integer maxAnnotId =  sortedSet.last();
     // Compare its value to the one hold by the document's ID generator
     Integer generatorId = ((DocumentImpl)aDoc).getNextAnnotationId();
 
@@ -380,7 +378,7 @@ public class TestXml extends TestCase
    * @param origAnnotMap A map by ID, containing the original annotations
    * @param reloadedAnnMap A map by ID, containing the recreated annotations
    */
-  private void verifyIDConsistency(Map origAnnotMap, Map reloadedAnnMap) {
+  private void verifyIDConsistency(Map<Integer,Annotation> origAnnotMap, Map<Integer,Annotation> reloadedAnnMap) {
     assertEquals("Found a different number of annot in both documents.",
             origAnnotMap.keySet().size(), reloadedAnnMap.keySet().size());
 
@@ -393,10 +391,10 @@ public class TestXml extends TestCase
 //    System.out.println("REL  SET =" + rel);
 //
 
-    for (Iterator it = origAnnotMap.keySet().iterator(); it.hasNext();){
-      Integer id = (Integer) it.next();
-      Annotation origAnn = (Annotation) origAnnotMap.get(id);
-      Annotation reloadedAnnot = (Annotation) reloadedAnnMap.get(id);
+    for (Iterator<Integer> it = origAnnotMap.keySet().iterator(); it.hasNext();){
+      Integer id = it.next();
+      Annotation origAnn = origAnnotMap.get(id);
+      Annotation reloadedAnnot = reloadedAnnMap.get(id);
 
       assertTrue("Annotation with ID="+ id +" was not found in the reloaded document.", reloadedAnnot != null);
       compareAnnot(origAnn, reloadedAnnot);
@@ -422,9 +420,9 @@ public class TestXml extends TestCase
   }// End of compareAnnot()
 
 
-  private Map addAnnotSet2Map(AnnotationSet annotSet, Map id2AnnMap){
-    for (Iterator it = annotSet.iterator(); it.hasNext();){
-      Annotation a = (Annotation) it.next();
+  private Map<Integer,Annotation> addAnnotSet2Map(AnnotationSet annotSet, Map<Integer,Annotation> id2AnnMap){
+    for (Iterator<Annotation> it = annotSet.iterator(); it.hasNext();){
+      Annotation a = it.next();
       Integer id = a.getId();
 
       assertTrue("Found two annotations(one with type = " + a.getType() +
@@ -441,17 +439,17 @@ public class TestXml extends TestCase
    * @param aDoc The GATE doc to be scaned
    * @return a Map ID2Annot
    */
-  private Map buildID2AnnotMap(Document aDoc){
-    Map id2AnnMap = new HashMap();
+  private Map<Integer,Annotation> buildID2AnnotMap(Document aDoc){
+    Map<Integer,Annotation> id2AnnMap = new HashMap<Integer,Annotation>();
     // Scan the default annotation set
     AnnotationSet annotSet = aDoc.getAnnotations();
     addAnnotSet2Map(annotSet, id2AnnMap);
     // Scan all named annotation sets
     if (aDoc.getNamedAnnotationSets() != null){
-      for ( Iterator namedAnnotSetsIter = aDoc.getNamedAnnotationSets().values().iterator();
+      for ( Iterator<AnnotationSet> namedAnnotSetsIter = aDoc.getNamedAnnotationSets().values().iterator();
                                                                 namedAnnotSetsIter.hasNext(); ){
 
-        addAnnotSet2Map((gate.AnnotationSet) namedAnnotSetsIter.next(), id2AnnMap);
+        addAnnotSet2Map(namedAnnotSetsIter.next(), id2AnnMap);
       }// End while
     }// End if
     return id2AnnMap;

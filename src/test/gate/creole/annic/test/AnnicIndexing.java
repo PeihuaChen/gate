@@ -79,9 +79,8 @@ public class AnnicIndexing {
    * This method creates a lucene index.
    */
   public void execute() throws ExecutionException {
-    long start = System.currentTimeMillis();
     try {
-      Map parameters = new HashMap();
+      Map<String,Object> parameters = new HashMap<String,Object>();
       ArrayList<String> toinclude = new ArrayList<String>();
       toinclude.add(getAnnotationSetName());
       parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE, toinclude);
@@ -166,7 +165,7 @@ public class AnnicIndexing {
   /**
    * Gets the features of annotation to be excluded from being indexed
    */
-  public List getFeaturesToExclude() {
+  public List<?> getFeaturesToExclude() {
     return featuresToExclude;
   }
 

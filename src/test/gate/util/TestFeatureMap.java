@@ -12,9 +12,6 @@ import junit.framework.*;
 
 public class TestFeatureMap extends TestCase {
 
-    /** Debug flag */
-    private static final boolean DEBUG = false;
-
     /** Construction */
     public TestFeatureMap(String name) { super(name); }
 

@@ -147,7 +147,7 @@ public class TestIndex extends TestCase{
 
     QueryResultList res = search.search("+content:Diller +author:John",10);
 
-    Iterator it = res.getQueryResults();
+    Iterator<QueryResult> it = res.getQueryResults();
     //while (it.hasNext()) {
     //  QueryResult qr = (QueryResult) it.next();
     //  System.out.println("DOCUMENT_ID="+ qr.getDocumentID() +",   scrore="+qr.getScore());

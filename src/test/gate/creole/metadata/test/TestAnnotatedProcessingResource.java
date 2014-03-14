@@ -9,4 +9,6 @@ import gate.creole.metadata.CreoleResource;
  */
 @CreoleResource
 public class TestAnnotatedProcessingResource extends AbstractLanguageAnalyser {
+
+  private static final long serialVersionUID = 3933602896538740135L;
 }

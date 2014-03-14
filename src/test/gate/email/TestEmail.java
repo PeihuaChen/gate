@@ -16,14 +16,15 @@
 
 package gate.email;
 
-import java.net.URL;
-import java.util.Map;
-
-import junit.framework.*;
-
 import gate.Gate;
-//import org.w3c.www.mime.*;
 import gate.corpora.TestDocument;
+
+import java.net.URL;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+//import org.w3c.www.mime.*;
 
 
 /**
@@ -31,8 +32,6 @@ import gate.corpora.TestDocument;
   */
 public class TestEmail extends TestCase
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
 
   /** Construction */
   public TestEmail(String name) { super(name); }
@@ -44,8 +43,7 @@ public class TestEmail extends TestCase
 
   /** A test */
   public void testUnpackMarkup() throws Exception{
-    // create the markupElementsMap map
-    Map markupElementsMap = null;
+
     gate.Document doc = null;
 //    Gate.init();
     doc = gate.Factory.newDocument(new URL(TestDocument.getTestServerName()+"tests/email/test.eml"), "ISO-8859-1");

@@ -31,9 +31,6 @@ import junit.framework.*;
   */
 public class TestTemplate extends TestCase
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /** Construction */
   public TestTemplate(String name) { super(name); }
 

@@ -66,11 +66,11 @@ public class TestJavac extends TestCase{
       " }//class Outer" + nl;
 
       //load the class
-      Map sources = new HashMap();
+      Map<String,String> sources = new HashMap<String,String>();
       sources.put("foo.bar.Outer", javaSource);
       Javac.loadClasses(sources, Gate.getClassLoader());
       //try to access the class
-      Class testClass = Gate.getClassLoader().loadClass("foo.bar.Outer");
+      Class<?> testClass = Gate.getClassLoader().loadClass("foo.bar.Outer");
       assertNotNull("Could not find decalred class", testClass);
       Object testInstance = testClass.newInstance();
       assertNotNull("Could not instantiate declared class", testInstance);
@@ -107,7 +107,7 @@ public class TestJavac extends TestCase{
         " }//class Outer" + nl;
 
     //load the class
-    Map sources = new HashMap();
+    Map<String,String> sources = new HashMap<String,String>();
     sources.put("foo.bar.X", javaSource);
     boolean gotException = false;
     try {
@@ -125,8 +125,4 @@ public class TestJavac extends TestCase{
     assertTrue("Garbage java code did not raise an exception!",
                gotException);
   }
-
-
-  /** Debug flag */
-  private static final boolean DEBUG = false;
 }

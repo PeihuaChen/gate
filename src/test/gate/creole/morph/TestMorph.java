@@ -154,13 +154,13 @@ public class TestMorph extends TestCase {
 
 
 		// now check if the tokenizer was run properly on the document
-		queryTokens = new ArrayList(nounDocumentToTest.getAnnotations(
+		queryTokens = new ArrayList<Annotation>(nounDocumentToTest.getAnnotations(
 				"TokeniserAS").get("Token"));
-		Comparator offsetComparator = new OffsetComparator();
+		OffsetComparator offsetComparator = new OffsetComparator();
 		Collections.sort(queryTokens, offsetComparator);
 
 		// same procedure with the answer document
-		answerTokens = new ArrayList(nounDocumentWithAnswers
+		answerTokens = new ArrayList<Annotation>(nounDocumentWithAnswers
 				.getAnnotations("TokeniserAS").get("Token"));
 		Collections.sort(answerTokens, offsetComparator);
 

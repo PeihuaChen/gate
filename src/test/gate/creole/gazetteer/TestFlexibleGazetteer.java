@@ -16,12 +16,23 @@
 
 package gate.creole.gazetteer;
 
-import junit.framework.*;
-import gate.*;
-import gate.corpora.*;
-import java.io.File;
-import java.net.*;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.GateConstants;
+import gate.corpora.TestDocument;
 import gate.util.GateRuntimeException;
+
+import java.io.File;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 public class TestFlexibleGazetteer extends TestCase {
 
@@ -86,7 +97,7 @@ public class TestFlexibleGazetteer extends TestCase {
     FeatureMap params = Factory.newFeatureMap();
     // Create a list of input features with just one feature (root) and add it
     // to the feature map.
-    java.util.ArrayList testInputFeatures=new java.util.ArrayList();
+    List<String> testInputFeatures=new ArrayList<String>();
     testInputFeatures.add("Token.root");
     params.put("inputFeatureNames", testInputFeatures);
     params.put("gazetteerInst",gazetteerInst);

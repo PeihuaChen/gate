@@ -27,10 +27,6 @@ import gate.util.SimpleFeatureMapImpl;
   */
 public class TestCorpus extends TestCase
 {
-
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /** Construction */
   public TestCorpus(String name) { super(name); }
 

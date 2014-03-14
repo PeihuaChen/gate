@@ -16,14 +16,24 @@
 
 package gate.config;
 
-import java.io.*;
-import java.net.URL;
-import java.util.Map;
-import junit.framework.*;
-
-import gate.*;
+import gate.CreoleRegister;
+import gate.Gate;
+import gate.GateConstants;
 import gate.corpora.TestDocument;
-import gate.util.*;
+import gate.util.Files;
+import gate.util.GateException;
+import gate.util.OptionsMap;
+import gate.util.Out;
+import gate.util.Strings;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 /** CREOLE test class
   */
@@ -128,7 +138,7 @@ public class TestConfig extends TestCase
   public void testConfigUpdating() throws Exception {
     // clear the gate config so we don't write values from the
     // system initialisation into the test file
-    Map configMap = Gate.getUserConfig();
+    OptionsMap configMap = Gate.getUserConfig();
     configMap.clear();
 
     // if user config file exists, save it and remember the name
@@ -159,7 +169,9 @@ public class TestConfig extends TestCase
     //this is no longer a valid test as the written user config will at least
     //contain the values for the known and autload plugin paths.
     Gate.writeUserConfig();
+    @SuppressWarnings("unused")
     String writtenConfig = Files.getString(new File(configName));
+    @SuppressWarnings("unused")
     String empty = Gate.getEmptyConfigFile();
 //    assertEquals("written config doesn't match", writtenConfig, empty);
 

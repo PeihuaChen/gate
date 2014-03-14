@@ -64,8 +64,8 @@ public class TestDiffer extends TestCase{
      for (int i = 0; i < 100; i++) {
        annSet.add(new Long(i * 10), new Long( (i + 1) * 10), "Foo", features);
      }
-     List keySet = new ArrayList(annSet);
-     List responseSet = new ArrayList(annSet);
+     List<Annotation> keySet = new ArrayList<Annotation>(annSet);
+     List<Annotation> responseSet = new ArrayList<Annotation>(annSet);
 
      //check 100% Precision and recall
      AnnotationDiffer differ = new AnnotationDiffer();

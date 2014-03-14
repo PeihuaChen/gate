@@ -7,4 +7,6 @@ import gate.creole.AbstractLanguageAnalyser;
  * annotation.
  */
 public class TestUnannotatedProcessingResource extends AbstractLanguageAnalyser {
+
+  private static final long serialVersionUID = 3102891799898728865L;
 }

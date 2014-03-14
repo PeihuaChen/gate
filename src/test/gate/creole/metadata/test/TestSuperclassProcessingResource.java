@@ -8,6 +8,9 @@ import java.net.URL;
 @CreoleResource(comment = "Superclass comment", isPrivate = true,
         name = "This should be overridden by the XML")
 public class TestSuperclassProcessingResource extends AbstractLanguageAnalyser {
+
+  private static final long serialVersionUID = -7138568686172001909L;
+
   @RunTime
   @CreoleParameter(comment = "First parameter comment")
   public void setFirstParameter(URL value) {

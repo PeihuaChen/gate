@@ -14,9 +14,14 @@
 
 package gate.swing;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 
+@SuppressWarnings("serial")
 public class MenuLayoutTest extends JFrame {
+
   public MenuLayoutTest() {
     super("Displaying Long Menus");
     JMenuBar menuBar = new JMenuBar();
