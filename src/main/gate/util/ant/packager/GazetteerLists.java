@@ -57,7 +57,7 @@ public class GazetteerLists extends DataType implements ResourceCollection {
    * ResourceCollection interface: returns an iterator over the list
    * files.
    */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings({"rawtypes","unchecked"})
   @Override
   public Iterator iterator() {
     load();

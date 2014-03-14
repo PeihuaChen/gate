@@ -34,13 +34,13 @@ public interface Search{
   /** Search in corpus with this query.
    *  In each QueryResult will be added values of these fields.
    *  Result length is unlimited. */
-  public QueryResultList search(String query, List fieldNames)
+  public QueryResultList search(String query, List<String> fieldNames)
                          throws IndexException, SearchException;
 
   /** Search in corpus with this query.
    *  In each QueryResult will be added values of these fields.
    *  Result length is limited. */
-  public QueryResultList search(String query, int limit, List fieldNames)
+  public QueryResultList search(String query, int limit, List<String> fieldNames)
                          throws IndexException, SearchException;
 
 }

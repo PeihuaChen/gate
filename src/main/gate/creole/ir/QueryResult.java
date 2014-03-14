@@ -26,10 +26,10 @@ public class QueryResult{
   private float relevance;
 
   /** List of Terms*/
-  private List fieldValues;
+  private List<Term> fieldValues;
 
   /** Constructor of the class. */
-  public QueryResult(Object docID,float relevance, List fieldValues){
+  public QueryResult(Object docID,float relevance, List<Term> fieldValues){
     this.docID = docID;
     this.relevance = relevance;
     this.fieldValues = fieldValues;
@@ -46,7 +46,7 @@ public class QueryResult{
   }
 
   /** returns certain document fields (if specified) from the search() call */
-  public List getFields(){
+  public List<Term> getFields(){
     return fieldValues;
   }
 
