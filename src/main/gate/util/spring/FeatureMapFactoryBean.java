@@ -75,7 +75,7 @@ public class FeatureMapFactoryBean extends GateAwareObject implements
   }
 
   @Override
-  public Class getObjectType() {
+  public Class<?> getObjectType() {
     return gate.FeatureMap.class;
   }
 

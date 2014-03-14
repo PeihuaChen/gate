@@ -41,7 +41,7 @@ public class InitBeanDefinitionParser
     Element preloadElt = DomUtils.getChildElementByTagName(element,
             "preload-plugins");
     if(preloadElt != null) {
-      List preloadPluginsList = ctx.getDelegate().parseListElement(preloadElt,
+      List<?> preloadPluginsList = ctx.getDelegate().parseListElement(preloadElt,
               builder.getBeanDefinition());
       builder.addPropertyValue("preloadPlugins", preloadPluginsList);
     }
@@ -49,7 +49,7 @@ public class InitBeanDefinitionParser
   }
 
   @Override
-  protected Class getBeanClass(Element element) {
+  protected Class<?> getBeanClass(Element element) {
     return Init.class;
   }
 

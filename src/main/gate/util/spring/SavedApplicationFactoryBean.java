@@ -105,7 +105,7 @@ public class SavedApplicationFactoryBean extends GateAwareObject implements
   }
 
   @Override
-  public Class getObjectType() {
+  public Class<?> getObjectType() {
     return null;
   }
 

@@ -51,7 +51,7 @@ public class AddPRBeanDefinitionParser
   }
 
   @Override
-  protected Class getBeanClass(Element element) {
+  protected Class<?> getBeanClass(Element element) {
     return AddPRResourceCustomiser.class;
   }
 

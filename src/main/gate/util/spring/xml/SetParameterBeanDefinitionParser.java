@@ -47,7 +47,7 @@ public class SetParameterBeanDefinitionParser
   }
 
   @Override
-  protected Class getBeanClass(Element element) {
+  protected Class<?> getBeanClass(Element element) {
     return SetParameterResourceCustomiser.class;
   }
 

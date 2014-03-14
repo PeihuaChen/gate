@@ -73,7 +73,7 @@ public class DuplicateBeanDefinitionParser
   }
   
   @Override
-  protected Class getBeanClass(Element element) {
+  protected Class<?> getBeanClass(Element element) {
     return DuplicateResourceFactoryBean.class;
   }
 

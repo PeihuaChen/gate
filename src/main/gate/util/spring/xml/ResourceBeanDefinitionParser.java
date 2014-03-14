@@ -78,7 +78,7 @@ public class ResourceBeanDefinitionParser
   }
 
   @Override
-  protected Class getBeanClass(Element element) {
+  protected Class<?> getBeanClass(Element element) {
     return GateResourceFactoryBean.class;
   }
 

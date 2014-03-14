@@ -36,7 +36,7 @@ public class FeatureMapBeanDefinitionParser
   @Override
   protected void doParse(Element element, ParserContext parserContext,
           BeanDefinitionBuilder builder) {
-    Map sourceMap = parserContext.getDelegate().parseMapElement(element,
+    Map<?,?> sourceMap = parserContext.getDelegate().parseMapElement(element,
             builder.getRawBeanDefinition());
     builder.addPropertyValue("sourceMap", sourceMap);
     if(element.hasAttribute("scope")) {
@@ -45,7 +45,7 @@ public class FeatureMapBeanDefinitionParser
   }
 
   @Override
-  protected Class getBeanClass(Element element) {
+  protected Class<?> getBeanClass(Element element) {
     return FeatureMapFactoryBean.class;
   }
 
