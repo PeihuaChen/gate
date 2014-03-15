@@ -37,7 +37,11 @@
         description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${src}" destdir="${build}" source="1.6" target="1.6"
-           classpathref="compile.classpath" />
+           classpathref="compile.classpath">
+    	<compilerarg value="-Xmaxwarns" />
+		<compilerarg value="${gate.compile.maxwarnings}" />
+		<compilerarg value="-Xlint:all" />
+	</javac>
   </target>
 
   <!-- Build JavaDoc documentation -->

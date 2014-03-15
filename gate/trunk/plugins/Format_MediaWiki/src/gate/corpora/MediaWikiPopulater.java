@@ -47,6 +47,8 @@ import org.xml.sax.SAXException;
 @CreoleResource(name = "MediaWiki Corpus Populater", tool = true, autoinstances = @AutoInstance)
 public class MediaWikiPopulater extends ResourceHelper {
 
+  private static final long serialVersionUID = -2505026690286047751L;
+
   /**
    * so that we don't end up with a document littered with unparsed
    * "magic words" we we need a custom model that we can use to filter them out
@@ -69,6 +71,7 @@ public class MediaWikiPopulater extends ResourceHelper {
     }
   };
 
+  @SuppressWarnings("serial")
   @Override
   protected List<Action> buildActions(final NameBearerHandle handle) {
     List<Action> actions = new ArrayList<Action>();

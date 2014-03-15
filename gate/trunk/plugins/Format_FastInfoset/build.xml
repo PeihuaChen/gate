@@ -44,7 +44,10 @@
 
 	<!-- compile the source -->
 	<target name="compile" depends="prepare, resources">
-		<javac classpathref="compile.classpath" srcdir="${src.dir}" destdir="${classes.dir}" debug="true" debuglevel="lines,source" source="1.5" target="1.5">
+		<javac classpathref="compile.classpath" srcdir="${src.dir}" destdir="${classes.dir}" debug="true" debuglevel="lines,source" source="1.6" target="1.6">
+			<compilerarg value="-Xmaxwarns" />
+			<compilerarg value="${gate.compile.maxwarnings}" />
+			<compilerarg value="-Xlint:all" />
 		</javac>
 	</target>
 

@@ -40,6 +40,8 @@ import info.bliki.wiki.model.WikiModel;
     autoinstances = {@AutoInstance(hidden = true)})
 public class MediaWikiDocumentFormat extends NekoHtmlDocumentFormat {
 
+  private static final long serialVersionUID = 2979612569607249915L;
+
   /**
    * so that we don't end up with a document littered with unparsed "magic words" we
    * we need a custom model that we can use to filter them out

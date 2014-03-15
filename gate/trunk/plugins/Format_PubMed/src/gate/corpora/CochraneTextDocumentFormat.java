@@ -51,7 +51,8 @@ import gate.util.Strings;
   isPrivate = true)
 public class CochraneTextDocumentFormat extends TextualDocumentFormat {
 
-  
+  private static final long serialVersionUID = 8362288605943414676L;
+
   private static final String COCHRANE_TITLE = "TI";
   
   private static final String COCHRANE_ABSTRACT = "AB";
