@@ -50,6 +50,7 @@ public class PubmedUtils {
       newValue.add(fieldValue);
       fieldValues.put(fieldName, newValue);
     } else { // old value must be a LinkedList<String>
+      @SuppressWarnings("unchecked")
       LinkedList<String> newValue = (LinkedList<String>)oldValue;
       newValue.add(fieldValue);
     } 

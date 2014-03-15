@@ -51,6 +51,8 @@ import org.xml.sax.SAXException;
 @CreoleResource(name = "MediaWiki XML Document Format", isPrivate = true, autoinstances = {@AutoInstance(hidden = true)})
 public class MediaWikiXMLDocumentFormat extends NekoHtmlDocumentFormat {
 
+  private static final long serialVersionUID = 5954146546655770283L;
+
   /**
    * so that we don't end up with a document littered with unparsed
    * "magic words" we we need a custom model that we can use to filter them out

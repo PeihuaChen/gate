@@ -15,18 +15,6 @@
  */
 package gate.corpora;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Serializable;
-import java.io.StringReader;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.log4j.Logger;
-
 import gate.AnnotationSet;
 import gate.Document;
 import gate.Factory;
@@ -38,6 +26,17 @@ import gate.creole.metadata.CreoleResource;
 import gate.util.DocumentFormatException;
 import gate.util.InvalidOffsetException;
 import gate.util.Strings;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Serializable;
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.log4j.Logger;
 
 /**
  * A document format analyser for PubMed text documents. Use mime type value 
