@@ -19,21 +19,24 @@
 
 package kea;
 
-import java.util.*;
-import java.io.*;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.FastVector;
-import weka.core.Utils;
-import weka.core.Option;
-import weka.filters.Filter;
-import weka.filters.supervised.attribute.Discretize;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayesSimple;
 import weka.classifiers.meta.FilteredClassifier;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.supervised.attribute.Discretize;
 
 /**
  * This filter converts the incoming data into data appropriate for
@@ -56,6 +59,7 @@ import weka.classifiers.meta.FilteredClassifier;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version 1.0
   */
+@SuppressWarnings({"serial","rawtypes","unchecked","cast","unused"})
 public class KEAFilter extends Filter implements OptionHandler {
 
   /** Index of attribute containing the documents */

@@ -31,6 +31,7 @@ import java.util.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version 1.0
  */
+@SuppressWarnings({"serial","cast"})
 public class NumbersFilter extends Filter {
 
   /**

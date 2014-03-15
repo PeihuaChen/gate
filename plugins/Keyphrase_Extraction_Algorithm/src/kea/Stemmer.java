@@ -19,8 +19,7 @@
 
 package kea;
 
-import java.util.*;
-import java.io.*;
+import java.io.Serializable;
 
 /**
  * Abstract class for stemmers.
@@ -28,6 +27,7 @@ import java.io.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version 1.0
  */
+@SuppressWarnings("serial")
 public abstract class Stemmer implements Serializable {
 
   /**
