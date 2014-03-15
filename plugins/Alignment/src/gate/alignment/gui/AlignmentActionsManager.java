@@ -47,12 +47,15 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.io.IOUtils;
+
 /**
  * Alignment actions manager that allows managing actions that should be
  * taken on various occasions.
  * @author niraj
  *
  */
+@SuppressWarnings("serial")
 public class AlignmentActionsManager extends JPanel {
 
   /**
@@ -169,7 +172,7 @@ public class AlignmentActionsManager extends JPanel {
 
     // default actions conf file
     ResourceData myResourceData =
-            (ResourceData)Gate.getCreoleRegister().get(
+            Gate.getCreoleRegister().get(
                     CompoundDocumentImpl.class.getName());
     URL creoleXml = myResourceData.getXmlFileUrl();
     URL alignmentHomeURL = null;
@@ -421,8 +424,9 @@ public class AlignmentActionsManager extends JPanel {
   private void readActions(File actionsConfFile) {
 
     if(actionsConfFile != null && actionsConfFile.exists()) {
+      BufferedReader br = null;
       try {
-        BufferedReader br = new BufferedReader(new FileReader(actionsConfFile));
+        br = new BufferedReader(new FileReader(actionsConfFile));
         String line = br.readLine();
         String cName = "";
         while(line != null) {
@@ -438,7 +442,7 @@ public class AlignmentActionsManager extends JPanel {
             cName = index < 0 ? line.trim() : line.substring(0, index);
             line = index < 0 ? "" : line.substring(index + 1);
 
-            Class actionClass =
+            Class<?> actionClass =
                     Class.forName(cName, true, Gate.getClassLoader());
 
             Object action = actionClass.newInstance();
@@ -487,6 +491,9 @@ public class AlignmentActionsManager extends JPanel {
         }
       } catch(IOException ioe) {
         throw new GateRuntimeException(ioe);
+      }
+      finally {
+        IOUtils.closeQuietly(br);
       }
     }
   }
@@ -572,6 +579,7 @@ public class AlignmentActionsManager extends JPanel {
    * 
    * @author gate
    */
+  @SuppressWarnings("unused")
   private class PropertyActionCB extends JCheckBox {
     /**
      * Which action to call if the check box is selected

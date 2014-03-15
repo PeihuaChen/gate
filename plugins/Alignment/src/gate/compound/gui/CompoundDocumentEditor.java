@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -54,7 +55,7 @@ import javax.swing.SwingUtilities;
  * document editors for all member documents of the compound document under
  * a single component.
  */
-
+@SuppressWarnings("serial")
 public class CompoundDocumentEditor extends AbstractVisualResource
                                                                   implements
                                                                   ActionsPublisher,
@@ -87,8 +88,8 @@ public class CompoundDocumentEditor extends AbstractVisualResource
    * The document view is just an empty shell. This method publishes the
    * actions from the contained views.
    */
-  public List getActions() {
-    List actions = new ArrayList();
+  public List<Action> getActions() {
+    List<Action> actions = new ArrayList<Action>();
     return actions;
   }
 
@@ -134,13 +135,13 @@ public class CompoundDocumentEditor extends AbstractVisualResource
    */
   public void setHandle(Handle handle) {
     super.setHandle(handle);
-    Map documents = ((CompoundDocument)this.document).getDocuments();
+    Map<String,Document> documents = ((CompoundDocument)this.document).getDocuments();
     ((CompoundDocument)this.document).addCompoundDocumentListener(this);
 
-    Iterator iter = documents.values().iterator();
+    Iterator<Document> iter = documents.values().iterator();
     try {
       while(iter.hasNext()) {
-        Document doc = (Document)iter.next();
+        Document doc = iter.next();
         NameBearerHandle nbHandle = new NameBearerHandle(doc, Main
                 .getMainFrame());
         JComponent largeView = nbHandle.getLargeView();
@@ -172,7 +173,7 @@ public class CompoundDocumentEditor extends AbstractVisualResource
     public void actionPerformed(ActionEvent e) {
       try {
         // get all the documents loaded in the system
-        java.util.List loadedDocuments = Gate.getCreoleRegister()
+        List<Resource> loadedDocuments = Gate.getCreoleRegister()
                 .getAllInstances("gate.Document");
         if(loadedDocuments == null || loadedDocuments.isEmpty()) {
           JOptionPane.showMessageDialog(CompoundDocumentEditor.this,
@@ -182,7 +183,7 @@ public class CompoundDocumentEditor extends AbstractVisualResource
           return;
         }
 
-        Vector docNames = new Vector();
+        Vector<String> docNames = new Vector<String>();
         for(int i = 0; i < loadedDocuments.size(); i++) {
           Document doc = (Document)loadedDocuments.get(i);
           if(doc instanceof CompoundDocument) {
@@ -415,7 +416,7 @@ public class CompoundDocumentEditor extends AbstractVisualResource
   }
 
   public void documentRemoved(CompoundDocumentEvent event) {
-    Handle handle = (Handle)documentsMap.remove(event.getDocumentID());
+    Handle handle = documentsMap.remove(event.getDocumentID());
     if(handle != null) {
       tabbedPane.remove(handle.getLargeView());
       tabbedPane.updateUI();

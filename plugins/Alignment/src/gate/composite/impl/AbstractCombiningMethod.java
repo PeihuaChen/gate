@@ -38,6 +38,8 @@ import javax.xml.stream.XMLStreamWriter;
  */
 public abstract class AbstractCombiningMethod implements CombiningMethod {
 
+  private static final long serialVersionUID = -6866546515510128190L;
+
   protected HashMap<String, List<OffsetDetails>> offsetMappings;
 
   protected StringBuffer documentContent;

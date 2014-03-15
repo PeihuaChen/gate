@@ -10,6 +10,7 @@ import javax.swing.table.AbstractTableModel;
  * @author niraj
  *
  */
+@SuppressWarnings("serial")
 public class DefaultDataModel extends AbstractTableModel {
   
   /**

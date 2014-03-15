@@ -50,6 +50,7 @@ import javax.swing.table.DefaultTableModel;
  * This is a links view which shows pairs in horizontal mode and shows links
  * among the highlight
  */
+@SuppressWarnings("serial")
 public class LinksView extends JPanel implements AlignmentListener,
                                      AlignmentView {
 
@@ -729,6 +730,7 @@ public class LinksView extends JPanel implements AlignmentListener,
     /**
      * clears the local cache
      */
+    @SuppressWarnings("unused")
     public boolean removeEdges(Edge e) {
       return edges.remove(e);
     }
@@ -771,16 +773,16 @@ public class LinksView extends JPanel implements AlignmentListener,
 
       for(Edge e : edges) {
         int x =
-                (int)(e.srcAH.getBounds().x + (double)((double)e.srcAH
+                (int)(e.srcAH.getBounds().x + ((double)e.srcAH
                         .getBounds().width / 2));
         int y = 0;
         int x1 =
-                (int)(e.tgtAH.getBounds().x + (double)((double)e.tgtAH
+                (int)(e.tgtAH.getBounds().x + ((double)e.tgtAH
                         .getBounds().width / 2));
         int y1 = this.getBounds().height;
         Line2D line =
-                new Line2D.Double(new Point((int)x, (int)y), new Point((int)x1,
-                        (int)y1));
+                new Line2D.Double(new Point(x, y), new Point(x1,
+                        y1));
         Stroke stroke = new BasicStroke(2.0f);
         g2d.setStroke(stroke);
         Color c = g2d.getColor();
@@ -834,7 +836,7 @@ public class LinksView extends JPanel implements AlignmentListener,
       super.fireTableDataChanged();
     }
 
-    public Class getColumnClass(int column) {
+    public Class<?> getColumnClass(int column) {
       return String.class;
     }
 

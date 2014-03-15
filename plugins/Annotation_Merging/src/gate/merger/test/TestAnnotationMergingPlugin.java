@@ -100,7 +100,7 @@ public class TestAnnotationMergingPlugin extends TestCase {
     MergingMethodsEnum methodMerger = MergingMethodsEnum.MajorityVoting;
     mergerOne.setMergingMethod(methodMerger);
     controller.execute();
-    Document doc = (Document)corpus.get(0);
+    Document doc = corpus.get(0);
     AnnotationSet anns = doc.getAnnotations("mergerAnns").get("sent");
     int num = obtainAnns(anns, "Op", "true");
     assertEquals(num, 5);
@@ -113,7 +113,7 @@ public class TestAnnotationMergingPlugin extends TestCase {
     mergerOne.setMergingMethod(methodMerger);
     mergerOne.setMinimalAnnNum("3");
     controller.execute();
-    doc = (Document)corpus.get(0);
+    doc = corpus.get(0);
     anns = doc.getAnnotations("mergerAnns").get("sent");
     num = obtainAnns(anns, "Op", "true");
     assertEquals(num, 4);

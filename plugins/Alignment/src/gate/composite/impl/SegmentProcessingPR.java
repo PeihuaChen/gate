@@ -42,6 +42,9 @@ import java.util.Map;
  */
 public class SegmentProcessingPR extends AbstractLanguageAnalyser implements
                                                                  ProcessingResource {
+
+  private static final long serialVersionUID = 8528040629940314055L;
+
   /**
    * Controller that should be used to process segments.
    */

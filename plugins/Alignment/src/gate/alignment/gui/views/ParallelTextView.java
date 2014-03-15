@@ -49,6 +49,7 @@ import javax.swing.table.DefaultTableModel;
 /**
  * This class provides an editor for aligning texts in a compound document.
  */
+@SuppressWarnings("serial")
 public class ParallelTextView extends JPanel implements AlignmentListener,
                                             AlignmentView {
 
@@ -783,7 +784,7 @@ public class ParallelTextView extends JPanel implements AlignmentListener,
       super.fireTableDataChanged();
     }
 
-    public Class getColumnClass(int column) {
+    public Class<?> getColumnClass(int column) {
       return String.class;
     }
 
@@ -846,6 +847,7 @@ public class ParallelTextView extends JPanel implements AlignmentListener,
     /**
      * clears the local cache
      */
+    @SuppressWarnings("unused")
     public boolean removeEdges(Edge e) {
       return edges.remove(e);
     }
@@ -888,16 +890,16 @@ public class ParallelTextView extends JPanel implements AlignmentListener,
 
       for(Edge e : edges) {
         int y = 
-                (int)(e.srcAH.getBounds().y + (double)((double)e.srcAH
+                (int)(e.srcAH.getBounds().y + ((double)e.srcAH
                         .getBounds().height / 2));
         int x = 0;
         int y1 =
-                (int)(e.tgtAH.getBounds().y + (double)((double)e.tgtAH
+                (int)(e.tgtAH.getBounds().y + ((double)e.tgtAH
                         .getBounds().height / 2));
         int x1 = this.getBounds().width;
         Line2D line =
-                new Line2D.Double(new Point((int)x, (int)y), new Point((int)x1,
-                        (int)y1));
+                new Line2D.Double(new Point(x, y), new Point(x1,
+                        y1));
         Stroke stroke = new BasicStroke(2.0f);
         g2d.setStroke(stroke);
         Color c = g2d.getColor();

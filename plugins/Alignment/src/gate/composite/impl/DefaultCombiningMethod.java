@@ -51,7 +51,7 @@ public class DefaultCombiningMethod extends AbstractCombiningMethod {
    * map.put("copyUnderlyingAnnotations","true");
    */
   public CompositeDocument combine(CompoundDocument compoundDocument,
-          Map parameters) throws CombiningMethodException {
+          Map<String,Object> parameters) throws CombiningMethodException {
     try {
 
       // parameters

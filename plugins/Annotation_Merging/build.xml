@@ -84,7 +84,11 @@
 	<!-- This target compiles all the classes -->
 	<target name="compile" description="compile the source " depends="prepare">
 		<!-- Compile the java code from ${srcDir} into ${buildDir} -->
-		<javac srcdir="${srcDir}" destdir="${buildDir}" source="1.5" target="1.5" encoding="UTF-8" debug="true" debuglevel="lines,source" classpathref="build.class.path" />
+		<javac srcdir="${srcDir}" destdir="${buildDir}" source="1.6" target="1.6" encoding="UTF-8" debug="true" debuglevel="lines,source" classpathref="build.class.path">
+			<compilerarg value="-Xmaxwarns" />
+			<compilerarg value="${gate.compile.maxwarnings}" />
+			<compilerarg value="-Xlint:all" />
+		</javac>
 	</target>
 
 	<target name="jar" depends="compile">

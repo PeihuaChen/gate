@@ -1,14 +1,11 @@
 package gate.compound.impl;
 
-import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
 import gate.Resource;
 import gate.alignment.Alignment;
 import gate.creole.ResourceInstantiationException;
-import gate.creole.metadata.CreoleParameter;
-import gate.creole.metadata.CreoleResource;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.GateRuntimeException;
 
@@ -17,7 +14,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
@@ -26,6 +22,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * Those compound documents saved in a single xml document can be
@@ -48,9 +46,10 @@ public class CompoundDocumentFromXml extends CompoundDocumentImpl {
               "The compoundDocumentUrl is null.");
     }
 
+    BufferedReader br = null;
     try {
       StringBuilder xmlString = new StringBuilder();
-      BufferedReader br = new BomStrippingInputStreamReader(compoundDocumentUrl
+       br = new BomStrippingInputStreamReader(compoundDocumentUrl
               .openStream(), getEncoding());
       String line = br.readLine();
       while(line != null) {
@@ -66,12 +65,16 @@ public class CompoundDocumentFromXml extends CompoundDocumentImpl {
       xstream.setClassLoader(Gate.getClassLoader());
 
       // reading the xml object
+      @SuppressWarnings("unchecked")
       Map<String, Object> globalMap = (HashMap<String, Object>)xstream
               .fromXML(reader);
 
       // now we read individual information
+      @SuppressWarnings("unchecked")
       Map<String, String> docXmls = (HashMap<String, String>)globalMap
               .get("docXmls");
+      
+      @SuppressWarnings("unchecked")
       Map<String, Object> features = (Map<String, Object>)globalMap
               .get("feats");
 
@@ -132,6 +135,9 @@ public class CompoundDocumentFromXml extends CompoundDocumentImpl {
     }
     catch(IOException ioe) {
       throw new ResourceInstantiationException(ioe);
+    }
+    finally {
+      IOUtils.closeQuietly(br);
     }
     return this;
   } // init()
