@@ -9,19 +9,28 @@
  */
 package gate.lingpipe;
 
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.Utils;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
 import gate.util.GateRuntimeException;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+
 import com.aliasi.classify.Classification;
 import com.aliasi.classify.LMClassifier;
 import com.aliasi.util.AbstractExternalizable;
-import gate.creole.metadata.*;
 
 /**
  * A Processing resource to identify language of the document based on
@@ -62,6 +71,7 @@ public class LanguageIdentifierPR
   protected File modelFile;
 
   /** classifier object */
+  @SuppressWarnings("rawtypes")
   protected LMClassifier classifier;
 
   /** document feature name */
@@ -75,6 +85,7 @@ public class LanguageIdentifierPR
    * @return Resource
    * @throws ResourceInstantiationException
    */
+  @SuppressWarnings("rawtypes")
   public Resource init() throws ResourceInstantiationException {
     if(modelFileUrl == null)
       throw new ResourceInstantiationException("No model file provided!");

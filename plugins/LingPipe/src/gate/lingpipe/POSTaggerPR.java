@@ -150,6 +150,7 @@ public class POSTaggerPR extends AbstractLanguageAnalyser implements
         List<String> theTags = tags.get(score);
         for(int m = 0; m < theTags.size(); m++) {
           FeatureMap f = tokenList.get(m).getFeatures();
+          @SuppressWarnings("unchecked")
           Map<String, Set<Double>> scores = (Map<String, Set<Double>>) f.get("category");
           if(scores == null) {
             scores = new HashMap<String, Set<Double>>();
@@ -191,7 +192,7 @@ public class POSTaggerPR extends AbstractLanguageAnalyser implements
     Map<Double, List<String>> toReturn = new HashMap<Double, List<String>>();
     Iterator<ScoredTagging<String>> nBestIt = decoder.tagNBest(tokens, 5);
     for(int n = 0; n < nBest.intValue() && nBestIt.hasNext(); ++n) {
-      ScoredTagging<String> tagScores = (ScoredTagging<String>) nBestIt.next();
+      ScoredTagging<String> tagScores = nBestIt.next();
       double score = tagScores.score();
       List<String> tags = tagScores.tags();
       toReturn.put(new Double(score), tags);

@@ -18,6 +18,9 @@ import com.aliasi.tokenizer.Tokenizer;
  */
 public class TokenizerPR extends AbstractLanguageAnalyser implements
                                                          ProcessingResource {
+
+  private static final long serialVersionUID = -6429885471274279223L;
+
   /**
    * Name of the output annotation set
    */
