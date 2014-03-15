@@ -138,7 +138,7 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
       for(int i = 0; i < documentIDs.size(); i++) {
         // apart from the index, we need to search for all other files
         // create file Name
-        documentID = (String)documentIDs.get(i);
+        documentID = documentIDs.get(i);
         String fileNameToSearch = file.getParentFile().getAbsolutePath() + "/"
                 + name + "." + documentID + extension;
         File newFile = new File(fileNameToSearch);
@@ -229,7 +229,7 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
   public void fireDocumentAdded(String documentID) {
     CompoundDocumentEvent cde = new CompoundDocumentEvent(this, documentID);
     for(int i = 0; i < listeners.size(); i++) {
-      CompoundDocumentListener cdl = (CompoundDocumentListener)listeners.get(i);
+      CompoundDocumentListener cdl = listeners.get(i);
       cdl.documentAdded(cde);
     }
   }
@@ -242,7 +242,7 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
   public void fireDocumentRemoved(String documentID) {
     CompoundDocumentEvent cde = new CompoundDocumentEvent(this, documentID);
     for(int i = 0; i < listeners.size(); i++) {
-      CompoundDocumentListener cdl = (CompoundDocumentListener)listeners.get(i);
+      CompoundDocumentListener cdl = listeners.get(i);
       cdl.documentRemoved(cde);
     }
   }

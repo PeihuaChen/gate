@@ -63,7 +63,7 @@ public interface CompoundDocument extends TextualDocument {
 	 * 
 	 * @return
 	 */
-	public Map getDocuments();
+	public Map<String,Document> getDocuments();
 
 	/**
 	 * The method should return all document IDs

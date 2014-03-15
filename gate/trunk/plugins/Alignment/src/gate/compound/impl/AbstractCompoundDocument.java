@@ -1,5 +1,6 @@
 package gate.compound.impl;
 
+import gate.Annotation;
 import gate.AnnotationSet;
 import gate.DataStore;
 import gate.Document;
@@ -381,7 +382,8 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
    * specified in the aSourceAnnotationSet. It is equivalent to
    * toXml(aSourceAnnotationSet, true).
    */
-  public String toXml(Set aSourceAnnotationSet) {
+  @Override
+  public String toXml(Set<Annotation> aSourceAnnotationSet) {
     if(currentDocument == null) {
       throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
     } else {
@@ -408,7 +410,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
    * @return a string representing an XML document containing the original
    *         markup + dumped annotations form the aSourceAnnotationSet
    */
-  public String toXml(Set aSourceAnnotationSet, boolean includeFeatures) {
+  public String toXml(Set<Annotation> aSourceAnnotationSet, boolean includeFeatures) {
     if(currentDocument == null) {
       throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
     } else {
@@ -544,7 +546,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   } // toString
 
   public void removeDocument(String documentID) {
-    Document doc = (Document)documents.get(documentID);
+    Document doc = documents.get(documentID);
     if(doc == null) return;
     Factory.deleteResource(doc);
   }
@@ -554,7 +556,8 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
       currentDocument.removeDocumentListener(l);
     } else {
       if(documentListeners != null && documentListeners.contains(l)) {
-        Vector v = (Vector)documentListeners.clone();
+        @SuppressWarnings("unchecked")
+        Vector<DocumentListener> v = (Vector<DocumentListener>)documentListeners.clone();
         v.removeElement(l);
         documentListeners = v;
       }
@@ -565,10 +568,11 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
     if(currentDocument != null) {
       currentDocument.addDocumentListener(l);
     } else {
-      Vector v =
+      @SuppressWarnings("unchecked")
+      Vector<DocumentListener> v =
           documentListeners == null
               ? new Vector<DocumentListener>(2)
-              : (Vector)documentListeners.clone();
+              : (Vector<DocumentListener>)documentListeners.clone();
       if(!v.contains(l)) {
         v.addElement(l);
         documentListeners = v;
@@ -592,11 +596,11 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   }
 
   private void deleteAllDocs() {
-    Set keys = documents.keySet();
-    Iterator iter = keys.iterator();
+    Set<String> keys = documents.keySet();
+    Iterator<String> iter = keys.iterator();
     while(iter.hasNext()) {
       Object key = iter.next();
-      Document doc = (Document)documents.get(key);
+      Document doc = documents.get(key);
       Factory.deleteResource(doc);
     }
   }
@@ -667,7 +671,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
     }
   }
 
-  public Map getDocuments() {
+  public Map<String,Document> getDocuments() {
     return documents;
   }
 

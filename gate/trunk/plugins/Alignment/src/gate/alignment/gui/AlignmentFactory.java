@@ -49,7 +49,6 @@ public class AlignmentFactory {
    *          sentences are already aligned)
    * @throws Exception
    */
-  @SuppressWarnings("unchecked")
   public AlignmentFactory(CompoundDocument alignedDocument,
           String srcDocumentId, String tgtDocumentId, String srcInputAS,
           String tgtInputAS, String srcTokenAnnotationType,

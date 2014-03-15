@@ -73,6 +73,7 @@ import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
 /**
  * This class provides an editor for aligning texts in a compound document.
  */
+@SuppressWarnings("serial")
 public class AlignmentEditor extends JFrame implements FeatureMapListener,
                                            DocumentListener {
 

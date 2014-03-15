@@ -81,7 +81,7 @@ public class CompositeDocumentImpl extends DocumentImpl implements
       if(annotNames != null && !annotNames.isEmpty()) {
         Iterator<String> iter = annotNames.iterator();
         while(iter.hasNext()) {
-          String asName = (String)iter.next();
+          String asName = iter.next();
           this.getAnnotations(asName).addAnnotationSetListener(this);
         }
       }
@@ -343,12 +343,12 @@ public class CompositeDocumentImpl extends DocumentImpl implements
           as = getAnnotations();
         }
         else {
-          Map ass = getNamedAnnotationSets();
+          Map<String,AnnotationSet> ass = getNamedAnnotationSets();
           if(ass == null) return;
-          Iterator namesIter = getNamedAnnotationSets().keySet().iterator();
+          Iterator<String> namesIter = getNamedAnnotationSets().keySet().iterator();
           while(namesIter.hasNext()) {
-            String name = (String)namesIter.next();
-            as = (AnnotationSet)getNamedAnnotationSets().get(name);
+            String name = namesIter.next();
+            as = getNamedAnnotationSets().get(name);
             if(as.contains(annot)) {
               break;
             }
@@ -368,8 +368,9 @@ public class CompositeDocumentImpl extends DocumentImpl implements
   }
 
   public void featureMapUpdated() {
-    Map<Object, List<List<Integer>>> matches =
-      (Map<Object, List<List<Integer>>>)this.getFeatures().get("MatchesAnnots");
+    @SuppressWarnings("unchecked")
+    Map<String, List<List<Integer>>> matches =
+      (Map<String, List<List<Integer>>>)this.getFeatures().get("MatchesAnnots");
     if(matches == null) return;
     for(List<List<Integer>> topList : matches.values()) {
       for(List<Integer> list : topList) {
@@ -393,11 +394,12 @@ public class CompositeDocumentImpl extends DocumentImpl implements
         }
         for(String docID : newList.keySet()) {
           Document aDoc = compoundDocument.getDocument(docID);
-          Map<Object, List<List<Integer>>> docMatches =
-            (Map<Object, List<List<Integer>>>)aDoc.getFeatures().get(
+          @SuppressWarnings("unchecked")
+          Map<String, List<List<Integer>>> docMatches =
+            (Map<String, List<List<Integer>>>)aDoc.getFeatures().get(
               "MatchesAnnots");
           if(docMatches == null) {
-            docMatches = new HashMap<Object, List<List<Integer>>>();
+            docMatches = new HashMap<String, List<List<Integer>>>();
             aDoc.getFeatures().put("MatchesAnnots", docMatches);
           }
 

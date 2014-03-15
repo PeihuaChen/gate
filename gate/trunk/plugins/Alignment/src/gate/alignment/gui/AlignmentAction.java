@@ -1,12 +1,10 @@
 package gate.alignment.gui;
 
-import java.util.Set;
 import gate.Annotation;
-import gate.Document;
-import gate.alignment.Alignment;
 import gate.alignment.AlignmentActionInitializationException;
 import gate.alignment.AlignmentException;
-import gate.compound.CompoundDocument;
+
+import java.util.Set;
 
 import javax.swing.Icon;
 

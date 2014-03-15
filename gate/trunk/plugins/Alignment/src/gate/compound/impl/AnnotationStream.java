@@ -48,7 +48,7 @@ public class AnnotationStream implements Serializable {
 	 *            annotations are sorted and returned in the specified order.
 	 */
 	public AnnotationStream(Document doc, String annotationSet,
-			String unitAnnotationType, String language, Comparator comparator) {
+			String unitAnnotationType, String language, Comparator<Annotation> comparator) {
 		this.doc = doc;
 		this.language = language;
 		this.annotationSet = annotationSet;

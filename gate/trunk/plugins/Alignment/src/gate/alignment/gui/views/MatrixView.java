@@ -32,6 +32,7 @@ import javax.swing.table.DefaultTableModel;
 /**
  * This class provides an editor for aligning texts in a compound document.
  */
+@SuppressWarnings("serial")
 public class MatrixView extends JPanel implements AlignmentListener,
                                       AlignmentView {
 
@@ -299,7 +300,7 @@ public class MatrixView extends JPanel implements AlignmentListener,
       super.fireTableDataChanged();
     }
 
-    public Class getColumnClass(int column) {
+    public Class<?> getColumnClass(int column) {
       return String.class;
     }
 

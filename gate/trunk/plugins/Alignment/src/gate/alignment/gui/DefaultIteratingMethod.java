@@ -33,6 +33,7 @@ import gate.util.OffsetComparator;
  * 
  * @author niraj
  */
+@SuppressWarnings("serial")
 public class DefaultIteratingMethod implements IteratingMethod {
 
   /**

@@ -1,7 +1,5 @@
 package gate.merger;
 
-import java.util.*;
-
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Factory;
@@ -11,11 +9,20 @@ import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.util.AnnotationMerging;
-//import gate.util.IaaCalculation;
 import gate.util.InvalidOffsetException;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.Vector;
+//import gate.util.IaaCalculation;
 
 public class AnnotationMergingMain extends AbstractLanguageAnalyser implements
                                                                    ProcessingResource {
+
+  private static final long serialVersionUID = -5149313306167125053L;
+
   /** Annotation sets for merging in one document. */
   private String annSetsForMerging;
 
