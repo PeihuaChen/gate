@@ -124,10 +124,8 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
       featuresList.loadFromFile(wdResults, ConstantParameters.FILENAME_TERMS, this.textCode);
       if(!featuresList.featuresList.containsKey(ConstantParameters.NONFEATURE)) {
         int size = featuresList.featuresList.size() + 1;
-        featuresList.featuresList.put(ConstantParameters.NONFEATURE,
-          new Integer(size));
-        featuresList.idfFeatures.put(ConstantParameters.NONFEATURE,
-          new Integer(1));
+        featuresList.featuresList.put(ConstantParameters.NONFEATURE,(long)size);
+        featuresList.idfFeatures.put(ConstantParameters.NONFEATURE,1L);
       }
 
       // read the label list
@@ -280,9 +278,9 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
               // +
               // "*");
               String labelC = null;
-              String iObj = new Integer(selectedLabels[j]+1).toString();
+              Integer iObj = new Integer(selectedLabels[j]+1);
               if(labelsAndId.id2Label.containsKey(iObj))
-                labelC = labelsAndId.id2Label.get(iObj).toString();
+                labelC = labelsAndId.id2Label.get(iObj);
 
               if(chs[j] == ConstantParameters.REPLACEMENT_Digit
                 || chs[j] == ConstantParameters.REPLACEMENT_Letter
