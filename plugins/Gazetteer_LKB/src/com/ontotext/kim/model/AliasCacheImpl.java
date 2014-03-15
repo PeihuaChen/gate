@@ -4,9 +4,24 @@ import gate.creole.ResourceInstantiationException;
 import gate.util.profile.Profiler;
 import gnu.trove.TIntHashSet;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.rmi.RemoteException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.Transformer;
 import org.apache.commons.io.FileUtils;
@@ -64,9 +79,9 @@ public class AliasCacheImpl implements AliasLookupDictionary {
    * aliases has been stored in the alias register. */
   protected HashRegister aliasInstRegister;
   /** Array used for encoding/decoding the instance URI's name-spaces */
-  protected ArrayList<String> instNS;
+  protected List<String> instNS;
   /** Array used for encoding/decoding the semantic class URIs */
-  protected ArrayList<String> classCache;
+  protected List<String> classCache;
   /** Additional register containing exactly appointed aliases, which
    * must be ignored on storing */
   protected HashRegister aliasToIgnore;
@@ -301,6 +316,7 @@ public class AliasCacheImpl implements AliasLookupDictionary {
     pro.checkPoint("cache loaded");
   }
 
+  @SuppressWarnings("unchecked")
   private boolean loadDictionaryFromCacheFile(File fileTCache,
           boolean flagTLoaded) {
     try {
@@ -310,8 +326,8 @@ public class AliasCacheImpl implements AliasLookupDictionary {
       ois.close();
       aliasRegister = (HashRegister) res[0];
       aliasPrefixes = (TIntHashSet) res[1];
-      instNS = (ArrayList<String>) res[2];
-      classCache = (ArrayList<String>) res[3];
+      instNS = (List<String>) res[2];
+      classCache = (List<String>) res[3];
 
 
       aliasInstRegister = new HashRegister();
@@ -388,9 +404,9 @@ public class AliasCacheImpl implements AliasLookupDictionary {
     public void endTableQueryResult() throws IOException {
       super.endTableQueryResult();
       if (existsClassPriority && allPrioritiesCompetition != null) {
-        Iterator it = allPrioritiesCompetition.keySet().iterator();
+        Iterator<String> it = allPrioritiesCompetition.keySet().iterator();
         while (it.hasNext()) {
-          ArrayList<priorityCompetition> pcList =
+          List<priorityCompetition> pcList =
             allPrioritiesCompetition.get(it.next());
           int maxPrior = pcList.get(0).maxPriority;
           int treshold = m_entPrior.getThreshold();
@@ -571,7 +587,7 @@ public class AliasCacheImpl implements AliasLookupDictionary {
    * @param alias - the label string of the alias
    * @return - array of matching HashedAlias instances 
    */
-  public ArrayList<KimLookupParser.AliasWrapper> lookup(String alias) {
+  public List<KimLookupParser.AliasWrapper> lookup(String alias) {
     ParsingFrame pfm = new ParsingFrame(alias);
     pfm.parseAll();
     return lookup(pfm, true);
@@ -580,10 +596,10 @@ public class AliasCacheImpl implements AliasLookupDictionary {
   public Collection<KimLookupParser.AliasWrapper> lookup(ParsingFrame pfm) {
     return lookup(pfm, false);
   }
-  private ArrayList<KimLookupParser.AliasWrapper> lookup(
+  private List<KimLookupParser.AliasWrapper> lookup(
           ParsingFrame pfm, boolean exactlySame) {
     Stats.markIt(-1);
-    ArrayList<KimLookupParser.AliasWrapper> res = new ArrayList<KimLookupParser.AliasWrapper>();
+    List<KimLookupParser.AliasWrapper> res = new ArrayList<KimLookupParser.AliasWrapper>();
 
     Object[] tmp = aliasRegister.get(pfm.getAliasHash1());
     Stats.markIt(5);
@@ -687,7 +703,7 @@ public class AliasCacheImpl implements AliasLookupDictionary {
     }
   }
 
-  protected HashMap<String, ArrayList<priorityCompetition>> allPrioritiesCompetition = new HashMap();
+  protected Map<String, List<priorityCompetition>> allPrioritiesCompetition = new HashMap<String,List<priorityCompetition>>();
   protected EntityPriority entPrior;
   protected boolean existsClassPriority = false;	
 
@@ -715,13 +731,13 @@ public class AliasCacheImpl implements AliasLookupDictionary {
       rejectedByPriority =
         entPrior.m_hClassPrio.containsKey(priorityClassName);
       if (rejectedByPriority) {
-        int mp = (Integer) entPrior.m_hClassPrio.get(priorityClassName);
+        int mp = entPrior.m_hClassPrio.get(priorityClassName);
         log.info("COMPETITION:" + "\t" + instURI
                 + "\t" + classURI + "\t" + alias + "\t" + mp);
         if (!allPrioritiesCompetition.containsKey(alias))
           allPrioritiesCompetition.put(alias,
                   new ArrayList<priorityCompetition>());
-        ArrayList<priorityCompetition> pcList =
+        List<priorityCompetition> pcList =
           allPrioritiesCompetition.get(alias);
         boolean foundLesser = false;
         for (int i = 0; i < pcList.size(); i++) {

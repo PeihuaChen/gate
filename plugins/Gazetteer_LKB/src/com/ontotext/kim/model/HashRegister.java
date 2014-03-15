@@ -80,7 +80,7 @@ public class HashRegister implements Serializable {
       byte elemCountChange = add12(element); 
       if (elemCountChange < 0) {
         if (element instanceof Comparable)
-          elemCountChange = addSorted((Comparable) element);
+          elemCountChange = addSorted((Comparable<?>) element);
         else
           elemCountChange = addUnsorted(element);
       }
@@ -117,7 +117,8 @@ public class HashRegister implements Serializable {
       return 1;
     }
 
-    private static final Comparator<Comparable> nsc = new NullComparator(true);
+    @SuppressWarnings("unchecked")
+    private static final Comparator<Comparable<?>> nsc = new NullComparator(true);
 
     /** Method adds new element to the container in sorted manner.
      * The method is called only if the container already have 2 
@@ -126,9 +127,9 @@ public class HashRegister implements Serializable {
      * @return number of elements stored: 1 - if stored successfully;
      * 0 - element already existed and no duplicates are allowed;
      */
-    private byte addSorted(Comparable element) {
-      Comparable[] newSubReg;
-      Comparable[] oldSubReg = ((Comparable[])elementHolder);
+    private byte addSorted(Comparable<?> element) {
+      Comparable<?>[] newSubReg;
+      Comparable<?>[] oldSubReg = ((Comparable[])elementHolder);
       int addPosition = Arrays.binarySearch( oldSubReg, element, nsc);
       if (addPosition >= 0) {
         return 0; // ignore the new one and retain the old one
@@ -180,8 +181,8 @@ public class HashRegister implements Serializable {
       Object[] newSubReg;
       if (element instanceof Comparable) {
         newSubReg = new Comparable[1 + subRegIncrement];
-        if (nsc.compare((Comparable) elementHolder,
-                (Comparable) element) < 0) {
+        if (nsc.compare((Comparable<?>) elementHolder,
+                (Comparable<?>) element) < 0) {
           newSubReg[0] = elementHolder;
           newSubReg[1] = element;
         }
@@ -219,8 +220,8 @@ public class HashRegister implements Serializable {
       if (element == null)
         return (elements == null);
       else if (element instanceof Comparable)
-        return Arrays.binarySearch( (Comparable[])elements,
-                (Comparable) element, nsc) >= 0;
+        return Arrays.binarySearch( (Comparable<?>[])elements,
+                (Comparable<?>) element, nsc) >= 0;
                 else
                   return Arrays.asList(elements).contains(element);
     }
@@ -234,8 +235,8 @@ public class HashRegister implements Serializable {
       int i = -1;
       if (element != null) {
         if (element instanceof Comparable)
-          i = Arrays.binarySearch( (Comparable[])elements,
-                  (Comparable) element, nsc);
+          i = Arrays.binarySearch( (Comparable<?>[])elements,
+                  (Comparable<?>) element, nsc);
         else
           i = Arrays.asList(elements).indexOf(element);
       }
@@ -262,7 +263,7 @@ public class HashRegister implements Serializable {
       }
       else {  // getPoint.elementHolder contains single object
         if (elementHolder instanceof Comparable)
-          return new Comparable[]{(Comparable) elementHolder};
+          return new Comparable[]{(Comparable<?>) elementHolder};
         else
           return new Object[]{elementHolder};
       }

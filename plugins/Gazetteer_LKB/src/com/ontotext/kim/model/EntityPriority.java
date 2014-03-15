@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 
 import com.ontotext.kim.KIMConstants;
@@ -21,9 +22,9 @@ public class EntityPriority implements KIMConstants {
     protected int m_nThreshold;
     protected boolean m_bFilterLookups;
 
-    protected HashMap m_hClassPrio;
-    protected HashMap m_hInstPrio;
-    protected HashMap m_hRules;
+    protected Map<String,Integer> m_hClassPrio;
+    protected Map<String,Integer> m_hInstPrio;
+    protected Map<String,Integer> m_hRules;
 
     /**
      * read the config file
@@ -31,9 +32,9 @@ public class EntityPriority implements KIMConstants {
      * @throws Exception
      */
     public EntityPriority() {
-        m_hClassPrio = new HashMap(50);
-        m_hInstPrio = new HashMap(50);
-        m_hRules = new HashMap(100);
+        m_hClassPrio = new HashMap<String,Integer>(50);
+        m_hInstPrio = new HashMap<String,Integer>(50);
+        m_hRules = new HashMap<String,Integer>(100);
 
         m_prop = new Properties();
     }
@@ -52,7 +53,7 @@ public class EntityPriority implements KIMConstants {
                         .getProperty("priority.filterLookups"));
 
         // init class and instance priority
-        for (Iterator iter = m_prop.keySet().iterator(); iter.hasNext();) {
+        for (Iterator<Object> iter = m_prop.keySet().iterator(); iter.hasNext();) {
             String item = (String) iter.next();
             if (item.startsWith(PRIORITY_CLASS_PREFIX))
                 addClassPriority(item);
@@ -94,17 +95,17 @@ public class EntityPriority implements KIMConstants {
     }
 
     public int getInstancePriority(String sInstanceURI) {
-        Integer prio = (Integer) m_hInstPrio.get(stripNameSpace(sInstanceURI));
+        Integer prio = m_hInstPrio.get(stripNameSpace(sInstanceURI));
         return prio == null ? m_nDefaultInstancePriority : prio.intValue();
     }
 
     public int getClassPriority(String sClassURI) {
-        Integer prio = (Integer) m_hClassPrio.get(stripNameSpace(sClassURI));
+        Integer prio = m_hClassPrio.get(stripNameSpace(sClassURI));
         return prio == null ? m_nDefaultInstancePriority : prio.intValue();
     }
 
     public int getPairDelta(String sClass1, String sClass2) {
-        Integer nDelta = (Integer) m_hRules.get(stripNameSpace(sClass1) + "_"
+        Integer nDelta = m_hRules.get(stripNameSpace(sClass1) + "_"
                 + stripNameSpace(sClass2));
         if (nDelta == null)
             return 0;

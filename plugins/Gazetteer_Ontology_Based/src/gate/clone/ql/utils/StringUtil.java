@@ -13,7 +13,6 @@ package gate.clone.ql.utils;
 
 import gate.clone.ql.CATConstants;
 import gate.creole.ontology.InvalidURIException;
-import gate.creole.ontology.URI;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,6 +39,7 @@ public class StringUtil {
    * @return a Map with a key taken from the first column of the table and a
    *         value being a set of values taken from the second column.
    */
+  @SuppressWarnings("deprecation")
   public static Map<String, Set<String>> fromStringToMap(String resultsTable) {
     Map<String, Set<String>> map = new HashMap<String, Set<String>>();
 
@@ -55,7 +55,8 @@ public class StringUtil {
         }
         classes.add(classUri);
         try {
-          URI uri = new URI(propertyUri, false);
+          @SuppressWarnings("unused")
+          gate.creole.ontology.URI uri = new gate.creole.ontology.URI(propertyUri, false);
           map.put(propertyUri, classes);
         }
         catch(InvalidURIException e) {
@@ -75,13 +76,15 @@ public class StringUtil {
    * @return a Set of Strings from the given table (string separated by new
    *         lines)
    */
+  @SuppressWarnings("deprecation")
   public static Set<String> fromStringToSet(String resultsTable) {
     Set<String> set = new HashSet<String>();
     String[] rows = resultsTable.split(CATConstants.NEW_LINE);
     for(String eachRow : rows) {
       String uri = eachRow.trim();
       try {
-        URI uriUri = new URI(uri, false);
+        @SuppressWarnings("unused")
+        gate.creole.ontology.URI uriUri = new gate.creole.ontology.URI(uri, false);
         set.add(uri);
       }
       catch(InvalidURIException e) {

@@ -15,7 +15,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Statement;
-import org.openrdf.model.impl.GraphImpl;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
@@ -50,13 +49,14 @@ public class Options {
    * @param dictionaryPath the dictionary path, not null
    * @return an Options instance, no null
    */
+  @SuppressWarnings("deprecation")
   public static Options load(File dictionaryPath) {    
     Map<String, String> opts = new HashMap<String, String>();
     Reader inp = null;
     try {
       inp = new FileReader(new File(dictionaryPath, getConfigFileName()));
       RDFParser parser = RDFParserRegistry.getInstance().get(RDFFormat.TURTLE).getParser();
-      Graph statements = new GraphImpl();
+      Graph statements = new org.openrdf.model.impl.GraphImpl();
       parser.setRDFHandler(new StatementCollector(statements));      
       parser.parse(inp, "http://www.ontotext.com/lkb_gazetteer#");
       Iterator<Statement> it = statements.match(new URIImpl("http://www.ontotext.com/lkb_gazetteer#DictionaryConfiguration"), null, null);

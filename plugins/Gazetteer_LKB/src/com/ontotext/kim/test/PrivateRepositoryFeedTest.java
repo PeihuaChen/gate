@@ -22,7 +22,8 @@ public class PrivateRepositoryFeedTest extends TestCase {
 		URL configReader = this.getClass().getClassLoader().getResource("config.ttl");
 		String query = IOUtils.toString(this.getClass().getClassLoader().getResourceAsStream("query.txt"));
 		int settingsHash = new SettingsHashBuilder().getHash(configReader, query);
-		PrivateRepositoryFeed feed = new PrivateRepositoryFeed(configReader, query, settingsHash, new Options(Collections.EMPTY_MAP, new File(".")));
+		@SuppressWarnings("unchecked")
+    PrivateRepositoryFeed feed = new PrivateRepositoryFeed(configReader, query, settingsHash, new Options(Collections.EMPTY_MAP, new File(".")));
 		QueryResultCounter counter = new QueryResultCounter();
 		feed.feedTo(counter);
 		assertEquals(100, counter.getCount());
@@ -33,7 +34,8 @@ public class PrivateRepositoryFeedTest extends TestCase {
 		URL configReader = configFile.toURI().toURL();
 		String query = FileUtils.readFileToString(new File(configFile.getParentFile(), "query.txt"));
 		int settingsHash = new SettingsHashBuilder().getHash(configReader, query);
-		PrivateRepositoryFeed feed = new PrivateRepositoryFeed(configReader, query, settingsHash, new Options(Collections.EMPTY_MAP, new File(".")));
+		@SuppressWarnings("unchecked")
+    PrivateRepositoryFeed feed = new PrivateRepositoryFeed(configReader, query, settingsHash, new Options(Collections.EMPTY_MAP, new File(".")));
 		QueryResultCounter counter = new QueryResultCounter();
 		feed.feedTo(counter);
 		assertEquals(327, counter.getCount());

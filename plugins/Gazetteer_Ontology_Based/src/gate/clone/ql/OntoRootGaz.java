@@ -30,7 +30,6 @@ import gate.creole.gazetteer.Lookup;
 import gate.creole.morph.Morph;
 import gate.creole.ontology.InvalidURIException;
 import gate.creole.ontology.Ontology;
-import gate.creole.ontology.URI;
 import gate.creole.tokeniser.DefaultTokeniser;
 import gate.util.OffsetComparator;
 
@@ -146,6 +145,8 @@ public class OntoRootGaz extends DefaultGazetteer {
     this.init();
   }
 
+  @Override
+  @SuppressWarnings("deprecation")
   public Resource init() throws ResourceInstantiationException {
     // list of namespaces to be ignored when creating gazetteer list
     List<String> nsToIgnore = new ArrayList<String>();
@@ -188,7 +189,7 @@ public class OntoRootGaz extends DefaultGazetteer {
       typesToConsider.add(CATConstants.TYPE_INSTANCE);
       typesToConsider.add(CATConstants.TYPE_PROPERTY);
     }
-    fsmStates = new HashSet();
+    fsmStates = new HashSet<FSMState>();
     initialState = new FSMState(this);
     /* set the hidden feature to true */
     FeatureMap features = Factory.newFeatureMap();
@@ -256,13 +257,13 @@ public class OntoRootGaz extends DefaultGazetteer {
               /* create uriURI for validation purposes */
               // URI uriUri = new URI(uri, false);
               // OURI uriUri = ontology.createOURI(uri);
-              URI uriUri = null;
+              gate.creole.ontology.URI uriUri = null;
               String classType = "";
               if(uri.startsWith("_")) {
-                uriUri = new URI(uri, true);
+                uriUri = new gate.creole.ontology.URI(uri, true);
                 classType = "bNode";
               } else {
-                uriUri = new URI(uri, false);
+                uriUri = new gate.creole.ontology.URI(uri, false);
                 classType =
                     new ArrayList<String>(Ontology2MapManager.getInstance()
                         .getOntology2Map().getInstanceTypes().get(uri)).get(0);
@@ -328,10 +329,10 @@ public class OntoRootGaz extends DefaultGazetteer {
             try {
               // URI uriUri = new URI(uri, false);
               // OURI uriUri = ontology.createOURI(uri);
-              URI uriUri = null;
+              gate.creole.ontology.URI uriUri = null;
               if(uri.startsWith("_"))
-                uriUri = new URI(uri, true);
-              else uriUri = new URI(uri, false);
+                uriUri = new gate.creole.ontology.URI(uri, true);
+              else uriUri = new gate.creole.ontology.URI(uri, false);
               String propUri = columns[1].trim();
               if((propertiesToIncludeList.size() == 0 || propertiesToIncludeList
                   .contains(propUri))
@@ -373,10 +374,10 @@ public class OntoRootGaz extends DefaultGazetteer {
             try {
               // URI uriUri = new URI(uri, false);
               // OURI uriUri = ontology.createOURI(uri);
-              URI uriUri = null;
+              gate.creole.ontology.URI uriUri = null;
               if(uri.startsWith("_"))
-                uriUri = new URI(uri, true);
-              else uriUri = new URI(uri, false);
+                uriUri = new gate.creole.ontology.URI(uri, true);
+              else uriUri = new gate.creole.ontology.URI(uri, false);
               String propUri = columns[1].trim();
               if((propertiesToIncludeList.size() == 0 || propertiesToIncludeList
                   .contains(propUri))
@@ -419,10 +420,10 @@ public class OntoRootGaz extends DefaultGazetteer {
           try {
             // URI uriUri = new URI(uri, false);
             // OURI uriUri = ontology.createOURI(uri);
-            URI uriUri = null;
+            gate.creole.ontology.URI uriUri = null;
             if(uri.startsWith("_"))
-              uriUri = new URI(uri, true);
-            else uriUri = new URI(uri, false);
+              uriUri = new gate.creole.ontology.URI(uri, true);
+            else uriUri = new gate.creole.ontology.URI(uri, false);
             String shortName = uriUri.getResourceName();
             if(!nsToIgnore.contains(uriUri.getNameSpace())) {
               Map<String, Object> lookupFeatures =
@@ -450,10 +451,10 @@ public class OntoRootGaz extends DefaultGazetteer {
           try {
             // URI uriUri = new URI(uri, false);
             // OURI uriUri = ontology.createOURI(uri);
-            URI uriUri = null;
+            gate.creole.ontology.URI uriUri = null;
             if(uri.startsWith("_"))
-              uriUri = new URI(uri, true);
-            else uriUri = new URI(uri, false);
+              uriUri = new gate.creole.ontology.URI(uri, true);
+            else uriUri = new gate.creole.ontology.URI(uri, false);
             String shortName = uriUri.getResourceName();
             if(!nsToIgnore.contains(uriUri.getNameSpace())) {
               Map<String, Object> lookupFeatures =
@@ -464,7 +465,7 @@ public class OntoRootGaz extends DefaultGazetteer {
               Set<String> l =
                   Ontology2MapManager.getInstance().getOntology2Map()
                       .getInstanceTypes().get(uri);
-              if(l == null) l = new HashSet();
+              if(l == null) l = new HashSet<String>();
               lookupFeatures.put(CATConstants.CLASS_URI_LIST, l);
               lookupFeatures.put(CATConstants.CLASS_URI, new ArrayList<String>(
                   l).get(0));
@@ -490,10 +491,10 @@ public class OntoRootGaz extends DefaultGazetteer {
           try {
             // URI uriUri = new URI(uri, false);
             // OURI uriUri = ontology.createOURI(uri);
-            URI uriUri = null;
+            gate.creole.ontology.URI uriUri = null;
             if(uri.startsWith("_"))
-              uriUri = new URI(uri, true);
-            else uriUri = new URI(uri, false);
+              uriUri = new gate.creole.ontology.URI(uri, true);
+            else uriUri = new gate.creole.ontology.URI(uri, false);
             String shortName = uriUri.getResourceName();
             if(!nsToIgnore.contains(uriUri.getNameSpace())) {
               Map<String, Object> lookupFeatures =
@@ -664,9 +665,9 @@ public class OntoRootGaz extends DefaultGazetteer {
         } catch(ExecutionException ee) {
           throw new ResourceInstantiationException(ee);
         }
-        Iterator it = applicationCorpus.iterator();
+        Iterator<Document> it = applicationCorpus.iterator();
         while(it.hasNext()) {
-          Document doc = (Document)it.next();
+          Document doc = it.next();
           Set<String> tokenTypes = new HashSet<String>();
           tokenTypes.add(ANNIEConstants.TOKEN_ANNOTATION_TYPE);
           tokenTypes.add(ANNIEConstants.SPACE_TOKEN_ANNOTATION_TYPE);

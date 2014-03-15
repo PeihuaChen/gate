@@ -8,8 +8,8 @@ import gate.creole.gazetteer.LinearNode;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -70,8 +70,7 @@ public class GazetteerListFeed implements Feed {
   private void loadDefinitions(QueryResultListener listener)
           throws ResourceInstantiationException, IOException {
 
-    @SuppressWarnings("unchecked")
-    List<File> definitionPaths = (List<File>)FileUtils.listFiles(dictionaryPath,
+    Collection<File> definitionPaths = FileUtils.listFiles(dictionaryPath,
             new WildcardFileFilter(DEF_EXTENSION), null);
     for(File definitionPath : definitionPaths) {
 

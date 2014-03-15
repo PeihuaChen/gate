@@ -11,6 +11,7 @@
 	<property name="jar.location" location="GENIA.jar" />
 	<property name="doc.dir" location="doc" />
 	<property name="javadoc.dir" location="${doc.dir}/javadoc" />
+	<property name="gate.compile.maxwarnings" value="10000" />
 
 	<!-- Path to compile - includes gate.jar and GATE/lib/*.jar -->
 	<path id="compile.classpath">
@@ -28,7 +29,11 @@
 
 	<!-- compile the source -->
 	<target name="compile" depends="prepare">
-		<javac classpathref="compile.classpath" srcdir="${src.dir}" destdir="${classes.dir}" debug="true" debuglevel="lines,source" encoding="UTF-8" source="1.5" target="1.5" />
+		<javac classpathref="compile.classpath" srcdir="${src.dir}" destdir="${classes.dir}" debug="true" debuglevel="lines,source" encoding="UTF-8" source="1.6" target="1.6">
+			<compilerarg value="-Xmaxwarns" />
+			<compilerarg value="${gate.compile.maxwarnings}" />
+			<compilerarg value="-Xlint:all" />
+		</javac>
 	</target>
 
 	<target name="resources" depends="prepare">

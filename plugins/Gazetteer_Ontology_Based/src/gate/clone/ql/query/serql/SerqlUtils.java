@@ -11,19 +11,15 @@
  */
 package gate.clone.ql.query.serql;
 
-import java.io.IOException;
+import gate.clone.ql.CATConstants;
+import gate.creole.ontology.GateOntologyException;
+import gate.creole.ontology.OConstants.OWL;
+import gate.creole.ontology.OConstants.RDF;
+import gate.creole.ontology.OConstants.RDFS;
+import gate.creole.ontology.Ontology;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import gate.clone.ql.CATConstants;
-import gate.creole.ontology.GateOntologyException;
-import gate.creole.ontology.OConstants.QueryLanguage;
-import gate.creole.ontology.Ontology;
-import gate.creole.ontology.OntologyTupleQuery;
-import gate.creole.ontology.OConstants.RDF;
-import gate.creole.ontology.OConstants.RDFS;
-import gate.creole.ontology.OConstants.OWL;
 //import org.openrdf.model.vocabulary.OWL;
 //import org.openrdf.model.vocabulary.RDF;
 //import org.openrdf.model.vocabulary.RDFS;
@@ -36,6 +32,7 @@ import gate.creole.ontology.OConstants.OWL;
  * @author Danica Damljanovic
  * 
  */
+@SuppressWarnings("deprecation")
 public class SerqlUtils {
 
   // public static Ontology ontology;
@@ -223,10 +220,12 @@ public class SerqlUtils {
         + "     {p} rdf:type {<" + OWL.OBJECTPROPERTY + ">} " + "where y in ("
         + domainClasses + ") and x in (" + domainClasses + ")  and x!=y";
 
+    @SuppressWarnings("unused")
     String domainAddition =
       " select distinct p, x" + " from {p} rdfs:domain {x}" + " where x=<"
         + firstUri + "> ";
 
+    @SuppressWarnings("unused")
     String rangeAddition =
       " select distinct p, x" + " from {p} rdfs:range {x}" + " where x=<"
         + secondUri + "> ";

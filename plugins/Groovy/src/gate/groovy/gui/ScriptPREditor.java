@@ -46,6 +46,8 @@ public class ScriptPREditor extends AbstractVisualResource implements
                                                           ProgressListener,
                                                           DocumentListener {
 
+  private static final long serialVersionUID = -3397858340190887863L;
+
   private ConsoleTextEditor editor;
 
   private ScriptPR pr;

@@ -47,8 +47,8 @@ public class GateGroovyMethods {
    * @param closure the closure to call
    * @return a list of the return values from each closure call.
    */
-  public static List collect(Corpus self, Closure closure) {
-    return (List)collect(self, new ArrayList(), closure);
+  public static <T> List<T> collect(Corpus self, Closure<T> closure) {
+    return (List<T>)collect(self, new ArrayList<T>(), closure);
   }
   
   /**
@@ -61,11 +61,11 @@ public class GateGroovyMethods {
    * @param closure the closure to call
    * @return a list of the return values from each closure call.
    */
-  public static Collection collect(Corpus self, Collection coll,
-          Closure closure) {
+  public static <T> Collection<T> collect(Corpus self, Collection<T> coll,
+          Closure<T> closure) {
     for(int i = 0; i < self.size(); i++) {
       boolean docWasLoaded = self.isDocumentLoaded(i);
-      Document doc = (Document)self.get(i);
+      Document doc = self.get(i);
       coll.add(closure.call(doc));
       if(!docWasLoaded) {
         self.unloadDocument(doc);
@@ -85,10 +85,10 @@ public class GateGroovyMethods {
    * @param closure the closure to call
    * @return the corpus.
    */
-  public static Object each(Corpus self, Closure closure) {
+  public static <T> Object each(Corpus self, Closure<T> closure) {
     for(int i = 0; i < self.size(); i++) {
       boolean docWasLoaded = self.isDocumentLoaded(i);
-      Document doc = (Document)self.get(i);
+      Document doc = self.get(i);
       closure.call(doc);
       if(!docWasLoaded) {
         self.unloadDocument(doc);
@@ -108,10 +108,10 @@ public class GateGroovyMethods {
    * @param closure the closure to call
    * @return the corpus.
    */
-  public static Object eachWithIndex(Corpus self, Closure closure) {
+  public static <T> Object eachWithIndex(Corpus self, Closure<T> closure) {
     for(int i = 0; i < self.size(); i++) {
       boolean docWasLoaded = self.isDocumentLoaded(i);
-      Document doc = (Document)self.get(i);
+      Document doc = self.get(i);
       closure.call(new Object[] {doc, i});
       if(!docWasLoaded) {
         self.unloadDocument(doc);
@@ -129,7 +129,8 @@ public class GateGroovyMethods {
    * (as start and end return Long).
    * @see AnnotationSet#getContained(Long, Long)
    */
-  public static AnnotationSet getAt(AnnotationSet self, Range range) {
+  @SuppressWarnings("unchecked")
+  public static AnnotationSet getAt(AnnotationSet self, Range<?> range) {
     if(range.getFrom() instanceof Number) {
       return self.getContained(
               Long.valueOf(((Number)range.getFrom()).longValue()),
@@ -154,7 +155,7 @@ public class GateGroovyMethods {
    * @param range
    * @return
    */
-  public static DocumentContent getAt(DocumentContent self, Range range) {
+  public static DocumentContent getAt(DocumentContent self, Range<?> range) {
     if(range.getFrom() instanceof Number) {
       try {
         return self.getContent(
@@ -203,7 +204,7 @@ public class GateGroovyMethods {
    * @param closure
    * @return the value returned from the closure
    */
-  public static Object withResource(Resource self, Closure closure) {
+  public static <T> T withResource(Resource self, Closure<T> closure) {
     try {
       return closure.call(self);
     }
