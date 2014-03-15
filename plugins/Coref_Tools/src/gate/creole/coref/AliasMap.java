@@ -18,7 +18,6 @@ package gate.creole.coref;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;

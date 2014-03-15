@@ -15,13 +15,12 @@
  */
 package gate.creole.coref.taggers;
 
-import java.util.Collections;
-import java.util.Set;
-
 import gate.Annotation;
 import gate.Utils;
 import gate.creole.coref.CorefBase;
-import gate.creole.coref.Tagger;
+
+import java.util.Collections;
+import java.util.Set;
 
 /**
  *

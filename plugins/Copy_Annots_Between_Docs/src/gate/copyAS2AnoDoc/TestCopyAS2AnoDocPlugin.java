@@ -103,7 +103,7 @@ public class TestCopyAS2AnoDocPlugin extends TestCase {
     
     controller.execute();
     
-    Document doc = (Document)corpus.get(1);
+    Document doc = corpus.get(1);
     AnnotationSet anns = doc.getAnnotations("ann5").get("Os");
     int num;
     num = anns.size();
@@ -114,7 +114,7 @@ public class TestCopyAS2AnoDocPlugin extends TestCase {
     assertEquals(num, 18);
     doc.removeAnnotationSet("ann5");
     
-    doc = (Document)corpus.get(0);
+    doc = corpus.get(0);
     doc.removeAnnotationSet("ann5");
     
     System.out.println("completed");

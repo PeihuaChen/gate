@@ -15,11 +15,8 @@
  */
 package gate.creole.coref.matchers;
 
-import java.util.List;
-
 import gate.Annotation;
 import gate.creole.coref.CorefBase;
-import gate.creole.coref.Matcher;
 
 /**
  *

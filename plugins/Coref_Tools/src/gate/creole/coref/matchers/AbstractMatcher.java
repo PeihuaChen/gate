@@ -15,7 +15,6 @@
  */
 package gate.creole.coref.matchers;
 
-import gate.Annotation;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.coref.CorefBase;
 import gate.creole.coref.Matcher;

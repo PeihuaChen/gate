@@ -18,7 +18,6 @@ package gate.creole.coref;
 import gate.Annotation;
 import gate.creole.ResourceInstantiationException;
 
-import java.util.List;
 import java.util.Set;
 
 public interface Tagger {

@@ -75,6 +75,7 @@ public class LegacyCorefDataWriter extends AbstractLanguageAnalyser {
   /* (non-Javadoc)
    * @see gate.creole.AbstractProcessingResource#execute()
    */
+  @SuppressWarnings("unchecked")
   @Override
   public void execute() throws ExecutionException {
     fireStatusChanged("Generating legacy co-reference data for " + 
@@ -92,7 +93,7 @@ public class LegacyCorefDataWriter extends AbstractLanguageAnalyser {
     if(document.getFeatures().containsKey(DOCUMENT_COREF_FEATURE_NAME)){
       Object oldMap = document.getFeatures().get(DOCUMENT_COREF_FEATURE_NAME);
       if(Map.class.isAssignableFrom(oldMap.getClass())) {
-        docCorefMap = (Map)oldMap;
+        docCorefMap = (Map<String,List<List<Integer>>>)oldMap;
       } else {
         log.warn("Old value for \"" + DOCUMENT_COREF_FEATURE_NAME +
           "\" document feature was invalid and has been deleted");

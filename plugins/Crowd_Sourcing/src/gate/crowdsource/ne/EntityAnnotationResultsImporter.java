@@ -45,6 +45,8 @@ public class EntityAnnotationResultsImporter
                                                 extends
                                                   AbstractLanguageAnalyser {
 
+  private static final long serialVersionUID = 3424823295729835240L;
+
   private static final Logger log = Logger
           .getLogger(EntityAnnotationResultsImporter.class);
 
