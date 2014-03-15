@@ -15,22 +15,43 @@
  
 package gate.creole.kea;
 
-import java.io.*;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import kea.KEAFilter;
-import weka.core.*;
-import gate.*;
-import gate.creole.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Factory;
+import gate.Resource;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
 import gate.gui.ActionsPublisher;
 import gate.gui.MainFrame;
 import gate.util.Err;
 import gate.util.InvalidOffsetException;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
+import javax.swing.Action;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
+import kea.KEAFilter;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
 
 /**
  * This is wrapper for using the KEA Keyphrase extractor
@@ -45,7 +66,10 @@ import gate.util.InvalidOffsetException;
  *  of extracting keyphrases.
  * </UL>
  */
+@SuppressWarnings("serial")
 public class Kea extends AbstractLanguageAnalyser implements ActionsPublisher{
+
+  private static final long serialVersionUID = 8297240873486868105L;
 
   /**
    * Anonymous constructor, required by GATE. Does nothing.
@@ -58,7 +82,7 @@ public class Kea extends AbstractLanguageAnalyser implements ActionsPublisher{
    * Save model.
    * @return
    */
-  public List getActions() {
+  public List<Action> getActions() {
     return actions;
   }
 
@@ -90,7 +114,7 @@ public class Kea extends AbstractLanguageAnalyser implements ActionsPublisher{
     //generate the first attribute: the text
     //this will be used for both training and application modes.
     double[] newInst = new double[2];
-    newInst[0] = (double)data.attribute(0).addStringValue(text);
+    newInst[0] = data.attribute(0).addStringValue(text);
 
     if(trainingMode.booleanValue()){
       //training mode -> we need to collect the keyphrases
@@ -102,14 +126,14 @@ public class Kea extends AbstractLanguageAnalyser implements ActionsPublisher{
       AnnotationSet kpSet = annSet.get(keyphraseAnnotationType);
       if(kpSet != null && kpSet.size() > 0){
         //use a set to avoid repetitions
-        Set keyPhrases = new HashSet();
+        Set<String> keyPhrases = new HashSet<String>();
 
-        Iterator keyPhraseIter = kpSet.iterator();
+        Iterator<Annotation> keyPhraseIter = kpSet.iterator();
         //initialise the string for the second attribute
         String keyPhrasesStr = "";
         while(keyPhraseIter.hasNext()){
           //get one keyphrase annotation
-          Annotation aKeyPhrase = (Annotation)keyPhraseIter.next();
+          Annotation aKeyPhrase = keyPhraseIter.next();
           try{
             //get the string for the keyphrase annotation
             String keyPhraseStr = document.getContent().
@@ -127,7 +151,7 @@ public class Kea extends AbstractLanguageAnalyser implements ActionsPublisher{
           }
         }
         //all the keyphrases have been enumerated -> create the second attribute
-        newInst[1] = (double)data.attribute(1).addStringValue(keyPhrasesStr);
+        newInst[1] = data.attribute(1).addStringValue(keyPhrasesStr);
       }else{
         //no keyphrase annotations
         newInst[1] = Instance.missingValue();
@@ -165,7 +189,7 @@ public class Kea extends AbstractLanguageAnalyser implements ActionsPublisher{
       }
       //annotate the document with the results -> create a list with all the
       //keyphrases found by KEA
-      List phrases = new ArrayList();
+      List<String> phrases = new ArrayList<String>();
       for(int i = 0; i < topRankedInstances.length; i ++){
         if(topRankedInstances[i] != null){
           phrases.add(topRankedInstances[i].
@@ -187,13 +211,13 @@ public class Kea extends AbstractLanguageAnalyser implements ActionsPublisher{
    * @param phrases the list of keyphrases.
    * @throws Exception
    */
-  protected void annotateKeyPhrases(List phrases) throws Exception{
+  protected void annotateKeyPhrases(List<String> phrases) throws Exception{
     if(phrases == null || phrases.isEmpty()) return;
     //create a pattern
     String patternStr = "";
-    Iterator phraseIter = phrases.iterator();
+    Iterator<String> phraseIter = phrases.iterator();
     while(phraseIter.hasNext()){
-      String phrase = (String)phraseIter.next();
+      String phrase = phraseIter.next();
       patternStr += patternStr.length() == 0 ?
                  "\\Q" + phrase + "\\E" :
                  "|\\Q" + phrase + "\\E";
@@ -399,7 +423,7 @@ public class Kea extends AbstractLanguageAnalyser implements ActionsPublisher{
     }catch(Exception e){
       throw new ResourceInstantiationException(e);
     }
-    actions = new ArrayList();
+    actions = new ArrayList<Action>();
     actions.add(new SaveModelAction());
     actions.add(new LoadModelAction());
     return this;
@@ -438,6 +462,7 @@ public class Kea extends AbstractLanguageAnalyser implements ActionsPublisher{
       throw new ExecutionException(e);
     }
     // Get rid of instances in filter
+    @SuppressWarnings("unused")
     Instance dummy;
     while ((dummy = keaFilter.output()) != null) {};
     trainingFinished = true;
@@ -572,5 +597,5 @@ public class Kea extends AbstractLanguageAnalyser implements ActionsPublisher{
   /**
    * The list of GUI actions available from this PR on popup menus.
    */
-  protected List actions;
+  protected List<Action> actions;
 }

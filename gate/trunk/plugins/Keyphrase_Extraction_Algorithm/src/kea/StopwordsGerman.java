@@ -33,6 +33,7 @@ import java.util.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version 1.0
  */
+@SuppressWarnings({"serial","rawtypes","unchecked"})
 public class StopwordsGerman extends Stopwords {
   
   /** The hashtable containing the list of stopwords */

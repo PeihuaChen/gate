@@ -19,8 +19,8 @@
 package kea;
 
 
-import java.util.*;
-import java.io.*;
+import java.io.Serializable;
+import java.util.HashMap;
 
 /** 
  * Implements the Lovins stemmer.
@@ -28,6 +28,7 @@ import java.io.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version 1.0
  */
+@SuppressWarnings({"serial","rawtypes","unchecked","cast"})
 public class LovinsStemmer extends Stemmer implements Serializable {
 
   /** C version compatibility mode (emulates bugs

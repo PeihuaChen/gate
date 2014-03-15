@@ -19,8 +19,7 @@
 
 package kea;
 
-import java.util.*;
-import java.io.*;
+import java.io.Serializable;
 
 /**
  * Class that can test whether a given string is a stop word.
@@ -29,6 +28,7 @@ import java.io.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version 1.0
  */
+@SuppressWarnings("serial")
 public abstract class Stopwords implements Serializable {
   
   /** 

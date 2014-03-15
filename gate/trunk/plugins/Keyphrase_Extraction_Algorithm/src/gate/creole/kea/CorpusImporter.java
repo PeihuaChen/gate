@@ -15,15 +15,14 @@
 
 package gate.creole.kea;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.io.*;
-import java.util.*;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.swing.*;
-import gate.*;
+import gate.AnnotationSet;
+import gate.Corpus;
+import gate.Document;
+import gate.Executable;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.Resource;
 import gate.creole.AbstractVisualResource;
 import gate.creole.ExecutionException;
 import gate.gui.MainFrame;
@@ -31,12 +30,43 @@ import gate.util.BomStrippingInputStreamReader;
 import gate.util.Err;
 import gate.util.ExtensionFileFilter;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import org.apache.commons.io.IOUtils;
+
 /**
  * A simple utility to import KEA style corpora into GATE.
  * It is registered as a GATE viewer for the KEA Processing Resource and it is
  * available from the main pane.
  */
+@SuppressWarnings("serial")
 public class CorpusImporter extends AbstractVisualResource {
+
+  private static final long serialVersionUID = 5318018411995211792L;
+
   public CorpusImporter() {
   }
   /**
@@ -220,10 +250,11 @@ public class CorpusImporter extends AbstractVisualResource {
                   String fileName = textFiles[i].getCanonicalPath();
                   int pos = fileName.lastIndexOf(textExt);
                   fileName = fileName.substring(0, pos) + keyExt;
-                  List keys = new ArrayList();
+                  List<String> keys = new ArrayList<String>();
                   Exception e = null;
+                  BufferedReader reader = null;
                   try{
-                    BufferedReader reader;
+                    
                     if(encoding != null && encoding.length() > 0){
                       reader = new BomStrippingInputStreamReader(
                                  new FileInputStream(fileName), encoding);
@@ -238,6 +269,9 @@ public class CorpusImporter extends AbstractVisualResource {
                     }
                   }catch(IOException ioe){
                     e = ioe;
+                  }
+                  finally {
+                    IOUtils.closeQuietly(reader);
                   }
                   if(keys.isEmpty() || e != null){
                     MainFrame.unlockGUI();
@@ -360,13 +394,13 @@ public class CorpusImporter extends AbstractVisualResource {
   protected boolean annotateKeyPhrases(Document document,
                                     String annSetName,
                                     String keyphraseAnnotationType,
-                                    List phrases) throws Exception{
+                                    List<String> phrases) throws Exception{
     if(phrases == null || phrases.isEmpty()) return false;
     //create a pattern
     String patternStr = "";
-    Iterator phraseIter = phrases.iterator();
+    Iterator<String> phraseIter = phrases.iterator();
     while(phraseIter.hasNext()){
-      String phrase = (String)phraseIter.next();
+      String phrase = phraseIter.next();
       patternStr += patternStr.length() == 0 ?
                  "\\Q" + phrase + "\\E" :
                  "|\\Q" + phrase + "\\E";

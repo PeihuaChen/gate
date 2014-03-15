@@ -27,6 +27,7 @@ import java.io.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version 1.0
  */
+@SuppressWarnings("serial")
 public class Counter implements Serializable {
   
   /** Integer value stored */

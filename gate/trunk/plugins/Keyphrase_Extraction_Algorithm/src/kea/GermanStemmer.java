@@ -65,6 +65,7 @@ package kea;
  * @author    Gerhard Schwarz
  * @version   $Id: GermanStemmer.java,v 1.3 2005/02/03 12:52:20 valyt Exp $
  */
+@SuppressWarnings("serial")
 public class GermanStemmer extends Stemmer
 {
     /**

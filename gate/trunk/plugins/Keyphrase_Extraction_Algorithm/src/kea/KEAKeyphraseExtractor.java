@@ -62,6 +62,7 @@ import weka.core.Option;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version 1.0
  */
+@SuppressWarnings({"rawtypes","unchecked","cast","resource"})
 public class KEAKeyphraseExtractor implements OptionHandler {
 
   /** Name of directory */

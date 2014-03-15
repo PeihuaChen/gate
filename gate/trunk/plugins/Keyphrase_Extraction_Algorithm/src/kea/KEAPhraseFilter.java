@@ -19,10 +19,16 @@
 package kea;
 
 
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Vector;
 
-import weka.core.*;
-import weka.filters.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.Utils;
+import weka.filters.Filter;
 
 /**
  * This filter splits the text in selected string
@@ -56,6 +62,7 @@ import weka.filters.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version 1.0
  */
+@SuppressWarnings({"serial","rawtypes","unchecked","cast"})
 public class KEAPhraseFilter extends Filter implements OptionHandler {
 
   /** Stores which columns to select as a funky range */
