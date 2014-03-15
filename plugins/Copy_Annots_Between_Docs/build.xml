@@ -57,6 +57,7 @@
 
 	<property name="gate.jar" location="${gate.home}/bin/gate.jar" />
 	<property name="gate.lib.dir" location="${gate.home}/lib" />
+	<property name="gate.compile.maxwarnings" value="10000" />
 
 	<fileset id="gate.libs" dir="${gate.lib.dir}">
 		<include name="*.jar" />

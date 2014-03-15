@@ -23,6 +23,7 @@
 	<property name="jar.location" location="dev_tools.jar" />
 	<property name="doc.dir" location="doc" />
 	<property name="javadoc.dir" location="${doc.dir}/javadoc" />
+	<property name="gate.compile.maxwarnings" value="10000" />
 
 	<!-- Path to compile - includes gate.jar and GATE/lib/*.jar -->
 	<path id="compile.classpath">
