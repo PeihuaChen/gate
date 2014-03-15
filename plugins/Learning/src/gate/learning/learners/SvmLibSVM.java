@@ -7,15 +7,15 @@
  */
 package gate.learning.learners;
 
-import gate.learning.LabelsOfFV;
 import gate.learning.LogService;
 import gate.learning.SparseFeatureVector;
 import gate.learning.UsefulFunctions;
 import gate.learning.learners.svm.svm;
+import gate.learning.learners.svm.svm.decision_function;
 import gate.learning.learners.svm.svm_node;
 import gate.learning.learners.svm.svm_parameter;
 import gate.learning.learners.svm.svm_problem;
-import gate.learning.learners.svm.svm.decision_function;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -177,8 +177,8 @@ public class SvmLibSVM extends SupervisedLearner {
         if(instDist[0] > 0 && instDist[1] / instDist[0] > 10) b += optB;
         if(instDist[1] > 0 && instDist[0] / instDist[1] > 10) b -= optB;
       }
-      int numSV;
-      numSV = new Integer(modelFile.readLine()).intValue();
+      
+      int numSV = new Integer(modelFile.readLine());
       SparseFeatureVector[] svFVs = new SparseFeatureVector[numSV];
       double[] alphas = new double[numSV];
       for(int i = 0; i < numSV; ++i) {
@@ -227,8 +227,8 @@ public class SvmLibSVM extends SupervisedLearner {
     svFVs[i] = new SparseFeatureVector(len);
     for(int j = 0; j < len; ++j) {
       String[] indexValue = items[j+1].split(":");
-      svFVs[i].nodes[j].index = new Integer(indexValue[0]).intValue();
-      svFVs[i].nodes[j].value = new Float(indexValue[1]).floatValue();
+      svFVs[i].nodes[j].index = new Integer(indexValue[0]);
+      svFVs[i].nodes[j].value = new Float(indexValue[1]);
     }
     return alpha;
   }
@@ -331,13 +331,13 @@ public class SvmLibSVM extends SupervisedLearner {
     int num;
     String[] lineItems;
     lineItems = modelFile.readLine().split(" ");
-    num = new Integer(lineItems[0]).intValue();
+    num = new Integer(lineItems[0]);
     int index;
     float value;
     for(int i = 0; i < num; ++i) {
       lineItems = modelFile.readLine().split(" ");
-      index = new Integer(lineItems[0]).intValue();
-      value = new Float(lineItems[1]).floatValue();
+      index = new Integer(lineItems[0]);
+      value = new Float(lineItems[1]);
       w[index] = value;
     }
     return b;

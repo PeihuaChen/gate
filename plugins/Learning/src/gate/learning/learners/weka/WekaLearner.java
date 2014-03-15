@@ -19,6 +19,9 @@ import weka.core.Instances;
  * learners.  
  */
 public abstract class WekaLearner implements Serializable {
+
+  private static final long serialVersionUID = -3601046262665415307L;
+
   /** The name of learner. */
   String learnerName = null;
   /** The weka classifier. */

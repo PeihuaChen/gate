@@ -7,25 +7,6 @@
  */
 package gate.learning.learners.weka;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.SparseInstance;
 import gate.learning.ConstantParameters;
 import gate.learning.LabelsOfFV;
 import gate.learning.LabelsOfFeatureVectorDoc;
@@ -33,6 +14,28 @@ import gate.learning.NLPFeaturesList;
 import gate.learning.SparseFeatureVector;
 import gate.learning.learners.MultiClassLearning;
 import gate.util.BomStrippingInputStreamReader;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SparseInstance;
 
 /**
  * The interface between the Weka learner and the data defined in the ML Api,
@@ -185,10 +188,10 @@ public class WekaLearning {
       // Get the number of attributes in the data
       String[] items = inData.readLine()
         .split(ConstantParameters.ITEMSEPARATOR);
-      HashMap metaFeats = new HashMap();
+      Map<String,Set<String>> metaFeats = new HashMap<String,Set<String>>();
       int numFeats = 0;
       // Create an attribute for each meta feature
-      HashMap entityToPosition = new HashMap();
+      Map<String,String> entityToPosition = new HashMap<String,String>();
       String entityTerm = "";
       int numEntity = 0;
       // Not include the class attribute
@@ -196,7 +199,7 @@ public class WekaLearning {
         // Assume the name of NGRAM should end with "gram"!!
         if(!items[i].endsWith("gram")) {
           if(!metaFeats.containsKey(items[i])) {
-            metaFeats.put(items[i], new HashSet());
+            metaFeats.put(items[i], new HashSet<String>());
             ++numFeats; // counted as a new attribute
           }
           String feat = items[i].substring(0, items[i].lastIndexOf("("));
@@ -207,15 +210,15 @@ public class WekaLearning {
           } else ++numEntity;
           entityToPosition.put(feat + "_" + numEntity, featNum);
           if(!metaFeats.containsKey(feat)) {
-            metaFeats.put(feat, new HashSet());
+            metaFeats.put(feat, new HashSet<String>());
             // just for collect the terms
           }
         }
       }
-      List allTerms = new ArrayList(nlpFeatList.featuresList.keySet());
+      List<String> allTerms = new ArrayList<String>(nlpFeatList.featuresList.keySet());
       Collections.sort(allTerms);
       for(int i = 0; i < allTerms.size(); ++i) {
-        String feat = allTerms.get(i).toString();
+        String feat = allTerms.get(i);
         if(isNgramFeat(feat)) {
           ++numFeats;
         } else {
@@ -224,26 +227,26 @@ public class WekaLearning {
           String feat1 = feat.substring(0, feat.indexOf("_"));
           // Term itself
           String feat2 = feat.substring(feat.indexOf("_") + 1);
-          ((HashSet)metaFeats.get(feat1)).add(feat2);
+          metaFeats.get(feat1).add(feat2);
         }
       }
       numFeats += 1; // include the class feature
       // Create the attributes.
-      HashMap featToAttr = new HashMap(); // feat to attribute index
+      Map<String,Integer> featToAttr = new HashMap<String,Integer>(); // feat to attribute index
       FastVector attributes = new FastVector(numFeats);
       // First for the meta feature attribute.
-      List metaFeatTerms = new ArrayList(metaFeats.keySet());
+      List<String> metaFeatTerms = new ArrayList<String>(metaFeats.keySet());
       int numMetaFeats = 0;
       for(int i = 0; i < metaFeatTerms.size(); ++i) {
         String featName = metaFeatTerms.get(i).toString();
         if(featName.endsWith(")")) {
           String featName0 = featName.substring(0, featName.lastIndexOf("("));
-          HashSet metaF = (HashSet)metaFeats.get(featName0);
+          Set<String> metaF = metaFeats.get(featName0);
           FastVector featFV = new FastVector(metaF.size());
           for(Object obj : metaF)
             featFV.addElement(obj.toString());
           attributes.addElement(new Attribute(featName, featFV));
-          featToAttr.put(featName, new Integer(numMetaFeats));
+          featToAttr.put(featName, numMetaFeats);
           ++numMetaFeats;
         }
       }
@@ -254,7 +257,7 @@ public class WekaLearning {
           FastVector featFV = new FastVector(1);
           featFV.addElement(feat);
           attributes.addElement(new Attribute(feat, featFV));// Nominal form
-          featToAttr.put(feat, new Integer(i + numMetaFeats));
+          featToAttr.put(feat, i + numMetaFeats);
         }
       }
       // Add class attribute.

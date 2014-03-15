@@ -21,8 +21,10 @@ import java.io.IOException;
 
 public class PaumForExec extends SupervisedLearner {
   /** The positive margin parameter. */
+  @SuppressWarnings("unused")
   private float tauP = 5;
   /** The negative margin parameter. */
+  @SuppressWarnings("unused")
   private float tauN = 1;
   /** The modification for the threshold. */
   private float optB = 0;
@@ -31,8 +33,10 @@ public class PaumForExec extends SupervisedLearner {
   /** The model file for svm learning. */
   private String modelSVMFile;
   /** The maximal loop number for paum Learning. */
+  @SuppressWarnings("unused")
   final private int totalLoops = 300;
   /** The increment value for lambda. */
+  @SuppressWarnings("unused")
   final private float lambInc = (float)1.0;
 
   /** Class constructor with no parameter. */

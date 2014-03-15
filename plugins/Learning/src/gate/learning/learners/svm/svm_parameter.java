@@ -34,7 +34,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package gate.learning.learners.svm;
 public class svm_parameter implements Cloneable,java.io.Serializable
 {
-	/* svm_type */
+  private static final long serialVersionUID = -3985979415821033903L;
+
+  /* svm_type */
 	public static final int C_SVC = 0;
 	public static final int NU_SVC = 1;
 	public static final int ONE_CLASS = 2;

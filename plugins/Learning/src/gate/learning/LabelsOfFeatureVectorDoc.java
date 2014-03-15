@@ -8,10 +8,12 @@
 package gate.learning;
 
 import gate.learning.DocFeatureVectors.LongCompactor;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Labels (indexes) of feature vectors in one document. It represents
@@ -37,36 +39,36 @@ public class LabelsOfFeatureVectorDoc {
     multiLabels = new LabelsOfFV[num];
     if(!surroundMode) {// not the surroundMode
       for(int i = 0; i < num; ++i) {
-        HashSet setLabels = new HashSet();
-        if(nlpDoc.classNames[i] instanceof String) {
-          String[] items = nlpDoc.classNames[i]
-            .split(ConstantParameters.ITEMSEPARATOR);
-          for(int j = 0; j < items.length; ++j) {
-            currentN = items[j];
-            if(currentN.endsWith(ConstantParameters.SUFFIXSTARTTOKEN))
-              currentN = currentN.substring(0, currentN
-                .lastIndexOf(ConstantParameters.SUFFIXSTARTTOKEN));
-            if(label2Id.label2Id.containsKey(currentN))
-              // just use the labels in the LabelsList.save file
-              setLabels.add(Integer.valueOf(label2Id.label2Id.get(currentN)
-                .toString())); // Integer.valueOf(label2Id.label2Id.get(currentN).toString());
-          }
+        Set<Integer> setLabels = new HashSet<Integer>();
+        if (nlpDoc.classNames[i] == null) continue;
+        String[] items = nlpDoc.classNames[i]
+          .split(ConstantParameters.ITEMSEPARATOR);
+        for(int j = 0; j < items.length; ++j) {
+          currentN = items[j];
+          if(currentN.endsWith(ConstantParameters.SUFFIXSTARTTOKEN))
+            currentN = currentN.substring(0, currentN
+              .lastIndexOf(ConstantParameters.SUFFIXSTARTTOKEN));
+          if(label2Id.label2Id.containsKey(currentN))
+            // just use the labels in the LabelsList.save file
+            setLabels.add(label2Id.label2Id.get(currentN));
+          // Integer.valueOf(label2Id.label2Id.get(currentN).toString());
         }
+        
         multiLabels[i] = new LabelsOfFV(setLabels.size());
         if(setLabels.size() > 0) {
           multiLabels[i].labels = new int[setLabels.size()];
-          List indexes = new ArrayList(setLabels);
+          List<Integer> indexes = new ArrayList<Integer>(setLabels);
           LongCompactor c = new LongCompactor();
           Collections.sort(indexes, c);
           for(int j = 0; j < indexes.size(); ++j)
-            multiLabels[i].labels[j] = Integer.valueOf(indexes.get(j)
-              .toString()); // Integer.valueOf(obj.toString());
+            multiLabels[i].labels[j] = indexes.get(j);
+              //.toString()); // Integer.valueOf(obj.toString());
         }
       }// end of the i loop
     } else
     // for the surrond mode
     for(int i = 0; i < num; ++i) {
-      HashSet setLabels = new HashSet();
+      Set<Integer> setLabels = new HashSet<Integer>();
       if(nlpDoc.classNames[i] != null) {
         String[] items = nlpDoc.classNames[i]
           .split(ConstantParameters.ITEMSEPARATOR);
@@ -76,23 +78,19 @@ public class LabelsOfFeatureVectorDoc {
             String label = currentN.substring(0, currentN
               .lastIndexOf(ConstantParameters.SUFFIXSTARTTOKEN));
             if(label2Id.label2Id.containsKey(label)) {
-              setLabels.add(Integer.valueOf(label2Id.label2Id.get(label)
-                .toString()) * 2 - 1);
+              setLabels.add(label2Id.label2Id.get(label) * 2 - 1);
               if(i + 1 == num
                 || !hasTheSameLabel(label, nlpDoc.classNames[i + 1]))
                 // single token
-                setLabels.add(Integer.valueOf(label2Id.label2Id.get(label)
-                  .toString()) * 2);
+                setLabels.add(label2Id.label2Id.get(label) * 2);
             }
           } else { // no start token
             if(label2Id.label2Id.containsKey(currentN)) {
               if(i + 1 == num) {// the last token, hence the
                 // end token
-                setLabels.add(Integer.valueOf(label2Id.label2Id.get(currentN)
-                  .toString()) * 2);
+                setLabels.add(label2Id.label2Id.get(currentN) * 2);
               } else if(!hasTheSameLabel(currentN, nlpDoc.classNames[i + 1]))
-                setLabels.add(Integer.valueOf(label2Id.label2Id.get(currentN)
-                  .toString()) * 2);
+                setLabels.add(label2Id.label2Id.get(currentN) * 2);
             }
           }
         }
@@ -100,11 +98,11 @@ public class LabelsOfFeatureVectorDoc {
       multiLabels[i] = new LabelsOfFV(setLabels.size());
       if(setLabels.size() > 0) {
         multiLabels[i].labels = new int[setLabels.size()];
-        List indexes = new ArrayList(setLabels);
+        List<Integer> indexes = new ArrayList<Integer>(setLabels);
         LongCompactor c = new LongCompactor();
         Collections.sort(indexes, c);
         for(int j = 0; j < indexes.size(); ++j) {
-          multiLabels[i].labels[j] = Integer.valueOf(indexes.get(j).toString()); // Integer.valueOf(obj.toString());
+          multiLabels[i].labels[j] = indexes.get(j); // Integer.valueOf(obj.toString());
         }
       }
     }// end of the i loop

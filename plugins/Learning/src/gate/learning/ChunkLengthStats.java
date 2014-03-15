@@ -18,11 +18,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Store the length statitics of chunks belonging to one type which will be used
@@ -45,8 +46,8 @@ public class ChunkLengthStats {
   }
 
   /** Read the chunk length statistics from a file specified. */
-  static public HashMap loadChunkLenStats(File parentDir, String filename) {
-    HashMap chunkLenHash = new HashMap();
+  static public Map<Integer,ChunkLengthStats> loadChunkLenStats(File parentDir, String filename) {
+    Map<Integer,ChunkLengthStats> chunkLenHash = new HashMap<Integer,ChunkLengthStats>();
     File file1 = new File(parentDir, filename);
     if(file1.exists()) {
       try {
@@ -62,7 +63,7 @@ public class ChunkLengthStats {
           num = Integer.parseInt(items[1]);
           ChunkLengthStats chunkLens;
           if(chunkLenHash.containsKey(label)) {
-            chunkLens = (ChunkLengthStats)chunkLenHash.get(label);
+            chunkLens = chunkLenHash.get(label);
           } else
             chunkLens = new ChunkLengthStats();
           for(int i = 0; i < num; ++i) {
@@ -86,17 +87,17 @@ public class ChunkLengthStats {
 
   /** Write the chunk length statistics into a file. */
   static public void writeChunkLensStatsIntoFile(File parentDir,
-    String filename, HashMap chunkLenHash) {
-    File file1 = new File(parentDir, filename);
+    String filename, Map<Integer,ChunkLengthStats> chunkLenHash) {
+    
     try {
       BufferedWriter out = new BufferedWriter(new OutputStreamWriter
         (new FileOutputStream(new File(parentDir, filename)), "UTF-8"));
-      ArrayList labelSet = new ArrayList(chunkLenHash.keySet());
+      List<Object> labelSet = new ArrayList<Object>(chunkLenHash.keySet());
       Collections.sort(labelSet, new LongCompactor());
       for(int i = 0; i < labelSet.size(); ++i) {
         Object obj = labelSet.get(i);
         // if( chunkLenHash.containsKey(obj)) {
-        ChunkLengthStats chunkLens = (ChunkLengthStats)chunkLenHash.get(obj);
+        ChunkLengthStats chunkLens = chunkLenHash.get(obj);
         int num = 0;
         for(int j = 0; j < ChunkLengthStats.maxLen; ++j)
           if(chunkLens.lenStats[j] > 0) ++num;
@@ -127,13 +128,12 @@ public class ChunkLengthStats {
    * set defintion.
    */
   public static void updateChunkLensStats(AnnotationSet annotations,
-    DataSetDefinition dsd, HashMap chunkLenHash, Label2Id label2Id) {
+    DataSetDefinition dsd, Map<Integer,ChunkLengthStats> chunkLenHash, Label2Id label2Id) {
     AnnotationSet annsC = annotations.get(dsd.classAttribute.getType());
     String classFeat = dsd.classAttribute.getFeature();
     AnnotationSet annsI = annotations.get(dsd.instanceType);
     // For each annotation of class
-    for(Object obj : annsC) {
-      Annotation annC = (Annotation)obj;
+    for(Annotation annC : annsC) {
       if(annC.getFeatures().get(classFeat) != null) {
         // Get the label
         String feat = annC.getFeatures().get(classFeat).toString();
@@ -147,7 +147,7 @@ public class ChunkLengthStats {
           if(num < ChunkLengthStats.maxLen) {
             // Update the chunk length statistics
             if(chunkLenHash.containsKey(label)) {
-              ChunkLengthStats chunkLen = (ChunkLengthStats)chunkLenHash
+              ChunkLengthStats chunkLen = chunkLenHash
                 .get(label);
               chunkLen.lenStats[num] += 1;
               chunkLenHash.put(label, chunkLen);

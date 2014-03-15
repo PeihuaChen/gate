@@ -76,7 +76,7 @@ public class Ngram {
     featuresGate = new String[consnum];
     for(int i = 0; i < consnum; ++i) {
       // find the type
-      anElement = jdomElement.getChild("CONS-" + new Integer(i + 1));
+      anElement = jdomElement.getChild("CONS-" + (i + 1));
       if(anElement == null)
         throw new GateException(
           "Required element \"TYPE\" not present in attribute:\n"
@@ -91,14 +91,14 @@ public class Ngram {
   private void obtainTypeAndFeat(Element anElement, String[] typesGate,
     String[] featuresGate, int i) throws GateException {
     Element lowerElement = anElement.getChild("TYPE");
-    if(anElement != null) {
+    if(lowerElement != null) {
       typesGate[i] = lowerElement.getTextTrim();
       typesGate[i] = typesGate[i].replaceAll(ConstantParameters.ITEMSEPARATOR,
         ConstantParameters.ITEMSEPREPLACEMENT);
     } else throw new GateException(
       "Required element \"TYPE\" not present in attribute!");
     lowerElement = anElement.getChild("FEATURE");
-    if(anElement != null) {
+    if(lowerElement != null) {
       featuresGate[i] = lowerElement.getTextTrim();
       featuresGate[i] = featuresGate[i]
         .replaceAll(ConstantParameters.ITEMSEPARATOR,
@@ -161,7 +161,7 @@ public class Ngram {
     res.append("Number: " + this.number + "\n");
     res.append("Consnum: " + this.consnum + "\n");
     for(int i = 0; i < typesGate.length; ++i) {
-      res.append("cons-" + new Integer(i + 1) + "\n");
+      res.append("cons-" + (i + 1) + "\n");
       res.append("Types: " + typesGate[i] + "\n");
       res.append("Features: " + featuresGate[i] + "\n");
     }

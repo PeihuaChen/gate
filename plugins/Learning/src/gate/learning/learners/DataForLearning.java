@@ -6,21 +6,19 @@
  *  $Id: DataForLearning.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
  */
 package gate.learning.learners;
+import gate.learning.DocFeatureVectors;
+import gate.learning.LabelsOfFeatureVectorDoc;
+import gate.learning.SparseFeatureVector;
+import gate.learning.learners.svm.svm_node;
+import gate.util.BomStrippingInputStreamReader;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-
-import gate.learning.ConstantParameters;
-import gate.learning.DocFeatureVectors;
-import gate.learning.LabelsOfFeatureVectorDoc;
-import gate.learning.SparseFeatureVector;
-import gate.learning.learners.svm.svm_node;
-import gate.util.BomStrippingInputStreamReader;
 /**
  * Data used for learning, read from the feature vector file.
  */
@@ -76,7 +74,7 @@ public class DataForLearning {
         items = line
           .split(gate.learning.ConstantParameters.ITEMSEPARATOR);
         int num;
-        num = (new Integer(items[1])).intValue();
+        num = new Integer(items[1]);
         trainingFVinDoc[i] = new DocFeatureVectors();
         trainingFVinDoc[i].setDocID(items[2]);
         labelsFVDoc[i] = new LabelsOfFeatureVectorDoc();
@@ -141,7 +139,7 @@ public class DataForLearning {
         items = line
           .split(gate.learning.ConstantParameters.ITEMSEPARATOR);
         int num;
-        num = (new Integer(items[1])).intValue();
+        num = new Integer(items[1]);
         trainingFVinDoc[i] = new DocFeatureVectors();
         labelsFVDoc[i] = new LabelsOfFeatureVectorDoc();
         trainingFVinDoc[i].readDocFVFromFile(in, num, labelsFVDoc[i]);

@@ -36,7 +36,9 @@ package gate.learning.learners.svm;
 
 public class svm_model implements java.io.Serializable
 {
-	svm_parameter param;	// parameter
+  private static final long serialVersionUID = 2171710291939694712L;
+  
+  svm_parameter param;	// parameter
 	int nr_class;		// number of classes, = 2 in regression/one class svm
 	int l;			// total #SV
 	svm_node[][] SV;	// SVs (SV[l])
