@@ -17,7 +17,10 @@ import gate.fsm.Transition;
 import gate.jape.BasicPatternElement;
 
 public class TransitionPDA extends Transition {
-	public TransitionPDA() {
+
+  private static final long serialVersionUID = 1666743948471929109L;
+
+  public TransitionPDA() {
 		super();
 	}
 

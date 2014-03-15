@@ -7,6 +7,14 @@
  */
 package gate.iaaplugin;
 
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.ProcessingResource;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
+import gate.util.AnnotationDiffer;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,16 +32,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import gate.Annotation;
-import gate.AnnotationSet;
-import gate.Factory;
-import gate.FeatureMap;
-import gate.ProcessingResource;
-import gate.creole.AbstractLanguageAnalyser;
-import gate.creole.ExecutionException;
-import gate.creole.ResourceInstantiationException;
-import gate.util.AnnotationDiffer;
-
 // import gate.util.FMeasure;
 // import gate.util.IaaCalculation;
 /**
@@ -43,6 +41,9 @@ import gate.util.AnnotationDiffer;
  */
 public class IaaMain extends AbstractLanguageAnalyser implements
                                                      ProcessingResource {
+
+  private static final long serialVersionUID = 6987588770277158507L;
+
   /** Annotation sets for merging in one document. */
   private String annSetsForIaa;
 
@@ -194,7 +195,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     boolean isAvailabelAllAnnSets = true;
     // Get the annotation sets for computing the IAA
     // Get all the existing annotation sets from the current document
-    Set annsExisting = document.getAnnotationSetNames();
+    Set<String> annsExisting = document.getAnnotationSetNames();
     String[] annsArray = null;
     if(annSetsForIaa == null || annSetsForIaa.trim().length() == 0) {
       // if there is no annotation specified, compare all the annotation
@@ -235,8 +236,8 @@ public class IaaMain extends AbstractLanguageAnalyser implements
       // If not specify the annotation type and features, use
       // all the types but no feature.
       for(int i = 0; i < numAnns; ++i) {
-        Set types = document.getAnnotations(annsArray[i]).getAllTypes();
-        for(Object obj : types)
+        Set<String> types = document.getAnnotations(annsArray[i]).getAllTypes();
+        for(String obj : types)
           if(!annsTypes.containsKey(obj)) annsTypes.put(obj.toString(), "");
       }
     }
@@ -456,7 +457,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
 
   private void printOverallResultsFmeasure(Vector<String> typeNames,
           String[] annsArray) {
-    ArrayList<String> keyList = new ArrayList(fMeasuresPairwiseLabel.keySet());
+    List<String> keyList = new ArrayList<String>(fMeasuresPairwiseLabel.keySet());
     Collections.sort(keyList);
     int numDoc = corpus.size();
     numDoc -= numDocNotCounted;
@@ -569,8 +570,8 @@ public class IaaMain extends AbstractLanguageAnalyser implements
 
   private void printOverallResultsFmeasureBDM(Vector<String> typeNames,
           String[] annsArray) {
-    ArrayList<String> keyList =
-            new ArrayList(fMeasuresPairwiseLabelBDM.keySet());
+    List<String> keyList =
+            new ArrayList<String>(fMeasuresPairwiseLabelBDM.keySet());
     Collections.sort(keyList);
     int numDoc = corpus.size();
     numDoc -= numDocNotCounted;

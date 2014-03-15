@@ -14,50 +14,54 @@
  */
 package gate.jape.plus;
 
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Controller;
+import gate.Corpus;
+import gate.CorpusController;
+import gate.Factory;
+import gate.FeatureMap;
 import gate.annotation.AnnotationSetImpl;
-import gate.creole.*;
-import gate.creole.ontology.OClass;
-import gate.creole.ontology.OConstants;
-import gate.creole.ontology.OConstants.Closure;
-import gate.creole.ontology.OResource;
+import gate.creole.ANNIEConstants;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ExecutionInterruptedException;
+import gate.creole.ResourceInstantiationException;
 import gate.creole.ontology.Ontology;
+import gate.jape.ActionContext;
+import gate.jape.ControllerEventBlocksAction;
+import gate.jape.DefaultActionContext;
 import gate.jape.JapeException;
 import gate.jape.Rule;
-import gate.jape.DefaultActionContext;
-import gate.jape.ActionContext;
-import gate.*;
+import gate.jape.constraint.ConstraintPredicate;
+import gate.jape.plus.Transducer.SinglePhaseTransducerPDA;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
-import com.ontotext.jape.pda.TransitionPDA;
-
-import cern.colt.GenericSorting;
 import cern.colt.Sorting;
-import cern.colt.Swapper;
 import cern.colt.bitvector.QuickBitVector;
 import cern.colt.function.IntComparator;
 import cern.colt.list.IntArrayList;
-import gate.jape.ControllerEventBlocksAction;
-import gate.jape.constraint.ConstraintPredicate;
+
+import com.ontotext.jape.pda.TransitionPDA;
 
 /**
  * An optimised implementation for a JAPE single phase transducer.
  */
 public abstract class SPTBase extends AbstractLanguageAnalyser {
+
+  private static final long serialVersionUID = 5250715506654515025L;
 
   protected ActionContext actionContext;
   
@@ -813,6 +817,7 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
             predicateId);
   }
 
+  @SuppressWarnings({"rawtypes", "unchecked"})
   protected boolean calculatePredicateValue(int annotationId, int predicateId) 
       throws JapeException {
     Predicate predicate =

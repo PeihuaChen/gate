@@ -19,7 +19,10 @@ import gate.jape.RightHandSide;
 import com.ontotext.jape.automaton.TripleTransitions;
 
 public class StatePDA extends State {
-	public void setAction(RightHandSide rhs, TripleTransitions tripleTransitions) {
+
+  private static final long serialVersionUID = 2995079945805849819L;
+
+  public void setAction(RightHandSide rhs, TripleTransitions tripleTransitions) {
 		action = rhs;
 		isFinal = (action != null);
 		if (tripleTransitions != null) {
