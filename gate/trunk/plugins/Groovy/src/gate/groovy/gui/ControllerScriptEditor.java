@@ -22,6 +22,8 @@ public class ControllerScriptEditor extends AbstractVisualResource
                                     implements DocumentListener,
                                                PropertyChangeListener {
 
+  private static final long serialVersionUID = -3690719863931044767L;
+
   protected ConsoleTextEditor editor;
 
   protected ScriptableController controller;

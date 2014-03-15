@@ -11,13 +11,12 @@
  */
 package gate.clone.ql.utils;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import gate.clone.ql.query.serql.SerqlUtils;
 import gate.creole.ontology.Ontology;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 

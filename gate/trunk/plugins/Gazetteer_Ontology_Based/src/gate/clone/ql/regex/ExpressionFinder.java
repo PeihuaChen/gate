@@ -53,7 +53,6 @@ public class ExpressionFinder {
   public static String findAndSeparateCamelCases(String inputString,
           String regularExpression, String substituteString) {
     String afterSubstitution = null;
-    int matches = 0;
     Pattern pattern = null;
     PatternMatcherInput input;
     PatternCompiler compiler;
@@ -84,7 +83,7 @@ public class ExpressionFinder {
     while(matcher.contains(input, pattern)) {
       // Since we're still in the loop, fetch match that was found.
       result = matcher.getMatch();
-      ++matches;
+
       // System.out.println("Match " + matches + ": " + result);
       String foundMatch = result.toString();
       String[] chars = foundMatch.split("");

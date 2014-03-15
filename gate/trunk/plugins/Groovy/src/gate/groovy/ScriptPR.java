@@ -53,6 +53,8 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
                                                       ProcessingResource,
                                                       ControllerAwarePR {
 
+  private static final long serialVersionUID = 7563063357390091727L;
+
   /**
    * Groovy script file
    */

@@ -29,8 +29,12 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.net.URL;
 
+import org.apache.commons.io.IOUtils;
+
 @CreoleResource(name = "GENIA Sentence Splitter", icon = "sentence-splitter.png", helpURL = "http://gate.ac.uk/userguide/sec:domain-creole:biomed:genia")
 public class GENIASentenceSplitter extends AbstractLanguageAnalyser {
+
+  private static final long serialVersionUID = 142837355544158905L;
 
   private boolean debug = false;
 
@@ -81,6 +85,9 @@ public class GENIASentenceSplitter extends AbstractLanguageAnalyser {
     String docContent =
             document.getContent().toString().replace((char)160, ' ');
 
+    //The reader that brings back the output from the sentence splitter
+    BufferedReader in = null;
+    
     try {
       // create temporary files to use with the external sentence splitter
       File tmpIn = File.createTempFile("GENIA", ".txt");
@@ -109,7 +116,7 @@ public class GENIASentenceSplitter extends AbstractLanguageAnalyser {
       int end = 0;
 
       // read in the output from the sentence splitter one line at a time
-      BufferedReader in = new BufferedReader(new FileReader(tmpOut));
+      in = new BufferedReader(new FileReader(tmpOut));
       String sentence = in.readLine();
       while(sentence != null) {
 
@@ -140,6 +147,9 @@ public class GENIASentenceSplitter extends AbstractLanguageAnalyser {
 
     } catch(Exception ioe) {
       throw new ExecutionException("An error occured running the splitter", ioe);
+    }
+    finally {
+      IOUtils.closeQuietly(in);
     }
   }
 }

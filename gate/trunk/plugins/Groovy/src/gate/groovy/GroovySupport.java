@@ -54,6 +54,8 @@ import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 @CreoleResource(name = "Groovy support for GATE", isPrivate = true, tool = true,
         autoinstances = @AutoInstance)
 public class GroovySupport extends AbstractResource implements ActionsPublisher {
+
+  private static final long serialVersionUID = 4763983982544551334L;
   /**
    * Standard list of import statements that are available to any groovy script
    * or console in GATE.
@@ -105,7 +107,7 @@ public class GroovySupport extends AbstractResource implements ActionsPublisher 
 
   private List<Action> actions;
 
-  public List getActions() {
+  public List<Action> getActions() {
     if(actions == null) {
       actions = new ArrayList<Action>();
       actions.add(new AbstractAction("Groovy Console", MainFrame.getIcon("groovyConsole")) {
@@ -145,6 +147,7 @@ public class GroovySupport extends AbstractResource implements ActionsPublisher 
              * of Console.  So we have to implement the property setter here,
              * delegating to the real private field in the superclass.
              */
+            @SuppressWarnings("unused")
             public void setScriptRunning(boolean b) {
               try {
                 Field f = groovy.ui.Console.class.getDeclaredField("scriptRunning");

@@ -28,7 +28,7 @@ import org.apache.log4j.Logger
     icon = "/gate/groovy/scriptable-controller")
 public class ScriptableController extends SerialController
                           implements CorpusController, LanguageAnalyser {
-
+                            
   protected static final Logger log = Logger.getLogger(ScriptableController)
                             
   /**
@@ -430,7 +430,7 @@ eachDocument {
    * Yes, this is another typo in the superclass, the method really is called
    * getOffendingP(r)ocessingResources.
    */
-  public List getOffendingPocessingResources() {
+  public List<ProcessingResource> getOffendingPocessingResources() {
     return []
   }
 
