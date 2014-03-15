@@ -10,6 +10,7 @@
 	<property name="src" value="src"/>
 	<property name="doc.dir" location="doc" />
 	<property name="javadoc.dir" location="${doc.dir}/javadoc" />
+	<property name="gate.compile.maxwarnings" value="10000" />
 
 	<fileset id="gatelib.classpath" dir="${gatehome}/lib">
 		<include name="*.jar"/>
