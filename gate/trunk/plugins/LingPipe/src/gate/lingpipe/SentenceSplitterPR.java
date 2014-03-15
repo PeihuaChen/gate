@@ -27,6 +27,8 @@ import com.aliasi.tokenizer.TokenizerFactory;
 public class SentenceSplitterPR extends AbstractLanguageAnalyser implements
 		ProcessingResource {
 
+  private static final long serialVersionUID = -1474263938869304875L;
+
   /**
    * Instance of the tokeniser
    */
@@ -105,7 +107,7 @@ public class SentenceSplitterPR extends AbstractLanguageAnalyser implements
 
 		Chunking chunking = SENTENCE_CHUNKER.chunk(text.toCharArray(), 0, text
 				.length());
-		Set sentences = chunking.chunkSet();
+		Set<Chunk> sentences = chunking.chunkSet();
 		if (sentences.size() < 1) {
 			System.out.println("No sentence chunks found.");
 			return;
@@ -113,8 +115,8 @@ public class SentenceSplitterPR extends AbstractLanguageAnalyser implements
 
 		FeatureMap map = gate.Factory.newFeatureMap();
 		int i=1;
-		for (Iterator it = sentences.iterator(); it.hasNext();i++) {
-			Chunk sentence = (Chunk) it.next();
+		for (Iterator<Chunk> it = sentences.iterator(); it.hasNext();i++) {
+			Chunk sentence = it.next();
 			int start = sentence.start();
 			int end = sentence.end();
 			try {

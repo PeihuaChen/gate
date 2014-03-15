@@ -30,6 +30,8 @@ import com.aliasi.util.AbstractExternalizable;
 public class NamedEntityRecognizerPR extends AbstractLanguageAnalyser implements
                                                                      ProcessingResource {
 
+  private static final long serialVersionUID = 6157830435067675635L;
+
   /** File which cotains model for NE */
   protected URL modelFileUrl;
 
