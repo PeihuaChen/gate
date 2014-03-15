@@ -54,6 +54,7 @@ import java.util.Set;
 import com.ontotext.russie.RussIEConstants;
 
 @CreoleResource(name = "Russian POS Tagger", icon = "pos-tagger")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class POSTagger extends gate.creole.AbstractLanguageAnalyser implements
   RussIEConstants {
 
@@ -191,7 +192,7 @@ public class POSTagger extends gate.creole.AbstractLanguageAnalyser implements
             Lemma lemma;
             fireStatusChanged(READING + configLine);
             while(lemmaIter.hasNext()) {
-              lemma = (Lemma)lemmaIter.next();
+              lemma = lemmaIter.next();
               fireProgressChanged(++lemmaIdx * 100 / linesCnt);
               this.add(lemma);
             } // while
@@ -299,7 +300,6 @@ public class POSTagger extends gate.creole.AbstractLanguageAnalyser implements
     // letter to number or number to letter transition zone
     boolean l2nORn2lZone = false;
     char currentChar = 0;
-    boolean goonFlag = true;
     int typeWeight = 0;
 
     // note that the code within the next cycle is overwhelmed by complexity
@@ -366,7 +366,7 @@ public class POSTagger extends gate.creole.AbstractLanguageAnalyser implements
         } else while(iend < length &&
           (Character.isLetterOrDigit(currentChar = content.charAt(iend)) ||
           // handling for ch and etc. cyrillic letters that fail the above check
-          ((215 == (currCharInt = (int)currentChar)) || (currCharInt == 168) ||
+          ((215 == (currCharInt = currentChar)) || (currCharInt == 168) ||
             (currCharInt == 247) || (currCharInt == 184))) ||
           ((isDashOrQuotePunctuation(currentChar)) && (Character
             .isWhitespace(content.charAt(iend - 1)) || isWhiteSpacePunctuation(content
@@ -572,6 +572,7 @@ public class POSTagger extends gate.creole.AbstractLanguageAnalyser implements
 
     SuffixNest nest = lemma.getSuffixNest();
     String root = lemma.getRoot();
+    @SuppressWarnings("unused")
     String mainFormSuffix = lemma.getSuffix(lemma.getMainFormType());
 
     if(!caseSensitive.booleanValue()) {
@@ -733,7 +734,6 @@ public class POSTagger extends gate.creole.AbstractLanguageAnalyser implements
     Iterator ni;
     String suffix = "";
     SuffixNest nest;
-    String type;
     String lemma;
     // temporary mediator
     Set types;

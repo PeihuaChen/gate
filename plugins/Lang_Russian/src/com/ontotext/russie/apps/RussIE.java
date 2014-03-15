@@ -10,4 +10,6 @@ import gate.creole.metadata.CreoleResource;
 	@AutoInstanceParam(name="menu", value="Russian")}))
 public class RussIE extends PackagedController {
 
+  private static final long serialVersionUID = 271518814092944109L;
+
 }

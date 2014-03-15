@@ -143,7 +143,7 @@ public class LemmaImpl implements Lemma {
    * @return the word-form that has this type
    */
   public String getWordForm(String type) {
-    return (String)root + typeVsSuffix.get(type);
+    return root + typeVsSuffix.get(type);
   }
 
   /**

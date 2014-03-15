@@ -117,9 +117,9 @@ public class SuffixNestImpl implements SuffixNest {
     while(it.hasNext()) {
       o = it.next();
       if(o == null) continue;
-      if(o instanceof Set) {
-        allTypes.addAll((Set<String>)o);
-      }
+      
+        allTypes.addAll(o);
+      
       /*
        * if (o instanceof String) { allTypes.add((String)o); }
        */
