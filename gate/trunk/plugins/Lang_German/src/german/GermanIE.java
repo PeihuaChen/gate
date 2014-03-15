@@ -13,5 +13,5 @@ import java.util.List;
 	@AutoInstanceParam(name="pipelineURL", value="resources/german.gapp"),
 	@AutoInstanceParam(name="menu", value="German")}))
 public class GermanIE extends PackagedController {
-
+  private static final long serialVersionUID = -1983465516568025601L;
 }

@@ -66,6 +66,7 @@ import com.ontotext.russie.RussIEConstants;
  * @version 1.0
  */
 @CreoleResource(name = "Russian Gazetteer", icon = "shefGazetteer")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class RussGazetteer extends AbstractGazetteer implements RussIEConstants {
 
   private static final long serialVersionUID = -5174914553200046785L;
@@ -228,7 +229,7 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
    */
   void readList(LinearNode node, boolean add) throws GazetteerException {
 
-    String listName, majorType, minorType, languages, oClass;
+    String listName, majorType, minorType, languages;
     if(null == node) { throw new GazetteerException(" LinearNode node is null "); }
 
     listName = node.getList();
@@ -314,7 +315,6 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
     // letter to number or number to letter transition zone
     boolean l2nORn2lZone = false;
     char currentChar = 0;
-    boolean goonFlag = true;
     int typeWeight = 0;
 
     // note that the code within the next cycle is overwhelmed by complexity
@@ -381,7 +381,7 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
         } else while(iend < length &&
           (Character.isLetterOrDigit(currentChar = content.charAt(iend)) ||
           // handling for ch and etc. cyrillic letters that fail the above check
-          ((215 == (currCharInt = (int)currentChar)) || (currCharInt == 168) ||
+          ((215 == (currCharInt = currentChar)) || (currCharInt == 168) ||
             (currCharInt == 247) || (currCharInt == 184))) ||
           ((isDashOrQuotePunctuation(currentChar)) && (Character
             .isWhitespace(content.charAt(iend - 1)) || isWhiteSpacePunctuation(content
@@ -568,7 +568,6 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
   }
 
   public boolean add(String singleItem, Lookup lookup) {
-    boolean isAdded = false;
 
     // ALL-UPPER-CASE SUPPORT
     String upper = singleItem.toUpperCase();
@@ -688,7 +687,7 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
   public String trunxSuffixVowelsFromPhrase(String phrase) {
     String line = phrase;
     int length = phrase.length();
-    String word;
+    //String word;
     StringBuffer stem = new StringBuffer();
     int lastWordEnd = 0;
     String justWord;
@@ -700,7 +699,7 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
         if(lineIndex + 1 == length) lineIndex = length;
         // get the word
 
-        word = line.substring(0, lineIndex).trim();
+        //word = line.substring(0, lineIndex).trim();
         justWord = line.substring(lastWordEnd, lineIndex).trim();
         stem.append(trunxSuffixVowelsFromWord(justWord)).append(" ");
         lastWordEnd = lineIndex;
@@ -717,7 +716,7 @@ public class RussGazetteer extends AbstractGazetteer implements RussIEConstants 
   public String trunxSuffixVowelsFromWord(String word) {
     int len = word.length();
     String lastCh;
-    String sufix2l;
+    
     int trunxCount = 0;
     while(len > minWordLength && trunxCount < maxTruncatedVowels) {
 

@@ -52,6 +52,7 @@ import com.ontotext.russie.morph.SuffixPool;
 import com.ontotext.russie.morph.TypePool;
 
 @CreoleResource(name = "Inflectional gazetteer")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class InflectionalGazetteer extends AbstractLanguageAnalyser implements
   RussIEConstants {
 
@@ -363,7 +364,7 @@ public class InflectionalGazetteer extends AbstractLanguageAnalyser implements
         } else while(iend < length &&
           (Character.isLetterOrDigit(currentChar = content.charAt(iend)) ||
           // handling for ch and etc. cyrillic letters that fail the above check
-          ((215 == (currCharInt = (int)currentChar)) || (currCharInt == 168) ||
+          ((215 == (currCharInt = currentChar)) || (currCharInt == 168) ||
             (currCharInt == 247) || (currCharInt == 184))) ||
           ((isDashOrQuotePunctuation(currentChar)) && (Character
             .isWhitespace(content.charAt(iend - 1)) || isWhiteSpacePunctuation(content
@@ -555,6 +556,7 @@ public class InflectionalGazetteer extends AbstractLanguageAnalyser implements
     boolean isAdded = false;
     SuffixNest nest = lemma.getSuffixNest();
     String root = lemma.getRoot();
+    @SuppressWarnings("unused")
     String mainFormSuffix = lemma.getSuffix(lemma.getMainFormType());
     nest.setFeatureMap(lemma.getFeatureMap());
 
@@ -726,8 +728,7 @@ public class InflectionalGazetteer extends AbstractLanguageAnalyser implements
     SuffixNest nest;
     FeatureMap fm, oldFm;
     String lemma;
-    // temporary mediator
-    Set types;
+
     while(phrase.length() > 0) {
       if(map.containsKey(phrase)) {
         nests = (Set)map.get(phrase);
