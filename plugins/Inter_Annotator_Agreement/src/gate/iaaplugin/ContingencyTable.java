@@ -162,7 +162,7 @@ public class ContingencyTable {
         term2 += (assignmentMatrix[i][j] - pc[i])
           * (assignmentMatrix[i][j] - pc[i]);
     if(numInstances > 0 && numJudges > 1 && (term1 > 0 || term2 > 0))
-      kappaDF = 1 - (float)(numInstances * numJudges * numJudges - ySum)
+      kappaDF = 1f - (numInstances * numJudges * numJudges - ySum)
         / (numInstances * (numJudges * (numJudges - 1) * term1 + term2));
     else kappaDF = 0;
     // Compute the observed agreement and the S&C kappa

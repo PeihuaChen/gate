@@ -92,6 +92,7 @@ import com.ontotext.jape.pda.FSMPDA;
 @CreoleResource(name = "JAPE-Plus Transducer", 
     comment = "An optimised, JAPE-compatible transducer.", 
     icon="JapePlus")
+@SuppressWarnings("serial")
 public class Transducer extends AbstractLanguageAnalyser 
     implements ControllerAwarePR, ProgressListener , ActionsPublisher {
 
@@ -259,6 +260,7 @@ public class Transducer extends AbstractLanguageAnalyser
           duplicatedRules, that.predicatesByType, that.inputTypes);
     }
     
+    @SuppressWarnings("unchecked")
     public SPTBase generateSpt(GateClassLoader classLoader) throws ResourceInstantiationException {
       
       SPTBase optimisedTransducer = null;
@@ -275,7 +277,7 @@ public class Transducer extends AbstractLanguageAnalyser
         if(!classes.isEmpty()) {
           Javac.loadClasses(classes, classLoader);
         }
-        @SuppressWarnings("unchecked")
+        
         Class<? extends SPTBase> sptClass = (Class<? extends SPTBase>)
             classLoader.loadClass(className);
         

@@ -15,30 +15,7 @@
 
 package gate.jape.plus;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.ontotext.jape.pda.FSMPDA;
-import com.ontotext.jape.pda.StatePDA;
-import com.ontotext.jape.pda.TransitionPDA;
-
-import cern.colt.list.IntArrayList;
-import cern.colt.map.OpenIntIntHashMap;
-
-import gate.Gate;
 import gate.creole.ResourceInstantiationException;
-import gate.jape.plus.SPTBase.Transition;
 import gate.jape.Constraint;
 import gate.jape.JapeConstants;
 import gate.jape.RightHandSide;
@@ -50,10 +27,27 @@ import gate.jape.constraint.WithinPredicate;
 import gate.jape.plus.Predicate.PredicateType;
 import gate.jape.plus.SPTBase.MatchMode;
 import gate.jape.plus.SPTBase.State;
+import gate.jape.plus.SPTBase.Transition;
 import gate.jape.plus.Transducer.SPTData;
 import gate.util.GateClassLoader;
-import gate.util.GateException;
-import gate.util.Javac;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import cern.colt.list.IntArrayList;
+import cern.colt.map.OpenIntIntHashMap;
+
+import com.ontotext.jape.pda.FSMPDA;
+import com.ontotext.jape.pda.StatePDA;
+import com.ontotext.jape.pda.TransitionPDA;
 
 /**
  * An utility class for converting a default JAPE transducer into a JAPE-Plus transducer. 
@@ -174,7 +168,7 @@ public class SPTBuilder {
     SPTData sptData = new SPTData(GENERATED_CLASS_PACKAGE + "." + className, 
         sptCode.toString(), 
         oldSpt.generateControllerEventBlocksCode(GENERATED_CLASS_PACKAGE,className+"CEAB"), rules, 
-        predicatesByTypeArray, (Set<String>)oldSpt.input);
+        predicatesByTypeArray, oldSpt.input);
     
     //cleanup
     annotationTypes = null;

@@ -40,7 +40,10 @@ import com.ontotext.jape.automaton.GenericWholeArrray;
 import com.ontotext.jape.automaton.TripleTransitions;
 
 public class FSMPDA extends FSM {
-	private transient ClosedHashOfStrings setOfBindingNames;
+	
+  private static final long serialVersionUID = 5672459102751022260L;
+  
+  private transient ClosedHashOfStrings setOfBindingNames;
 	private transient TripleTransitions tripleTransitions;
 	private String[] arrayOfBindingNames;
 	private StatePDA initialState;
@@ -67,10 +70,10 @@ public class FSMPDA extends FSM {
 
 	@Override
 	protected void addRules(PrioritisedRuleList rules) {
-		Iterator rulesEnum = rules.iterator();
+		Iterator<Rule> rulesEnum = rules.iterator();
 
 		while (rulesEnum.hasNext()) {
-			FSMPDA ruleFSM = spawn((Rule) rulesEnum.next());
+			FSMPDA ruleFSM = spawn(rulesEnum.next());
 			initialState.addTransition(new TransitionPDA(null, ruleFSM.initialState), tripleTransitions);
 		}
 		arrayOfBindingNames = setOfBindingNames.getCopyOfStrings();

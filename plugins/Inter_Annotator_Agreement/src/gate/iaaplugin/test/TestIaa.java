@@ -123,7 +123,7 @@ public class TestIaa extends TestCase {
     AnnotationSet[][] annArr2 = new AnnotationSet[numDocs][numJudges];
    
     for(int i = 0; i < numDocs; ++i) {
-      Document doc = (Document)data.get(i);
+      Document doc = data.get(i);
       for(int j=0; j<numJudges; ++j) {
         // Get the annotation
         annArr2[i][j] = doc.getAnnotations(annSetsN[j]).get(nameAnnType);
@@ -147,10 +147,10 @@ public class TestIaa extends TestCase {
 
     iaa.pairwiseIaaFmeasure();
     int[] nPwF = new int[4];
-    nPwF[0] = (int)Math.ceil((double)iaa.fMeasureOverall.correct);
-    nPwF[1] = (int)Math.ceil((double)iaa.fMeasureOverall.partialCor);
-    nPwF[2] = (int)Math.ceil((double)iaa.fMeasureOverall.spurious);
-    nPwF[3] = (int)Math.ceil((double)iaa.fMeasureOverall.missing);
+    nPwF[0] = (int)Math.ceil(iaa.fMeasureOverall.correct);
+    nPwF[1] = (int)Math.ceil(iaa.fMeasureOverall.partialCor);
+    nPwF[2] = (int)Math.ceil(iaa.fMeasureOverall.spurious);
+    nPwF[3] = (int)Math.ceil(iaa.fMeasureOverall.missing);
 
     boolean isSuitable = true;
     for(int i = 0; i < annArr2.length; ++i)
@@ -165,7 +165,7 @@ public class TestIaa extends TestCase {
     for(int i = 0; i < annArr2.length; ++i)
       isMerged[i] = false;
     for(int iJ = 0; iJ < annArr2.length; ++iJ) {
-      Document docC = (Document)data.get(iJ);
+      Document docC = data.get(iJ);
       HashMap<Annotation, String> mergeInfor = new HashMap<Annotation, String>();
       AnnotationMerging.mergeAnnotation(annArr2[iJ], nameAnnFeat, mergeInfor, 2, isSuitable);
       AnnotationSet annsDoc = docC.getAnnotations("mergedAnns");
@@ -187,15 +187,15 @@ public class TestIaa extends TestCase {
     iaa.allwayIaaFmeasure(refAnnsArr);
     //  remove the reference annotations created
     for(int iJ = 0; iJ < numDocs; ++iJ) {
-      Document docC = (Document)data.get(iJ);
+      Document docC = data.get(iJ);
       docC.removeAnnotationSet("mergedAnns");
     }
     
     int[] nAwF = new int[4];
-    nAwF[0] = (int)Math.ceil((double)iaa.fMeasureOverall.correct);
-    nAwF[1] = (int)Math.ceil((double)iaa.fMeasureOverall.partialCor);
-    nAwF[2] = (int)Math.ceil((double)iaa.fMeasureOverall.spurious);
-    nAwF[3] = (int)Math.ceil((double)iaa.fMeasureOverall.missing);
+    nAwF[0] = (int)Math.ceil(iaa.fMeasureOverall.correct);
+    nAwF[1] = (int)Math.ceil(iaa.fMeasureOverall.partialCor);
+    nAwF[2] = (int)Math.ceil(iaa.fMeasureOverall.spurious);
+    nAwF[3] = (int)Math.ceil(iaa.fMeasureOverall.missing);
 
     // Compute the kappa
     iaa.pairwiseIaaKappa();

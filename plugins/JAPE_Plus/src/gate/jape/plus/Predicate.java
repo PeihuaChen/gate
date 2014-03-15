@@ -26,6 +26,8 @@ import java.util.regex.Pattern;
  */
 public class Predicate implements Serializable{
 
+  private static final long serialVersionUID = 915414429992023708L;
+
   public static enum PredicateType {
     EQ,
     NOT_EQ,
