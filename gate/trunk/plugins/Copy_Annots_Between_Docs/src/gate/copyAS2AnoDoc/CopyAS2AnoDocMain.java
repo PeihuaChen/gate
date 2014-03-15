@@ -30,10 +30,12 @@ import java.util.List;
 public class CopyAS2AnoDocMain extends AbstractLanguageAnalyser implements
 ProcessingResource {
 
+  private static final long serialVersionUID = -2874636782869415162L;
+
   URL sourceFilesURL = null;
   private String inputASName;
   private String outputASName;
-  private List annotationTypes;
+  private List<String> annotationTypes;
   
 
   /** Initialise this resource, and return it. */
@@ -102,7 +104,7 @@ ProcessingResource {
       AnnotationSet asToCopy = null;
       if (annotationTypes != null && annotationTypes.size() > 0) {
         //String [] annTypes = annotationTypes.split(";");
-        asToCopy = sourceAS.get(new HashSet(annotationTypes));
+        asToCopy = sourceAS.get(new HashSet<String>(annotationTypes));
         //asToCopy = sourceAS.get();
       } else {
         // transfer everything
@@ -193,11 +195,11 @@ ProcessingResource {
     return this.sourceFilesURL;
   }
   
-  public List getAnnotationTypes() {
+  public List<String> getAnnotationTypes() {
     return this.annotationTypes;
   }
 
-  public void setAnnotationTypes(List newTypes) {
+  public void setAnnotationTypes(List<String> newTypes) {
     annotationTypes = newTypes;
   }
 

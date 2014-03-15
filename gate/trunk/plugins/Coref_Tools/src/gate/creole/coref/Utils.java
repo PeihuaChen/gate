@@ -15,8 +15,6 @@
  */
 package gate.creole.coref;
 
-import java.io.File;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
