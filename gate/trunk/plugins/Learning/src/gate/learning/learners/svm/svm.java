@@ -37,6 +37,8 @@ import gate.util.BomStrippingInputStreamReader;
 import java.io.*;
 import java.util.*;
 
+import org.apache.commons.io.IOUtils;
+
 //
 // Kernel Cache
 //
@@ -226,7 +228,7 @@ abstract class Kernel extends QMatrix {
 		this.gamma = param.gamma;
 		this.coef0 = param.coef0;
 
-		x = (svm_node[][])x_.clone();
+		x = x_.clone();
 
 		if(kernel_type == svm_parameter.RBF)
 		{
@@ -421,9 +423,9 @@ class Solver {
 		this.l = l;
 		this.Q = Q;
 		QD = Q.get_QD();
-		b = (double[])b_.clone();
-		y = (byte[])y_.clone();
-		alpha = (double[])alpha_.clone();
+		b = b_.clone();
+		y = y_.clone();
+		alpha = alpha_.clone();
 		this.Cp = Cp;
 		this.Cn = Cn;
 		this.eps = eps;
@@ -470,7 +472,8 @@ class Solver {
 
 		// optimization step
 
-		int iter = 0;
+		@SuppressWarnings("unused")
+    int iter = 0;
 		int counter = Math.min(l,1000)+1;
 		int[] working_set = new int[2];
 
@@ -1230,7 +1233,7 @@ class SVC_Q extends Kernel
 	SVC_Q(svm_problem prob, svm_parameter param, byte[] y_)
 	{
 		super(prob.l, prob.x, param);
-		y = (byte[])y_.clone();
+		y = y_.clone();
 		cache = new Cache(prob.l,(int)(param.cache_size*(1<<20)));
 		QD = new float[prob.l];
 		for(int i=0;i<prob.l;i++)
@@ -1390,7 +1393,8 @@ public class svm {
 		s.Solve(l, new SVC_Q(prob,param,y), minus_ones, y,
 			alpha, Cp, Cn, param.eps, si, param.shrinking);
 
-		double sum_alpha=0;
+		@SuppressWarnings("unused")
+    double sum_alpha=0;
 		for(i=0;i<l;i++)
 			sum_alpha += alpha[i];
 
@@ -1584,8 +1588,10 @@ public class svm {
 
 		// output SVs
 
-		int nSV = 0;
-		int nBSV = 0;
+		@SuppressWarnings("unused")
+    int nSV = 0;
+		@SuppressWarnings("unused")
+    int nBSV = 0;
 		for(int i=0;i<prob.l;i++)
 		{
 			if(Math.abs(alpha[i]) > 0)
@@ -2217,7 +2223,8 @@ public class svm {
 			svm_group_classes(prob,tmp_nr_class,tmp_label,tmp_start,tmp_count,perm);
 
 			int nr_class = tmp_nr_class[0];
-			int[] label = tmp_label[0];
+			@SuppressWarnings("unused")
+      int[] label = tmp_label[0];
 			int[] start = tmp_start[0];
 			int[] count = tmp_count[0];
 
@@ -2569,9 +2576,13 @@ public class svm {
 		return Integer.parseInt(s);
 	}
 
-	public static svm_model svm_load_model(String model_file_name) throws IOException
+	@SuppressWarnings("resource")
+  public static svm_model svm_load_model(String model_file_name) throws IOException
 	{
-		BufferedReader fp = new BomStrippingInputStreamReader(new FileInputStream(
+		BufferedReader fp =  null;
+		
+		try {
+		fp = new BomStrippingInputStreamReader(new FileInputStream(
       model_file_name), "UTF-8");
 
 		// read parameters
@@ -2708,9 +2719,10 @@ public class svm {
 				model.SV[i][j].value = atof(st.nextToken());
 			}
 		}
-
-		fp.close();
 		return model;
+		} finally {
+		  IOUtils.closeQuietly(fp);
+		}
 	}
 
 	public static String svm_check_parameter(svm_problem prob, svm_parameter param)

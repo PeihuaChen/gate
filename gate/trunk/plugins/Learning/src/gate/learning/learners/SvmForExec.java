@@ -1,6 +1,5 @@
 package gate.learning.learners;
 
-import gate.creole.ResourceInstantiationException;
 import gate.learning.SparseFeatureVector;
 import gate.learning.learners.svm.svm_parameter;
 import gate.util.BomStrippingInputStreamReader;
@@ -14,9 +13,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+
+import org.apache.commons.io.IOUtils;
 
 public class SvmForExec extends SupervisedLearner{
   /** The uneven margins parameter. */
@@ -77,22 +77,22 @@ public class SvmForExec extends SupervisedLearner{
       kernelType = 0;
       for(int i=0; i<len-2; ++i) {
         if(items[i].equals("-t") && i+1<len-2) {
-          kernelType = new Integer(items[i+1]).intValue();
+          kernelType = new Integer(items[i+1]);
         }
         if(items[i].equals("-d") && i+1<len-2) {
-          this.paramD = new Integer(items[i+1]).intValue();
+          this.paramD = new Integer(items[i+1]);
         }
         if(items[i].equals("-g") && i+1<len-2) {
-          this.paramG = new Double(items[i+1]).doubleValue();
+          this.paramG = new Double(items[i+1]);
         }
         if(items[i].equals("-r") && i+1<len-2) {
-          this.paramR = new Double(items[i+1]).doubleValue();
+          this.paramR = new Double(items[i+1]);
         }
         if(items[i].equals("-s") && i+1<len-2) {
-          coef1 = new Double(items[i+1]).doubleValue();
+          coef1 = new Double(items[i+1]);
         }
         if(items[i].equals("-tau") && i+1<len-2) {
-          this.tau = new Float(items[i+1]).floatValue();
+          this.tau = new Float(items[i+1]);
         }
       }
       if(coef1!=0)
@@ -208,7 +208,7 @@ public class SvmForExec extends SupervisedLearner{
       line = svmModelBuff.readLine();
       while(!(line.contains("# threshold b,") || line.contains("nr_sv "))) {
         if(line.contains("# number of support vectors plus 1")) {
-          numSV = new Integer(line.substring(0, line.indexOf(" "))).intValue();
+          numSV = new Integer(line.substring(0, line.indexOf(" ")));
           numSV -= 1; //since it's number of SVs plus 1 in svm_light
         }
         if(line.contains("rho ")) { //for the model from libsvm
@@ -224,16 +224,13 @@ public class SvmForExec extends SupervisedLearner{
       if(line.contains("nr_sv ")) { //for the model from libsvm
         String [] items = line.split(" ");
         if(items.length>1) {
-           numSV = new Integer(items[1]).intValue();
+           numSV = new Integer(items[1]);
            if(items.length>2)
-             numSV += new Integer(items[2]).intValue();
+             numSV += new Integer(items[2]);
         } else {
           System.out.println("Error: no information for num_sv in the model file from libsvm!!");
-          try {
-            throw new Exception();
-          } catch(Exception e) {
-            e.printStackTrace();
-          }
+          Exception e = new Exception();
+          e.fillInStackTrace().printStackTrace();
         }
         line = svmModelBuff.readLine(); //read in one more line for the libsvm model file
       }
@@ -303,9 +300,10 @@ public class SvmForExec extends SupervisedLearner{
 
       public void run()
       {
-          try
+        BufferedReader br = null;  
+        try
           {
-              BufferedReader br = new BomStrippingInputStreamReader(is);
+              br = new BomStrippingInputStreamReader(is);
               String line=null;
               while ( (line = br.readLine()) != null)
                   System.out.println(type + ">" + line);
@@ -313,6 +311,9 @@ public class SvmForExec extends SupervisedLearner{
                 {
                   ioe.printStackTrace();
                 }
+        finally {
+          IOUtils.closeQuietly(br);
+        }
       }
   }
 
@@ -365,6 +366,7 @@ public class SvmForExec extends SupervisedLearner{
           outputGobbler.start();
 
           // any error???
+          @SuppressWarnings("unused")
           int exitVal = proc.waitFor();
           //System.out.println("ExitValue: " + exitVal);
       } catch (Throwable t)
@@ -394,13 +396,14 @@ public class SvmForExec extends SupervisedLearner{
 
       public void run()
       {
-          try
+        BufferedReader br = null;  
+        try
           {
               PrintWriter pw = null;
               if (os != null)
                   pw = new PrintWriter(os);
 
-              BufferedReader br = new BomStrippingInputStreamReader(is);
+              br = new BomStrippingInputStreamReader(is);
               String line=null;
               while ( (line = br.readLine()) != null)
               {
@@ -414,6 +417,9 @@ public class SvmForExec extends SupervisedLearner{
               {
               ioe.printStackTrace();
               }
+        finally {
+          IOUtils.closeQuietly(br);
+        }
       }
 
   }

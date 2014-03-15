@@ -7,16 +7,17 @@
  */
 package gate.learning.learners;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.List;
-
 import gate.learning.ChunkLengthStats;
 import gate.learning.LabelsOfFV;
 import gate.learning.LabelsOfFeatureVectorDoc;
 import gate.learning.LogService;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 /**
  * Post-processing the resutls from the classifiers for annotate
  * text. Some specific post-processing procedure is used
@@ -48,15 +49,15 @@ public class PostProcessing {
    * chunks.  
    */
   public void postProcessingChunk(short stage, LabelsOfFV[] multiLabels,
-    int numClasses, HashSet chunks, HashMap chunkLenHash) {
+    int numClasses, Set<ChunkOrEntity> chunks, Map<Integer,ChunkLengthStats> chunkLenHash) {
     int num = multiLabels.length;
-    HashMap<ChunkOrEntity,Integer>tempChunks = new HashMap<ChunkOrEntity,Integer>();
+    Map<ChunkOrEntity,Integer> tempChunks = new HashMap<ChunkOrEntity,Integer>();
     for(int j = 0; j < numClasses; j += 2) { // for start and end token
       ChunkLengthStats chunkLen;
       //String labelS = new Integer(j / 2 + 1).toString();
       int labelS = j / 2 + 1;
       if(chunkLenHash.get(labelS) != null)
-        chunkLen = (ChunkLengthStats)chunkLenHash.get(labelS);
+        chunkLen = chunkLenHash.get(labelS);
       else chunkLen = new ChunkLengthStats();
       for(int i = 0; i < num; ++i) {
         if(multiLabels[i].probs[j] > boundaryProb) {
@@ -123,8 +124,8 @@ public class PostProcessing {
         }// end of the inner loop
       }
     }// end of the outer loop
-    for(Object ob1 : tempChunks.keySet()) {
-      if(tempChunks.get((ChunkOrEntity)ob1).intValue() == 1) chunks.add(ob1);
+    for(ChunkOrEntity ob1 : tempChunks.keySet()) {
+      if(tempChunks.get(ob1).intValue() == 1) chunks.add(ob1);
     }
   }
   /** Post-processing the results for the classification problem

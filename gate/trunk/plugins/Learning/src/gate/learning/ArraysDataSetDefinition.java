@@ -52,7 +52,7 @@ public class ArraysDataSetDefinition {
   int maxPosPosition = 0;
 
   /** Put the types and feautures and others into the arrays. */
-  void putTypeAndFeatIntoArray(List attrs) {
+  void putTypeAndFeatIntoArray(List<? extends Attribute> attrs) {
     numTypes = obtainNumberOfNLPTypes(attrs);
     typesInDataSetDef = new String[numTypes];
     featuresInDataSetDef = new String[numTypes];
@@ -71,23 +71,23 @@ public class ArraysDataSetDefinition {
   }
 
   /** Get the number of features in the dataset definition unit. */
-  static int obtainNumberOfNLPTypes(List attrs) {
+  static int obtainNumberOfNLPTypes(List<? extends Attribute> attrs) {
     int num = 0;
     if(attrs == null) {
       return num;
     } else {
       for(int i = 0; i < attrs.size(); i++) {
-        if(!((Attribute)attrs.get(i)).isClass()) num++;
+        if(!attrs.get(i).isClass()) num++;
       }
       return num;
     }
   }
 
   /** Get the type, feature, name and position of each of attribute features. */
-  void obtainGATETypesAndFeatures(List attrs) {
+  void obtainGATETypesAndFeatures(List<? extends Attribute> attrs) {
     int num0 = 0;
     for(int i = 0; i < attrs.size(); i++) {
-      Attribute attr = (Attribute)attrs.get(i);
+      Attribute attr = attrs.get(i);
       if(!attr.isClass()) {
         typesInDataSetDef[num0] = attr.getType();
         featuresInDataSetDef[num0] = attr.getFeature();
@@ -109,12 +109,12 @@ public class ArraysDataSetDefinition {
    * Get the annotation features of the two arguments of relation for all the
    * ATTRIBUTE_RELs.
    */
-  void obtainArgs(List relAttrs) {
+  void obtainArgs(List<AttributeRelation> relAttrs) {
     int num0 = 0;
     arg1s = new String[numTypes];
     arg2s = new String[numTypes];
     for(int i = 0; i < relAttrs.size(); i++) {
-      AttributeRelation attr = (AttributeRelation)relAttrs.get(i);
+      AttributeRelation attr = relAttrs.get(i);
       if(!attr.isClass()) {
         arg1s[num0] = attr.getArg1();
         arg2s[num0] = attr.getArg2();

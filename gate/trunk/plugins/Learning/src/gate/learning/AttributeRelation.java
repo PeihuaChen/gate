@@ -8,7 +8,7 @@
 package gate.learning;
 
 import gate.util.GateException;
-import java.util.ArrayList;
+
 import org.jdom.Element;
 
 /**

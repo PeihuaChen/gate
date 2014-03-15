@@ -59,17 +59,17 @@ public class EvaluationBasedOnDocs {
   public List<EvaluationMeasuresComputation> macroMeasuresOfResultsPerRun =
           new ArrayList<EvaluationMeasuresComputation>();
   /** Storing the macro averaged results of every label. */
-  HashMap labels2MMR = new HashMap();
+  Map<String,EvaluationMeasuresComputation> labels2MMR = new HashMap<String,EvaluationMeasuresComputation>();
   /**
    * Label to number of the runs having that label, used for macro-averaged for
    * each label.
    */
-  HashMap labels2RunsNum = new HashMap();
+  Map<String,Integer> labels2RunsNum = new HashMap<String,Integer>();
   /**
    * Label to number of the instances with that label, averaged over the number
    * of runs for that label.
    */
-  HashMap labels2InstNum = new HashMap();
+  Map<String,Integer> labels2InstNum = new HashMap<String,Integer>();
 
   /** Constructor. */
   public EvaluationBasedOnDocs(Corpus corpus, File wdRes, String inputAsN) {
@@ -140,15 +140,15 @@ public class EvaluationBasedOnDocs {
     if(lenPerFold < 1) lenPerFold = 1;
     int beginIndex, endIndex;
     if(LogService.minVerbosityLevel > 0) {
-      System.out.println("Kfold k=" + new Integer(k) + ", numDoc="
-        + new Integer(numDoc) + ", len=" + new Integer(lenPerFold) + ".");
+      System.out.println("Kfold k=" + k + ", numDoc="
+        + numDoc + ", len=" + lenPerFold + ".");
     }
-    LogService.logMessage("Kfold k=" + new Integer(k) + ", numDoc="
-      + new Integer(numDoc) + ", len=" + new Integer(lenPerFold) + ".", 1);
+    LogService.logMessage("Kfold k=" + k + ", numDoc="
+      + numDoc + ", len=" + lenPerFold + ".", 1);
     for(int nr = 0; nr < k; ++nr) {
       EvaluationMeasuresComputation measuresOfResults = new EvaluationMeasuresComputation();
       // Label to measure of result of the label
-      HashMap labels2MR = new HashMap();
+      Map<String,EvaluationMeasuresComputation> labels2MR = new HashMap<String,EvaluationMeasuresComputation>();
       beginIndex = nr * lenPerFold;
       endIndex = (nr + 1) * lenPerFold;
       if(endIndex > numDoc) endIndex = numDoc;
@@ -164,12 +164,12 @@ public class EvaluationBasedOnDocs {
       int nr0 = nr + 1;
       logMes.append("\n*** Fold " + nr0 + "\n");
       logMes.append("Number of docs for training: "
-        + (int)(numDoc - endIndex + beginIndex) + "\n");
+        + (numDoc - endIndex + beginIndex) + "\n");
       int ik = 0;
       for(i = 0; i < numDoc; ++i) {
         if(isUsedForTraining[i]) {
           ++ik;
-          Document toProcess = (Document)corpusOn.get(i);
+          Document toProcess = corpusOn.get(i);
           logMes
             .append(ik + " " + toProcess.getName() + "\n");
           if(toProcess.getDataStore() != null
@@ -178,12 +178,12 @@ public class EvaluationBasedOnDocs {
         }
       }
       logMes.append("Number of docs for application: "
-        + (int)(endIndex - beginIndex) + "\n");
+        + (endIndex - beginIndex) + "\n");
       ik = 0;
       for(i = 0; i < numDoc; ++i) {
         if(!isUsedForTraining[i]) {
           ++ik;
-          Document toProcess = (Document)corpusOn.get(i);
+          Document toProcess = corpusOn.get(i);
           logMes
             .append(ik + " " + toProcess.getName() + "\n");
           if(toProcess.getDataStore() != null
@@ -209,30 +209,30 @@ public class EvaluationBasedOnDocs {
       }
     }
     macroMeasuresOfResults.macroAverage(k);
-    for(Object obj : labels2MMR.keySet()) {
-      int num = new Integer(labels2RunsNum.get(obj).toString()).intValue();
-      ((EvaluationMeasuresComputation)labels2MMR.get(obj)).macroAverage(num);
-      num = (int)(new Float(labels2InstNum.get(obj).toString()).floatValue() / num);
-      labels2InstNum.put(obj, new Integer(num));
+    for(String obj : labels2MMR.keySet()) {
+      int num = labels2RunsNum.get(obj);
+      labels2MMR.get(obj).macroAverage(num);
+      num = (int)(labels2InstNum.get(obj).floatValue() / num);
+      labels2InstNum.put(obj, num);
     }
   }
   
   private EvaluationMeasuresComputation createRunMeasures(
-          EvaluationMeasuresComputation curResults, HashMap labels2MR) { 
+          EvaluationMeasuresComputation curResults, Map<String,EvaluationMeasuresComputation> labels2MR) { 
     
-      HashMap foldLabels2MMR = new HashMap();
-      HashMap foldLabels2RunsNum = new HashMap();
-      HashMap foldLabels2InstNum = new HashMap();
+      Map<String,EvaluationMeasuresComputation> foldLabels2MMR = new HashMap<String,EvaluationMeasuresComputation>();
+      Map<String,Integer> foldLabels2RunsNum = new HashMap<String,Integer>();
+      Map<String,Integer> foldLabels2InstNum = new HashMap<String,Integer>();
       foldLabels2InstNum.putAll(labels2InstNum);
       EvaluationMeasuresComputation retResults = 
               new EvaluationMeasuresComputation();
       add2MacroMeasure(curResults, labels2MR, retResults,
               foldLabels2MMR, foldLabels2RunsNum);
-      for(Object obj : foldLabels2MMR.keySet()) {
-        int num = new Integer(foldLabels2RunsNum.get(obj).toString()).intValue();
-        ((EvaluationMeasuresComputation)foldLabels2MMR.get(obj)).macroAverage(num);
-        num = (int)(new Float(foldLabels2InstNum.get(obj).toString()).floatValue() / num);
-        foldLabels2InstNum.put(obj, new Integer(num));
+      for(String obj : foldLabels2MMR.keySet()) {
+        int num = foldLabels2RunsNum.get(obj);
+        foldLabels2MMR.get(obj).macroAverage(num);
+        num = (int)(foldLabels2InstNum.get(obj).floatValue() / num);
+        foldLabels2InstNum.put(obj, num);
       }
       return retResults;
   }
@@ -247,21 +247,21 @@ public class EvaluationBasedOnDocs {
     int trainingNum = (new Double(Math
       .floor((numDoc * learningSettings.evaluationconfig.ratio))).intValue());
     if(trainingNum > numDoc) trainingNum = numDoc;
-    LogService.logMessage("Split, k=" + new Integer(k) + ", trainingNum="
-      + new Integer(trainingNum) + ".", 1);
+    LogService.logMessage("Split, k=" + k + ", trainingNum="
+      + trainingNum + ".", 1);
     if(LogService.minVerbosityLevel > 0) {
       System.out.println("Hold-out test: runs=" + k
         + ", ratio of training docs is "
         + learningSettings.evaluationconfig.ratio);
-      System.out.println("Split, k=" + new Integer(k) + ", trainingNum="
-        + new Integer(trainingNum) + ".");
+      System.out.println("Split, k=" + k + ", trainingNum="
+        + trainingNum + ".");
     }
     int testNum = numDoc - trainingNum;
     Random randGenerator = new Random(1000);
     for(int nr = 0; nr < k; ++nr) {
       EvaluationMeasuresComputation measuresOfResults = new EvaluationMeasuresComputation();
       // Label to measure of result of the label
-      HashMap labels2MR = new HashMap();
+      Map<String,EvaluationMeasuresComputation> labels2MR = new HashMap<String,EvaluationMeasuresComputation>();
       // Select the training examples randomly from the data
       int[] indexRand = new int[testNum];
       for(int i = 0; i < testNum; ++i) {
@@ -292,8 +292,8 @@ public class EvaluationBasedOnDocs {
           }
         }
         if(LogService.minVerbosityLevel > 1) {
-          System.out.println("i=" + new Integer(i) + ", newNum="
-            + new Integer(newNum));
+          System.out.println("i=" + i + ", newNum="
+            + newNum);
         }
         indexRand[i] = newNum;
       }
@@ -304,13 +304,13 @@ public class EvaluationBasedOnDocs {
       StringBuffer logMes = new StringBuffer();
       int nr0 = nr + 1;
       logMes.append("\n*** Run " + nr0 + "\n");
-      logMes.append("Number of docs for training: " + (int)(numDoc - testNum)
+      logMes.append("Number of docs for training: " + (numDoc - testNum)
         + "\n");
       int ik = 0;
       for(int i = 0; i < numDoc; ++i) {
         if(isUsedForTraining[i]) {
           ++ik;
-          Document toProcess = (Document)corpusOn.get(i);
+          Document toProcess = corpusOn.get(i);
           logMes
             .append(ik + " " + toProcess.getName() + "\n");
           if(toProcess.getDataStore() != null
@@ -323,7 +323,7 @@ public class EvaluationBasedOnDocs {
       for(int i = 0; i < numDoc; ++i) {
         if(!isUsedForTraining[i]) {
           ++ik;
-          Document toProcess = (Document)corpusOn.get(i);
+          Document toProcess = corpusOn.get(i);
           logMes
             .append(ik + " " + toProcess.getName() + "\n");
           if(toProcess.getDataStore() != null
@@ -349,12 +349,12 @@ public class EvaluationBasedOnDocs {
       }
     }
     macroMeasuresOfResults.macroAverage(k);
-    for(Object obj : labels2MMR.keySet()) {
-      int num = new Integer(labels2RunsNum.get(obj).toString()).intValue();
-      ((EvaluationMeasuresComputation)labels2MMR.get(obj)).macroAverage(num);
+    for(String obj : labels2MMR.keySet()) {
+      int num = labels2RunsNum.get(obj);
+      labels2MMR.get(obj).macroAverage(num);
       // Averaged the number of instances for all the runs
-      num = (int)(new Float(labels2InstNum.get(obj).toString()).floatValue() / num);
-      labels2InstNum.put(obj, new Integer(num));
+      num = (int)(labels2InstNum.get(obj).floatValue() / num);
+      labels2InstNum.put(obj, num);
     }
   }
 
@@ -366,8 +366,8 @@ public class EvaluationBasedOnDocs {
    */
   private void oneRun(LearningEngineSettings learningSettings,
     LightWeightLearningApi lightWeightApi, boolean isUsedForTraining[],
-    EvaluationMeasuresComputation measuresOfResults, HashMap labels2MR,
-    HashMap labels2InstNum) throws GateException {
+    EvaluationMeasuresComputation measuresOfResults, Map<String,EvaluationMeasuresComputation> labels2MR,
+    Map<String,Integer> labels2InstNum) throws GateException {
     // first learning using the document for training
     // empty the data file
     emptyDatafile(wdResults, true);
@@ -384,7 +384,7 @@ public class EvaluationBasedOnDocs {
           ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
       for(int i = 0; i < corpusOn.size(); ++i)
         if(isUsedForTraining[i]) {
-          Document toProcess = (Document)corpusOn.get(i);
+          Document toProcess = corpusOn.get(i);
           lightWeightApi.annotations2NLPFeatures(toProcess, numDoc,
             outNLPFeatures, isTraining, learningSettings);
           if(toProcess.getDataStore() != null
@@ -464,7 +464,7 @@ public class EvaluationBasedOnDocs {
           ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
       for(int i = 0; i < corpusOn.size(); ++i)
         if(!isUsedForTraining[i]) {
-          Document toProcess = (Document)corpusOn.get(i);
+          Document toProcess = corpusOn.get(i);
           lightWeightApi.annotations2NLPFeatures(toProcess,
             numDoc, outNLPFeatures, isTraining, learningSettings);
           ++numDoc;
@@ -500,7 +500,7 @@ public class EvaluationBasedOnDocs {
       numDoc = 0;
       for(int i = 0; i < corpusOn.size(); ++i)
         if(!isUsedForTraining[i]) {
-          Document d = (Document)corpusOn.get(i);
+          Document d = corpusOn.get(i);
           corpusTest.add(d);
           if(corpusTest.getDataStore() != null) {
             corpusTest.getDataStore().sync(corpusTest);
@@ -528,19 +528,19 @@ public class EvaluationBasedOnDocs {
       // First get all the labels in the training data,
       // so that we can do evaluation on each single label
       // as well as on all labels
-      HashMap uniqueLabels = new HashMap();
+      Map<String,Integer> uniqueLabels = new HashMap<String,Integer>();
       for(int i = 0; i < corpusOn.size(); ++i)
         if(isUsedForTraining[i]) {
-          Document toProcess = (Document)corpusOn.get(i);
+          Document toProcess = corpusOn.get(i);
           AnnotationSet keyAnns = getInputAS(toProcess).get(classTypeOriginal);
           for(Object obj : keyAnns) {
             if(((Annotation)obj).getFeatures().get(classFeature) != null) {
               String label = ((Annotation)obj).getFeatures().get(classFeature)
                 .toString();
               if(uniqueLabels.containsKey(label))
-                uniqueLabels.put(label, new Integer(new Integer(uniqueLabels
-                  .get(label).toString()).intValue() + 1));
-              else uniqueLabels.put(label, "1");
+                uniqueLabels.put(label, uniqueLabels
+                  .get(label) + 1);
+              else uniqueLabels.put(label, 1); //MAG was "1" instead of 1
             }
           }
           if(toProcess.getDataStore() != null
@@ -550,17 +550,15 @@ public class EvaluationBasedOnDocs {
           }
         }
       // Then create one evaluationMeasure object for each label
-      for(Object obj : uniqueLabels.keySet()) {
+      for(String obj : uniqueLabels.keySet()) {
         EvaluationMeasuresComputation emc = new EvaluationMeasuresComputation();
         labels2MR.put(obj, emc);
       }
       // Copy the number of instances for each label into the macro one
-      for(Object obj : uniqueLabels.keySet()) {
+      for(String obj : uniqueLabels.keySet()) {
         if(labels2InstNum.containsKey(obj)) {
-          int num = new Integer(uniqueLabels.get(obj).toString()).intValue();
-          labels2InstNum.put(obj, new Integer(new Integer(labels2InstNum.get(
-            obj).toString()).intValue()
-            + num));
+          int num = uniqueLabels.get(obj);//new Integer(uniqueLabels.get(obj).toString()).intValue();
+          labels2InstNum.put(obj, labels2InstNum.get(obj) + num);
         } else labels2InstNum.put(obj, uniqueLabels.get(obj));
       }
       // Do the evaluation on the test set
@@ -573,7 +571,7 @@ public class EvaluationBasedOnDocs {
         String arg2F = relAttr.getArg2();
         for(int i = 0; i < corpusOn.size(); ++i) {
           if(!isUsedForTraining[i]) {
-            Document toProcess = (Document)corpusOn.get(i);
+            Document toProcess = corpusOn.get(i);
             evaluateAnnotationsRel(toProcess,
               classTypeOriginal, classTypeTest, classFeature, arg1F, arg2F,
               uniqueLabels.keySet(), labels2MR);
@@ -593,7 +591,7 @@ public class EvaluationBasedOnDocs {
         // evaluation on each label using the AnnDiff method of Gate
         for(int i = 0; i < corpusOn.size(); ++i)
           if(!isUsedForTraining[i]) {
-            Document toProcess = (Document)corpusOn.get(i);
+            Document toProcess = corpusOn.get(i);
             evaluateAnnDiff(toProcess, classTypeOriginal,
               classTypeTest, classFeature, uniqueLabels.keySet(), labels2MR);
             if(toProcess.getDataStore() != null
@@ -606,11 +604,11 @@ public class EvaluationBasedOnDocs {
       // Pool the results of all labels together
       for(Object obj : uniqueLabels.keySet())
         measuresOfResults
-          .add((EvaluationMeasuresComputation)labels2MR.get(obj));
+          .add(labels2MR.get(obj));
       measuresOfResults.computeFmeasure();
       measuresOfResults.computeFmeasureLenient();
       for(Object obj : uniqueLabels.keySet()) {
-        EvaluationMeasuresComputation emc = (EvaluationMeasuresComputation)labels2MR
+        EvaluationMeasuresComputation emc = labels2MR
           .get(obj);
         emc.computeFmeasure();
         emc.computeFmeasureLenient();
@@ -630,12 +628,12 @@ public class EvaluationBasedOnDocs {
         classTypeOriginal);
       for(int i = 0; i < corpusOn.size(); ++i) {
         if(!isUsedForTraining[i]) {
-          Document toProcess = (Document)corpusOn.get(i);
+          Document toProcess = corpusOn.get(i);
           AnnotationSet annsInput = getInputAS(toProcess);
           AnnotationSet anns = annsInput.get(classTypeTest);
-          Iterator iter = anns.iterator();
+          Iterator<Annotation> iter = anns.iterator();
           while(iter.hasNext())
-            annsInput.remove((Annotation)iter.next());
+            annsInput.remove(iter.next());
           if(toProcess.getDataStore() != null
             && corpusOn.getDataStore() != null) {
             corpusOn.getDataStore().sync(corpusOn);
@@ -680,41 +678,39 @@ public class EvaluationBasedOnDocs {
 
   /** Add the F-measure of each label to the overal F-measure */
   public void add2MacroMeasure(EvaluationMeasuresComputation measuresOfResults,
-    HashMap labels2MR, EvaluationMeasuresComputation macroMeasuresOfResults,
-    HashMap labels2MMR, HashMap labels2RunsNum) {
+    Map<String,EvaluationMeasuresComputation> labels2MR, EvaluationMeasuresComputation macroMeasuresOfResults,
+    Map<String,EvaluationMeasuresComputation> labels2MMR, Map<String,Integer> labels2RunsNum) {
     macroMeasuresOfResults.add(measuresOfResults);
     // for each label
-    for(Object obj : labels2MR.keySet()) {
-      String label = obj.toString();
+    for(String label : labels2MR.keySet()) {
       if(labels2MMR.containsKey(label)) {// the label is in the macro
         // Array already
-        ((EvaluationMeasuresComputation)labels2MMR.get(label))
-          .add(((EvaluationMeasuresComputation)(labels2MR.get(label))));
-        labels2RunsNum.put(label, new Integer((new Integer(labels2RunsNum.get(
-          label).toString()).intValue() + 1)));
+        labels2MMR.get(label)
+          .add((labels2MR.get(label)));
+        labels2RunsNum.put(label, labels2RunsNum.get(label) + 1);
       } else {
         // labels2MMR.put(label, new EvaluationMeasuresComputation());
         EvaluationMeasuresComputation emc = new EvaluationMeasuresComputation();
-        emc.add((EvaluationMeasuresComputation)(labels2MR.get(label)));
+        emc.add((labels2MR.get(label)));
         labels2MMR.put(label, emc);
-        labels2RunsNum.put(label, "1");
+        labels2RunsNum.put(label, 1); //MAG: was "1" instead of 1
       }
     }
   }
 
   /** Print the F-measure results for each label. */
-  public String printFmeasureForEachLabel(HashMap uniqueLabels,
-    HashMap labels2MR) {
+  public String printFmeasureForEachLabel(Map<String,Integer> uniqueLabels,
+    Map<String,EvaluationMeasuresComputation> labels2MR) {
     StringBuffer logMes = new StringBuffer();
     logMes.append("\nResults of single label:\n");
     // LogService.logMessage("\nResults of single label", 1);
-    List labels = new ArrayList(uniqueLabels.keySet());
+    List<String> labels = new ArrayList<String>(uniqueLabels.keySet());
     Collections.sort(labels);
     for(int i = 0; i < labels.size(); ++i) {
       String labelName = labels.get(i).toString();
       logMes.append(i + " LabelName=" + labelName + ", number of instances="
-        + new Integer(uniqueLabels.get(labelName).toString()) + "\n");
-      logMes.append(((EvaluationMeasuresComputation)labels2MR.get(labelName))
+        + uniqueLabels.get(labelName) + "\n");
+      logMes.append(labels2MR.get(labelName)
         .printResults());
       // ((EvaluationMeasuresComputation)labels2MR.get(labelName))
       // .printResults(logFileIn);
@@ -724,12 +720,12 @@ public class EvaluationBasedOnDocs {
 
   /** Get the measures per label */
   public Map<String,EvaluationMeasuresComputation> getMeasuresForEachLabel() {
-    List labels = new ArrayList(labels2InstNum.keySet());
+    List<String> labels = new ArrayList<String>(labels2InstNum.keySet());
     Map<String,EvaluationMeasuresComputation> ret = new LinkedHashMap<String,EvaluationMeasuresComputation>();
     Collections.sort(labels);
     for(int i = 0; i < labels.size(); ++i) {
       String labelName = labels.get(i).toString();
-      ret.put(labelName, (EvaluationMeasuresComputation)labels2MMR.get(labelName));
+      ret.put(labelName, labels2MMR.get(labelName));
     }
     return ret;
   }
@@ -737,30 +733,29 @@ public class EvaluationBasedOnDocs {
   
   /** Evaluate the test document by using the AnnotationDiff class. */
   public void evaluateAnnDiff(Document doc, String classTypeOriginal,
-    String classTypeTest, String classFeat, Set labelSet, HashMap labels2MR) {
+    String classTypeTest, String classFeat, Set<String> labelSet, Map<String,EvaluationMeasuresComputation> labels2MR) {
     // for each label
     AnnotationSet annsOriginal = getInputAS(doc).get(classTypeOriginal);
     AnnotationSet annsTest = getInputAS(doc).get(classTypeTest);
-    HashSet annsKey = new HashSet();
-    HashSet annsRes = new HashSet();
-    HashSet signSet = new HashSet();
+    Set<Annotation> annsKey = new HashSet<Annotation>();
+    Set<Annotation> annsRes = new HashSet<Annotation>();
+    Set<String> signSet = new HashSet<String>();
     signSet.add(classFeat);
-    for(Object obj : labelSet) {
-      String label = obj.toString();
+    for(String label : labelSet) {
       annsKey.clear();
       annsRes.clear();
-      for(Object objAnn : annsOriginal)
-        if(((FeatureMap)((Annotation)objAnn).getFeatures()).get(classFeat) != null)
-          if(((FeatureMap)((Annotation)objAnn).getFeatures()).get(classFeat)
+      for(Annotation objAnn : annsOriginal)
+        if(objAnn.getFeatures().get(classFeat) != null)
+          if(objAnn.getFeatures().get(classFeat)
             .toString().equals(label)) annsKey.add(objAnn);
-      for(Object objAnn : annsTest)
-        if(((FeatureMap)((Annotation)objAnn).getFeatures()).get(classFeat) != null)
-          if(((FeatureMap)((Annotation)objAnn).getFeatures()).get(classFeat)
+      for(Annotation objAnn : annsTest)
+        if(objAnn.getFeatures().get(classFeat) != null)
+          if(objAnn.getFeatures().get(classFeat)
             .toString().equals(label)) annsRes.add(objAnn);
       AnnotationDiffer annDiff = new AnnotationDiffer();
       annDiff.setSignificantFeaturesSet(signSet);
       annDiff.calculateDiff(annsKey, annsRes);
-      EvaluationMeasuresComputation emc = (EvaluationMeasuresComputation)labels2MR
+      EvaluationMeasuresComputation emc = labels2MR
         .get(label);
       emc.correct += annDiff.getCorrectMatches();
       emc.partialCor += annDiff.getPartiallyCorrectMatches();
@@ -774,25 +769,24 @@ public class EvaluationBasedOnDocs {
    * standard
    */
   public void evaluateAnnotations(Document doc, String classTypeOriginal,
-    String classTypeTest, String classFeat, Set labelSet, HashMap labels2MR) {
+    String classTypeTest, String classFeat, Set<String> labelSet, Map<String,EvaluationMeasuresComputation> labels2MR) {
     AnnotationSet annsOriginal = getInputAS(doc).get(classTypeOriginal);
     AnnotationSet annsTest = getInputAS(doc).get(classTypeTest);
-    HashSet annsKey = new HashSet();
-    HashSet annsRes = new HashSet();
+    Set<Annotation> annsKey = new HashSet<Annotation>();
+    Set<Annotation> annsRes = new HashSet<Annotation>();
     // For each label
-    for(Object obj : labelSet) {
-      String label = obj.toString();
+    for(String label : labelSet) {
       annsKey.clear();
       annsRes.clear();
-      for(Object objAnn : annsOriginal) {
-        Object label0 = ((Annotation)objAnn).getFeatures().get(classFeat);
+      for(Annotation objAnn : annsOriginal) {
+        Object label0 = objAnn.getFeatures().get(classFeat);
         if(label0 != null && label0.equals(label)) annsKey.add(objAnn);
       }
-      for(Object objAnn : annsTest) {
-        Object label0 = ((Annotation)objAnn).getFeatures().get(classFeat);
+      for(Annotation objAnn : annsTest) {
+        Object label0 = objAnn.getFeatures().get(classFeat);
         if(label0 != null && label0.equals(label)) annsRes.add(objAnn);
       }
-      EvaluationMeasuresComputation measuresOfResults = (EvaluationMeasuresComputation)labels2MR
+      EvaluationMeasuresComputation measuresOfResults = labels2MR
         .get(label);
       for(Object annOrig : annsKey) {
         boolean isMatch = false;
@@ -822,25 +816,24 @@ public class EvaluationBasedOnDocs {
    */
   public void evaluateAnnotationsRel(Document doc, String classTypeOriginal,
     String classTypeTest, String classFeat, String arg1F, String arg2F,
-    Set labelSet, HashMap labels2MR) {
+    Set<String> labelSet, Map<String,EvaluationMeasuresComputation> labels2MR) {
     AnnotationSet annsOriginal = getInputAS(doc).get(classTypeOriginal);
     AnnotationSet annsTest = getInputAS(doc).get(classTypeTest);
-    HashSet annsKey = new HashSet();
-    HashSet annsRes = new HashSet();
+    Set<Annotation> annsKey = new HashSet<Annotation>();
+    Set<Annotation> annsRes = new HashSet<Annotation>();
     // For each label
-    for(Object obj : labelSet) {
-      String label = obj.toString();
+    for(String label : labelSet) {
       annsKey.clear();
       annsRes.clear();
-      for(Object objAnn : annsOriginal) {
-        Object label0 = ((Annotation)objAnn).getFeatures().get(classFeat);
+      for(Annotation objAnn : annsOriginal) {
+        Object label0 = objAnn.getFeatures().get(classFeat);
         if(label0 != null && label0.equals(label)) annsKey.add(objAnn);
       }
-      for(Object objAnn : annsTest) {
-        Object label0 = ((Annotation)objAnn).getFeatures().get(classFeat);
+      for(Annotation objAnn : annsTest) {
+        Object label0 = objAnn.getFeatures().get(classFeat);
         if(label0 != null && label0.equals(label)) annsRes.add(objAnn);
       }
-      EvaluationMeasuresComputation measuresOfResults = (EvaluationMeasuresComputation)labels2MR
+      EvaluationMeasuresComputation measuresOfResults = labels2MR
         .get(label);
       for(Object annOrig : annsKey) {
         Object arg1VO = ((Annotation)annOrig).getFeatures().get(arg1F);

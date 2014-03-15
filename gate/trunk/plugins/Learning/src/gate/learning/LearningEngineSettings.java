@@ -7,18 +7,20 @@
  */
 package gate.learning;
 
+import gate.creole.ResourceInstantiationException;
+import gate.learning.learners.MultiClassLearning;
+import gate.util.GateException;
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
-import gate.creole.ResourceInstantiationException;
-import gate.util.GateException;
 
 /**
  * Reading and storing the learning settings from the configuration file.
@@ -280,7 +282,7 @@ public class LearningEngineSettings {
         "The DSD element in the configureation file is missing or invalid");
     }
     // Threshold settings
-    Iterator parameters = rootElement.getChildren("PARAMETER").iterator();
+    Iterator<?> parameters = rootElement.getChildren("PARAMETER").iterator();
     while(parameters.hasNext()) {
       Element paramelem = (Element)parameters.next();
       String name = paramelem.getAttribute("name").getValue();

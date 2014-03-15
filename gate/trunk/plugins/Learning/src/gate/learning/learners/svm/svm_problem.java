@@ -34,7 +34,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package gate.learning.learners.svm;
 public class svm_problem implements java.io.Serializable
 {
-	public int l;
+  private static final long serialVersionUID = -8940208993494897178L;
+
+  public int l;
 	public double[] y;
 	public svm_node[][] x;
 }

@@ -8,30 +8,32 @@
 package gate.learning.learners;
 
 import gate.learning.ConstantParameters;
+import gate.learning.DocFeatureVectors.LongCompactor;
 import gate.learning.LabelsOfFV;
 import gate.learning.LogService;
 import gate.learning.SparseFeatureVector;
-import gate.learning.DocFeatureVectors.LongCompactor;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.GateException;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * Learning and application by converting the multi-class problem into several
@@ -53,7 +55,7 @@ public class MultiClassLearning {
   /** Number of classes for learning */
   public int numClasses;
   /** The name of class and the number of instances in training document */
-  public HashMap class2NumberInstances;
+  public Map<Integer,Integer> class2NumberInstances;
   /**
    * Use the one against all others, or use the one against another. 1 for one
    * against all others, 2 for one against another.
@@ -91,7 +93,7 @@ public class MultiClassLearning {
     //Open the temp file for writing the fv data
     dataFVinDoc.readingFVsFromFile(trainingDataFile, isUsingFile, tempFVDataFile);
     // First, get the unique labels from the trainign data
-    class2NumberInstances = new HashMap();
+    class2NumberInstances = new HashMap<Integer,Integer>();
     numNull = obtainUniqueLabels(dataFVinDoc, class2NumberInstances);
     numClasses = class2NumberInstances.size();
     return;
@@ -114,7 +116,7 @@ public class MultiClassLearning {
       }
     }
     // Reset the label collection
-    class2NumberInstances = new HashMap();
+    class2NumberInstances = new HashMap<Integer,Integer>();
     numNull = obtainUniqueLabels(dataFVinDoc, class2NumberInstances);
     numClasses = class2NumberInstances.size();
     return numNeg;
@@ -123,8 +125,8 @@ public class MultiClassLearning {
   /** Learn the models and write them into a set of files */
   public void training(final SupervisedLearner learner, File modelFile) {
     final int totalNumFeatures = dataFVinDoc.getTotalNumFeatures();
-    Set classesName = class2NumberInstances.keySet();
-    final ArrayList array1 = new ArrayList(classesName);
+    Set<Integer> classesName = class2NumberInstances.keySet();
+    final List<Integer> array1 = new ArrayList<Integer>(classesName);
     LongCompactor c = new LongCompactor();
     Collections.sort(array1, c);
     if(LogService.minVerbosityLevel > 1)
@@ -567,40 +569,51 @@ public class MultiClassLearning {
     modelFile.delete();
     modelFile.mkdir();
     // open the backup model file and copy its sections into new files
-    BufferedReader oldModelsBuff = new BomStrippingInputStreamReader(
-      new FileInputStream(backupModelFile), "UTF-8");
-    // first 8 lines are the meta data
-    File metaDataFile = new File(modelFile,
-      ConstantParameters.FILENAMEOFModelMetaData);
-    BufferedWriter metaDataBuff = new BufferedWriter(new OutputStreamWriter(
-      new FileOutputStream(metaDataFile), "UTF-8"));
-    for(int i = 0; i < 8; i++) {
-      metaDataBuff.write(oldModelsBuff.readLine());
-      metaDataBuff.write('\n');
-    }
-    metaDataBuff.close();
-    int classIndex = 1;
-    BufferedWriter modelWriter = null;
-    String line = null;
-    while((line = oldModelsBuff.readLine()) != null) {
-      if(line.startsWith("Class=") && line.contains("numTraining=")
-        && line.contains("numPos=")) {
-        // found the start of a new model, so close the previous file and start
-        // the next one
-        if(modelWriter != null) {
-          modelWriter.close();
-        }
-        File nextModel = new File(modelFile, String.format(
-          ConstantParameters.FILENAMEOFPerClassModel, Integer
-            .valueOf(classIndex++)));
-        modelWriter = new BufferedWriter(new OutputStreamWriter(
-          new FileOutputStream(nextModel), "UTF-8"));
+    BufferedReader oldModelsBuff = null;
+    
+    try {
+      oldModelsBuff =
+        new BomStrippingInputStreamReader(new FileInputStream(backupModelFile),
+          "UTF-8");
+      // first 8 lines are the meta data
+      File metaDataFile =
+        new File(modelFile, ConstantParameters.FILENAMEOFModelMetaData);
+      BufferedWriter metaDataBuff =
+        new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+          metaDataFile), "UTF-8"));
+      for(int i = 0; i < 8; i++) {
+        metaDataBuff.write(oldModelsBuff.readLine());
+        metaDataBuff.write('\n');
       }
-      modelWriter.write(line);
-      modelWriter.write('\n');
-    }
-    if(modelWriter != null) {
-      modelWriter.close();
+      metaDataBuff.close();
+      int classIndex = 1;
+      BufferedWriter modelWriter = null;
+      String line = null;
+      while((line = oldModelsBuff.readLine()) != null) {
+        if(line.startsWith("Class=") && line.contains("numTraining=") &&
+          line.contains("numPos=")) {
+          // found the start of a new model, so close the previous file and
+          // start
+          // the next one
+          if(modelWriter != null) {
+            modelWriter.close();
+          }
+          File nextModel =
+            new File(modelFile, String.format(
+              ConstantParameters.FILENAMEOFPerClassModel,
+              Integer.valueOf(classIndex++)));
+          modelWriter =
+            new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+              nextModel), "UTF-8"));
+        }
+        modelWriter.write(line);
+        modelWriter.write('\n');
+      }
+      if(modelWriter != null) {
+        modelWriter.close();
+      }
+    } finally {
+      IOUtils.closeQuietly(oldModelsBuff);
     }
   }
 
@@ -637,12 +650,11 @@ public class MultiClassLearning {
     String line;
     modelsBuff.readLine(); // read the traing documents
     line = modelsBuff.readLine(); // read the number of classes
-    numClasses = new Integer(line.substring(0, line.indexOf(" "))).intValue();
+    numClasses = new Integer(line.substring(0, line.indexOf(" ")));
     line = modelsBuff.readLine(); // read the number of classes
-    numNull = new Integer(line.substring(0, line.indexOf(" "))).intValue();
+    numNull = new Integer(line.substring(0, line.indexOf(" ")));
     line = modelsBuff.readLine(); // read the total number of features
-    totalFeatures = new Integer(line.substring(0, line.indexOf(" ")))
-      .intValue();
+    totalFeatures = new Integer(line.substring(0, line.indexOf(" ")));
     totalFeatures += 5;
     modelsBuff.readLine(); // read the model file name
     line = modelsBuff.readLine(); // read the learner's name
@@ -654,7 +666,7 @@ public class MultiClassLearning {
 
   /** Obtain the unqilabels from the training data. */
   int obtainUniqueLabels(DataForLearning dataFVinDoc,
-    HashMap class2NumberInstances) {
+    Map<Integer,Integer> class2NumberInstances) {
     int numN = 0;
     for(int i = 0; i < dataFVinDoc.getNumTrainingDocs(); ++i)
       for(int j = 0; j < dataFVinDoc.labelsFVDoc[i].multiLabels.length; ++j) {
@@ -662,12 +674,12 @@ public class MultiClassLearning {
         LabelsOfFV multiLabel = dataFVinDoc.labelsFVDoc[i].multiLabels[j];
         if(multiLabel.num == 0) ++numN;
         for(int j1 = 0; j1 < multiLabel.num; ++j1) {
-          if(Integer.valueOf(multiLabel.labels[j1]) > 0) {
+          if(multiLabel.labels[j1] > 0) {
             if(class2NumberInstances.containsKey(multiLabel.labels[j1]))
               class2NumberInstances.put(multiLabel.labels[j1],
-                (new Integer(class2NumberInstances.get(multiLabel.labels[j1])
-                  .toString())) + 1);
-            else class2NumberInstances.put(multiLabel.labels[j1], "1");
+                class2NumberInstances.get(multiLabel.labels[j1])
+                   + 1);
+            else class2NumberInstances.put(multiLabel.labels[j1], 1);
           }
         }
       }
@@ -677,8 +689,8 @@ public class MultiClassLearning {
   /** Learn the models and write them into a file -- not use thread*/
   public void trainingNoThread(SupervisedLearner learner, File modelFile, boolean isUsingTempDataFile, File tempFVDataFile) {
     final int totalNumFeatures = dataFVinDoc.getTotalNumFeatures();
-    Set classesName = class2NumberInstances.keySet();
-    final ArrayList array1 = new ArrayList(classesName);
+    Set<Integer> classesName = class2NumberInstances.keySet();
+    final List<Integer> array1 = new ArrayList<Integer>(classesName);
     LongCompactor c = new LongCompactor();
     Collections.sort(array1, c);
     if(LogService.minVerbosityLevel>1)

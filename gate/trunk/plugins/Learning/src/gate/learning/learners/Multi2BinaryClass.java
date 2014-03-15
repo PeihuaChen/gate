@@ -30,7 +30,7 @@ public class Multi2BinaryClass {
         LabelsOfFV multiLabel = dataFVinDoc.labelsFVDoc[i].multiLabels[j];
         labels[kk] = -1;
         for(int j1 = 0; j1 < multiLabel.num; ++j1) {
-          if(className.equals(new Integer(multiLabel.labels[j1]).toString())) {
+          if(className.equals(((Integer)multiLabel.labels[j1]).toString())) {
             labels[kk] = 1;
             break;
           }
@@ -54,7 +54,7 @@ public class Multi2BinaryClass {
         short labelT = 0;
         for(int j1 = 0; j1 < multiLabel.num; ++j1) {
           // if(className1.equals(multiLabel.labels[j1])) {
-          if(className1.equals(new Integer(multiLabel.labels[j1]).toString())) {
+          if(className1.equals(((Integer)multiLabel.labels[j1]).toString())) {
             // labels[kk] = 1;
             // isCounted = true;
             labelT = 1;
@@ -62,7 +62,7 @@ public class Multi2BinaryClass {
               isCounted = false;
             else isCounted = true;
             // break;
-          } else if(className2.equals(new Integer(multiLabel.labels[j1])
+          } else if(className2.equals(((Integer)multiLabel.labels[j1])
             .toString())) {
             // labels[kk] = 1;
             // isCounted = true;
@@ -96,7 +96,7 @@ public class Multi2BinaryClass {
         } else {
           for(int j1 = 0; j1 < multiLabel.num; ++j1) {
             // if(className.equals(multiLabel.labels[j1])) {
-            if(className.equals(new Integer(multiLabel.labels[j1]).toString())) {
+            if(className.equals(((Integer)multiLabel.labels[j1]).toString())) {
               labels[kk] = 1;
               isCounted = true;
               break;

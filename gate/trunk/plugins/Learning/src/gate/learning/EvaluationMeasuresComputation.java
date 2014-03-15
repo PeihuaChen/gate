@@ -7,7 +7,6 @@
  */
 package gate.learning;
 
-import java.io.PrintWriter;
 
 /**
  * Store the results for computing the F-measures for binary classification
@@ -61,10 +60,10 @@ public class EvaluationMeasuresComputation {
     resSize = correct + partialCor + missing;
     if((keySize) == 0)
       precision = 0;
-    else precision = (float)correct / keySize;
+    else precision = correct / keySize;
     if((resSize) == 0)
       recall = 0;
-    else recall = (float)correct / resSize;
+    else recall = correct / resSize;
     if((precision + recall) == 0)
       f1 = 0;
     else f1 = 2 * precision * recall / (precision + recall);
@@ -77,10 +76,10 @@ public class EvaluationMeasuresComputation {
     resSize = correct + partialCor + missing;
     if((keySize) == 0)
       precisionLenient = 0;
-    else precisionLenient = (float)(correct + partialCor) / keySize;
+    else precisionLenient = (correct + partialCor) / keySize;
     if((resSize) == 0)
       recallLenient = 0;
-    else recallLenient = (float)(correct + partialCor) / resSize;
+    else recallLenient = (correct + partialCor) / resSize;
     if((precisionLenient + recallLenient) == 0)
       f1Lenient = 0;
     else f1Lenient = 2 * precisionLenient * recallLenient

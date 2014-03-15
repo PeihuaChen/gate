@@ -15,11 +15,11 @@
 package gate.learning;
 
 import gate.util.GateException;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.jdom.Content;
 import org.jdom.Element;
 
 /**
@@ -35,7 +35,7 @@ public class DataSetDefinition {
   /** Class attibute index in the attribute list. */
   protected int classIndex;
   /** List of Ngram type features. */
-  protected java.util.List ngrams;
+  protected List<Ngram> ngrams;
   /** Data set for relation learning or others. */
   public short dataType;
   /** Chunking learning data type. */
@@ -56,7 +56,7 @@ public class DataSetDefinition {
   /** The second argument of relation. */
   ArgOfRelation arg2 = null;
   /** List of ATTRIBUTE_REL type features. */
-  protected java.util.List relAttributes;
+  protected List<AttributeRelation> relAttributes;
   /** Is the same window size for all NLP features. */
   public boolean isSameWinSize=false;
   /** The common window size. */
@@ -155,8 +155,8 @@ public class DataSetDefinition {
       }
       // find the relation attributes
       int attrIndex = 0;
-      relAttributes = new ArrayList();
-      Iterator childrenIter = domElement.getChildren("ATTRIBUTE_REL")
+      relAttributes = new ArrayList<AttributeRelation>();
+      Iterator<?> childrenIter = domElement.getChildren("ATTRIBUTE_REL")
         .iterator();
       while(childrenIter.hasNext()) {
         Element child = (Element)childrenIter.next();
@@ -183,7 +183,7 @@ public class DataSetDefinition {
       // find the attributes
       int attrIndex = 0;
       attributes = new ArrayList<Attribute>();
-      Iterator childrenIter = domElement.getChildren("ATTRIBUTE").iterator();
+      Iterator<?> childrenIter = domElement.getChildren("ATTRIBUTE").iterator();
       while(childrenIter.hasNext()) {
         Element child = (Element)childrenIter.next();
         Attribute attribute = new Attribute(child);
@@ -200,7 +200,7 @@ public class DataSetDefinition {
         attributes.add(attribute);
         attrIndex++;
       }
-      Iterator childrenSerieIter = domElement.getChildren("ATTRIBUTELIST")
+      Iterator<?> childrenSerieIter = domElement.getChildren("ATTRIBUTELIST")
         .iterator();
       while(childrenSerieIter.hasNext()) {
         Element child = (Element)childrenSerieIter.next();
@@ -246,7 +246,7 @@ public class DataSetDefinition {
       if(classAttribute == null)
         System.out.println("!! Warning: No class attribute defined! You CANNOT learn, but it's OK for producing the feature files.");
       // find the Ngrams
-      ngrams = new ArrayList();
+      ngrams = new ArrayList<Ngram>();
       childrenIter = domElement.getChildren("NGRAM").iterator();
       while(childrenIter.hasNext()) {
         Element child = (Element)childrenIter.next();
@@ -266,16 +266,16 @@ public class DataSetDefinition {
     int maxP = 0;
     int maxN = 0;
     for(int i = 0; i < arg1.attributes.size(); ++i) {
-      if(((Attribute)arg1.attributes.get(i)).position > maxP)
-        maxP = ((Attribute)arg1.attributes.get(i)).position;
-      else if(((Attribute)arg1.attributes.get(i)).position < maxN)
-        maxN = ((Attribute)arg1.attributes.get(i)).position;
+      if(arg1.attributes.get(i).position > maxP)
+        maxP = arg1.attributes.get(i).position;
+      else if(arg1.attributes.get(i).position < maxN)
+        maxN = arg1.attributes.get(i).position;
     }
     for(int i = 0; i < arg1.ngrams.size(); ++i) {
-      if(((Ngram)arg1.ngrams.get(i)).position > maxP)
-        maxP = ((Ngram)arg1.ngrams.get(i)).position;
-      else if(((Ngram)arg1.ngrams.get(i)).position < maxN)
-        maxN = ((Ngram)arg1.ngrams.get(i)).position;
+      if(arg1.ngrams.get(i).position > maxP)
+        maxP = arg1.ngrams.get(i).position;
+      else if(arg1.ngrams.get(i).position < maxN)
+        maxN = arg1.ngrams.get(i).position;
     }
     // Minus for maxN because it's a negative number.
     return maxP - maxN;
@@ -285,24 +285,24 @@ public class DataSetDefinition {
   private int obtainArgumentFeatures(Element domElement, ArgOfRelation argRel)
     throws GateException {
     int attrIndex = 0;
-    argRel.attributes = new ArrayList();
-    Iterator childrenIter = domElement.getChildren("ATTRIBUTE").iterator();
+    argRel.attributes = new ArrayList<Attribute>();
+    Iterator<?> childrenIter = domElement.getChildren("ATTRIBUTE").iterator();
     while(childrenIter.hasNext()) {
       Element child = (Element)childrenIter.next();
       Attribute attribute = new Attribute(child);
       argRel.attributes.add(attribute);
       attrIndex++;
     }
-    Iterator childrenSerieIter = domElement.getChildren("ATTRIBUTELIST")
+    Iterator<?> childrenSerieIter = domElement.getChildren("ATTRIBUTELIST")
       .iterator();
     while(childrenSerieIter.hasNext()) {
       Element child = (Element)childrenSerieIter.next();
-      List attributelist = Attribute.parseSerie(child);
+      List<Attribute> attributelist = Attribute.parseSerie(child);
       argRel.attributes.addAll(attributelist);
       attrIndex += attributelist.size();
     }
     // find the Ngrams
-    argRel.ngrams = new ArrayList();
+    argRel.ngrams = new ArrayList<Ngram>();
     childrenIter = domElement.getChildren("NGRAM").iterator();
     while(childrenIter.hasNext()) {
       Element child = (Element)childrenIter.next();
@@ -315,7 +315,7 @@ public class DataSetDefinition {
   public String toString() {
     StringBuffer res = new StringBuffer();
     res.append("Instance type: " + instanceType + "\n");
-    Iterator attrIter = attributes.iterator();
+    Iterator<?> attrIter = attributes.iterator();
     while(attrIter.hasNext()) {
       res.append("Attribute:" + attrIter.next().toString() + "\n");
     }
@@ -327,7 +327,7 @@ public class DataSetDefinition {
     return res.toString();
   }
 
-  public java.util.List getAttributes() {
+  public List<Attribute> getAttributes() {
     return attributes;
   }
 
@@ -343,7 +343,7 @@ public class DataSetDefinition {
     return classIndex;
   }
 
-  public java.util.List getNgrams() {
+  public List<Ngram> getNgrams() {
     return ngrams;
   }
 

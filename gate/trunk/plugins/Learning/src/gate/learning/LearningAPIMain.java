@@ -13,9 +13,22 @@ import gate.ProcessingResource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
-import gate.util.*;
+import gate.util.Benchmark;
+import gate.util.Benchmarkable;
+import gate.util.BomStrippingInputStreamReader;
+import gate.util.Files;
+import gate.util.GateException;
+import gate.util.GateRuntimeException;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DateFormat;
@@ -109,7 +122,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
   }
 
   // featureMap that is used for exporting log messages
-  protected java.util.Map benchmarkingFeatures = new HashMap();
+  protected Map<Object,Object> benchmarkingFeatures = new HashMap<Object,Object>();
 
   /** Initialise this resource, and return it. */
   public gate.Resource init() throws ResourceInstantiationException {
@@ -256,7 +269,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
       throw new ExecutionException("No Document found in corpus!");
     // set benchmark ID on the lightWeightApi
     String oldLightWeightApiParentId = null;
-    if(lightWeightApi instanceof Benchmarkable) {
+    if(lightWeightApi != null) {
       oldLightWeightApiParentId = lightWeightApi.getParentBenchmarkId();
       lightWeightApi.createBenchmarkId(getBenchmarkId());
     }
@@ -355,7 +368,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
           benchmarkingFeatures.put("numDocs", "" + numDoc);
           for(int i = startDocIdApp; i < endDocIdApp; ++i) {
             boolean wasLoaded = corpus.isDocumentLoaded(i);
-            Document toProcess = (Document)corpus.get(i);
+            Document toProcess = corpus.get(i);
             lightWeightApi.annotations2NLPFeatures(toProcess,
                     i - startDocIdApp, outNLPFeatures, isTraining,
                     learningSettings);
@@ -460,7 +473,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             outDocsName.append("##totalDocs=" + numDoc);
             outDocsName.newLine();
             for(int i = 0; i < numDoc; ++i) {
-              Document toProcess = (Document)corpus.get(i);
+              Document toProcess = corpus.get(i);
               lightWeightApi.annotations2NLPFeatures(toProcess, i,
                       outNLPFeatures, isTraining, learningSettings);
               String docN = toProcess.getName();
@@ -519,8 +532,8 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
               if(learningSettings.datasetDefinition.getNgrams().size() >= 1) {
                 startTime = Benchmark.startPoint();
                 lightWeightApi.featureList2LM(wdResults,
-                        ((Ngram)learningSettings.datasetDefinition.getNgrams()
-                                .get(0)).getNumber());
+                        learningSettings.datasetDefinition.getNgrams()
+                                .get(0).getNumber());
                 Benchmark.checkPoint(startTime, getBenchmarkId() + "."
                         + Benchmark.WRITING_NGRAM_MODEL, this,
                         benchmarkingFeatures);
@@ -577,7 +590,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                                                     ConstantParameters.FILENAMEOFNLPFeaturesData)),
                                     "UTF-8"));
             for(int i = 0; i < numDoc; ++i) {
-              Document toProcess = (Document)corpus.get(i);
+              Document toProcess = corpus.get(i);
               lightWeightApi.annotations2NLPFeatures(toProcess, i,
                       outNLPFeatures, isTraining, learningSettings);
               if(toProcess.getDataStore() != null
@@ -691,7 +704,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
               startTime = Benchmark.startPoint();
               for(int i = startDocIdApp; i < endDocIdApp; ++i) {
                 boolean wasLoaded = corpus.isDocumentLoaded(i);
-                Document toProcess = (Document)corpus.get(i);
+                Document toProcess = corpus.get(i);
                 lightWeightApi.annotations2NLPFeatures(toProcess, i
                         - startDocIdApp, outNLPFeatures, isTraining,
                         learningSettings);
@@ -767,7 +780,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             // value of EXPERIMENT-ID in the config file and the date and 
             // time of the evaluation run.
             if(getRunProtocolDir() != null) {
-              File configDir = learningSettings.configFile.getParentFile();
+              //File configDir = learningSettings.configFile.getParentFile();
               String fileNameBase = 
                       learningSettings.configFile.getName().replaceAll("\\.xml$","");
               String date_time_ended = dateTimeStampFormat.format(new Date());
@@ -883,7 +896,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                                                     ConstantParameters.FILENAMEOFNLPFeaturesDataTemp)),
                                     "UTF-8"));
             for(int i = 0; i < numDoc; ++i) {
-              lightWeightApi.annotations2NLPFeatures((Document)corpus.get(i),
+              lightWeightApi.annotations2NLPFeatures(corpus.get(i),
                       i, outNLPFeaturesTemp, isTraining, learningSettings);
             }
             outNLPFeaturesTemp.flush();

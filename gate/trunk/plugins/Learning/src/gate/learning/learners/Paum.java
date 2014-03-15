@@ -1,15 +1,10 @@
 package gate.learning.learners;
 
+import gate.learning.SparseFeatureVector;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import gate.learning.DocFeatureVectors;
-import gate.learning.LabelsOfFV;
-import gate.learning.LabelsOfFeatureVectorDoc;
-import gate.learning.SparseFeatureVector;
-import gate.learning.UsefulFunctions;
 
 /** The Java implementation of the PAUM learning algorithm,
  * the Perceptron algorithm with uneven margins. See the following reference
