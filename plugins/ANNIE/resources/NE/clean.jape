@@ -14,7 +14,7 @@
 */
 
 Phase:	Clean
-Input: TempPerson TempLocation TempOrganization TempDate TempTime TempYear TempZone Street Postcode Email Url Phone Ip TempIdentifier TempSpecs ClosedClass Initials Upper FirstPerson JobTitle HashtagToken HashtagLookup Temp
+Input: TempPerson TempLocation TempOrganization TempDate TempTime TempYear TempZone Street Postcode Email Url Phone Ip TempIdentifier TempSpecs ClosedClass Initials Upper FirstPerson JobTitle HashtagToken HashtagLookup Temp Title UrlPre
 Options: control = all
 
 Rule:CleanTempAnnotations
@@ -41,6 +41,8 @@ Rule:CleanTempAnnotations
  {JobTitle}|
  {HashtagToken}|
  {HashtagLookup}|
+ {Title}|
+ {UrlPre}|
  {Temp}
 ):temp
 -->

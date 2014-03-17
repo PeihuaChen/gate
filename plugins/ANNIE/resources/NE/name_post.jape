@@ -14,7 +14,7 @@
 */
 
 Phase:	NamePost
-Input: Token Lookup FirstPerson
+Input: Token Lookup FirstPerson 
 Options: control = appelt
 
 // this runs after name.jape to fix some problems that may have been caused
@@ -58,3 +58,8 @@ if (firstPerson != null && firstPerson.size()>0)
 outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }}
+
+
+
+
+ 
