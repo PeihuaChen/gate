@@ -14,7 +14,7 @@
 */
 
 Phase:	First
-Input: Token 
+Input: Token NumberLetter
 Options: control = appelt
 
 // this has to be run first of all 
@@ -55,6 +55,14 @@ Priority: 100
 ):tag
 -->
 :tag.ClosedClass = {rule = "ClosedClass"}
+
+Rule: NumberLetter
+Priority: 100
+( 
+ {NumberLetter}
+):tag
+-->
+{} 
 
 
 Rule: Upper

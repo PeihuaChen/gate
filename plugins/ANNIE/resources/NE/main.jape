@@ -14,7 +14,8 @@
 */
 
 MultiPhase:	TestTheGrammars
-Phases: 
+Phases:
+numberletter 
 first
 firstname
 name
