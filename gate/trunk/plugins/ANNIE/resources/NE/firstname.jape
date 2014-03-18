@@ -14,7 +14,7 @@
 */
 
 Phase:	FirstName
-Input: Token Lookup ClosedClass
+Input: Token Lookup ClosedClass NumberLetter
 Options: control = appelt
 
 
@@ -126,7 +126,7 @@ Rule: Title
 
 Rule: Initials1
 (
-  ({Token.orth == upperInitial, Token.length =="1", !ClosedClass, !Lookup}
+  ({Token.orth == upperInitial, Token.length =="1", !ClosedClass, !Lookup, !NumberLetter}
   ({Token.string == "."})?
   )+
 ):tag
@@ -137,8 +137,8 @@ Rule: Initials1
 Rule: Initials2
 
 (
- {Token.orth == allCaps, Token.length == "2", !Lookup, !ClosedClass} |
- {Token.orth == allCaps, Token.length == "3", !Lookup, !ClosedClass}
+ {Token.orth == allCaps, Token.length == "2", !Lookup, !ClosedClass, !NumberLetter} |
+ {Token.orth == allCaps, Token.length == "3", !Lookup, !ClosedClass, !NumberLetter}
 ):tag
 -->
 :tag.Initials = {rule = "Initials2"}
