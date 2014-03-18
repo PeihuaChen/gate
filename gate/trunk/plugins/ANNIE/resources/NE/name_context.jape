@@ -134,9 +134,22 @@ Priority: 20
 -->
   {}
 
-
-
-
+Rule:PersonSays
+Priority: 20
+(
+ {Unknown}({Unknown})?
+):tag
+ ({Lookup.majorType == say})
+-->
+{
+//removes old  "Unknown" annotations and adds a new "Person" one
+gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("tag");
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule", "PersonSays");
+outputAS.add(person.firstNode(), person.lastNode(), "Person",
+features);
+outputAS.removeAll(person);
+}
 
 
 
