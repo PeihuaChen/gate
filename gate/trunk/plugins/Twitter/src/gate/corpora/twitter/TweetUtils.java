@@ -188,7 +188,7 @@ public class TweetUtils  {
         // value to a normal object (possibly FeatureMap)
         return process(value);
       }
-      else if (value instanceof JsonNode){
+      else if (value != null){
         // Found current key; keep digging for the rest
         return dig(value, keySequence, index + 1);
       }

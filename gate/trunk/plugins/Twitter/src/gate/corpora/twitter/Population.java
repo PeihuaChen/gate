@@ -63,7 +63,7 @@ public class Population extends ResourceHelper  {
       // For now, we assume the streaming API format (concatenated maps, not in a list)
       List<Tweet> tweets = TweetUtils.readTweetStrings(lines, contentKeys, featureKeys);
       
-      int digits = (int) Math.ceil(Math.log10((double) tweets.size()));
+      int digits = (int) Math.ceil(Math.log10(tweets.size()));
       int tweetCounter = 0;
       Document document = newDocument(inputUrl, tweetCounter, digits);
       StringBuilder content = new StringBuilder();

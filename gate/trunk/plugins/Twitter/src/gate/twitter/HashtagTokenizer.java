@@ -506,7 +506,7 @@ public class HashtagTokenizer extends AbstractLanguageAnalyser {
     if(annotations == null || annotations.isEmpty()) return sorted;
 
     sorted.addAll(annotations);
-    Collections.sort(sorted, (Comparator<Annotation>)lengthComparator);
+    Collections.sort(sorted, lengthComparator);
 
     // TODO filter out annotations with the same span
 
