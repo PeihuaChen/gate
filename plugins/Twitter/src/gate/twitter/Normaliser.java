@@ -239,7 +239,7 @@ public class Normaliser extends AbstractLanguageAnalyser {
           new ArrayList<Annotation>(annotations.get());
         boolean found = false;
         for(int i = 0; i < tempList.size(); i++) {
-          Annotation annotation = (Annotation)tempList.get(i);
+          Annotation annotation = tempList.get(i);
           if(annotation.getStartNode().getOffset().intValue() == start &&
             annotation.getEndNode().getOffset().intValue() == end) {
             // this is the one
