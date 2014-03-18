@@ -20,6 +20,7 @@ Options: control = appelt
 
 Rule: LocConjLoc1 
 Priority: 10
+// Unknown and Location 
 
 (
 {Unknown.kind == PN}
@@ -43,6 +44,8 @@ outputAS.removeAll(loc);
 
 Rule: LocConjLoc2
 Priority: 10
+
+// Location and Unknown
 
 (
  {Location}
@@ -93,4 +96,13 @@ Priority: 100
 -->
 :tag.Location = {locType = region, rule = "LocState"}
 
+
+Rule: UnknownLocKey
+Priority: 20
+(
+ ({Unknown}):tag
+ {Lookup.majorType == loc_general_key}
+)
+-->
+:tag.Location = {locType = unknown, rule = "UnknownLocKey"}
 
