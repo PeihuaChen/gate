@@ -15,7 +15,7 @@
 
 
 Phase:	Org_Context
-Input: Token Lookup Organization Unknown Location Person
+Input: Token Lookup Organization Unknown Location Person JobTitle
 Options: control = appelt
 
 
@@ -202,6 +202,33 @@ features);
 outputAS.removeAll(org);
 }
 
+Rule:UnknownJobTitlePerson
+
+(
+ {Unknown.kind == PN}
+):org 
+(
+ ({Token.string == "'"}
+  ({Token.string == "s"})?
+ )?
+{JobTitle}
+ {Person}
+)
+--> 
+ {
+//get the matched annotation(s)
+gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
+
+//create the new annotation
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule ", "UnknownJobTitlePerson");
+features.put("orgType ", "company");
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
+features);
+
+//delete the old annotation(s)
+outputAS.removeAll(org);
+}
 
 Rule: OrgConjOrg1 
 Priority: 10
