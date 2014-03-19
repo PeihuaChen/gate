@@ -15,29 +15,48 @@
  */
 package gate.metamap;
 
-import gov.nih.nlm.nls.metamap.*;
-
-import gate.*;
-import gate.creole.*;
-import gate.creole.metadata.*;
-import gate.util.*;
-
 import gate.Annotation;
 import gate.AnnotationSet;
-import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
+import gate.util.InvalidOffsetException;
+import gate.util.OffsetComparator;
+import gov.nih.nlm.nls.metamap.Ev;
+import gov.nih.nlm.nls.metamap.Mapping;
+import gov.nih.nlm.nls.metamap.MetaMapApi;
+import gov.nih.nlm.nls.metamap.MetaMapApiImpl;
+import gov.nih.nlm.nls.metamap.Negation;
+import gov.nih.nlm.nls.metamap.PCM;
+import gov.nih.nlm.nls.metamap.Phrase;
+import gov.nih.nlm.nls.metamap.Position;
+import gov.nih.nlm.nls.metamap.Result;
+import gov.nih.nlm.nls.metamap.Utterance;
+import info.olteanu.interfaces.StringFilter;
+import info.olteanu.utils.TextNormalizer;
 
-import java.util.*;
-import java.io.*;
-
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 // TextNormalizer code from phramer.org
 // Allows compilation under both Java 5 and Java 6
-import info.olteanu.utils.*;
-import info.olteanu.interfaces.StringFilter;
-
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 /** 
  * This class is the implementation of the resource METAMAP.

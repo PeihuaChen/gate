@@ -11,17 +11,28 @@
  */
 package crawl;
 
+import gate.Corpus;
 import gate.Document;
 import gate.Factory;
 import gate.ProcessingResource;
 import gate.Resource;
-import gate.creole.*;
-import gate.creole.metadata.*;
-import gate.util.*;
-import gate.*;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ExecutionInterruptedException;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.HiddenCreoleParameter;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
+import gate.util.Err;
+import gate.util.Strings;
+
 import java.net.URL;
-import java.util.*;
-import websphinx.*;
+import java.util.List;
+
+import websphinx.Crawler;
+import websphinx.DownloadParameters;
 
 
 @CreoleResource(name = "Crawler PR",

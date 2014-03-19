@@ -11,13 +11,28 @@
  */
 package gate.termraider.bank;
 
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
 import gate.creole.ResourceInstantiationException;
-import gate.creole.metadata.*;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
 import gate.gui.ActionsPublisher;
-import gate.*;
-import gate.termraider.modes.*;
-import gate.termraider.util.*;
-import java.util.*;
+import gate.termraider.modes.IdfCalculation;
+import gate.termraider.modes.Normalization;
+import gate.termraider.modes.TfCalculation;
+import gate.termraider.util.ScoreType;
+import gate.termraider.util.Term;
+import gate.termraider.util.Utilities;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 
 @CreoleResource(name = "TfIdfTermbank",
