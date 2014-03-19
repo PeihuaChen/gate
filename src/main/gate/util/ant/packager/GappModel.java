@@ -94,7 +94,6 @@ public class GappModel {
    * packaging does not contain any $gatehome$ paths.  If no gateHomeURL is
    * provided but the application does contain a $gatehome$ path, a
    * GateRuntimeException will be thrown.
-   * @param resourcesHomeURL TODO
    * @param resourcesHomeURL the URL against which $resourceshome$ relative paths should
    * be resolved.  This may be null if you are sure that the GAPP you are
    * packaging does not contain any $resourceshome$ paths.  If no gateHomeURL is
