@@ -39,7 +39,7 @@
   <!-- location for the generated JAR file -->
   <property name="jar.location" location="languageID.jar" />
 
-
+  <property name="gate.compile.maxwarnings" value="10000" />
 
   <!-- Classpath to compile - includes gate.jar, GATE/lib/*.jar and any local
        library JAR files. -->
@@ -65,8 +65,12 @@
            destdir="${classes.dir}"
            debug="true"
            debuglevel="lines,source"
-           source="1.5"
-           target="1.5" />
+           source="1.6"
+           target="1.6">
+    	<compilerarg value="-Xmaxwarns" />
+		<compilerarg value="${gate.compile.maxwarnings}" />
+		<compilerarg value="-Xlint:all" />
+    </javac>
   </target>
 
   <!-- copy resources (anything non-.java) from src to classes -->
