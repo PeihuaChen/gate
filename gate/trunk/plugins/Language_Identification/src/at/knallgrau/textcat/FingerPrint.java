@@ -31,8 +31,6 @@ public class FingerPrint {
 
     private Map<String, Integer> ngrams = new HashMap<String, Integer>();
 
-    private static final long serialVersionUID = -2790111752993314113L;
-
     private final Pattern filePattern = Pattern.compile("-(.*)\\.lm$");
 
     private final Pattern pattern = Pattern.compile("^_?[^0-9\\?!\\-_/]*_?$");

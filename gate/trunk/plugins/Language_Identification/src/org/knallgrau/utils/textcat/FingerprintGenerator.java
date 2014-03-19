@@ -36,6 +36,8 @@ import at.knallgrau.textcat.FingerPrint;
 public class FingerprintGenerator extends AbstractLanguageAnalyser implements
                                                                   ControllerAwarePR {
 
+  private static final long serialVersionUID = -1039437923175492426L;
+
   private URL fingerprintURL;
 
   private StringBuilder text;
