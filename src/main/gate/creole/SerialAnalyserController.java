@@ -15,13 +15,26 @@
 
 package gate.creole;
 
-import java.lang.reflect.UndeclaredThrowableException;
-import java.util.*;
-
-import gate.*;
-import gate.creole.metadata.*;
+import gate.Controller;
+import gate.CorpusController;
+import gate.Document;
+import gate.Factory;
+import gate.Gate;
+import gate.LanguageAnalyser;
+import gate.ProcessingResource;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
 import gate.event.CreoleEvent;
-import gate.util.*;
+import gate.util.Benchmark;
+import gate.util.GateRuntimeException;
+import gate.util.Out;
+
+import java.lang.reflect.UndeclaredThrowableException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * This class implements a SerialController that only contains

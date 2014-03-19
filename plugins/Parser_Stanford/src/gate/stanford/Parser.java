@@ -11,19 +11,46 @@
  */
 package gate.stanford;
 
-import edu.stanford.nlp.parser.lexparser.*;
-import edu.stanford.nlp.trees.*;
-import gate.*;
-import gate.util.*;
-import gate.creole.*;
-import gate.creole.metadata.*;
+import edu.stanford.nlp.ling.Word;
+import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
+import edu.stanford.nlp.trees.GrammaticalStructure;
+import edu.stanford.nlp.trees.GrammaticalStructureFactory;
+import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.Trees;
+import edu.stanford.nlp.trees.TypedDependency;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.creole.ANNIEConstants;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ExecutionInterruptedException;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
+import gate.creole.metadata.Sharable;
+import gate.util.Files;
+import gate.util.InvalidOffsetException;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.NumberFormat;
-import java.util.*;
-
-import edu.stanford.nlp.ling.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * GATE PR wrapper around the Stanford Parser. This class expects to find Token

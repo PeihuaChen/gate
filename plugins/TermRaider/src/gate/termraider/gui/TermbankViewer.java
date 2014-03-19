@@ -20,10 +20,12 @@ import gate.event.ProgressListener;
 import gate.gui.MainFrame;
 import gate.swing.JMenuButton;
 import gate.swing.XJFileChooser;
-import gate.termraider.bank.*;
+import gate.termraider.bank.AbstractTermbank;
+import gate.termraider.bank.HyponymyTermbank;
 import gate.termraider.gui.ColorMenu.Callback;
 import gate.termraider.output.CloudGenerator;
-import gate.termraider.util.*;
+import gate.termraider.util.ScoreType;
+import gate.termraider.util.Term;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -32,7 +34,12 @@ import java.awt.event.ActionListener;
 import java.io.ByteArrayInputStream;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.swing.Box;
 import javax.swing.JButton;

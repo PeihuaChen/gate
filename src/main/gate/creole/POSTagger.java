@@ -14,15 +14,29 @@
 
 package gate.creole;
 
-import java.text.NumberFormat;
-import java.util.*;
-
-import gate.*;
-import gate.creole.metadata.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Resource;
+import gate.Utils;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
 import gate.util.GateRuntimeException;
 import gate.util.OffsetComparator;
-import org.apache.log4j.Logger;
+
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 /**
  * This class is a wrapper for HepTag, Mark Hepple's POS tagger.
  */

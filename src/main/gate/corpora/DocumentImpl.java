@@ -15,16 +15,57 @@
  */
 package gate.corpora;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.*;
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.DataStore;
+import gate.DocumentContent;
+import gate.DocumentFormat;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.GateConstants;
+import gate.Node;
+import gate.Resource;
+import gate.TextualDocument;
 import gate.annotation.AnnotationSetImpl;
 import gate.creole.AbstractLanguageResource;
 import gate.creole.ResourceInstantiationException;
-import gate.creole.metadata.*;
-import gate.event.*;
-import gate.util.*;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.event.CreoleEvent;
+import gate.event.CreoleListener;
+import gate.event.DatastoreEvent;
+import gate.event.DatastoreListener;
+import gate.event.DocumentEvent;
+import gate.event.DocumentListener;
+import gate.event.StatusListener;
+import gate.util.DocumentFormatException;
+import gate.util.Err;
+import gate.util.GateRuntimeException;
+import gate.util.InvalidOffsetException;
+import gate.util.OptionsMap;
+import gate.util.Out;
+import gate.util.SimpleFeatureMapImpl;
+import gate.util.Strings;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.Stack;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.Vector;
 
 /**
  * Represents the commonalities between all sorts of documents.

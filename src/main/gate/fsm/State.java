@@ -193,14 +193,14 @@ public class State implements JapeConstants {
    * state.
    * The value for fileIndex is correct only on final states!
    */
-  int getFileIndex() { return fileIndex; }
+  protected int getFileIndex() { return fileIndex; }
 
   /**
    * Returns the priority in the definition file of the rule that generated
    * this state.
    * This value is correct only on final states!
    */
-  int getPriority() { return priority; }
+  protected int getPriority() { return priority; }
 
   /**
    * Adds a new transition to the list of outgoing transitions for this state.
