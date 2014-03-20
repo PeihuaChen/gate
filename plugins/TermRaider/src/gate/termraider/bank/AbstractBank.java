@@ -12,13 +12,15 @@
 
 package gate.termraider.bank;
 
-import gate.*;
+import gate.Annotation;
+import gate.Corpus;
+import gate.Document;
 import gate.creole.AbstractLanguageResource;
 import gate.creole.metadata.CreoleParameter;
+import gate.termraider.util.Term;
 import gate.util.GateException;
 import java.io.File;
-import java.util.*;
-import gate.termraider.util.*;
+import java.util.Set;
 
 
 /**

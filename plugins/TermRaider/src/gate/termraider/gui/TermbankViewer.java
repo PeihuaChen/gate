@@ -26,7 +26,6 @@ import gate.termraider.gui.ColorMenu.Callback;
 import gate.termraider.output.CloudGenerator;
 import gate.termraider.util.ScoreType;
 import gate.termraider.util.Term;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -40,7 +39,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -60,7 +58,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-
 import org.xhtmlrenderer.simple.XHTMLPanel;
 
 

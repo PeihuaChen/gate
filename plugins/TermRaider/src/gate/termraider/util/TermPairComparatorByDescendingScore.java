@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010--2012, The University of Sheffield. See the file
+ *  Copyright (c) 2010--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -11,7 +11,8 @@
  */
 package gate.termraider.util;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Map;
 
 /**
  * Comparator used to sort UnorderedTermPair instance in descending order by score.

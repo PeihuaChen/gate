@@ -11,7 +11,11 @@
  */
 package gate.termraider.apply;
 
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.FeatureMap;
+import gate.ProcessingResource;
+import gate.Resource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ExecutionInterruptedException;
@@ -20,9 +24,11 @@ import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.RunTime;
 import gate.termraider.bank.AbstractTermbank;
-import gate.termraider.util.*;
+import gate.termraider.util.ScoreType;
+import gate.termraider.util.Term;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 
 
 

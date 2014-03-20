@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008--2012, The University of Sheffield. See the file
+ *  Copyright (c) 2008--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -11,12 +11,19 @@
  */
 package gate.termraider.output;
 
+import gate.termraider.bank.AbstractPairbank;
+import gate.termraider.util.Term;
+import gate.termraider.util.TermPairComparatorByDescendingScore;
+import gate.termraider.util.UnorderedTermPair;
 import gate.util.GateException;
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang.StringEscapeUtils;
-import gate.termraider.bank.*;
-import gate.termraider.util.*;
 
 
 public class PairCsvGenerator {

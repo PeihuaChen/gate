@@ -11,11 +11,21 @@
  */
 package gate.termraider.bank;
 
-import gate.creole.metadata.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
 import gate.gui.ActionsPublisher;
-import gate.*;
-import gate.termraider.util.*;
-import java.util.*;
+import gate.termraider.util.Term;
+import gate.termraider.util.UnorderedTermPair;
+import gate.termraider.util.Utilities;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 

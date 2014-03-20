@@ -27,7 +27,6 @@ import gate.termraider.modes.TfCalculation;
 import gate.termraider.util.ScoreType;
 import gate.termraider.util.Term;
 import gate.termraider.util.Utilities;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;

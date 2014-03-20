@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008--2012, The University of Sheffield. See the file
+ *  Copyright (c) 2008--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -17,10 +17,14 @@ package gate.termraider.gui;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.util.*;
-import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
+
 
 public class MultilineCellRenderer 
   extends JTextArea 
