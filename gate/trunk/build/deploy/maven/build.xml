@@ -65,7 +65,8 @@
         <copy todir="lib">
             <fileset refid="dependency.fileset" />
             <!-- This mapper strips off all leading directory information -->
-            <mapper classpathref="maven-ant-tasks.classpath" classname="org.apache.maven.artifact.ant.VersionMapper" from="${dependency.versions}" to="flatten" />
+            <!--<mapper classpathref="maven-ant-tasks.classpath" classname="org.apache.maven.artifact.ant.VersionMapper" from="${dependency.versions}" to="flatten" />-->
+            <flattenmapper />
         </copy>
 
         <fileset dir="lib" id="onlyinmaven" includes="**/*.jar"> 
