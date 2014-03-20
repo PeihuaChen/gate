@@ -1,7 +1,9 @@
 package gate.termraider;
 
 import gate.creole.PackagedController;
-import gate.creole.metadata.*;
+import gate.creole.metadata.AutoInstance;
+import gate.creole.metadata.AutoInstanceParam;
+import gate.creole.metadata.CreoleResource;
 
 @CreoleResource(name = "PMI Example (English)",
     icon = "TermRaiderApp",

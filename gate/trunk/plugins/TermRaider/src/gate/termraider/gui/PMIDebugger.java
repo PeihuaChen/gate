@@ -11,8 +11,14 @@
  */
 package gate.termraider.gui;
 
+import gate.termraider.bank.AbstractBank;
+import gate.termraider.bank.PMIBank;
+import gate.termraider.util.Term;
+import gate.termraider.util.UnorderedTermPair;
 import java.awt.BorderLayout;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -20,8 +26,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
-import gate.termraider.bank.*;
-import gate.termraider.util.*;
 
 
 public class PMIDebugger extends JPanel {

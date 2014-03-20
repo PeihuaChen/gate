@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008--2013, The University of Sheffield. See the file
+ *  Copyright (c) 2008--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -12,12 +12,17 @@
 package gate.termraider.gui;
 
 import gate.gui.MainFrame;
+import gate.termraider.bank.AbstractBank;
+import gate.termraider.gui.CsvFileSelectionActionListener.Mode;
+import gate.termraider.util.Utilities;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import javax.swing.*;
-import gate.termraider.gui.CsvFileSelectionActionListener.Mode;
-import gate.termraider.util.*;
-import gate.termraider.bank.*;
+import javax.swing.AbstractAction;
+import javax.swing.BoxLayout;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 

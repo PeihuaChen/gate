@@ -11,16 +11,28 @@
  */
 package gate.termraider.gui;
 
+import gate.creole.ANNIEConstants;
+import gate.termraider.bank.HyponymyTermbank;
+import gate.termraider.util.Term;
+import gate.termraider.util.TermComparator;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.*;
-import javax.swing.table.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 import org.apache.commons.lang.StringUtils;
-import gate.creole.*;
-import java.util.*;
-import gate.termraider.bank.*;
-import gate.termraider.util.*;
 
 
 public class HyponymyDebugger 

@@ -11,13 +11,17 @@
  */
 package gate.termraider.util;
 
-import gate.*;
+import gate.Annotation;
+import gate.Document;
+import gate.FeatureMap;
 import gate.creole.ANNIEConstants;
-
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
+import java.io.File;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 

@@ -11,12 +11,14 @@
  */
 package gate.termraider.output;
 
+import gate.termraider.bank.AbstractBank;
+import gate.termraider.bank.AbstractTermbank;
+import gate.termraider.util.Term;
 import gate.util.GateException;
-
-import java.io.*;
-import java.util.*;
-import gate.termraider.bank.*;
-import gate.termraider.util.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.List;
 
 
 public class CsvGenerator {

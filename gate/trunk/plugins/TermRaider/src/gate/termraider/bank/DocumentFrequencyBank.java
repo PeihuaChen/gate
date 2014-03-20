@@ -11,12 +11,6 @@
  */
 package gate.termraider.bank;
 
-import java.util.*;
-
-import javax.swing.Action;
-
-import org.apache.commons.lang.StringEscapeUtils;
-
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Corpus;
@@ -27,7 +21,17 @@ import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.gui.ActionsPublisher;
 import gate.termraider.gui.ActionSaveCsv;
-import gate.termraider.util.*;
+import gate.termraider.util.ScoreType;
+import gate.termraider.util.Term;
+import gate.termraider.util.Utilities;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.swing.Action;
+import org.apache.commons.lang.StringEscapeUtils;
 
 
 @CreoleResource(name = "DocumentFrequencyBank",

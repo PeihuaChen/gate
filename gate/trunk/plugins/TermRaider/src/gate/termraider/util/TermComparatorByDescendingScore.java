@@ -11,7 +11,8 @@
  */
 package gate.termraider.util;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Map;
 
 /**
  * Comparator used to sort terms in descending order by score.

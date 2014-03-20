@@ -11,13 +11,24 @@
  */
 package gate.termraider.bank;
 
-import gate.creole.metadata.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.FeatureMap;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
 import gate.gui.ActionsPublisher;
-import gate.*;
-import gate.termraider.util.*;
-import gate.termraider.modes.*;
-
-import java.util.*;
+import gate.termraider.modes.MergingMode;
+import gate.termraider.modes.Normalization;
+import gate.termraider.util.ScoreType;
+import gate.termraider.util.Term;
+import gate.termraider.util.Utilities;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 @CreoleResource(name = "AnnotationTermbank",

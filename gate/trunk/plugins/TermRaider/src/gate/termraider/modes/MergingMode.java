@@ -12,7 +12,9 @@
 package gate.termraider.modes;
 
 import gate.termraider.util.Utilities;
-import java.util.*;
+
+import java.util.Collections;
+import java.util.List;
 
 
 public enum MergingMode {

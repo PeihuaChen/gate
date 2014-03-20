@@ -11,12 +11,17 @@
  */
 package gate.termraider.gui;
 
+import gate.termraider.bank.AbstractBank;
+
 import java.awt.FlowLayout;
 import java.util.Hashtable;
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
-import gate.termraider.bank.*;
+import javax.swing.Box;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.border.EtchedBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 
 public class SliderPanel extends JPanel {

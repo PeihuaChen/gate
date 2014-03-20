@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008--2012, The University of Sheffield. See the file
+ *  Copyright (c) 2008--2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -11,16 +11,24 @@
  */
 package gate.termraider.gui;
 
-import java.awt.BorderLayout;
-import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
 import gate.Resource;
-import gate.creole.*;
-import gate.creole.metadata.*;
+import gate.creole.ANNIEConstants;
+import gate.creole.AbstractVisualResource;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.GuiType;
 import gate.event.ProgressListener;
-import java.util.*;
-import gate.termraider.bank.*;
-import gate.termraider.util.*;
+import gate.termraider.bank.AbstractPairbank;
+import gate.termraider.bank.PMIBank;
+import gate.termraider.util.UnorderedTermPair;
+import java.awt.BorderLayout;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.table.AbstractTableModel;
 
 
 @CreoleResource(name = "Pairbank Viewer",
