@@ -146,10 +146,7 @@ public class Eclipse extends gate.util.Javac {
         return result;
       }
       
-      // should be marked as override but until we have the new version of
-      // ecj available that would cause the build to fail, so far now
-      // we just mark it as unused instead to stop java complaining
-      @SuppressWarnings("unused")
+      @Override
       public boolean ignoreOptionalProblems() {
         return false;
       }
@@ -342,7 +339,7 @@ public class Eclipse extends gate.util.Javac {
 
     // source and target - force 1.6 target as GATE only requires 1.6 or later.
     settings.put(CompilerOptions.OPTION_Source,
-                 CompilerOptions.VERSION_1_7);
+                 CompilerOptions.VERSION_1_8);
     settings.put(CompilerOptions.OPTION_TargetPlatform,
                  CompilerOptions.VERSION_1_6);
 

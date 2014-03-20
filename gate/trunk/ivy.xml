@@ -23,7 +23,7 @@
   <dependencies>	
     <!-- things that we repackage under an alternative package name -->
     <dependency org="uk.ac.gate" name="gate-asm" rev="3.1" conf="required->master" />
-    <dependency org="uk.ac.gate" name="gate-compiler-jdt" rev="3.7.1" conf="required->master" />
+    <dependency org="uk.ac.gate" name="gate-compiler-jdt" rev="4.3.2-P20140317-1600" conf="required->master" />
 
     <!-- needed to ensure the same version across configurations -->
     <dependency org="commons-logging" name="commons-logging" rev="1.1.3" />
