@@ -4,12 +4,12 @@
   <artifactId>gate-compiler-jdt</artifactId>
   <packaging>jar</packaging>
   <name>Repackaged version of the Eclipse JDT compiler for GATE</name>
-  <version>3.7.1</version>
+  <version>4.3.2-P20140317-1600</version>
   <description>Repackaged version of the Eclipse JDT compiler for GATE</description>
   <url>http://gate.ac.uk</url>
   <scm>
-    <url>http://gate.svn.sourceforge.net/viewvc/gate/gate</url>
-    <connection>http://gate.svn.sourceforge.net/viewvc/gate/gate</connection>
+    <url>http://sourceforge.net/p/gate/code/HEAD/tree/gate/trunk</url>
+    <connection>scm:svn:http://svn.code.sf.net/p/gate/code/gate/trunk</connection>
   </scm>
   <developers>
     <developer>
