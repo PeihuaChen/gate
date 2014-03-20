@@ -1,8 +1,8 @@
 gate-compiler-jdt.jar contains a copy of the Eclipse JDT compiler
-(org.eclipse.jdt.core.compiler:ecj:3.7.1 in Maven central), moved into an
-alternative package using Jar Jar Links (http://code.google.com/p/jarjar/).
-The following is the Eclipse Public License, under which the original JDT
-compiler is distributed.
+(from http://download.eclipse.org/eclipse/downloads/drops4/P20140317-1600/),
+moved into an alternative package using Jar Jar Links
+(http://code.google.com/p/jarjar/).  The following is the Eclipse Public
+License, under which the original JDT compiler is distributed.
 
 ----------------------------------------------------------------------------
 
