@@ -145,6 +145,14 @@ public class Eclipse extends gate.util.Javac {
         }
         return result;
       }
+      
+      // should be marked as override but until we have the new version of
+      // ecj available that would cause the build to fail, so far now
+      // we just mark it as unused instead to stop java complaining
+      @SuppressWarnings("unused")
+      public boolean ignoreOptionalProblems() {
+        return false;
+      }
     }
     
     // Name enviroment - maps class names to eclipse objects.  If the class
