@@ -126,7 +126,7 @@ Rule: Title
 
 Rule: Initials1
 (
-  ({Token.orth == upperInitial, Token.length =="1", !ClosedClass, !Lookup, !NumberLetter}
+  ({Token.orth == upperInitial, Token.length =="1", !ClosedClass, !NumberLetter}
   ({Token.string == "."})?
   )+
 ):tag
