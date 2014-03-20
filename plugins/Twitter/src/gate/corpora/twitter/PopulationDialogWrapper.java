@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1995-2013, The University of Sheffield. See the file
+ *  Copyright (c) 1995-2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -11,15 +11,18 @@
  */
 package gate.corpora.twitter;
 
-import gate.gui.*;
-import gate.util.*;
+import gate.gui.ListEditorDialog;
+import gate.gui.MainFrame;
+import gate.util.ExtensionFileFilter;
+import gate.util.Strings;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
