@@ -79,6 +79,41 @@ features);
 }
 
 
+Rule: UnknownSurname
+Priority: 100
+(
+ ({Unknown}):firstName
+ ({Person.kind == firstName}):surname
+):person
+-->
+ {
+ gate.FeatureMap features = Factory.newFeatureMap();
+ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+ 
+ gate.AnnotationSet firstNameSet = (gate.AnnotationSet)bindings.get("firstName");
+
+ gate.AnnotationSet surnameSet = (gate.AnnotationSet)bindings.get("surname");
+ gate.Annotation surnameAnn = (gate.Annotation)surnameSet.iterator().next();
+
+
+ if (firstNameSet != null && firstNameSet.size()>0)
+ {
+  gate.Annotation firstNameAnn = (gate.Annotation)firstNameSet.iterator().next();
+  String firstNameContent = gate.Utils.stringFor(doc, firstNameAnn);
+  features.put("firstName", firstNameContent);
+ }
+  String surnameContent = gate.Utils.stringFor(doc, surnameAnn);
+  features.put("surname", surnameContent);
+
+  features.put("kind", "personName");
+  features.put("rule", "UnknownSurname");
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "Person",
+features);
+outputAS.removeAll(surnameSet);
+}
+
+
+
 Rule:PersonTitle1
 Priority: 40
 (

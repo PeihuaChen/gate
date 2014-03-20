@@ -40,7 +40,7 @@ Macro: FIRSTNAME
 
 Macro: FIRSTNAMEAMBIG
 (
- {Lookup.majorType == person_first, Lookup.minorType == ambig}
+ {Lookup.majorType == person_first, Lookup.kind == ambig}
 )
 
 
@@ -49,6 +49,7 @@ Macro: FIRSTNAMEAMBIG
 
 Macro: PERSONENDING
 (
+ ({Token.string == ","})?
  {Lookup.majorType == person_ending}
 )
 
