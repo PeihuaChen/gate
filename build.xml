@@ -68,7 +68,7 @@
       <pathelement location="${buildDir}/lib/ivy.jar" />
     </classpath>
   </taskdef>
-  <ivy:retrieve sync="true" pattern="${libDir}/[artifact].[ext]" />
+  <ivy:retrieve sync="true" pattern="${libDir}/[artifact]-[revision].[ext]" />
 
   <!-- generate the pretty HTML report for what we just retrieved -->
   <ivy:report todir="${libDir}" graph="false" />
