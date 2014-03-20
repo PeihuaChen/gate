@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1995-2013, The University of Sheffield. See the file
+ *  Copyright (c) 1995-2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -11,21 +11,31 @@
  */
 package gate.corpora.twitter;
 
-import gate.*;
+import gate.AnnotationSet;
+import gate.Corpus;
+import gate.Document;
+import gate.DocumentContent;
+import gate.Factory;
+import gate.Gate;
 import gate.corpora.DocumentContentImpl;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.CreoleResource;
-import gate.gui.*;
-import gate.util.*;
+import gate.gui.NameBearerHandle;
+import gate.gui.ResourceHelper;
+import gate.util.InvalidOffsetException;
 import java.awt.event.ActionEvent;
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.*;
+import org.apache.commons.lang.StringUtils;
 
 
 @CreoleResource(name = "Twitter Corpus Populator", tool = true, autoinstances = @AutoInstance)

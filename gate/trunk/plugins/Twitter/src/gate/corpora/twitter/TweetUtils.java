@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1995-2013, The University of Sheffield. See the file
+ *  Copyright (c) 1995-2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -11,13 +11,13 @@
  */
 package gate.corpora.twitter;
 
-import gate.*;
-
+import gate.Factory;
+import gate.FeatureMap;
 import java.io.IOException;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import org.apache.commons.lang.StringUtils;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;

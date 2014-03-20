@@ -1,7 +1,5 @@
 /*
- *  JSONTweetFormat.java
- *
- *  Copyright (c) 1995-2013, The University of Sheffield. See the file
+ *  Copyright (c) 1995-2014, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -13,17 +11,22 @@
  */
 package gate.corpora;
 
-import gate.*;
+import gate.AnnotationSet;
+import gate.DocumentContent;
+import gate.GateConstants;
+import gate.Resource;
+import gate.corpora.twitter.PreAnnotation;
+import gate.corpora.twitter.Tweet;
+import gate.corpora.twitter.TweetUtils;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.CreoleResource;
 import gate.util.DocumentFormatException;
 import gate.util.InvalidOffsetException;
-import gate.corpora.twitter.*;
-
 import java.io.IOException;
-import java.util.*;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 
 
