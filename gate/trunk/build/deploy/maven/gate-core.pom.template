@@ -345,9 +345,9 @@
     </mailingLists>
     <scm>
         <connection>
-            scm:svn:https://gate.svn.sourceforge.net/svnroot/gate/gate/trunk</connection>
+            scm:svn:http://svn.code.sf.net/p/gate/code/gate/trunk</connection>
         <developerConnection>
-            scm:svn:https://gate.svn.sourceforge.net/svnroot/gate/gate/trunk</developerConnection>
-        <url>http://gate.svn.sourceforge.net/viewvc/gate</url>
+            scm:svn:svn+ssh://svn.code.sf.net/p/gate/code/gate/trunk</developerConnection>
+        <url>http://sourceforge.net/p/gate/code/HEAD/tree/gate/trunk</url>
     </scm>
 </project>
