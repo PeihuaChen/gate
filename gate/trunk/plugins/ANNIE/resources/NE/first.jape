@@ -66,11 +66,12 @@ Priority: 100
 
 
 Rule: UpperAllCaps
+Priority: 100
 // separate proper nouns that are in all caps, as they're more ambiguous
 (
- {Token.category == NNP, Token.orth == upper}
+ {Token.category == NNP, Token.orth == allCaps}
  ({Token.string == "-"}
-  {Token.category == NNP, Token.orth == upper}
+  {Token.category == NNP, Token.orth == allCaps}
  )?
 ):tag
 -->
