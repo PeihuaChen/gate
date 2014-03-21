@@ -125,6 +125,10 @@ Rule: Title
 
 
 Rule: Initials1
+// A.B.
+// A.
+// A
+
 (
   ({Token.orth == upperInitial, Token.length =="1", !ClosedClass, !NumberLetter}
   ({Token.string == "."})?
@@ -135,12 +139,14 @@ Rule: Initials1
 
 
 Rule: Initials2
+// AB
+// ABC
 
 (
  {Token.orth == allCaps, Token.length == "2", !Lookup, !ClosedClass, !NumberLetter} |
  {Token.orth == allCaps, Token.length == "3", !Lookup, !ClosedClass, !NumberLetter}
 ):tag
 -->
-:tag.Initials = {rule = "Initials2"}
+:tag.Initials = {kind == "nopunct", rule = "Initials2"}
 
 
