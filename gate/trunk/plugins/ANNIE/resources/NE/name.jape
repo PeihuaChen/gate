@@ -493,6 +493,25 @@ Priority: 50
 -->
 :loc.TempLocation = {kind = "locName", rule = LocPersonAmbig2}
 
+Rule: PersonFullInitialsCaps
+Priority: 100
+// TO FISH
+// If the initials is of type nopunct, we want to discard the Person if the surname is also in all caps, as it's too ambiguous
+
+(
+ {Token.category == DT}
+)?
+(
+ 
+  ({Initials.kind == nopunct})
+  ((FIRSTNAME | FIRSTNAMEAMBIG )?)
+ ((PREFIX)*
+  ({Upper.kind == allCaps})
+  (PERSONENDING)?
+ )
+):person -->
+:person.Discard = {rule = "PersonFullInitialsCaps"}
+
 
 
 Rule: 	PersonFullInitials

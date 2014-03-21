@@ -147,6 +147,6 @@ Rule: Initials2
  {Token.orth == allCaps, Token.length == "3", !Lookup, !ClosedClass, !NumberLetter}
 ):tag
 -->
-:tag.Initials = {kind == "nopunct", rule = "Initials2"}
+:tag.Initials = {kind = "nopunct", rule = "Initials2"}
 
 
