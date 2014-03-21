@@ -65,6 +65,17 @@ Priority: 100
 {} 
 
 
+Rule: UpperAllCaps
+// separate proper nouns that are in all caps, as they're more ambiguous
+(
+ {Token.category == NNP, Token.orth == upper}
+ ({Token.string == "-"}
+  {Token.category == NNP, Token.orth == upper}
+ )?
+):tag
+-->
+:tag.Upper = {kind = "allCaps", rule = "Upper"}
+
 Rule: Upper
 // define what can be a possible proper noun - cater for the fact that POS tag might not be correct
 (
