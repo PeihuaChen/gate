@@ -75,7 +75,7 @@
               <localMap>
                 <entry>
                   <string>annotationSetName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
                 <entry>
                   <string>document</string>
@@ -116,7 +116,7 @@
               <localMap>
                 <entry>
                   <string>outputASName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
                 <entry>
                   <string>document</string>
@@ -124,7 +124,7 @@
                 </entry>
                 <entry>
                   <string>inputASName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
               </localMap>
             </runtimeParams>
@@ -171,7 +171,7 @@
                 </entry>
                 <entry>
                   <string>inputASName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
                 <entry>
                   <string>regex</string>
@@ -237,7 +237,7 @@
                 </entry>
                 <entry>
                   <string>outputASName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
                 <entry>
                   <string>encoding</string>
@@ -295,7 +295,7 @@
                 </entry>
                 <entry>
                   <string>annotationSetName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
               </localMap>
             </runtimeParams>
@@ -352,7 +352,7 @@
                 </entry>
                 <entry>
                   <string>annotationSetName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
               </localMap>
             </runtimeParams>
@@ -397,7 +397,7 @@
               <localMap>
                 <entry>
                   <string>outputASName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
                 <entry>
                   <string>document</string>
@@ -413,7 +413,7 @@
                 </entry>
                 <entry>
                   <string>inputASName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
               </localMap>
             </runtimeParams>
@@ -462,7 +462,7 @@
               <localMap>
                 <entry>
                   <string>annotationSetName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
                 <entry>
                   <string>document</string>

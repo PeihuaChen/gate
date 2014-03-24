@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <metadata xmlns="http://gate.ac.uk/ns/pipeline-metadata">
   <pipeline-name>Arabic Named Entity Recognizer</pipeline-name>
-  <annotation-selectors>NE:Address, NE:Date, NE:Location, NE:Organization, NE:Person</annotation-selectors>
+  <slug>arabic-named-entity-recognizer</slug>
+  <ordering>49</ordering>
+  <annotation-selectors>:Address, :Date, :Location, :Organization, :Person</annotation-selectors>
+  <additional-annotations>:Money, :Percent, :Token, :SpaceToken, :Sentence</additional-annotations>
   <tags>
     <tag>Arabic</tag>
     <tag>Named Entity</tag>
