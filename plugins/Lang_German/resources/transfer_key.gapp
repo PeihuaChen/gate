@@ -54,7 +54,7 @@
               <localMap>
                 <entry>
                   <string>annotationSetName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
               </localMap>
             </runtimeParams>
@@ -78,11 +78,11 @@
               <localMap>
                 <entry>
                   <string>outputASName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
                 <entry>
                   <string>inputASName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
               </localMap>
             </runtimeParams>
@@ -106,7 +106,7 @@
               <localMap>
                 <entry>
                   <string>annotationSetName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
                 <entry>
                   <string>treeTaggerBinary</string>
@@ -136,7 +136,7 @@
               <localMap>
                 <entry>
                   <string>annotationSetName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
               </localMap>
             </runtimeParams>
@@ -179,7 +179,7 @@
               <localMap>
                 <entry>
                   <string>annotationSetName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
               </localMap>
             </runtimeParams>
@@ -222,11 +222,11 @@
               <localMap>
                 <entry>
                   <string>outputASName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
                 <entry>
                   <string>inputASName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
               </localMap>
             </runtimeParams>
@@ -265,7 +265,7 @@
               <localMap>
                 <entry>
                   <string>annotationSetName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
                 <entry>
                   <string>annotationTypes</string>

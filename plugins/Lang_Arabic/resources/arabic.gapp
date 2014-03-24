@@ -62,7 +62,7 @@
                 </entry>
                 <entry>
                   <string>annotationSetName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
               </localMap>
             </runtimeParams>
@@ -107,7 +107,7 @@
                 </entry>
                 <entry>
                   <string>annotationSetName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
               </localMap>
             </runtimeParams>
@@ -154,7 +154,7 @@
                 </entry>
                 <entry>
                   <string>annotationSetName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
               </localMap>
             </runtimeParams>
@@ -201,11 +201,11 @@
                 </entry>
                 <entry>
                   <string>outputASName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
                 <entry>
                   <string>inputASName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
               </localMap>
             </runtimeParams>
@@ -244,7 +244,7 @@
                 </entry>
                 <entry>
                   <string>annotationSetName</string>
-                  <string>NE</string>
+                  <null/>
                 </entry>
                 <entry>
                   <string>annotationTypes</string>
