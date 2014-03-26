@@ -8,7 +8,7 @@
       <NAME>Machine Learning PR</NAME>
       <JAR>lib/maxent-2.4.0.jar</JAR>
       <JAR>lib/troveForMaxent.jar</JAR>
-      <JAR>lib/weka-3.4.6.jar</JAR>
+      <JAR>lib/weka-3.6.10.jar</JAR>
       <JAR>machinelearning.jar</JAR>
       <COMMENT>Trains a machine learning algorithm from a corpus. For new code, consider using the "learning" plugin instead.</COMMENT>
       <HELPURL>http://gate.ac.uk/userguide/sec:ml:machine-learning-pr</HELPURL>
