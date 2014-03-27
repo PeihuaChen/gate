@@ -36,7 +36,7 @@ loc_prekey.lst:loc_key:pre
 ministry.lst:organization:government
 months.lst:date:month
 mountain.lst:location:region
-new_cdg.lst:cdg
+cdg.lst:cdg
 newspapers.lst:organization:newspaper
 numbers.lst:number
 number_fold.lst:number_fold
