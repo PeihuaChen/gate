@@ -523,7 +523,7 @@ Priority: 10
 )?
 (
  
-  ({Initials}):initials
+  ({Initials, !Lookup}):initials
   ((FIRSTNAME | FIRSTNAMEAMBIG )?):middleName
  ((PREFIX)*
   ({Upper,!Initials})
