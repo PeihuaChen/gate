@@ -338,3 +338,23 @@ features);
 outputAS.removeAll(org);
 }
 
+
+Rule: PersonOrgEnding
+Priority: 30
+// J.W. Fish & Co should be an Organisation not a Person
+
+(
+ ({Person}):person
+ {Lookup.majorType == cdg}
+):org
+-->
+{
+gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
+gate.AnnotationSet personSet = (gate.AnnotationSet) bindings.get("person");
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("rule ", "PersonOrgEnding");
+features.put("orgType ", "company");
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
+features);
+outputAS.removeAll(personSet);
+}
