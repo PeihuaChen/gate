@@ -4,6 +4,7 @@ airports.lst:location:airport
 charities.lst:organization:charity
 city_cap.lst:location:city
 city.lst:location:city
+company_ambig.lst:organization:company
 company_cap.lst:organization:company
 company.lst:organization:company
 more_company.lst:organization:company
