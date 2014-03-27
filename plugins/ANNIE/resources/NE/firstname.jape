@@ -23,7 +23,7 @@ Rule: FirstName
 
 
 (
- {Lookup.majorType == person_first}
+ {Lookup.majorType == person_first, !ClosedClass}
 ):person
 -->
 {
