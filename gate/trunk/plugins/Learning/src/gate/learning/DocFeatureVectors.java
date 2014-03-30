@@ -8,13 +8,16 @@
 package gate.learning;
 
 import gate.util.GateException;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Hashtable;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -50,8 +53,7 @@ public class DocFeatureVectors {
     fvs = new SparseFeatureVector[numInstances];
     // For each istance
     for(int i = 0; i < numInstances; ++i) {
-      Hashtable indexValues = new Hashtable();
-      int n = 0;
+      Map<Object,Object> indexValues = new HashMap<Object,Object>();
       String[] feat = nlpDoc.featuresInLine[i].toString().split(
         ConstantParameters.ITEMSEPARATOR);
       // Some variables for normalising the feature values of the same ngram
@@ -134,8 +136,7 @@ public class DocFeatureVectors {
                 case 3: // for tf*idf representation
                   val = (Long.parseLong(featVal) + 1)
                     * Math.log((double)numDocs
-                      / (Long.parseLong(featList.idfFeatures.get(featCur)
-                        .toString())));
+                      / featList.idfFeatures.get(featCur));
                   break;
                 default:
                   try {
@@ -175,18 +176,17 @@ public class DocFeatureVectors {
               if(positionCurr == 0)
                 indexValues.put(featList.featuresList.get(featCur), valNow);
               else if(positionCurr < 0)
-                  indexValues.put(new Long((Long.parseLong(featList.featuresList
-                    .get(featCur).toString()) - positionCurr
-                    * ConstantParameters.MAXIMUMFEATURES)), new Float(-1*valNow
-                    / (double)positionCurr));
+                  indexValues.put(featList.featuresList
+                    .get(featCur) - positionCurr
+                    * ConstantParameters.MAXIMUMFEATURES, -1f*valNow
+                    / (double)positionCurr);
                 else indexValues.put(
-                  new Long((Long.parseLong(featList.featuresList.get(featCur)
-                    .toString()) + (positionCurr + maxNegPosition)
-                    * ConstantParameters.MAXIMUMFEATURES)), new Float(
-                    valNow / (double)positionCurr));
+                  (featList.featuresList.get(featCur)
+                     + (positionCurr + maxNegPosition)
+                    * ConstantParameters.MAXIMUMFEATURES), 
+                    valNow / (double)positionCurr);
               
             }
-            ++n;
           }
         }
         prevPosition = positionCurr;
@@ -201,12 +201,11 @@ public class DocFeatureVectors {
           for(int ii = 0; ii < tempSize; ++ii) {
             tempVals[ii] /= sum;
             tempVals[ii] *= ngramWeight;
-            indexValues.put(new Long(tempInds[ii]), new Float(tempVals[ii]));
+            indexValues.put(tempInds[ii], tempVals[ii]);
           }
         } else {
           for(int ii = 0; ii < tempSize; ++ii) {
-            indexValues.put(new Long(tempInds[ii]), new Integer(
-              (int)tempVals[ii]));
+            indexValues.put(tempInds[ii], tempVals[ii]);
           }
         }
         tempSize = 0;
@@ -218,7 +217,7 @@ public class DocFeatureVectors {
       // + nlpDoc.featuresCounted[i] + ")in document " + docId);
       // }
       // sort the indexes in ascending order
-      List indexes = new ArrayList(indexValues.keySet());
+      List<Object> indexes = new ArrayList<Object>(indexValues.keySet());
       Collections.sort(indexes, new LongCompactor());
       // Iterator iterator = indexes.iterator();
       // n = 0;
@@ -241,7 +240,7 @@ public class DocFeatureVectors {
   }
 
   /** A static class for comparing two long numbers. */
-  public static class LongCompactor implements java.util.Comparator {
+  public static class LongCompactor implements Comparator<Object> {
     public int compare(Object l1, Object l2) {
       // return (new Long((new Long(l1.toString()).longValue()- new
       // Long(l2.toString()).longValue()))).intValue();
@@ -308,8 +307,8 @@ public class DocFeatureVectors {
       if(indexValue.length <= 1) {
         System.out.println("i=" + i + " item=" + items[i + iEndLabel]);
       }
-      fv.nodes[i].index = (new Integer(indexValue[0])).intValue();
-      fv.nodes[i].value = (new Float(indexValue[1])).floatValue();
+      fv.nodes[i].index = new Integer(indexValue[0]);
+      fv.nodes[i].value = new Float(indexValue[1]);
     }
     return;
   }
@@ -386,14 +385,14 @@ public class DocFeatureVectors {
   /** Write the FVs of one document into file. */
   public void addDocFVsToFile(int index, BufferedWriter out, int[] labels) {
     try {
-      out.write(new Integer(index) + ConstantParameters.ITEMSEPARATOR
-        + new Integer(numInstances) + ConstantParameters.ITEMSEPARATOR
+      out.write(index + ConstantParameters.ITEMSEPARATOR
+        + numInstances + ConstantParameters.ITEMSEPARATOR
         + docId);
       out.newLine();
       for(int i = 0; i < numInstances; ++i) {
         StringBuffer line = new StringBuffer();
-        line.append(new Integer(i + 1) + ConstantParameters.ITEMSEPARATOR
-          + new Integer(labels[i]));
+        line.append((i + 1) + ConstantParameters.ITEMSEPARATOR
+          + labels[i]);
         for(int j = 0; j < fvs[i].len; ++j)
           line.append(ConstantParameters.ITEMSEPARATOR
             + fvs[i].nodes[j].index + ConstantParameters.INDEXVALUESEPARATOR
@@ -409,8 +408,8 @@ public class DocFeatureVectors {
   public void addDocFVsMultiLabelToFile(int index, BufferedWriter out,
     LabelsOfFV[] multiLabels) {
     try {
-      out.write(new Integer(index) + ConstantParameters.ITEMSEPARATOR
-        + new Integer(numInstances) + ConstantParameters.ITEMSEPARATOR
+      out.write(index + ConstantParameters.ITEMSEPARATOR
+        + numInstances + ConstantParameters.ITEMSEPARATOR
         + docId);
       out.newLine();
       for(int i = 0; i < numInstances; ++i) {
@@ -421,7 +420,7 @@ public class DocFeatureVectors {
                     + 0);
         	
         } else {
-        line.append(new Integer(i + 1) + ConstantParameters.ITEMSEPARATOR
+        line.append((i + 1) + ConstantParameters.ITEMSEPARATOR
           + multiLabels[i].num);
         for(int j = 0; j < multiLabels[i].num; ++j) {
           line.append(ConstantParameters.ITEMSEPARATOR
