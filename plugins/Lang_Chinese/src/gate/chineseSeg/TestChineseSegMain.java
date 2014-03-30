@@ -128,7 +128,9 @@ public class TestChineseSegMain extends TestCase {
         chs[i] = lastLine.charAt(i);
         //System.out.println("i="+i+", ch="+chs[i]+"*");
       }
-
+      
+      System.out.println("1="+chs[2]+", 2="+chs[4]+", 3="+chs[8]+", 4="+chs[14]+".");
+      
       //System.out.println("1="+nPwF[0]+", 2="+nPwF[1]+", 3="+nPwF[2]+", 4="+nPwF[3]+".");
       assertEquals("Wrong value for correct: ", ConstantParameters.SEPARATTOR_BLANK, chs[2]);
       assertEquals("Wrong value for correct: ", '9', chs[4]);

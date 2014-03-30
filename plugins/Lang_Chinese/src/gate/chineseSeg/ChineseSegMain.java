@@ -122,10 +122,12 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
       NLPFeaturesList featuresList = null;
       featuresList = new NLPFeaturesList();
       featuresList.loadFromFile(wdResults, ConstantParameters.FILENAME_TERMS, this.textCode);
+      if(new File(wdResults, ConstantParameters.FILENAME_TERMS).exists()) {
       if(!featuresList.featuresList.containsKey(ConstantParameters.NONFEATURE)) {
         int size = featuresList.featuresList.size() + 1;
         featuresList.featuresList.put(ConstantParameters.NONFEATURE,(long)size);
         featuresList.idfFeatures.put(ConstantParameters.NONFEATURE,1L);
+      }
       }
 
       // read the label list

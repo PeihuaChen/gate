@@ -14,14 +14,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -30,12 +30,12 @@ import java.util.regex.Pattern;
  */
 public class NLPFeaturesList {
   /** the features with ids, can be accessed by multiple threads. */
-  public Map<String,Long> featuresList = null;
+  public Hashtable featuresList = null;
   /**
    * Document frequence of each term, useful for document or passage
    * classification
    */
-  public Map<String,Long> idfFeatures = null;
+  public Hashtable idfFeatures = null;
   /** Total number of documents used for forming the list. */
   int totalNumDocs;
   /** The unique sysmbol used for the N-gram feature. */
@@ -43,8 +43,8 @@ public class NLPFeaturesList {
 
   /** Constructor, get the two hashtables. */
   public NLPFeaturesList() {
-    featuresList = new HashMap<String,Long>();
-    idfFeatures = new HashMap<String,Long>();
+    featuresList = new Hashtable();
+    idfFeatures = new Hashtable();
     totalNumDocs = 0;
   }
 
@@ -58,11 +58,12 @@ public class NLPFeaturesList {
         // featuresList = new Hashtable();
         String line;
         if((line = in.readLine()) != null)
-          totalNumDocs = new Integer(line.substring(line.lastIndexOf("=") + 1));
+          totalNumDocs = (new Integer(line.substring(line.lastIndexOf("=") + 1)))
+            .intValue();
         while((line = in.readLine()) != null) {
           String[] st = line.split(" ");
-          featuresList.put(st[0], new Long(st[1]));
-          idfFeatures.put(st[0], new Long(st[2]));
+          featuresList.put(st[0], st[1]);
+          idfFeatures.put(st[0], st[2]);
         }
         in.close();
       } catch(IOException e) {
@@ -83,12 +84,12 @@ public class NLPFeaturesList {
         fileFeaturesList), tcode));
       // for the total number of docs
       out.println("totalNumDocs=" + totalNumDocs);
-      List<String> keys = new ArrayList<String>(featuresList.keySet());
+      List keys = new ArrayList(featuresList.keySet());
       Collections.sort(keys);
       // write the features list into the output file
-      Iterator<String> iterator = keys.iterator();
+      Iterator iterator = keys.iterator();
       while(iterator.hasNext()) {
-        String key = iterator.next();
+        Object key = iterator.next();
         out.println(key + " " + featuresList.get(key) + " "
           + idfFeatures.get(key));
          //System.out.println("*"+key+ "* " + featuresList.get(key));
@@ -113,8 +114,21 @@ public class NLPFeaturesList {
         if(features[j].equals(""))
           continue;
         String feat = features[j];
+ 
         if(feat.contains(SYMBOLNGARM))
           feat = feat.substring(0, feat.lastIndexOf(SYMBOLNGARM));
+        else {//for the attribute type
+          //System.out.println("feat="+feat);
+          if(!feat.equals(ConstantParameters.NAMENONFEATURE)) {
+        	  
+        	  char semanticTypeNow=feat.charAt(ConstantParameters.ITEMSEPREPLACEMENT.length());
+            //feat =feat.substring(ConstantParameters.ITEMSEPREPLACEMENT.length()+1);//remove the semantic type, which is char.
+            //char semanticTypeNow=feat.charAt(ConstantParameters.ITEMSEPREPLACEMENT.length());
+            
+            if(semanticTypeNow != Attribute.NOMINAL) 
+              feat = feat.substring(0, feat.lastIndexOf(ConstantParameters.ITEMSEPREPLACEMENT));
+          }
+        }
         if(!feat.equals(ConstantParameters.NAMENONFEATURE)) {
           // If the featureName is not in the feature list
           if(size < ConstantParameters.MAXIMUMFEATURES) {
@@ -122,10 +136,11 @@ public class NLPFeaturesList {
               ++size;
               // features is from 1 (not zero), in the SVM-light
               // format
-              featuresList.put(feat, size);
-              idfFeatures.put(feat, 1L);
+              featuresList.put(feat, new Long(size));
+              idfFeatures.put(feat, new Long(1));
             } else {
-              idfFeatures.put(feat, idfFeatures.get(feat) + 1);
+              idfFeatures.put(feat, new Long((new Long(idfFeatures.get(feat)
+                .toString())).longValue() + 1));
             }
           } else {
             String msg = 
@@ -160,7 +175,7 @@ public class NLPFeaturesList {
      // for the total number of docs
      //out.println("totalNumDocs=" + new Integer(totalNumDocs));
      out.println("## The following "+nGram+"-gram were obtained from " + totalNumDocs+ " documents or examples");
-     List<String> keys = new ArrayList<String>(featuresList.keySet());
+     List keys = new ArrayList(featuresList.keySet());
      //Collections.sort(keys);
      int numT = keys.size();
      float [] freqs = new float[numT];
