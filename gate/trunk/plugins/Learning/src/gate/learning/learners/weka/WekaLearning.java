@@ -202,6 +202,8 @@ public class WekaLearning {
             metaFeats.put(items[i], new HashSet<String>());
             ++numFeats; // counted as a new attribute
           }
+          //System.out.println(i +" item="+items[i]);
+          
           String feat = items[i].substring(0, items[i].lastIndexOf("("));
           String featNum = items[i].substring(items[i].lastIndexOf("("));
           if(!feat.equals(entityTerm)) {
@@ -289,8 +291,12 @@ public class WekaLearning {
           // the instance
           entityTerm = "";
           numEntity = 0;
+         
           // For each NLP feature term
           for(int j = numLabel + 1; j < items.length; ++j) {
+        	  if(items[j].endsWith("[0]"))
+        		  items[j] = items[j].substring(0, items[j].lastIndexOf("["));
+        	  //System.out.println(j+", "+items[j]);
             // Skip the feature if it is not in the list
             if(!allTerms.contains(items[j])) continue;
             if(isNgramFeat(items[j])) {// if it's a ngram
@@ -300,6 +306,9 @@ public class WekaLearning {
                 .toString()), items[j]);
             } else {// if not a ngram
               // For real features, not "_NA"
+            	//System.out.println(j+", items="+items[j]);
+            	//items[j] = items[j].substring(0, items[j].lastIndexOf("["));
+            	
               if(!items[j].equals(ConstantParameters.NAMENONFEATURE)) {
                 // Get the feature term
                 items[j] = items[j].substring(items[j].indexOf("_") + 1);

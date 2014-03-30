@@ -8,15 +8,13 @@
 package gate.learning;
 
 import gate.util.GateException;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -52,8 +50,8 @@ public class DocFeatureVectors {
     fvs = new SparseFeatureVector[numInstances];
     // For each istance
     for(int i = 0; i < numInstances; ++i) {
-      Map<Object,Object> indexValues = new HashMap<Object,Object>();
-
+      Hashtable indexValues = new Hashtable();
+      int n = 0;
       String[] feat = nlpDoc.featuresInLine[i].toString().split(
         ConstantParameters.ITEMSEPARATOR);
       // Some variables for normalising the feature values of the same ngram
@@ -66,6 +64,7 @@ public class DocFeatureVectors {
       for(int j = 0; j < feat.length; ++j) {
         // First get the position information for the current NLP feature
         positionCurr = 0;
+        
         if(feat[j] != null && Pattern.matches((".+\\[[-0-9]+\\]$"), feat[j])) {
           int ind = feat[j].lastIndexOf('[');
           String positionStr = feat[j].substring(ind + 1, feat[j].length() - 1);
@@ -92,15 +91,31 @@ public class DocFeatureVectors {
         }
         String featCur = feat[j];
         String featVal = null;
+        char featType = Attribute.NOMINAL;
         int kk = -3;
-        if(featCur.contains(NLPFeaturesList.SYMBOLNGARM)) {
+        if(featCur.contains(NLPFeaturesList.SYMBOLNGARM)) {//for the ngram feature
           kk = feat[j].lastIndexOf(NLPFeaturesList.SYMBOLNGARM);
           featCur = feat[j].substring(0, kk);
           featVal = feat[j].substring(kk + 2);
+        } else { /* for the attribute feature*/
+        	
+          String [] featComponents = featCur.split(ConstantParameters.ITEMSEPREPLACEMENT);
+          
+          //for(int ii=0; ii<featComponents.length; ++ii) {  
+        	//  System.out.println(ii+ ", featCur="+featComponents[ii]);
+          //}
+          
+          
+          featType = featCur.charAt(ConstantParameters.ITEMSEPREPLACEMENT.length());
+          
+          if( featType != Attribute.NOMINAL) {/* if not the nominal feature */
+            featVal = featComponents[2];
+            featCur = ConstantParameters.ITEMSEPREPLACEMENT+featComponents[1];
+          }
         }
         if(featCur.length() > 0) { // if there is any feature
           if(featList.featuresList.containsKey(featCur)) {
-            if(featCur.contains(NLPFeaturesList.SYMBOLNGARM)) {
+            if(featCur.contains(NLPFeaturesList.SYMBOLNGARM)) { /* for ngram feature*/
               int shiftNum = 0;
               if(positionCurr > 0)
                 shiftNum = maxNegPosition + positionCurr;
@@ -135,19 +150,43 @@ public class DocFeatureVectors {
               tempVals[tempSize] = (float)val;
               ++tempSize;
             } else {
+              float valNow=0;
+              switch(featType) {
+                case Attribute.NUMERIC:
+                  valNow=new Float(featVal);
+                  break;
+                case Attribute.BOOLEAN:
+                  if(featVal.equalsIgnoreCase("true"))
+                    valNow=1;
+                  else valNow=0;
+                  break;
+                case Attribute.NOMINAL:
+                  valNow=1;
+                  break;
+                default: 
+                  try {
+                    throw new GateException(
+                      "The semantic type for one attribute is not defined!");
+                  } catch(GateException e) {
+                    e.printStackTrace();
+                  }
+              }
+       
               if(positionCurr == 0)
-                indexValues.put(featList.featuresList.get(feat[j]), "1");
+                indexValues.put(featList.featuresList.get(featCur), valNow);
               else if(positionCurr < 0)
-                indexValues.put(new Long((Long.parseLong(featList.featuresList
-                  .get(feat[j]).toString()) - positionCurr
-                  * ConstantParameters.MAXIMUMFEATURES)), new Float(-1.0
-                  / positionCurr));
-              else indexValues.put(
-                new Long((Long.parseLong(featList.featuresList.get(feat[j])
-                  .toString()) + (positionCurr + maxNegPosition)
-                  * ConstantParameters.MAXIMUMFEATURES)), new Float(
-                  1.0 / positionCurr));
+                  indexValues.put(new Long((Long.parseLong(featList.featuresList
+                    .get(featCur).toString()) - positionCurr
+                    * ConstantParameters.MAXIMUMFEATURES)), new Float(-1*valNow
+                    / (double)positionCurr));
+                else indexValues.put(
+                  new Long((Long.parseLong(featList.featuresList.get(featCur)
+                    .toString()) + (positionCurr + maxNegPosition)
+                    * ConstantParameters.MAXIMUMFEATURES)), new Float(
+                    valNow / (double)positionCurr));
+              
             }
+            ++n;
           }
         }
         prevPosition = positionCurr;
@@ -166,7 +205,8 @@ public class DocFeatureVectors {
           }
         } else {
           for(int ii = 0; ii < tempSize; ++ii) {
-            indexValues.put(new Long(tempInds[ii]), (int)tempVals[ii]);
+            indexValues.put(new Long(tempInds[ii]), new Integer(
+              (int)tempVals[ii]));
           }
         }
         tempSize = 0;
@@ -178,7 +218,7 @@ public class DocFeatureVectors {
       // + nlpDoc.featuresCounted[i] + ")in document " + docId);
       // }
       // sort the indexes in ascending order
-      List<Object> indexes = new ArrayList<Object>(indexValues.keySet());
+      List indexes = new ArrayList(indexValues.keySet());
       Collections.sort(indexes, new LongCompactor());
       // Iterator iterator = indexes.iterator();
       // n = 0;
@@ -201,7 +241,7 @@ public class DocFeatureVectors {
   }
 
   /** A static class for comparing two long numbers. */
-  public static class LongCompactor implements java.util.Comparator<Object> {
+  public static class LongCompactor implements java.util.Comparator {
     public int compare(Object l1, Object l2) {
       // return (new Long((new Long(l1.toString()).longValue()- new
       // Long(l2.toString()).longValue()))).intValue();
@@ -268,8 +308,8 @@ public class DocFeatureVectors {
       if(indexValue.length <= 1) {
         System.out.println("i=" + i + " item=" + items[i + iEndLabel]);
       }
-      fv.nodes[i].index = new Integer(indexValue[0]);
-      fv.nodes[i].value = new Float(indexValue[1]);
+      fv.nodes[i].index = (new Integer(indexValue[0])).intValue();
+      fv.nodes[i].value = (new Float(indexValue[1])).floatValue();
     }
     return;
   }
@@ -346,14 +386,14 @@ public class DocFeatureVectors {
   /** Write the FVs of one document into file. */
   public void addDocFVsToFile(int index, BufferedWriter out, int[] labels) {
     try {
-      out.write(index + ConstantParameters.ITEMSEPARATOR
-        + numInstances + ConstantParameters.ITEMSEPARATOR
+      out.write(new Integer(index) + ConstantParameters.ITEMSEPARATOR
+        + new Integer(numInstances) + ConstantParameters.ITEMSEPARATOR
         + docId);
       out.newLine();
       for(int i = 0; i < numInstances; ++i) {
         StringBuffer line = new StringBuffer();
-        line.append((i + 1) + ConstantParameters.ITEMSEPARATOR
-          + labels[i]);
+        line.append(new Integer(i + 1) + ConstantParameters.ITEMSEPARATOR
+          + new Integer(labels[i]));
         for(int j = 0; j < fvs[i].len; ++j)
           line.append(ConstantParameters.ITEMSEPARATOR
             + fvs[i].nodes[j].index + ConstantParameters.INDEXVALUESEPARATOR
@@ -369,17 +409,25 @@ public class DocFeatureVectors {
   public void addDocFVsMultiLabelToFile(int index, BufferedWriter out,
     LabelsOfFV[] multiLabels) {
     try {
-      out.write(index + ConstantParameters.ITEMSEPARATOR
-        + numInstances + ConstantParameters.ITEMSEPARATOR
+      out.write(new Integer(index) + ConstantParameters.ITEMSEPARATOR
+        + new Integer(numInstances) + ConstantParameters.ITEMSEPARATOR
         + docId);
       out.newLine();
       for(int i = 0; i < numInstances; ++i) {
-        StringBuffer line = new StringBuffer();
-        line.append((i + 1) + ConstantParameters.ITEMSEPARATOR
+        StringBuffer line = new StringBuffer(); 
+        
+        if(multiLabels[i]==null) { //if there is no lable for this example
+        	line.append(1+ConstantParameters.ITEMSEPARATOR
+                    + 0);
+        	
+        } else {
+        line.append(new Integer(i + 1) + ConstantParameters.ITEMSEPARATOR
           + multiLabels[i].num);
-        for(int j = 0; j < multiLabels[i].num; ++j)
+        for(int j = 0; j < multiLabels[i].num; ++j) {
           line.append(ConstantParameters.ITEMSEPARATOR
             + multiLabels[i].labels[j]);
+        }
+        }
         for(int j = 0; j < fvs[i].len; ++j)
           line.append(ConstantParameters.ITEMSEPARATOR
             + fvs[i].nodes[j].index + ConstantParameters.INDEXVALUESEPARATOR

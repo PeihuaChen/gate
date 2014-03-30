@@ -20,6 +20,8 @@ public class ArraysDataSetDefinition {
   String[] featuresInDataSetDef;
   /** Array of names of all ATTRIBUTEs. */
   String[] namesInDataSetDef;
+  /** Array of the semantic type of all ATTRIBUTEs*/
+  char[] semanticTypeInDataSetDef;
   /**
    * Array of annotation types of all attributes in Argument 1 of a relation.
    */
@@ -52,12 +54,13 @@ public class ArraysDataSetDefinition {
   int maxPosPosition = 0;
 
   /** Put the types and feautures and others into the arrays. */
-  void putTypeAndFeatIntoArray(List<? extends Attribute> attrs) {
+  void putTypeAndFeatIntoArray(List attrs) {
     numTypes = obtainNumberOfNLPTypes(attrs);
     typesInDataSetDef = new String[numTypes];
     featuresInDataSetDef = new String[numTypes];
     namesInDataSetDef = new String[numTypes];
     featurePosition = new int[numTypes];
+    semanticTypeInDataSetDef = new char[numTypes];
     // added allFeat;
     obtainGATETypesAndFeatures(attrs);
     // System.out.println("name0="+namesInDataSetDef[0]);
@@ -71,28 +74,29 @@ public class ArraysDataSetDefinition {
   }
 
   /** Get the number of features in the dataset definition unit. */
-  static int obtainNumberOfNLPTypes(List<? extends Attribute> attrs) {
+  static int obtainNumberOfNLPTypes(List attrs) {
     int num = 0;
     if(attrs == null) {
       return num;
     } else {
       for(int i = 0; i < attrs.size(); i++) {
-        if(!attrs.get(i).isClass()) num++;
+        if(!((Attribute)attrs.get(i)).isClass()) num++;
       }
       return num;
     }
   }
 
   /** Get the type, feature, name and position of each of attribute features. */
-  void obtainGATETypesAndFeatures(List<? extends Attribute> attrs) {
+  void obtainGATETypesAndFeatures(List attrs) {
     int num0 = 0;
     for(int i = 0; i < attrs.size(); i++) {
-      Attribute attr = attrs.get(i);
+      Attribute attr = (Attribute)attrs.get(i);
       if(!attr.isClass()) {
         typesInDataSetDef[num0] = attr.getType();
         featuresInDataSetDef[num0] = attr.getFeature();
         namesInDataSetDef[num0] = attr.getName();
         featurePosition[num0] = attr.getPosition();
+        semanticTypeInDataSetDef[num0]=attr.getSemantic_type();
         // System.out.println(new Integer(num0+1) + " " +
         // namesInDataSetDef[num0] + " "
         // + typesInDataSetDef[num0] + " " +
@@ -109,12 +113,12 @@ public class ArraysDataSetDefinition {
    * Get the annotation features of the two arguments of relation for all the
    * ATTRIBUTE_RELs.
    */
-  void obtainArgs(List<AttributeRelation> relAttrs) {
+  void obtainArgs(List relAttrs) {
     int num0 = 0;
     arg1s = new String[numTypes];
     arg2s = new String[numTypes];
     for(int i = 0; i < relAttrs.size(); i++) {
-      AttributeRelation attr = relAttrs.get(i);
+      AttributeRelation attr = (AttributeRelation)relAttrs.get(i);
       if(!attr.isClass()) {
         arg1s[num0] = attr.getArg1();
         arg2s[num0] = attr.getArg2();

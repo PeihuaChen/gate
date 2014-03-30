@@ -28,9 +28,9 @@ import org.jdom.Element;
 public class Attribute {
   // These constants are used only for returning values from
   // semanticType
-  public static final int NOMINAL = 1;
-  public static final int NUMERIC = 2;
-  public static final int BOOLEAN = 3;
+  public static final char NOMINAL = 'N';
+  public static final char NUMERIC = 'D';
+  public static final char BOOLEAN = 'B';
   boolean isClass = false;
   String name;
   String type;
@@ -39,7 +39,7 @@ public class Attribute {
   // Create a feature on an annotation generated
   // by an UniEngine with the confidence as value
   String confidence_feature;
-  int semantic_type = Attribute.NOMINAL;
+  char semantic_type = Attribute.NOMINAL;
   // The SVMLightWrapper allows weighting for attributes to be specified
   // in
   // the configuration file, and those weightings are stored in this
@@ -66,6 +66,7 @@ public class Attribute {
         "Required element \"SEMTYPE\" not present in attribute:\n"
           + jdomElement.toString() + "!");
     else {
+        this.semantic_type = Attribute.NOMINAL;	//this is the default semantic type
       if(anElement.getTextTrim().equalsIgnoreCase("NOMINAL"))
         this.semantic_type = Attribute.NOMINAL;
       else if(anElement.getTextTrim().equalsIgnoreCase("NUMERIC"))
@@ -100,6 +101,9 @@ public class Attribute {
     // confidence_feature
     anElement = jdomElement.getChild("CLASS");
     isClass = anElement != null;
+    
+//System.out.println("semtype="+this.semantic_type + ",name="+this.name+", feat="+this.feature);
+
   }
 
   public Attribute() {
@@ -171,7 +175,7 @@ public class Attribute {
     this.position = position;
   }
 
-  public void setSemanticType(int type) {
+  public void setSemanticType(char type) {
     this.semantic_type = type;
   }
 
@@ -183,11 +187,11 @@ public class Attribute {
     this.confidence_feature = confidence_feature;
   }
 
-  public int getSemantic_type() {
+  public char getSemantic_type() {
     return semantic_type;
   }
 
-  public void setSemantic_type(int semantic_type) {
+  public void setSemantic_type(char semantic_type) {
     this.semantic_type = semantic_type;
   }
 
@@ -196,7 +200,7 @@ public class Attribute {
    * 
    * @return Attribute.NOMINAL, Attribute.NUMERIC or Attribute.BOOLEAN
    */
-  public int semanticType() {
+  public char semanticType() {
     return this.semantic_type;
   }
 
@@ -244,7 +248,7 @@ public class Attribute {
       throw new GateException(
         "Required element \"SEMTYPE\" not present in attribute:\n"
           + jdomElement.toString() + "!");
-    int semantic_type = Attribute.NOMINAL;
+    char semantic_type = Attribute.NOMINAL;
     if(anElement.getTextTrim().equalsIgnoreCase("NUMERIC"))
       semantic_type = Attribute.NUMERIC;
     else if(anElement.getTextTrim().equalsIgnoreCase("BOOLEAN"))

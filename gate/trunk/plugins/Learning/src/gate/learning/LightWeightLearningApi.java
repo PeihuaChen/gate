@@ -557,9 +557,9 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         new FileInputStream(new File(wdResults,
           ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8");
       HashMap<Integer, String> indexTerm = new HashMap<Integer, String>();
-      for(String obj : featuresList.featuresList.keySet()) {
+      for(Object obj : featuresList.featuresList.keySet()) {
         indexTerm.put(
-          featuresList.featuresList.get(obj).intValue(), obj);
+          new Long(featuresList.featuresList.get(obj).toString()).intValue(), obj.toString());
       }
       for(int nd = 0; nd < numDocs; ++nd) {
         String[] ts = inFVs.readLine().split(ConstantParameters.ITEMSEPARATOR);
@@ -1573,9 +1573,9 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       surroundMode = engineSettings.surround;
       // Open the mode file and read the model
       Map<Integer,String> featId2Form = new HashMap<Integer,String>();
-      for(String obj : featuresList.featuresList.keySet()) {
-        int k = featuresList.featuresList.get(obj).intValue();
-        featId2Form.put(k, obj);
+      for(Object obj : featuresList.featuresList.keySet()) {
+        int k =  new Long(featuresList.featuresList.get(obj).toString()).intValue();
+        featId2Form.put(k, obj.toString());
       }
       // Need some methods from MultiClassLearning
       MultiClassLearning mulL = new MultiClassLearning();
