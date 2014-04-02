@@ -354,8 +354,9 @@
       Tagger_Boilerpipe Tagger_Chemistry Tagger_DateNormalizer Tagger_Framework
       Tagger_Lupedia Tagger_Measurements Tagger_MetaMap Tagger_MutationFinder
       Tagger_NormaGene Tagger_NP_Chunking Tagger_Numbers Tagger_OpenCalais
-      Tagger_PennBio Tagger_Stanford Tagger_Zemanta Teamware_Tools TermRaider
-      Text_Categorization Tools Twitter UIMA Web_Crawler_Websphinx WordNet
+      Tagger_PennBio Tagger_Stanford Tagger_TextRazor Tagger_Zemanta
+      Teamware_Tools TermRaider Text_Categorization Tools Twitter UIMA
+      Web_Crawler_Websphinx WordNet
     " />
   <target name="plugins.build" depends="jar">
     <for param="plugin">
