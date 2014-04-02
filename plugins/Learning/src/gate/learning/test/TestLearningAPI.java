@@ -459,8 +459,10 @@ public class TestLearningAPI extends TestCase {
   }
   /** Test the relation extraction by using the SVM with linear kernel
    * and a small part of data from ACE-04 relation extraction.
+   * This test has been disabled (02/Apr/2014, IR) as it produces different
+   * numbers when run on Java 6 vs Java 7.
    */
-  public void testSVMRelationLearning() throws GateException, IOException {
+  public void dont_testSVMRelationLearning() throws GateException, IOException {
     System.out.print("Testing the SVM with linear kernel on relation extraction...");
     // Initialisation relation-learning
     File scHome = new File(new File(learningHome, "test"), "relation-learning");
