@@ -190,9 +190,7 @@ public class NLPFeaturesOfDoc {
         for(int j = 0; j < featuresNgram.length; ++j)
           if(!ngramTerms.containsKey(featuresNgram[j].toString()))
             ngramTerms.put(featuresNgram[j].toString(), 1);
-          else ngramTerms.put(featuresNgram[j].toString(),
-            new Integer(ngramTerms
-              .get(featuresNgram[j].toString()) + 1));
+          else ngramTerms.put(featuresNgram[j].toString(),ngramTerms.get(featuresNgram[j].toString()) + 1);
         List<String> keys = new ArrayList<String>(ngramTerms.keySet());
         Collections.sort(keys);
         Iterator<String> iterator = keys.iterator();
