@@ -237,7 +237,7 @@ public class ParseCpsl implements JapeConstants {
       blockBuffer.append("          );" + nl);
       blockBuffer.append("        }" + nl);
       blockBuffer.append("        catch(gate.util.InvalidOffsetException ioe) {" + nl);
-      blockBuffer.append("          throw new LuckyException(\"Invalid offset exception generated \" +" + nl);
+      blockBuffer.append("          throw new gate.util.LuckyException(\"Invalid offset exception generated \" +" + nl);
       blockBuffer.append("               \"from offsets taken from same document!\");" + nl);
       blockBuffer.append("        }" + nl);
       blockBuffer.append("      }" + nl);
@@ -767,13 +767,12 @@ String JavaImportBlock() :
 {
   // default java imports
   String defaultimportblock =
+      "import gate.*;\n" +
       "import java.io.*;\n" +
       "import java.util.*;\n" +
-      "import gate.*;\n" +
+      "import gate.util.*;\n" +
       "import gate.jape.*;\n" +
-      "import gate.creole.ontology.*;\n" +
-      "import gate.annotation.*;\n" +
-      "import gate.util.*;\n";
+      "import gate.creole.ontology.*;\n";
   String importblock = null;
 }
 {
@@ -1395,7 +1394,7 @@ String[] AssignmentExpression(boolean checkLabel) :
 
   blockBuffer.append("// RHS assignment block" + nl);
   blockBuffer.append(
-    "      FeatureMap features = Factory.newFeatureMap();" + nl
+    "      gate.FeatureMap features = gate.Factory.newFeatureMap();" + nl
   );
 }
 {
@@ -1430,7 +1429,7 @@ String[] AssignmentExpression(boolean checkLabel) :
     newAnnotType = nameTok.image;
 
     // start of the attribute stuff
-    blockBuffer.append("      Object val = null;" + nl);
+    blockBuffer.append("      java.lang.Object val = null;" + nl);
   }
 
   // equals sign, and the opening brace of the assignments list
@@ -1456,10 +1455,10 @@ String[] AssignmentExpression(boolean checkLabel) :
             break;
           case integer:
             blockBuffer.append("      try { " +
-              "val = Long.valueOf(");
+              "val = java.lang.Long.valueOf(");
             appendJavaStringLiteral(blockBuffer, attrVal.second.toString());
             blockBuffer.append("); }" +
-              nl + "      catch(NumberFormatException e) { }" + nl
+              nl + "      catch(java.lang.NumberFormatException e) { }" + nl
             );
             break;
           case ident:
@@ -1470,16 +1469,16 @@ String[] AssignmentExpression(boolean checkLabel) :
             break;
           case bool:
             blockBuffer.append(
-              "      val = Boolean.valueOf(");
+              "      val = java.lang.Boolean.valueOf(");
             appendJavaStringLiteral(blockBuffer, attrVal.second.toString());
             blockBuffer.append(");" + nl);
             break;
           case floatingPoint:
             blockBuffer.append("      try { " +
-              "val = Double.valueOf(");
+              "val = java.lang.Double.valueOf(");
             appendJavaStringLiteral(blockBuffer, attrVal.second.toString());
             blockBuffer.append("); }" +
-              nl + "      catch(NumberFormatException e) { }" + nl
+              nl + "      catch(java.lang.NumberFormatException e) { }" + nl
             );
             break;
           default:
@@ -1514,7 +1513,7 @@ String[] AssignmentExpression(boolean checkLabel) :
             " = (gate.AnnotationSet)bindings.get(");
           appendJavaStringLiteral(blockBuffer, nameTok.image);
           blockBuffer.append("); " + nl +
-            "        Object existingFeatureValue;" + nl);
+            "        java.lang.Object existingFeatureValue;" + nl);
 
         }
         (

@@ -211,7 +211,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       blockBuffer.append("          );" + nl);
       blockBuffer.append("        }" + nl);
       blockBuffer.append("        catch(gate.util.InvalidOffsetException ioe) {" + nl);
-      blockBuffer.append("          throw new LuckyException(\u005c"Invalid offset exception generated \u005c" +" + nl);
+      blockBuffer.append("          throw new gate.util.LuckyException(\u005c"Invalid offset exception generated \u005c" +" + nl);
       blockBuffer.append("               \u005c"from offsets taken from same document!\u005c");" + nl);
       blockBuffer.append("        }" + nl);
       blockBuffer.append("      }" + nl);
@@ -681,13 +681,12 @@ finishSPT(t);
 // otherwise set it to the default block
   final public String JavaImportBlock() throws ParseException {// default java imports
   String defaultimportblock =
+      "import gate.*;\u005cn" +
       "import java.io.*;\u005cn" +
       "import java.util.*;\u005cn" +
-      "import gate.*;\u005cn" +
+      "import gate.util.*;\u005cn" +
       "import gate.jape.*;\u005cn" +
-      "import gate.creole.ontology.*;\u005cn" +
-      "import gate.annotation.*;\u005cn" +
-      "import gate.util.*;\u005cn";
+      "import gate.creole.ontology.*;\u005cn";
   String importblock = null;
     switch (jj_nt.kind) {
     case javaimport:{
@@ -1495,7 +1494,7 @@ String[] AnonymousJavaBlock() throws ParseException {String[] block = new String
 
   blockBuffer.append("// RHS assignment block" + nl);
   blockBuffer.append(
-    "      FeatureMap features = Factory.newFeatureMap();" + nl
+    "      gate.FeatureMap features = gate.Factory.newFeatureMap();" + nl
   );
     switch (jj_nt.kind) {
     case colon:{
@@ -1529,7 +1528,7 @@ block[0] = nameTok.image;
 newAnnotType = nameTok.image;
 
     // start of the attribute stuff
-    blockBuffer.append("      Object val = null;" + nl);
+    blockBuffer.append("      java.lang.Object val = null;" + nl);
     jj_consume_token(assign);
     jj_consume_token(leftBrace);
     label_14:
@@ -1565,10 +1564,10 @@ switch(((Integer) attrVal.first).intValue()) {
             break;
           case integer:
             blockBuffer.append("      try { " +
-              "val = Long.valueOf(");
+              "val = java.lang.Long.valueOf(");
             appendJavaStringLiteral(blockBuffer, attrVal.second.toString());
             blockBuffer.append("); }" +
-              nl + "      catch(NumberFormatException e) { }" + nl
+              nl + "      catch(java.lang.NumberFormatException e) { }" + nl
             );
             break;
           case ident:
@@ -1579,16 +1578,16 @@ switch(((Integer) attrVal.first).intValue()) {
             break;
           case bool:
             blockBuffer.append(
-              "      val = Boolean.valueOf(");
+              "      val = java.lang.Boolean.valueOf(");
             appendJavaStringLiteral(blockBuffer, attrVal.second.toString());
             blockBuffer.append(");" + nl);
             break;
           case floatingPoint:
             blockBuffer.append("      try { " +
-              "val = Double.valueOf(");
+              "val = java.lang.Double.valueOf(");
             appendJavaStringLiteral(blockBuffer, attrVal.second.toString());
             blockBuffer.append("); }" +
-              nl + "      catch(NumberFormatException e) { }" + nl
+              nl + "      catch(java.lang.NumberFormatException e) { }" + nl
             );
             break;
           default:
@@ -1621,7 +1620,7 @@ existingAnnotSetName = nameTok.image + "ExistingAnnots";
             " = (gate.AnnotationSet)bindings.get(");
           appendJavaStringLiteral(blockBuffer, nameTok.image);
           blockBuffer.append("); " + nl +
-            "        Object existingFeatureValue;" + nl);
+            "        java.lang.Object existingFeatureValue;" + nl);
         switch (jj_nt.kind) {
         case period:{
           jj_consume_token(period);
@@ -1850,6 +1849,18 @@ appendAnnotationAdd(blockBuffer, newAnnotType, annotSetName);
     finally { jj_save(1, xla); }
   }
 
+  private boolean jj_3R_27()
+ {
+    if (jj_scan_token(pling)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_26()
+ {
+    if (jj_3R_15()) return true;
+    return false;
+  }
+
   private boolean jj_3R_25()
  {
     Token xsp;
@@ -1948,18 +1959,6 @@ appendAnnotationAdd(blockBuffer, newAnnotType, annotSetName);
   }
 
   private boolean jj_3_1()
- {
-    if (jj_3R_15()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_27()
- {
-    if (jj_scan_token(pling)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_26()
  {
     if (jj_3R_15()) return true;
     return false;
