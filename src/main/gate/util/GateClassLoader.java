@@ -152,6 +152,14 @@ public class GateClassLoader extends URLClassLoader {
   private Class<?> loadClass(String name, boolean resolve, boolean localOnly,
       Set<GateClassLoader> visited) throws ClassNotFoundException {
 
+    Class<?> previous = findLoadedClass(name);
+    
+    if (previous != null) {
+      if (DEBUG) System.out.println("CACHE HIT: " + name + " -- " + id);
+      
+      return previous;
+    }
+    
     if(DEBUG)
       System.out.println(name + " -- " + id + ": " + localOnly + "/" + isolated
           + "/" + getParent());
