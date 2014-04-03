@@ -84,7 +84,7 @@ public class Batch implements JapeConstants, Benchmarkable {
     this.encoding = encoding;
     this.classLoader =
         Gate.getClassLoader().getDisposableClassLoader(
-            url.toExternalForm() + System.currentTimeMillis());
+            url.toExternalForm() + System.currentTimeMillis(), true);
     parseJape();
     linkListeners();
   } // full init constructor
@@ -97,14 +97,14 @@ public class Batch implements JapeConstants, Benchmarkable {
     this.encoding = encoding;
     this.classLoader =
         Gate.getClassLoader().getDisposableClassLoader(
-            url.toExternalForm() + System.currentTimeMillis());
+            url.toExternalForm() + System.currentTimeMillis(), true);
     parseJape();
     linkListeners();
   } // full init constructor
 
   private void readObject(java.io.ObjectInputStream in) throws IOException,
       ClassNotFoundException {
-    classLoader = Gate.getClassLoader().getDisposableClassLoader(in.toString());
+    classLoader = Gate.getClassLoader().getDisposableClassLoader(in.toString(),true);
     in.defaultReadObject();
     // now recreate the listeners
     linkListeners();
