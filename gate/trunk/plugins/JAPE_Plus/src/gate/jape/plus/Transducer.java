@@ -603,10 +603,10 @@ public class Transducer extends AbstractLanguageAnalyser
                 new GZIPInputStream(
                 new BufferedInputStream(binaryGrammarURL.openStream())));
             singlePhaseTransducersData = (SPTData[])ois.readObject();
-            classLoader = Gate.getClassLoader().getDisposableClassLoader(binaryGrammarURL.toExternalForm()+System.currentTimeMillis());
+            classLoader = Gate.getClassLoader().getDisposableClassLoader(binaryGrammarURL.toExternalForm()+System.currentTimeMillis(),true);
             classLoaderRefCount.incrementAndGet();
           }else if(grammarURL != null) {
-            classLoader = Gate.getClassLoader().getDisposableClassLoader(grammarURL.toExternalForm()+System.currentTimeMillis());
+            classLoader = Gate.getClassLoader().getDisposableClassLoader(grammarURL.toExternalForm()+System.currentTimeMillis(),true);
             classLoaderRefCount.incrementAndGet();
             parseJape();  
           }

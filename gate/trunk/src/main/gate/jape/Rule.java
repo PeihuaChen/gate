@@ -103,6 +103,7 @@ implements JapeConstants, Serializable
   @Override
   public void finish(GateClassLoader classloader) {
     lhs.finish();
+    rhs.finish(classloader);
   } // finish
 
 

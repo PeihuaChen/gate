@@ -22,6 +22,7 @@ import gate.Document;
 import gate.Gate;
 import gate.creole.ontology.Ontology;
 import gate.util.Err;
+import gate.util.GateClassLoader;
 import gate.util.GateRuntimeException;
 import gate.util.Strings;
 
@@ -71,6 +72,8 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   /** A list of source info object for mapping between Java and Jape. */
   //private transient List<SourceInfo> sourceInfo;
   private transient SourceInfo sourceInfo;
+  
+  private transient GateClassLoader classloader;
 
   /** Cardinality of the action class set. Used for ensuring class name
     * uniqueness.
@@ -203,7 +206,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     );
   } // addBlock(name, block)
   
-  
+  public void finish(GateClassLoader classloader) {
+    this.classloader = classloader;
+  }
   
 
   /** Create the action class and an instance of it. */
@@ -229,7 +234,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   public void instantiateActionClass() throws JapeException {
 
     try {
-      theActionObject = Gate.getClassLoader().
+      theActionObject = classloader.
                         loadClass(actionClassQualifiedName).
                         newInstance();
     } catch(Exception e) {
@@ -278,7 +283,8 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 		try{
 			Map<String, String> actionClasses = new HashMap<String, String>();
 			actionClasses.put(className, getActionClassString());
-			gate.util.Javac.loadClasses(actionClasses, Gate.getClassLoader().getDisposableClassLoader(in.toString()));
+			classloader = Gate.getClassLoader().getDisposableClassLoader(in.toString(),true);
+			gate.util.Javac.loadClasses(actionClasses, classloader);
 		}catch(Exception e1){
 			throw new GateRuntimeException (e1);
 		}
