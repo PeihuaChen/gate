@@ -583,6 +583,10 @@ public class Transducer extends AbstractLanguageAnalyser
           this.singlePhaseTransducersData[i] = new SPTData(
               existingTransducer.singlePhaseTransducersData[i],
               this.singlePhaseTransducers[i].rules);
+          
+          for (Rule rule : this.singlePhaseTransducers[i].rules) {
+            rule.getRHS().finish(classLoader);
+          }
         }
       } else {
         if (classLoader != null) {
