@@ -36,9 +36,13 @@ import gate.creole.metadata.RunTime;
 import gate.crowdsource.rest.CrowdFlowerClient;
 import gate.gui.ActionsPublisher;
 
+import org.apache.log4j.Logger;
+
 @CreoleResource(name = "Entity Classification Job Builder",
    comment = "Build a CrowdFlower job asking users to select the right label for entities")
 public class EntityClassificationJobBuilder extends AbstractLanguageAnalyser implements ActionsPublisher {
+
+  private static final Logger log = Logger.getLogger(EntityClassificationJobBuilder.class);
 
   private static final long serialVersionUID = -1584716901194104888L;
 
@@ -148,13 +152,20 @@ public class EntityClassificationJobBuilder extends AbstractLanguageAnalyser imp
         fireProgressChanged((100 * entityIdx++) / allEntities.size());
         if(isInterrupted()) throw new ExecutionInterruptedException();
         AnnotationSet thisEntityContext = Utils.getCoveringAnnotations(contextAnnotations, entity);
-        // get the "closest" context, i.e. the shortest annotation in the covering set.
-        // usually we'd expect this set to contain just one annotation
-        Annotation context = Collections.min(thisEntityContext, ANNOTATION_LENGTH_COMPARATOR);
-        crowdFlowerClient.createClassificationUnit(jobId, getDocument(), entityASName, context, entity);
+        if(thisEntityContext.isEmpty()) {
+          log.warn(entityAnnotationType + " with ID " + entity.getId() +
+              " at offsets (" + Utils.start(entity) + ":" + Utils.end(entity) +
+              ") in document " + getDocument().getName() + 
+              " has no surrounding " + contextAnnotationType + " - ignored");
+        } else {
+          // get the "closest" context, i.e. the shortest annotation in the covering set.
+          // usually we'd expect this set to contain just one annotation
+          Annotation context = Collections.min(thisEntityContext, ANNOTATION_LENGTH_COMPARATOR);
+          crowdFlowerClient.createClassificationUnit(jobId, getDocument(), entityASName, context, entity);
+        }
       }
       fireProcessFinished();
-      fireStatusChanged(allEntities.size() + " units created");
+      fireStatusChanged(entityIdx + " units created");
     } finally {
       interrupted = false;
     }
