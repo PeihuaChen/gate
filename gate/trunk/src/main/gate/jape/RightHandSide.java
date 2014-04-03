@@ -121,12 +121,12 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       "package " + actionsDirName + "; " + nl +
       importblock + nl +
       "public class " + actionClassName + nl +
-      "implements java.io.Serializable, RhsAction { " + nl +
-      "  private ActionContext ctx;"+nl+
-      "  public String ruleName() { return \""+ruleName+"\"; }"+nl+
-      "  public String phaseName() { return \""+phaseName+"\"; }"+nl+
-      "  public void setActionContext(ActionContext ac) { ctx = ac; }"+nl+
-      "  public ActionContext getActionContext() { return ctx; }"+nl+
+      "implements java.io.Serializable, gate.jape.RhsAction { " + nl +
+      "  private gate.jape.ActionContext ctx;"+nl+
+      "  public java.lang.String ruleName() { return \""+ruleName+"\"; }"+nl+
+      "  public java.lang.String phaseName() { return \""+phaseName+"\"; }"+nl+
+      "  public void setActionContext(gate.jape.ActionContext ac) { ctx = ac; }"+nl+
+      "  public gate.jape.ActionContext getActionContext() { return ctx; }"+nl+
       "  public void doit(gate.Document doc, " + nl +
       "                   java.util.Map<java.lang.String, gate.AnnotationSet> bindings, " + nl +
       //"                   gate.AnnotationSet annotations, " + nl +
