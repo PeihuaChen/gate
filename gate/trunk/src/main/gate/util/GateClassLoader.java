@@ -123,8 +123,10 @@ public class GateClassLoader extends URLClassLoader {
     }
 
     for(GateClassLoader cl : children) {
-      result = cl.getResource(name);
-      if(result != null) return result;
+      if (!cl.isIsolated()) {
+        result = cl.getResource(name);
+        if(result != null) return result;
+      }      
     }
 
     return null;
