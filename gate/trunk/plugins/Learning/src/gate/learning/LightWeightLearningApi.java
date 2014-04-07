@@ -1187,11 +1187,11 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     for(int i = 0; i < annotationArray.size(); ++i) {
       if(selectedLabels[i] < 0) continue;
       FeatureMap features = Factory.newFeatureMap();
+      Annotation ann = annotationArray.get(i);
+      features.putAll(ann.getFeatures()); //GG: put all instance features on output
       features.put(featName, labelsAndId.id2Label.get(
         selectedLabels[i] + 1).toString());
       features.put("prob", valuesLabels[i]);
-      Annotation ann = annotationArray.get(i);
-      features.putAll(ann.getFeatures()); //GG: put all instance features on output
       // For relation data, need the argument features
       if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
         String arg1V = ann.getFeatures().get(
@@ -1260,10 +1260,10 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         strB.append(label + ":" + multiLabels[i].probs[indexSort[j]] + " ");
       }
       FeatureMap features = Factory.newFeatureMap();
-      features.put(featName, strB.toString().trim());
-      // features.put("prob", valuesLabels[i]);
       Annotation ann = annotationArray.get(i);
       features.putAll(ann.getFeatures()); //GG: put all instance features on output
+      features.put(featName, strB.toString().trim());
+      // features.put("prob", valuesLabels[i]);
       // For relation data, need the argument features
       if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
         String arg1V = ann.getFeatures().get(
