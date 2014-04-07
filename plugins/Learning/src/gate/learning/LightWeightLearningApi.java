@@ -1191,6 +1191,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         selectedLabels[i] + 1).toString());
       features.put("prob", valuesLabels[i]);
       Annotation ann = annotationArray.get(i);
+      features.putAll(ann.getFeatures()); //GG: put all instance features on output
       // For relation data, need the argument features
       if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
         String arg1V = ann.getFeatures().get(
@@ -1262,6 +1263,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       features.put(featName, strB.toString().trim());
       // features.put("prob", valuesLabels[i]);
       Annotation ann = annotationArray.get(i);
+      features.putAll(ann.getFeatures()); //GG: put all instance features on output
       // For relation data, need the argument features
       if(engineSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
         String arg1V = ann.getFeatures().get(
