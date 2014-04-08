@@ -57,8 +57,6 @@ GATE papers
 
 %2* 2014
 
-- S. Bethard, L. Derczynski, J. Pustejovsky, M. Verhagen. Clinical TempEval. Computing Research Repository (arXiv). %(http://derczynski.com/sheffield/papers/clinical-tempeval.pdf, PDF)
-
 - L. Derczynski, K. Bontcheva. Spatio-temporal grounding of claims made on the web, in Pheme. Proceedings of the 10th Joint ACL - ISO Workshop on Interoperable Semantic Annotation (ISA). %(https://gate.ac.uk/sale/lrec2014/st-project-note/pheme-st-grounding.pdf, PDF)
 
 - L. Derczynski, K. Bontcheva. Passive-Aggressive Sequence Labeling with Discriminative Post-Editing for Recognising Person Entities in Tweets. Proceedings of the meeting of the European chapter of the Association for Computation Linguistics (EACL). %(http://derczynski.com/sheffield/papers/person_tweets.pdf,PDF)
@@ -538,6 +536,9 @@ GATE papers
 
 
 %1 Tech reports etc.
+
+
+ - S. Bethard, L. Derczynski, J. Pustejovsky, M. Verhagen. Clinical TempEval. Computing Research Repository (arXiv). %(http://derczynski.com/sheffield/papers/clinical-tempeval.pdf, PDF)
 
  - T. Polajnar and V. Tablan and H. Cunningham. User-Friendly Ontology Authoring Using a Controlled Language. Technical report CS-05-10, University of Sheffield, Department of Computer Science, 2005. %(http://www.dcs.shef.ac.uk/intranet/research/resmes/CS0510.pdf, PDF).
 
