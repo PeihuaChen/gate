@@ -375,10 +375,15 @@ public class CrowdFlowerClient {
    *         includes the case where an empty annotation set is
    *         provided, as this represents a gold snippet where the
    *         correct answer is that this snippet contains no entities.
+   * @param goldReason for a gold-standard unit, the <em>reason</em>
+   *         why the annotations should be considered correct.  This
+   *         will be shown to users as feedback if they get the gold
+   *         unit wrong.  Ignored for non-gold units. 
    * @return the ID of the newly-created unit.
    */
   public long createAnnotationUnit(long jobId, Document doc, String asName,
-          Annotation snippet, AnnotationSet tokens, AnnotationSet correctAnnotations) {
+          Annotation snippet, AnnotationSet tokens, AnnotationSet correctAnnotations,
+          String goldReason) {
     String documentId = String.valueOf(doc.getLRPersistenceId());
     int formDataSize = 6; // docId + asName + annId
     List<Annotation> tokensList = Utils.inDocumentOrder(tokens);
@@ -401,6 +406,9 @@ public class CrowdFlowerClient {
       } else {
         formDataSize += 2*answerGold.size(); // answer=N for each token
       }
+      if(goldReason != null) {
+        formDataSize += 2; // answer_gold_reason or noentities_gold_reason
+      }
     }
     
     String[] formData = new String[formDataSize];
@@ -421,12 +429,21 @@ public class CrowdFlowerClient {
       if(answerGold.size() == 0) {
         formData[i++] = "unit[data][noentities_gold]";
         formData[i++] = "1";
-      }
-      Integer[] goldArray = answerGold.toArray(new Integer[answerGold.size()]);
-      Arrays.sort(goldArray);
-      for(Integer tokIndex : goldArray) {
-        formData[i++] = "unit[data][answer_gold][]";
-        formData[i++] = String.valueOf(tokIndex);
+        if(goldReason != null) {
+          formData[i++] = "unit[data][noentities_gold_reason]";
+          formData[i++] = goldReason;
+        }
+      } else {
+        Integer[] goldArray = answerGold.toArray(new Integer[answerGold.size()]);
+        Arrays.sort(goldArray);
+        for(Integer tokIndex : goldArray) {
+          formData[i++] = "unit[data][answer_gold][]";
+          formData[i++] = String.valueOf(tokIndex);
+        }
+        if(goldReason != null) {
+          formData[i++] = "unit[data][answer_gold_reason]";
+          formData[i++] = goldReason;
+        }
       }
     }
 

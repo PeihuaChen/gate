@@ -54,6 +54,8 @@ public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser impleme
   private String goldFeatureName;
   
   private String goldFeatureValue;
+  
+  private String goldReasonFeatureName;
 
   private String entityAnnotationType;
   
@@ -172,6 +174,18 @@ public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser impleme
     this.goldFeatureValue = goldFeatureValue;
   }
 
+  public String getGoldReasonFeatureName() {
+    return goldReasonFeatureName;
+  }
+
+  @Optional
+  @RunTime
+  @CreoleParameter(comment = "Feature on gold snippet annotations explaining " +
+  		"why the snippet's entities are correct")
+  public void setGoldReasonFeatureName(String goldReasonFeatureName) {
+    this.goldReasonFeatureName = goldReasonFeatureName;
+  }
+
   @Override
   public Resource init() throws ResourceInstantiationException {
     if(apiKey == null || "".equals(apiKey)) {
@@ -206,12 +220,17 @@ public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser impleme
         if(isInterrupted()) throw new ExecutionInterruptedException();
         AnnotationSet snippetTokens = Utils.getContainedAnnotations(tokens, snippet);
         AnnotationSet goldAnnots = null;
+        String goldReason = null;
         if(goldFeatureValue.equals(snippet.getFeatures().get(goldFeatureName))) {
           goldAnnots = Utils.getContainedAnnotations(goldAS, snippet);
+          if(goldReasonFeatureName != null) {
+            Object goldReasonValue = snippet.getFeatures().get(goldReasonFeatureName);
+            if(goldReasonValue != null) goldReason = goldReasonValue.toString();
+          }
         }
         
         long unitId = crowdFlowerClient.createAnnotationUnit(
-                jobId, getDocument(), snippetASName, snippet, snippetTokens, goldAnnots);
+                jobId, getDocument(), snippetASName, snippet, snippetTokens, goldAnnots, goldReason);
         // store the unit ID - we use the entity annotation type as part of this feature
         // name so the same sentences can hold units for different annotation types
         // e.g. Person, Location, Organization
