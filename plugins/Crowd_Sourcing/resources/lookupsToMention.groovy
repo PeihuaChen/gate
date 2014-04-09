@@ -12,7 +12,9 @@
  *  each with a different "inst".  Additionally, Lookups may have a feature
  *  named "connections" containing a human-readable description of the KB
  *  instance (these can be created using the semantic enrichment PR from the
- *  Gazetteer_LKB plugin).
+ *  Gazetteer_LKB plugin, see add-abstracts-from-dbpedia.xgapp for an example
+ *  of this and http://gate.ac.uk/userguide/sec:gazetteers:semantic-enrichment
+ *  for documentation).
  *
  *  The script gathers co-extensive Lookup annotations into groups, and for
  *  each group it generates one output Mention annotation, with the "options"
