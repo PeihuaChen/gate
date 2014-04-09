@@ -180,8 +180,9 @@ public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser impleme
 
   @Optional
   @RunTime
-  @CreoleParameter(comment = "Feature on gold snippet annotations explaining " +
-  		"why the snippet's entities are correct")
+  @CreoleParameter(defaultValue = "reason",
+          comment = "Feature on gold snippet annotations explaining " +
+  		        "why the snippet's entities are correct")
   public void setGoldReasonFeatureName(String goldReasonFeatureName) {
     this.goldReasonFeatureName = goldReasonFeatureName;
   }
