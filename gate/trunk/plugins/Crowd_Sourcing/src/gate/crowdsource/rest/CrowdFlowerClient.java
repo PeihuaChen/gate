@@ -201,8 +201,12 @@ public class CrowdFlowerClient {
       }
     }
     String correctAnswer = (String)target.getFeatures().get("correct");
+    String reason = (String)target.getFeatures().get("reason");
     if(correctAnswer != null) {
       formDataSize += 4; // "golden" + answer
+      if(reason != null) {
+        formDataSize += 2; // answer_gold_reason
+      }
     }
 
     String[] formData = new String[formDataSize];
@@ -237,6 +241,10 @@ public class CrowdFlowerClient {
       formData[i++] = "true";
       formData[i++] = "unit[data][answer_gold]";
       formData[i++] = correctAnswer;
+      if(reason != null) {
+        formData[i++] = "unit[data][answer_gold_reason]";
+        formData[i++] = reason;
+      }
     }
 
     try {
