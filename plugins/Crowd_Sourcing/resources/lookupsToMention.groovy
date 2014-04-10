@@ -33,7 +33,7 @@
  *  Version 3, June 2007 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *  
- *  $Id: CrowdFlowerConstants.java 17412 2014-02-24 17:30:09Z ian_roberts $
+ *  $Id$
  */
 
 import org.apache.commons.lang.StringEscapeUtils as SEU
