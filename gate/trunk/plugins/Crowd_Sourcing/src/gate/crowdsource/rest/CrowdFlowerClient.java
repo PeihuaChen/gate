@@ -98,15 +98,14 @@ public class CrowdFlowerClient {
 
     // construct the CML with the specified caption and common radio
     // options
-    cml.append("<h2 id=\"unit_text\">{{text}}</h2>\n\n"
-            + "<cml:radios validates=\"required\" label=\"");
+    cml.append("<h2 id=\"unit_text\">{{text}}</h2>\n\n" + "{% if detail %}\n"
+            + "  <div class=\"well\">{{detail}}</div>\n"
+            + "{% endif %}\n" + "<cml:radios validates=\"required\" label=\"");
     StringEscapeUtils.escapeXml(cml, caption);
-    cml.append("\" name=\"answer\">\n"
-            + "  {% for opt in options %}\n"
+    cml.append("\" name=\"answer\">\n" + "  {% for opt in options %}\n"
             + "    {% if opt.description %}\n"
             + "      {% assign desc = opt.description %}\n"
-            + "    {% else %}\n"
-            + "      {% assign desc = opt.value %}\n"
+            + "    {% else %}\n" + "      {% assign desc = opt.value %}\n"
             + "    {% endif %}\n"
             + "    <cml:radio value=\"{{opt.value}}\" label=\"{{desc}}\" />\n"
             + "  {% endfor %}\n");
@@ -157,13 +156,12 @@ public class CrowdFlowerClient {
    * </p>
    * 
    * <p>
-   * If the target annotation has a feature named "correct" then it
-   * will be treated as a gold-standard unit.  The "correct" feature
-   * must match one of the "options" (i.e. one of the <i>keys</i> if
-   * options is a Map) or one of the common options defined when
-   * the job was created - typically things like "none" (none of the
-   * available options is correct) or "nae" (the target is not an
-   * entity).
+   * If the target annotation has a feature named "correct" then it will
+   * be treated as a gold-standard unit. The "correct" feature must
+   * match one of the "options" (i.e. one of the <i>keys</i> if options
+   * is a Map) or one of the common options defined when the job was
+   * created - typically things like "none" (none of the available
+   * options is correct) or "nae" (the target is not an entity).
    * </p>
    * 
    * @param jobId the CrowdFlower job ID
@@ -200,6 +198,11 @@ public class CrowdFlowerClient {
         formDataSize += (2 * ((Collection<?>)options).size());
       }
     }
+
+    if(target.getFeatures().get("detail") != null) {
+      formDataSize += 2;
+    }
+
     String correctAnswer = (String)target.getFeatures().get("correct");
     String reason = (String)target.getFeatures().get("reason");
     if(correctAnswer != null) {
@@ -236,6 +239,12 @@ public class CrowdFlowerClient {
         }
       }
     }
+
+    if(target.getFeatures().get("detail") != null) {
+      formData[i++] = "unit[data][detail]";
+      formData[i++] = target.getFeatures().get("detail").toString();
+    }
+
     if(correctAnswer != null) {
       formData[i++] = "unit[golden]";
       formData[i++] = "true";
@@ -258,10 +267,10 @@ public class CrowdFlowerClient {
               + target, e);
     }
   }
-  
+
   /**
-   * Get the list of judgments for the given unit.  If there are no judgments,
-   * null is returned.
+   * Get the list of judgments for the given unit. If there are no
+   * judgments, null is returned.
    * 
    * @param jobId the CrowdFlower job identifier
    * @param unitId the unit identifier
@@ -272,7 +281,8 @@ public class CrowdFlowerClient {
       String uri = "/jobs/" + jobId + "/units/" + unitId;
       JsonElement unitResponse = get(uri);
       if(!unitResponse.isJsonObject()) {
-        throw new GateRuntimeException("Response from " + uri + " was not a JSON object");
+        throw new GateRuntimeException("Response from " + uri
+                + " was not a JSON object");
       }
       JsonElement results = unitResponse.getAsJsonObject().get("results");
       if(!results.isJsonObject()) {
@@ -289,16 +299,16 @@ public class CrowdFlowerClient {
       throw new GateRuntimeException("Could not retrieve unit details", e);
     }
   }
-  
+
   /**
    * Create a named entity annotation job on CrowdFlower.
    * 
    * @param title the job title
    * @param instructions the instructions
-   * @param caption a caption for the answer form, which should include the
-   *         entity type to be annotated.
+   * @param caption a caption for the answer form, which should include
+   *          the entity type to be annotated.
    * @param noEntitiesCaption a caption for the "there are no entities"
-   *         checkbox.
+   *          checkbox.
    * @return the newly created job ID.
    * @throws IOException
    */
@@ -308,7 +318,7 @@ public class CrowdFlowerClient {
     log.debug("title: " + title);
     log.debug("instructions: " + instructions);
     log.debug("caption: " + caption);
-    
+
     // load the CSS that makes highlighting work
     InputStream cssStream =
             CrowdFlowerClient.class.getResourceAsStream("gate-crowdflower.css");
@@ -319,7 +329,8 @@ public class CrowdFlowerClient {
       cssStream.close();
     }
 
-    // load the JavaScript that toggles the colour of tokens when clicked
+    // load the JavaScript that toggles the colour of tokens when
+    // clicked
     InputStream jsStream =
             CrowdFlowerClient.class.getResourceAsStream("gate-crowdflower.js");
     String js = null;
@@ -337,11 +348,12 @@ public class CrowdFlowerClient {
     cml.append("\" name=\"answer\">\n"
             + "    {% for tok in tokens %}\n"
             + "      <cml:checkbox label=\"{{ tok }}\" value=\"{{ forloop.index0 }}\" />\n"
-            + "    {% endfor %}\n"
-            + "  </cml:checkboxes>\n"
-            + "</div>\n"
-            + "<div class=\"gate-no-entities\">\n"
-            // TODO work out how to customize the validation error message
+            + "    {% endfor %}\n" + "  </cml:checkboxes>\n" + "</div>\n"
+            + "{% if detail %}\n"
+            + "  <div class=\"well\">{{detail}}</div>\n"
+            + "{% endif %}\n" + "<div class=\"gate-no-entities\">\n"
+            // TODO work out how to customize the validation error
+            // message
             + "  <cml:checkbox name=\"noentities\" label=\"");
     StringEscapeUtils.escapeXml(cml, noEntitiesCaption);
     cml.append("\" value=\"1\"\n"
@@ -361,41 +373,47 @@ public class CrowdFlowerClient {
       throw new GateRuntimeException("Failed to create CF job");
     }
   }
-  
+
   /**
    * Create a single unit for an entity annotation job.
    * 
    * @param jobId the CrowdFlower job ID
    * @param doc the document containing the annotation
    * @param asName the annotation set containing the snippet annotation
-   * @param snippet an annotation covering the snippet of text that
-   *         will be presented for annotation, typically a Sentence or
-   *         Tweet
-   * @param tokens annotations representing the individual substrings
-   *         of the snippet that will be the atomic units of annotation.
-   *         Typically these will be Token annotations.  The supplied
-   *         "tokens" should completely cover the non-whitespace content
-   *         of the snippet, but need not cover all the intervening
-   *         spaces.
+   * @param snippet an annotation covering the snippet of text that will
+   *          be presented for annotation, typically a Sentence or Tweet
+   * @param detail additional details to be shown to the annotator below
+   *          the snippet, e.g. a list of URL links that they might want
+   *          to follow for more information.  May be null, in which case
+   *          no detail section will be added.
+   * @param tokens annotations representing the individual substrings of
+   *          the snippet that will be the atomic units of annotation.
+   *          Typically these will be Token annotations. The supplied
+   *          "tokens" should completely cover the non-whitespace
+   *          content of the snippet, but need not cover all the
+   *          intervening spaces.
    * @param correctAnnotations annotations representing the "correct"
-   *         answer - if this parameter is not <code>null</code> then
-   *         the unit will be considered as gold-standard data. This
-   *         includes the case where an empty annotation set is
-   *         provided, as this represents a gold snippet where the
-   *         correct answer is that this snippet contains no entities.
-   * @param goldReason for a gold-standard unit, the <em>reason</em>
-   *         why the annotations should be considered correct.  This
-   *         will be shown to users as feedback if they get the gold
-   *         unit wrong.  Ignored for non-gold units. 
+   *          answer - if this parameter is not <code>null</code> then
+   *          the unit will be considered as gold-standard data. This
+   *          includes the case where an empty annotation set is
+   *          provided, as this represents a gold snippet where the
+   *          correct answer is that this snippet contains no entities.
+   * @param goldReason for a gold-standard unit, the <em>reason</em> why
+   *          the annotations should be considered correct. This will be
+   *          shown to users as feedback if they get the gold unit
+   *          wrong. Ignored for non-gold units.
    * @return the ID of the newly-created unit.
    */
   public long createAnnotationUnit(long jobId, Document doc, String asName,
-          Annotation snippet, AnnotationSet tokens, AnnotationSet correctAnnotations,
-          String goldReason) {
+          Annotation snippet, String detail, AnnotationSet tokens,
+          AnnotationSet correctAnnotations, String goldReason) {
     String documentId = String.valueOf(doc.getLRPersistenceId());
     int formDataSize = 6; // docId + asName + annId
     List<Annotation> tokensList = Utils.inDocumentOrder(tokens);
-    formDataSize += 2*tokensList.size();
+    formDataSize += 2 * tokensList.size();
+    if(detail != null) {
+      formDataSize += 2;
+    }
     Set<Integer> answerGold = null;
     if(correctAnnotations != null) {
       // gold unit
@@ -403,7 +421,8 @@ public class CrowdFlowerClient {
       for(Annotation a : correctAnnotations) {
         for(int i = 0; i < tokensList.size(); i++) {
           Annotation tokenI = tokensList.get(i);
-          if(Utils.start(tokenI) >= Utils.start(a) && Utils.end(tokenI) <= Utils.end(a)) {
+          if(Utils.start(tokenI) >= Utils.start(a)
+                  && Utils.end(tokenI) <= Utils.end(a)) {
             answerGold.add(i);
           }
         }
@@ -412,13 +431,15 @@ public class CrowdFlowerClient {
       if(answerGold.size() == 0) {
         formDataSize += 2; // noentities=1
       } else {
-        formDataSize += 2*answerGold.size(); // answer=N for each token
+        formDataSize += 2 * answerGold.size(); // answer=N for each
+                                               // token
       }
       if(goldReason != null) {
-        formDataSize += 2; // answer_gold_reason or noentities_gold_reason
+        formDataSize += 2; // answer_gold_reason or
+                           // noentities_gold_reason
       }
     }
-    
+
     String[] formData = new String[formDataSize];
     int i = 0;
     formData[i++] = "unit[data][documentId]";
@@ -431,6 +452,10 @@ public class CrowdFlowerClient {
       formData[i++] = "unit[data][tokens][]";
       formData[i++] = Utils.stringFor(doc, tok);
     }
+    if(detail != null) {
+      formData[i++] = "unit[data][detail]";
+      formData[i++] = detail;
+    }
     if(answerGold != null) {
       formData[i++] = "unit[golden]";
       formData[i++] = "true";
@@ -442,7 +467,8 @@ public class CrowdFlowerClient {
           formData[i++] = goldReason;
         }
       } else {
-        Integer[] goldArray = answerGold.toArray(new Integer[answerGold.size()]);
+        Integer[] goldArray =
+                answerGold.toArray(new Integer[answerGold.size()]);
         Arrays.sort(goldArray);
         for(Integer tokIndex : goldArray) {
           formData[i++] = "unit[data][answer_gold][]";
@@ -468,7 +494,7 @@ public class CrowdFlowerClient {
   protected JsonElement post(String uri, String... formData) throws IOException {
     return request("POST", uri, formData);
   }
-  
+
   protected JsonElement get(String uri) throws IOException {
     return request("GET", uri);
   }
