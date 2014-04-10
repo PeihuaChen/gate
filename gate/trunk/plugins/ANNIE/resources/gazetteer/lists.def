@@ -51,7 +51,7 @@ org_spur.lst:spur
 percent.lst:percent
 person_male_ambig.lst:person_first:male
 person_ending.lst:person_ending
-person_female_cap.lst:person_first:female
+person_female_cap.lst :person_first:female
 person_female.lst:person_first:female
 person_full.lst:person_full
 person_male_cap.lst:person_first:male
@@ -99,4 +99,5 @@ person_female_ambig.lst:person_first:female
 url_key.lst:url_key
 country_code.lst:country_code
 say.lst:say
-company_ambig.lst:organization-ambig:company
+person_male_lower.lst:person_first:male
+person_female_lower.lst:person_first:female
