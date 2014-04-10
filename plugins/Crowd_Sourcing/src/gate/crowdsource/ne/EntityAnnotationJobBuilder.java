@@ -33,35 +33,37 @@ import java.util.List;
 
 import javax.swing.Action;
 
-@CreoleResource(name = "Entity Annotation Job Builder",
-   comment = "Build a CrowdFlower job asking users to annotate entities within a snippet of text")
-public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser implements ActionsPublisher {
+@CreoleResource(name = "Entity Annotation Job Builder", comment = "Build a CrowdFlower job asking users to annotate entities within a snippet of text")
+public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser
+                                                                        implements
+                                                                        ActionsPublisher {
 
   private static final long serialVersionUID = -1584716901194104888L;
 
   private String apiKey;
-  
+
   private Long jobId;
-  
+
   private String snippetAnnotationType;
-  
+
   private String snippetASName;
-  
+
   private String tokenAnnotationType;
-  
+
   private String tokenASName;
-  
+
+  private String detailFeatureName;
+
   private String goldFeatureName;
-  
+
   private String goldFeatureValue;
-  
+
   private String goldReasonFeatureName;
 
   private String entityAnnotationType;
-  
+
   private String entityASName;
 
-  
   protected CrowdFlowerClient crowdFlowerClient;
 
   public String getApiKey() {
@@ -88,9 +90,8 @@ public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser impleme
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "Sentence",
-           comment = "Annotation type for the \"snippet\" annotations.  " +
-           		"One snippet = one CrowdFlower unit")
+  @CreoleParameter(defaultValue = "Sentence", comment = "Annotation type for the \"snippet\" annotations.  "
+          + "One snippet = one CrowdFlower unit")
   public void setSnippetAnnotationType(String contextAnnotationType) {
     this.snippetAnnotationType = contextAnnotationType;
   }
@@ -111,9 +112,9 @@ public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser impleme
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "Token",
-          comment = "Annotation type representing the \"tokens\" - the atomic " +
-          		"units that workers will have to select to mark entity annotations.")
+  @CreoleParameter(defaultValue = "Token", comment = "Annotation type "
+          + "representing the \"tokens\" - the atomic units that "
+          + "workers will have to select to mark entity annotations.")
   public void setTokenAnnotationType(String tokenAnnotationType) {
     this.tokenAnnotationType = tokenAnnotationType;
   }
@@ -129,14 +130,29 @@ public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser impleme
     this.tokenASName = tokenASName;
   }
 
+  public String getDetailFeatureName() {
+    return detailFeatureName;
+  }
+
+  @Optional
+  @RunTime
+  @CreoleParameter(defaultValue = "detail", comment = "Feature on the "
+          + "snippet annotations containing additional details to be shown "
+          + "to the annotators.  This is interpreted as HTML, and can be "
+          + "used for example to show a list of clickable links extracted "
+          + "from the snippet.")
+  public void setDetailFeatureName(String detailFeatureName) {
+    this.detailFeatureName = detailFeatureName;
+  }
+
   public String getEntityAnnotationType() {
     return entityAnnotationType;
   }
 
   @RunTime
-  @CreoleParameter(comment = "Annotation type representing the gold " +
-  		"standard annotations, i.e. the kind of entities that you want " +
-  		"workers to find.")
+  @CreoleParameter(comment = "Annotation type representing the gold "
+          + "standard annotations, i.e. the kind of entities that you want "
+          + "workers to find.")
   public void setEntityAnnotationType(String entityAnnotationType) {
     this.entityAnnotationType = entityAnnotationType;
   }
@@ -157,8 +173,7 @@ public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser impleme
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "gold",
-          comment = "Name of a feature that marks a snippet as \"gold\"")
+  @CreoleParameter(defaultValue = "gold", comment = "Name of a feature that marks a snippet as \"gold\"")
   public void setGoldFeatureName(String goldFeatureName) {
     this.goldFeatureName = goldFeatureName;
   }
@@ -168,8 +183,7 @@ public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser impleme
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "yes",
-          comment = "Value of the feature that marks a snippet as \"gold\"")
+  @CreoleParameter(defaultValue = "yes", comment = "Value of the feature that marks a snippet as \"gold\"")
   public void setGoldFeatureValue(String goldFeatureValue) {
     this.goldFeatureValue = goldFeatureValue;
   }
@@ -180,9 +194,8 @@ public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser impleme
 
   @Optional
   @RunTime
-  @CreoleParameter(defaultValue = "reason",
-          comment = "Feature on gold snippet annotations explaining " +
-  		        "why the snippet's entities are correct")
+  @CreoleParameter(defaultValue = "reason", comment = "Feature on gold snippet annotations explaining "
+          + "why the snippet's entities are correct")
   public void setGoldReasonFeatureName(String goldReasonFeatureName) {
     this.goldReasonFeatureName = goldReasonFeatureName;
   }
@@ -204,38 +217,58 @@ public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser impleme
       if(jobId == null || jobId.longValue() <= 0) {
         throw new ExecutionException("Job ID must be provided");
       }
-      
-      AnnotationSet tokens = getDocument().getAnnotations(tokenASName).get(tokenAnnotationType);
-      AnnotationSet snippetAnnotations = getDocument().getAnnotations(snippetASName)
-              .get(snippetAnnotationType);
-      AnnotationSet goldAS = getDocument().getAnnotations(entityASName).get(entityAnnotationType);
-      
+
+      AnnotationSet tokens =
+              getDocument().getAnnotations(tokenASName)
+                      .get(tokenAnnotationType);
+      AnnotationSet snippetAnnotations =
+              getDocument().getAnnotations(snippetASName).get(
+                      snippetAnnotationType);
+      AnnotationSet goldAS =
+              getDocument().getAnnotations(entityASName).get(
+                      entityAnnotationType);
+
       List<Annotation> allSnippets = Utils.inDocumentOrder(snippetAnnotations);
-      fireStatusChanged("Creating CrowdFlower units for " + allSnippets.size() + " "
-              + snippetAnnotationType + " annotations for " + entityAnnotationType
-              + " annotation task");
-      
+      fireStatusChanged("Creating CrowdFlower units for " + allSnippets.size()
+              + " " + snippetAnnotationType + " annotations for "
+              + entityAnnotationType + " annotation task");
+
       int snippetIdx = 0;
       for(Annotation snippet : allSnippets) {
         fireProgressChanged((100 * snippetIdx++) / allSnippets.size());
         if(isInterrupted()) throw new ExecutionInterruptedException();
-        AnnotationSet snippetTokens = Utils.getContainedAnnotations(tokens, snippet);
+        AnnotationSet snippetTokens =
+                Utils.getContainedAnnotations(tokens, snippet);
+        String detail = null;
+        if(detailFeatureName != null) {
+          Object detailObj = snippet.getFeatures().get(detailFeatureName);
+          if(detailObj != null) {
+            detail = detailObj.toString();
+          }
+        }
         AnnotationSet goldAnnots = null;
         String goldReason = null;
         if(goldFeatureValue.equals(snippet.getFeatures().get(goldFeatureName))) {
           goldAnnots = Utils.getContainedAnnotations(goldAS, snippet);
           if(goldReasonFeatureName != null) {
-            Object goldReasonValue = snippet.getFeatures().get(goldReasonFeatureName);
-            if(goldReasonValue != null) goldReason = goldReasonValue.toString();
+            Object goldReasonValue =
+                    snippet.getFeatures().get(goldReasonFeatureName);
+            if(goldReasonValue != null)
+              goldReason = goldReasonValue.toString();
           }
         }
-        
-        long unitId = crowdFlowerClient.createAnnotationUnit(
-                jobId, getDocument(), snippetASName, snippet, snippetTokens, goldAnnots, goldReason);
-        // store the unit ID - we use the entity annotation type as part of this feature
-        // name so the same sentences can hold units for different annotation types
+
+        long unitId =
+                crowdFlowerClient.createAnnotationUnit(jobId, getDocument(),
+                        snippetASName, snippet, detail, snippetTokens,
+                        goldAnnots, goldReason);
+        // store the unit ID - we use the entity annotation type as part
+        // of this feature
+        // name so the same sentences can hold units for different
+        // annotation types
         // e.g. Person, Location, Organization
-        snippet.getFeatures().put(entityAnnotationType + "_unit_id", Long.valueOf(unitId));
+        snippet.getFeatures().put(entityAnnotationType + "_unit_id",
+                Long.valueOf(unitId));
       }
       fireProcessFinished();
       fireStatusChanged(allSnippets.size() + " units created");
@@ -243,9 +276,9 @@ public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser impleme
       interrupted = false;
     }
   }
-  
+
   private List<Action> actions = null;
-  
+
   public List<Action> getActions() {
     if(actions == null) {
       actions = new ArrayList<Action>();
