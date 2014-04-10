@@ -55,22 +55,20 @@ public class TestGazetteer extends TestCase {
     //test with default parameters
     gaz.execute();
     AnnotationSet resultAS = doc.getAnnotations("GazetteerAS");
-    assertTrue("Found " + resultAS.size() + 
-            " annotations instead of the expected 64!", resultAS.size() == 64);
+    assertEquals("Wrong number of annotations produced",60, resultAS.size());
     resultAS.clear();
     
     //test with partial words
     gaz.setWholeWordsOnly(false);
     gaz.execute();
-    assertEquals("Wrong number of annotations produced", 358, resultAS.size());
+    assertEquals("Wrong number of annotations produced", 388, resultAS.size());
     gaz.setWholeWordsOnly(true);
     resultAS.clear();
 
     //test with prefix matching
     gaz.setLongestMatchOnly(false);
     gaz.execute();
-    assertTrue("Found " + resultAS.size() + 
-            " annotations instead of the expected 78!", resultAS.size() == 78);
+    assertEquals("Wrong number of annotations produced", 73, resultAS.size());
     gaz.setLongestMatchOnly(true);
     resultAS.clear();
     Factory.deleteResource(gaz);
@@ -83,7 +81,7 @@ public class TestGazetteer extends TestCase {
     gaz.setDocument(doc);
     gaz.setAnnotationSetName("GazetteerAS");
     gaz.execute();
-    assertEquals("Wrong number of annotations generated", 98, resultAS.size());
+    assertEquals("Wrong number of annotations generated", 97, resultAS.size());
     gaz.setCaseSensitive(true);
     resultAS.clear();
     Factory.deleteResource(gaz);
