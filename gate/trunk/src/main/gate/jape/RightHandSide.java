@@ -19,6 +19,8 @@ package gate.jape;
 
 import gate.AnnotationSet;
 import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
 import gate.Gate;
 import gate.creole.ontology.Ontology;
 import gate.util.Err;
@@ -28,6 +30,9 @@ import gate.util.Strings;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -295,16 +300,47 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   public void transduce(Document doc, java.util.Map<String, AnnotationSet> bindings,
                         AnnotationSet inputAS, final AnnotationSet outputAS,
                         Ontology ontology,
-                        ActionContext actionContext)
+                        final ActionContext actionContext)
                         throws JapeException {
     if(theActionObject == null) {
       instantiateActionClass();
     }
-        
+      
     // run the action class
     try {
       ((RhsAction) theActionObject).setActionContext(actionContext);
-      ((RhsAction) theActionObject).doit(doc, bindings, inputAS, outputAS, ontology);
+      
+      if (actionContext.isDebuggingEnabled()) {
+        AnnotationSet outputASproxy =
+                (AnnotationSet)Proxy.newProxyInstance(Gate.getClassLoader(), new Class[] {AnnotationSet.class},
+                        new InvocationHandler() {
+                          public Object invoke(Object proxy, Method method,
+                                  Object[] args) throws Throwable {
+                            
+                            if (method.getName().equals("add")) {
+                              int index = args.length - 1;
+                              Class<?> lastArgType = method.getParameterTypes()[index];
+                              if (lastArgType.equals(FeatureMap.class)) {
+                                FeatureMap features = (FeatureMap)args[index];
+                                if (features == null) {
+                                  features = Factory.newFeatureMap();
+                                  args[index] = features;
+                                }
+                                
+                                features.put("addedByPR", actionContext.getPRName());
+                                features.put("addedByPhase", getPhaseName());
+                                features.put("addedByRule",getRuleName());
+                              }
+                            }
+                            
+                            return method.invoke(outputAS, args);
+                          }
+                        });
+        ((RhsAction)theActionObject).doit(doc, bindings, inputAS, outputASproxy,
+                ontology);
+      } else {
+        ((RhsAction)theActionObject).doit(doc, bindings, inputAS, outputAS, ontology);
+      }
     } catch (NonFatalJapeException e) {
       // if the action class throws a non-fatal exception then respond by
       // dumping a whole bunch of useful debug information but then allow
