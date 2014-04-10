@@ -352,7 +352,7 @@ public class Transducer extends AbstractLanguageAnalyser
    */
   protected List<String> annotationAccessors = null;
   
-  
+  protected Boolean enableDebugging;
   
   protected String encoding;
   
@@ -494,6 +494,16 @@ public class Transducer extends AbstractLanguageAnalyser
   public void setAnnotationAccessors(List<String> annotationAccessors) {
     this.annotationAccessors = annotationAccessors;
   }  
+  
+  public Boolean getEnableDebugging() {
+    return enableDebugging;
+  }
+
+  @RunTime
+  @CreoleParameter(defaultValue = "false")
+  public void setEnableDebugging(Boolean enableDebugging) {
+    this.enableDebugging = enableDebugging;
+  }
   
   public String getEncoding() {
     return encoding;
@@ -920,6 +930,7 @@ public class Transducer extends AbstractLanguageAnalyser
     actionContext.setPRFeatures(features);
     actionContext.setPRName(this.getName());
     actionContext.setPR(this);
+    actionContext.setDebuggingEnabled(enableDebugging);
     for(SPTBase aSpt : singlePhaseTransducers){
       aSpt.runControllerExecutionStartedBlock(actionContext,c,ontology);
     }

@@ -434,6 +434,8 @@ public class Transducer
     return enableDebugging;
   }
 
+  @RunTime
+  @CreoleParameter(defaultValue = "false")
   public void setEnableDebugging(Boolean enableDebugging) {
     this.enableDebugging = enableDebugging;
   }
@@ -597,6 +599,7 @@ public class Transducer
     actionContext.setPRFeatures(features);
     actionContext.setPRName(this.getName());
     actionContext.setPR(this);
+    actionContext.setDebuggingEnabled(enableDebugging);
     batch.runControllerExecutionStartedBlock(actionContext,c,ontology);
   }
 

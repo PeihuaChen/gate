@@ -38,6 +38,7 @@ public class DefaultActionContext implements ActionContext {
   protected Controller controller;
   protected boolean phaseEnded = false;
   protected ProcessingResource pr;
+  protected boolean debug = false;
 
   public DefaultActionContext() {}
 
@@ -78,6 +79,15 @@ public class DefaultActionContext implements ActionContext {
   @Override
   public Controller getController() {
     return controller;
+  }
+  
+  @Override
+  public boolean isDebuggingEnabled() {
+    return debug;
+  }
+  
+  public void setDebuggingEnabled(boolean debug) {
+    this.debug = debug;
   }
 
   @Override

@@ -62,6 +62,12 @@ public interface ActionContext  extends Serializable {
    */
   public boolean isPREnabled();
   
+  /**
+   * Returns true if debugging of this transducer has been enabled.
+   * @return true if debugging of this transducer has been enabled, false otherwise
+   */
+  public boolean isDebuggingEnabled();
+  
   public Controller getController();
   /**
    * Request the current JAPE phase to be ended as soon as possible.
