@@ -1186,6 +1186,11 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     }
     for(int i = 0; i < annotationArray.size(); ++i) {
       if(selectedLabels[i] < 0) continue;
+      
+      if (labelsAndId.id2Label.get(selectedLabels[i] + 1) == null) {
+        throw new RuntimeException("Required feature '"+featName+"' is missing");
+      }
+      
       FeatureMap features = Factory.newFeatureMap();
       Annotation ann = annotationArray.get(i);
       features.putAll(ann.getFeatures()); //GG: put all instance features on output
