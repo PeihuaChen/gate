@@ -225,6 +225,7 @@ public class Coreferencer extends AbstractLanguageAnalyser implements
           List<List<Integer>> matchesList = new ArrayList<List<Integer>>();
           matchesMap.put(getAnnotationSetName(), matchesList);
           matchesList.add(matches);
+          document.getFeatures().put(DOCUMENT_COREF_FEATURE_NAME, matchesMap);
         }// if else
       }// if matches == null
 
