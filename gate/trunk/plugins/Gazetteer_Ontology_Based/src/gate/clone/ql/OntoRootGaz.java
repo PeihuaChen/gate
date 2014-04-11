@@ -561,7 +561,7 @@ public class OntoRootGaz extends DefaultGazetteer {
     all.addAll(addition);
     for(Lookup aLookup : all) {
       String root = listRoots.get(aLookup.list);
-      int hLevel = 0;
+      long hLevel = 0;
       if(root != null) {
         /*
          * check if the root has spaces and if considerHeuristicRules is set to
@@ -599,7 +599,7 @@ public class OntoRootGaz extends DefaultGazetteer {
           }
         } else {// if it doesn't have spaces or
           // considerHeuristicRules=false
-          aLookup.features.put(CATConstants.FEATURE_HEURISTIC_LEVEL, 0);
+          aLookup.features.put(CATConstants.FEATURE_HEURISTIC_LEVEL, 0L);
           if(root != null && aLookup != null) {
             addLookup(root.trim(), aLookup);
             logger.info("NEW ENTRY: " + root + "\n");
