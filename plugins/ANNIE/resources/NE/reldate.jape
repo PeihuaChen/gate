@@ -120,7 +120,7 @@ features.put("rule", dateAnn.getFeatures().get("rule"));
 features.put("rule2", "EarlyDate");
 outputAS.add(date.firstNode(), date.lastNode(), "TempDate",
 features);
-outputAS.removeAll(date);
+outputAS.removeAll(date.get("TempDate"));
 }
  
 Rule:FiscalDate
