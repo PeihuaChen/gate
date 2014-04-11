@@ -318,6 +318,7 @@ public class ClassificationMeasures {
         sum += confusionMatrix[j][i];
       marginalArrayR[i] = sum;
     }
+    
     // Compute Cohen's p(E)
     float pE = 0;
     if(totalSum > 0) {
@@ -325,10 +326,15 @@ public class ClassificationMeasures {
       for(int i = 0; i < numCats; ++i)
         pE += (marginalArrayC[i] * marginalArrayR[i]) / doubleSum;
     }
+    
     // Compute Cohen's Kappa
-    if(totalSum > 0) // FIXME: division by zero when pE = 1
-      kappaCohen = (observedAgreement - pE) / (1 - pE);
+    if (pE == 1.0F) { // prevent division by zero
+      kappaCohen = 1.0F;
+    }
+    else if (totalSum > 0) 
+      kappaCohen = (observedAgreement - pE) / (1.0F - pE);
     else kappaCohen = 0;
+    
     // Compute S&C's chance agreement
     pE = 0;
     if(totalSum > 0) {
@@ -338,9 +344,14 @@ public class ClassificationMeasures {
         pE += p * p;
       }
     }
-    if(totalSum > 0) // FIXME: division by zero when pE = 1
-      kappaPi = (observedAgreement - pE) / (1 - pE);
+    
+    if (pE == 1.0F) { // prevent division by zero
+      kappaPi = 1.0F;
+    }
+    else if (totalSum > 0)
+      kappaPi = (observedAgreement - pE) / (1.0F - pE);
     else kappaPi = 0;
+    
     // Compute the specific agreement for each label using marginal sums
     float[][] sAgreements = new float[numCats][2];
     for(int i = 0; i < numCats; ++i) {
