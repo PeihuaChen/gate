@@ -22,6 +22,7 @@ import gate.DataStore;
 import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
+import gate.corpora.DocumentStaxUtils;
 import gate.corpora.TestDocument;
 import gate.creole.gazetteer.DefaultGazetteer;
 import gate.creole.orthomatcher.OrthoMatcher;
@@ -34,6 +35,7 @@ import gate.jape.constraint.ConstraintPredicate;
 import gate.jape.constraint.MetaPropertyAccessor;
 import gate.util.AnnotationDiffer;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -192,7 +194,7 @@ public class TestPR extends TestCase
 //      doc1.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 60);
     assertEquals("Wrong number of annotations produced in " +
             doc1.getSourceUrl().getFile(),
-            129,
+            130,
             doc1.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size());
 
 //    assertTrue("Found in "+ doc2.getSourceUrl().getFile()+ " "+
@@ -201,7 +203,7 @@ public class TestPR extends TestCase
 //      doc2.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 134);
     assertEquals("Wrong number of annotations produced in " +
             doc2.getSourceUrl().getFile(),
-            221,
+            227,
             doc2.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size());
 
 //    assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+
@@ -210,7 +212,7 @@ public class TestPR extends TestCase
 //      doc3.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 144);
     assertEquals("Wrong number of annotations produced in " +
             doc3.getSourceUrl().getFile(),
-            269,
+            271,
             doc3.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size());
   }//testGazetteer
 
@@ -346,7 +348,7 @@ public class TestPR extends TestCase
     // assertions for doc 1
     assertTrue("Found in "+ doc1.getSourceUrl().getFile()+ " "+
       doc1.getAnnotations().get(ANNIEConstants.ORGANIZATION_ANNOTATION_TYPE).size() +
-      " Organization annotations, instead of the expected 27",
+      " Organization annotations, instead of the expected 28",
       doc1.getAnnotations().get(ANNIEConstants.ORGANIZATION_ANNOTATION_TYPE).size()== 27);
     assertTrue("Found in "+doc1.getSourceUrl().getFile()+ " "+
       doc1.getAnnotations().get(ANNIEConstants.LOCATION_ANNOTATION_TYPE).size() +
@@ -390,8 +392,8 @@ public class TestPR extends TestCase
     // assertions for doc 3
     assertTrue("Found in "+doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().get(ANNIEConstants.ORGANIZATION_ANNOTATION_TYPE).size() +
-      " Organization annotations, instead of the expected 27",
-      doc3.getAnnotations().get(ANNIEConstants.ORGANIZATION_ANNOTATION_TYPE).size()== 27);
+      " Organization annotations, instead of the expected 28",
+      doc3.getAnnotations().get(ANNIEConstants.ORGANIZATION_ANNOTATION_TYPE).size()== 28);
     assertTrue("Found in "+doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().get(ANNIEConstants.LOCATION_ANNOTATION_TYPE).size() +
       " Location annotations, instead of the expected 11",
@@ -636,6 +638,7 @@ public class TestPR extends TestCase
    public void compareAnnots(Document keyDocument, Document responseDocument)
                 throws Exception{
       // organization type
+      //DocumentStaxUtils.writeDocument(responseDocument, new File("/home/mark/"+responseDocument.getName()+".xml"));
       Iterator<String> iteratorTypes = annotationTypes.iterator();
       while (iteratorTypes.hasNext()){
         // get the type of annotation
@@ -652,8 +655,9 @@ public class TestPR extends TestCase
         annotDiffer.setSignificantFeaturesSet(significantFeatures);
         annotDiffer.calculateDiff(keyDocument.getAnnotations().get(annotType),
                                   responseDocument.getAnnotations().get(annotType));
-        if(DEBUG) annotDiffer.printMissmatches();
-
+        
+        annotDiffer.printMissmatches();       
+        
         assertTrue(annotType+ " precision strict in "+
           responseDocument.getSourceUrl().getFile()+
           " is "+ annotDiffer.getPrecisionStrict()+ " instead of 1.0 ",
