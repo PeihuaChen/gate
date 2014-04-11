@@ -568,10 +568,10 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             break;
           case TRAINING:
             // empty the data file
-            Long tm1,
-            tm2,
-            tm3;
-            if(LogService.DEBUG > 1) {
+            Long tm1 = null,
+            tm2 = null,
+            tm3 = null;
+            if(LogService.minVerbosityLevel >= LogService.DEBUG) {
               tm1 = new Date().getTime();
             }
             EvaluationBasedOnDocs.emptyDatafile(wdResults, true);
@@ -604,7 +604,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             Benchmark.checkPoint(startTime, getBenchmarkId() + "."
                     + Benchmark.ANNOTS_TO_NLP_FEATURES, this,
                     benchmarkingFeatures);
-            if(LogService.DEBUG > 1) {
+            if(LogService.minVerbosityLevel >= LogService.DEBUG) {
               tm2 = new Date().getTime();
               tm3 = tm2 - tm1;
               tm3 /= 1000;
@@ -636,7 +636,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                     .checkPoint(startTime, getBenchmarkId() + "."
                             + Benchmark.NLP_FEATURES_TO_FVS, this,
                             benchmarkingFeatures);
-            if(LogService.DEBUG > 1) {
+            if(LogService.minVerbosityLevel >= LogService.DEBUG) {
               tm1 = new Date().getTime();
               tm3 = tm1 - tm2;
               tm3 /= 1000;
@@ -651,7 +651,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
               Benchmark.checkPoint(startTime, getBenchmarkId() + "."
                       + Benchmark.FILTERING, this, benchmarkingFeatures);
             }
-            if(LogService.DEBUG > 1) {
+            if(LogService.minVerbosityLevel >= LogService.DEBUG) {
               tm2 = new Date().getTime();
               tm3 = tm2 - tm1;
               tm3 /= 1000;
@@ -663,7 +663,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             Benchmark.checkPoint(startTime, getBenchmarkId() + "."
                     + Benchmark.MODEL_TRAINING, this, benchmarkingFeatures);
             benchmarkingFeatures.remove("numDocs");
-            if(LogService.DEBUG > 1) {
+            if(LogService.minVerbosityLevel >= LogService.DEBUG) {
               tm1 = new Date().getTime();
               tm3 = tm1 - tm2;
               tm3 /= 1000;
@@ -680,7 +680,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                   modelFileName + "!");
             }
             if(endDocIdApp > startDocIdApp) {
-              if(LogService.minVerbosityLevel > 0)
+              if(LogService.minVerbosityLevel > LogService.MINIMUM)
                 System.out.println("** "
                         + "Application mode for document from " + startDocIdApp
                         + " to " + endDocIdApp + "(not included):");
@@ -764,7 +764,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             }
             break;
           case EVALUATION:
-            if(LogService.minVerbosityLevel > 0) {
+            if(LogService.minVerbosityLevel > LogService.MINIMUM) {
               System.out.println("** Evaluation mode started:");
             }
             LogService.logMessage("** Evaluation mode:", 1);
@@ -877,7 +877,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             benchmarkingFeatures.remove("numDocs");
             break;
           case MITRAINING:
-            if(LogService.minVerbosityLevel > 0)
+            if(LogService.minVerbosityLevel > LogService.MINIMUM)
               System.out.println("** MITRAINING mode:");
             LogService.logMessage("** MITRAINING mode:", 1);
             isTraining = true;
