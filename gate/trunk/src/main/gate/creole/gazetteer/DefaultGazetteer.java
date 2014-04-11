@@ -602,7 +602,7 @@ public class DefaultGazetteer extends AbstractGazetteer
    * @param gazetteerFeatureSeparator the gazetteerFeatureSeparator to set
    */
   @Optional
-  @CreoleParameter(comment="The character used to separate features for entries in gazetteer lists. Accepts strings like &quot;\t&quot; and will unescape it to the relevant character. If not specified, this gazetteer does not support extra features.")
+  @CreoleParameter(comment="The character used to separate features for entries in gazetteer lists. Accepts strings like &quot;\t&quot; and will unescape it to the relevant character. If not specified, this gazetteer does not support extra features.",defaultValue=":")
   public void setGazetteerFeatureSeparator(String gazetteerFeatureSeparator) {
     this.gazetteerFeatureSeparator = gazetteerFeatureSeparator;
   }
