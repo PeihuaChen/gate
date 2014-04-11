@@ -61,12 +61,7 @@
             <resourceName>ANNIE Gazetteer</resourceName>
             <initParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-		<localMap>
- 		<entry>
-                  <string>gazetteerFeatureSeparator</string>
-                  <string>:</string>
-                </entry>
-              </localMap>
+		<localMap/>
             </initParams>
             <features class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
