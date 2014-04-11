@@ -67,14 +67,14 @@ public class DocFeatureVectors {
         // First get the position information for the current NLP feature
         positionCurr = 0;
         
-        if(feat[j] != null && Pattern.matches((".+\\[[-0-9]+\\]$"), feat[j])) {
+        if(feat[j] != null && Pattern.matches((".+\\[-?[0-9]+\\]$"), feat[j])) {
           int ind = feat[j].lastIndexOf('[');
           String positionStr = feat[j].substring(ind + 1, feat[j].length() - 1);
           try {
 	      positionCurr = Integer.parseInt(positionStr);
 	  }
 	  catch(NumberFormatException e) {
-	      // FIXME: Learning PR bug
+	      // shouldn't happen now I've "fixed" the regexp, fingers crossed!
 	      e.printStackTrace();
 	      break;
 	  }
