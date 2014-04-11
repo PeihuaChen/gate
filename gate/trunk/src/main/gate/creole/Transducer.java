@@ -573,7 +573,7 @@ public class Transducer
   /**
    * A switch used to activate the JAPE debugger.
    */
-  protected Boolean enableDebugging;
+  protected Boolean enableDebugging = Boolean.FALSE;
 
 
   public java.net.URL getBinaryGrammarURL() {
