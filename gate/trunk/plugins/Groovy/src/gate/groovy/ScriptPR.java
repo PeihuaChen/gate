@@ -18,8 +18,10 @@ import gate.Corpus;
 import gate.CorpusController;
 import gate.FeatureMap;
 import gate.Gate;
+import gate.Factory;
 import gate.ProcessingResource;
 import gate.Resource;
+import gate.Document;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ControllerAwarePR;
 import gate.creole.ExecutionException;
@@ -169,7 +171,9 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
   public void controllerExecutionStarted(Controller c)
           throws ExecutionException {
     // ensure scriptParams are available to the callback
+    if(scriptParams == null) { scriptParams = Factory.newFeatureMap(); }
     groovyScript.getBinding().setVariable("scriptParams", scriptParams);
+    groovyScript.getBinding().setVariable("controller",c);
     callControllerAwareMethod("beforeCorpus", c);
   }
 
@@ -222,28 +226,32 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
    */
   public void execute() throws ExecutionException {
 
-    if(document == null) { throw new ExecutionException(
-            "There is no loaded document"); }
-
     AnnotationSet outputAS = null;
-    if(outputASName == null || outputASName.trim().length() == 0)
-      outputAS = document.getAnnotations();
-    else outputAS = document.getAnnotations(outputASName);
-
     AnnotationSet inputAS = null;
-    if(inputASName == null || inputASName.trim().length() == 0)
-      inputAS = document.getAnnotations();
-    else inputAS = document.getAnnotations(inputASName);
-
-    // Status
-    fireStatusChanged("Groovy script PR running on " + document.getSourceUrl());
+    if(document != null) {
+      if(outputASName == null || outputASName.trim().length() == 0)
+        outputAS = document.getAnnotations();
+      else 
+        outputAS = document.getAnnotations(outputASName);
+      if(inputASName == null || inputASName.trim().length() == 0)
+        inputAS = document.getAnnotations();
+      else 
+        inputAS = document.getAnnotations(inputASName);
+      fireStatusChanged("Groovy script PR running on " + document.getSourceUrl());
+    } else {
+      fireStatusChanged("Groovy script PR running");
+    }      
     fireProgressChanged(0);
 
     // Create the variable bindings
     Binding binding = groovyScript.getBinding();
     binding.setVariable("doc", document);
     binding.setVariable("corpus", corpus);
-    binding.setVariable("content", document.getContent().toString());
+    if(document != null) {
+      binding.setVariable("content", document.getContent().toString());
+    } else {
+      binding.setVariable("content", null);
+    }
     binding.setVariable("inputAS", inputAS);
     binding.setVariable("outputAS", outputAS);
 
@@ -378,5 +386,13 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
   public String getGroovySrc() {
     return groovySrc;
   }
+  
+  @Override
+  @Optional
+  @RunTime
+  @CreoleParameter(comment = "The document to process")
+  public void setDocument(Document doc) {
+    document = doc;
+  } 
 
 }
