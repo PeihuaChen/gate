@@ -330,8 +330,10 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       return _resolve$HE$HIM$HIS$HIMSELF$(currPronoun,prnSentIndex);
     }
     else if (strPronoun.equalsIgnoreCase("SHE") ||
-              strPronoun.equalsIgnoreCase("HER")) {
-      return _resolve$SHE$HER$(currPronoun,prnSentIndex);
+              strPronoun.equalsIgnoreCase("HER") ||
+              strPronoun.equalsIgnoreCase("HERS") ||
+              strPronoun.equalsIgnoreCase("HERSELF")) {
+      return _resolve$SHE$HER$HERS$HERSELF$(currPronoun,prnSentIndex);
     }
     else if (strPronoun.equalsIgnoreCase("IT") ||
               strPronoun.equalsIgnoreCase("ITS") ||
@@ -435,7 +437,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
             bestAntecedent = currPerson;
           }
           else {
-            bestAntecedent = _chooseAntecedent$HE$HIM$HIS$SHE$HER$HIMSELF$(bestAntecedent,currPerson,pronoun);
+            bestAntecedent = _chooseAntecedent$HE$HIM$HIS$SHE$HER$HERS$HIMSELF$HERSELF$(bestAntecedent,currPerson,pronoun);
           }
         }
       }
@@ -450,7 +452,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
 
   /** --- */
-  private Annotation _resolve$SHE$HER$(Annotation pronoun, int sentenceIndex) {
+  private Annotation _resolve$SHE$HER$HERS$HERSELF$(Annotation pronoun, int sentenceIndex) {
 
     //0. preconditions
     assert (pronoun.getType().equals(TOKEN_ANNOTATION_TYPE));
@@ -458,7 +460,9 @@ public class PronominalCoref extends AbstractLanguageAnalyser
                       pronoun.getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME).equals(PRP$_CATEGORY));
     String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
     assert (pronounString.equalsIgnoreCase("SHE") ||
-                      pronounString.equalsIgnoreCase("HER"));
+                      pronounString.equalsIgnoreCase("HER") ||
+                      pronounString.equalsIgnoreCase("HERS") ||
+                      pronounString.equalsIgnoreCase("HERSELF"));
 
     //1.
     boolean antecedentFound = false;
@@ -486,7 +490,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
             bestAntecedent = currPerson;
           }
           else {
-            bestAntecedent = _chooseAntecedent$HE$HIM$HIS$SHE$HER$HIMSELF$(bestAntecedent,currPerson,pronoun);
+            bestAntecedent = _chooseAntecedent$HE$HIM$HIS$SHE$HER$HERS$HIMSELF$HERSELF$(bestAntecedent,currPerson,pronoun);
           }
         }
       }
@@ -885,7 +889,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
 
   /** --- */
-  private Annotation _chooseAntecedent$HE$HIM$HIS$SHE$HER$HIMSELF$(Annotation ant1, Annotation ant2, Annotation pronoun) {
+  private Annotation _chooseAntecedent$HE$HIM$HIS$SHE$HER$HERS$HIMSELF$HERSELF$(Annotation ant1, Annotation ant2, Annotation pronoun) {
 
     //0. preconditions
     assert (null != ant1);
@@ -896,6 +900,8 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     String pronounString = (String)pronoun.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
     assert (pronounString.equalsIgnoreCase("SHE") ||
                       pronounString.equalsIgnoreCase("HER") ||
+                      pronounString.equalsIgnoreCase("HERS") ||
+                      pronounString.equalsIgnoreCase("HERSELF") ||
                       pronounString.equalsIgnoreCase("HE") ||
                       pronounString.equalsIgnoreCase("HIM") ||
                       pronounString.equalsIgnoreCase("HIS") ||
