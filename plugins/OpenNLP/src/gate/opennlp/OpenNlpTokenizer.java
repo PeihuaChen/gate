@@ -43,7 +43,7 @@ public class OpenNlpTokenizer extends AbstractLanguageAnalyser {
   private String annotationSetName = null;
   private URL modelUrl;
   private TokenizerME tokenizer = null;
-  private TokenizerModel model = null;	
+  private TokenizerModel model = null;  
 
   
   public void execute() throws ExecutionException {
@@ -150,42 +150,42 @@ public class OpenNlpTokenizer extends AbstractLanguageAnalyser {
   }
 
   
-	/* CREOLE PARAMETERS */
+  /* CREOLE PARAMETERS */
 
-	@RunTime
-	@CreoleParameter(defaultValue = "",
-	    comment = "Output AS for Tokens")
-	public void setAnnotationSetName(String a) {
-		annotationSetName = a;
-	}
+  @RunTime
+  @CreoleParameter(defaultValue = "",
+      comment = "Output AS for Tokens")
+  public void setAnnotationSetName(String a) {
+    annotationSetName = a;
+  }
 
-	public String getAnnotationSetName() {
-		return annotationSetName;
-	}
-	
-	
-	@CreoleParameter(defaultValue = "models/english/en-token.bin",
-	    comment = "location of the tokenizer model")
+  public String getAnnotationSetName() {
+    return annotationSetName;
+  }
+  
+  
+  @CreoleParameter(defaultValue = "models/english/en-token.bin",
+      comment = "location of the tokenizer model")
   public void setModel(URL model) {
     this.modelUrl = model;
   }
   
-	public URL getModel() {
-		return modelUrl;
-	}
+  public URL getModel() {
+    return modelUrl;
+  }
 
-	/**
-	 * For internal use by the duplication mechanism.
-	 */
-	@Sharable
-	public void setTokenizerModel(TokenizerModel model) {
-	  this.model = model;
-	}
-	
   /**
    * For internal use by the duplication mechanism.
    */
-	public TokenizerModel getTokenizerModel() {
-	  return model;
-	}
+  @Sharable
+  public void setTokenizerModel(TokenizerModel model) {
+    this.model = model;
+  }
+  
+  /**
+   * For internal use by the duplication mechanism.
+   */
+  public TokenizerModel getTokenizerModel() {
+    return model;
+  }
 }
