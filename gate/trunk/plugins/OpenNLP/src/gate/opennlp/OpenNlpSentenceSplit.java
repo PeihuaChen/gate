@@ -200,7 +200,7 @@ public class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
   /**
    * For internal use by the duplication mechanism.
    */
-  public SentenceModel getSentenceMode() {
+  public SentenceModel getSentenceModel() {
     return model;
   }
 
