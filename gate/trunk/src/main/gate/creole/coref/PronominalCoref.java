@@ -343,8 +343,9 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     else if (strPronoun.equalsIgnoreCase("I") ||
               strPronoun.equalsIgnoreCase("ME") ||
               strPronoun.equalsIgnoreCase("MY") ||
+              strPronoun.equalsIgnoreCase("MINE") ||
               strPronoun.equalsIgnoreCase("MYSELF")) {
-      return _resolve$I$ME$MY$MYSELF$(currPronoun,prnSentIndex);
+      return _resolve$I$ME$MY$MINE$MYSELF$(currPronoun,prnSentIndex);
     }
     else {
       if (DEBUG) {
@@ -562,7 +563,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
 
   /** --- */
-  private Annotation _resolve$I$ME$MY$MYSELF$(Annotation pronoun, int sentenceIndex) {
+  private Annotation _resolve$I$ME$MY$MINE$MYSELF$(Annotation pronoun, int sentenceIndex) {
 
     //0. preconditions
     assert (pronoun.getType().equals(TOKEN_ANNOTATION_TYPE));
@@ -572,6 +573,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     assert (pronounString.equalsIgnoreCase("I") ||
                       pronounString.equalsIgnoreCase("MY") ||
                       pronounString.equalsIgnoreCase("ME") ||
+                      pronounString.equalsIgnoreCase("MINE") ||
                       pronounString.equalsIgnoreCase("MYSELF"));
 
     //0.5 sanity check
