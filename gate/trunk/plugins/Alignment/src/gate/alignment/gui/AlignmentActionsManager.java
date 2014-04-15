@@ -443,7 +443,7 @@ public class AlignmentActionsManager extends JPanel {
             line = index < 0 ? "" : line.substring(index + 1);
 
             Class<?> actionClass =
-                    Class.forName(cName, true, Gate.getClassLoader());
+                    Class.forName(cName);
 
             Object action = actionClass.newInstance();
             String[] args = line.split("[,]");
