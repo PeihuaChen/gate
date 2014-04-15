@@ -73,7 +73,8 @@ public class PopulationConfig   {
    * Constructor with defaults.
    */
   public PopulationConfig() {
-    this.tweetsPerDoc = 0;
+    this.tweetsPerDoc = 1;
+    // Default changed from 0 (all in one doc) to 1 as agreed.
     this.encoding = TweetUtils.DEFAULT_ENCODING;
     this.contentKeys = Arrays.asList(TweetUtils.DEFAULT_CONTENT_KEYS);
     this.featureKeys = Arrays.asList(TweetUtils.DEFAULT_FEATURE_KEYS);

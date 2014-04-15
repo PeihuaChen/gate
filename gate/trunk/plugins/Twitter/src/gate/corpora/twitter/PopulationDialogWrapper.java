@@ -63,6 +63,8 @@ public class PopulationDialogWrapper  {
     dialog.add(encodingBox);
     dialog.add(Box.createVerticalStrut(4));
 
+    // Default is now 1 tweet per document; changed in PopulationConfig's
+    // default constructor.
     Box checkboxBox = Box.createHorizontalBox();
     checkboxBox.setToolTipText("If unchecked, one document per file");
     JLabel checkboxLabel = new JLabel("One document per tweet");
