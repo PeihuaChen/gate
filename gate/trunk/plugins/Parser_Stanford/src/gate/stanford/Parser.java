@@ -184,7 +184,7 @@ implements ProcessingResource {
     }
     try {
       Class<?> tlppClassObj =
-              Class.forName(tlppClass, true, Gate.getClassLoader());
+              Class.forName(tlppClass);
       if(!TreebankLangParserParams.class.isAssignableFrom(tlppClassObj)) {
         throw new ResourceInstantiationException(tlppClassObj
                 + " does not implement "
