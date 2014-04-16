@@ -8,7 +8,6 @@ import gate.creole.ontology.OConstants;
 import gate.creole.ontology.OInstance;
 import gate.creole.ontology.OURI;
 import gate.creole.ontology.Ontology;
-import gate.creole.ontology.OntologyUtilities;
 import gate.util.GateRuntimeException;
 
 import java.awt.datatransfer.DataFlavor;
@@ -202,7 +201,7 @@ public class ClassNode implements IFolder, Transferable, Cloneable,
 			if (null != turl) {
 				Ontology o2 = null;
 				try {
-					o2 = OntologyUtilities.getOntology(turl);
+					o2 = gate.creole.ontology.OntologyUtilities.getOntology(turl);
 				} catch (gate.creole.ResourceInstantiationException x) {
 				}
 				if (o2 != null && o2.equals(o)) {
