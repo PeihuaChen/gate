@@ -22,7 +22,6 @@ import gate.DataStore;
 import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
-import gate.corpora.DocumentStaxUtils;
 import gate.corpora.TestDocument;
 import gate.creole.gazetteer.DefaultGazetteer;
 import gate.creole.orthomatcher.OrthoMatcher;
@@ -35,7 +34,6 @@ import gate.jape.constraint.ConstraintPredicate;
 import gate.jape.constraint.MetaPropertyAccessor;
 import gate.util.AnnotationDiffer;
 
-import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,9 +53,6 @@ import org.junit.runners.MethodSorters;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestPR extends TestCase
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   protected static Document doc1;
   protected static Document doc2;
   protected static Document doc3;

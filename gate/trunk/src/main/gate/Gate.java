@@ -233,14 +233,6 @@ public class Gate implements GateConstants {
     if(System.getProperty("java.version").compareTo(MIN_JDK_VERSION) < 0) { throw new GateException(
       "GATE requires JDK " + MIN_JDK_VERSION + " or newer"); }
 
-    // register Lucene as a IR search engine
-    try {
-      registerIREngine("gate.creole.ir.lucene.LuceneIREngine");
-    }
-    catch(ClassNotFoundException cnfe) {
-      throw new GateRuntimeException(cnfe);
-    }
-
     initFinished = true;
   } // init()
 

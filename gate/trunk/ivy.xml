@@ -108,9 +108,6 @@
     
     <!-- required for outputting documents as JSON -->
     <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.3.2" />
-
-    <!-- required for indexing datastores (not used by ANNIC) -->
-    <dependency org="org.apache.lucene" name="lucene-core" rev="3.5.0" />
     
     <!-- required for the new controller metadata viewer -->
     <dependency org="org.xhtmlrenderer" name="flying-saucer-core" rev="9.0.4" />

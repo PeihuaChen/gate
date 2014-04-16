@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <!-- $Id$ -->
 <CREOLE-DIRECTORY>
+  <JAR>lib/lucene-core-3.5.0.jar</JAR>
+  <JAR SCAN="true">Information_Retrieval.jar</JAR>
   <CREOLE>   
    <!-- creole.xml for SearchPR -->
     <RESOURCE>

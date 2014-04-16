@@ -20,7 +20,6 @@ import gate.DataStore;
 import gate.Document;
 import gate.Factory;
 import gate.Gate;
-import gate.corpora.TestDocument;
 import gate.creole.ir.lucene.LuceneSearch;
 import gate.util.GateException;
 
@@ -41,12 +40,39 @@ public class TestIndex extends TestCase{
 
   public TestIndex(String name) throws GateException {
     super(name);
+    try{
+      Gate.init();
+      Gate.getCreoleRegister().registerDirectories(
+        (new File(Gate.getPluginsHome(), "Information_Retrieval")).toURI()
+          .toURL());
+      
+      setUp();
+      testIndex_01();
+      tearDown();
+
+      setUp();
+      testIndex_02();
+      tearDown();
+
+      setUp();
+      testIndex_10();
+      tearDown();
+
+      setUp();
+      testIndex_101();
+      tearDown();
+
+    } catch (Exception e){
+      e.printStackTrace();
+    }
   }
 
   /** Fixture set up */
   @Override
   public void setUp() throws Exception {
     try {
+      
+      
       File storageDir = File.createTempFile("TestIndex__", "__StorageDir");
 
       if (null == TEMP_LOCATION) {
@@ -65,7 +91,7 @@ public class TestIndex extends TestCase{
 
       sds.open();
 
-      String server = TestDocument.getTestServerName();
+      String server = Gate.getClassLoader().getResource("gate/resources/gate.ac.uk/").toExternalForm();
 
       Document doc0 = Factory.newDocument(new URL(server + "tests/doc0.html"));
       doc0.getFeatures().put("author","John Smit");
@@ -176,33 +202,5 @@ public class TestIndex extends TestCase{
     ic.setIndexDefinition(did);
 
     ic.getIndexManager().deleteIndex();
-  }
-
-
-  public static void main(String[] args){
-    try{
-      Gate.init();
-
-      TestIndex test = new TestIndex("");
-
-      test.setUp();
-      test.testIndex_01();
-      test.tearDown();
-
-      test.setUp();
-      test.testIndex_02();
-      test.tearDown();
-
-      test.setUp();
-      test.testIndex_10();
-      test.tearDown();
-
-      test.setUp();
-      test.testIndex_101();
-      test.tearDown();
-
-    } catch (Exception e){
-      e.printStackTrace();
-    }
   }
 }

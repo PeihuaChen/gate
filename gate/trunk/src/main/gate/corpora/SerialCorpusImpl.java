@@ -999,7 +999,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     if(this.dataStore != null) this.dataStore.addDatastoreListener(this);
 
     // if indexed construct the manager.
-    IndexDefinition definition = (IndexDefinition)this.getFeatures().get(
+    /*IndexDefinition definition = (IndexDefinition)this.getFeatures().get(
             GateConstants.CORPUS_INDEX_DEFINITION_FEATURE_KEY);
     if(definition != null) {
       String className = definition.getIrEngineClassName();
@@ -1024,7 +1024,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       this.addedDocs = new Vector<Document>();
       this.removedDocIDs = new Vector<String>();
       this.changedDocs = new Vector<Document>();
-    }
+    }*/
   }// readObject
 
   @Override
