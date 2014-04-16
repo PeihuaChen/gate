@@ -47,9 +47,6 @@ public class OntoGazetteerImpl extends AbstractOntoGazetteer {
     try {
       checkParameters();
 
-      // load gazetteer class from GATE classloader
-      Class<?> cl = Class.forName(gazetteerName, true, Gate.getClassLoader());
-
       FeatureMap params = Factory.newFeatureMap();
 
       mappingDefinition = new MappingDefinition();
@@ -60,10 +57,7 @@ public class OntoGazetteerImpl extends AbstractOntoGazetteer {
       params.put("listsURL",listsURL);
       params.put("encoding",encoding);
       params.put("mappingDefinition",mappingDefinition);
-      gaz = (Gazetteer)Factory.createResource(cl.getName(),params);
-
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException("ClassNotFoundException : "+e.getMessage());
+      gaz = (Gazetteer)Factory.createResource(gazetteerName,params);
     } catch (InvalidFormatException e) {
       throw new ResourceInstantiationException(e);
     }

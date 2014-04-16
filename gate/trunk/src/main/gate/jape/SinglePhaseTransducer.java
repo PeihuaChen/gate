@@ -1279,7 +1279,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       try {
 			    gate.util.Javac.loadClasses(actionClasses, classloader);
           controllerEventBlocksActionClass =
-            Gate.getClassLoader().
+            classloader.
               loadClass(controllerEventBlocksActionClassName).newInstance();
 		    }catch(Exception e1){
 			    throw new GateRuntimeException (e1);
