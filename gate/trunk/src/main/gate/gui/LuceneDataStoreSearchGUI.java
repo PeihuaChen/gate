@@ -152,8 +152,8 @@ import javax.swing.text.BadLocationException;
  * GUI allowing to write a query with a JAPE derived syntax for querying
  * a Lucene Datastore and display the results with a stacked view of the
  * annotations and their values. <br>
- * This VR is associated to {@link gate.creole.ir.SearchPR}. You have to
- * set the target with setTarget(). <br>
+ * This VR is associated to {@link gate.creole.annic.SearchableDataStore}.
+ * You have to set the target with setTarget(). <br>
  * Features: query auto-completion, syntactic error checker, display of
  * very big values, export of results in a file, 16 types of statistics,
  * store display settings in gate config.
