@@ -17,7 +17,6 @@ package gate.creole.gazetteer;
 
 import gate.Factory;
 import gate.FeatureMap;
-import gate.Gate;
 import gate.Resource;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
