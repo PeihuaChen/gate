@@ -1,12 +1,26 @@
 package com.ontotext.gate.vr;
 
-import java.util.*;
-import gate.creole.ontology.*;
-import gate.util.*;
-import gate.creole.gazetteer.*;
-import java.awt.datatransfer.*;
-import java.io.*;
+import gate.creole.gazetteer.MappingDefinition;
+import gate.creole.gazetteer.MappingNode;
+import gate.creole.ontology.AnonymousClass;
+import gate.creole.ontology.OClass;
+import gate.creole.ontology.OConstants;
+import gate.creole.ontology.OInstance;
+import gate.creole.ontology.OURI;
+import gate.creole.ontology.Ontology;
+import gate.creole.ontology.OntologyUtilities;
+import gate.util.GateRuntimeException;
+
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
+import java.io.Serializable;
 import java.net.URL;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
 /** Represents a single class node from the visualized ontology */
 public class ClassNode implements IFolder, Transferable, Cloneable,
@@ -36,7 +50,7 @@ public class ClassNode implements IFolder, Transferable, Cloneable,
 	public static ClassNode createRootNode(Ontology o,
 			boolean includeInstances, boolean includeAnonymousClasses) {
 		if (null == o)
-			throw new gate.util.LazyProgrammerException("ontology is null.");
+			throw new NullPointerException("ontology is null.");
 
 		ClassNode root = new ClassNode(o);
 		Iterator<OClass> itops = o.getOClasses(true).iterator();
@@ -133,7 +147,7 @@ public class ClassNode implements IFolder, Transferable, Cloneable,
 	public static ClassNode createRootNode(Ontology o,
 			MappingDefinition mapping, Map<String, ClassNode> nameVsNode) {
 		if (null == o || null == nameVsNode || null == mapping)
-			throw new gate.util.LazyProgrammerException(
+			throw new NullPointerException(
 					"mapping, nameVsNode or ontology-o is null.");
 		ClassNode root = new ClassNode(o);
 		Iterator<OClass> itops = o.getOClasses(true).iterator();

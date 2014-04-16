@@ -16,15 +16,16 @@
 
 package gate;
 
-import java.io.File;
-import java.io.Serializable;
-import java.net.URL;
-import java.util.*;
-
 import gate.creole.ResourceData;
 import gate.creole.metadata.CreoleResource;
 import gate.event.CreoleListener;
 import gate.util.GateException;
+
+import java.io.Serializable;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /** The CREOLE register records the set of resources that are currently
   * known to the system. Each member of the register is a
@@ -117,15 +118,6 @@ public interface CreoleRegister extends Map<String, ResourceData>, Serializable,
     * <TT>resources/creole</TT>.
     */
   public void registerBuiltins() throws GateException;
-
-  /** This is a utility method for creating CREOLE directory files
-    * (typically called <CODE>creole.xml</CODE>) from a list of Jar
-    * files that contain resources. The method concatenates the
-    * <CODE>resource.xml</CODE> files that the Jars contain.
-    * <P>
-    * If Java allowed class methods in interfaces this would be static.
-    */
-  public File createCreoleDirectoryFile(File directoryFile, Set<String> jarFileNames);
 
   /** Get the list of types of LR in the register. */
   public Set<String> getLrTypes();

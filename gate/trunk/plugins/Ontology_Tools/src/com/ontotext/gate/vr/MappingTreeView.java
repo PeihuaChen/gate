@@ -4,7 +4,6 @@ import gate.creole.gazetteer.MappingDefinition;
 import gate.creole.gazetteer.MappingNode;
 import gate.creole.ontology.OClass;
 import gate.gui.MainFrame;
-import gate.util.LazyProgrammerException;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -68,11 +67,11 @@ public class MappingTreeView extends JTree {
     super(model);
 
     if (null == mappingDef)
-      throw new LazyProgrammerException(
+      throw new NullPointerException(
         "Mapping Def cannot be null on contructing MappingTreeView");
 
     if (null == gazeVR)
-      throw new LazyProgrammerException(
+      throw new NullPointerException(
         "Gazetteer Editor - Gaze VR - cannot be null on contructing MappingTreeView");
 
     mapping = mappingDef;
