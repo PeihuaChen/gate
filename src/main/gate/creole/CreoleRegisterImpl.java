@@ -33,11 +33,9 @@ import gate.util.Err;
 import gate.util.GateClassLoader;
 import gate.util.GateException;
 import gate.util.GateRuntimeException;
-import gate.util.LazyProgrammerException;
 import gate.util.LuckyException;
 import gate.util.Out;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -399,25 +397,6 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       throw (new GateException(e));
     }
   } // registerBuiltins()
-
-  /**
-   * This is a utility method for creating CREOLE directory files (typically
-   * called <CODE>creole.xml</CODE>) from a list of Jar files that contain
-   * resources. The method concatenates the <CODE>resource.xml</CODE> files that
-   * the Jars contain.
-   * <P>
-   * If Java allowed class methods in interfaces this would be static.
-   */
-  @Override
-  public File createCreoleDirectoryFile(File directoryFile, Set<String> jarFileNames) {
-    // //////////////////
-    // dump xml header and comment header and <CREOLE-DIRECTORY> into dirfile
-    // for each jar file pick out resource.xml
-    // strip xml header
-    // dump into dirfile
-    // put </CREOLE-DIRECTORY> into dirfile
-    throw new LazyProgrammerException();
-  } // createCreoleDirectoryFile
 
   /**
    * Overide HashMap's put method to maintain a list of all the types of LR in

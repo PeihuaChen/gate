@@ -16,16 +16,26 @@
 
 package gate.util;
 
-
+/** What to throw in a method that hasn't been implemented yet. 
+ * Yes, there are good reasons never to throw RuntimeExceptions
+ * and thereby sidestep Java's exception checking mechanism. But
+ * we're so lazy we don't care. And anyway, none of these are
+ * ever supposed to make it into released versions (who are we
+ * kidding?).
+ */
 public class MethodNotImplementedException extends GateRuntimeException {
 
   private static final long serialVersionUID = 6273189553052866276L;
 
+  /**The default message carried by this type of exceptions*/
+  static String defaultMessage = 
+          " It was Valentin's fault. I never touched it.";
+  
   public MethodNotImplementedException() {
+    super(defaultMessage);
   }
 
   public MethodNotImplementedException(String message) {
-    super(message);
+    super(defaultMessage+"\n"+message);
   }
-
 }
