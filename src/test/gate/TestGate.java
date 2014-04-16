@@ -31,7 +31,6 @@ import gate.creole.TestXSchema;
 import gate.creole.annic.test.TestAnnic;
 import gate.creole.gazetteer.TestFlexibleGazetteer;
 import gate.creole.gazetteer.TestGazetteer;
-import gate.creole.ir.TestIndex;
 import gate.creole.morph.TestMorph;
 import gate.creole.test.DynamicRegistrationTest;
 import gate.email.TestEmail;
@@ -148,7 +147,9 @@ public class TestGate {
 
         //WordNet has been moved into a plugin along with the test
         //suite.addTest(TestWordNet.suite());
-        suite.addTest(TestIndex.suite());
+
+        //The IR impls are now in a plugin along with the tests
+        //suite.addTest(TestIndex.suite());
         suite.addTest(TestPersist.suite());
         suite.addTest(TestControllers.suite());
 

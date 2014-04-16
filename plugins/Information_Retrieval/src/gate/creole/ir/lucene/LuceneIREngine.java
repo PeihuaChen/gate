@@ -14,14 +14,31 @@
  */
 package gate.creole.ir.lucene;
 
-import gate.creole.ir.*;
+import gate.Gate;
+import gate.creole.AbstractResource;
+import gate.creole.ir.IREngine;
+import gate.creole.ir.IndexManager;
+import gate.creole.ir.Search;
+import gate.creole.metadata.AutoInstance;
+import gate.creole.metadata.CreoleResource;
 
 /**
  * The lucene IR engine.
  * Packages a {@link LuceneIndexManager} and a {@link LuceneSearch}.
  */
+@CreoleResource(name = "Lucene IR Engine", tool = true, autoinstances = @AutoInstance)
+public class LuceneIREngine extends AbstractResource implements IREngine{
 
-public class LuceneIREngine implements IREngine{
+  private static final long serialVersionUID = -152880506664125169L;
+  
+  static {
+    try {
+      Gate.registerIREngine(LuceneIREngine.class.getName());
+    }
+    catch(Exception cnfe) {
+      throw new RuntimeException(cnfe);
+    }
+  }
 
   public LuceneIREngine() {
     search = new LuceneSearch();

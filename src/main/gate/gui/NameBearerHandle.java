@@ -25,7 +25,6 @@ import gate.Executable;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
-import gate.GateConstants;
 import gate.LanguageResource;
 import gate.ProcessingResource;
 import gate.Resource;
@@ -39,12 +38,6 @@ import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.RunningStrategy;
 import gate.creole.SerialAnalyserController;
-import gate.creole.ir.DefaultIndexDefinition;
-import gate.creole.ir.DocumentContentReader;
-import gate.creole.ir.FeatureReader;
-import gate.creole.ir.IREngine;
-import gate.creole.ir.IndexException;
-import gate.creole.ir.IndexField;
 import gate.creole.ir.IndexedCorpus;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
@@ -320,7 +313,9 @@ public class NameBearerHandle implements Handle, StatusListener,
                 sListenerProxy));
         // staticPopupItems.add(new XJMenuItem(new
         // SaveCorpusAsXmlAction(true), sListenerProxy));
-        if(target instanceof IndexedCorpus) {
+        
+        //This has been moved into the IR plugin
+        /*if(target instanceof IndexedCorpus) {
           IndexedCorpus ic = (IndexedCorpus)target;
           if(ic.getDataStore() != null
                   && ic.getDataStore() instanceof LuceneDataStoreImpl) {
@@ -334,7 +329,7 @@ public class NameBearerHandle implements Handle, StatusListener,
             staticPopupItems.add(new XJMenuItem(new DeleteIndexAction(),
                     sListenerProxy));
           }
-        }
+        }*/
       }
       if(((LanguageResource)target).getDataStore() != null) {
         // this item can be used only if the resource belongs to a
@@ -1721,170 +1716,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
   }
 
-  class CreateIndexAction extends AbstractAction {
-    private static final long serialVersionUID = -292879296310753260L;
-
-    CreateIndexAction() {
-      super("Index Corpus");
-      putValue(SHORT_DESCRIPTION, "Create index with documents from the corpus");
-      createIndexGui = new CreateIndexGUI();
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      boolean ok = OkCancelDialog.showDialog(largeView, createIndexGui,
-              "Index \"" + target.getName() + "\" corpus");
-      if(ok) {
-        DefaultIndexDefinition did = new DefaultIndexDefinition();
-        IREngine engine = createIndexGui.getIREngine();
-        did.setIrEngineClassName(engine.getClass().getName());
-
-        did.setIndexLocation(createIndexGui.getIndexLocation().toString());
-
-        // add the content if wanted
-        if(createIndexGui.getUseDocumentContent()) {
-          did.addIndexField(new IndexField("body", new DocumentContentReader(),
-                  false));
-        }
-        // add all the features
-        Iterator<String> featIter = createIndexGui.getFeaturesList().iterator();
-        while(featIter.hasNext()) {
-          String featureName = featIter.next();
-          did.addIndexField(new IndexField(featureName, new FeatureReader(
-                  featureName), false));
-        }
-
-        ((IndexedCorpus)target).setIndexDefinition(did);
-
-        Thread thread = new Thread(new Runnable() {
-          @Override
-          public void run() {
-            try {
-              fireProgressChanged(1);
-              fireStatusChanged("Indexing corpus...");
-              long start = System.currentTimeMillis();
-              ((IndexedCorpus)target).getIndexManager().deleteIndex();
-              fireProgressChanged(10);
-              ((IndexedCorpus)target).getIndexManager().createIndex();
-              fireProgressChanged(100);
-              fireProcessFinished();
-              fireStatusChanged("Corpus indexed in "
-                      + NumberFormat
-                              .getInstance()
-                              .format(
-                                      (double)(System.currentTimeMillis() - start) / 1000)
-                      + " seconds");
-            }
-            catch(IndexException ie) {
-              JOptionPane.showMessageDialog(getLargeView() != null
-                      ? getLargeView()
-                      : getSmallView(), "Could not create index!\n "
-                      + "See \"Messages\" tab for details!", "GATE",
-                      JOptionPane.ERROR_MESSAGE);
-              ie.printStackTrace(Err.getPrintWriter());
-            }
-            finally {
-              fireProcessFinished();
-            }
-          }
-        });
-        thread.setPriority(Thread.MIN_PRIORITY);
-        thread.start();
-      }
-    }
-
-    CreateIndexGUI createIndexGui;
-  }
-
-  class OptimizeIndexAction extends AbstractAction {
-    private static final long serialVersionUID = 261845730081082766L;
-
-    OptimizeIndexAction() {
-      super("Optimize Index");
-      putValue(SHORT_DESCRIPTION, "Optimize existing index");
-    }
-
-    @Override
-    public boolean isEnabled() {
-      return ((IndexedCorpus)target).getIndexDefinition() != null;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      Thread thread = new Thread(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            fireProgressChanged(1);
-            fireStatusChanged("Optimising index...");
-            long start = System.currentTimeMillis();
-            ((IndexedCorpus)target).getIndexManager().optimizeIndex();
-            fireStatusChanged("Index optimised in "
-                    + NumberFormat
-                            .getInstance()
-                            .format(
-                                    (double)(System.currentTimeMillis() - start) / 1000)
-                    + " seconds");
-            fireProcessFinished();
-          }
-          catch(IndexException ie) {
-            JOptionPane.showMessageDialog(getLargeView() != null
-                    ? getLargeView()
-                    : getSmallView(), "Errors during optimisation!", "GATE",
-                    JOptionPane.PLAIN_MESSAGE);
-            ie.printStackTrace(Err.getPrintWriter());
-          }
-          finally {
-            fireProcessFinished();
-          }
-        }
-      });
-      thread.setPriority(Thread.MIN_PRIORITY);
-      thread.start();
-    }
-  }
-
-  class DeleteIndexAction extends AbstractAction {
-    private static final long serialVersionUID = 6121632107964572415L;
-
-    DeleteIndexAction() {
-      super("Delete Index");
-      putValue(SHORT_DESCRIPTION, "Delete existing index");
-    }
-
-    @Override
-    public boolean isEnabled() {
-      return ((IndexedCorpus)target).getIndexDefinition() != null;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      int answer = JOptionPane.showOptionDialog(getLargeView() != null
-              ? getLargeView()
-              : getSmallView(), "Do you want to delete index?", "Gate",
-              JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-              null, null);
-      if(answer == JOptionPane.YES_OPTION) {
-        try {
-          IndexedCorpus ic = (IndexedCorpus)target;
-          if(ic.getIndexManager() != null) {
-            ic.getIndexManager().deleteIndex();
-            ic.getFeatures().remove(
-                    GateConstants.CORPUS_INDEX_DEFINITION_FEATURE_KEY);
-          }
-          else {
-            JOptionPane.showMessageDialog(getLargeView() != null
-                    ? getLargeView()
-                    : getSmallView(), "There is no index to delete!", "GATE",
-                    JOptionPane.PLAIN_MESSAGE);
-          }
-        }
-        catch(gate.creole.ir.IndexException ie) {
-          ie.printStackTrace();
-        }
-      }
-    }
-  }
+  
 
   class CreateCorpusForDocAction extends AbstractAction {
     /**
@@ -1973,7 +1805,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
   }
 
-  protected void fireProgressChanged(int e) {
+  public void fireProgressChanged(int e) {
     if(progressListeners != null) {
       Vector<ProgressListener> listeners = progressListeners;
       int count = listeners.size();
@@ -1983,7 +1815,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
   }// protected void fireProgressChanged(int e)
 
-  protected void fireProcessFinished() {
+  public void fireProcessFinished() {
     if(progressListeners != null) {
       Vector<ProgressListener> listeners = progressListeners;
       int count = listeners.size();
@@ -2014,7 +1846,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
   }// public synchronized void addStatusListener(StatusListener l)
 
-  protected void fireStatusChanged(String e) {
+  public void fireStatusChanged(String e) {
     if(statusListeners != null) {
       Vector<StatusListener> listeners = statusListeners;
       int count = listeners.size();
