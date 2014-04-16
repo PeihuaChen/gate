@@ -336,7 +336,7 @@ public class EmailDocumentHandler {
     * @return true if the line begins an e-mail message
     * @return false if is doesn't
     */
-  private boolean lineBeginsMessage(String aTextLine){
+  protected boolean lineBeginsMessage(String aTextLine){
     int score = 0;
 
     // if first token is "From" and the rest contains Day, Zone, etc
@@ -385,7 +385,7 @@ public class EmailDocumentHandler {
     * @return true if the line begins with a field from the e-mail header
     * @return false if is doesn't
     */
-  private boolean lineBeginsWithField(String aTextLine){
+  protected boolean lineBeginsWithField(String aTextLine){
     if (containsSemicolon(aTextLine)){
       StringTokenizer tokenizer = new StringTokenizer(aTextLine,":");
 
@@ -412,7 +412,7 @@ public class EmailDocumentHandler {
   /**
     * This method checks if a String contains white spaces.
     */
-  private boolean containsWhiteSpaces(String aString) {
+  protected boolean containsWhiteSpaces(String aString) {
     for (int i = 0; i<aString.length(); i++)
       if (Character.isWhitespace(aString.charAt(i))) return true;
     return false;
@@ -421,7 +421,7 @@ public class EmailDocumentHandler {
   /**
     * This method checks if a String contains a semicolon char
     */
-  private boolean containsSemicolon(String aString) {
+  protected boolean containsSemicolon(String aString) {
     for (int i = 0; i<aString.length(); i++)
       if (aString.charAt(i) == ':') return true;
     return false;
@@ -430,7 +430,7 @@ public class EmailDocumentHandler {
   /**
     * This method tests a token if is Day, Month, Zone, Time, Year
     */
-  private boolean hasAMeaning(String aToken) {
+  protected boolean hasAMeaning(String aToken) {
     // if token is a Day return true
     if (day.contains(aToken)) return true;
 
@@ -470,7 +470,7 @@ public class EmailDocumentHandler {
   /**
     * Tests a token if is in time format HH:MM:SS
     */
-  private boolean isTime(String aToken) {
+  protected boolean isTime(String aToken) {
     StringTokenizer st = new StringTokenizer(aToken,":");
 
     // test each token if is hour, minute or second
@@ -661,112 +661,5 @@ public class EmailDocumentHandler {
   private Collection<String> month = null;
   private Collection<String> zone = null;
 
-
- // TEST SECTION
-
-  /**
-    * Test containsSemicolon
-    */
-  private void testContainsSemicolon() {
-    String str1 = "X-Sender: oana@derwent";
-    String str2 = "X-Sender oana@derwent";
-    String str3 = ":X-Sender oana@derwent";
-    String str4 = "X-Sender oana@derwent:";
-
-    Assert.assertTrue((containsSemicolon(str1) == true));
-    Assert.assertTrue((containsSemicolon(str2)== false));
-    Assert.assertTrue((containsSemicolon(str3) == true));
-    Assert.assertTrue((containsSemicolon(str4) == true));
-  }// testContainsSemicolon
-
-  /**
-    * Test containsWhiteSpaces
-    */
-  private void testContainsWhiteSpaces(){
-    String str1 = "Content-Type: TEXT/PLAIN; charset=US-ASCII";
-    String str2 = "Content-Type:TEXT/PLAIN;charset=US-ASCII";
-    String str3 = " Content-Type:TEXT/PLAIN;charset=US-ASCII";
-    String str4 = "Content-Type:TEXT/PLAIN;charset=US-ASCII ";
-
-    Assert.assertTrue((containsWhiteSpaces(str1) == true));
-    Assert.assertTrue((containsWhiteSpaces(str2) == false));
-    Assert.assertTrue((containsWhiteSpaces(str3) == true));
-    Assert.assertTrue((containsWhiteSpaces(str4) == true));
-  }// testContainsWhiteSpaces
-
-  /**
-    * Test hasAMeaning
-    */
-  private void testHasAMeaning() {
-    String str1 = "12:05:22";
-    String str2 = "Sep";
-    String str3 = "Fri";
-    String str4 = "2000";
-    String str5 = "GMT";
-    String str6 = "Date: Wed, 13 Sep 2000 13:05:22 +0100 (BST)";
-    String str7 = "12:75:22";
-    String str8 = "September";
-    String str9 = "Friday";
-
-    Assert.assertTrue((hasAMeaning(str1) == true));
-    Assert.assertTrue((hasAMeaning(str2) == true));
-    Assert.assertTrue((hasAMeaning(str3) == true));
-    Assert.assertTrue((hasAMeaning(str4) == true));
-    Assert.assertTrue((hasAMeaning(str5) == true));
-    Assert.assertTrue((hasAMeaning(str6) == false));
-    Assert.assertTrue((hasAMeaning(str7) == false));
-    Assert.assertTrue((hasAMeaning(str8) == false));
-    Assert.assertTrue((hasAMeaning(str9) == false));
-  } // testHasAMeaning
-
-  /**
-    * Test isTime
-    */
-  private void testIsTime() {
-    String str1 = "13:05:22";
-    String str2 = "13/05/22";
-    String str3 = "24:05:22";
-
-    Assert.assertTrue((isTime(str1) == true));
-    Assert.assertTrue((isTime(str2) == false));
-    Assert.assertTrue((isTime(str3) == false));
-  }// testIsTime
-
-  /**
-    * Test lineBeginsMessage
-    */
-  private void testLineBeginsMessage(){
-    String str1 = "From oana@dcs.shef.ac.uk Wed Sep 13 13:05:23 2000";
-    String str2 = "Date: Wed, 13 Sep 2000 13:05:22 +0100 (BST)";
-    String str3 = "From oana@dcs.shef.ac.uk Sep 13 13:05:23 2000";
-
-    Assert.assertTrue((lineBeginsMessage(str1) == true));
-    Assert.assertTrue((lineBeginsMessage(str2) == false));
-    Assert.assertTrue((lineBeginsMessage(str3) == false));
-
-  }// testLineBeginsMessage
-
-  /**
-    * Test lineBeginsWithField
-    */
-  private void testLineBeginsWithField() {
-    String str1 = "Message-ID: <Pine.SOL.3.91.1000913130311.19537A-10@derwent>";
-    String str2 = "%:ContentType TEXT/PLAIN; charset=US-ASCII";
-
-    Assert.assertTrue((lineBeginsWithField(str1) == true));
-    Assert.assertTrue((lineBeginsWithField(str2) == true));
-  }// testLineBeginsWithField
-
-   /**
-     * Test final
-     */
-   public void testSelf(){
-     testContainsSemicolon();
-     testContainsWhiteSpaces();
-     testHasAMeaning();
-     testIsTime();
-     testLineBeginsMessage();
-     testLineBeginsWithField();
-   } // testSelf
 
 } //EmailDocumentHandler
