@@ -2169,6 +2169,11 @@ public class DocumentImpl extends AbstractLanguageResource implements
   public Integer getNextAnnotationId() {
     return new Integer(nextAnnotationId++);
   } // getNextAnnotationId
+  
+  /** look at the next annotation ID without incrementing it */
+  public Integer peakAtNextAnnotationId() {
+    return nextAnnotationId;
+  }
 
   /** Generate and return the next node ID */
   public Integer getNextNodeId() {

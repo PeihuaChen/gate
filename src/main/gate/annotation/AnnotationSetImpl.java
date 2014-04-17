@@ -908,6 +908,12 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     // construct an annotation
     annFactory.createAnnotationInSet(this, id, nodes[0], nodes[1], type,
             features);
+    
+    //try to ensure that if someone adds an annotation directly by ID
+    //the other methods don't trample all over it later
+    if (id > doc.peakAtNextAnnotationId()) {
+      doc.setNextAnnotationId(id+1);
+    }
   } // add(id, start, end, type, features)
 
   /** Construct the positional index. */
