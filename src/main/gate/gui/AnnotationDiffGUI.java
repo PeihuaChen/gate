@@ -152,12 +152,12 @@ public class AnnotationDiffGUI extends JFrame{
     JLabel keyDocLabel = new JLabel("Key doc:");
     keyDocLabel.setToolTipText("Key document");
     getContentPane().add(keyDocLabel, constraints);
-    keyDocCombo = new JComboBox();
+    keyDocCombo = new JComboBox<String>();
     keyDocCombo.setPrototypeDisplayValue("long_document_name");
     // add the value of the combobox in a tooltip for long value
     keyDocCombo.setRenderer(new DefaultListCellRenderer() {
       @Override
-      public Component getListCellRendererComponent(JList list, Object value,
+      public Component getListCellRendererComponent(JList<?> list, Object value,
           int index, boolean isSelected, boolean cellHasFocus) {
         super.getListCellRendererComponent(
           list, value, index, isSelected, cellHasFocus);
@@ -192,13 +192,13 @@ public class AnnotationDiffGUI extends JFrame{
     JLabel keySetLabel = new JLabel("Key set:");
     keySetLabel.setToolTipText("Key annotation set");
     getContentPane().add(keySetLabel, constraints);
-    keySetCombo = new JComboBox();
+    keySetCombo = new JComboBox<String>();
     keySetCombo.setPrototypeDisplayValue("long_set_name");
     getContentPane().add(keySetCombo, constraints);
     JLabel typeLabel = new JLabel("Type:");
     typeLabel.setToolTipText("Annotation type");
     getContentPane().add(typeLabel, constraints);
-    annTypeCombo = new JComboBox();
+    annTypeCombo = new JComboBox<String>();
     annTypeCombo.setPrototypeDisplayValue("very_long_type");
     constraints.gridwidth = 3;
     getContentPane().add(annTypeCombo, constraints);
@@ -227,11 +227,11 @@ public class AnnotationDiffGUI extends JFrame{
     responseDocLabel.setToolTipText("Response document");
     getContentPane().add(responseDocLabel, constraints);
     constraints.gridx = GridBagConstraints.RELATIVE;
-    resDocCombo = new JComboBox();
+    resDocCombo = new JComboBox<String>();
     resDocCombo.setPrototypeDisplayValue("long_document_name");
     resDocCombo.setRenderer(new DefaultListCellRenderer() {
       @Override
-      public Component getListCellRendererComponent(JList list, Object value,
+      public Component getListCellRendererComponent(JList<?> list, Object value,
           int index, boolean isSelected, boolean cellHasFocus) {
         super.getListCellRendererComponent(
           list, value, index, isSelected, cellHasFocus);
@@ -266,7 +266,7 @@ public class AnnotationDiffGUI extends JFrame{
     JLabel responseSetLabel = new JLabel("Resp. set:");
     responseSetLabel.setToolTipText("Response annotation set");
     getContentPane().add(responseSetLabel, constraints);
-    resSetCombo = new JComboBox();
+    resSetCombo = new JComboBox<String>();
     resSetCombo.setPrototypeDisplayValue("long_set_name");
     getContentPane().add(resSetCombo, constraints);
     getContentPane().add(new JLabel("Features:"), constraints);
@@ -565,8 +565,8 @@ public class AnnotationDiffGUI extends JFrame{
     bottomPanel.setBackground(background);
     bottomTabbedPane.setBackground(background);
 
-    featureslistModel = new DefaultListModel();
-    featuresList = new JList(featureslistModel);
+    featureslistModel = new DefaultListModel<String>();
+    featuresList = new JList<String>(featureslistModel);
     featuresList.setSelectionMode(
       ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     keySetCombo.requestFocusInWindow();
@@ -610,7 +610,7 @@ public class AnnotationDiffGUI extends JFrame{
             keySets.add(keyDoc.getAnnotations(name));
           }
         }
-        keySetCombo.setModel(new DefaultComboBoxModel(keySetNames.toArray()));
+        keySetCombo.setModel(new DefaultComboBoxModel<String>(keySetNames.toArray(new String[keySetNames.size()])));
         if(!keySetNames.isEmpty()) {
           keySetCombo.setSelectedIndex(0);
           if(resSetCombo.getItemCount() > 0) {
@@ -664,7 +664,7 @@ public class AnnotationDiffGUI extends JFrame{
             resSets.add(resDoc.getAnnotations(name));
           }
         }
-        resSetCombo.setModel(new DefaultComboBoxModel(resSetNames.toArray()));
+        resSetCombo.setModel(new DefaultComboBoxModel<String>(resSetNames.toArray(new String[resSetNames.size()])));
         if(!resSetNames.isEmpty()) {
           resSetCombo.setSelectedIndex(0);
           if(keySetCombo.getItemCount() > 0) {
@@ -714,7 +714,7 @@ public class AnnotationDiffGUI extends JFrame{
         types.retainAll(resTypes);
         List<String> typesList = new ArrayList<String>(types);
         Collections.sort(typesList);
-        annTypeCombo.setModel(new DefaultComboBoxModel(typesList.toArray()));
+        annTypeCombo.setModel(new DefaultComboBoxModel<String>(typesList.toArray(new String[typesList.size()])));
         if(typesList.size() > 0) {
           annTypeCombo.setSelectedIndex(0);
           diffAction.setEnabled(true);
@@ -773,7 +773,7 @@ public class AnnotationDiffGUI extends JFrame{
              significantFeatures.clear();
              int[] selIdxs = featuresList.getSelectedIndices();
              for (int selIdx : selIdxs) {
-               significantFeatures.add((String) featureslistModel.get(selIdx));
+               significantFeatures.add(featureslistModel.get(selIdx));
              }
            }
         }
@@ -1040,8 +1040,8 @@ public class AnnotationDiffGUI extends JFrame{
     }
     Object keyDocSelectedItem = keyDocCombo.getSelectedItem();
     Object resDocSelectedItem = resDocCombo.getSelectedItem();
-    keyDocCombo.setModel(new DefaultComboBoxModel(documentNames.toArray()));
-    resDocCombo.setModel(new DefaultComboBoxModel(documentNames.toArray()));
+    keyDocCombo.setModel(new DefaultComboBoxModel<String>(documentNames.toArray(new String[documentNames.size()])));
+    resDocCombo.setModel(new DefaultComboBoxModel<String>(documentNames.toArray(new String[documentNames.size()])));
     if(!documents.isEmpty()){
       keyDocCombo.setSelectedItem(keyDocSelectedItem);
       if (keyDocCombo.getSelectedIndex() == -1) {
@@ -2036,13 +2036,13 @@ public class AnnotationDiffGUI extends JFrame{
   protected ShowDocumentAction showDocumentAction;
 
   // Top part of the UI from left to right
-  protected JComboBox keyDocCombo;
-  protected JComboBox resDocCombo;
-  protected JComboBox keySetCombo;
-  protected JComboBox resSetCombo;
-  protected JComboBox annTypeCombo;
-  protected DefaultListModel featureslistModel;
-  protected JList featuresList;
+  protected JComboBox<String> keyDocCombo;
+  protected JComboBox<String> resDocCombo;
+  protected JComboBox<String> keySetCombo;
+  protected JComboBox<String> resSetCombo;
+  protected JComboBox<String> annTypeCombo;
+  protected DefaultListModel<String> featureslistModel;
+  protected JList<String> featuresList;
   protected JRadioButton allFeaturesBtn;
   protected JRadioButton someFeaturesBtn;
   protected JRadioButton noFeaturesBtn;
