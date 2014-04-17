@@ -24,7 +24,7 @@
              basedir="${top}/doc/javadoc"
              excludes="internal/**, src-html/**" />
         <jar destfile="${build}/gate-core-sources.jar"
-             basedir="${top}/src"/>
+             basedir="${top}/src/main"/>
     </target>
 
     <target name="prepare.snapshot.pom" depends="init">
