@@ -248,7 +248,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
     pane.add(dismissButton, constraints);
     constraints.anchor = GridBagConstraints.CENTER;
     constraints.insets = insets0;
-    typeCombo = new JComboBox();
+    typeCombo = new JComboBox<String>();
     typeCombo.setEditable(true);
     typeCombo.setBackground(UIManager.getLookAndFeelDefaults().getColor(
         "ToolTip.background"));
@@ -455,7 +455,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
     this.ann = ann;
     this.set = set;
     if(ann == null) {
-      typeCombo.setModel(new DefaultComboBoxModel());
+      typeCombo.setModel(new DefaultComboBoxModel<String>());
       featuresEditor.setSchema(new AnnotationSchema());
       // popupWindow.doLayout();
       popupWindow.validate();
@@ -468,7 +468,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
     types.addAll(set.getAllTypes());
     java.util.List<String> typeList = new ArrayList<String>(types);
     Collections.sort(typeList);
-    typeCombo.setModel(new DefaultComboBoxModel(typeList.toArray()));
+    typeCombo.setModel(new DefaultComboBoxModel<String>(typeList.toArray(new String[typeList.size()])));
     typeCombo.setSelectedItem(annType);
     featuresEditor.setSchema(schemasByType.get(annType));
     featuresEditor.setTargetFeatures(ann.getFeatures());
@@ -820,7 +820,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
   /**
    * Combobox for annotation type.
    */
-  protected JComboBox typeCombo;
+  protected JComboBox<String> typeCombo;
 
   /**
    * Component for features editing.

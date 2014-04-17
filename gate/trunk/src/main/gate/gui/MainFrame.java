@@ -3010,7 +3010,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
       });
 
-      JComboBox asie = new JComboBox(new String[]{"include", "exclude"});
+      JComboBox<String> asie = new JComboBox<String>(new String[]{"include", "exclude"});
       inputAS.setToolTipText("Leave blank for indexing all annotation sets. \"" 
               + Constants.DEFAULT_ANNOTATION_SET_NAME + 
               "\" indicates the default annotation set");
@@ -3053,7 +3053,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
       });
 
-      JComboBox ftie = new JComboBox(new String[]{"include", "exclude"});
+      JComboBox<String> ftie = new JComboBox<String>(new String[]{"include", "exclude"});
       ftie.setSelectedIndex(1);
       fte.setToolTipText("Leave blank for inclusion of all features");
 
@@ -3484,7 +3484,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
       if(!dsTypeByName.isEmpty()) {
         JLabel label = new JLabel("Select a type of Datastore:");
-        final JList list = new JList(dsTypeByName.keySet().toArray());
+        final JList<String> list = new JList<String>(dsTypeByName.keySet().toArray(new String[dsTypeByName.keySet().size()]));
         String initialSelection = Gate.getUserConfig().getString(
           MainFrame.class.getName()+".datastoretype");
         if (dsTypeByName.containsKey(initialSelection)) {
@@ -4042,7 +4042,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
       if(!dsTypeByName.isEmpty()) {
         JLabel label = new JLabel("Select a type of Datastore:");
-        final JList list = new JList(dsTypeByName.keySet().toArray());
+        final JList<String> list = new JList<String>(dsTypeByName.keySet().toArray(new String[dsTypeByName.keySet().size()]));
         String initialSelection = Gate.getUserConfig().getString(
           MainFrame.class.getName()+".datastoretype");
         if (dsTypeByName.containsKey(initialSelection)) {
