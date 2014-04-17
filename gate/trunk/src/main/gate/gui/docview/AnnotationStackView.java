@@ -348,7 +348,7 @@ public class AnnotationStackView  extends AbstractDocumentView
       collator.setStrength(Collator.TERTIARY);
       SortedSet<String> setNames = new TreeSet<String>(collator);
       setNames.addAll(document.getAnnotationSetNames());
-      JList list = new JList(setNames.toArray());
+      JList<String> list = new JList<String>(setNames.toArray(new String[setNames.size()]));
       list.setVisibleRowCount(Math.min(10, setNames.size()));
       list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       list.setSelectedValue(targetSetName, true);
@@ -358,9 +358,10 @@ public class AnnotationStackView  extends AbstractDocumentView
       list.addListSelectionListener(new ListSelectionListener() {
         @Override
         public void valueChanged(ListSelectionEvent e) {
-          JList list = (JList) e.getSource();
+          @SuppressWarnings("unchecked")
+          JList<String> list = (JList<String>) e.getSource();
           if (list.getSelectedValue() != null) {
-            setsTextField.setText((String) list.getSelectedValue());
+            setsTextField.setText(list.getSelectedValue());
           }
         }
       });
@@ -638,7 +639,7 @@ public class AnnotationStackView  extends AbstractDocumentView
       }
       features.add("          ");
       // create the list component
-      final JList list = new JList(features.toArray());
+      final JList<String> list = new JList<String>(features.toArray(new String[features.size()]));
       list.setVisibleRowCount(Math.min(8, features.size()));
       list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       list.setBackground(Color.WHITE);
@@ -646,7 +647,7 @@ public class AnnotationStackView  extends AbstractDocumentView
         @Override
         public void mouseClicked(MouseEvent e) {
           if (e.getClickCount() == 1) {
-            String feature = (String) list.getSelectedValue();
+            String feature = list.getSelectedValue();
             if (feature.equals("          ")) {
               typesFeatures.remove(type);
             } else {

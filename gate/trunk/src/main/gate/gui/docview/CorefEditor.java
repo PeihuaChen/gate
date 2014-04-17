@@ -89,8 +89,8 @@ public class CorefEditor
 
   private JPanel mainPanel, topPanel, subPanel;
   private JToggleButton showAnnotations;
-  private JComboBox annotSets, annotTypes;
-  private DefaultComboBoxModel annotSetsModel, annotTypesModel;
+  private JComboBox<String> annotSets, annotTypes;
+  private DefaultComboBoxModel<String> annotSetsModel, annotTypesModel;
 
   // Co-reference Tree
   private JTree corefTree;
@@ -193,26 +193,26 @@ public class CorefEditor
     showAnnotations.addActionListener(this);
 
     // annotSets
-    annotSets = new JComboBox();
+    annotSets = new JComboBox<String>();
     annotSets.addActionListener(this);
 
     // get all the annotationSets
     Map<String,AnnotationSet> annotSetsMap = document.getNamedAnnotationSets();
-    annotSetsModel = new DefaultComboBoxModel();
+    annotSetsModel = new DefaultComboBoxModel<String>();
     if (annotSetsMap != null) {
-      Object [] array = annotSetsMap.keySet().toArray();
+      String [] array = annotSetsMap.keySet().toArray(new String[annotSetsMap.keySet().size()]);
       for(int i=0;i<array.length;i++) {
         annotSetsMap.get(array[i]).addAnnotationSetListener(this);
       }
-      annotSetsModel = new DefaultComboBoxModel(array);
+      annotSetsModel = new DefaultComboBoxModel<String>(array);
     }
     document.getAnnotations().addAnnotationSetListener(this);
     annotSetsModel.insertElementAt(DEFAULT_ANNOTSET_NAME, 0);
     annotSets.setModel(annotSetsModel);
 
     // annotTypes
-    annotTypesModel = new DefaultComboBoxModel();
-    annotTypes = new JComboBox(annotTypesModel);
+    annotTypesModel = new DefaultComboBoxModel<String>();
+    annotTypes = new JComboBox<String>(annotTypesModel);
     annotTypes.addActionListener(this);
     subPanel.add(new JLabel("Sets : "));
     subPanel.add(annotSets);
@@ -953,12 +953,12 @@ public class CorefEditor
     String currentAnnotSet = (String) annotSets.getSelectedItem();
     // get all the types of the currently Selected AnnotationSet
     if (currentAnnotSet == null)
-      currentAnnotSet = (String) annotSets.getItemAt(0);
+      currentAnnotSet = annotSets.getItemAt(0);
     AnnotationSet temp = getAnnotationSet(currentAnnotSet);
     Set<String> types = temp.getAllTypes();
-    annotTypesModel = new DefaultComboBoxModel();
+    annotTypesModel = new DefaultComboBoxModel<String>();
     if (types != null) {
-      annotTypesModel = new DefaultComboBoxModel(types.toArray());
+      annotTypesModel = new DefaultComboBoxModel<String>(types.toArray(new String[types.size()]));
     }
     annotTypes.setModel(annotTypesModel);
     annotTypes.updateUI();
@@ -1032,7 +1032,7 @@ public class CorefEditor
     // see if this setName available in the annotSets
     boolean found = false;
     for (int i = 0; i < annotSets.getModel().getSize(); i++) {
-      if ( ( (String) annotSets.getModel().getElementAt(i)).equals(setName)) {
+      if ( annotSets.getModel().getElementAt(i).equals(setName)) {
         found = true;
         break;
       }
@@ -1070,7 +1070,7 @@ public class CorefEditor
     // see if this setName available in the annotSets
     boolean found = false;
     for (int i = 0; i < annotSets.getModel().getSize(); i++) {
-      if ( ( (String) annotSets.getModel().getElementAt(i)).equals(setName)) {
+      if ( annotSets.getModel().getElementAt(i).equals(setName)) {
         found = true;
         break;
       }
@@ -1388,11 +1388,11 @@ public class CorefEditor
     String field = "";
     JButton add = new JButton("OK");
     JButton cancel = new JButton("Cancel");
-    JComboBox list = new JComboBox();
+    JComboBox<String> list = new JComboBox<String>();
     JPanel mainPanel = new JPanel();
     JPopupMenu popup1 = new JPopupMenu();
     ListEditor listEditor = null;
-    ComboBoxModel model = new DefaultComboBoxModel();
+    ComboBoxModel<String> model = new DefaultComboBoxModel<String>();
     boolean firstTime = true;
 
     public NewCorefAction() {
@@ -1482,10 +1482,10 @@ public class CorefEditor
         }
         else {
           popupWindow.setVisible(false);
-          ArrayList<String> set = new ArrayList<String>(currentSelections.keySet());
+          List<String> set = new ArrayList<String>(currentSelections.keySet());
           Collections.sort(set);
           set.add(0, "[New Chain]");
-          model = new DefaultComboBoxModel(set.toArray());
+          model = new DefaultComboBoxModel<String>(set.toArray(new String[set.size()]));
           list.setModel(model);
           listEditor.setItem("");
           label.setText("Add \"" + getString(annotToConsiderForChain) +
@@ -1630,7 +1630,7 @@ public class CorefEditor
             myList.add(currString);
           }
         }
-        ComboBoxModel model = new DefaultComboBoxModel(myList);
+        ComboBoxModel<String> model = new DefaultComboBoxModel<String>(myList);
         list.setModel(model);
         myField.setText(startWith);
         field = myField.getText();

@@ -2312,7 +2312,7 @@ public class AnnotationSetsView extends AbstractDocumentView
        && (event.getModifiers() & InputEvent.BUTTON1_MASK)
                                != InputEvent.BUTTON1_MASK) {
         // shows a confirm dialog to delete types and sets
-        JList list = new JList(resourcesToDelete);
+        JList<String> list = new JList<String>(resourcesToDelete);
         list.setVisibleRowCount(Math.min(resourcesToDelete.size()+1, 10));
         int choice = JOptionPane.showOptionDialog(MainFrame.getInstance(), new
           Object[]{"Are you sure you want to delete the following annotations?",

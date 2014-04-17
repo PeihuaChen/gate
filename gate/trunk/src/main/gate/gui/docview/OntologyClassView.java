@@ -166,7 +166,7 @@ public class OntologyClassView extends AbstractDocumentView
     gbc.fill = GridBagConstraints.BOTH;
     gbc.anchor = GridBagConstraints.NORTHWEST;
     mainPanel.add(new JScrollPane(treesPanel), gbc);
-    setComboBox = new JComboBox();
+    setComboBox = new JComboBox<String>();
     setComboBox.setEditable(true);
     setComboBox.setToolTipText(
       "Annotation set where to load/save the annotations");
@@ -182,14 +182,14 @@ public class OntologyClassView extends AbstractDocumentView
     annotationSets.add("");
     annotationSets.addAll(document.getAnnotationSetNames());
     Collections.sort(annotationSets);
-    setComboBox.setModel(new DefaultComboBoxModel(
+    setComboBox.setModel(new DefaultComboBoxModel<String>(
       new Vector<String>(annotationSets)));
 
     if (isOntologyLoaded) {
       // find the first set that contains annotations used before by this view
       selectedSet = "";
       for (int i = 0; i < setComboBox.getItemCount(); i++) {
-        String setName = (String) setComboBox.getItemAt(i);
+        String setName = setComboBox.getItemAt(i);
         if (setColorTreeNodesWhenInstancesFound(setName)) {
           selectedSet = setName;
           break;
@@ -312,7 +312,7 @@ public class OntologyClassView extends AbstractDocumentView
         // find the first set that contains annotations used before by this view
         selectedSet = "";
         for (int i = 0; i < setComboBox.getItemCount(); i++) {
-          String setName = (String) setComboBox.getItemAt(i);
+          String setName = setComboBox.getItemAt(i);
           if (setColorTreeNodesWhenInstancesFound(setName)) {
             selectedSet = setName;
             break;
@@ -1081,7 +1081,7 @@ public class OntologyClassView extends AbstractDocumentView
   protected JPanel mainPanel;
   protected JLabel messageLabel;
   protected JPanel treesPanel;
-  protected JComboBox setComboBox;
+  protected JComboBox<String> setComboBox;
 
   // local objects
   /** Class that has the lead selection in the focused ontology tree. */
