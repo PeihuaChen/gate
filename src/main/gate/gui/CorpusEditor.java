@@ -462,14 +462,14 @@ public class CorpusEditor extends AbstractVisualResource
   }
 
   class DocumentNameRenderer extends DefaultTableCellRenderer implements 
-      ListCellRenderer{
+      ListCellRenderer<String>{
     public DocumentNameRenderer(){
       super();
       setIcon(MainFrame.getIcon("document"));
     }
     
     @Override
-    public Component getListCellRendererComponent(JList list, Object value,
+    public Component getListCellRendererComponent(JList<? extends String> list, String value,
             int index, boolean isSelected, boolean cellHasFocus) {
       // prepare the renderer
 
@@ -625,7 +625,7 @@ public class CorpusEditor extends AbstractVisualResource
           docNames.add(loadedDocument.getName());
         }
       }
-      JList docList = new JList(docNames);
+      JList<String> docList = new JList<String>(docNames);
       docList.getSelectionModel().setSelectionInterval(0, docNames.size()-1);
       docList.setCellRenderer(renderer);
       final JOptionPane optionPane = new JOptionPane(new JScrollPane(docList),
