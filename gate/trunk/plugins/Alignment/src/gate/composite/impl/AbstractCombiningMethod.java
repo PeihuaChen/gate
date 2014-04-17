@@ -153,9 +153,9 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
               : doc.getAnnotations(od.getAsName());
       String type = od.getOriginalAnnotation().getType();
       gate.FeatureMap f = od.getOriginalAnnotation().getFeatures();
-      Integer id;
+      Integer id = od.getOriginalAnnotation().getId();
       try {
-        id = aSet.add(new Long(od.getNewStartOffset()), new Long(od
+        aSet.add(id,new Long(od.getNewStartOffset()), new Long(od
                 .getNewEndOffset()), type, f);
         od.setNewAnnotation(aSet.get(id));
       }
