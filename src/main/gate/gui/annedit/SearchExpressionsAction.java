@@ -118,7 +118,7 @@ public class SearchExpressionsAction extends AbstractAction {
     modifiedTextField.setText(sourceTextField.getText());
     JPanel vspace1 = new JPanel();
     vspace1.setSize(0, 5);
-    final JList list1 = new JList(values1);
+    final JList<String> list1 = new JList<String>(values1);
     list1.setVisibleRowCount(Math.min(10, values1.length));
     list1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     JScrollPane jsp1 = new JScrollPane(list1);
@@ -126,7 +126,7 @@ public class SearchExpressionsAction extends AbstractAction {
     b1.setEnabled(false);
     JPanel vspace2 = new JPanel();
     vspace2.setSize(0, 5);
-    final JList list2 = new JList(values2);
+    final JList<String> list2 = new JList<String>(values2);
     list2.setVisibleRowCount(Math.min(10, values2.length));
     list2.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     JScrollPane jsp2 = new JScrollPane(list2);
@@ -134,7 +134,7 @@ public class SearchExpressionsAction extends AbstractAction {
     b2.setEnabled(false);
     JPanel vspace3 = new JPanel();
     vspace3.setSize(0, 5);
-    final JList list3 = new JList(values3);
+    final JList<String> list3 = new JList<String>(values3);
     list3.setVisibleRowCount(Math.min(10, values3.length));
     list3.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     JScrollPane jsp3 = new JScrollPane(list3);

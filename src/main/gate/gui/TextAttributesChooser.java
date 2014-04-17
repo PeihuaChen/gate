@@ -33,8 +33,8 @@ import gate.util.Out;
 @SuppressWarnings("serial")
 public class TextAttributesChooser extends JDialog {
 
-  JComboBox fontFamilyCombo;
-  JComboBox fontSizeCombo;
+  JComboBox<String> fontFamilyCombo;
+  JComboBox<String> fontSizeCombo;
   JCheckBox boldChk;
   JCheckBox italicChk;
   JCheckBox underlineChk;
@@ -109,12 +109,12 @@ public class TextAttributesChooser extends JDialog {
     //Font stuff
     Box fontBox = Box.createVerticalBox();
 
-    fontFamilyCombo = new JComboBox(
+    fontFamilyCombo = new JComboBox<String>(
                         GraphicsEnvironment.getLocalGraphicsEnvironment().
                         getAvailableFontFamilyNames()
                       );
     fontFamilyCombo.setSelectedItem(StyleConstants.getFontFamily(currentStyle));
-    fontSizeCombo = new JComboBox(new String[]{"6", "8", "10", "12", "14", "16",
+    fontSizeCombo = new JComboBox<String>(new String[]{"6", "8", "10", "12", "14", "16",
                                               "18", "20", "22", "24", "26"});
     fontSizeCombo.setSelectedItem(new Integer(
                         StyleConstants.getFontSize(currentStyle)).toString());
