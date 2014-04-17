@@ -11,7 +11,12 @@ Rule: TermCandidate
    double threshold = 50.0; // fallback
    if (ctx.getPRFeatures().containsKey("threshold")) {
       threshold = Double.parseDouble(ctx.getPRFeatures().get("threshold").toString());
-   }     
+   }
+
+   // Note that this reads a feature called 'threshold' on the PR itself.
+   // To edit the feature in the GATE GUI, show the termCandidateThreshold PR
+   // & look in the lower left corner.  If the feature is missing,
+   // the fallback given above is used.
 
    if (oldf.containsKey("tfIdfAug") &&
        (((Double) oldf.get("tfIdfAug")) > threshold) )   {
