@@ -50,13 +50,13 @@ public class CreateIndexDialog extends JDialog {
 
     protected JPanel panel1 = new JPanel();
     protected JLabel indexTypeLabel = new JLabel();
-    protected JComboBox jComboIType = new JComboBox();
+    protected JComboBox<String> jComboIType = new JComboBox<String>();
     protected JLabel locationLabel = new JLabel();
     protected JTextField locationTextField = new JTextField();
     protected JButton browse = new JButton();
     protected JLabel featureLable = new JLabel();
     protected JTextField featureTextField = new JTextField();
-    protected JList jList1 = null;
+    protected JList<String> jList1 = null;
     protected JScrollPane scrollPane = new JScrollPane();
     protected JButton addButton = new JButton();
     protected JCheckBox content = new JCheckBox();
@@ -96,7 +96,7 @@ public class CreateIndexDialog extends JDialog {
         jComboIType.setSelectedItem("Lucene");
 
 
-        jList1 = new JList(fields);
+        jList1 = new JList<String>(fields);
         scrollPane.getViewport().setView(jList1);
 
         this.getContentPane().add(panel1, BorderLayout.NORTH);

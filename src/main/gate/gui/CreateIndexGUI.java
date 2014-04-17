@@ -68,7 +68,7 @@ public class CreateIndexGUI extends JPanel {
     add(new JLabel("IR Engine type:"), constraints);
     constraints.gridwidth = 4;
 
-    irEngineCombo = new JComboBox();
+    irEngineCombo = new JComboBox<String>();
     add(irEngineCombo, constraints);
 
     //second line
@@ -122,7 +122,7 @@ public class CreateIndexGUI extends JPanel {
     while(namesIter.hasNext()){
       names[i++] = namesIter.next();
     }
-    irEngineCombo.setModel(new DefaultComboBoxModel(names));
+    irEngineCombo.setModel(new DefaultComboBoxModel<String>(names));
     if(oldIREngineName != null && engineByName.containsKey(oldIREngineName)){
       irEngineCombo.setSelectedItem(oldIREngineName);
     }else if(engineByName.size() > 0) irEngineCombo.setSelectedIndex(0);
@@ -199,7 +199,7 @@ public class CreateIndexGUI extends JPanel {
   /**
    * Combobox for selecting IR engine.
    */
-  JComboBox irEngineCombo;
+  JComboBox<String> irEngineCombo;
 
   /**
    * Text field for the location of the index.
