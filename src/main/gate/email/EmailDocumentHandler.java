@@ -32,8 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.junit.Assert;
-
 /**
   * This class implements the behaviour of the Email reader
   * It takes the Gate Document representing a list with e-mails and
