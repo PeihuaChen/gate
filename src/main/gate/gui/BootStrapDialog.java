@@ -52,7 +52,7 @@ public class BootStrapDialog extends JDialog{
   JTextField packageNameTextField = null;
 
   JLabel     resourceTypesLabel = null;
-  JComboBox  resourceTypesComboBox = null;
+  JComboBox<String>  resourceTypesComboBox = null;
 
   JLabel     classNameLabel = null;
   JTextField classNameTextField = null;
@@ -200,7 +200,7 @@ public class BootStrapDialog extends JDialog{
     resourceTypesLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
     Vector<String> comboCont = new Vector<String>(resourceTypes.keySet());
     Collections.sort(comboCont);
-    resourceTypesComboBox = new JComboBox(comboCont);
+    resourceTypesComboBox = new JComboBox<String>(comboCont);
     resourceTypesComboBox.setEditable(false);
     resourceTypesComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
 
