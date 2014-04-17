@@ -131,16 +131,15 @@ public class CompositeDocumentImpl extends DocumentImpl implements
         if(enOffset == -1) continue;
         Annotation originalAnnot = null;
         try {
-
+          Integer id = annot.getId();
           if(defaultAS) {
-            Integer id =
-              aDoc.getAnnotations().add(new Long(stOffset), new Long(enOffset),
+            
+              aDoc.getAnnotations().add(id, new Long(stOffset), new Long(enOffset),
                 annot.getType(), features);
             originalAnnot = aDoc.getAnnotations().get(id);
           }
           else {
-            Integer id =
-              aDoc.getAnnotations(as.getName()).add(new Long(stOffset),
+              aDoc.getAnnotations(as.getName()).add(id,new Long(stOffset),
                 new Long(enOffset), annot.getType(), features);
             originalAnnot = aDoc.getAnnotations(as.getName()).get(id);
           }

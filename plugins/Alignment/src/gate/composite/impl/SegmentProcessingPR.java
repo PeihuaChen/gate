@@ -16,6 +16,7 @@ import gate.composite.CombiningMethodException;
 import gate.composite.CompositeDocument;
 import gate.compound.CompoundDocument;
 import gate.compound.impl.CompoundDocumentImpl;
+import gate.corpora.DocumentImpl;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
@@ -183,6 +184,15 @@ public class SegmentProcessingPR extends AbstractLanguageAnalyser implements
           }
           compositeDoc = combiningMethodInst.combine(compoundDoc, map);
           compositeDoc.setName(nameForCompositeDoc);
+          
+          // try and make sure any annotations created in the segment will have
+          // IDs that are valid in the original document
+          if(oldDoc instanceof DocumentImpl) {
+            ((CompositeDocumentImpl)compositeDoc)
+                .setNextAnnotationId(((DocumentImpl)oldDoc)
+                    .peakAtNextAnnotationId());
+          }
+          
           compoundDoc.addDocument(nameForCompositeDoc, compositeDoc);
           // change focus to composite document
           compoundDoc.setCurrentDocument(nameForCompositeDoc);
