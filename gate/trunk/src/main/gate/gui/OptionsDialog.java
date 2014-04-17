@@ -106,7 +106,7 @@ public class OptionsDialog extends JDialog {
         e.printStackTrace();
       }
     }
-    lnfCombo = new JComboBox(supportedLNFs.toArray());
+    lnfCombo = new JComboBox<LNFData>(supportedLNFs.toArray(new LNFData[supportedLNFs.size()]));
     lnfCombo.setSelectedItem(currentLNF);
     lnfCombo.setToolTipText("Be aware that only 'Metal' is fully tested.");
 
@@ -191,7 +191,7 @@ public class OptionsDialog extends JDialog {
       .DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME) )
       addSpaceOnMarkupUnpackChk.setSelected(false);
 
-    browserComboBox = new JComboBox(new String[] {
+    browserComboBox = new JComboBox<String>(new String[] {
       "Default browser", "Java", "Custom"});
     browserComboBox.setPrototypeDisplayValue("Default browser");
     browserComboBox.setToolTipText(
@@ -692,12 +692,12 @@ public class OptionsDialog extends JDialog {
   /**
    * The combobox for the look and feel selection
    */
-  protected JComboBox lnfCombo;
+  protected JComboBox<LNFData> lnfCombo;
 
   /**
    * List of browsers. Update the browserCommandLineTextField.
    */
-  protected JComboBox browserComboBox;
+  protected JComboBox<String> browserComboBox;
 
   /**
    * Browser command line.
