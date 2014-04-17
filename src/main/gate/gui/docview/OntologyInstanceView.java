@@ -624,14 +624,14 @@ public class OntologyInstanceView extends AbstractDocumentView {
 
   protected class PropertyValueCellEditor extends AbstractCellEditor
       implements TableCellEditor, ActionListener {
-    private JComboBox valueComboBox;
+    private JComboBox<String> valueComboBox;
     private Collator comparator;
     private String oldValue;
     private Map<String, OInstance> nameInstanceMap;
     private Pattern instanceLabelsPattern;
 
     private PropertyValueCellEditor() {
-      valueComboBox = new JComboBox();
+      valueComboBox = new JComboBox<String>();
       valueComboBox.setMaximumRowCount(10);
       valueComboBox.addActionListener(this);
       comparator = Collator.getInstance();
@@ -669,7 +669,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
           nameInstanceMap.put(instance.getName(), instance);
         }
       }
-      DefaultComboBoxModel dcbm = new DefaultComboBoxModel(ts.toArray());
+      DefaultComboBoxModel<String> dcbm = new DefaultComboBoxModel<String>(ts.toArray(new String[ts.size()]));
       valueComboBox.setModel(dcbm);
       valueComboBox.setSelectedItem(propertyTable.getValueAt(row, column));
       return valueComboBox;
