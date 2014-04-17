@@ -250,7 +250,7 @@
   <!-- This target compiles all the classes -->
   <target name="compile" depends="prepare, depend, svg2java" description="compile the source ">
     <!-- Compile the java code from ${srcDir} into ${buildDir} -->
-    <javac srcdir="${srcDir}" destdir="${outputDir}" source="1.6" target="1.6" encoding="UTF-8" debug="true" deprecation="${deprecation}" debuglevel="lines,source" includes="gate/**,com/**,hepple/**" classpathref="build.class.path">
+    <javac srcdir="${srcDir}" destdir="${outputDir}" source="1.7" target="1.7" encoding="UTF-8" debug="true" deprecation="${deprecation}" debuglevel="lines,source" includes="gate/**,com/**,hepple/**" classpathref="build.class.path">
       <compilerarg value="-Xmaxwarns" />
       <compilerarg value="${gate.compile.maxwarnings}" />
       <compilerarg value="-Xlint:all" />
@@ -260,7 +260,7 @@
   <!-- This target compiles all the classes including debug information -->
   <target name="compile_debug" depends="prepare, depend" description="compile the source ">
     <!-- Compile the java code from ${srcDir} into ${buildDir} -->
-    <javac srcdir="${srcDir}" destdir="${outputDir}" encoding="UTF-8" source="1.6" target="1.6" debug="true" deprecation="${deprecation}" includes="gate/**,com/**,hepple/**" classpathref="build.class.path" />
+    <javac srcdir="${srcDir}" destdir="${outputDir}" encoding="UTF-8" source="1.7" target="1.7" debug="true" deprecation="${deprecation}" includes="gate/**,com/**,hepple/**" classpathref="build.class.path" />
   </target>
 
 
@@ -449,9 +449,9 @@
   </target>
 
   <target name="javadoc.core" depends="java2html.taskdef">
-    <javadoc access="protected" destdir="${docDir}/javadoc" classpathref="run.class.path" Encoding="UTF-8" Use="yes" Windowtitle="GATE JavaDoc" docencoding="UTF-8" charset="UTF-8" source="1.6" useexternalfile="yes" breakiterator="true" linksource="yes" >
+    <javadoc access="protected" destdir="${docDir}/javadoc" classpathref="run.class.path" Encoding="UTF-8" Use="yes" Windowtitle="GATE JavaDoc" docencoding="UTF-8" charset="UTF-8" source="1.7" useexternalfile="yes" breakiterator="true" linksource="yes" >
       <fileset dir="${srcDir}" includes="**/*.java" excludes="gate/resources/**" />
-      <link href="http://docs.oracle.com/javase/6/docs/api/" />
+      <link href="http://docs.oracle.com/javase/7/docs/api/" />
     </javadoc>
     <!-- Now replace the ugly Java-html files with a better version -->
     <delete dir="${docDir}/javadoc/src-html" />
@@ -460,7 +460,7 @@
 
   <!-- Make documentation - internal -->
   <target name="internaljavadoc" depends="java2html.taskdef">
-    <javadoc access="private" destdir="${docDir}/javadoc/internal" classpathref="run.class.path" Encoding="UTF-8" Use="yes" Windowtitle="GATE JavaDoc (including private members)" link="http://docs.oracle.com/javase/6/docs/api/" docencoding="UTF-8" charset="UTF-8" source="1.6" useexternalfile="yes" breakiterator="true" linksource="yes" >
+    <javadoc access="private" destdir="${docDir}/javadoc/internal" classpathref="run.class.path" Encoding="UTF-8" Use="yes" Windowtitle="GATE JavaDoc (including private members)" link="http://docs.oracle.com/javase/7/docs/api/" docencoding="UTF-8" charset="UTF-8" source="1.7" useexternalfile="yes" breakiterator="true" linksource="yes" >
       <fileset dir="${srcDir}" includes="**/*.java" excludes="gate/resources/**" />
     </javadoc>
     <delete dir="${docDir}/javadoc/internal/src-html" />
@@ -503,7 +503,7 @@
 
   <target name="prepare.tests" depends="jar">
     <mkdir dir="${tests.outputDir}"/>
-    <javac srcdir="${tests.srcDir}" destdir="${tests.outputDir}" source="1.6" target="1.6" encoding="UTF-8" debug="true" deprecation="${deprecation}" debuglevel="lines,source" classpathref="run.class.path">
+    <javac srcdir="${tests.srcDir}" destdir="${tests.outputDir}" source="1.7" target="1.7" encoding="UTF-8" debug="true" deprecation="${deprecation}" debuglevel="lines,source" classpathref="run.class.path">
       <compilerarg value="-Xmaxwarns" />
       <compilerarg value="${gate.compile.maxwarnings}" />
     </javac>
