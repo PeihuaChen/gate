@@ -289,14 +289,6 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- required for indexing datastores (not used by ANNIC) -->
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-core</artifactId>
-            <version>3.5.0</version>
-            <scope>compile</scope>
-        </dependency>
-
         <!-- required for the new controller metadata viewer -->
         <dependency>
             <groupId>org.xhtmlrenderer</groupId>
