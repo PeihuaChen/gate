@@ -67,6 +67,7 @@ def termbank2 = Factory.createResource(&quot;gate.termraider.bank.HyponymyTermba
 eachDocument {
     augTfIdfCopier(termbank:termbank1);
     kyotoCopier(termbank:termbank2);
+    termCandidateThreshold();
 }
 </controlScript>
     <prList class="gate.util.persistence.CollectionPersistence">
@@ -97,12 +98,12 @@ eachDocument {
                 <null/>
               </entry>
               <entry>
-                <string>setsToRemove</string>
-                <null/>
-              </entry>
-              <entry>
                 <string>keepOriginalMarkupsAS</string>
                 <boolean>true</boolean>
+              </entry>
+              <entry>
+                <string>setsToRemove</string>
+                <null/>
               </entry>
             </localMap>
           </runtimeParams>
@@ -141,14 +142,14 @@ eachDocument {
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>encoding</string>
-                <string>UTF-8</string>
-              </entry>
-              <entry>
                 <string>rulesURL</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
                   <urlString>$relpath$../../ANNIE/resources/tokeniser/DefaultTokeniser.rules</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+              <entry>
+                <string>encoding</string>
+                <string>UTF-8</string>
               </entry>
             </localMap>
           </initParams>
@@ -181,14 +182,14 @@ eachDocument {
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>encoding</string>
-                <string>UTF-8</string>
-              </entry>
-              <entry>
                 <string>externalSplitListURL</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
                   <urlString>$relpath$../../ANNIE/resources/regex-splitter/external-split-patterns.txt</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+              <entry>
+                <string>encoding</string>
+                <string>UTF-8</string>
               </entry>
               <entry>
                 <string>nonSplitListURL</string>
@@ -241,22 +242,22 @@ eachDocument {
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>gazetteerFeatureSeparator</string>
-                <null/>
+                <string>caseSensitive</string>
+                <boolean>true</boolean>
               </entry>
               <entry>
                 <string>encoding</string>
                 <string>UTF-8</string>
               </entry>
               <entry>
+                <string>gazetteerFeatureSeparator</string>
+                <null/>
+              </entry>
+              <entry>
                 <string>listsURL</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
                   <urlString>$relpath$../../ANNIE/resources/gazetteer/lists.def</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
-              </entry>
-              <entry>
-                <string>caseSensitive</string>
-                <boolean>true</boolean>
               </entry>
             </localMap>
           </initParams>
@@ -282,12 +283,12 @@ eachDocument {
                 <string>Token</string>
               </entry>
               <entry>
-                <string>inputASName</string>
-                <null/>
-              </entry>
-              <entry>
                 <string>failOnMissingInputAnnotations</string>
                 <boolean>false</boolean>
+              </entry>
+              <entry>
+                <string>inputASName</string>
+                <null/>
               </entry>
               <entry>
                 <string>outputASName</string>
@@ -313,14 +314,14 @@ eachDocument {
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>encoding</string>
-                <null/>
-              </entry>
-              <entry>
                 <string>rulesURL</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
                   <urlString>$relpath$../../ANNIE/resources/heptag/ruleset</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+              <entry>
+                <string>encoding</string>
+                <null/>
               </entry>
               <entry>
                 <string>lexiconURL</string>
@@ -352,6 +353,10 @@ eachDocument {
                 <null/>
               </entry>
               <entry>
+                <string>rootFeatureName</string>
+                <string>root</string>
+              </entry>
+              <entry>
                 <string>annotationSetName</string>
                 <null/>
               </entry>
@@ -362,10 +367,6 @@ eachDocument {
               <entry>
                 <string>affixFeatureName</string>
                 <string>affix</string>
-              </entry>
-              <entry>
-                <string>rootFeatureName</string>
-                <string>root</string>
               </entry>
             </localMap>
           </runtimeParams>
@@ -410,6 +411,10 @@ eachDocument {
               <entry>
                 <string>ontology</string>
                 <null/>
+              </entry>
+              <entry>
+                <string>enableDebugging</string>
+                <boolean>false</boolean>
               </entry>
               <entry>
                 <string>inputASName</string>
@@ -501,12 +506,12 @@ eachDocument {
                 <boolean>true</boolean>
               </entry>
               <entry>
-                <string>encoding</string>
-                <string>UTF-8</string>
-              </entry>
-              <entry>
                 <string>caseSensitive</string>
                 <boolean>false</boolean>
+              </entry>
+              <entry>
+                <string>encoding</string>
+                <string>UTF-8</string>
               </entry>
               <entry>
                 <string>highPrecisionOrgs</string>
@@ -548,6 +553,10 @@ eachDocument {
                 <null/>
               </entry>
               <entry>
+                <string>enableDebugging</string>
+                <boolean>false</boolean>
+              </entry>
+              <entry>
                 <string>inputASName</string>
                 <null/>
               </entry>
@@ -563,18 +572,18 @@ eachDocument {
                 <string>UTF-8</string>
               </entry>
               <entry>
+                <string>grammarURL</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../resources/jape/select-tokens-en.jape</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+              <entry>
                 <string>annotationAccessors</string>
                 <null/>
               </entry>
               <entry>
                 <string>operators</string>
                 <null/>
-              </entry>
-              <entry>
-                <string>grammarURL</string>
-                <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$../resources/jape/select-tokens-en.jape</urlString>
-                </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
             </localMap>
           </initParams>
@@ -600,6 +609,10 @@ eachDocument {
                 <null/>
               </entry>
               <entry>
+                <string>enableDebugging</string>
+                <boolean>false</boolean>
+              </entry>
+              <entry>
                 <string>inputASName</string>
                 <null/>
               </entry>
@@ -615,18 +628,18 @@ eachDocument {
                 <string>UTF-8</string>
               </entry>
               <entry>
+                <string>grammarURL</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../resources/jape/multiword-main-en.jape</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+              <entry>
                 <string>annotationAccessors</string>
                 <null/>
               </entry>
               <entry>
                 <string>operators</string>
                 <null/>
-              </entry>
-              <entry>
-                <string>grammarURL</string>
-                <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$../resources/jape/multiword-main-en.jape</urlString>
-                </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
             </localMap>
           </initParams>
@@ -653,7 +666,10 @@ eachDocument {
               </entry>
               <entry>
                 <string>scriptParams</string>
-                <null/>
+                <gate.util.persistence.MapPersistence>
+                  <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+                  <localMap/>
+                </gate.util.persistence.MapPersistence>
               </entry>
               <entry>
                 <string>inputASName</string>
@@ -702,6 +718,10 @@ eachDocument {
               <entry>
                 <string>ontology</string>
                 <null/>
+              </entry>
+              <entry>
+                <string>enableDebugging</string>
+                <boolean>false</boolean>
               </entry>
               <entry>
                 <string>inputASName</string>
@@ -842,6 +862,75 @@ eachDocument {
             <localMap/>
           </features>
         </gate.util.persistence.PRPersistence>
+        <gate.util.persistence.LanguageAnalyserPersistence>
+          <runtimeParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>outputASName</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>document</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>corpus</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>ontology</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>enableDebugging</string>
+                <boolean>false</boolean>
+              </entry>
+              <entry>
+                <string>inputASName</string>
+                <null/>
+              </entry>
+            </localMap>
+          </runtimeParams>
+          <resourceType>gate.creole.Transducer</resourceType>
+          <resourceName>termCandidateThreshold</resourceName>
+          <initParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>encoding</string>
+                <string>UTF-8</string>
+              </entry>
+              <entry>
+                <string>annotationAccessors</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>operators</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>grammarURL</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../resources/jape/term-candidate-threshold.jape</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+              <entry>
+                <string>binaryGrammarURL</string>
+                <null/>
+              </entry>
+            </localMap>
+          </initParams>
+          <features class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>threshold</string>
+                <string>45.0</string>
+              </entry>
+            </localMap>
+          </features>
+        </gate.util.persistence.LanguageAnalyserPersistence>
       </localList>
       <collectionType>java.util.ArrayList</collectionType>
     </prList>
