@@ -137,7 +137,7 @@ public class HashRegister implements Serializable {
 
       addPosition = - addPosition - 1;
       if (oldSubReg[oldSubReg.length-1] != null) {
-        newSubReg = new Comparable[oldSubReg.length + subRegIncrement];
+        newSubReg = new Comparable<?>[oldSubReg.length + subRegIncrement];
         for (int i = 0; i < oldSubReg.length; i++) {
           if (i < addPosition)
             newSubReg[i] = oldSubReg[i];
@@ -180,7 +180,7 @@ public class HashRegister implements Serializable {
       }
       Object[] newSubReg;
       if (element instanceof Comparable) {
-        newSubReg = new Comparable[1 + subRegIncrement];
+        newSubReg = new Comparable<?>[1 + subRegIncrement];
         if (nsc.compare((Comparable<?>) elementHolder,
                 (Comparable<?>) element) < 0) {
           newSubReg[0] = elementHolder;
@@ -256,14 +256,14 @@ public class HashRegister implements Serializable {
           i--;
         if (eList[0] instanceof Comparable)
           return Arrays.asList(
-                  eList).subList(0, i).toArray(new Comparable[0]);
+                  eList).subList(0, i).toArray(new Comparable<?>[0]);
         else
           return Arrays.asList(
                   eList).subList(0, i).toArray();
       }
       else {  // getPoint.elementHolder contains single object
         if (elementHolder instanceof Comparable)
-          return new Comparable[]{(Comparable<?>) elementHolder};
+          return new Comparable<?>[]{(Comparable<?>) elementHolder};
         else
           return new Object[]{elementHolder};
       }
