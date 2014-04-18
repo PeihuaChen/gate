@@ -48,7 +48,7 @@ public class SimpleSet {
 	/**
 	 * The constructor. Allocates the whole needed space.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked","rawtypes"})
 	public SimpleSet(int documentLength) {
 		annotations = new ArrayList[documentLength];
 		next = new int[documentLength];
