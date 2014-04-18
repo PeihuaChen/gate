@@ -231,8 +231,12 @@ public class STreeNode extends DefaultMutableTreeNode {
       for (int i=0; i < newAnnots.size(); i++) {
         Annotation newAnnot = newAnnots.get(i);
         
+        FeatureMap features = newAnnot.getFeatures();
+        
+        Object value = features.get(SyntaxTreeViewer.NODE_CONSISTS_FEATURE_NAME);
+        
         @SuppressWarnings("unchecked")
-        List<Integer> children = (List<Integer>)(newAnnot.getFeatures().get(SyntaxTreeViewer.NODE_CONSISTS_FEATURE_NAME));
+        List<Integer> children = (List<Integer>)value;
         
         if (children == null || children.size()== 0) {
           continue;
