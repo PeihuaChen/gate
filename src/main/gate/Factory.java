@@ -825,7 +825,7 @@ public abstract class Factory {
   public static ParseCpsl newJapeParser(java.io.Reader stream, Map<String,Object> existingMacros) {
       try {
           Constructor<? extends ParseCpsl> c = japeParserClass.getConstructor
-              (new Class[] {Reader.class, Map.class});
+              (new Class<?>[] {Reader.class, Map.class});
           return c.newInstance(new Object[] {stream, existingMacros});
       } catch (NoSuchMethodException e) { // Shouldn't happen
           throw new RuntimeException(e);

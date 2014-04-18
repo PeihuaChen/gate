@@ -159,7 +159,7 @@ public class GazetteerEditor extends AbstractVisualResource
 
     JPanel definitionPanel = new JPanel(new BorderLayout());
     JPanel definitionTopPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    newListComboBox = new JComboBox();
+    newListComboBox = new JComboBox<String>();
     newListComboBox.setEditable(true);
     newListComboBox.setPrototypeDisplayValue("123456789012345");
     newListComboBox.setToolTipText(
@@ -840,7 +840,7 @@ public class GazetteerEditor extends AbstractVisualResource
         filenames[i++] = file.getName();
       }
       Arrays.sort(filenames, collator);
-      newListComboBox.setModel(new DefaultComboBoxModel(filenames));
+      newListComboBox.setModel(new DefaultComboBoxModel<String>(filenames));
       if (filenames.length == 0) {
         newListButton.setEnabled(false);
       }
@@ -1348,7 +1348,7 @@ public class GazetteerEditor extends AbstractVisualResource
   protected DefaultTableModel definitionTableModel;
   protected XJTable listTable;
   protected ListTableModel listTableModel;
-  protected JComboBox newListComboBox;
+  protected JComboBox<String> newListComboBox;
   protected JButton newListButton;
   protected JButton addColumnsButton;
   protected JTextField listEntryTextField;

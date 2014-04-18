@@ -652,8 +652,9 @@ public class LuceneDocument {
       }
     }
 
-    @SuppressWarnings("unchecked")
-    List<Token> toReturn[] = new ArrayList[unitOffsetsSet.size()];
+    
+    @SuppressWarnings({"cast","unchecked"})
+    List<Token> toReturn[] = (List<Token>[])new List[unitOffsetsSet.size()];
     Iterator<OffsetGroup> iter = unitOffsetsSet.iterator();
     int counter = 0;
     while(iter.hasNext()) {

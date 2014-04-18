@@ -59,7 +59,7 @@ public class DatatypePropertyAction extends AbstractAction implements
 
     gbc.gridy = 1;
     mainPanel.add(new JLabel("Data Type:"), gbc);
-    mainPanel.add(datatypesComboBox = new JComboBox(), gbc);
+    mainPanel.add(datatypesComboBox = new JComboBox<String>(), gbc);
     mainPanel.add(datatypesComboBox, gbc);
 
     gbc.gridy = 2;
@@ -67,7 +67,7 @@ public class DatatypePropertyAction extends AbstractAction implements
     mainPanel.add(propertyName = new JTextField(30), gbc);
     mainPanel.add(domainButton = new JButton("Domain"), gbc);
 
-    datatypesComboBox.setModel(new DefaultComboBoxModel(new String[] {
+    datatypesComboBox.setModel(new DefaultComboBoxModel<String>(new String[] {
         "http://www.w3.org/2001/XMLSchema#boolean",
         "http://www.w3.org/2001/XMLSchema#byte",
         "http://www.w3.org/2001/XMLSchema#date",
@@ -186,7 +186,7 @@ public class DatatypePropertyAction extends AbstractAction implements
 
   protected JPanel mainPanel;
   protected JTextField nameSpace;
-  protected JComboBox datatypesComboBox;
+  protected JComboBox<String> datatypesComboBox;
   protected JButton domainButton;
   protected JTextField propertyName;
   protected ValuesSelectionAction domainAction;

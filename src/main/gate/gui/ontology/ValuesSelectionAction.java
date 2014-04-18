@@ -25,15 +25,25 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import javax.swing.*;
+import java.util.List;
+
+import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.text.JTextComponent;
 
 public class ValuesSelectionAction {
   public ValuesSelectionAction() {
     list = null;
-    domainBox = new JComboBox();
+    domainBox = new JComboBox<String>();
     domainBox.setEditable(true);
-    list = new JList(new DefaultComboBoxModel());
+    list = new JList<String>(new DefaultComboBoxModel<String>());
     list.setVisibleRowCount(7);
     add = new JButton("Add");
     remove = new JButton("Remove");
@@ -49,7 +59,7 @@ public class ValuesSelectionAction {
                 .getText();
         if(s != null) {
           if(keyevent.getKeyCode() != KeyEvent.VK_ENTER) {
-            ArrayList<String> arraylist = new ArrayList<String>();
+            List<String> arraylist = new ArrayList<String>();
             for(int i = 0; i < ontologyClasses.length; i++) {
               String s1 = ontologyClasses[i];
               if(s1.toLowerCase().startsWith(s.toLowerCase())) {
@@ -57,8 +67,8 @@ public class ValuesSelectionAction {
               }
             }
             Collections.sort(arraylist);
-            DefaultComboBoxModel model =
-              new DefaultComboBoxModel(arraylist.toArray());
+            DefaultComboBoxModel<String> model =
+              new DefaultComboBoxModel<String>(arraylist.toArray(new String[arraylist.size()]));
             domainBox.setModel(model);
             if(!arraylist.isEmpty()) domainBox.showPopup();
           }
@@ -83,22 +93,22 @@ public class ValuesSelectionAction {
             return;
           }
         }
-        if(((DefaultComboBoxModel)list.getModel()).getIndexOf(s) != -1) {
+        if(((DefaultComboBoxModel<String>)list.getModel()).getIndexOf(s) != -1) {
           JOptionPane.showMessageDialog(MainFrame.getInstance(),
             "Already added!");
         }
         else {
-          ((DefaultComboBoxModel)list.getModel()).addElement(s);
+          ((DefaultComboBoxModel<String>)list.getModel()).addElement(s);
         }
       }
     });
     remove.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent actionevent) {
-        Object aobj[] = list.getSelectedValues();
-        if(aobj != null && aobj.length > 0) {
-          for(int i = 0; i < aobj.length; i++)
-            ((DefaultComboBoxModel)list.getModel()).removeElement(aobj[i]);
+        List<String> aobj = list.getSelectedValuesList();
+        if(aobj != null && aobj.size() > 0) {
+          for(int i = 0; i < aobj.size(); i++)
+            ((DefaultComboBoxModel<String>)list.getModel()).removeElement(aobj.get(i));
         }
       }
     });
@@ -120,8 +130,8 @@ public class ValuesSelectionAction {
           Icon icon) {
     this.ontologyClasses = inDropDownList;
     this.allowValueOutsideDropDownList = allowValueOutsideDropDownList;
-    domainBox.setModel(new DefaultComboBoxModel(inDropDownList));
-    list.setModel(new DefaultComboBoxModel(alreadySelected));
+    domainBox.setModel(new DefaultComboBoxModel<String>(inDropDownList));
+    list.setModel(new DefaultComboBoxModel<String>(alreadySelected));
     @SuppressWarnings("serial")
     JOptionPane pane = new JOptionPane(panel, JOptionPane.QUESTION_MESSAGE,
      JOptionPane.OK_CANCEL_OPTION, icon) {
@@ -137,15 +147,15 @@ public class ValuesSelectionAction {
   }
 
   public String[] getSelectedValues() {
-    DefaultComboBoxModel model = (DefaultComboBoxModel) list.getModel();
+    DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) list.getModel();
     String as[] = new String[model.getSize()];
     for(int i = 0; i < as.length; i++)
-      as[i] = (String) model.getElementAt(i);
+      as[i] = model.getElementAt(i);
     return as;
   }
 
-  protected JComboBox domainBox;
-  protected JList list;
+  protected JComboBox<String> domainBox;
+  protected JList<String> list;
   protected JButton add;
   protected JButton remove;
   protected JPanel panel;
