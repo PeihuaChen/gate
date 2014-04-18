@@ -1787,7 +1787,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       // Create an ApplicationListener proxy instance
       Object applicationListenerObject =
         Proxy.newProxyInstance(Gate.getClassLoader(),
-          new Class[]{eawtApplicationListenerInterface}, handler);
+          new Class<?>[]{eawtApplicationListenerInterface}, handler);
 
       // get hold of the Application object
       Method getApplicationMethod =
@@ -3328,7 +3328,7 @@ public class MainFrame extends JFrame implements ProgressListener,
                 dsLocation.getText());
     
             // we need to set Indexer
-            Class<?>[] consParam = new Class[1];
+            Class<?>[] consParam = new Class<?>[1];
             consParam[0] = URL.class;
             Constructor<?> constructor =
               Class.forName("gate.creole.annic.lucene.LuceneIndexer", true,
@@ -3398,7 +3398,7 @@ public class MainFrame extends JFrame implements ProgressListener,
                 .put(Constants.FEATURES_TO_INCLUDE, new ArrayList<String>());
             }
     
-            Class<?>[] params = new Class[2];
+            Class<?>[] params = new Class<?>[2];
             params[0] =
               Class.forName("gate.creole.annic.Indexer", true, Gate
                 .getClassLoader());
@@ -3411,7 +3411,7 @@ public class MainFrame extends JFrame implements ProgressListener,
               Class.forName("gate.creole.annic.lucene.LuceneSearcher", true,
                 Gate.getClassLoader()).getConstructor();
             Object searcher = searcherConst.newInstance();
-            Class<?>[] searchParams = new Class[1];
+            Class<?>[] searchParams = new Class<?>[1];
             searchParams[0] =
               Class.forName("gate.creole.annic.Searcher", true, Gate
                 .getClassLoader());
