@@ -14,11 +14,9 @@ import gate.creole.ontology.TransitiveProperty;
 import gate.gui.MainFrame;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -28,7 +26,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.Icon;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.ListCellRenderer;
 import javax.swing.text.JTextComponent;
 import javax.swing.tree.TreePath;
 
@@ -60,10 +68,9 @@ public class SearchAction extends AbstractAction {
     JPanel panel2 = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     panel1.add(new JLabel("Find what: "));
 
-    resourcesBox = new JComboBox();
+    resourcesBox = new JComboBox<OResource>();
     resourcesBox.setRenderer(new ComboRenderer());
-    resourcesBox
-            .setPrototypeDisplayValue("this is just an example, not a value. OK?");
+    resourcesBox.setPrototypeDisplayValue(new RDFPropertyPrototype("this is just an example, not a value. OK?"));
     
     resourcesBox.setEditable(true);
     resourcesBox.setEditable(true);
@@ -105,8 +112,8 @@ public class SearchAction extends AbstractAction {
                     List<OResource> setList = new ArrayList<OResource>(set);
                     Collections.sort(setList, new OntologyItemComparator());
 
-                    DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(
-                            setList.toArray());
+                    DefaultComboBoxModel<OResource> defaultcomboboxmodel = new DefaultComboBoxModel<OResource>(
+                            setList.toArray(new OResource[setList.size()]));
 
                     resourcesBox.setModel(defaultcomboboxmodel);
 
@@ -122,11 +129,10 @@ public class SearchAction extends AbstractAction {
               }
             });
     panel1.add(resourcesBox);
-    properties = new JComboBox();
+    properties = new JComboBox<RDFProperty>();
     properties.setRenderer(new ComboRenderer());
     properties.setEditable(true);
-    properties
-            .setPrototypeDisplayValue("this is just an example, not a value. OK?");
+    properties.setPrototypeDisplayValue(new RDFPropertyPrototype("this is just an example, not a value. OK?"));
     properties.getEditor().getEditorComponent().addKeyListener(
             new KeyAdapter() {
               @Override
@@ -135,7 +141,7 @@ public class SearchAction extends AbstractAction {
                         .getEditorComponent()).getText();
                 if(s != null) {
                   if(keyevent.getKeyCode() != KeyEvent.VK_ENTER) {
-                    ArrayList<OResource> arraylist = new ArrayList<OResource>();
+                    ArrayList<RDFProperty> arraylist = new ArrayList<RDFProperty>();
                     for(int i = 0; i < propertiesArray.length; i++) {
                       String s1 = propertiesArray[i].getName();
                       if(s1.toLowerCase().startsWith(s.toLowerCase())) {
@@ -143,8 +149,8 @@ public class SearchAction extends AbstractAction {
                       }
                     }
                     Collections.sort(arraylist, new OntologyItemComparator());
-                    DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(
-                            arraylist.toArray());
+                    DefaultComboBoxModel<RDFProperty> defaultcomboboxmodel = new DefaultComboBoxModel<RDFProperty>(
+                            arraylist.toArray(new RDFProperty[arraylist.size()]));
                     properties.setModel(defaultcomboboxmodel);
 
                     try {
@@ -182,8 +188,8 @@ public class SearchAction extends AbstractAction {
 
     resourcesArray = new OResource[resources.size()];
     resourcesArray = resources.toArray(resourcesArray);
-    DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(
-            resources.toArray());
+    DefaultComboBoxModel<OResource> defaultcomboboxmodel = new DefaultComboBoxModel<OResource>(
+            resources.toArray(new OResource[resources.size()]));
     resourcesBox.setModel(defaultcomboboxmodel);
 
     Set<RDFProperty> props = ontologyEditor.ontology.getRDFProperties();
@@ -194,8 +200,8 @@ public class SearchAction extends AbstractAction {
 
     propertiesArray = new RDFProperty[props.size()];
     propertiesArray = props.toArray(propertiesArray);
-    DefaultComboBoxModel defaultcomboboxmodel1 = new DefaultComboBoxModel(
-            propsList.toArray());
+    DefaultComboBoxModel<RDFProperty> defaultcomboboxmodel1 = new DefaultComboBoxModel<RDFProperty>(
+            propsList.toArray(new RDFProperty[propsList.size()]));
     properties.setModel(defaultcomboboxmodel1);
 
     resources = null;
@@ -237,7 +243,7 @@ public class SearchAction extends AbstractAction {
    * Box to show the filtered resources based on the user's input in the
    * find what box.
    */
-  protected JComboBox resourcesBox;
+  protected JComboBox<OResource> resourcesBox;
 
   /**
    * main guiPanel that holds the search gui components.
@@ -266,7 +272,7 @@ public class SearchAction extends AbstractAction {
   /**
    * combobox that holds the filtered properties based on user's input.
    */
-  protected JComboBox properties;
+  protected JComboBox<RDFProperty> properties;
 
   /**
    * Indicates if the search function should search for the find what
@@ -280,7 +286,7 @@ public class SearchAction extends AbstractAction {
    * @author Niraj Aswani
    * @version 1.0
    */
-  public class ComboRenderer extends JPanel implements ListCellRenderer {
+  public class ComboRenderer extends JPanel implements ListCellRenderer<OResource> {
 
     /**
      * Class label is shown using this label
@@ -315,17 +321,17 @@ public class SearchAction extends AbstractAction {
      * Renderer method
      */
     @Override
-    public Component getListCellRendererComponent(JList list, Object value,
+    public Component getListCellRendererComponent(JList<? extends OResource> list, OResource value,
         int row, boolean isSelected, boolean hasFocus) {
 
      
-      if (!(value instanceof OResource)) {
+      /*if (!(value instanceof OResource)) {
         label.setBackground(Color.white);
         return this;
-      }
+      }*/
       
       javax.swing.Icon icon = null;
-      String conceptName = ((OResource) value).getName();
+      String conceptName = value.getName();
       iconLabel.setVisible(true);
       if(value instanceof Restriction) {
         icon = MainFrame.getIcon("ontology-restriction");

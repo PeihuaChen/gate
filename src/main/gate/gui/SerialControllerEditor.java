@@ -405,7 +405,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     
     if(corpusControllerMode){
       //we need to add the corpus combo
-      corpusCombo = new JComboBox(corpusComboModel = new CorporaComboModel());
+      corpusCombo = new JComboBox<Resource>(corpusComboModel = new CorporaComboModel());
       corpusCombo.setRenderer(new ResourceRenderer());
       corpusCombo.setMaximumSize(new Dimension(Integer.MAX_VALUE,
                                                corpusCombo.getPreferredSize().
