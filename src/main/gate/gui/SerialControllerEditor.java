@@ -173,6 +173,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     removePRAction = new RemovePRAction();
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   protected void initGuiComponents() {
     //we use a JSplitPane for most of the content, and add the Run button to 
     //the South area
@@ -405,7 +406,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     
     if(corpusControllerMode){
       //we need to add the corpus combo
-      corpusCombo = new JComboBox<Resource>(corpusComboModel = new CorporaComboModel());
+      corpusCombo = new JComboBox(corpusComboModel = new CorporaComboModel());
       corpusCombo.setRenderer(new ResourceRenderer());
       corpusCombo.setMaximumSize(new Dimension(Integer.MAX_VALUE,
                                                corpusCombo.getPreferredSize().
@@ -1335,6 +1336,7 @@ public class SerialControllerEditor extends AbstractVisualResource
   /**
    * A model for a combobox containing the loaded corpora in the system
    */
+  @SuppressWarnings("rawtypes")
   protected class CorporaComboModel extends AbstractListModel
                                   implements ComboBoxModel{
     @Override
@@ -1878,6 +1880,7 @@ public class SerialControllerEditor extends AbstractVisualResource
    * A combobox that allows selection of a corpus from the list of loaded
    * corpora.
    */
+  @SuppressWarnings("rawtypes")
   protected JComboBox corpusCombo;
 
   protected CorporaComboModel corpusComboModel;
