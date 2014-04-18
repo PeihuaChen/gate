@@ -106,17 +106,17 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
   /**
    * Shows available alignment features alignment features
    */
-  private JComboBox alignmentFeatures;
+  private JComboBox<String> alignmentFeatures;
 
   /**
    * annotation sets of the source document
    */
-  private JComboBox srcAnnotationSets;
+  private JComboBox<String> srcAnnotationSets;
 
   /**
    * annotation sets of the target document
    */
-  private JComboBox tgtAnnotationSets;
+  private JComboBox<String> tgtAnnotationSets;
 
   /**
    * source annotation set
@@ -399,17 +399,17 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
      */
     List<String> alignmentFeatureNames =
         new ArrayList<String>(document.getAllAlignmentFeatureNames());
-    this.alignmentFeatures = new JComboBox(alignmentFeatureNames.toArray());
+    this.alignmentFeatures = new JComboBox<String>(alignmentFeatureNames.toArray(new String[alignmentFeatureNames.size()]));
 
     controls.add(new JLabel("Alignment Features:"));
     controls.add(this.alignmentFeatures);
 
     controls.add(new JLabel(" Source InputAS:"));
-    this.srcAnnotationSets = new JComboBox(getASNames(srcDoc).toArray());
+    this.srcAnnotationSets = new JComboBox<String>(getASNames(srcDoc));
     controls.add(this.srcAnnotationSets);
 
     controls.add(new JLabel(" Target InputAS:"));
-    this.tgtAnnotationSets = new JComboBox(getASNames(tgtDoc).toArray());
+    this.tgtAnnotationSets = new JComboBox<String>(getASNames(tgtDoc));
     controls.add(this.tgtAnnotationSets);
 
     refreshHighlights = new JButton("Go");
@@ -723,14 +723,14 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
    * @param document
    * @return
    */
-  private List<String> getASNames(Document document) {
+  private String[] getASNames(Document document) {
     Set<String> setNames = document.getAnnotationSetNames();
     List<String> setNamesList = null;
     if(setNames == null)
       setNamesList = new ArrayList<String>();
     else setNamesList = new ArrayList<String>(setNames);
     setNamesList.add(0, DEFAULT_AS_NAME);
-    return setNamesList;
+    return setNamesList.toArray(new String[setNamesList.size()]);
   }
 
   private void initListeners() {
@@ -951,13 +951,13 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
 
     List<String> alignmentFeatureNames = new ArrayList<String>();
     alignmentFeatureNames.addAll(document.getAllAlignmentFeatureNames());
-    JComboBox dataSources = new JComboBox(alignmentFeatureNames.toArray());
+    JComboBox<String> dataSources = new JComboBox<String>(alignmentFeatureNames.toArray(new String[alignmentFeatureNames.size()]));
     dataSources.setEditable(true);
 
-    JComboBox storeAlignmentIn = new JComboBox(alignmentFeatureNames.toArray());
+    JComboBox<String> storeAlignmentIn = new JComboBox<String>(alignmentFeatureNames.toArray(new String[alignmentFeatureNames.size()]));
     storeAlignmentIn.setEditable(true);
 
-    JComboBox viewsToSelectFrom = new JComboBox(VIEWS);
+    JComboBox<String> viewsToSelectFrom = new JComboBox<String>(VIEWS);
     viewsToSelectFrom.setEditable(false);
 
     final JTextField actionsFile = new JTextField("", 25);
@@ -1160,8 +1160,9 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
   private Document[] askForDocuments() {
     JPanel mainPanel = new JPanel(new GridBagLayout());
     // two combo-boxes
-    JComboBox sourceDocs = new JComboBox(document.getDocumentIDs().toArray());
-    JComboBox targetDocs = new JComboBox(document.getDocumentIDs().toArray());
+    List<String> docIDs = document.getDocumentIDs();
+    JComboBox<String> sourceDocs = new JComboBox<String>(docIDs.toArray(new String[docIDs.size()]));
+    JComboBox<String> targetDocs = new JComboBox<String>(docIDs.toArray(new String[docIDs.size()]));
 
     GridBagConstraints constraints = new GridBagConstraints();
     constraints.gridx = GridBagConstraints.RELATIVE;
@@ -1387,10 +1388,10 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
     final boolean reselect =
         selectedFeature != null ? alignmentFeatureNames
             .contains(selectedFeature) : false;
-    DefaultComboBoxModel model =
-        new DefaultComboBoxModel(alignmentFeatureNames.toArray());
+    DefaultComboBoxModel<String> model =
+        new DefaultComboBoxModel<String>(alignmentFeatureNames.toArray(new String[alignmentFeatureNames.size()]));
     if(this.alignmentFeatures == null) {
-      this.alignmentFeatures = new JComboBox(model);
+      this.alignmentFeatures = new JComboBox<String>(model);
     } else {
       this.alignmentFeatures.setModel(model);
     }
@@ -1419,7 +1420,7 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
    */
   public void annotationSetAdded(DocumentEvent e) {
     Document doc = (Document)e.getSource();
-    JComboBox comboBox = null;
+    JComboBox<String> comboBox = null;
     if(srcDoc == doc) {
       comboBox = this.srcAnnotationSets;
     } else if(tgtDoc == doc) {
@@ -1438,11 +1439,11 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
       addedASName = DEFAULT_AS_NAME;
     }
 
-    DefaultComboBoxModel model = (DefaultComboBoxModel)comboBox.getModel();
+    DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>)comboBox.getModel();
     model.addElement(addedASName);
 
     final String ASToReselect = selectedASName;
-    final JComboBox finalComboBox = comboBox;
+    final JComboBox<String> finalComboBox = comboBox;
 
     // update ui
     SwingUtilities.invokeLater(new Runnable() {
@@ -1467,7 +1468,7 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
    */
   public void annotationSetRemoved(DocumentEvent e) {
     Document doc = (Document)e.getSource();
-    JComboBox comboBox = null;
+    JComboBox<String> comboBox = null;
     if(srcDoc == doc) {
       comboBox = this.srcAnnotationSets;
     } else if(tgtDoc == doc) {
@@ -1486,12 +1487,12 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
       deletedASName = DEFAULT_AS_NAME;
     }
 
-    DefaultComboBoxModel model = (DefaultComboBoxModel)comboBox.getModel();
+    DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>)comboBox.getModel();
     model.removeElement(deletedASName);
 
     final String ASToReselect =
         selectedASName.equals(deletedASName) ? null : deletedASName;
-    final JComboBox finalComboBox = comboBox;
+    final JComboBox<String> finalComboBox = comboBox;
 
     // update ui
     SwingUtilities.invokeLater(new Runnable() {

@@ -194,7 +194,7 @@ public class CompoundDocumentEditor extends AbstractVisualResource
           docNames.add(doc.getName());
         }
 
-        JList docList = new JList(docNames);
+        JList<String> docList = new JList<String>(docNames);
         JOptionPane dialog = new JOptionPane(new JScrollPane(docList),
                 JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
         dialog.createDialog(CompoundDocumentEditor.this,
@@ -369,7 +369,7 @@ public class CompoundDocumentEditor extends AbstractVisualResource
     public void actionPerformed(ActionEvent ae) {
       CompoundDocument cd = (CompoundDocument)document;
       List<String> docIDs = cd.getDocumentIDs();
-      JComboBox box = new JComboBox(docIDs.toArray());
+      JComboBox<String> box = new JComboBox<String>(docIDs.toArray(new String[docIDs.size()]));
       Object[] options = {"OK", "CANCEL"};
       int reply = JOptionPane.showOptionDialog(MainFrame.getInstance(), box,
               "Select the document ID to switch to...",
