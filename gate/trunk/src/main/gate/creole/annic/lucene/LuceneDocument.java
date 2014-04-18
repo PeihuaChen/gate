@@ -8,6 +8,7 @@
 package gate.creole.annic.lucene;
 
 import java.io.*;
+import java.lang.reflect.Array;
 
 import gate.annotation.AnnotationSetImpl;
 import gate.creole.annic.Constants;
@@ -653,7 +654,7 @@ public class LuceneDocument {
     }
 
     
-    @SuppressWarnings({"cast","unchecked"})
+    @SuppressWarnings({"cast","unchecked","rawtypes"})
     List<Token> toReturn[] = (List<Token>[])new List[unitOffsetsSet.size()];
     Iterator<OffsetGroup> iter = unitOffsetsSet.iterator();
     int counter = 0;
