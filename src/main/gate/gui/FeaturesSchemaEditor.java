@@ -61,7 +61,7 @@ import javax.swing.table.TableCellRenderer;
 
 /**
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial","rawtypes","unchecked"})
 @CreoleResource(name = "Resource Features", guiType = GuiType.SMALL,
     resourceDisplayed = "gate.util.FeatureBearer")
 public class FeaturesSchemaEditor extends XJTable
@@ -198,7 +198,6 @@ public class FeaturesSchemaEditor extends XJTable
    * Fire a table data changed event for the feature table whith featureList
    * used as data model.
    */
-  @SuppressWarnings({"rawtypes", "unchecked"})
   protected void populate(){
     featureList.clear();
     //get all the existing features
