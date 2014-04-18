@@ -207,9 +207,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
   /** Text Area that contains the query */
   private QueryTextArea queryTextArea;
 
-  private JComboBox corpusToSearchIn;
+  private JComboBox<String> corpusToSearchIn;
 
-  private JComboBox annotationSetsToSearchIn;
+  private JComboBox<String> annotationSetsToSearchIn;
 
   /** list of IDs available in datastore */
   private List<Object> corpusIds;
@@ -443,7 +443,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     // second column, first row
     gbc.gridx = GridBagConstraints.RELATIVE;
     topPanel.add(new JLabel("Corpus: "), gbc);
-    corpusToSearchIn = new JComboBox();
+    corpusToSearchIn = new JComboBox<String>();
     corpusToSearchIn.addItem(Constants.ENTIRE_DATASTORE);
     corpusToSearchIn.setPrototypeDisplayValue(Constants.ENTIRE_DATASTORE);
     corpusToSearchIn.setToolTipText("Select the corpus to search in.");
@@ -464,7 +464,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     topPanel.add(corpusToSearchIn, gbc);
     topPanel.add(Box.createHorizontalStrut(4), gbc);
     topPanel.add(new JLabel("Annotation set: "), gbc);
-    annotationSetsToSearchIn = new JComboBox();
+    annotationSetsToSearchIn = new JComboBox<String>();
     annotationSetsToSearchIn.setPrototypeDisplayValue(Constants.COMBINED_SET);
     annotationSetsToSearchIn
             .setToolTipText("Select the annotation set to search in.");
@@ -1393,7 +1393,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
                             .get(corpusToSearchIn.getSelectedIndex() - 1);
     TreeSet<String> ts = new TreeSet<String>(stringCollator);
     ts.addAll(getAnnotationSetNames(corpusName));
-    DefaultComboBoxModel dcbm = new DefaultComboBoxModel(ts.toArray());
+    DefaultComboBoxModel<String> dcbm = new DefaultComboBoxModel<String>(ts.toArray(new String[ts.size()]));
     dcbm.insertElementAt(Constants.ALL_SETS, 0);
     annotationSetsToSearchIn.setModel(dcbm);
     annotationSetsToSearchIn.setSelectedItem(Constants.ALL_SETS);
@@ -1404,9 +1404,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     types.addAll(getTypesAndFeatures(null, null).keySet());
     // put all annotation types from the datastore
     // combobox used as cell editor
-    JComboBox annotTypesBox = new JComboBox();
+    JComboBox<String> annotTypesBox = new JComboBox<String>();
     annotTypesBox.setMaximumRowCount(10);
-    annotTypesBox.setModel(new DefaultComboBoxModel(types.toArray()));
+    annotTypesBox.setModel(new DefaultComboBoxModel<String>(types.toArray(new String[types.size()])));
     DefaultCellEditor cellEditor = new DefaultCellEditor(annotTypesBox);
     cellEditor.setClickCountToStart(0);
     configureStackViewFrame.getTable().getColumnModel()
@@ -2580,7 +2580,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       }
       features.add(" ");
       // create the list component
-      final JList list = new JList(features.toArray());
+      final JList<String> list = new JList<String>(features.toArray(new String[features.size()]));
       list.setVisibleRowCount(Math.min(8, features.size()));
       list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       list.setBackground(Color.WHITE);
@@ -2588,7 +2588,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         @Override
         public void mouseClicked(MouseEvent e) {
           if(e.getClickCount() == 1) {
-            String newFeature = (String)list.getSelectedValue();
+            String newFeature = list.getSelectedValue();
             if(newFeature.equals(" ")) {
               newFeature = "";
             }
@@ -3348,7 +3348,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       // combobox used as cell editor
 
       String[] s = {"Crop middle", "Crop start", "Crop end"};
-      JComboBox cropBox = new JComboBox(s);
+      JComboBox<String> cropBox = new JComboBox<String>(s);
 
       // set the cell renderer and/or editor for each column
 
@@ -3434,17 +3434,17 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
                         Object color, boolean isSelected, boolean hasFocus,
                         int row, int col) {
                   String[] s = {stackRows[row][ANNOTATION_TYPE]};
-                  return new JComboBox(s);
+                  return new JComboBox<String>(s);
                 }
               });
 
       final class FeatureCellEditor extends AbstractCellEditor implements
                                                               TableCellEditor,
                                                               ActionListener {
-        private JComboBox featuresBox;
+        private JComboBox<String> featuresBox;
 
         public FeatureCellEditor() {
-          featuresBox = new JComboBox();
+          featuresBox = new JComboBox<String>();
           featuresBox.setMaximumRowCount(10);
           featuresBox.addActionListener(this);
         }
@@ -3472,7 +3472,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
                     .get(configureStackViewTable.getValueAt(row,
                             ANNOTATION_TYPE)));
           }
-          DefaultComboBoxModel dcbm = new DefaultComboBoxModel(ts.toArray());
+          DefaultComboBoxModel<String> dcbm = new DefaultComboBoxModel<String>(ts.toArray(new String[ts.size()]));
           dcbm.insertElementAt("", 0);
           featuresBox.setModel(dcbm);
           featuresBox.setSelectedItem(ts
@@ -3492,7 +3492,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
                         Object color, boolean isSelected, boolean hasFocus,
                         int row, int col) {
                   String[] s = {stackRows[row][FEATURE]};
-                  return new JComboBox(s);
+                  return new JComboBox<String>(s);
                 }
               });
 
@@ -3507,7 +3507,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
                         Object color, boolean isSelected, boolean hasFocus,
                         int row, int col) {
                   String[] s = {stackRows[row][CROP]};
-                  return new JComboBox(s);
+                  return new JComboBox<String>(s);
                 }
               });
 
@@ -3822,9 +3822,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
     private static final String PREVIOUS_RESULT = "previous result";
 
-    protected DefaultListModel queryListModel;
+    protected DefaultListModel<String> queryListModel;
 
-    protected JList queryList;
+    protected JList<String> queryList;
 
     protected JWindow queryPopupWindow;
 
@@ -3899,8 +3899,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       am.put(PREVIOUS_RESULT, new PreviousResultAction());
 
       // list for autocompletion
-      queryListModel = new DefaultListModel();
-      queryList = new JList(queryListModel);
+      queryListModel = new DefaultListModel<String>();
+      queryList = new JList<String>(queryListModel);
       queryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       queryList.setBackground(Color.WHITE);
       queryList.addMouseListener(new MouseAdapter() {
@@ -4004,7 +4004,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         }
         for(int i = 0; i < queryList.getModel().getSize(); i++) {
           if(startsWithIgnoreCase(
-                  ((String)queryList.getModel().getElementAt(i)), type)) {
+                  queryList.getModel().getElementAt(i), type)) {
             queryPopupWindow.setVisible(true);
             queryList.setSelectedIndex((i));
             queryList.ensureIndexIsVisible(i);
@@ -4019,7 +4019,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         }
         for(int i = 0; i < queryList.getModel().getSize(); i++) {
           if(startsWithIgnoreCase(
-                  ((String)queryList.getModel().getElementAt(i)), feature)) {
+                  queryList.getModel().getElementAt(i), feature)) {
             queryPopupWindow.setVisible(true);
             queryList.setSelectedIndex((i));
             queryList.ensureIndexIsVisible(i);
@@ -4071,7 +4071,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         if(type.matches("[a-zA-Z0-9]+")) {
           for(int i = 0; i < queryList.getModel().getSize(); i++) {
             if(startsWithIgnoreCase(
-                    ((String)queryList.getModel().getElementAt(i)), type)) {
+                    queryList.getModel().getElementAt(i), type)) {
               queryPopupWindow.setVisible(true);
               queryList.setSelectedIndex(i);
               queryList.ensureIndexIsVisible(i);
@@ -4091,7 +4091,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
         if(feature.matches("[a-zA-Z0-9]+")) {
           for(int i = 0; i < queryList.getModel().getSize(); i++) {
             if(startsWithIgnoreCase(
-                    ((String)queryList.getModel().getElementAt(i)), feature)) {
+                    queryList.getModel().getElementAt(i), feature)) {
               queryPopupWindow.setVisible(true);
               queryList.setSelectedIndex(i);
               queryList.ensureIndexIsVisible(i);
@@ -4205,7 +4205,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
     private class EnterAction extends AbstractAction {
       @Override
       public void actionPerformed(ActionEvent ev) {
-        String selection = (String)queryList.getSelectedValue();
+        String selection = queryList.getSelectedValue();
         if(mode == POPUP_TYPES) {
           if(selection == null) {
             return;
@@ -4486,7 +4486,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
             String name = ((LuceneDataStoreImpl)target).getLrName(corpusPId);
             this.corpusIds.add(corpusPId);
             // add the corpus name to combobox
-            ((DefaultComboBoxModel)corpusToSearchIn.getModel())
+            ((DefaultComboBoxModel<String>)corpusToSearchIn.getModel())
                     .addElement(name);
           }
         }
@@ -4552,7 +4552,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       index++;
 
       // now lets remove it from the comboBox as well
-      ((DefaultComboBoxModel)corpusToSearchIn.getModel())
+      ((DefaultComboBoxModel<String>)corpusToSearchIn.getModel())
               .removeElementAt(index);
     }
     // Added a refresh button which user should click to refresh types
@@ -4571,7 +4571,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
       if(!corpusIds.contains(id)) {
         // we need to add its name to the combobox
         corpusIds.add(id);
-        ((DefaultComboBoxModel)corpusToSearchIn.getModel()).addElement(resource
+        ((DefaultComboBoxModel<String>)corpusToSearchIn.getModel()).addElement(resource
                 .getName());
       }
     }

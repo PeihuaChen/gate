@@ -115,12 +115,12 @@ public class InputOutputAnnotationSetsDialog {
     if(selectedOption == JOptionPane.OK_OPTION) {
       inputSetNames.clear();
       for(int i = 0; i < inputList.listModel.size(); i++) {
-        inputSetNames.add((String)inputList.listModel.get(i));
+        inputSetNames.add(inputList.listModel.get(i));
       }
 
       outputSetNames.clear();
       for(int i = 0; i < outputList.listModel.size(); i++) {
-        outputSetNames.add((String)outputList.listModel.get(i));
+        outputSetNames.add(outputList.listModel.get(i));
       }
 
       return true;
@@ -136,11 +136,11 @@ public class InputOutputAnnotationSetsDialog {
    */
   @SuppressWarnings("serial")
   class AnnotationSetsList extends JPanel {
-    private JList annotationSetsList;
+    private JList<String> annotationSetsList;
 
-    private DefaultListModel listModel;
+    private DefaultListModel<String> listModel;
 
-    private JComboBox combo;
+    private JComboBox<String> combo;
 
     private JButton addButton;
 
@@ -162,7 +162,7 @@ public class InputOutputAnnotationSetsDialog {
         // find where to insert
         int index = 0;
         while(index < listModel.size()
-                && NATURAL_COMPARATOR.compare((String)listModel.get(index),
+                && NATURAL_COMPARATOR.compare(listModel.get(index),
                         selected) < 0) {
           index++;
         }
@@ -172,7 +172,7 @@ public class InputOutputAnnotationSetsDialog {
         }
         else {
           // add if the value is not already present
-          if(NATURAL_COMPARATOR.compare((String)listModel.get(index), selected) != 0) {
+          if(NATURAL_COMPARATOR.compare(listModel.get(index), selected) != 0) {
             listModel.add(index, selected);
           }
         }
@@ -211,7 +211,7 @@ public class InputOutputAnnotationSetsDialog {
       String[] hintSetNamesArray = hintSetNames.toArray(new String[hintSetNames
               .size()]);
       Arrays.sort(hintSetNamesArray, NATURAL_COMPARATOR);
-      combo = new JComboBox(hintSetNamesArray);
+      combo = new JComboBox<String>(hintSetNamesArray);
       combo.setEditable(true);
       // custom editor to handle the default annotation set.
       combo.setEditor(new AnnotationSetNameComboEditor(combo.getEditor()));
@@ -237,7 +237,7 @@ public class InputOutputAnnotationSetsDialog {
 
       add(buttonsBox, c);
 
-      listModel = new DefaultListModel();
+      listModel = new DefaultListModel<String>();
       String[] initialSetNamesArray = initialSetNames
               .toArray(new String[initialSetNames.size()]);
       Arrays.sort(initialSetNamesArray, NATURAL_COMPARATOR);
@@ -245,7 +245,7 @@ public class InputOutputAnnotationSetsDialog {
         listModel.addElement(name);
       }
 
-      annotationSetsList = new JList(listModel);
+      annotationSetsList = new JList<String>(listModel);
       // set up list cell renderer
       annotationSetsList.setCellRenderer(new AnnotationSetNameCellRenderer());
 

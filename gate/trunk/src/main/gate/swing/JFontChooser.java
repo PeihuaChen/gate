@@ -120,13 +120,13 @@ public class JFontChooser extends JPanel {
 
   protected void initGuiComponents() {
     this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-    familyCombo = new JComboBox(
+    familyCombo = new JComboBox<String>(
                         GraphicsEnvironment.getLocalGraphicsEnvironment().
                         getAvailableFontFamilyNames()
                       );
     familyCombo.setSelectedItem(UIManager.getFont("Label.font").getFamily());
 
-    sizeCombo = new JComboBox(new String[]{"6", "8", "10", "12", "14", "16",
+    sizeCombo = new JComboBox<String>(new String[]{"6", "8", "10", "12", "14", "16",
                                               "18", "20", "22", "24", "26"});
     sizeCombo.setSelectedItem(new Integer(
                         UIManager.getFont("Label.font").getSize()).toString());
@@ -252,10 +252,10 @@ public class JFontChooser extends JPanel {
     return fontValue;
   }
 
-  JComboBox familyCombo;
+  JComboBox<String> familyCombo;
   JCheckBox italicChk;
   JCheckBox boldChk;
-  JComboBox sizeCombo;
+  JComboBox<String> sizeCombo;
   JTextArea sampleTextArea;
   private java.awt.Font fontValue;
 }// class JFontChooser extends JPanel

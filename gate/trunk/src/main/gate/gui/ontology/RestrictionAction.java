@@ -69,9 +69,8 @@ public class RestrictionAction extends AbstractAction {
 
     middlePanel = new JPanel(new FlowLayout());
     middlePanel.setBorder(new TitledBorder("On Property"));
-    onPropertyChoice = new JComboBox(new DefaultComboBoxModel());
-    onPropertyChoice.setPrototypeDisplayValue(new String(
-            "http://www.dcs.shef.ac.uk/owlim#SomeObjectProperty"));
+    onPropertyChoice = new JComboBox<RDFProperty>(new DefaultComboBoxModel<RDFProperty>());
+    onPropertyChoice.setPrototypeDisplayValue(new RDFPropertyPrototype("http://www.dcs.shef.ac.uk/owlim#SomeObjectProperty"));
     middlePanel.add(onPropertyChoice);
 
     bottomPanel = new JPanel(new GridLayout(2, 1));
@@ -82,9 +81,8 @@ public class RestrictionAction extends AbstractAction {
 
     hasValuePanel = new JPanel(new FlowLayout());
     hasValuePanel.setBorder(new TitledBorder("Has Value"));
-    hasValChoice = new JComboBox(new DefaultComboBoxModel());
-    hasValChoice.setPrototypeDisplayValue(new String(
-            "http://www.dcs.shef.ac.uk/owlim#SomeObjectProperty"));
+    hasValChoice = new JComboBox<OResource>(new DefaultComboBoxModel<OResource>());
+    hasValChoice.setPrototypeDisplayValue(new RDFPropertyPrototype("http://www.dcs.shef.ac.uk/owlim#SomeObjectProperty"));
     hasValuePanel.add(hasValChoice);
     bottomPanel.add(valuePanel);
     bottomPanel.add(hasValuePanel);
@@ -104,13 +102,13 @@ public class RestrictionAction extends AbstractAction {
     props.addAll(ontology.getObjectProperties());
     props.addAll(ontology.getDatatypeProperties());
     Collections.sort(props, new OntologyItemComparator());
-    DefaultComboBoxModel dcbm = new DefaultComboBoxModel(props.toArray());
+    DefaultComboBoxModel<RDFProperty> dcbm = new DefaultComboBoxModel<RDFProperty>(props.toArray(new RDFProperty[props.size()]));
     onPropertyChoice.setModel(dcbm);
 
     ArrayList<OResource> classes = new ArrayList<OResource>();
     classes.addAll(ontology.getOClasses(false));
     Collections.sort(classes, new OntologyItemComparator());
-    DefaultComboBoxModel dcbm1 = new DefaultComboBoxModel(classes.toArray());
+    DefaultComboBoxModel<OResource> dcbm1 = new DefaultComboBoxModel<OResource>(classes.toArray(new OResource[classes.size()]));
     hasValChoice.setModel(dcbm1);
 
     int i = JOptionPane.showOptionDialog(MainFrame.getInstance(), mainPanel,
@@ -175,7 +173,7 @@ public class RestrictionAction extends AbstractAction {
 
   protected JPanel middlePanel;
 
-  protected JComboBox onPropertyChoice;
+  protected JComboBox<RDFProperty> onPropertyChoice;
 
   protected JPanel bottomPanel;
 
@@ -183,7 +181,7 @@ public class RestrictionAction extends AbstractAction {
 
   protected JTextField value;
 
-  protected JComboBox hasValChoice;
+  protected JComboBox<OResource> hasValChoice;
 
   protected Ontology ontology;
 

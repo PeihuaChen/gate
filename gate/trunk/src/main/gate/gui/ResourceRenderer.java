@@ -33,7 +33,7 @@ import gate.creole.ResourceData;
  * the rendered string and the type of the resource as the tooltip.
  */
 @SuppressWarnings("serial")
-public class ResourceRenderer extends JLabel implements ListCellRenderer,
+public class ResourceRenderer extends JLabel implements ListCellRenderer<Resource>,
                                             TableCellRenderer, TreeCellRenderer {
 
   public ResourceRenderer() {
@@ -41,7 +41,7 @@ public class ResourceRenderer extends JLabel implements ListCellRenderer,
   }
 
   @Override
-  public Component getListCellRendererComponent(JList list, Object value,
+  public Component getListCellRendererComponent(JList<? extends Resource> list, Resource value,
           int index, boolean isSelected, boolean cellHasFocus) {
     prepareRendererList(list, value, isSelected, hasFocus());
     return this;
@@ -100,7 +100,7 @@ public class ResourceRenderer extends JLabel implements ListCellRenderer,
     prepareRendererCommon(table, value, isSelected, hasFocus);
   }
 
-  private void prepareRendererList(JList list, Object value,
+  private void prepareRendererList(JList<? extends Resource> list, Resource value,
           boolean isSelected, boolean hasFocus) {
     if(isSelected) {
       setForeground(list.getSelectionForeground());
