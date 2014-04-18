@@ -44,7 +44,7 @@ public class AnnotationMerging {
     HashMap<Annotation, String> mergeAnns, int numMinK, boolean isTheSameInstances) {
     int numA = annsArr.length;
     // First copy the annotatioin sets into a temp array
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked","rawtypes"})
     Set<Annotation>[] annsArrTemp = new Set[numA];
     for(int i = 0; i < numA; ++i) {
       if(annsArr[i] != null) {
@@ -118,7 +118,7 @@ public class AnnotationMerging {
     }
       
     // First copy the annotatioin sets into a temp array
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked","rawtypes"})
     Set<Annotation>[] annsArrTemp = new Set[numA];
     for(int i = 0; i < numA; ++i) {
       if(annsArr[i] != null) {
@@ -212,7 +212,7 @@ public class AnnotationMerging {
     HashMap<Annotation, String> mergeAnns, boolean isTheSameInstances) {
     int numA = annsArr.length;
     // First copy the annotatioin sets into a temp array
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked","rawtypes"})
     Set<Annotation>[] annsArrTemp = new Set[numA];
     for(int i = 0; i < numA; ++i) {
       if(annsArr[i] != null) {

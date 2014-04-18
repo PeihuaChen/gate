@@ -126,7 +126,7 @@ class FSMState implements java.io.Serializable {
     * (the ids used internally by the tokeniser for the Unicode types) to sets
     * of states.
     */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked","rawtypes"})
   Set<FSMState>[] transitionFunction = new Set[SimpleTokeniser.maxTypeId + 1];
 
   /** The RHS string value from which the annotation associated to
