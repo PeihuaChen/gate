@@ -35,7 +35,6 @@ public class PatternValidator {
    * annotations in which it checks if the annotations exist that are
    * validating for the given query
    * 
-   * @throws SearchException
    * @return int positive number indicates the offset of the last
    *         annotation of the pattern. -1 indicates invalid pattern.
    */
@@ -128,10 +127,6 @@ public class PatternValidator {
 
   /**
    * Checks whether two terms are equal.
-   * 
-   * @param tk
-   * @param term
-   * @return
    */
   private boolean isEqual(Token tk, Term term) {
     return (term.text().equals(tk.termText()) && term.type().equals(tk.type()));

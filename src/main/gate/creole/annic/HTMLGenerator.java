@@ -146,9 +146,6 @@ public class HTMLGenerator {
 
   /**
    * This method is used for sorting the pattern annotations.
-   * 
-   * @param annots
-   * @return
    */
   private static PatternAnnotation[] sort(PatternAnnotation[] annots) {
 
@@ -232,10 +229,6 @@ public class HTMLGenerator {
   /**
    * From given an array of pattern annotations, this method finds out
    * the annotations of the given type.
-   * 
-   * @param annotations
-   * @param type
-   * @return
    */
   private static List<PatternAnnotation> findOutAnnotationsOfType(
           PatternAnnotation[] annotations, String type) {

@@ -125,9 +125,6 @@ public class LuceneSearchThread {
 
   /**
    * Given a file name, it replaces the all invalid characters with '_'.
-   * 
-   * @param name
-   * @return
    */
   private String getCompatibleName(String name) {
     return name.replaceAll("[\\/:\\*\\?\"<>|]", "_");
@@ -490,9 +487,6 @@ public class LuceneSearchThread {
    * pattern, converts it into the annic pattern. In other words, for
    * each pattern it collects the information such as annotations in
    * context and so on.
-   * 
-   * @param aResult
-   * @return
    */
   private List<Pattern> createAnnicPatterns(LuceneQueryResult aResult) {
     // get the result from search engine
@@ -514,13 +508,6 @@ public class LuceneSearchThread {
   /**
    * Locates the valid patterns in token stream and discards the invalid
    * first term positions returned by the lucene searcher.
-   * 
-   * @param docID
-   * @param gateAnnotations
-   * @param firstTermPositions
-   * @param patternLength
-   * @param queryString
-   * @return
    */
   private List<Pattern> locatePatterns(String docID, String annotationSetName,
           List<List<PatternAnnotation>> gateAnnotations,
@@ -641,9 +628,6 @@ public class LuceneSearchThread {
    * Each index unit is first converted into a separate lucene document.
    * And a new ID with documentName and a unit number is assined to it.
    * But when we return results, we take the unit number out.
-   * 
-   * @param documentID
-   * @return
    */
   private String removeUnitNumber(String documentID) {
     int index = documentID.lastIndexOf("-");
@@ -653,10 +637,6 @@ public class LuceneSearchThread {
 
   /**
    * This method looks on the disk to find the tokenStream
-   * 
-   * @param location String
-   * @throws Exception
-   * @return ArrayList
    */
   private List<gate.creole.annic.apache.lucene.analysis.Token> getTokenStreamFromDisk(
           String indexDirectory, String documentFolder, String documentID) throws Exception {
@@ -687,15 +667,6 @@ public class LuceneSearchThread {
    * positions, pattern length, queryType and patternWindow and returns
    * the GateAnnotations as an array for each pattern with left and
    * right context
-   * 
-   * @param subTokens
-   * @param ftp
-   * @param patLen
-   * @param qType
-   * @param patWindow
-   * @param query
-   * @param baseTokenAnnotationType
-   * @return
    */
   private PatternResult getPatternResult(
           List<gate.creole.annic.apache.lucene.analysis.Token> subTokens,
@@ -759,13 +730,6 @@ public class LuceneSearchThread {
   /**
    * This method returns the valid patterns back and the respective
    * GateAnnotations
-   * 
-   * @param subTokens ArrayList
-   * @param ftp ArrayList
-   * @param patLen int
-   * @param patWindow int
-   * @param query String
-   * @return PatternResult
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   private PatternResult getPatternResult(
@@ -1115,10 +1079,6 @@ public class LuceneSearchThread {
 
   /**
    * Checks if the QueryItem already exists.
-   * 
-   * @param n
-   * @param top
-   * @return
    */
 //  private boolean doesAlreadyExist(QueryItem n, List<QueryItem> top) {
 //
