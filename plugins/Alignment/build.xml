@@ -35,7 +35,7 @@
 
 
 	<target name="compile" depends="init">
-		<javac classpathref="compile.classpath" source="1.6" target="1.6"
+		<javac classpathref="compile.classpath" source="1.7" target="1.7"
           debug="true" deprecation="true" destdir="${dest}" 
           nowarn="false" encoding="UTF-8">
 			<src path="${src}"/>
@@ -55,11 +55,11 @@
              classpathref="compile.classpath"
              encoding="UTF-8"
              windowtitle="${plugin.name} JavaDoc"
-             source="1.6">
+             source="1.7">
 			<sourcepath>
 				<pathelement location="${src}" />
 			</sourcepath>
-			<link href="http://docs.oracle.com/javase/6/docs/api/" />
+			<link href="http://docs.oracle.com/javase/7/docs/api/" />
 			<link href="http://gate.ac.uk/gate/doc/javadoc/" />
 		</javadoc>
 	</target>

@@ -48,7 +48,7 @@
            debug="true"
            debuglevel="lines,source"
            encoding="UTF-8"
-           source="1.6" target="1.6">
+           source="1.7" target="1.7">
 		<compilerarg value="-Xmaxwarns" />
 		<compilerarg value="${gate.compile.maxwarnings}" />
 		<compilerarg value="-Xlint:all" />
@@ -82,11 +82,11 @@
              classpathref="compile.classpath"
              encoding="UTF-8"
              windowtitle="${plugin.name} JavaDoc"
-             source="1.6">
+             source="1.7">
       <sourcepath>
         <pathelement location="${src.dir}" />
       </sourcepath>
-      <link href="http://docs.oracle.com/javase/6/docs/api/" />
+      <link href="http://docs.oracle.com/javase/7/docs/api/" />
       <link href="http://gate.ac.uk/gate/doc/javadoc/" />
     </javadoc>
   </target>
