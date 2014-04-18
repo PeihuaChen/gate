@@ -82,7 +82,7 @@ import javax.swing.table.TableCellEditor;
  * actually a list of lists of strings representing parameter
  * disjunctions.
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial","rawtypes","unchecked"})
 public class ResourceParametersEditor extends XJTable implements CreoleListener {
 
   public ResourceParametersEditor() {
