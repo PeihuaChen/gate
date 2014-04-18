@@ -143,7 +143,7 @@ public class Parameter implements Serializable
       // Create an collection object belonging to paramClass
       Collection<?> colection = null;
       try{
-        colection = paramClass.asSubclass(Collection.class).getConstructor(new Class[]{}).
+        colection = paramClass.asSubclass(Collection.class).getConstructor(new Class<?>[]{}).
                                   newInstance(new Object[]{});
       } catch(Exception ex){
           throw new ParameterException("Could not construct an object of type "
@@ -181,7 +181,7 @@ public class Parameter implements Serializable
           String itemStringValue = strTokenizer.nextToken();
           Object itemValue = null;
           try{
-            itemValue = itemClass.getConstructor(new Class[]{String.class}).
+            itemValue = itemClass.getConstructor(new Class<?>[]{String.class}).
                                   newInstance(new Object[]{itemStringValue});
           }catch(Exception e){
             throw new ParameterException("Could not create an object of " +
@@ -206,7 +206,7 @@ public class Parameter implements Serializable
       }
       else {
         try{
-          fm = paramClass.asSubclass(FeatureMap.class).getConstructor(new Class[]{}).
+          fm = paramClass.asSubclass(FeatureMap.class).getConstructor(new Class<?>[]{}).
                                     newInstance(new Object[]{});
         } catch(Exception ex){
             throw new ParameterException("Could not construct an object of type "
@@ -291,7 +291,7 @@ public class Parameter implements Serializable
         // e.g. for URLs
         try{
           if(!paramClass.isAssignableFrom(String.class)){
-            value = paramClass.getConstructor(new Class[]{String.class}).
+            value = paramClass.getConstructor(new Class<?>[]{String.class}).
                          newInstance(new Object[]{stringValue});
           }
         }catch(Exception e){
