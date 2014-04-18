@@ -230,7 +230,7 @@ public class STreeNode extends DefaultMutableTreeNode {
       //now update the consists Ids, because they have the old Ids in them
       for (int i=0; i < newAnnots.size(); i++) {
         Annotation newAnnot = newAnnots.get(i);
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked","cast"})
         List<Integer> children = (List<Integer>)newAnnot.getFeatures().get(
             SyntaxTreeViewer.NODE_CONSISTS_FEATURE_NAME);
         if (children == null || children.size()== 0) {
