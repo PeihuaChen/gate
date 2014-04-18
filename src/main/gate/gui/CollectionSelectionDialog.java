@@ -43,7 +43,7 @@ import javax.swing.ListSelectionModel;
 /** This class visually selects some items from a collection and returns
   * a collection with the items selected by the user.
   */
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial","unchecked","rawtypes","deprecation"})
 public class CollectionSelectionDialog extends JDialog {
 
   // Local data
@@ -96,7 +96,6 @@ public class CollectionSelectionDialog extends JDialog {
   /** Init local data from a source collection
     * @param aSourceData is the collection from what the user will choose
     */
-  @SuppressWarnings({"rawtypes", "unchecked"})
   protected void initLocalData(Collection aSourceData){
     targetListModel = new DefaultListModel();
     sourceListModel = new DefaultListModel();
@@ -251,7 +250,6 @@ public class CollectionSelectionDialog extends JDialog {
     }// end for
   }// doAdd();
   /** Returns the target collection*/
-  @SuppressWarnings({"rawtypes", "unchecked"})
   public Collection getSelectedCollection(){
     List resultsList = new ArrayList();
     for (int i=0; i<targetListModel.getSize(); i++){
@@ -261,7 +259,6 @@ public class CollectionSelectionDialog extends JDialog {
   }// getSelectedCollection()
 
   /** This method displays the CollectionSelectionDialog*/
-  @SuppressWarnings("rawtypes")
   public int show(String aTitle,Collection aSourceData){
     if (aTitle == null){
       JOptionPane.showMessageDialog(mainFrame,
