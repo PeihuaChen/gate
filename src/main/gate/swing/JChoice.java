@@ -47,7 +47,7 @@ import javax.swing.event.ListDataListener;
  * simple {@link JComboBox} is used instead.
  */
 @SuppressWarnings("serial")
-public class JChoice extends JPanel implements ItemSelectable{
+public class JChoice<E> extends JPanel implements ItemSelectable {
 
   @Override
   public Object[] getSelectedObjects() {
@@ -95,7 +95,7 @@ public class JChoice extends JPanel implements ItemSelectable{
   /**
    * The combobox used for a large number of choices. 
    */
-  private JComboBox combo;
+  private JComboBox<E> combo;
   
   /**
    * Internal item listener for both the combo and the buttons, used to keep
@@ -106,7 +106,7 @@ public class JChoice extends JPanel implements ItemSelectable{
   /**
    * The data model used for choices and selection.
    */
-  private ComboBoxModel model;
+  private ComboBoxModel<E> model;
   
   /**
    * Keeps a mapping between the button and the corresponding option from the
@@ -119,7 +119,7 @@ public class JChoice extends JPanel implements ItemSelectable{
    * Creates a FastChoice with a default empty data model.
    */
   public JChoice() {
-    this(new DefaultComboBoxModel());
+    this(new DefaultComboBoxModel<E>());
   }
   
   /**
@@ -130,7 +130,7 @@ public class JChoice extends JPanel implements ItemSelectable{
   /**
    * Creates a FastChoice with the given data model.
    */
-  public JChoice(ComboBoxModel model) {
+  public JChoice(ComboBoxModel<E> model) {
     layout = new FlowLayout();
     layout.setHgap(0);
     layout.setVgap(0);
@@ -147,8 +147,8 @@ public class JChoice extends JPanel implements ItemSelectable{
    * Creates a FastChoice with a default data model populated from the provided
    * array of objects.
    */
-  public JChoice(Object[] items) {
-    this(new DefaultComboBoxModel(items));
+  public JChoice(E[] items) {
+    this(new DefaultComboBoxModel<E>(items));
   }
   
   
@@ -159,7 +159,7 @@ public class JChoice extends JPanel implements ItemSelectable{
     maximumFastChoices = DEFAULT_MAX_FAST_CHOICES;
     maximumWidth = DEFAULT_MAX_WIDTH;
     listenersMap = new HashMap<EventListener, ListenerWrapper>();
-    combo = new JComboBox(model);
+    combo = new JComboBox<E>(model);
     buttonToValueMap = new HashMap<AbstractButton, Object>();
     sharedItemListener = new ItemListener(){
       /**
@@ -222,7 +222,7 @@ public class JChoice extends JPanel implements ItemSelectable{
   }
   
   public static void main(String[] args){
-    final JChoice fChoice = new JChoice(new String[]{
+    final JChoice<String> fChoice = new JChoice<String>(new String[]{
             "Jan",
             "Feb",
             "Mar",
@@ -433,14 +433,14 @@ public class JChoice extends JPanel implements ItemSelectable{
   /**
    * @return the model
    */
-  public ComboBoxModel getModel() {
+  public ComboBoxModel<E> getModel() {
     return model;
   }
 
   /**
    * @param model the model to set
    */
-  public void setModel(ComboBoxModel model) {
+  public void setModel(ComboBoxModel<E> model) {
     this.model = model;
     combo.setModel(model);
     buildGui();

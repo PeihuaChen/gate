@@ -392,7 +392,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
   /**
    * JChoice used for selecting the annotation type.
    */
-  protected JChoice typesChoice;
+  protected JChoice<String> typesChoice;
 
   /**
    * The default border for the types choice
@@ -647,7 +647,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
     Collections.sort(typeList);
     String[] typesArray = new String[typeList.size()];
     typeList.toArray(typesArray);
-    typesChoice = new JChoice(typesArray);
+    typesChoice = new JChoice<String>(typesArray);
     typesChoice.setDefaultButtonMargin(new Insets(0, 2, 0, 2));
     typesChoice.setMaximumFastChoices(20);
     typesChoice.setMaximumWidth(300);

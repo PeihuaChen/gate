@@ -168,7 +168,7 @@ public class SchemaFeaturesEditor extends JPanel{
       switch(type) {
         case nominal:
           //use JChoice
-          jchoice = new JChoice(values);
+          jchoice = new JChoice<String>(values);
           jchoice.setDefaultButtonMargin(new Insets(0, 2, 0, 2));
           jchoice.setMaximumFastChoices(20);
           jchoice.setMaximumWidth(300);
@@ -179,7 +179,7 @@ public class SchemaFeaturesEditor extends JPanel{
         case bool:
           //new implementation -> use JChoice instead of JCheckBox in order
           //to allow "unset" value (i.e. null)
-          jchoice = new JChoice(values);
+          jchoice = new JChoice<String>(values);
           jchoice.setDefaultButtonMargin(new Insets(0, 2, 0, 2));
           jchoice.setMaximumFastChoices(20);
           jchoice.setMaximumWidth(300);
@@ -242,7 +242,7 @@ public class SchemaFeaturesEditor extends JPanel{
     
     protected JNullableTextField textField;
     protected JCheckBox checkbox;
-    protected JChoice jchoice;
+    protected JChoice<String> jchoice;
     
     protected Border defaultBorder;
     
