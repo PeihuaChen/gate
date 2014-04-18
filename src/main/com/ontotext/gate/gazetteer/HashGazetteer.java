@@ -45,7 +45,7 @@ public class HashGazetteer extends AbstractGazetteer {
   private AnnotationSet annotationSet = null;
 
   @Override
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked","rawtypes"})
   public Resource init() throws ResourceInstantiationException {
     if(mapsList != null) {
       // this is a duplicate - nothing to do

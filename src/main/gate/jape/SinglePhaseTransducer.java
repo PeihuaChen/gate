@@ -452,6 +452,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
                 .getConstraints();
   
         boolean hasPositiveConstraint = false;
+        @SuppressWarnings("rawtypes")
         List<Annotation>[] matchesByConstraint = new List[currentConstraints.length];
         for(int i = 0; i < matchesByConstraint.length; i++)
           matchesByConstraint[i] = null;
