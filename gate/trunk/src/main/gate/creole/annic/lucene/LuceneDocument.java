@@ -7,30 +7,33 @@
  */
 package gate.creole.annic.lucene;
 
-import java.io.*;
-import java.lang.reflect.Array;
-
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.FeatureMap;
 import gate.annotation.AnnotationSetImpl;
 import gate.creole.annic.Constants;
+import gate.creole.annic.apache.lucene.analysis.Token;
 import gate.creole.annic.apache.lucene.document.Document;
 import gate.creole.annic.apache.lucene.document.Field;
-import java.util.ArrayList;
-import gate.AnnotationSet;
 import gate.util.Err;
 import gate.util.GateRuntimeException;
 import gate.util.InvalidOffsetException;
 import gate.util.OffsetComparator;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import gate.Annotation;
-import gate.FeatureMap;
-import gate.creole.annic.apache.lucene.analysis.Token;
-import java.util.Iterator;
 
 /**
  * Given an instance of Gate Document, this class provides a method to convert
