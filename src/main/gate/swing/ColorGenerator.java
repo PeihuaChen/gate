@@ -159,7 +159,7 @@ public class ColorGenerator {
   }
 
   /**    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked","rawtypes"})
   LinkedList<ColorSpace>[] availableSpacesList = new LinkedList[8];
 
   /**    */
