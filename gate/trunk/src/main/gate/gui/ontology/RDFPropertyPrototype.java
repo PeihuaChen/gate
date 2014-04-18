@@ -13,6 +13,10 @@ import gate.creole.ontology.OURI;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.RDFProperty;
 
+/**
+ * An empty impl of RDFProperty that can be used as a prototype in a JComboBox etc.
+ * @author Mark A. Greenwood
+ */
 @SuppressWarnings("deprecation")
 class RDFPropertyPrototype implements RDFProperty {
 

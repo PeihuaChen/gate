@@ -47,10 +47,10 @@ public class DeleteOntologyResourceAction extends AbstractAction implements
     String[] resourcesToDelete = new String[selectedNodes.size()];
     int i = 0;
     for (DefaultMutableTreeNode node : selectedNodes) {
-      Object object = ((OResourceNode) node.getUserObject()).getResource();
-      resourcesToDelete[i++] = ((OResource) object).getONodeID().toString();
+      OResource object = ((OResourceNode) node.getUserObject()).getResource();
+      resourcesToDelete[i++] = object.getONodeID().toString();
     }
-    JList list = new JList(resourcesToDelete);
+    JList<String> list = new JList<String>(resourcesToDelete);
     int choice = JOptionPane.showOptionDialog(MainFrame.getInstance(),
       new Object[]{"Are you sure you want to delete the following resources?",
       "\n\n", new JScrollPane(list), '\n'}, "Delete resources",
