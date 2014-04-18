@@ -512,9 +512,6 @@ public class LuceneDocument {
   /**
    * Some file names are not compatible to the underlying file system. This
    * method replaces all those incompatible characters with '_'.
-   * 
-   * @param name
-   * @return
    */
   private String getCompatibleName(String name) {
     return name.replaceAll("[\\/:\\*\\?\"<>|]", "_");
@@ -523,11 +520,6 @@ public class LuceneDocument {
   /**
    * This method, given a tokenstream and file name, writes the tokenstream on
    * the provided location.
-   * 
-   * @param tokenStream
-   * @param fileName
-   * @param location
-   * @throws Exception
    */
   private void writeOnDisk(List<Token> tokenStream, String folderName,
     String fileName, String location) throws Exception {
@@ -585,13 +577,6 @@ public class LuceneDocument {
    * This method given a GATE document and other required parameters, for each
    * annotation of type indexUnitAnnotationType creates a separate list of
    * baseTokens underlying in it.
-   * 
-   * @param document
-   * @param inputAs
-   * @param featuresToExclude
-   * @param baseTokenAnnotationType
-   * @param indexUnitAnnotationType
-   * @return
    */
   private List<Token>[] getTokens(gate.Document document,
     AnnotationSet inputAs, List<String> featuresToInclude,

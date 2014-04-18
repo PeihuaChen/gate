@@ -259,9 +259,6 @@ public class NekoHtmlDocumentFormat extends TextualDocumentFormat {
    * the document. The HTML parser only reports event positions as line
    * and column numbers, so we need this information to be able to
    * correctly infer the repositioning information.
-   *
-   * @param docContent
-   * @return
    */
   private int[] buildLineOffsets(String docContent) {
     Matcher m = afterNewlinePattern.matcher(docContent);

@@ -224,9 +224,6 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   /**
    * Obtain the lock object on which we must synchronize when loading or
    * saving the LR with the given ID.
-   * 
-   * @param id
-   * @return
    */
   private Object lockObjectForID(Object id) {
     synchronized(lockObjects) {

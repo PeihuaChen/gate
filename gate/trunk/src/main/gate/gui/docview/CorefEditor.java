@@ -930,8 +930,6 @@ public class CorefEditor
 
   /**
    * Returns annotation Set
-   * @param annotSet
-   * @return
    */
   private AnnotationSet getAnnotationSet(String annotSet) {
     return (annotSet.equals(DEFAULT_ANNOTSET_NAME)) ? document.getAnnotations() :
@@ -1204,8 +1202,6 @@ public class CorefEditor
 
   /**
    * Given an annotation, this will find out the chainHead
-   * @param ann
-   * @return
    */
   private CorefTreeNode findOutTheChainHead(Annotation ann, String set) {
     Map<CorefTreeNode, List<Integer>> chains = corefChains.get(corefAnnotationSetNodesMap.get(

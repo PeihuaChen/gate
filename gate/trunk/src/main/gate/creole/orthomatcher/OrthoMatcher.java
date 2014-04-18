@@ -1085,10 +1085,6 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
   /**
    * basic_person_match_criteria
    * Note that this function relies on various global variables in some other match rules.
-   * @param shortName
-   * @param longName
-   * @param mr
-   * @return
    */
   private boolean basic_person_match_criteria(String shortName,
           String longName, boolean mr[]) {

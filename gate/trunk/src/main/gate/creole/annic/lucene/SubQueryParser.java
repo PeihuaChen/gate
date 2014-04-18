@@ -44,10 +44,6 @@ public class SubQueryParser {
 
   /**
    * Method retrieves wild card characters after the closing bracket.
-   * 
-   * @param brClPos
-   * @param query
-   * @return
    */
   private static String findWildCardString(int brClPos, String query) {
     String wcs = "";
@@ -72,10 +68,6 @@ public class SubQueryParser {
    * This method, interprets the wild cards and convert query
    * accordingly. For example: (A)+3 is converted into ((A) | ((A)(A)) |
    * ((A)(A)(A)))
-   * 
-   * @param query
-   * @return
-   * @throws SearchException
    */
   private static String extractWildcards(String query) throws SearchException {
     outer: while(true) {
@@ -159,7 +151,6 @@ public class SubQueryParser {
    * and the arrayList consists of 
    * 1. {A}{C} 
    * 2. {B}{C}
-   * @throws SearchException
    */
   public static List<String> parseQuery(String q1) throws SearchException {
 
@@ -378,10 +369,6 @@ public class SubQueryParser {
 
   /**
    * This is a helper method that helps in duplicating the provided tokens.
-   * @param tokens
-   * @param queries
-   * @param dupliSize
-   * @return
    */
   private static List<String> writeTokens(List<String> tokens, List<String> queries,
           int dupliSize) {
@@ -488,9 +475,6 @@ public class SubQueryParser {
 
   /**
    * Returns the position of a closing bracket.
-   * @param startFrom
-   * @param query
-   * @return
    */
   private static int findBracketClosingPosition(int startFrom, String query) {
     int balance = 0;
@@ -518,10 +502,6 @@ public class SubQueryParser {
 
   /**
    * Helps in duplicating a character in the provided queries
-   * @param c
-   * @param no
-   * @param queries
-   * @return
    */
   private static List<String> writeCharInAll(char c, int no, List<String> queries) {
     for(int i = 0; i < no; i++) {
@@ -534,10 +514,6 @@ public class SubQueryParser {
 
   /**
    * Helps in duplicating a string in the provided queries
-   * @param c
-   * @param no
-   * @param queries
-   * @return
    */
   private static List<String> writeStringInAll(String c, int no, List<String> queries) {
     for(int i = 0; i < no; i++) {
@@ -550,9 +526,6 @@ public class SubQueryParser {
 
   /**
    * Returns if the character is bracket used to mark boundary of a token or an escape character.
-   * @param ch
-   * @param pre
-   * @return
    */
   private static boolean isOpenBracket(char ch, char pre) {
     if(ch == '(' && pre != '\\')
@@ -562,9 +535,6 @@ public class SubQueryParser {
 
   /**
    * Returns if the character is bracket used to mark boundary of a token or an escape character.
-   * @param ch
-   * @param pre
-   * @return
    */
   private static boolean isClosingBracket(char ch, char pre) {
     if(ch == ')' && pre != '\\')
@@ -574,9 +544,6 @@ public class SubQueryParser {
 
   /**
    * Returns if the character is an OR symbol used as a logical operator or an escape character.
-   * @param ch
-   * @param pre
-   * @return
    */
   private static boolean isOrSym(char ch, char pre) {
     if(ch == '|' && pre != '\\')

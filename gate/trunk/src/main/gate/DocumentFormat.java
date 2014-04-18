@@ -528,8 +528,6 @@ extends AbstractLanguageResource implements LanguageResource{
    * .-separated tokens (such as .gate.xml.gz). The order the extensions are 
    * returned in is from the most specific (longest) to the most generic 
    * (shortest) one, e.g. [.gate.xml.gz, .xml.gz, .gz]. 
-   * @param url
-   * @return
    */
   private static List<String> getFileSuffixes(URL url){
     List<String> res = new LinkedList<String>();
