@@ -312,7 +312,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       
       if (actionContext.isDebuggingEnabled()) {
         AnnotationSet outputASproxy =
-                (AnnotationSet)Proxy.newProxyInstance(classloader, new Class[] {AnnotationSet.class},
+                (AnnotationSet)Proxy.newProxyInstance(classloader, new Class<?>[] {AnnotationSet.class},
                         new InvocationHandler() {
                           public Object invoke(Object proxy, Method method,
                                   Object[] args) throws Throwable {
