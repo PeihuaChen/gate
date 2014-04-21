@@ -100,8 +100,10 @@ public class CorpusBenchmarkTool {
   }
 
   public void init() {
-    //first read the corpus_tool.properties file
-    File propFile = new File("corpus_tool.properties");
+    //first read the corpus_tool.properties file from the reference dir
+    File propFile = new File(getStartDirectory(),"corpus_tool.properties");
+    if (!propFile.exists())
+      propFile = new File("corpus_tool.properties");    
     Out.prln("Loading properties from " + propFile.getAbsolutePath());
     if (propFile.exists()) {
       try {
