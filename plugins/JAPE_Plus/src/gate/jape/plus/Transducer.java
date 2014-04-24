@@ -569,7 +569,19 @@ public class Transducer extends AbstractLanguageAnalyser
     }
   }
 
- 
+  @Override
+  public void reInit() throws ResourceInstantiationException {
+    existingTransducer = null;
+    
+    if(classLoaderRefCount.decrementAndGet() == 0) {
+      Gate.getClassLoader().forgetClassLoader(classLoader);
+    }
+    
+    classLoaderRefCount = new AtomicInteger(0);
+    classLoader = null;
+    
+    init();
+  }
   
   @Override
   public Resource init() throws ResourceInstantiationException {
@@ -599,12 +611,6 @@ public class Transducer extends AbstractLanguageAnalyser
           }
         }
       } else {
-        if (classLoader != null) {
-          if(classLoaderRefCount.decrementAndGet() == 0) {
-            Gate.getClassLoader().forgetClassLoader(classLoader);
-          }
-        }
-        
         // sanity check parameters
         if(binaryGrammarURL == null && grammarURL == null) {
           throw new ResourceInstantiationException(
@@ -641,7 +647,7 @@ public class Transducer extends AbstractLanguageAnalyser
       actionContext = initActionContext();
       return this;
     } catch(Exception e) {
-      if(classLoaderRefCount.decrementAndGet() == 0) {
+      if(classLoaderRefCount.decrementAndGet() <= 0) {
         Gate.getClassLoader().forgetClassLoader(classLoader);
       }
       if(e instanceof ResourceInstantiationException) {
