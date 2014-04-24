@@ -472,9 +472,8 @@ public class AnnotationEditor extends AbstractVisualResource implements
     typeCombo.setSelectedItem(annType);
     featuresEditor.setSchema(schemasByType.get(annType));
     featuresEditor.setTargetFeatures(ann.getFeatures());
-    // popupWindow.doLayout();
-    popupWindow.validate();
     setEditingEnabled(true);
+    popupWindow.pack();
     setVisible(true);
     if(!pinnedButton.isSelected()) {
       hideTimer.restart();
@@ -848,7 +847,7 @@ public class AnnotationEditor extends AbstractVisualResource implements
   /**
    * Constant for delay before hiding the popup window (in milliseconds).
    */
-  protected static final int HIDE_DELAY = 1500;
+  protected static final int HIDE_DELAY = 3000;
 
   /**
    * Constant for the number of characters when changing annotation boundary
