@@ -13,21 +13,36 @@
 
 package gate.gui.docview;
 
-import gate.Node;
 import gate.FeatureMap;
-import gate.util.Strings;
+import gate.Node;
 import gate.annotation.NodeImpl;
+import gate.util.Strings;
 
-import javax.swing.*;
-import javax.swing.event.MouseInputAdapter;
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.UIManager;
 import javax.swing.border.CompoundBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.event.MouseInputAdapter;
 
 import org.apache.commons.lang.StringEscapeUtils;
-
-import java.util.*;
-import java.awt.*;
 
 /**
  * Stack of annotations in a JPanel.
@@ -340,15 +355,26 @@ public class AnnotationStack extends JPanel {
             Integer.toHexString(color.getGreen()) +
             Integer.toHexString(color.getBlue());
           boolean odd = false; // alternate background color every other row
-          for(Map.Entry<Object, Object> map : ann.getFeatures().entrySet()) {
+          
+          List<Object> features = new ArrayList<Object>(ann.getFeatures().keySet());
+          //sort the features into alphabetical order
+          Collections.sort(features, new Comparator<Object>() {
+            @Override
+            public int compare(Object o1, Object o2) {
+              return o1.toString().compareToIgnoreCase(o2.toString());
+            }
+          });
+          
+          for (Object key : features) {
+            String fv = Strings.toString(ann.getFeatures().get(key));
             toolTip +="<tr align=\"left\""
               + (odd?" bgcolor=\"#"+hexColor+"\"":"")+"><td><strong>"
-              + map.getKey() + "</strong></td><td>"
-              + ((Strings.toString(map.getValue()).length() > 500) ?
+              + key + "</strong></td><td>"
+              + ((fv.length() > 500) ?
               "<textarea rows=\"20\" cols=\"40\" cellspacing=\"0\">"
-                + StringEscapeUtils.escapeHtml(Strings.toString(map.getValue()).replaceAll("(.{50,60})\\b", "$1\n"))
+                + StringEscapeUtils.escapeHtml(fv.replaceAll("(.{50,60})\\b", "$1\n"))
                 + "</textarea>" :
-              StringEscapeUtils.escapeHtml(Strings.toString(map.getValue())).replaceAll("\n", "<br>"))
+              StringEscapeUtils.escapeHtml(fv).replaceAll("\n", "<br>"))
               + "</td></tr>";
             odd = !odd;
           }
