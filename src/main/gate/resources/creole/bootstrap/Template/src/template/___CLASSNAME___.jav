@@ -18,8 +18,6 @@
 
 package ___PACKAGE___;
 
-import java.util.*;
-
 import gate.*;
 import gate.creole.*;
 import gate.creole.metadata.*;
