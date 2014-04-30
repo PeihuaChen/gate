@@ -38,10 +38,10 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 /**
- * GATE's class loader, which allows loading of classes over the net. A list of
- * URLs is searched, which should point at .jar files or to directories
- * containing class file hierarchies. The loader is also used for creating JAPE
- * RHS action classes.
+ * GATE's class loader, which allows loading of classes over the net. A
+ * list of URLs is searched, which should point at .jar files or to
+ * directories containing class file hierarchies. The loader is also
+ * used for creating JAPE RHS action classes.
  */
 public class GateClassLoader extends URLClassLoader {
 
@@ -75,7 +75,7 @@ public class GateClassLoader extends URLClassLoader {
   }
 
   public GateClassLoader(String name, URL[] urls, ClassLoader parent,
-      boolean isolated) {
+          boolean isolated) {
     super(urls, parent);
     this.id = name;
     this.isolated = isolated;
@@ -99,8 +99,8 @@ public class GateClassLoader extends URLClassLoader {
   }
 
   /**
-   * Appends the specified URL to the list of URLs to search for classes and
-   * resources.
+   * Appends the specified URL to the list of URLs to search for classes
+   * and resources.
    */
   @Override
   public void addURL(URL url) {
@@ -125,10 +125,10 @@ public class GateClassLoader extends URLClassLoader {
     }
 
     for(GateClassLoader cl : children) {
-      if (!cl.isIsolated()) {
+      if(!cl.isIsolated()) {
         result = cl.getResource(name);
         if(result != null) return result;
-      }      
+      }
     }
 
     return null;
@@ -140,47 +140,52 @@ public class GateClassLoader extends URLClassLoader {
   }
 
   /**
-   * Delegate loading to the super class (loadClass has protected access there).
+   * Delegate loading to the super class (loadClass has protected access
+   * there).
    */
   @Override
   public Class<?> loadClass(String name, boolean resolve)
-      throws ClassNotFoundException {
+          throws ClassNotFoundException {
     return loadClass(name, resolve, false, new HashSet<GateClassLoader>());
   }
 
   /**
-   * Delegate loading to the super class (loadClass has protected access there).
+   * Delegate loading to the super class (loadClass has protected access
+   * there).
    */
   private Class<?> loadClass(String name, boolean resolve, boolean localOnly,
-      Set<GateClassLoader> visited) throws ClassNotFoundException {
+          Set<GateClassLoader> visited) throws ClassNotFoundException {
 
     Class<?> previous = findLoadedClass(name);
-    
-    if (previous != null) {
-      if (DEBUG) System.out.println("CACHE HIT: " + name + " -- " + id);
-      
+
+    if(previous != null) {
+      if(DEBUG) System.out.println("CACHE HIT: " + name + " -- " + id);
+
       return previous;
     }
-    
+
     if(DEBUG)
       System.out.println(name + " -- " + id + ": " + localOnly + "/" + isolated
-          + "/" + getParent());
+              + "/" + getParent());
 
-    // to ensure we don't end up looping through the same classloader twice we
+    // to ensure we don't end up looping through the same classloader
+    // twice we
     // keep a track of which ones we have already visited
     visited.add(this);
 
     if(!this.equals(Gate.getClassLoader())) {
       try {
-        // first we see if we can find the class via the system class path
+        // first we see if we can find the class via the system class
+        // path
         Class<?> found = Gate.getClassLoader().getParent().loadClass(name);
 
         URL url = findResource(name.replace('.', '/') + ".class");
         if(url != null)
           log.warn(name
-              + " is available via both the system classpath and a plugin; the plugin classes will be ignored");
+                  + " is available via both the system classpath and a plugin; the plugin classes will be ignored");
 
-        // if we got to here then the class has been found via the system
+        // if we got to here then the class has been found via the
+        // system
         // classpath so return it and stop looking
         return found;
 
@@ -205,7 +210,8 @@ public class GateClassLoader extends URLClassLoader {
       if(getParent() == null) {
         try {
           // if this classloader doesn't have a parent then it must be
-          // disposable, but as we haven't found the class we need yet we should
+          // disposable, but as we haven't found the class we need yet
+          // we should
           // now look into the main GATE classloader
           return Gate.getClassLoader().loadClass(name, resolve, false, visited);
         } catch(ClassNotFoundException e) {
@@ -216,15 +222,18 @@ public class GateClassLoader extends URLClassLoader {
       Set<GateClassLoader> children;
       synchronized(childClassLoaders) {
         children =
-            new LinkedHashSet<GateClassLoader>(childClassLoaders.values());
+                new LinkedHashSet<GateClassLoader>(childClassLoaders.values());
       }
 
-      // make sure we don't visit a classloader we've already been through
+      // make sure we don't visit a classloader we've already been
+      // through
       children.removeAll(visited);
 
       for(GateClassLoader cl : children) {
-        // the class isn't to be found in either this classloader or the main
-        // GATE classloader so let's check all the other disposable classloaders
+        // the class isn't to be found in either this classloader or the
+        // main
+        // GATE classloader so let's check all the other disposable
+        // classloaders
         try {
           if(!cl.isIsolated())
             return cl.loadClass(name, resolve, true, visited);
@@ -234,44 +243,46 @@ public class GateClassLoader extends URLClassLoader {
       }
     }
 
-    // if we got to here then no matter where we have looked we have been unable
+    // if we got to here then no matter where we have looked we have
+    // been unable
     // to find the class requested so throw an exception
     throw new ClassNotFoundException(name);
   }
 
   /**
-   * Forward a call to super.defineClass, which is protected and final in super.
-   * This is used by JAPE and the Jdk compiler class.
+   * Forward a call to super.defineClass, which is protected and final
+   * in super. This is used by JAPE and the Jdk compiler class.
    */
   public Class<?> defineGateClass(String name, byte[] bytes, int offset, int len) {
     return super.defineClass(name, bytes, offset, len);
   }
 
   /**
-   * Forward a call to super.resolveClass, which is protected and final in
-   * super. This is used by JAPE and the Jdk compiler class
+   * Forward a call to super.resolveClass, which is protected and final
+   * in super. This is used by JAPE and the Jdk compiler class
    */
   public void resolveGateClass(Class<?> c) {
     super.resolveClass(c);
   }
 
   /**
-   * Given a fully qualified class name, this method returns the instance of
-   * Class if it is already loaded using the ClassLoader or it returns null.
+   * Given a fully qualified class name, this method returns the
+   * instance of Class if it is already loaded using the ClassLoader or
+   * it returns null.
    */
   public Class<?> findExistingClass(String name) {
     return findLoadedClass(name);
   }
 
   Map<String, GateClassLoader> childClassLoaders =
-      new LinkedHashMap<String, GateClassLoader>();
+          new LinkedHashMap<String, GateClassLoader>();
 
   /**
-   * Returns a classloader that can, at some point in the future, be forgotton
-   * which allows the class definitions to be garbage collected.
+   * Returns a classloader that can, at some point in the future, be
+   * forgotton which allows the class definitions to be garbage
+   * collected.
    * 
-   * @param id
-   *          the id of the classloader to return
+   * @param id the id of the classloader to return
    * @return either an existing classloader with the given id or a new
    *         classloader
    */
@@ -284,7 +295,7 @@ public class GateClassLoader extends URLClassLoader {
   }
 
   public GateClassLoader getDisposableClassLoader(String id,
-      ClassLoader parent, boolean isolated) {
+          ClassLoader parent, boolean isolated) {
     GateClassLoader gcl = null;
 
     synchronized(childClassLoaders) {
@@ -300,11 +311,10 @@ public class GateClassLoader extends URLClassLoader {
   }
 
   /**
-   * Causes the specified classloader to be forgotten, making it and all the
-   * class definitions loaded by it available for garbage collection
+   * Causes the specified classloader to be forgotten, making it and all
+   * the class definitions loaded by it available for garbage collection
    * 
-   * @param id
-   *          the id of the classloader to forget
+   * @param id the id of the classloader to forget
    */
   public void forgetClassLoader(String id) {
     Introspector.flushCaches();
@@ -315,23 +325,26 @@ public class GateClassLoader extends URLClassLoader {
   }
 
   /**
-   * Causes the specified classloader to be forgotten, making it and all the
-   * class definitions loaded by it available for garbage collection
+   * Causes the specified classloader to be forgotten, making it and all
+   * the class definitions loaded by it available for garbage collection
    * 
-   * @param classloader
-   *          the classloader to forget
+   * @param classloader the classloader to forget
    */
   public void forgetClassLoader(GateClassLoader classloader) {
     if(classloader != null) forgetClassLoader(classloader.getID());
   }
-  
+
   /**
-   * Get the child classloaders in creation order.
+   * Get the child classloaders in creation order. Note that you
+   * shouldn't have any need to access the child classloaders. Holding
+   * references is very likely to lead to a memory leak as the plugins
+   * will no longer be disposable. YOU HAVE BEEN WARNED!
+   * 
    * @return the child classloaders in creation order
    */
   public List<GateClassLoader> getChildren() {
     synchronized(childClassLoaders) {
-     return new ArrayList<GateClassLoader>(childClassLoaders.values());
+      return new ArrayList<GateClassLoader>(childClassLoaders.values());
     }
   }
 }
