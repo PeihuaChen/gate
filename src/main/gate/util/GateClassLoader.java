@@ -27,9 +27,11 @@ import gate.creole.AbstractResource;
 import java.beans.Introspector;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -321,5 +323,15 @@ public class GateClassLoader extends URLClassLoader {
    */
   public void forgetClassLoader(GateClassLoader classloader) {
     if(classloader != null) forgetClassLoader(classloader.getID());
+  }
+  
+  /**
+   * Get the child classloaders in creation order.
+   * @return the child classloaders in creation order
+   */
+  public List<GateClassLoader> getChildren() {
+    synchronized(childClassLoaders) {
+     return new ArrayList<GateClassLoader>(childClassLoaders.values());
+    }
   }
 }
