@@ -356,7 +356,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       if(!keepGoing) break;
       if(((DefaultActionContext)actionContext).isPhaseEnded()) {
         ((DefaultActionContext)actionContext).setPhaseEnded(false);
-        System.out.println("DEBUG: Ending phase prematurely");
+        log.debug("Ending phase prematurely");
         break;
       }
     }// while(state.startNodeOff != -1)
