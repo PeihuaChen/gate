@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- $Id$ -->
-<project name="GATE" default="all" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="GATE" default="all" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:jacoco="antlib:org.jacoco.ant">
   <description>
       GATE
       see http://gate.ac.uk
@@ -69,7 +69,7 @@
     </classpath>
   </taskdef>
   <ivy:retrieve sync="true" pattern="${libDir}/[artifact]-[revision].[ext]" />
-
+	
   <!-- generate the pretty HTML report for what we just retrieved -->
   <ivy:report todir="${libDir}" graph="false" />
 
@@ -78,6 +78,12 @@
     <classpath>
       <pathelement location="${buildDir}/lib/ant-contrib.jar" />
     </classpath>
+  </taskdef>
+	
+  <taskdef resource="org/jacoco/ant/antlib.xml" uri="antlib:org.jacoco.ant" >
+	<classpath>
+		<pathelement location="${buildDir}/lib/jacocoant.jar" />
+	</classpath>
   </taskdef>
 
   <!-- Read version and build numbers -->
@@ -518,21 +524,52 @@
         <pathelement location="${basedir}/plugins/ANNIE/" />
       </path>
     </makeurl>
-    <junit fork="true" showoutput="true" printsummary="yes" maxmemory="512m">
-      <classpath refid="test.class.path" />
-      <sysproperty key="gate.config" value="${buildDir}/gate.xml" />
-      <sysproperty key="gate.home" value="${basedir}" />
-      <sysproperty key="load.plugin.path" value="${creole.plugins}" />
-      <sysproperty key="java.awt.headless" value="true" />
-      <!-- set this property to run just a single test case -->
-      <syspropertyset>
-        <propertyref name="gate.testcase" />
-      </syspropertyset>
-      <formatter type="plain" usefile="false" />
-      <formatter type="xml" if="write.xml" />
-      <formatter type="plain" if="write.plain" />
-      <test name="gate.TestGate" outfile="testResult" todir="${buildDir}" />
-    </junit>
+  	<jacoco:coverage append="false">
+  	  <junit fork="true" showoutput="true" printsummary="yes" maxmemory="512m">
+        <classpath refid="test.class.path" />
+        <sysproperty key="gate.config" value="${buildDir}/gate.xml" />
+        <sysproperty key="gate.home" value="${basedir}" />
+        <sysproperty key="load.plugin.path" value="${creole.plugins}" />
+        <sysproperty key="java.awt.headless" value="true" />
+        <!-- set this property to run just a single test case -->
+        <syspropertyset>
+          <propertyref name="gate.testcase" />
+        </syspropertyset>
+        <formatter type="plain" usefile="false" />
+        <formatter type="xml" if="write.xml" />
+        <formatter type="plain" if="write.plain" />
+        <test name="gate.TestGate" outfile="testResult" todir="${buildDir}" />
+      </junit>
+  	</jacoco:coverage>  	
+  </target>
+	
+  <target name="test.coverage" depends="test.gate" >
+  	<jacoco:report>
+  	  <executiondata>
+  	    <file file="jacoco.exec"/>
+  	  </executiondata>
+      <structure name="JaCoCo GATE Report">
+  	  	<classfiles>
+  	  	  <fileset dir="classes/main">
+  	  	  	<!-- don't include any of the GUI stuff -->
+  	  	    <exclude name="gate/gui/**"/>
+  	  	    <exclude name="gate/resources/**"/>
+  	  	    <exclude name="gate/swing/**"/>
+  	  	  	
+  	  	  	<!-- these packages are only used from plugins -->
+  	  	  	<exclude name="gate/wordnet/**"/>
+  	  	    <exclude name="gate/creole/ir/**"/>
+  	  	    
+  	  	  	<!-- exclude all test classes -->
+  	  	  	<exclude name="**/Test*"/>
+  	  	  </fileset>
+  	  	</classfiles>
+  	    <sourcefiles encoding="UTF-8"><fileset dir="src/main"/></sourcefiles>
+  	  </structure>
+  	  <html destdir="jacoco"/>
+  	  <csv destfile="jacoco/report.csv"/>
+   	  <xml destfile="jacoco/report.xml"/>
+    </jacoco:report>
   </target>
 
   <target name="test" depends="test.gate, plugins.build, plugins.test" />
