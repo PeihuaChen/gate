@@ -524,7 +524,7 @@
         <pathelement location="${basedir}/plugins/ANNIE/" />
       </path>
     </makeurl>
-  	<jacoco:coverage append="false">
+  	<jacoco:coverage destfile="jacoco.exec" append="false">
   	  <junit fork="true" showoutput="true" printsummary="yes" maxmemory="512m">
         <classpath refid="test.class.path" />
         <sysproperty key="gate.config" value="${buildDir}/gate.xml" />
