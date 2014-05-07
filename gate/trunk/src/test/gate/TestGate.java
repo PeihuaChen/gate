@@ -35,6 +35,7 @@ import gate.creole.morph.TestMorph;
 import gate.creole.test.DynamicRegistrationTest;
 import gate.email.TestEmail;
 import gate.html.TestHtml;
+import gate.jape.functest.TestConstraints;
 import gate.jape.functest.TestJape;
 import gate.persist.TestPersist;
 import gate.sgml.TestSgml;
@@ -168,11 +169,11 @@ public class TestGate {
         suite.addTest(TestFiles.suite());
         suite.addTest(TestJavac.suite());
         suite.addTest(TestJape.suite());
+        
+        //TODO fix these tests so that they work properly
+        //suite.addTest(TestConstraints.suite());
+        
         suite.addTest(TestTemplate.suite());
-        /* The TCL tests rely on the application being started from the
-         * gate directory. This is not possible from the nightly build script.
-         */
-//        suite.addTest(TestJacl.suite());
         suite.addTest(TestDocument.suite());
         suite.addTest(TestDocumentStaxUtils.suite());
         suite.addTest(TestTikaFormats.suite());
@@ -180,7 +181,6 @@ public class TestGate {
         suite.addTest(TestCorpus.suite());
         suite.addTest(TestSerialCorpus.suite());
         suite.addTest(TestDiffer.suite());
-        //suite.addTest(TestIaa.suite()); Moved this to the IAA plugin
         suite.addTest(TestAnnotationMerging.suite());
         suite.addTest(TestClassificationMeasures.suite());
 //no longer needed as replaced by testPR
