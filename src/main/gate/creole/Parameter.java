@@ -284,7 +284,8 @@ public class Parameter implements Serializable
             value = new URL(baseURL, stringValue);
           }
         }catch(MalformedURLException mue){
-          value = null;
+          //value = null;
+          throw new ParameterException("Malformed URL parameter value: "+stringValue,mue);
         }
       else{
         //try to construct a new value from the string using a constructor

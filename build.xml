@@ -544,6 +544,9 @@
   </target>
 	
   <target name="test.coverage" depends="test.gate" >
+  	<!-- this isn't used by jenkins so class/package exclusions have to be done
+  	     via the jenkins web interface if as well if you want to keep the two
+  	     different report processes in sync with one another -->
   	<jacoco:report>
   	  <executiondata>
   	    <file file="jacoco.exec"/>

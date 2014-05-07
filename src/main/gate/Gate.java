@@ -198,11 +198,6 @@ public class Gate implements GateConstants {
       }
     }
 
-    // register the URL handler for the "gate://" URLs
-    System.setProperty("java.protocol.handler.pkgs", System
-      .getProperty("java.protocol.handler.pkgs")
-      + "|" + "gate.util.protocols");
-
     // initialise the symbols generator
     lastSym = 0;
 

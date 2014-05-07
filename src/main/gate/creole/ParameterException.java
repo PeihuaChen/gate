@@ -33,6 +33,10 @@ public class ParameterException extends GateException {
   }
 
   public ParameterException(Exception e) {
-    super(e.toString());
+    super(e);
+  }
+  
+  public ParameterException(String s, Exception e) {
+    super(s,e);
   }
 } // ParameterException
