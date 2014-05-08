@@ -162,7 +162,7 @@ public class TestConstraints extends BaseJapeTests {
    * @throws Exception
    */
   public void test812MatchNegativeAnnotationsInEmptyAnnotSet() throws Exception {
-    final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.2-Negative.jape";
+    final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.2-Negatives.jape";
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.2.txt";
     Set<Annotation> actualResults = doTest(docFilePath, japeFilePath, annoCreatorEmpty);
     assertEquals("There must be no transduced annotations.", 0, actualResults.size());
