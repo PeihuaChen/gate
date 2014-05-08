@@ -22,6 +22,7 @@ import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
 import gate.Resource;
+import gate.corpora.DocumentStaxUtils;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
@@ -67,8 +68,11 @@ public abstract class BaseJapeTests extends TestCase {
     protected static void setUpGate() {
 	if (Gate.isInitialised()) {
 	    logger.warn("GATE already intialized and set up for JAPE Transducer tests.");
-	    return;
+	    
 	}
+	else {
+	  
+	
 
 	Properties logConfProps = new Properties();
 	InputStream logConfStream = BaseJapeTests.class.getResourceAsStream("log4j-test.properties");
@@ -98,6 +102,8 @@ public abstract class BaseJapeTests extends TestCase {
 	    String errMsg = "GATE home and plug-in directory set up failure.";
 	    logger.fatal(errMsg);
 	    throw new RuntimeException(errMsg);
+	}
+	
 	}
 
 	/** CHANGE THIS if JAPE Transducer need more plug-ins */
@@ -133,17 +139,14 @@ public abstract class BaseJapeTests extends TestCase {
 	}
     }
 
-    private static Resource createOntology(String ontologyURL) throws MalformedURLException {
+    private static Resource createOntology(String ontologyURL) throws MalformedURLException, ResourceInstantiationException {
 	FeatureMap params = Factory.newFeatureMap();
 	params.put("rdfXmlURL", new URL(ontologyURL)); //TODO: FeatureMap keys should be defined as constants somewhere
 	params.put("loadImports", true);
 	final String ontologyClass = "gate.creole.ontology.impl.sesame.OWLIMOntology";
 	Resource ontology = null;
-	try {
 	    ontology = Factory.createResource(ontologyClass, params);
-	} catch (ResourceInstantiationException rie) {
-	    assert false : "Cannot instantiate ontology class: " + ontologyClass;
-	}
+
 	return ontology;
     }
 
@@ -194,15 +197,25 @@ public abstract class BaseJapeTests extends TestCase {
 	final String outputAsName = "Output";
 	params.put("outputASName", outputAsName);
 
-	if (ontologyURL != null) {
-	    Resource ontology = createOntology(ontologyURL);
-	    params.put("ontology", ontology);
-	}
+	
 
 	AbstractLanguageAnalyser transducer = (AbstractLanguageAnalyser) Factory.createResource(
 		transducerType.getFqdnClass(), params);
+	
+	Resource ontology = null;
+	
+	if (ontologyURL != null) {
+    ontology = createOntology(ontologyURL);
+    transducer.setParameterValue("ontology", ontology);
+	}
+	
 	transducer.setDocument(doc);
 	transducer.execute();
+	
+	if (ontology != null) {
+	  transducer.setParameterValue("ontology", null);
+	  Factory.deleteResource(ontology);	  
+	}
 
 	Set<Annotation> orderedResults = new TreeSet<Annotation>(new OffsetComparator());
 	orderedResults.addAll(doc.getAnnotations(outputAsName));
@@ -215,18 +228,22 @@ public abstract class BaseJapeTests extends TestCase {
 
 	Document doc = Factory.newDocument(Files.getGateResourceAsString(docResourcePath));
 	return doTest(doc, japeResourcePath, ac, ontologyURL);
+	
     }
 
     protected Set<Annotation> doTest(String docResourcePath, String japeResourcePath, AnnotationCreator ac)
 	    throws Exception {
 	return doTest(docResourcePath, japeResourcePath, ac, null);
     }
+    
+    protected static int count=0;
 
     protected Set<Annotation> doTest(Document doc, String japeResourcePath, AnnotationCreator ac,
 	    String ontologyURL) throws Exception {
 	if (ac != null)
 	    ac.annotate(doc);
 	Set<Annotation> orderedResults = runTransducer(doc, japeResourcePath, ontologyURL);
+	//DocumentStaxUtils.writeDocument(doc, new File("/home/mark/test"+(count++)+".xml"));
 	return orderedResults;
     }
 
@@ -237,7 +254,7 @@ public abstract class BaseJapeTests extends TestCase {
     protected static void compareResults(String[] expectedResults, Set<Annotation> actualResults) {
 	int i = 0;
 
-	assertEquals("Number of the expected and transducet annotations must be equal.",
+	assertEquals("Number of the expected and transduced annotations must be equal.",
 		expectedResults.length, actualResults.size());
 
 	for (Annotation annot : actualResults) {

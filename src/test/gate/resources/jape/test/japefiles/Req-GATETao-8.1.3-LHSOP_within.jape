@@ -1,5 +1,5 @@
 Phase: Test
-Options: control = brill
+Options: control = appelt
 
 Rule:OpWithin
 ({Location within Location}):bind 

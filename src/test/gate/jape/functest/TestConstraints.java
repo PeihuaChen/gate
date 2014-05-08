@@ -21,6 +21,7 @@ import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
+import gate.corpora.TestDocument;
 import gate.jape.Transducer;
 import gate.jape.parser.ParseCpsl;
 import gate.jape.parser.ParseException;
@@ -67,8 +68,8 @@ public class TestConstraints extends BaseJapeTests {
 
     String[] expectedResults = {"SimpleText", "ComplexText", "ComplexText",
         "ComplexText", "ComplexText"};
-    int[] expectedStartOffsets = {1, 4, 11, 26, 43};
-    int[] expectedEndOffsets = {3, 11, 15, 32, 47};
+    int[] expectedStartOffsets = {0, 3, 10, 25, 42};
+    int[] expectedEndOffsets = {2, 10, 14, 31, 46};
 
     AnnotationCreator annocreator = new BaseAnnotationCreator() {
       @Override
@@ -76,47 +77,47 @@ public class TestConstraints extends BaseJapeTests {
               throws InvalidOffsetException {
         FeatureMap feat = Factory.newFeatureMap();
         feat.put("string", "of");
-        add(1, 3, "Token", feat);
+        add(0, 2, "Token", feat);
 
         feat = Factory.newFeatureMap();
         feat.put("string", "http");
-        add(4, 8, "Token", feat);
+        add(3, 7, "Token", feat);
         feat = Factory.newFeatureMap();
         feat.put("string", ":");
+        add(7, 8, "Token", feat);
+        feat = Factory.newFeatureMap();
+        feat.put("string", "/");
         add(8, 9, "Token", feat);
         feat = Factory.newFeatureMap();
         feat.put("string", "/");
         add(9, 10, "Token", feat);
         feat = Factory.newFeatureMap();
-        feat.put("string", "/");
-        add(10, 11, "Token", feat);
-        feat = Factory.newFeatureMap();
         feat.put("string", "www");
-        add(11, 14, "Token", feat);
+        add(10, 13, "Token", feat);
         feat = Factory.newFeatureMap();
         feat.put("string", ".");
-        add(14, 15, "Token", feat);
+        add(13, 14, "Token", feat);
 
         feat = Factory.newFeatureMap();
         feat.put("string", "ftp");
-        add(26, 29, "Token", feat);
+        add(25, 28, "Token", feat);
         feat = Factory.newFeatureMap();
         feat.put("string", ":");
+        add(28, 29, "Token", feat);
+        feat = Factory.newFeatureMap();
+        feat.put("string", "/");
         add(29, 30, "Token", feat);
         feat = Factory.newFeatureMap();
         feat.put("string", "/");
         add(30, 31, "Token", feat);
         feat = Factory.newFeatureMap();
-        feat.put("string", "/");
-        add(31, 32, "Token", feat);
-        feat = Factory.newFeatureMap();
 
         feat = Factory.newFeatureMap();
         feat.put("string", "www");
-        add(37, 42, "Token", feat);
+        add(42, 45, "Token", feat);
         feat = Factory.newFeatureMap();
         feat.put("string", ".");
-        add(42, 43, "Token", feat);
+        add(45, 46, "Token", feat);
         return as;
       }
     };
@@ -148,8 +149,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.2.txt";
 
     String[] expectedResults = {"SimpleAnnotation", "SimpleAnnotation"};
-    int[] expectedStartOffsets = {1, 101};
-    int[] expectedEndOffsets = {53, 137};
+    int[] expectedStartOffsets = {0, 100};
+    int[] expectedEndOffsets = {52, 136};
 
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator81LocOrgDateJob);
   }
@@ -176,12 +177,12 @@ public class TestConstraints extends BaseJapeTests {
    * @throws Exception
    */
   public void test812MatchNegativeAnnotations() throws Exception {
-    final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.2.jape";
+    final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.2-Negatives.jape";
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.2.txt";
 
-    String[] expectedResults = {"NegativeAnnotation", "NegativeAnnotation", "NegativeAnnotation"};
-    int[] expectedStartOffsets = {16, 69, 111};
-    int[] expectedEndOffsets = {53, 100, 137};
+    String[] expectedResults = {"NegativeAnnotation", "NegativeAnnotation", "NegativeAnnotation","NegativeAnnotation", "NegativeAnnotation", "NegativeAnnotation","NegativeAnnotation", "NegativeAnnotation", "NegativeAnnotation"};
+    int[] expectedStartOffsets = {15, 24, 35, 68, 77, 88, 110, 115, 126};
+    int[] expectedEndOffsets = {23, 34, 52, 76, 87, 99, 114, 125, 136};
 
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator81LocOrgDateJob);
   }
@@ -199,8 +200,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.2.txt";
 
     String[] expectedResults = {"OpContains", "OpContains", "OpContains"};
-    int[] expectedStartOffsets = {1, 54, 101};
-    int[] expectedEndOffsets = {15, 68, 110};
+    int[] expectedStartOffsets = {0, 53, 100};
+    int[] expectedEndOffsets = {14, 67, 109};
 
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator81LocOrgDateJob);
   }
@@ -218,9 +219,9 @@ public class TestConstraints extends BaseJapeTests {
     final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.3-LHSOP_within.jape";
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.2.txt";
 
-    String[] expectedResults = {"OpWithin", "OpWithin", "OpWithin", "OpWithin", "OpWithin", "OpWithin"};
-    int[] expectedStartOffsets = {1, 7, 54, 60, 101, 108};
-    int[] expectedEndOffsets = {6, 15, 59, 68, 107, 110};
+    String[] expectedResults = {"OpWithin", "OpWithin", "OpWithin"};
+    int[] expectedStartOffsets = {0, 53, 100};
+    int[] expectedEndOffsets = {14, 67, 109};
 
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator81LocOrgDateJob);
   }
@@ -257,8 +258,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
     
     String[] expectedResults = {"OpEquals"};
-    int[] expectedStartOffsets = {6};
-    int[] expectedEndOffsets = {13};
+    int[] expectedStartOffsets = {5};
+    int[] expectedEndOffsets = {12};
 
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
   }
@@ -329,8 +330,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
     
     String[] expectedResults = {"OpEquals"};
-    int[] expectedStartOffsets = {14};
-    int[] expectedEndOffsets = {17};
+    int[] expectedStartOffsets = {13};
+    int[] expectedEndOffsets = {16};
   
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
   }
@@ -348,8 +349,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
     
     String[] expectedResults = {"OpEquals"};
-    int[] expectedStartOffsets = {18};
-    int[] expectedEndOffsets = {21};
+    int[] expectedStartOffsets = {17};
+    int[] expectedEndOffsets = {20};
   
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
   }
@@ -367,8 +368,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
     
     String[] expectedResults = {"OpEquals"};
-    int[] expectedStartOffsets = {22};
-    int[] expectedEndOffsets = {26};
+    int[] expectedStartOffsets = {21};
+    int[] expectedEndOffsets = {25};
   
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
   }
@@ -386,8 +387,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
     
     String[] expectedResults = {"OpEquals"};
-    int[] expectedStartOffsets = {27};
-    int[] expectedEndOffsets = {34};
+    int[] expectedStartOffsets = {26};
+    int[] expectedEndOffsets = {33};
   
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
   }
@@ -406,8 +407,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
     
     String[] expectedResults = {"OpGreaterThan", "OpGreaterThan", "OpGreaterThan"};
-    int[] expectedStartOffsets = {1, 6 ,35};
-    int[] expectedEndOffsets = {5, 13, 43};
+    int[] expectedStartOffsets = {0, 5 ,34};
+    int[] expectedEndOffsets = {4, 12, 42};
   
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
   }
@@ -425,8 +426,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
     
     String[] expectedResults = {"OpGreaterThan", "OpGreaterThan"};
-    int[] expectedStartOffsets = {14, 22};
-    int[] expectedEndOffsets = {17, 26};
+    int[] expectedStartOffsets = {13, 21};
+    int[] expectedEndOffsets = {16, 25};
   
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
   }
@@ -444,9 +445,9 @@ public class TestConstraints extends BaseJapeTests {
     final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.3-op-gt-int-negative.jape";
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
     
-    String[] expectedResults = {"OpGreaterThan", "OpGreaterThan", "OpGreaterThan", "OpGreaterThan"};
-    int[] expectedStartOffsets = {14, 18, 22, 27};
-    int[] expectedEndOffsets = {17, 21, 26, 34};
+    String[] expectedResults = {"OpGreaterThan", "OpGreaterThan", "OpGreaterThan"};
+    int[] expectedStartOffsets = {13, 17, 21};
+    int[] expectedEndOffsets = {16, 20, 25};
   
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
   }
@@ -464,8 +465,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
     
     String[] expectedResults = {"OpGreaterThan", "OpGreaterThan"};
-    int[] expectedStartOffsets = {14, 22};
-    int[] expectedEndOffsets = {17, 26};
+    int[] expectedStartOffsets = {13, 21};
+    int[] expectedEndOffsets = {16, 25};
   
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
   }
@@ -483,8 +484,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
     
     String[] expectedResults = {"OpGreaterThan", "OpGreaterThan", "OpGreaterThan", "OpGreaterThan"};
-    int[] expectedStartOffsets = {14, 18, 22, 27};
-    int[] expectedEndOffsets = {17, 21, 26, 34};
+    int[] expectedStartOffsets = {13, 17, 21, 26};
+    int[] expectedEndOffsets = {16, 20, 25, 33};
   
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
   }
@@ -502,8 +503,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
     
     String[] expectedResults = {"OpGreaterEquals"};
-    int[] expectedStartOffsets = {1};
-    int[] expectedEndOffsets = {5};
+    int[] expectedStartOffsets = {0};
+    int[] expectedEndOffsets = {4};
   
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
   }
@@ -521,8 +522,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
     
     String[] expectedResults = {"OpGreaterEquals"};
-    int[] expectedStartOffsets = {14};
-    int[] expectedEndOffsets = {17};
+    int[] expectedStartOffsets = {13};
+    int[] expectedEndOffsets = {16};
   
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
   }
@@ -540,8 +541,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
     
     String[] expectedResults = {"OpGreaterEquals", "OpGreaterEquals", "OpGreaterEquals"};
-    int[] expectedStartOffsets = {14, 18, 22};
-    int[] expectedEndOffsets = {17, 21, 26};
+    int[] expectedStartOffsets = {13, 17, 21};
+    int[] expectedEndOffsets = {16, 20, 25};
   
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
   }
@@ -559,8 +560,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
     
     String[] expectedResults = {"OpGreaterEquals", "OpGreaterEquals"};
-    int[] expectedStartOffsets = {14, 22};
-    int[] expectedEndOffsets = {17, 26};
+    int[] expectedStartOffsets = {13, 21};
+    int[] expectedEndOffsets = {16, 25};
   
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
   }
@@ -578,8 +579,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
     
     String[] expectedResults = {"OpGreaterEquals", "OpGreaterEquals", "OpGreaterEquals", "OpGreaterEquals"};
-    int[] expectedStartOffsets = {14, 18, 22, 27};
-    int[] expectedEndOffsets = {17, 21, 26, 34};
+    int[] expectedStartOffsets = {13, 17, 21, 26};
+    int[] expectedEndOffsets = {16, 20, 25, 33};
   
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
   }
@@ -795,7 +796,7 @@ public class TestConstraints extends BaseJapeTests {
         "EqualAndNotExistance", "OntoTest", "OntoTest2"};
 
     Set<Annotation> actualResults = doTest(DEFAULT_DATA_FILE, japeFile,
-            basicAnnotCreator, "http://gate.ac.uk/tests/demo.owl");
+            basicAnnotCreator, TestDocument.getTestServerName() + "tests/demo.owl");
     Out.println(actualResults);
     compareResults(expectedResults, actualResults);
   }
@@ -1038,7 +1039,7 @@ public class TestConstraints extends BaseJapeTests {
       @Override
       public AnnotationSet createAnnots(Document doc)
               throws InvalidOffsetException { // OptionalB check
-        // addInc("C");
+         addInc("C");
         addInc("B");
         addInc("C");
 
@@ -1105,36 +1106,36 @@ private final AnnotationCreator annoCreator81LocOrgDateJob = new BaseAnnotationC
   @Override
   public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
     /* line 1 */
-    add(1, 6, "Location");
-    add(1, 15, "Location");
-    add(7, 15, "Location");
-    add(16, 24, "Organization");
+    add(0, 5, "Location");
+    add(0, 14, "Location");
+    add(6, 14, "Location");
+    add(15, 23, "Organization");
     FeatureMap feat = Factory.newFeatureMap();
     feat.put("month", "September");
-    add(25, 35, "Date", feat);
-    add(36, 53, "JobTitle");
+    add(24, 34, "Date", feat);
+    add(35, 52, "JobTitle");
     
     /* line 2 */
-    add(54, 59, "Location");
-    add(54, 68, "Location");
-    add(60, 68, "Location");
-    add(69, 77, "Organization");
+    add(53, 58, "Location");
+    add(53, 67, "Location");
+    add(59, 67, "Location");
+    add(68, 76, "Organization");
     feat = Factory.newFeatureMap();
     feat.put("month", "November");
-    add(78, 88, "Date", feat);
-    add(89, 100, "JobTitle");
+    add(77, 87, "Date", feat);
+    add(88, 99, "JobTitle");
     
     /* line 3 */
-    add(101, 107, "Location");
-    add(101, 110, "Location");
-    add(108, 110, "Location");
-    add(111, 115, "Organization");
+    add(100, 106, "Location");
+    add(100, 109, "Location");
+    add(107, 109, "Location");
+    add(110, 114, "Organization");
     
     feat = Factory.newFeatureMap();
     feat.put("month", "October");
-    add(116, 126, "Date", feat);
+    add(115, 125, "Date", feat);
     
-    add(127, 137, "JobTitle");
+    add(126, 136, "JobTitle");
     
     return as;
   }
@@ -1145,31 +1146,31 @@ private final AnnotationCreator annoCreator813Operators = new BaseAnnotationCrea
   public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
     FeatureMap feat = Factory.newFeatureMap();
     feat.put("string", "room");
-    add(1, 5, "Token", feat);
+    add(0, 4, "Token", feat);
     
     feat = Factory.newFeatureMap();
     feat.put("string", "qu\"oted");
-    add(6, 13, "Token", feat);
+    add(5, 12, "Token", feat);
     
     feat = Factory.newFeatureMap();
     feat.put("int", 101l);
-    add(14, 17, "Token", feat);
+    add(13, 16, "Token", feat);
     
     feat = Factory.newFeatureMap();
-    feat.put("int", -10);
-    add(18, 21, "Token", feat);
+    feat.put("int", -10l);
+    add(17, 20, "Token", feat);
     
     feat = Factory.newFeatureMap();
-    feat.put("double", 3.14f);
-    add(22, 26, "Token", feat);
+    feat.put("double", 3.14d);
+    add(21, 25, "Token", feat);
     
     feat = Factory.newFeatureMap();
-    feat.put("double", -273.15);
-    add(27, 34, "Token", feat);
+    feat.put("double", -273.15d);
+    add(26, 33, "Token", feat);
     
     feat = Factory.newFeatureMap();
     feat.put("string", "qu\\\"oted");
-    add(35, 43, "Token", feat);
+    add(34, 42, "Token", feat);
     return as;
   }
 };
@@ -1254,7 +1255,7 @@ private final AnnotationCreator annoCreator817Contexts = new BaseAnnotationCreat
       FeatureMap feat = Factory.newFeatureMap();
       feat.put("f1", "atext");
       feat.put("f2", "2");
-      feat.put("f3", 3);
+      feat.put("f3", 3l);
       add(2, 4, "A", feat);
 
       feat = Factory.newFeatureMap();
@@ -1286,14 +1287,14 @@ private final AnnotationCreator annoCreator817Contexts = new BaseAnnotationCreat
       feat = Factory.newFeatureMap();
       feat.put("f2", 2l);
       add(14, 16, "D", feat);
-
+      
       feat = Factory.newFeatureMap();
-      feat.put("ontology", "http://gate.ac.uk/tests/demo.owl");
+      feat.put("ontology", TestDocument.getTestServerName() + "tests/demo.owl");
       feat.put("class", "Businessman");
       add(16, 18, "D", feat);
 
       feat = Factory.newFeatureMap();
-      feat.put("ontology", "http://gate.ac.uk/tests/demo.owl");
+      feat.put("ontology", TestDocument.getTestServerName() + "tests/demo.owl");
       feat.put("class", "Country");
       add(18, 19, "D", feat);
       return as;
