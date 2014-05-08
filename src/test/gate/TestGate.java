@@ -171,7 +171,7 @@ public class TestGate {
         suite.addTest(TestJape.suite());
         
         //TODO fix these tests so that they work properly
-        //suite.addTest(TestConstraints.suite());
+        suite.addTest(TestConstraints.suite());
         
         suite.addTest(TestTemplate.suite());
         suite.addTest(TestDocument.suite());
@@ -183,16 +183,12 @@ public class TestGate {
         suite.addTest(TestDiffer.suite());
         suite.addTest(TestAnnotationMerging.suite());
         suite.addTest(TestClassificationMeasures.suite());
-//no longer needed as replaced by testPR
-//        suite.addTest(TestTokeniser.suite());
         suite.addTest(TestGazetteer.suite());
-//        suite.addTest(TestSplitterTagger.suite());
         suite.addTest(TestFeatureMap.suite());
         suite.addTest(TestTools.suite());
         suite.addTest(TestCreoleAnnotationHandler.suite());
         suite.addTest(TestPR.suite());
         suite.addTest(TestMorph.suite());
-        // suite.addTest(TestMaxentWrapper.suite());
 
         //test ontotext gazetteer
         suite.addTest(TestHashGazetteer.suite());
