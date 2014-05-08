@@ -56,12 +56,12 @@ Macro: RegExDe
     :abc.Result = {rule="EqualAndNotExistance"}
 
   Rule: OntoTest
-  ({D.ontology=="http://gate.ac.uk/tests/demo.owl", D.class=="Businessman"}):abc
+  ({D.class=="Businessman"}):abc
   -->
     :abc.Result = {rule="OntoTest"}
 
   Rule: OntoTest2
-  ({D.ontology=="http://gate.ac.uk/tests/demo.owl", D.class=="Location"}):abc
+  ({D.class=="Location"}):abc
   -->
     :abc.Result = {rule="OntoTest2"}
 
