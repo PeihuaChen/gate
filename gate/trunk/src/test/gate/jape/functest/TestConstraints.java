@@ -991,7 +991,7 @@ public class TestConstraints extends BaseJapeTests {
         addInc("F");
         addInc("B");
         addInc("B");
-        // addInc("B");
+        addInc("B");
         addInc("G");
         addInc("F");
         addInc("B");
@@ -1003,16 +1003,18 @@ public class TestConstraints extends BaseJapeTests {
         // ZeroToThreeC check - 1 C
         addInc("D");
         addInc("C");
-        // addInc("E");
+        addInc("E");
 
         // ZeroToThreeC check - 3 C
         addInc("D");
         addInc("C");
-        // addInc("C");
+        addInc("C");
         addInc("C");
         addInc("E");
 
-        // ZeroToThreeC check - 4 C = no match addInc("D"); addInc("C");
+        // ZeroToThreeC check - 4 C = no match
+        addInc("D");
+        addInc("C");
         addInc("C");
         addInc("C");
         addInc("C");
