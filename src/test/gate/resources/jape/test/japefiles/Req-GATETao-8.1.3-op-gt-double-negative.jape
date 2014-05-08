@@ -3,7 +3,7 @@ Options: control = appelt
 
 Rule:OpGreaterThan
 (
-	{Token.int > "-451.1"} | {Token.double > "-451.1"}
+	{Token.int > -451.1} | {Token.double > -451.1}
 ):bind 
 --> 
 :bind.SomeAnnotation = {rule="OpGreaterThan"}

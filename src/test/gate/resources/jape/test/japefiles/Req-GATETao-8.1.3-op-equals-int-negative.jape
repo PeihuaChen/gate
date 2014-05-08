@@ -3,7 +3,7 @@ Options: control = appelt
 
 Rule:OpEquals
 (
- 	{Token.int == "-10"} 
+ 	{Token.int == -10} 
 ):bind 
 --> 
 :bind.SomeAnnotation = {rule="OpEquals"}
