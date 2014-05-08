@@ -679,8 +679,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.5.txt";
     
     String[] expectedResults = {"PersonJobTitle1", "PersonJobTitle2"};
-    int[] expectedStartOffsets = {6, 13};
-    int[] expectedEndOffsets = {12, 21};
+    int[] expectedStartOffsets = {5, 12};
+    int[] expectedEndOffsets = {11, 20};
     
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator815MultipleActions);
   
@@ -698,8 +698,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.5.txt";
     
     String[] expectedResults = {"PersonJobTitle1", "PersonJobTitle2"};
-    int[] expectedStartOffsets = {36, 36};
-    int[] expectedEndOffsets = {50, 59};
+    int[] expectedStartOffsets = {5, 5};
+    int[] expectedEndOffsets = {11, 20};
     
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator815MultipleActions);
   }
@@ -1187,15 +1187,15 @@ private final AnnotationCreator annoCreator815MultipleActions = new BaseAnnotati
   @Override
   public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
     final String tp = "TempPerson";
-    add(1, 5, tp);
+    add(0, 4, tp);
     
     FeatureMap feats = Factory.newFeatureMap();
     feats.put("majorType", "jobtitle");
-    add(6,12, "Lookup", feats);
-    add(13, 21, tp);
+    add(5,11, "Lookup", feats);
+    add(12, 20, tp);
     
-    add(36, 50, "Lookup", feats);
-    add(36, 59, tp);
+    add(35, 49, "Lookup", feats);
+    add(35, 58, tp);
     
     return as;
   }
