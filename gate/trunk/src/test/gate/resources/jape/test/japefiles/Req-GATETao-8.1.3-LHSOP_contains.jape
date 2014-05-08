@@ -1,5 +1,5 @@
 Phase: Test
-Options: control = brill
+Options: control = appelt
 
 Rule:OpContains
 ({Location contains Location}):bind 
