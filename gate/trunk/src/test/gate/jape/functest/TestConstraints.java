@@ -596,8 +596,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.4.txt";
     
     String[] expectedResults = {"MetaLength"};
-    int[] expectedStartOffsets = {1};
-    int[] expectedEndOffsets = {61};
+    int[] expectedStartOffsets = {0};
+    int[] expectedEndOffsets = {60};
     
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator814MetaProps);
     }
@@ -614,8 +614,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.4.txt";
     
     String[] expectedResults = {"MetaString"};
-    int[] expectedStartOffsets = {1};
-    int[] expectedEndOffsets = {61};
+    int[] expectedStartOffsets = {0};
+    int[] expectedEndOffsets = {60};
     
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator814MetaProps);
   }
@@ -632,8 +632,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.4.txt";
     
     String[] expectedResults = {"MetaCleanString"};
-    int[] expectedStartOffsets = {1};
-    int[] expectedEndOffsets = {61};
+    int[] expectedStartOffsets = {0};
+    int[] expectedEndOffsets = {60};
     
     doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator814MetaProps);
   }
@@ -650,8 +650,8 @@ public class TestConstraints extends BaseJapeTests {
     final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.4.txt";
     
     String[] expectedResults = {"MetaRightString"};
-    int[] expectedStartOffsets = {1};
-    int[] expectedEndOffsets = {61};
+    int[] expectedStartOffsets = {0};
+    int[] expectedEndOffsets = {60};
 
     Set<Annotation> actualResults = doTest(docFilePath, japeFilePath, annoCreator814MetaProps);
     
@@ -1175,7 +1175,7 @@ private final AnnotationCreator annoCreator813Operators = new BaseAnnotationCrea
 private final  AnnotationCreator annoCreator814MetaProps = new BaseAnnotationCreator() {
   @Override
   public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
-    add(1, 61, "Span");
+    add(0, 60, "Span");
     return as;
   }
 };
