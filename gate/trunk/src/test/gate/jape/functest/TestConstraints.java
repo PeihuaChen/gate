@@ -320,6 +320,78 @@ public class TestConstraints extends BaseJapeTests {
   /**
    * GATE Tao: 8.1.3
    * 
+   * Operator: <
+   * Case: Integer
+   * 
+   * @throws Exception
+   */
+  public void test813OpLessThanIntegerNegative() throws Exception {
+    final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.3-op-lt-int-negative.jape";
+    final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
+    
+    String[] expectedResults = {"OpLessThan"};
+    int[] expectedStartOffsets = {17};
+    int[] expectedEndOffsets = {20};
+    doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
+  }
+  
+  /**
+   * GATE Tao: 8.1.3
+   * 
+   * Operator: <
+   * Case: Double
+   * 
+   * @throws Exception
+   */
+  public void test813OpLessThanDoubleNegative() throws Exception {
+    final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.3-op-lt-double-negative.jape";
+    final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
+    
+    String[] expectedResults = {"OpLessThan", "OpLessThan"};
+    int[] expectedStartOffsets = {17, 26};
+    int[] expectedEndOffsets = {20, 33};
+    doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
+  }
+  
+  /**
+   * GATE Tao: 8.1.3
+   * 
+   * Operator: <=
+   * Case: Integer
+   * 
+   * @throws Exception
+   */
+  public void test813OpLessEqualsIntegerNegative() throws Exception {
+    final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.3-op-le-int-negative.jape";
+    final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
+    
+    String[] expectedResults = {"OpLessThan"};
+    int[] expectedStartOffsets = {17};
+    int[] expectedEndOffsets = {20};
+    doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
+  }
+  
+  /**
+   * GATE Tao: 8.1.3
+   * 
+   * Operator: <=
+   * Case: Double
+   * 
+   * @throws Exception
+   */
+  public void test813OpLessEqualsDoubleNegative() throws Exception {
+    final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.3-op-le-double-negative.jape";
+    final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.3.txt";
+    
+    String[] expectedResults = {"OpLessThan"};
+    int[] expectedStartOffsets = {26};
+    int[] expectedEndOffsets = {33};
+    doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator813Operators);
+  }
+  
+  /**
+   * GATE Tao: 8.1.3
+   * 
    * Operator: ==
    * Case: Natural number
    * 
