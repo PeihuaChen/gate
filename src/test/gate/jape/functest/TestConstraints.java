@@ -229,6 +229,23 @@ public class TestConstraints extends BaseJapeTests {
   /**
    * GATE Tao: 8.1.3
    * 
+   * LHS Operators:  notWithin
+   * @throws Exception 
+   * 
+   */
+  public void test813OpNotWithin() throws Exception {
+    final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.3-LHSOP_notWithin.jape";
+    final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.5.txt";
+
+    String[] expectedResults = {"OpNotWithin"};
+    int[] expectedStartOffsets = {5};
+    int[] expectedEndOffsets = {11};
+    doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator815MultipleActions);
+  }
+  
+  /**
+   * GATE Tao: 8.1.3
+   * 
    * LHS Operators:  contains & within in document with no annotations
    * @throws Exception 
    * 
