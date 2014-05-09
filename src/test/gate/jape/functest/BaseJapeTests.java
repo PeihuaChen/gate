@@ -243,6 +243,7 @@ public abstract class BaseJapeTests extends TestCase {
 	if (ac != null)
 	    ac.annotate(doc);
 	Set<Annotation> orderedResults = runTransducer(doc, japeResourcePath, ontologyURL);
+	//DocumentStaxUtils.writeDocument(doc, new File("/home/mark/test"+(count++)+".xml"));
 	return orderedResults;
     }
 
