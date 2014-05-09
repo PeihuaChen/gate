@@ -246,6 +246,23 @@ public class TestConstraints extends BaseJapeTests {
   /**
    * GATE Tao: 8.1.3
    * 
+   * LHS Operators:  notContains
+   * @throws Exception 
+   * 
+   */
+  public void test813OpNotContains() throws Exception {
+    final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.3-LHSOP_notContains.jape";
+    final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.5.txt";
+
+    String[] expectedResults = {"OpNotContains","OpNotContains"};
+    int[] expectedStartOffsets = {0,12};
+    int[] expectedEndOffsets = {4,20};
+    doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator815MultipleActions);
+  }
+  
+  /**
+   * GATE Tao: 8.1.3
+   * 
    * LHS Operators:  contains & within in document with no annotations
    * @throws Exception 
    * 
