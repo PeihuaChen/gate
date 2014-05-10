@@ -834,10 +834,9 @@ public class GazetteerEditor extends AbstractVisualResource
             && !linearDefinition.getLists().contains(name);
         }
       });
-      String[] filenames = new String[files.length];
-      int i = 0;
-      for (File file : files) {
-        filenames[i++] = file.getName();
+      String[] filenames = new String[files == null ? 0 : files.length];
+      for (int i = 0; i < filenames.length; i++) {
+        filenames[i] = files[i].getName();
       }
       Arrays.sort(filenames, collator);
       newListComboBox.setModel(new DefaultComboBoxModel<String>(filenames));
