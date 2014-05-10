@@ -2,19 +2,19 @@
   <urlList class="gate.util.persistence.CollectionPersistence">
     <localList>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../Tools</urlString>
+        <urlString>$relpath$../../Tools/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../ANNIE</urlString>
+        <urlString>$relpath$../../ANNIE/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../Ontology_Tools</urlString>
+        <urlString>$relpath$../../Ontology_Tools/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
      <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../Ontology</urlString>
+        <urlString>$relpath$../../Ontology/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>      
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../Gazetteer_Ontology_Based</urlString>
+        <urlString>$relpath$../</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
     </localList>
     <collectionType>java.util.ArrayList</collectionType>
@@ -197,16 +197,31 @@
                     <mapType>gate.util.SimpleFeatureMapImpl</mapType>
                     <localMap>
                       <entry>
-                        <string>tokeniser</string>
-                        <gate.util.persistence.LanguageAnalyserPersistence reference="../../../../../../../../../gate.util.persistence.LanguageAnalyserPersistence"/>
+                        <string>rootFinderApplication</string>
+                        <gate.util.persistence.SerialAnalyserControllerPersistence>
+                          <prList class="gate.util.persistence.CollectionPersistence">
+                            <localList>
+                              <gate.util.persistence.LanguageAnalyserPersistence reference="../../../../../../../../../../../../gate.util.persistence.LanguageAnalyserPersistence"/>
+                              <gate.util.persistence.LanguageAnalyserPersistence reference="../../../../../../../../../../../../gate.util.persistence.LanguageAnalyserPersistence[3]"/>
+                              <gate.util.persistence.PRPersistence reference="../../../../../../../../../../../../gate.util.persistence.PRPersistence[2]"/>
+                            </localList>
+                            <collectionType>java.util.ArrayList</collectionType>
+                          </prList>
+                          <resourceType>gate.creole.SerialAnalyserController</resourceType>
+                          <resourceName>Root finder application for OntoRootGazetteer</resourceName>
+                          <initParams class="gate.util.persistence.MapPersistence">
+                            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+                            <localMap/>
+                          </initParams>
+                          <features class="gate.util.persistence.MapPersistence">
+                            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+                            <localMap/>
+                          </features>
+                        </gate.util.persistence.SerialAnalyserControllerPersistence>
                       </entry>
                       <entry>
                         <string>caseSensitive</string>
                         <boolean>false</boolean>
-                      </entry>
-                      <entry>
-                        <string>morpher</string>
-                        <gate.util.persistence.PRPersistence reference="../../../../../../../../../gate.util.persistence.PRPersistence[2]"/>
                       </entry>
                       <entry>
                         <string>ontology</string>
@@ -229,10 +244,6 @@
                             </localMap>
                           </initParams>
                         </gate.util.persistence.LRPersistence>
-                      </entry>
-                      <entry>
-                        <string>posTagger</string>
-                        <gate.util.persistence.LanguageAnalyserPersistence reference="../../../../../../../../../gate.util.persistence.LanguageAnalyserPersistence[3]"/>
                       </entry>
                       <entry>
                         <string>useResourceUri</string>
