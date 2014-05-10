@@ -12,11 +12,13 @@ package gate.clone.ql;
 
 import gate.Annotation;
 import gate.Corpus;
+import gate.CorpusController;
 import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
 import gate.Resource;
+import gate.Utils;
 import gate.clone.ql.regex.ExpressionFinder;
 import gate.creole.ANNIEConstants;
 import gate.creole.ExecutionException;
@@ -27,12 +29,19 @@ import gate.creole.gazetteer.DefaultGazetteer;
 import gate.creole.gazetteer.FSMState;
 import gate.creole.gazetteer.LinearDefinition;
 import gate.creole.gazetteer.Lookup;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.HiddenCreoleParameter;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
 import gate.creole.morph.Morph;
 import gate.creole.ontology.InvalidURIException;
 import gate.creole.ontology.Ontology;
 import gate.creole.tokeniser.DefaultTokeniser;
+import gate.util.InvalidOffsetException;
 import gate.util.OffsetComparator;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,18 +57,23 @@ import org.apache.commons.logging.LogFactory;
 /**
  * @author Danica Damljanovic
  */
+@CreoleResource(name = "Onto Root Gazetteer",
+    comment = "An ontology lookup component",
+    helpURL = "http://gate.ac.uk/userguide/sec:gazetteers:ontoRootGaz",
+    icon = "gazetteer")
 public class OntoRootGaz extends DefaultGazetteer {
   private static final long serialVersionUID = 0L;
 
+  @Deprecated
   protected POSTagger posTagger;
 
+  @Deprecated
   protected DefaultTokeniser tokeniser;
 
-  protected FakeSentenceSplitter sentenceSplitter;
-
+  @Deprecated
   protected Morph morpher;
 
-  protected SerialAnalyserController rootFinderApplication;
+  protected CorpusController rootFinderApplication;
 
   protected OffsetComparator offsetComparator;
 
@@ -132,6 +146,10 @@ public class OntoRootGaz extends DefaultGazetteer {
     return typesToConsider;
   }
 
+  @RunTime
+  @CreoleParameter(defaultValue = "class;instance;property",
+      comment = "The list of types to be included. Possible values: "
+          + "instance, class, property")
   public void setTypesToConsider(Set<String> typesToConsider) {
     this.typesToConsider = typesToConsider;
   }
@@ -160,19 +178,21 @@ public class OntoRootGaz extends DefaultGazetteer {
     long startedInit = System.currentTimeMillis();
     List<String> propertiesToIncludeList = new ArrayList<String>();
     List<String> propertiesToExcludeList = new ArrayList<String>();
-    if(tokeniser == null)
-      throw new ResourceInstantiationException("No tokeniser provided!");
-    if(sentenceSplitter == null) {
-      sentenceSplitter =
-          (FakeSentenceSplitter)Factory
-              .createResource("gate.clone.ql.FakeSentenceSplitter");
+    if(rootFinderApplication == null) {
+      if(tokeniser != null && posTagger != null & morpher != null) {
+        logger.warn("No rootFinderApplication provided, but found old-style "
+            + "separate parameters for tokeniser, POS tagger and morpher. "
+            + "Constructing an application from these.");
+        rootFinderApplication =
+            (CorpusController)Factory.createResource(
+                "gate.creole.SerialAnalyserController",
+                Factory.newFeatureMap(), Factory.newFeatureMap(),
+                "Root finder application for " + getName());
+        ((SerialAnalyserController)rootFinderApplication).add(tokeniser);
+        ((SerialAnalyserController)rootFinderApplication).add(posTagger);
+        ((SerialAnalyserController)rootFinderApplication).add(morpher);
+      }
     }
-    if(posTagger == null)
-      throw new ResourceInstantiationException(
-          "No Part-of-speach Tagger provided!");
-    if(morpher == null)
-      throw new ResourceInstantiationException(
-          "No Morphological Analyzer provided!");
     if(ontology == null) {
       throw new ResourceInstantiationException("No ontology provided!");
     } else {
@@ -191,17 +211,6 @@ public class OntoRootGaz extends DefaultGazetteer {
     }
     fsmStates = new HashSet<FSMState>();
     initialState = new FSMState(this);
-    /* set the hidden feature to true */
-    FeatureMap features = Factory.newFeatureMap();
-    FeatureMap parameters = Factory.newFeatureMap();
-    Gate.setHiddenAttribute(features, true);
-    rootFinderApplication =
-        (SerialAnalyserController)Factory.createResource(
-            "gate.creole.SerialAnalyserController", parameters, features);
-    rootFinderApplication.add(tokeniser);
-    rootFinderApplication.add(sentenceSplitter);
-    rootFinderApplication.add(posTagger);
-    rootFinderApplication.add(morpher);
     /* create a corpus and hide it inside the GATE GUI */
     FeatureMap corpusParams = Factory.newFeatureMap();
     corpusParams.put("name", this.getClass().getCanonicalName());
@@ -210,7 +219,6 @@ public class OntoRootGaz extends DefaultGazetteer {
     applicationCorpus =
         (Corpus)Factory.createResource("gate.corpora.CorpusImpl", corpusParams,
             corpusFeatures);
-    rootFinderApplication.setCorpus(applicationCorpus);
     offsetComparator = new OffsetComparator();
     /*
      * move properties to include and exclude from the list of CSV to the actual
@@ -517,14 +525,6 @@ public class OntoRootGaz extends DefaultGazetteer {
     /* release GATE resources */
     Factory.deleteResource(applicationCorpus);
     applicationCorpus = null;
-    rootFinderApplication.remove(morpher);
-    rootFinderApplication.remove(posTagger);
-    rootFinderApplication.remove(sentenceSplitter);
-    Factory.deleteResource(sentenceSplitter);
-    sentenceSplitter = null;
-    rootFinderApplication.remove(tokeniser);
-    Factory.deleteResource(rootFinderApplication);
-    rootFinderApplication = null;
     long currentTime = System.currentTimeMillis();
     logger.info("OntoRootGaz initialized for:" + (currentTime - startedInit)
         + " ms");
@@ -660,9 +660,21 @@ public class OntoRootGaz extends DefaultGazetteer {
           aDocument =
               (Document)Factory.createResource("gate.corpora.DocumentImpl",
                   docParams, docFeatures);
+          // add spanning Sentence annotation
+          aDocument.getAnnotations().add(Utils.start(aDocument),
+              Utils.end(aDocument), SENTENCE_ANNOTATION_TYPE,
+              Factory.newFeatureMap());
           applicationCorpus.add(aDocument);
-          rootFinderApplication.execute();
-        } catch(ExecutionException ee) {
+          // be nice - save the old corpus parameter from the RFA and restore
+          // it after running
+          Corpus rootFinderCorpus = rootFinderApplication.getCorpus();
+          try {
+            rootFinderApplication.setCorpus(applicationCorpus);
+            rootFinderApplication.execute();
+          } finally {
+            rootFinderApplication.setCorpus(rootFinderCorpus);
+          }
+        } catch(ExecutionException | InvalidOffsetException ee) {
           throw new ResourceInstantiationException(ee);
         }
         Iterator<Document> it = applicationCorpus.iterator();
@@ -721,34 +733,41 @@ public class OntoRootGaz extends DefaultGazetteer {
     return lookupsToBeReturned;
   }
 
-  public Morph getMorpher() {
-    return morpher;
-  }
-
+  @Deprecated
   public void setMorpher(Morph morpher) {
     this.morpher = morpher;
   }
 
-  public POSTagger getPosTagger() {
-    return posTagger;
-  }
-
+  @Deprecated
   public void setPosTagger(POSTagger posTagger) {
     this.posTagger = posTagger;
   }
 
-  public DefaultTokeniser getTokeniser() {
-    return tokeniser;
-  }
-
+  @Deprecated
   public void setTokeniser(DefaultTokeniser tokeniser) {
     this.tokeniser = tokeniser;
+  }
+
+  public CorpusController getRootFinderApplication() {
+    return rootFinderApplication;
+  }
+
+  @CreoleParameter(comment = "Application to find the roots that go into the "
+      + "gazetteer.  Executed over a document containing a single "
+      + SENTENCE_ANNOTATION_TYPE + " annotation spanning the whole document, "
+      + "this application should produce Token annotations with category (POS "
+      + "tag) and root (morphological root) features.  Typically that means a "
+      + "tokeniser, POS tagger and morphological analyser, but any "
+      + "application producing the correct features will work")
+  public void setRootFinderApplication(CorpusController rootFinderApplication) {
+    this.rootFinderApplication = rootFinderApplication;
   }
 
   public Ontology getOntology() {
     return ontology;
   }
 
+  @CreoleParameter(comment = "The ontology to be used")
   public void setOntology(Ontology ontology) {
     this.ontology = ontology;
   }
@@ -757,6 +776,8 @@ public class OntoRootGaz extends DefaultGazetteer {
     return considerProperties;
   }
 
+  @CreoleParameter(comment = "Should this gazetteer consider properties or not",
+      defaultValue = "true")
   public void setConsiderProperties(Boolean considerProperties) {
     this.considerProperties = considerProperties;
   }
@@ -765,6 +786,8 @@ public class OntoRootGaz extends DefaultGazetteer {
     return useResourceUri;
   }
 
+  @CreoleParameter(comment = "Should this gazetteer use resource URIs or not",
+      defaultValue = "true")
   public void setUseResourceUri(Boolean useResourceUri) {
     this.useResourceUri = useResourceUri;
   }
@@ -780,6 +803,8 @@ public class OntoRootGaz extends DefaultGazetteer {
    * @param separateCamelCasedWords
    *          the separateCamelCasedWords to set
    */
+  @CreoleParameter(comment = "Should this gazetteer separate camelCased "
+      + "words, e.g. ProjectName into Project Name", defaultValue = "true")
   public void setSeparateCamelCasedWords(Boolean separateCamelCasedWords) {
     this.separateCamelCasedWords = separateCamelCasedWords;
   }
@@ -795,6 +820,9 @@ public class OntoRootGaz extends DefaultGazetteer {
    * @param propertiesToExclude
    *          the propertiesToExclude to set
    */
+  @Optional
+  @CreoleParameter(comment = "The list of property names to be excluded, "
+      + "comma separated", defaultValue = "")
   public void setPropertiesToExclude(String propertiesToExclude) {
     this.propertiesToExclude = propertiesToExclude;
   }
@@ -810,6 +838,9 @@ public class OntoRootGaz extends DefaultGazetteer {
    * @param propertiesToInclude
    *          the propertiesToInclude to set
    */
+  @Optional
+  @CreoleParameter(comment = "The list of property names to be included, "
+      + "comma separated", defaultValue = "")
   public void setPropertiesToInclude(String propertiesToInclude) {
     this.propertiesToInclude = propertiesToInclude;
   }
@@ -824,6 +855,14 @@ public class OntoRootGaz extends DefaultGazetteer {
   /**
    * @param considerHeuristicRules
    */
+  @CreoleParameter(comment = "Should this gazetteer consider several "
+      + "heuristic rules or not: the words containing spaces will be split; "
+      + "for example, if 'pos tagger for spanish' would be analysed, 'for' "
+      + "would be consider as a stop word; heuristically derived would be "
+      + "'pos tagger' and this would be further used to add 'pos tagger' with "
+      + "heuristical level 0, and 'tagger' with hl 1 to the gazetteer list; "
+      + "at runtime lower heuristical level should be prefered",
+      defaultValue = "false")
   public void setConsiderHeuristicRules(Boolean considerHeuristicRules) {
     this.considerHeuristicRules = considerHeuristicRules;
   }
@@ -837,5 +876,21 @@ public class OntoRootGaz extends DefaultGazetteer {
    */
   public LinearDefinition getLinearDefinition() {
     return new LinearDefinition();
+  }
+
+  // hidden parameters
+  @HiddenCreoleParameter
+  public void setListsURL(URL u) {
+    super.setListsURL(u);
+  }
+
+  @HiddenCreoleParameter
+  public void setGazetteerFeatureSeparator(String sep) {
+    super.setGazetteerFeatureSeparator(sep);
+  }
+
+  @HiddenCreoleParameter
+  public void setEncoding(String encoding) {
+    super.setEncoding(encoding);
   }
 }
