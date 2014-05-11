@@ -38,7 +38,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 
-@CreoleResource(name = "Twitter Corpus Populator", tool = true, autoinstances = @AutoInstance)
+@CreoleResource(name = "Twitter Corpus Populator", tool = true, autoinstances = @AutoInstance,
+    comment = "Populate a corpus from Twitter JSON containing multiple Tweets",
+    helpURL = "http://gate.ac.uk/userguide/sec:social:twitter:format")
 public class Population extends ResourceHelper  {
 
   private static final long serialVersionUID = 1443073039199794668L;

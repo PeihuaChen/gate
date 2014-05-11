@@ -33,7 +33,7 @@ import org.apache.log4j.Logger;
  */
 @CreoleResource(name = "OpenNLP Sentence Splitter", 
     comment = "Sentence splitter using an OpenNLP maxent model",
-    helpURL = "http://gate.ac.uk/sale/tao/splitch21.html#sec:misc-creole:opennlp")
+    helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:opennlp")
 public class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 
   

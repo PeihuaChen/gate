@@ -36,7 +36,8 @@ import gate.creole.metadata.RunTime;
 import gate.crowdsource.rest.CrowdFlowerClient;
 
 @CreoleResource(name = "Entity Classification Results Importer", comment = "Import judgments from a CrowdFlower job created by "
-        + "the Entity Classification Job Builder as GATE annotations.")
+        + "the Entity Classification Job Builder as GATE annotations.",
+    helpURL = "http://gate.ac.uk/userguide/sec:crowd:classification:import")
 public class EntityClassificationResultsImporter
                                                 extends
                                                   AbstractLanguageAnalyser {

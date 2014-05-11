@@ -17,7 +17,8 @@ import gate.creole.metadata.CreoleResource;
 
 import java.net.URL;
 
-@CreoleResource(name = "Penn BioTagger: Malignancy", icon = "bio.png", helpURL = "http://gate.ac.uk/userguide/sec:domain-creole:biomed:pennbio")
+@CreoleResource(name = "Penn BioTagger: Malignancy", icon = "bio.png",
+    comment = "Penn BioTagger for malignancy types")
 public class MalignancyTagger extends AbstractTagger {
 
   public MalignancyTagger() {

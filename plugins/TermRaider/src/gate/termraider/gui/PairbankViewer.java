@@ -33,6 +33,7 @@ import javax.swing.table.AbstractTableModel;
 
 @CreoleResource(name = "Pairbank Viewer",
         comment = "viewer for the TermRaider Pairbank",
+        helpURL = "http://gate.ac.uk/userguide/sec:creole:termraider",
         guiType = GuiType.LARGE,
         mainViewer = true,
         resourceDisplayed = "gate.termraider.bank.AbstractPairbank")

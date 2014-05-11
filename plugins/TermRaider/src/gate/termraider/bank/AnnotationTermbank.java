@@ -33,7 +33,8 @@ import java.util.Set;
 
 @CreoleResource(name = "AnnotationTermbank",
     icon = "termbank-lr.png",
-    comment = "TermRaider Termbank derived from document annotations")
+    comment = "TermRaider Termbank derived from document annotations",
+    helpURL = "http://gate.ac.uk/userguide/sec:creole:termraider:annotation")
 public class AnnotationTermbank extends AbstractTermbank
     implements ActionsPublisher  {
 

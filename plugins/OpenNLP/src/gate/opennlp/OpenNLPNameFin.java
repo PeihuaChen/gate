@@ -34,7 +34,7 @@ import gate.util.InvalidOffsetException;
  */
 @CreoleResource(name = "OpenNLP NER", 
     comment = "NER PR using a set of OpenNLP maxent models",
-    helpURL = "http://gate.ac.uk/sale/tao/splitch21.html#sec:misc-creole:opennlp")
+    helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:opennlp")
 public class OpenNLPNameFin extends AbstractLanguageAnalyser {
 
   private static final long serialVersionUID = -5507338627058320125L;

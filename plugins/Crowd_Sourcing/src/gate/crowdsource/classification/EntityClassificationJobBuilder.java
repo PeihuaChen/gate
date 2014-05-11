@@ -39,7 +39,8 @@ import gate.gui.ActionsPublisher;
 import org.apache.log4j.Logger;
 
 @CreoleResource(name = "Entity Classification Job Builder",
-   comment = "Build a CrowdFlower job asking users to select the right label for entities")
+   comment = "Build a CrowdFlower job asking users to select the right label for entities",
+   helpURL = "http://gate.ac.uk/userguide/sec:crowd:classification")
 public class EntityClassificationJobBuilder extends AbstractLanguageAnalyser implements ActionsPublisher {
 
   private static final Logger log = Logger.getLogger(EntityClassificationJobBuilder.class);

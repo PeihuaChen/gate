@@ -53,7 +53,9 @@ import java.util.Set;
 
 import com.ontotext.russie.RussIEConstants;
 
-@CreoleResource(name = "Russian POS Tagger", icon = "pos-tagger")
+@CreoleResource(name = "Russian POS Tagger", icon = "pos-tagger",
+    comment = "Part-of-speech tagger for Russian",
+    helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:language-plugins:russian")
 @SuppressWarnings({"rawtypes","unchecked"})
 public class POSTagger extends gate.creole.AbstractLanguageAnalyser implements
   RussIEConstants {

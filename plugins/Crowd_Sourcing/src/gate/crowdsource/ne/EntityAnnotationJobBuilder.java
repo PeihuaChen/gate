@@ -33,7 +33,10 @@ import java.util.List;
 
 import javax.swing.Action;
 
-@CreoleResource(name = "Entity Annotation Job Builder", comment = "Build a CrowdFlower job asking users to annotate entities within a snippet of text")
+@CreoleResource(name = "Entity Annotation Job Builder",
+    comment = "Build a CrowdFlower job asking users to annotate entities "
+       + "within a snippet of text",
+    helpURL = "http://gate.ac.uk/userguide/sec:crowd:annotation")
 public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser
                                                                         implements
                                                                         ActionsPublisher {

@@ -34,7 +34,8 @@ import java.util.Set;
 
 @CreoleResource(name = "Termbank Score Copier",
     icon = "termbank-lr.png",
-    comment = "Copy scores from Termbanks back to their source annotations")
+    comment = "Copy scores from Termbanks back to their source annotations",
+    helpURL = "http://gate.ac.uk/userguide/sec:creole:termraider:copier")
 public class TermScoreCopier extends AbstractLanguageAnalyser
   implements  ProcessingResource {
 

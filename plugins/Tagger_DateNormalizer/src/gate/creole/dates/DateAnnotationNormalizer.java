@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 import mark.util.DateParser;
 import mark.util.ParsePositionEx;
 
-@CreoleResource(name = "Date Annotation Normalizer", icon = "date-normalizer.png", comment = "provides normalized values for all existing date annotations")
+@CreoleResource(name = "Date Annotation Normalizer", icon = "date-normalizer.png", comment = "provides normalized values for all existing date annotations", helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:datenormalizer")
 public class DateAnnotationNormalizer extends DateNormalizer {
 
   private String annotationFeature;

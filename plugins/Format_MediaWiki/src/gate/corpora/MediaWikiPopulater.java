@@ -44,7 +44,10 @@ import javax.swing.JFileChooser;
 
 import org.xml.sax.SAXException;
 
-@CreoleResource(name = "MediaWiki Corpus Populater", tool = true, autoinstances = @AutoInstance)
+@CreoleResource(name = "MediaWiki Corpus Populater", tool = true,
+    autoinstances = @AutoInstance,
+    comment = "Populate a corpus from a MediaWiki XML dump",
+    helpURL = "http://gate.ac.uk/userguide/sec:creole:mediawiki")
 public class MediaWikiPopulater extends ResourceHelper {
 
   private static final long serialVersionUID = -2505026690286047751L;

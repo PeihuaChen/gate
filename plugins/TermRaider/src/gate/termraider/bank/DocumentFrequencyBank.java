@@ -36,7 +36,8 @@ import org.apache.commons.lang.StringEscapeUtils;
 
 @CreoleResource(name = "DocumentFrequencyBank",
 icon = "termbank-lr.png",
-comment = "Document frequency counter derived from corpora and other DFBs")
+comment = "Document frequency counter derived from corpora and other DFBs",
+helpURL = "http://gate.ac.uk/userguide/sec:creole:termraider:docfrequency")
 public class DocumentFrequencyBank extends AbstractTermbank
 implements ActionsPublisher{
   

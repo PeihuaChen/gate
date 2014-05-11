@@ -31,7 +31,8 @@ import java.util.Set;
 
 @CreoleResource(name = "PMI Bank",
         icon = "termbank-lr.png",
-        comment = "Pointwise Mutual Information from corpora")
+        comment = "Pointwise Mutual Information from corpora",
+        helpURL = "http://gate.ac.uk/userguide/sec:creole:termraider:pmi")
 
 public class PMIBank extends AbstractPairbank
     implements ActionsPublisher  {

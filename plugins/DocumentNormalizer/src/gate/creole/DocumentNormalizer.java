@@ -27,7 +27,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@CreoleResource
+@CreoleResource(name = "Document normalizer",
+    comment = "Normalize document content to remove \"smart quotes\" etc.",
+    helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:doc-normalizer")
 public class DocumentNormalizer extends AbstractLanguageAnalyser {
 
   private static final long serialVersionUID = -6780562970645480555L;

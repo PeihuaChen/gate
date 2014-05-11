@@ -36,7 +36,8 @@ import java.util.Set;
 
 @CreoleResource(name = "TfIdfTermbank",
         icon = "termbank-lr.png",
-        comment = "TermRaider Termbank derived from vectors in document features")
+        comment = "TermRaider Termbank derived from vectors in document features",
+        helpURL = "http://gate.ac.uk/userguide/sec:creole:termraider:tfidf")
 
 public class TfIdfTermbank extends AbstractTermbank
     implements ActionsPublisher  {

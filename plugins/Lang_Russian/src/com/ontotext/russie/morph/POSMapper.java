@@ -27,7 +27,9 @@ import java.util.StringTokenizer;
 
 import com.ontotext.russie.RussIEConstants;
 
-@CreoleResource(name = "POS Mapper")
+@CreoleResource(name = "POS Mapper",
+    comment = "Map complex Russian morphology tags into simpler POS categories",
+    helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:language-plugins:russian")
 public class POSMapper extends AbstractLanguageAnalyser implements
   RussIEConstants {
 

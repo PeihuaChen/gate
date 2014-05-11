@@ -29,7 +29,7 @@ import gate.util.GateRuntimeException;
 
 import pt.tumba.spell.*;
 
-@CreoleResource(name = "Tweet Normaliser", comment = "Normalise texts in tweets (convert into standard English spelling mistakes, colloquialisms, typing variations and so on)")
+@CreoleResource(name = "Tweet Normaliser", comment = "Normalise texts in tweets (convert into standard English spelling mistakes, colloquialisms, typing variations and so on)", helpURL = "http://gate.ac.uk/userguide/sec:social:twitter:prs")
 public class Normaliser extends AbstractLanguageAnalyser {
 
   private static final long serialVersionUID = -4139489923193104429L;

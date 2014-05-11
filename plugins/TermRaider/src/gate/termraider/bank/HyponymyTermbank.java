@@ -34,7 +34,8 @@ import java.util.Set;
 
 @CreoleResource(name = "HyponymyTermbank",
         icon = "termbank-lr.png",
-        comment = "TermRaider Termbank derived from head/string hyponymy")
+        comment = "TermRaider Termbank derived from head/string hyponymy",
+        helpURL = "http://gate.ac.uk/userguide/sec:creole:termraider:hyponymy")
 
 public class HyponymyTermbank extends AbstractTermbank
     implements ActionsPublisher  {

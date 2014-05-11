@@ -65,7 +65,9 @@ import com.ontotext.russie.RussIEConstants;
  * @author borislav popov
  * @version 1.0
  */
-@CreoleResource(name = "Russian Gazetteer", icon = "shefGazetteer")
+@CreoleResource(name = "Russian Gazetteer", icon = "shefGazetteer",
+    comment = "Customised version of the hash gazetteer",
+    helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:language-plugins:russian")
 @SuppressWarnings({"rawtypes","unchecked"})
 public class RussGazetteer extends AbstractGazetteer implements RussIEConstants {
 

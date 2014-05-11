@@ -63,6 +63,7 @@ import org.xhtmlrenderer.simple.XHTMLPanel;
 
 @CreoleResource(name = "Termbank Viewer",
         comment = "viewer for the TermRaider Termbank",
+        helpURL = "http://gate.ac.uk/userguide/sec:creole:termraider",
         guiType = GuiType.LARGE,
         mainViewer = true,
         resourceDisplayed = "gate.termraider.bank.AbstractTermbank")

@@ -22,7 +22,7 @@ import javax.swing.RepaintManager;
 import org.jdesktop.swinghelper.debug.CheckThreadViolationRepaintManager;
 import org.jdesktop.swinghelper.debug.EventDispatchThreadHangMonitor;
 
-@CreoleResource(tool = true, isPrivate = true, autoinstances = @AutoInstance, name = "EDT Monitor")
+@CreoleResource(tool = true, isPrivate = true, autoinstances = @AutoInstance, name = "EDT Monitor", helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:dev-tools", comment = "Warns whenever an AWT component is updated from anywhere other than the event dispatch thread")
 public class EDTMonitor extends AbstractResource {
   private static final long serialVersionUID = -549306599972622831L;
 

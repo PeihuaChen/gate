@@ -51,7 +51,9 @@ import com.ontotext.russie.morph.SuffixNest;
 import com.ontotext.russie.morph.SuffixPool;
 import com.ontotext.russie.morph.TypePool;
 
-@CreoleResource(name = "Inflectional gazetteer")
+@CreoleResource(name = "Inflectional gazetteer",
+    comment = "Gazetteer with support for inflectional morphology",
+    helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:language-plugins:russian")
 @SuppressWarnings({"rawtypes","unchecked"})
 public class InflectionalGazetteer extends AbstractLanguageAnalyser implements
   RussIEConstants {

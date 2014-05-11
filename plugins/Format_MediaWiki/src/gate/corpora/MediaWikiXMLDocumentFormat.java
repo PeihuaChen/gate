@@ -48,7 +48,7 @@ import org.xml.sax.SAXException;
  * @author Mark A. Greenwood
  */
 @Deprecated
-@CreoleResource(name = "MediaWiki XML Document Format", isPrivate = true, autoinstances = {@AutoInstance(hidden = true)})
+@CreoleResource(name = "MediaWiki XML Document Format", isPrivate = true, autoinstances = {@AutoInstance(hidden = true)}, comment = "Deprecated MediaWiki importer")
 public class MediaWikiXMLDocumentFormat extends NekoHtmlDocumentFormat {
 
   private static final long serialVersionUID = 5954146546655770283L;

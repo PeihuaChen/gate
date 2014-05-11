@@ -31,7 +31,7 @@ import javax.swing.Action;
 import javax.swing.UIManager;
 
 @SuppressWarnings("serial")
-@CreoleResource(tool = true, isPrivate = true, autoinstances = @AutoInstance, name = "The Duplicator")
+@CreoleResource(tool = true, isPrivate = true, autoinstances = @AutoInstance, name = "The Duplicator", helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:dev-tools", comment = "Duplicate any resource with a right click menu option")
 public class TheDuplicator extends ResourceHelper {
 
   @Override
