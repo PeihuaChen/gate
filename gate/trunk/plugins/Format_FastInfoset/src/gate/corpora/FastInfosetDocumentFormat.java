@@ -45,7 +45,7 @@ import com.sun.xml.fastinfoset.sax.SAXDocumentParser;
 import com.sun.xml.fastinfoset.stax.StAXDocumentParser;
 import com.sun.xml.fastinfoset.stax.StAXManager;
 
-@CreoleResource(name = "Fast Infoset Document Format", isPrivate = true, autoinstances = {@AutoInstance(hidden = true)})
+@CreoleResource(name = "Fast Infoset Document Format", isPrivate = true, autoinstances = {@AutoInstance(hidden = true)}, comment = "Format parser for GATE XML stored in the binary FastInfoset format", helpURL = "http://gate.ac.uk/userguide/sec:creole:fastinfoset")
 public class FastInfosetDocumentFormat extends TextualDocumentFormat {
 
   private static final long serialVersionUID = -2394353168913311584L;

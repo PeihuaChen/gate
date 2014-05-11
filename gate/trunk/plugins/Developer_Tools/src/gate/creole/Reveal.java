@@ -34,7 +34,7 @@ import javax.swing.Action;
 import javax.swing.UIManager;
 
 @SuppressWarnings("serial")
-@CreoleResource(tool = true, isPrivate = true, autoinstances = @AutoInstance, name = "Show/Hide Resources")
+@CreoleResource(tool = true, isPrivate = true, autoinstances = @AutoInstance, name = "Show/Hide Resources", helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:dev-tools", comment = "Show resources that would otherwise be hidden, e.g. resources created for internal use by other resources")
 public class Reveal extends ResourceHelper implements ActionsPublisher {
   private List<Action> actions;
 

@@ -53,7 +53,7 @@ import mark.util.ParsePositionEx;
  *      GATE User Guide</a>
  * @author Mark A. Greenwood
  */
-@CreoleResource(name = "Date Normalizer", interfaceName = "gate.ProcessingResource", icon = "date-normalizer.png", comment = "provides normalized values for all known dates")
+@CreoleResource(name = "Date Normalizer", interfaceName = "gate.ProcessingResource", icon = "date-normalizer.png", comment = "provides normalized values for all known dates", helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:datenormalizer")
 public class DateNormalizer extends AbstractLanguageAnalyser {
   private static final long serialVersionUID = -6580533128028166284L;
 

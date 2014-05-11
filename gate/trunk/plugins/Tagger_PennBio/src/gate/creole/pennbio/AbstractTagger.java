@@ -27,6 +27,7 @@ import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
 import gate.util.OffsetComparator;
@@ -37,6 +38,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+@CreoleResource(helpURL = "http://gate.ac.uk/userguide/sec:domain-creole:biomed:pennbio")
 public abstract class AbstractTagger extends AbstractLanguageAnalyser {
 
   protected String type, inputASName, outputASName;

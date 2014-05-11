@@ -35,7 +35,7 @@ import org.apache.log4j.Logger;
  */
 @CreoleResource(name = "OpenNLP POS Tagger", 
     comment = "POS Tagger using an OpenNLP maxent model",
-    helpURL = "http://gate.ac.uk/sale/tao/splitch21.html#sec:misc-creole:opennlp")
+    helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:opennlp")
 public class OpenNlpPOS extends AbstractLanguageAnalyser {
 
   private static final long serialVersionUID = 4010938787910114221L;

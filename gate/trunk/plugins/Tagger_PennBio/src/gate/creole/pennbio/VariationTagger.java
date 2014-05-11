@@ -17,7 +17,8 @@ import gate.creole.metadata.CreoleResource;
 
 import java.net.URL;
 
-@CreoleResource(name = "Penn BioTagger: Variation", icon = "bio.png", helpURL = "http://gate.ac.uk/userguide/sec:domain-creole:biomed:pennbio")
+@CreoleResource(name = "Penn BioTagger: Variation", icon = "bio.png",
+    comment = "Penn BioTagger for variations")
 public class VariationTagger extends AbstractTagger {
 
   public VariationTagger() {

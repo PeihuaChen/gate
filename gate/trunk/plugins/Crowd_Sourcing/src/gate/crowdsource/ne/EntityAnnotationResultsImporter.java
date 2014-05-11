@@ -40,7 +40,8 @@ import gate.util.InvalidOffsetException;
 
 @CreoleResource(name = "Entity Annotation Results Importer",
 comment = "Import judgments from a CrowdFlower job created by "
-        + "the Entity Annotation Job Builder as GATE annotations.")
+        + "the Entity Annotation Job Builder as GATE annotations.",
+helpURL = "http://gate.ac.uk/userguide/sec:crowd:annotation:import")
 public class EntityAnnotationResultsImporter
                                                 extends
                                                   AbstractLanguageAnalyser {

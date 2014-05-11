@@ -35,7 +35,8 @@ import com.textrazor.annotations.Entity;
  * @author Ian Roberts
  */
 @CreoleResource(name = "TextRazor Service PR",
-  comment = "Runs the TextRazor annotation service (http://textrazor.com) on a GATE document")
+  comment = "Runs the TextRazor annotation service (http://textrazor.com) on a GATE document",
+  helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:textrazor")
 public class TextRazorServicePR extends gate.creole.AbstractLanguageAnalyser
   implements ProgressListener {
 

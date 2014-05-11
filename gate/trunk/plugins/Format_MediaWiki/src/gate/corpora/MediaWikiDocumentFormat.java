@@ -37,7 +37,9 @@ import info.bliki.wiki.model.WikiModel;
  * @author Mark A. Greenwood
  */
 @CreoleResource(name = "MediaWiki Document Format", isPrivate = true,
-    autoinstances = {@AutoInstance(hidden = true)})
+    autoinstances = {@AutoInstance(hidden = true)},
+    comment = "Document format for parsing MediaWiki markup",
+    helpURL = "http://gate.ac.uk/userguide/sec:creole:mediawiki")
 public class MediaWikiDocumentFormat extends NekoHtmlDocumentFormat {
 
   private static final long serialVersionUID = 2979612569607249915L;

@@ -36,7 +36,9 @@ import org.apache.commons.lang.StringUtils;
  *  This format produces one GATE document from one JSON file.
  */
 @CreoleResource(name = "GATE JSON Tweet Document Format", isPrivate = true,
-    autoinstances = {@AutoInstance(hidden = true)})
+    autoinstances = {@AutoInstance(hidden = true)},
+    comment = "Format parser for Twitter JSON files",
+    helpURL = "http://gate.ac.uk/userguide/sec:social:twitter:format")
 
 public class JSONTweetFormat extends TextualDocumentFormat {
   private static final long serialVersionUID = 6878020036304333918L;

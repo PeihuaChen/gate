@@ -49,7 +49,7 @@ import javax.swing.JOptionPane;
 import com.sun.xml.fastinfoset.stax.StAXDocumentSerializer;
 
 @SuppressWarnings("serial")
-@CreoleResource(name = "Fast Infoset Exporter", tool = true, autoinstances = @AutoInstance)
+@CreoleResource(name = "Fast Infoset Exporter", tool = true, autoinstances = @AutoInstance, comment = "Export GATE documents to GATE XML stored in the binary FastInfoset format", helpURL = "http://gate.ac.uk/userguide/sec:creole:fastinfoset")
 public class FastInfosetExporter extends ResourceHelper {
 
   @Override

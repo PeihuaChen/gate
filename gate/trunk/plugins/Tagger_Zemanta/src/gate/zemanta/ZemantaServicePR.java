@@ -40,7 +40,9 @@ import com.zemanta.api.suggest.Markup.Target;
  * 
  * @author niraj
  */
-@CreoleResource(name = "Zemanta Service PR", comment = "Runs a zemanta annotation service on a GATE document")
+@CreoleResource(name = "Zemanta Service PR",
+    comment = "Runs a zemanta annotation service on a GATE document",
+    helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:zemanta")
 public class ZemantaServicePR extends gate.creole.AbstractLanguageAnalyser
   implements ProgressListener {
   private static final long serialVersionUID = -8443994795704361590L;

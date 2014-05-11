@@ -45,7 +45,9 @@ import net.sf.json.JSONSerializer;
  * 
  * @author niraj
  */
-@CreoleResource(name = "Lupedia Service PR", comment = "Runs a lupedia annotation service on a GATE document")
+@CreoleResource(name = "Lupedia Service PR",
+    comment = "Runs a lupedia annotation service on a GATE document",
+    helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:lupedia")
 public class LupediaServicePR extends gate.creole.AbstractLanguageAnalyser
   implements ProgressListener {
   Map<String, String> datasetsMap;

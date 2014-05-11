@@ -58,7 +58,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import au.com.bytecode.opencsv.CSVReader;
 
 @SuppressWarnings("serial")
-@CreoleResource(name = "CSV Corpus Populater", tool = true, autoinstances = @AutoInstance)
+@CreoleResource(name = "CSV Corpus Populater", tool = true, autoinstances = @AutoInstance, comment = "Populate a corpus from CSV files", helpURL = "http://gate.ac.uk/userguide/sec:creole:csv")
 public class CSVImporter extends ResourceHelper {
 
   private static JComponent dialog = new JPanel();
