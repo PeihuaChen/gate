@@ -150,7 +150,7 @@
         <jar destfile="${basename.to.stage}-javadoc.jar"
              basedir="${top}/doc/javadoc"
              excludes="internal/**, src-html/**" />
-        <jar destfile="${basename.to.stage}-sources.jar" basedir="${top}/src"/>
+        <jar destfile="${basename.to.stage}-sources.jar" basedir="${top}/src/main"/>
     </target>
 
     <target name="stage.gate-compiler-jdt" depends="stage.init">
