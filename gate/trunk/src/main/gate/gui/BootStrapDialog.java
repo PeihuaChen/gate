@@ -71,6 +71,7 @@ public class BootStrapDialog extends JDialog{
   JFileChooser fileChooser = null;
 
   public BootStrapDialog(MainFrame aMainFrame){
+    super(aMainFrame);
     mainFrame = aMainFrame;
     thisBootStrapDialog = this;
     this.setTitle("BootStrap Wizard");
@@ -78,7 +79,6 @@ public class BootStrapDialog extends JDialog{
     initLocalData();
     initGuiComponents();
     initListeners();
-
   }//BootStrapDialog
 
   private void doCreateResource(){
