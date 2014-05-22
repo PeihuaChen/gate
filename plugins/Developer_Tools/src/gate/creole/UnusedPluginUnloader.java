@@ -119,7 +119,7 @@ public class UnusedPluginUnloader extends AbstractResource implements ActionsPub
         int n = 0;
         for (URL plugin : pluginsToUnload) {
           // The system logs plugins getting unloaded, so we do not have to do it
-          // System.out.println("Unloading plugin: " + plugin);
+          System.out.println("Trying to unload plugin: " + plugin);
           reg.removeDirectory(plugin);
           n++;
         }
