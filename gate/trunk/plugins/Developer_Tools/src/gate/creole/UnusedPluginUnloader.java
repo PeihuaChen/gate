@@ -13,46 +13,38 @@
  */
 package gate.creole;
 
-import gate.CreoleRegister;
 import gate.Gate;
+import gate.Gate.DirectoryInfo;
+import gate.Gate.ResourceInfo;
 import gate.Resource;
 import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.CreoleResource;
 import gate.gui.ActionsPublisher;
-import gate.resources.img.svg.Log4JALLIcon;
+import gate.resources.img.svg.PluginUnloaderIcon;
 import gate.util.GateException;
-import gate.util.GateRuntimeException;
+
 import java.awt.event.ActionEvent;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import org.apache.log4j.Appender;
-import org.apache.log4j.AppenderSkeleton;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 /**
- * A tool option that will try its best to unload just the plugins for which 
- * we do not have any known instances.
- * 
+ * A tool option that will try its best to unload just the plugins for which we
+ * do not have any known instances.
  * 
  * @author Johann Petrak
+ * @author Mark A. Greenwood
  */
 @SuppressWarnings("serial")
-@CreoleResource(
-        tool = true, 
-        isPrivate = true, 
-        autoinstances = @AutoInstance, 
-        name = "Unload unused plugins", 
-        helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:dev-tools", 
-        comment = "Unloads all plugins for which we cannot find any loaded instances")
-public class UnusedPluginUnloader extends AbstractResource implements ActionsPublisher {
+@CreoleResource(tool = true, isPrivate = true, autoinstances = @AutoInstance, name = "Unload Unused Plugins", helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:dev-tools", comment = "Unloads all plugins for which we cannot find any loaded instances")
+public class UnusedPluginUnloader extends AbstractResource implements
+  ActionsPublisher {
+
   // the cached set of actions so we don't have to keep creating them
   private List<Action> actions;
 
@@ -65,78 +57,76 @@ public class UnusedPluginUnloader extends AbstractResource implements ActionsPub
     // create the empty actions list
     actions = new ArrayList<Action>();
 
-    actions.add(new AbstractAction("Unload unused plugins") {
+    // we need access to the hidden instances as well and we can only do this
+    // through the impl so of something weird is going on and we have a
+    // different CreoleRegister than we expect then don't add the menu item
+    if(!(Gate.getCreoleRegister() instanceof CreoleRegisterImpl))
+      return actions;
+
+    actions.add(new AbstractAction("Unload Unused Plugins",
+      new PluginUnloaderIcon(24, 24)) {
 
       @Override
       public void actionPerformed(ActionEvent e) {
 
-        CreoleRegister reg = Gate.getCreoleRegister();
-        List<Resource> allInstances;
-        try {
-          allInstances = reg.getAllInstances("gate.Resource");
-        } catch (GateException ex) {
-          System.err.println("Could not obtain the resource instances!");
-          ex.printStackTrace(System.err);
-          return;
-        }
-        Set<URL> allPlugins = new HashSet<URL>();
-        for (ResourceData rd : reg.values()) {
-          String uriString = rd.getXmlFileUrl().toString();
-          if (uriString.startsWith("file:")) {
-            uriString = uriString.replaceAll("creole.xml$", "");
+        // get a handle to the Creole register implementation
+        CreoleRegisterImpl reg = (CreoleRegisterImpl)Gate.getCreoleRegister();
+
+        // this will hold the set of plugins that are to be unloaded
+        Set<URL> pluginsToUnload = new HashSet<URL>();
+
+        for(URL plugin : reg.getDirectories()) {
+          // for each registered plugin...
+
+          // assume the plugin is unused
+          boolean unused = true;
+
+          // get the plugin nifo
+          DirectoryInfo dInfo = Gate.getDirectoryInfo(plugin);
+
+          for(ResourceInfo rInfo : dInfo.getResourceInfoList()) {
+            // for each Resource the plugin defines...
+
             try {
-              allPlugins.add(new URL(uriString));
-            } catch (MalformedURLException ex) {
+              // get the instances of the resource
+              List<Resource> loaded =
+                reg.getAllInstances(rInfo.getResourceClassName(), true);
+
+              if(!loaded.isEmpty()) {
+                // if there are any instances then the plugin is in use
+                unused = false;
+                break;
+              }
+            } catch(GateException e1) {
               // ignore this, in the worst case we won't unload this plugin ...
             }
           }
+
+          // if we went through all the Resources and there aren't instances of
+          // any of them then the plugin is not in use and can be unloaded
+          if(unused) pluginsToUnload.add(plugin);
         }
-        Set<URL> usedPlugins = new HashSet<URL>();
-        for (Resource res : allInstances) {
-          String clazz = res.getClass().getName();
-          ResourceData rd = reg.get(clazz);
-          if (rd == null) {
-            // ignore ...
-            //System.out.println("ODD: no resource data found for class " + clazz);            
-          } else {
-            String uriString = rd.getXmlFileUrl().toString();
-            if (uriString.startsWith("file:")) {
-              uriString = uriString.replaceAll("creole.xml$", "");
-              try {
-                usedPlugins.add(new URL(uriString));
-              } catch (MalformedURLException ex) {
-                // ignore: we may unload a plugin that is used, but this should never happen ...
-              }
-            }
-          }
-        }
-        List<URL> pluginsToUnload = new ArrayList<URL>();
-        for (URL plugin : allPlugins) {
-          if (!usedPlugins.contains(plugin)) {
-            pluginsToUnload.add(plugin);
-          }
-        }
-        int n = 0;
-        for (URL plugin : pluginsToUnload) {
-          // The system logs plugins getting unloaded, so we do not have to do it
-          System.out.println("Trying to unload plugin: " + plugin);
-          reg.removeDirectory(plugin);
-          n++;
-        }
-        if(n==0) {
+
+        //TODO replace this with a GUI to give users some control        
+        if(pluginsToUnload.isEmpty()) {
           System.out.println("No plugin unloaded");
         } else {
-          System.out.println("Plugins unloaded: "+n);
-        }
-        System.out.println("\nPlugins still loaded:");
-        for(URL plugin : usedPlugins) {
-          System.out.println("  "+plugin);
-        }
+          for(URL plugin : pluginsToUnload) {
+            // The system logs plugins getting unloaded, so we do not have to do
+            // it
+            System.out.println("Trying to unload plugin: " + plugin);
+            reg.removeDirectory(plugin);           
+          }
+          System.out.println("Plugins unloaded: " + pluginsToUnload.size());
+          System.out.println("\nPlugins still loaded:");
+          for(URL plugin : reg.getDirectories()) {
+            System.out.println("  " + plugin);
+          }
+        }        
       }
     });
 
-    //return the list of actions
+    // return the list of actions
     return actions;
   }
-  
 }
