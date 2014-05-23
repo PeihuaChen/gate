@@ -35,7 +35,6 @@ import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileFilter;
 
 @SuppressWarnings("serial")
 @CreoleResource(tool = true, isPrivate = true, autoinstances = @AutoInstance, name = "Java Heap Dumper", helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:dev-tools", comment = "Dumps the Java heap to the specified file")
