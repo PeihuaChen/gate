@@ -35,6 +35,7 @@ import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileFilter;
 
 @SuppressWarnings("serial")
 @CreoleResource(tool = true, isPrivate = true, autoinstances = @AutoInstance, name = "Java Heap Dumper", helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:dev-tools", comment = "Dumps the Java heap to the specified file")
@@ -99,7 +100,11 @@ public class HeapDumper extends AbstractResource implements ActionsPublisher {
             XJFileChooser fileChooser = MainFrame.getFileChooser();
             ExtensionFileFilter filter =
               new ExtensionFileFilter("Java Heap Dump (*.hprof)", "hprof");
+            
+            fileChooser.resetChoosableFileFilters();
+            fileChooser.setAcceptAllFileFilterUsed(true);            
             fileChooser.addChoosableFileFilter(filter);
+            fileChooser.setFileFilter(filter);
             fileChooser.setMultiSelectionEnabled(false);
             fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             fileChooser.setDialogTitle("Java Heap Dump Generator");
