@@ -4459,8 +4459,8 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
         pos++;
       }
-      // finally, add the menu item and return it
-      return menuToUse.insert(new XJMenuItem(a, this.listener), pos);
+      // finally, add the menu item and return it    
+      return menuToUse.insert(a.getValue(Action.SELECTED_KEY) == null ? new JMenuItem(a) : new JCheckBoxMenuItem(a), pos);
     }
 
     /**
