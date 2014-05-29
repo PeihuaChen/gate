@@ -20,7 +20,6 @@ import gate.creole.metadata.CreoleResource;
 import javax.swing.RepaintManager;
 
 import org.jdesktop.swinghelper.debug.CheckThreadViolationRepaintManager;
-import org.jdesktop.swinghelper.debug.EventDispatchThreadHangMonitor;
 
 @CreoleResource(tool = true, isPrivate = true, autoinstances = @AutoInstance, name = "EDT Monitor", helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:dev-tools", comment = "Warns whenever an AWT component is updated from anywhere other than the event dispatch thread")
 public class EDTMonitor extends AbstractResource {
@@ -29,7 +28,11 @@ public class EDTMonitor extends AbstractResource {
   @Override
   public Resource init() throws ResourceInstantiationException {
     RepaintManager.setCurrentManager(new CheckThreadViolationRepaintManager());
-    EventDispatchThreadHangMonitor.initMonitoring();
+
+    // These actually seems to cause things to hang sometimes so don't use it
+    // until we have figured out why
+    // EventDispatchThreadHangMonitor.initMonitoring();
+
     return this;
   }
 }
