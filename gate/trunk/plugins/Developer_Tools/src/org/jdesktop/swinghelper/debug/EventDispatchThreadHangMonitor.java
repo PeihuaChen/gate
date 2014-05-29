@@ -216,7 +216,14 @@ public final class EventDispatchThreadHangMonitor extends EventQueue {
    * Sets up hang detection for the event dispatch thread.
    */
   public static void initMonitoring() {
-    Toolkit.getDefaultToolkit().getSystemEventQueue().push(INSTANCE);
+    //do the switch on the EDT as a fix for this bug
+    //http://bugs.java.com/bugdatabase/view_bug.do?bug_id=7097333
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        Toolkit.getDefaultToolkit().getSystemEventQueue().push(INSTANCE);
+      }      
+    });
   }
 
   /**
