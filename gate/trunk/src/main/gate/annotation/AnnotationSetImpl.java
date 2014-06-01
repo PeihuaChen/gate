@@ -998,7 +998,30 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   } // addToStartOffsetIndex(a)
 
   /**
-   * Propagate changes to the document content. Has, unfortunately, to be
+   * Propagate document content changes to this AnnotationSet. 
+   * 
+   * This method is called for all annotation sets of a document from 
+   * DocumentImpl.edit to adapt the annotations to the text changes made through
+   * the edit. The behaviour of this method is influenced by the configuration
+   * setting {@link gate.GateConstants#DOCEDIT_INSERT_PREPEND GateConstants.DOCEDIT_INSERT_PREPEND }: 
+   * annotations immediately 
+   * ending before or starting after the point of insertion will either become
+   * part of the inserted text or not. Currently it works like this:
+   * <ul>
+   * <li>PREPEND=true: annotation before will become part, annotation after not
+   * <li>PREPEND=false: annotation before will not become part, annotation after 
+   * will become part
+   * </UL>
+   * NOTE 1 (JP): There is another setting
+   * {@link gate.GateConstants#DOCEDIT_INSERT_APPEND GateConstants.DOCEDIT_INSERT_APPEND }
+   * but 
+   * this setting does currently not influence the behaviour of this method. 
+   * The behaviour of this method may change in the future so that 
+   * DOCEDIT_INSERT_APPEND is considered separately and in addition to 
+   * DOCEDIT_INSERT_PREPEND so that it can be controlled independently if 
+   * the annotation before and/or after an insertion point gets expanded or not.
+   * <p>
+   * NOTE 2: This method has, unfortunately, to be
    * public, to allow DocumentImpls to get at it. Oh for a "friend" declaration.
    * Doesn't throw InvalidOffsetException as DocumentImpl is the only client,
    * and that checks the offsets before calling this method.

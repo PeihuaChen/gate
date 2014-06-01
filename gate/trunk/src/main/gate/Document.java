@@ -164,7 +164,17 @@ public interface Document extends SimpleDocument {
    */
   public String toXml(Set<Annotation> aSourceAnnotationSet);
 
-  /** Make changes to the content.
+  /** 
+   * Make changes to the document content and adapt affected annotations.
+   * 
+   * This method replaces the document content ranging from the start to the
+   * end offset with the new DocumentContent provided as a replacement. If
+   * the original content should be removed, null can be used as a a replacement.
+   * In addition, annotations in all annotation sets are removed or adapted to 
+   * the changed documents see 
+   * {@link gate.annotation.AnnotationSetImpl#edit(java.lang.Long, java.lang.Long, gate.DocumentContent) AnnotationSetImpl.edit(long,long,DocumentContent) }
+   * for information on how annotations get adapted.
+   * 
    */
   public void edit(Long start, Long end, DocumentContent replacement)
     throws InvalidOffsetException;
