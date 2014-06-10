@@ -443,10 +443,10 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
         // order to avoid overlapping annotations
         start = pp.getIndex();
       } catch(Exception e) {
-        e.printStackTrace();
+        //e.printStackTrace();
         // not quite sure how we got here but continue on by moving parsing to
         // the next character in the document
-        start++;
+        start++;        
       }
       // Calculate percentage complete using the parsing position within the
       // document content
