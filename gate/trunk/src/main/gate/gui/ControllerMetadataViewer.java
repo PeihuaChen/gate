@@ -25,7 +25,7 @@ import gate.creole.metadata.GuiType;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
-import java.io.ByteArrayInputStream;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +36,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.xerces.parsers.DOMParser;
+import org.cyberneko.html.HTMLConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xhtmlrenderer.simple.XHTMLPanel;
@@ -43,6 +46,7 @@ import org.xhtmlrenderer.swing.BasicPanel;
 import org.xhtmlrenderer.swing.FSMouseListener;
 import org.xhtmlrenderer.swing.LinkListener;
 import org.xhtmlrenderer.util.Configuration;
+import org.xml.sax.InputSource;
 
 /**
  * This viewer displays metadata associated with a GATE Controller. The location
@@ -129,8 +133,7 @@ public class ControllerMetadataViewer extends AbstractVisualResource {
           Gate.getUserConfig().getFont(GateConstants.TEXT_COMPONENTS_FONT);
 
       StringBuilder page = new StringBuilder();
-      page.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-      page.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">");
+      page.append("<!DOCTYPE html>");
       page.append("<html>");
       page.append("<head>");
       page.append("<style type='text/css'>body { font-family: ")
@@ -139,12 +142,19 @@ public class ControllerMetadataViewer extends AbstractVisualResource {
       page.append("</head>");
       page.append("<body>");
       page.append("<h1><img style='vertical-align: middle;' src='")
-          .append(iconDesc.toString()).append("'/> ")
-          .append(text.getTextContent()).append("</h1>");
+          .append(StringEscapeUtils.escapeHtml(iconDesc.toString())).append("'/> ")
+          .append(StringEscapeUtils.escapeHtml(text.getTextContent())).append("</h1>");
       page.append(IOUtils.toString(longDesc, "UTF-8"));
       page.append("</body></html>");
 
-      display.setDocument(new ByteArrayInputStream(page.toString().getBytes()),
+      // parse using NekoHTML
+      HTMLConfiguration config = new HTMLConfiguration();
+      // Force element names to lower case to match XHTML requirements
+      // as that is what Flying Saucer expects
+      config.setProperty("http://cyberneko.org/html/properties/names/elems", "lower");
+      DOMParser htmlParser = new DOMParser(config);
+      htmlParser.parse(new InputSource(new StringReader(page.toString())));
+      display.setDocument(htmlParser.getDocument(),
           longDesc.toString());
 
     } catch(Exception e) {
