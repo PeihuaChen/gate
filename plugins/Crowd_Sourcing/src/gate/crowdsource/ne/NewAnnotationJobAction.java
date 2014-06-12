@@ -102,7 +102,8 @@ public class NewAnnotationJobAction extends AbstractAction {
                                 panel.getTextField("title").getText().trim(),
                                 panel.getTextComponent("instructions").getText(),
                                 panel.getTextField("caption").getText().trim(),
-                                panel.getTextField("noEntitiesCaption").getText().trim()));
+                                panel.getTextField("noEntitiesCaption").getText().trim(),
+                                panel.getTextField("noEntitiesError").getText().trim()));
                         // if the creation was successful we can dispose the dialog
                         SwingUtilities.invokeLater(new Runnable() {
                           public void run() {
@@ -157,6 +158,10 @@ public class NewAnnotationJobAction extends AbstractAction {
       valid = false;
     } else if("".equals(panel.getTextField("noEntitiesCaption").getText().trim())) {
       statusLabel.setText("<html><p>A caption for the \"no entities\" checkbox is required</p></html>");
+      statusLabel.setIcon(MainFrame.getIcon("Invalid"));
+      valid = false;
+    } else if("".equals(panel.getTextField("noEntitiesError").getText().trim())) {
+      statusLabel.setText("<html><p>An error message for the \"no entities\" checkbox is required</p></html>");
       statusLabel.setIcon(MainFrame.getIcon("Invalid"));
       valid = false;
     }
