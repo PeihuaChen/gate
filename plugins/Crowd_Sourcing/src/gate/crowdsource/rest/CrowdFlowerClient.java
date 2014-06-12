@@ -98,17 +98,22 @@ public class CrowdFlowerClient {
 
     // construct the CML with the specified caption and common radio
     // options
-    cml.append("<h2 id=\"unit_text\">{{text}}</h2>\n\n" + "{% if detail %}\n"
+    cml.append("<h2 id=\"unit_text\">{{text}}</h2>\n\n"
+            + "{% unless detail == \"No data available\" %}\n"
             + "  <div class=\"well\">{{detail}}</div>\n"
-            + "{% endif %}\n" + "<cml:radios validates=\"required\" label=\"");
+            + "{% endunless %}\n"
+            + "<cml:radios validates=\"required\" label=\"");
     StringEscapeUtils.escapeXml(cml, caption);
-    cml.append("\" name=\"answer\">\n" + "  {% for opt in options %}\n"
-            + "    {% if opt.description %}\n"
-            + "      {% assign desc = opt.description %}\n"
-            + "    {% else %}\n" + "      {% assign desc = opt.value %}\n"
-            + "    {% endif %}\n"
-            + "    <cml:radio value=\"{{opt.value}}\" label=\"{{desc}}\" />\n"
-            + "  {% endfor %}\n");
+    cml.append("\" name=\"answer\">\n"
+            + "  {% unless options == \"No data available\" %}\n"
+            + "    {% for opt in options %}\n"
+            + "      {% if opt.description %}\n"
+            + "        {% assign desc = opt.description %}\n"
+            + "      {% else %}\n" + "      {% assign desc = opt.value %}\n"
+            + "      {% endif %}\n"
+            + "      <cml:radio value=\"{{opt.value}}\" label=\"{{desc}}\" />\n"
+            + "    {% endfor %}\n"
+            + "  {% endunless %}\n");
     if(commonOptions != null) {
       for(List<String> opt : commonOptions) {
         cml.append("  <cml:radio value=\"");
@@ -349,9 +354,10 @@ public class CrowdFlowerClient {
             + "    {% for tok in tokens %}\n"
             + "      <cml:checkbox label=\"{{ tok }}\" value=\"{{ forloop.index0 }}\" />\n"
             + "    {% endfor %}\n" + "  </cml:checkboxes>\n" + "</div>\n"
-            + "{% if detail %}\n"
+            + "{% unless detail == \"No data available\" %}\n"
             + "  <div class=\"well\">{{detail}}</div>\n"
-            + "{% endif %}\n" + "<div class=\"gate-no-entities\">\n"
+            + "{% endunless %}\n"
+            + "<div class=\"gate-no-entities\">\n"
             // TODO work out how to customize the validation error
             // message
             + "  <cml:checkbox name=\"noentities\" label=\"");
