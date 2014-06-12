@@ -314,11 +314,14 @@ public class CrowdFlowerClient {
    *          the entity type to be annotated.
    * @param noEntitiesCaption a caption for the "there are no entities"
    *          checkbox.
+   * @param noEntitiesError the error message to show to the user if they have
+   *          not marked any annotations but have also not ticked the checkbox.
    * @return the newly created job ID.
    * @throws IOException
    */
   public long createAnnotationJob(String title, String instructions,
-          String caption, String noEntitiesCaption) throws IOException {
+          String caption, String noEntitiesCaption, String noEntitiesError)
+            throws IOException {
     log.debug("Creating annotation job");
     log.debug("title: " + title);
     log.debug("instructions: " + instructions);
@@ -338,12 +341,24 @@ public class CrowdFlowerClient {
     // clicked
     InputStream jsStream =
             CrowdFlowerClient.class.getResourceAsStream("gate-crowdflower.js");
-    String js = null;
+    StringWriter js = new StringWriter();
     try {
-      js = IOUtils.toString(jsStream, "UTF-8");
+      js.append(IOUtils.toString(jsStream, "UTF-8"));
     } finally {
       jsStream.close();
     }
+
+    // inject the custom error message
+    // success.crowdflower.com/customer/portal/questions/5445414
+    js.append("\n"
+            + "var validator_options = CMLFormValidator.getValidator('required').options;\n"
+            + "validator_options.errorMessage = function() {\n"
+            + "  return ('");
+    StringEscapeUtils.escapeJavaScript(js, noEntitiesError);
+    js.append("');\n"
+            + "};\n"
+            + "CMLFormValidator.addAllThese([ ['required', validator_options] ]);\n");
+    log.debug("js: " + js.toString());
 
     // construct the CML
     StringWriter cml = new StringWriter();
@@ -358,8 +373,6 @@ public class CrowdFlowerClient {
             + "  <div class=\"well\">{{detail}}</div>\n"
             + "{% endunless %}\n"
             + "<div class=\"gate-no-entities\">\n"
-            // TODO work out how to customize the validation error
-            // message
             + "  <cml:checkbox name=\"noentities\" label=\"");
     StringEscapeUtils.escapeXml(cml, noEntitiesCaption);
     cml.append("\" value=\"1\"\n"
@@ -371,7 +384,7 @@ public class CrowdFlowerClient {
     JsonElement json =
             post("/jobs", "job[title]", title, "job[instructions]",
                     instructions, "job[cml]", cml.toString(), "job[css]", css,
-                    "job[js]", js);
+                    "job[js]", js.toString());
     log.debug("CrowdFlower returned " + json);
     try {
       return json.getAsJsonObject().get("id").getAsLong();
