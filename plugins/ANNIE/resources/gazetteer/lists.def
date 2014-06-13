@@ -71,7 +71,6 @@ person_male_lower.lst:person_first:male
 person_sci.lst:person_full:sci
 person_spur.lst:spur
 phone_prefix.lst:phone_prefix
-post.lst:test:test
 province.lst:location:province
 racecourse.lst:location:racecourse
 radio_stations_uk.lst:organization
