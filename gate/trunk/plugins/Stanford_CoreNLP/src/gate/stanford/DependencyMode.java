@@ -7,7 +7,7 @@
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- *  $Id$
+ *  $Id: DependencyMode.java 15609 2012-03-21 11:00:31Z adamfunk $
  */
 package gate.stanford;
 

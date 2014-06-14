@@ -7,7 +7,7 @@
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- *  $Id$
+ *  $Id: Parser.java 17831 2014-04-15 09:37:23Z ian_roberts $
  */
 package gate.stanford;
 
@@ -619,7 +619,7 @@ implements ProcessingResource {
   }
 
   @CreoleParameter(comment = "path to the parser's grammar file",
-      defaultValue = "resources/englishPCFG.ser.gz")
+      defaultValue = "resources/englishRNN.ser.gz")
   public void setParserFile(URL parserFile) {
     this.parserFile = parserFile;
   }
