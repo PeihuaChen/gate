@@ -112,6 +112,10 @@
     <NewName>OpenNLP</NewName>
   </Plugin>
   <Plugin>
+    <OldName>Parser_Stanford</OldName>
+    <NewName>Stanford_CoreNLP</NewName>
+  </Plugin>
+  <Plugin>
     <OldName>rasp</OldName>
     <NewName>Parser_RASP</NewName>
   </Plugin>
@@ -121,7 +125,7 @@
   </Plugin>
   <Plugin>
     <OldName>Stanford</OldName>
-    <NewName>Parser_Stanford</NewName>
+    <NewName>Stanford_CoreNLP</NewName>
   </Plugin>
   <Plugin>
     <OldName>Stemmer</OldName>
@@ -134,6 +138,10 @@
   <Plugin>
     <OldName>TaggerFramework</OldName>
     <NewName>Tagger_Framework</NewName>
+  </Plugin>
+  <Plugin>
+    <OldName>Tagger_Stanford</OldName>
+    <NewName>Stanford_CoreNLP</NewName>
   </Plugin>
   <Plugin>
     <OldName>TreeTagger</OldName>
