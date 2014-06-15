@@ -81,6 +81,7 @@ say.lst:say
 sports.lst:sport
 spur_ident.lst:spur_ident
 state_us.lst:state:abbreviation
+state_us_ambig.lst:state:abbreviation
 stop.lst:stop
 surname_prefix.lst:surname:prefix
 team.lst:organization:team
