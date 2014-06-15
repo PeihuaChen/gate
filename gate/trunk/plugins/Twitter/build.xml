@@ -23,7 +23,7 @@
 	</fileset>
 
 	<!-- we also need to pull in the Tagger_Stanford jars -->
-	<fileset id="stanford.libs" dir="../Tagger_Stanford">
+	<fileset id="stanford.libs" dir="../Stanford_CoreNLP">
 		<include name="*.jar" />
 		<include name="*.zip" />
 	</fileset>
