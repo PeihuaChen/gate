@@ -527,7 +527,7 @@
                 </entry>
               </localMap>
             </runtimeParams>
-            <resourceType>gate.twitter.pos.POSTaggerEN</resourceType>
+            <resourceType>gate.stanford.Tagger</resourceType>
             <resourceName>Tweet PoS Tagger (EN)</resourceName>
             <initParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
