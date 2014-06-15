@@ -81,7 +81,7 @@ public class TestGazetteer extends TestCase {
     gaz.setDocument(doc);
     gaz.setAnnotationSetName("GazetteerAS");
     gaz.execute();
-    assertEquals("Wrong number of annotations generated", 100, resultAS.size());
+    assertEquals("Wrong number of annotations generated", 102, resultAS.size());
     gaz.setCaseSensitive(true);
     resultAS.clear();
     Factory.deleteResource(gaz);
