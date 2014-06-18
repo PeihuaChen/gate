@@ -212,7 +212,7 @@ public class Tagger extends AbstractLanguageAnalyser {
         if(sentenceForTagger.isEmpty()) continue;
 
         // run the POS tagger
-        ArrayList<TaggedWord> taggerResults =
+        List<TaggedWord> taggerResults =
           tagger.tagSentence(sentenceForTagger, useExistingTags);
 
         // add the results
