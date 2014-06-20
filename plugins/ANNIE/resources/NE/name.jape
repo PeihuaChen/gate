@@ -493,6 +493,30 @@ Priority: 50
 -->
 :loc.TempLocation = {kind = "locName", rule = LocPersonAmbig2}
 
+
+Rule: LocPersonAmbig3
+Priority: 100
+// Ambiguous Location/Person + Possible Surname --> Person
+
+(
+ {Lookup.majorType == location, Lookup.ambig == yes, FirstPerson}
+ (PREFIX)
+ ({Upper,!Initials})
+ (PERSONENDING)?
+):person
+-->
+{
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("gender", personAnn.getFeatures().get("gender"));
+features.put("kind", "firstName");
+features.put("rule", "LocPersonAmbig3");
+outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
+features);
+}
+
+
 Rule: PersonFullInitialsCaps
 Priority: 100
 // TO FISH
