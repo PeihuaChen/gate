@@ -167,13 +167,15 @@ outputAS.removeAll(locSet);
 Rule: DateTimeFinal
 Priority: 20
 // Friday 10 January 2000 2pm
+// 2008-01-25T16:10:48
 
 (
  {TempDate}
  (
   ({Token.string == ","})?
   {TempDate})?
- ({Token.string == ":"})?
+ ({Token.string == ":"}|
+  {Token.string == "T"})?
  {TempTime}
  ({TempYear})?
  ({TempZone})?
