@@ -13,8 +13,6 @@ package gate.corpora;
 
 import gate.AnnotationSet;
 import gate.DocumentContent;
-import gate.Factory;
-import gate.FeatureMap;
 import gate.Resource;
 import gate.corpora.datasift.DataSift;
 import gate.corpora.datasift.Interaction;
@@ -37,6 +35,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @CreoleResource(name = "GATE DataSift JSON Document Format", isPrivate = true, autoinstances = {@AutoInstance(hidden = true)}, comment = "Format parser for DataSift JSON files")
 public class DataSiftFormat extends TextualDocumentFormat {
+
+  private static final long serialVersionUID = -1768496491819413313L;
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
