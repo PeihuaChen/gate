@@ -102,4 +102,4 @@ url_key.lst:url_key
 water.lst:location:region
 year.lst:year
 city_uk_ambig.lst:location:city
-newspaper_ending.lst:newspaper_ending
+newspaper_ending.lst:newspaper_ending:newspaper

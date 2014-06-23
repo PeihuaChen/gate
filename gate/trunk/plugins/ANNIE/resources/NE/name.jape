@@ -838,7 +838,6 @@ Priority: 50
 
 
 
-
 ///////////////////////////////////////////////////////////////////
 // Organisation Rules
 
@@ -935,6 +934,33 @@ Priority: 50
 )
 :orgName -->  
   :orgName.TempOrganization = {kind = "orgName", rule=LocOrganization}
+
+
+Rule: NewspaperEnding
+Priority: 200
+// GSA Today
+
+(
+ ({Upper}|{Initials})
+ {Lookup.majorType == newspaper_ending}
+):orgName
+-->
+{
+ gate.FeatureMap features = Factory.newFeatureMap();
+gate.AnnotationSet orgSet = (gate.AnnotationSet)bindings.get("orgName");
+gate.AnnotationSet org = (gate.AnnotationSet)orgSet.get("Lookup");
+
+if (org != null && org.size()>0)
+{
+  gate.Annotation orgAnn = (gate.Annotation)org.iterator().next();
+  features.put("orgType", orgAnn.getFeatures().get("minorType"));
+}
+// create some new features
+  features.put("rule", "NewspaperEndng");
+// create a TempOrg annotation and add the features we've created
+outputAS.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
+features);
+}
 
 
 Rule:	INOrgXandY
