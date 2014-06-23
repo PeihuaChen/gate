@@ -1,4 +1,4 @@
-abbreviations.lst:stop
+abbreviations.lstMS:stop
 adbc.lst:adbc
 agency.lst:organization:government
 airports.lst:location:airport
@@ -103,3 +103,5 @@ water.lst:location:region
 year.lst:year
 city_uk_ambig.lst:location:city
 newspaper_ending.lst:newspaper_ending:newspaper
+person_male_lower_ambig.lst.:person_first:male
+political_party.lst:organization:political
