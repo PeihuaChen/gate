@@ -12,6 +12,11 @@
 
 package gate.corpora.datasift;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -20,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DataSift {
   private Interaction interaction;
+  private Map<String,Object> other = new HashMap<String,Object>();
   
   public Interaction getInteraction() {
     return interaction;
@@ -27,5 +33,15 @@ public class DataSift {
   
   public void setInteraction(Interaction interaction) {
     this.interaction = interaction;
+  }
+  
+  @JsonAnyGetter
+  public Map<String,Object> getFurtherData() {
+      return other;
+  }
+
+  @JsonAnySetter
+  public void setFurtherData(String name, Object value) {
+      other.put(name, value);
   }
 }
