@@ -13,6 +13,7 @@ package gate.corpora;
 
 import gate.AnnotationSet;
 import gate.DocumentContent;
+import gate.FeatureMap;
 import gate.Resource;
 import gate.corpora.datasift.DataSift;
 import gate.corpora.datasift.Interaction;
@@ -111,7 +112,10 @@ public class DataSiftFormat extends TextualDocumentFormat {
         Interaction interaction = ds.getInteraction();
         Long start = item.getValue();
         
-        originalMarkups.add(start,start+interaction.getContent().length(),"Interaction",interaction.asFeatureMap());            
+        FeatureMap features = interaction.asFeatureMap();        
+        features.putAll(ds.getFurtherData());
+        
+        originalMarkups.add(start,start+interaction.getContent().length(),"Interaction",features);            
       }
       
       //TODO add annotations and features
