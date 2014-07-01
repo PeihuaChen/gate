@@ -85,9 +85,6 @@ public class DataSiftFormat extends TextualDocumentFormat {
     try {
       ObjectMapper om = new ObjectMapper();
       
-      /*List<Interaction> twits = om.readValue(jsonString, new TypeReference<List<Interaction>>() {
-      });*/
-
       JsonFactory factory = new JsonFactory(om);
       JsonParser parser = factory.createParser(jsonString);
       
@@ -118,7 +115,6 @@ public class DataSiftFormat extends TextualDocumentFormat {
         originalMarkups.add(start,start+interaction.getContent().length(),"Interaction",features);            
       }
       
-      //TODO add annotations and features
     } catch(InvalidOffsetException | IOException e) {
       throw new DocumentFormatException(e);
     }
