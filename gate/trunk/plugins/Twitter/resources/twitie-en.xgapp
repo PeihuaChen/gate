@@ -343,7 +343,7 @@
                 </entry>
                 <entry>
                   <string>gazetteerFeatureSeparator</string>
-                  <null/>
+                  <string>:</string>
                 </entry>
                 <entry>
                   <string>encoding</string>
