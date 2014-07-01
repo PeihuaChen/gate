@@ -102,6 +102,7 @@ water.lst:location:region
 year.lst:year
 city_uk_ambig.lst:location:city
 newspaper_ending.lst:newspaper_ending:newspaper
-person_male_lower_ambig.lst.:person_first:male
 political_party.lst:organization:political
 abbreviations.lst:stop
+person_male_lower_ambig.lst:person_first:male
+person_female_lower_ambig.lst:person_first:female
