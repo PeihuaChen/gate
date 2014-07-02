@@ -34,13 +34,13 @@ Macro: TITLE
 
 Macro: FIRSTNAME
 
- ({FirstPerson.gender == male} |
-  {FirstPerson.gender == female})
+ ({FirstPerson.gender == male, FirstPerson.kind != ambig} |
+  {FirstPerson.gender == female, FirstPerson.kind != ambig})
 
 
 Macro: FIRSTNAMEAMBIG
 (
- {Lookup.majorType == person_first, Lookup.kind == ambig}
+ {FirstPerson.kind == ambig}
 )
 
 
@@ -179,9 +179,7 @@ Rule: PersonFirstContext
 Priority: 30
 // Anne and Kenton
 
-(
- {FirstPerson}
-):person1
+(FIRSTNAME):person1
 (
  {Token.string == "and"}
 )
@@ -399,7 +397,7 @@ Priority: 20
 
 
 Rule: NotFirstPersonStop
-Priority: 50
+Priority: 70
 // ambig first name and surname is stop word
 // e.g. Will And
 
@@ -419,9 +417,7 @@ Rule: FirstPersonStop
 Priority: 50
 // John And
 
-(
- {FirstPerson}
-):person
+(FIRSTNAME):person
 (
  {Token.category == DT}|
  {Token.category == PRP}|
@@ -435,7 +431,7 @@ gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("gender", personAnn.getFeatures().get("gender"));
 features.put("kind", "firstName");
-features.put("rule", "GazPersonFirst");
+features.put("rule", "FirstPersonStop");
 outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
 }
@@ -754,7 +750,7 @@ Priority: 40
 
 // Christian name + Location --> Person's Name
 (
-  ({Lookup.majorType == person_first}):firstName
+  (FIRSTNAME):firstName
   ({Lookup.majorType == location}):surname
 ):person -->
 {
