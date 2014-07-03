@@ -106,3 +106,4 @@ political_party.lst:organization:political
 abbreviations.lst:stop
 person_male_lower_ambig.lst:person_first:male
 person_female_lower_ambig.lst:person_first:female
+person_celebrity_surname.lst:person_full
