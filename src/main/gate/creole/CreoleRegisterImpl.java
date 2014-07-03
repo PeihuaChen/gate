@@ -281,11 +281,10 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       }
     }
 
-    // add the URL
     // if already present do nothing
-    if(directories.add(directoryUrl)) {
+    if(!directories.contains(directoryUrl)) {
       // add it to the list of known directories
-      Gate.addKnownPlugin(directoryUrl);
+      
       // parse the directory file
       try {
         parseDirectory(creoleStream, directoryUrl,
@@ -293,11 +292,12 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
         log.info("CREOLE plugin loaded: " + urlName);
       }
       catch(Throwable e) {
-        // it failed: remove it
-        directories.remove(directoryUrl);
-        //Gate.removeKnownPlugin(directoryUrl);
+        // it failed:
         throw (new GateException("couldn't open creole.xml",e));
       }
+      
+      directories.add(directoryUrl);
+      Gate.addKnownPlugin(directoryUrl);
     }
   }
   
