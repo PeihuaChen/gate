@@ -32,7 +32,6 @@ festival.lst:date:festival
 foreign_ministers.lst:person_full:government
 govern_key.lst:govern_key
 government.lst:organization:government
-government_base.lst:government_base
 greeting.lst:greeting
 hour.lst:time:hour
 ident_prekey.lst:ident_key:pre
@@ -107,3 +106,6 @@ abbreviations.lst:stop
 person_male_lower_ambig.lst:person_first:male
 person_female_lower_ambig.lst:person_first:female
 person_celebrity_surname.lst:person_full
+city_abbreviation.lst:location:city
+mlb-teams.lst:organization:team
+nba-teams.lst:organization:team
