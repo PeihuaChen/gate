@@ -109,3 +109,4 @@ person_celebrity_surname.lst:person_full
 city_abbreviation.lst:location:city
 mlb-teams.lst:organization:team
 nba-teams.lst:organization:team
+nfl-teams.lst:organization:team
