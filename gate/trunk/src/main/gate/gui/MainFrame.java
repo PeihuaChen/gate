@@ -30,10 +30,10 @@ import gate.ProcessingResource;
 import gate.Resource;
 import gate.VisualResource;
 import gate.creole.ANNIEConstants;
+import gate.creole.ConditionalSerialAnalyserController;
 import gate.creole.PackagedController;
 import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
-import gate.creole.SerialAnalyserController;
 import gate.creole.annic.Constants;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
@@ -2691,10 +2691,10 @@ public class MainFrame extends JFrame implements ProgressListener,
         @Override
         public void run() {
           lockGUI("ANNIE is being loaded...");
-          final SerialAnalyserController controller;
+          final ConditionalSerialAnalyserController controller;
           try {
             // load ANNIE as an application from a gapp file
-            controller = (SerialAnalyserController)
+            controller = (ConditionalSerialAnalyserController)
               PersistenceManager.loadObjectFromFile(new File(new File(
                 Gate.getPluginsHome(), ANNIEConstants.PLUGIN_DIR),
                   ANNIEConstants.DEFAULT_FILE));
