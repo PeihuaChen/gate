@@ -202,6 +202,15 @@ public class NewResourceDialog extends JDialog {
       return null;
   }// getSelectedParameters()
 
+  /**
+   * Return the String entered into the resource name field of the dialog.
+   * 
+   * @param rData 
+   */
+  public String getResourceName() {
+    return nameField.getText();
+  }
+  
   public synchronized void show(ResourceData rData) {
     if(rData != null) {
       this.resourceData = rData;
