@@ -15,7 +15,7 @@
 
 
 Phase:	Name
-Input: Token Lookup Title FirstPerson Upper ClosedClass Initials Split UserID
+Input: Token Lookup Title FirstPerson Upper ClosedClass Initials Split UserID URL
 Options: control = appelt debug = false
 
 ///////////////////////////////////////////////////////////////
@@ -86,7 +86,7 @@ Rule:Reject
 Priority: 1000
 // stops certain things being recognised as People
 (
- {ClosedClass}
+ {ClosedClass}|{URL}
 )
 -->
 {}
