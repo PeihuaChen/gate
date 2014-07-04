@@ -267,7 +267,8 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
 
         try {
           log.warn("Trying to use new plugin name for " + pluginName);
-          directoryXmlFileUrl = new URL(urlName + "creole.xml");
+          directoryUrl = new URL(urlName);
+          directoryXmlFileUrl = new URL(directoryUrl, "creole.xml");
           creoleStream = directoryXmlFileUrl.openStream();
           log.warn("Please note that plugin names have changed. "
             + "Please correct your application to rename " + pluginName
