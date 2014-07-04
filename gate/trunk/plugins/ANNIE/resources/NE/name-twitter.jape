@@ -86,7 +86,7 @@ Rule:Reject
 Priority: 1000
 // stops certain things being recognised as People
 (
- {ClosedClass}|{URL}
+ ({ClosedClass}|{URL})[1,5]
 )
 -->
 {}
