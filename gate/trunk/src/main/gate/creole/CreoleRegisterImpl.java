@@ -284,6 +284,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     // if already present do nothing
     if(!directories.contains(directoryUrl)) {
       // add it to the list of known directories
+      Gate.addKnownPlugin(directoryUrl);
       
       // parse the directory file
       try {
@@ -297,7 +298,6 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       }
       
       directories.add(directoryUrl);
-      Gate.addKnownPlugin(directoryUrl);
     }
   }
   
