@@ -110,3 +110,5 @@ city_abbreviation.lst:location:city
 mlb-teams.lst:organization:team
 nba-teams.lst:organization:team
 nfl-teams.lst:organization:team
+company_lower.lst:organization:company
+companies_uk_lower.lst:organization:company
