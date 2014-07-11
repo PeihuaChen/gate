@@ -11,7 +11,7 @@ import java.io.Serializable;
  * Persistent holder for {@link gate.creole.RunningStrategy.UnconditionalRunningStrategy}.
  */
 
-public class UnconditionalRunningStrategyPersistence implements Persistence {
+public class UnconditionalRunningStrategyPersistence extends AbstractPersistence {
 
   @Override
   public void extractDataFromSource(Object source) throws PersistenceException {
@@ -32,7 +32,7 @@ public class UnconditionalRunningStrategyPersistence implements Persistence {
                                       ResourceInstantiationException {
     return new UnconditionalRunningStrategy(
             (ProcessingResource)PersistenceManager.
-               getTransientRepresentation(pr),
+               getTransientRepresentation(pr,containingControllerName,initParamOverrides),
             shouldRun);
   }
 

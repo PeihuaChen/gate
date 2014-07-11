@@ -65,10 +65,11 @@ public class LRPersistence extends ResourcePersistence {
     if(dsData == null) return super.createObject();
     else{
       //persistent doc
-      initParams = PersistenceManager.getTransientRepresentation(initParams);
+      initParams = PersistenceManager.getTransientRepresentation(
+              initParams,containingControllerName,initParamOverrides);
 
-      DataStore ds = (DataStore)PersistenceManager.
-                     getTransientRepresentation(dsData);
+      DataStore ds = (DataStore)PersistenceManager.getTransientRepresentation(
+              dsData,containingControllerName,initParamOverrides);
       ((Map<Object,Object>)initParams).put(DataStore.DATASTORE_FEATURE_NAME, ds);
       ((Map<Object,Object>)initParams).put(DataStore.LR_ID_FEATURE_NAME, persistenceID);
       return super.createObject();

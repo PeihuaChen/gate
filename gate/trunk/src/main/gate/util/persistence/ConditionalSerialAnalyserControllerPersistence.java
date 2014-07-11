@@ -54,7 +54,8 @@ public class ConditionalSerialAnalyserControllerPersistence extends ConditionalC
                                      ResourceInstantiationException{
     ConditionalSerialAnalyserController sac = (ConditionalSerialAnalyserController)
                                   super.createObject();
-    sac.setCorpus((Corpus)PersistenceManager.getTransientRepresentation(corpus));
+    sac.setCorpus((Corpus)PersistenceManager.getTransientRepresentation(
+            corpus,resourceName,initParamOverrides));
     return sac;
   }
   protected Object corpus;

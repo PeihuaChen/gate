@@ -54,7 +54,8 @@ public class SerialAnalyserControllerPersistence extends ControllerPersistence {
                                      ResourceInstantiationException{
     SerialAnalyserController sac = (SerialAnalyserController)
                                   super.createObject();
-    sac.setCorpus((Corpus)PersistenceManager.getTransientRepresentation(corpus));
+    sac.setCorpus((Corpus)PersistenceManager.getTransientRepresentation(
+            corpus,resourceName,initParamOverrides));
     return sac;
   }
   protected Object corpus;

@@ -49,12 +49,10 @@ public class ConditionalControllerPersistence extends ControllerPersistence {
   public Object createObject()throws PersistenceException,
                                      ResourceInstantiationException{
     ConditionalController controller =
-        (ConditionalController)super.createObject();
-//    if(controller.getRunningStrategies().isEmpty()){
+      (ConditionalController)super.createObject();
     controller.setRunningStrategies(
-          (Collection<RunningStrategy>)PersistenceManager.
-          getTransientRepresentation(strategiesList));
-//    }
+      (Collection<RunningStrategy>)PersistenceManager.getTransientRepresentation(
+            strategiesList,resourceName,initParamOverrides));
     return controller;
   }
   protected Serializable strategiesList;

@@ -27,14 +27,19 @@ import gate.util.NameBearer;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
 
 /**
  * Holds the data needed to serialise and recreate a {@link Resource}.
  * This data is considered to be: the resource class name, the resource name,
  * the resource features and the resource initialistion parameters.
  */
-class ResourcePersistence implements Persistence{
+class ResourcePersistence extends AbstractPersistence{
 
+  protected static final Logger log = Logger.getLogger(ResourcePersistence.class);
+  
   @Override
   public void extractDataFromSource(Object source) throws PersistenceException{
     if(! (source instanceof Resource)){
@@ -85,9 +90,33 @@ class ResourcePersistence implements Persistence{
   public Object createObject()throws PersistenceException,
                                      ResourceInstantiationException {
     if(initParams != null)
-      initParams = PersistenceManager.getTransientRepresentation(initParams);
+      initParams = PersistenceManager.getTransientRepresentation(
+              initParams,containingControllerName,initParamOverrides);
     if(features != null)
-      features = PersistenceManager.getTransientRepresentation(features);
+      features = PersistenceManager.getTransientRepresentation(
+              features,containingControllerName,initParamOverrides);
+    if(initParamOverrides != null) {
+      // check if there is a map for this resource Id in the overrides
+      String containingControllerNameToUse = 
+              containingControllerName == null ? "" : containingControllerName;
+      String resourceId = containingControllerNameToUse+"\t"+resourceName;
+      if(initParamOverrides.containsKey(resourceId)) {
+        Map<String,Object> parmOverrides = initParamOverrides.get(resourceId);
+        if(initParams instanceof FeatureMap) {
+          FeatureMap fm = (FeatureMap)initParams;
+          // override the values
+          // do this in a loop instead of using putAll so we can log the changes
+          for(String name : parmOverrides.keySet()) {
+            Object obj = parmOverrides.get(name);
+            log.info(
+                    "Overriding init parameter "+name+
+                    " for "+containingControllerNameToUse+
+                    "//"+resourceName+" with "+obj);
+            fm.put(name, obj);
+          }
+        }
+      }
+    } 
     Resource res = Factory.createResource(resourceType, (FeatureMap)initParams,
                                           (FeatureMap)features,resourceName);
     return res;

@@ -469,6 +469,12 @@ public class PersistenceManager {
 
   public static Object getTransientRepresentation(Object target)
           throws PersistenceException, ResourceInstantiationException {
+    return getTransientRepresentation(target,null,null);
+  }
+  
+  public static Object getTransientRepresentation(Object target, 
+          String containingControllerName, Map<String,Map<String,Object>> initParamOverrides)
+          throws PersistenceException, ResourceInstantiationException {
 
     if(target == null || target instanceof SlashDevSlashNull) return null;
     if(target instanceof Persistence) {
@@ -478,6 +484,10 @@ public class PersistenceManager {
       if(result != null) return result;
 
       // we didn't find the value: create it
+      if(containingControllerName != null && target instanceof AbstractPersistence) {
+        ((AbstractPersistence)target).containingControllerName = containingControllerName;
+        ((AbstractPersistence)target).initParamOverrides = initParamOverrides;
+      }
       result = ((Persistence)target).createObject();
       existingTransientValues.get().getFirst().put(resultKey, result);
       return result;
