@@ -52,8 +52,8 @@ public class LanguageAnalyserPersistence extends PRPersistence {
                                      ResourceInstantiationException{
     LanguageAnalyser la = (LanguageAnalyser)super.createObject();
     la.setCorpus((Corpus)PersistenceManager.getTransientRepresentation(corpus));
-    la.setDocument((Document)PersistenceManager.
-                             getTransientRepresentation(document));
+    la.setDocument((Document)PersistenceManager.getTransientRepresentation(
+            document,containingControllerName,initParamOverrides));
     return la;
   }
 

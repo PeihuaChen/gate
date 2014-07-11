@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class MapPersistence implements Persistence {
+public class MapPersistence extends AbstractPersistence {
   /**
    * Populates this Persistence with the data that needs to be stored from the
    * original source object.
@@ -75,7 +75,8 @@ public class MapPersistence implements Persistence {
       Object value = localMap.get(key);
 
       key = PersistenceManager.getTransientRepresentation(key);
-      value = PersistenceManager.getTransientRepresentation(value);
+      value = PersistenceManager.getTransientRepresentation(
+              value,containingControllerName,initParamOverrides);
       result.put(key, value);
     }
 

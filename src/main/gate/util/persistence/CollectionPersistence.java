@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 
 
-public class CollectionPersistence implements Persistence {
+public class CollectionPersistence extends AbstractPersistence {
 
   /**
    * Populates this Persistence with the data that needs to be stored from the
@@ -79,7 +79,8 @@ public class CollectionPersistence implements Persistence {
     //now we have the collection let's populate it
     for(Object local : localList) {
       try {
-        result.add(PersistenceManager.getTransientRepresentation(local));
+        result.add(PersistenceManager.getTransientRepresentation(
+                local,containingControllerName,initParamOverrides));
       }
       catch(PersistenceException pe) {
         exceptionsOccurred.add(pe.getMessage());

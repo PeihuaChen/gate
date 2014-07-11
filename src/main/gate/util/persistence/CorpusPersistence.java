@@ -74,8 +74,8 @@ public class CorpusPersistence extends LRPersistence {
       if(!docList.isEmpty() && corpus.isEmpty()){
         Iterator<Serializable> docIter = docList.iterator();
         while(docIter.hasNext()){
-          corpus.add((Document) PersistenceManager.
-                     getTransientRepresentation(docIter.next()));
+          corpus.add((Document) PersistenceManager.getTransientRepresentation(
+                  docIter.next(),containingControllerName,initParamOverrides));
         }
 
       }

@@ -22,7 +22,7 @@ import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
 import java.net.URL;
 
-public class DSPersistence implements Persistence{
+public class DSPersistence extends AbstractPersistence{
 
 
   /**

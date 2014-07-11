@@ -11,7 +11,7 @@ import gate.persist.PersistenceException;
  * Persistent holder for {@link gate.creole.AnalyserRunningStrategy}.
  */
 
-public class AnalyserRunningStrategyPersistence implements Persistence {
+public class AnalyserRunningStrategyPersistence extends AbstractPersistence {
 
   @Override
   public void extractDataFromSource(Object source) throws PersistenceException {
@@ -32,9 +32,9 @@ public class AnalyserRunningStrategyPersistence implements Persistence {
   @Override
   public Object createObject() throws PersistenceException,
                                       ResourceInstantiationException {
-    return new AnalyserRunningStrategy((LanguageAnalyser)
-                                       PersistenceManager.
-                                       getTransientRepresentation(pr),
+    return new AnalyserRunningStrategy(
+            (LanguageAnalyser)PersistenceManager.getTransientRepresentation(
+              pr,containingControllerName,initParamOverrides),
                                        runMode, featureName, featureValue);
   }
 

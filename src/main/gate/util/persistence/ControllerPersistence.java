@@ -59,14 +59,12 @@ public class ControllerPersistence extends ResourcePersistence {
   @Override
   public Object createObject()throws PersistenceException,
                                      ResourceInstantiationException{
-
     Controller controller = (Controller)super.createObject();
-
     if(controller.getPRs().isEmpty()){
-      prList = PersistenceManager.getTransientRepresentation(prList);
+      prList = PersistenceManager.getTransientRepresentation(
+              prList,resourceName,initParamOverrides);
       controller.setPRs((Collection<ProcessingResource>)prList);
     }
-
     return controller;
   }
 

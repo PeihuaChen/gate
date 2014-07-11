@@ -86,10 +86,10 @@ public class PRPersistence extends ResourcePersistence {
     //now add the runtime parameters
     if(runtimeParams != null){
       runtimeParams = PersistenceManager.
-                      getTransientRepresentation(runtimeParams);
+                      getTransientRepresentation(
+              runtimeParams,containingControllerName,initParamOverrides);
       ((Resource)res).setParameterValues((FeatureMap)runtimeParams);
     }
-
     return res;
   }
 
