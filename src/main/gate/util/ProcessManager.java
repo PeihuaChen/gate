@@ -1,7 +1,10 @@
 package gate.util;
 
-import java.io.*;
-import gate.util.GateRuntimeException;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Class that supports running an external process and either silently
@@ -30,6 +33,8 @@ public class ProcessManager {
    * StreamGobbler thread for standard error.
    */
   private StreamGobbler stderr;
+  
+  private Process proc;
 
   /**
    * Construct a ProcessManager object and start the gobbler threads.
@@ -44,6 +49,108 @@ public class ProcessManager {
     t = new Thread(stderr);
     t.setDaemon(true);
     t.start();
+  }
+  
+  public synchronized boolean isProcessRunning() {
+    if (proc == null) return false;
+    
+    try {
+      proc.exitValue();
+      return false;
+    }
+    catch (IllegalThreadStateException e) {
+      return true;
+    }
+  }
+  
+  /**
+   * If a process is currently running then this method destroys it so
+   * that the ProcessManager instance can be used to start another
+   * process
+   */
+  public synchronized void destroyProcess() throws IOException {
+    if(isProcessRunning()) proc.destroy();
+
+    // wait for the gobblers to finish their jobs
+    while(!stderr.isDone() || !stdout.isDone()) {
+      try {
+        if(DEBUG) {
+          System.err.println("Gobblers not done, waiting...");
+        }
+        this.wait();
+      } catch(InterruptedException ie) {
+        // if interrupted, try waiting again
+      }
+    }
+
+    // make it really obvious the process has finished
+    proc = null;
+
+    // reset the gobblers
+    if(DEBUG) {
+      System.err.println("Gobblers done - resetting");
+    }
+    stdout.reset();
+    stderr.reset();
+
+    // if there was an exception during running, throw that
+    Exception ex = null;
+    if(stdout.hasException()) {
+      ex = stdout.getException();
+      stderr.getException(); // to reset exception cache
+    } else if(stderr.hasException()) {
+      ex = stderr.getException();
+    }
+
+    if(ex != null) {
+      if(DEBUG) {
+        System.err.println("Rethrowing exception");
+      }
+      if(ex instanceof IOException) {
+        throw (IOException)ex;
+      } else if(ex instanceof RuntimeException) {
+        throw (RuntimeException)ex;
+      } else throw new GateRuntimeException(ex);
+    }
+  }
+
+  /**
+   * Sometimes you want to start an external process and pass data to it
+   * at different intervals. A good example is a tool with large startup
+   * time where you can feed it one sentence at a time and get a
+   * response. If you keep the process running you can use it over
+   * multiple documents.
+   */
+  public synchronized OutputStream startProcess(String[] argv, File dir,
+          OutputStream out, OutputStream err) throws IOException {
+
+    if(isProcessRunning())
+      throw new IOException("The previous process is still running");
+
+    // Start the process. This may throw an exception
+    if(DEBUG) {
+      System.err.println("Starting process");
+    }
+
+    proc = Runtime.getRuntime().exec(argv, null, dir);
+
+    // set up the stream gobblers for stdout and stderr
+    if(DEBUG) {
+      System.err.println("Configuring gobblers");
+    }
+    stdout.setInputStream(proc.getInputStream());
+    stdout.setOutputStream(out);
+
+    stderr.setInputStream(proc.getErrorStream());
+    stderr.setOutputStream(err);
+
+    // start the gobblers
+    if(DEBUG) {
+      System.err.println("Waking up gobblers");
+    }
+    this.notifyAll();
+
+    return proc.getOutputStream();
   }
 
   /**
@@ -76,13 +183,16 @@ public class ProcessManager {
    */
   public synchronized int runProcess(String[] argv, File dir, OutputStream out, OutputStream err)
                           throws IOException {
-    // Start the process.  This may throw an exception
+
+    if (isProcessRunning()) throw new IOException("The previous process is still running");
+    
+    // Start the process.  This may throw an exception    
     if(DEBUG) {
       System.err.println("Starting process");
     }
     
-    Process proc = Runtime.getRuntime().exec(argv, null, dir);
-    
+    proc = Runtime.getRuntime().exec(argv, null, dir);
+        
     // set up the stream gobblers for stdout and stderr
     if(DEBUG) {
       System.err.println("Configuring gobblers");
@@ -122,6 +232,9 @@ public class ProcessManager {
         // if interrupted, just try waiting again
       }
     }
+    
+    // make it really obvious the process has finished
+    proc = null;
     
     // reset the gobblers
     if(DEBUG) {
