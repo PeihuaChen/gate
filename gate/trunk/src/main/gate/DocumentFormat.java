@@ -23,11 +23,8 @@ import gate.event.StatusListener;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.DocumentFormatException;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -107,8 +104,6 @@ extends AbstractLanguageResource implements LanguageResource{
 
   /** Flag for enable/disable collecting of repositioning information */
   private Boolean shouldCollectRepositioning = new Boolean(false);
-  
-  protected boolean supportsExport = false;
 
   /** If the document format could collect repositioning information
    *  during the unpack phase this method will return <B>true</B>.
@@ -164,60 +159,6 @@ extends AbstractLanguageResource implements LanguageResource{
      doc.setFeatures(fm);
      unpackMarkup(doc);
   }// unpackMarkup();
-  
-  /**
-   * Returns true if this DocumentFormat instance supports exporting
-   * GATE documents, false otherwise.
-   * 
-   * @return true if this DocumentFormat instance supports exporting
-   *         GATE documents, false otherwise.
-   */
-  public boolean isExportSupported() {
-    return supportsExport;
-  }
-  
-  /**
-   * Equivalent to {@link #export(Document,File, Map)} with an
-   * empty map of options.
-   */
-  public void export(Document doc, File file) throws IOException {
-    export(doc,file,new HashMap<String,Object>());
-  }
-  
-  /**
-   * Equivalent to {@link #export(Document,OutputStream, Map)} using a
-   * FileOutputStream instance constructed from the File param.
-   */
-  public void export(Document doc, File file, Map<String,Object> options) throws IOException {
-    FileOutputStream out = null;
-    try {
-      out = new FileOutputStream(file);
-      export(doc, new FileOutputStream(file), options);
-    }
-    finally {
-      IOUtils.closeQuietly(out);
-    }
-  }
-  
-  /**
-   * Equivalent to {@link #export(Document,OutputStream)} with an
-   * empty map of options.
-   */
-  public void export(Document doc, OutputStream out) throws IOException {
-    export(doc,out,new HashMap<String,Object>());
-  }
-  
-  /**
-   * Exports the provided {@link Document} instance to the specified
-   * {@link OutputStream} using the specified options.
-   * 
-   * @param doc the document to export
-   * @param out the OutputStream to export the document to
-   * @param options DocumentFormat specific export options
-   */
-  public void export(Document doc, OutputStream out, Map<String, Object> options) throws IOException {
-    throw new UnsupportedOperationException("Export Not Supported");
-  }
 
   /**
     * Returns a MimeType having as input a fileSufix.
@@ -623,7 +564,7 @@ extends AbstractLanguageResource implements LanguageResource{
                                                                       URL url) {
     return getDocumentFormat(aGateDocument, getMimeType(url));
   } // getDocumentFormat(URL)
-
+  
   /** Get the feature set */
   @Override
   public FeatureMap getFeatures() { return features; }

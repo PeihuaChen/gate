@@ -82,7 +82,6 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
@@ -207,9 +206,9 @@ public class NameBearerHandle implements Handle, StatusListener,
   public JPopupMenu getPopup() {
     JPopupMenu popup = new XJPopupMenu();
     // first add the static items
-    Iterator<XJMenuItem> itemIter = staticPopupItems.iterator();
+    Iterator<JComponent> itemIter = staticPopupItems.iterator();
     while(itemIter.hasNext()) {
-      JMenuItem anItem = itemIter.next();
+      JComponent anItem = itemIter.next();
       if(anItem == null)
         popup.addSeparator();
       else popup.add(anItem);
@@ -280,7 +279,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   
   protected void buildStaticPopupItems() {
     // build the static part of the popup
-    staticPopupItems = new ArrayList<XJMenuItem>();
+    staticPopupItems = new ArrayList<JComponent>();
 
     if(target instanceof ProcessingResource && !(target instanceof Controller)) {
       // actions for PRs (but not Controllers)
@@ -298,7 +297,8 @@ public class NameBearerHandle implements Handle, StatusListener,
         XJMenuItem saveAsXmlItem = new XJMenuItem(new SaveAsXmlAction(),
                 sListenerProxy);
         staticPopupItems.add(null);
-        staticPopupItems.add(saveAsXmlItem);
+        //staticPopupItems.add(saveAsXmlItem);
+        staticPopupItems.add(new DocumentExportDialog.SaveAsMenu((Document)target, saveAsXmlItem, sListenerProxy));
       }
       else if(target instanceof Corpus) {
         corpusFiller = new CorpusFillerComponent();
@@ -309,8 +309,10 @@ public class NameBearerHandle implements Handle, StatusListener,
                 new PopulateCorpusFromSingleConcatenatedFileAction(),
                 sListenerProxy));
         staticPopupItems.add(null);
-        staticPopupItems.add(new XJMenuItem(new SaveCorpusAsXmlAction(),
-                sListenerProxy));
+        XJMenuItem saveAsXmlItem = new XJMenuItem(new SaveCorpusAsXmlAction(),
+                sListenerProxy);
+        //staticPopupItems.add(saveAsXmlItem);
+        staticPopupItems.add(new DocumentExportDialog.SaveAsMenu((Corpus)target, saveAsXmlItem, sListenerProxy));
         // staticPopupItems.add(new XJMenuItem(new
         // SaveCorpusAsXmlAction(true), sListenerProxy));
         
@@ -495,7 +497,7 @@ public class NameBearerHandle implements Handle, StatusListener,
    * A list of menu items that constitute the static part of the popup.
    * Null values are used for separators.
    */
-  protected List<XJMenuItem> staticPopupItems;
+  protected List<JComponent> staticPopupItems;
 
   /**
    * The top level GUI component this handle belongs to.
@@ -589,7 +591,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     private static final long serialVersionUID = 1L;
 
     public SaveAsXmlAction() {
-      super("Save as XML...");
+      super("GATE XML (.xml)");
       putValue(SHORT_DESCRIPTION, "Saves this resource in GATE XML format");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S"));
     }// SaveAsXmlAction()
@@ -716,7 +718,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     private static final long serialVersionUID = 1L;
 
     public SaveCorpusAsXmlAction() {
-      super("Save as XML...");
+      super("GATE XML (.xml)");
       putValue(SHORT_DESCRIPTION, "Saves each document in GATE XML format");
     }// SaveAsXmlAction()
 
