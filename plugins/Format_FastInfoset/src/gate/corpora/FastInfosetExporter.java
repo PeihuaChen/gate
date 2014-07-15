@@ -14,45 +14,49 @@
 
 package gate.corpora;
 
-import gate.Corpus;
 import gate.Document;
+import gate.DocumentExporter;
 import gate.Factory;
+import gate.FeatureMap;
 import gate.Gate;
 import gate.creole.metadata.AutoInstance;
+import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
-import gate.gui.MainFrame;
-import gate.gui.NameBearerHandle;
+import gate.creole.metadata.RunTime;
 import gate.gui.ResourceHelper;
-import gate.swing.XJFileChooser;
-import gate.util.Err;
-import gate.util.ExtensionFileFilter;
-import gate.util.Files;
-import gate.util.InvalidOffsetException;
 
-import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
+import javax.xml.stream.XMLStreamException;
 
 import com.sun.xml.fastinfoset.stax.StAXDocumentSerializer;
 
 @SuppressWarnings("serial")
-@CreoleResource(name = "Fast Infoset Exporter", tool = true, autoinstances = @AutoInstance, comment = "Export GATE documents to GATE XML stored in the binary FastInfoset format", helpURL = "http://gate.ac.uk/userguide/sec:creole:fastinfoset")
-public class FastInfosetExporter extends ResourceHelper {
+@CreoleResource(name = "Fast Infoset Exporter", tool = true, autoinstances = @AutoInstance, comment = "Export GATE documents to GATE XML stored in the binary Fast Infoset format", helpURL = "http://gate.ac.uk/userguide/sec:creole:fastinfoset")
+public class FastInfosetExporter extends DocumentExporter {
 
-  @Override
+  public FastInfosetExporter() {
+    super("Fast Infoset","finf");
+  }
+  
+  
+  private URL test;  
+ 
+  @RunTime
+  @CreoleParameter
+  public void setTestParam(URL test) {
+    this.test = test;
+  }
+  
+  public URL getTestParam() {
+    return test;
+  }
+  
+  
+  /*
   protected List<Action> buildActions(final NameBearerHandle handle) {
     List<Action> actions = new ArrayList<Action>();
 
@@ -68,8 +72,8 @@ public class FastInfosetExporter extends ResourceHelper {
             public void run() {
               XJFileChooser fileChooser = MainFrame.getFileChooser();
               ExtensionFileFilter filter =
-                  new ExtensionFileFilter("Fast Infoset XML Files (*.finf)",
-                      "finf");
+                new ExtensionFileFilter("Fast Infoset XML Files (*.finf)",
+                  "finf");
               fileChooser.addChoosableFileFilter(filter);
               fileChooser.setMultiSelectionEnabled(false);
               fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -85,19 +89,19 @@ public class FastInfosetExporter extends ResourceHelper {
                 }
                 if(fileName.equals("") || fileName.equals("/")) {
                   if(doc.getNamedAnnotationSets().containsKey(
-                      "Original markups")
-                      && !doc.getAnnotations("Original markups").get("title")
-                          .isEmpty()) {
+                    "Original markups") &&
+                    !doc.getAnnotations("Original markups").get("title")
+                      .isEmpty()) {
                     // use the title annotation if any
                     try {
                       fileName =
-                          doc.getContent()
-                              .getContent(
-                                  doc.getAnnotations("Original markups")
-                                      .get("title").firstNode().getOffset(),
-                                  doc.getAnnotations("Original markups")
-                                      .get("title").lastNode().getOffset())
-                              .toString();
+                        doc
+                          .getContent()
+                          .getContent(
+                            doc.getAnnotations("Original markups").get("title")
+                              .firstNode().getOffset(),
+                            doc.getAnnotations("Original markups").get("title")
+                              .lastNode().getOffset()).toString();
                     } catch(InvalidOffsetException e) {
                       e.printStackTrace();
                     }
@@ -128,8 +132,8 @@ public class FastInfosetExporter extends ResourceHelper {
               File selectedFile = fileChooser.getSelectedFile();
               if(selectedFile == null) return;
               long start = System.currentTimeMillis();
-              handle.statusChanged("Saving as Fast Infoset XML to "
-                  + selectedFile.toString() + "...");
+              handle.statusChanged("Saving as Fast Infoset XML to " +
+                selectedFile.toString() + "...");
               try {
                 MainFrame.lockGUI("Exporting...");
 
@@ -137,17 +141,17 @@ public class FastInfosetExporter extends ResourceHelper {
               } catch(Exception ex) {
                 MainFrame.unlockGUI();
                 JOptionPane.showMessageDialog(MainFrame.getInstance(),
-                    "Could not create write file:" + ex.toString(), "GATE",
-                    JOptionPane.ERROR_MESSAGE);
+                  "Could not create write file:" + ex.toString(), "GATE",
+                  JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace(Err.getPrintWriter());
                 return;
               } finally {
                 MainFrame.unlockGUI();
               }
               long time = System.currentTimeMillis() - start;
-              handle.statusChanged("Finished saving as Fast Infoset XML into "
-                  + " the file: " + selectedFile.toString() + " in "
-                  + ((double)time) / 1000 + " s");
+              handle.statusChanged("Finished saving as Fast Infoset XML into " +
+                " the file: " + selectedFile.toString() + " in " +
+                ((double)time) / 1000 + " s");
             }
           };
           Thread thread = new Thread(runableAction, "Fast Infoset Exporter");
@@ -169,7 +173,7 @@ public class FastInfosetExporter extends ResourceHelper {
                 // we need a directory
                 XJFileChooser fileChooser = MainFrame.getFileChooser();
                 fileChooser
-                    .setDialogTitle("Select the directory that will contain the corpus");
+                  .setDialogTitle("Select the directory that will contain the corpus");
                 fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
                 if(fileChooser.showDialog(MainFrame.getInstance(), "Select") != JFileChooser.APPROVE_OPTION)
@@ -180,8 +184,8 @@ public class FastInfosetExporter extends ResourceHelper {
                 if(!dir.exists()) {
                   if(!dir.mkdirs()) {
                     JOptionPane.showMessageDialog(MainFrame.getInstance(),
-                        "Could not create top directory!", "GATE",
-                        JOptionPane.ERROR_MESSAGE);
+                      "Could not create top directory!", "GATE",
+                      JOptionPane.ERROR_MESSAGE);
                     return;
                   }
                 }
@@ -198,7 +202,7 @@ public class FastInfosetExporter extends ResourceHelper {
                 Set<String> usedFileNames = new HashSet<String>();
                 while(docIter.hasNext()) {
                   boolean docWasLoaded =
-                      corpus.isDocumentLoaded(currentDocIndex);
+                    corpus.isDocumentLoaded(currentDocIndex);
                   Document currentDoc = docIter.next();
                   URL sourceURL = currentDoc.getSourceUrl();
                   String fileName = null;
@@ -234,15 +238,14 @@ public class FastInfosetExporter extends ResourceHelper {
                     if(docFile.exists() && !overwriteAll) {
                       // ask the user if we can overwrite the file
                       Object[] options =
-                          new Object[]{"Yes", "All", "No", "Cancel"};
+                        new Object[]{"Yes", "All", "No", "Cancel"};
                       MainFrame.unlockGUI();
                       int answer =
-                          JOptionPane.showOptionDialog(MainFrame.getInstance(),
-                              "File " + docFile.getName()
-                                  + " already exists!\n" + "Overwrite?",
-                              "GATE", JOptionPane.DEFAULT_OPTION,
-                              JOptionPane.WARNING_MESSAGE, null, options,
-                              options[2]);
+                        JOptionPane.showOptionDialog(MainFrame.getInstance(),
+                          "File " + docFile.getName() + " already exists!\n" +
+                            "Overwrite?", "GATE", JOptionPane.DEFAULT_OPTION,
+                          JOptionPane.WARNING_MESSAGE, null, options,
+                          options[2]);
                       MainFrame.lockGUI("Saving...");
                       switch(answer){
                         case 0: {
@@ -259,11 +262,11 @@ public class FastInfosetExporter extends ResourceHelper {
                           // alternative name;
                           MainFrame.unlockGUI();
                           fileName =
-                              (String)JOptionPane.showInputDialog(
-                                  MainFrame.getInstance(),
-                                  "Please provide an alternative file name",
-                                  "GATE", JOptionPane.QUESTION_MESSAGE, null,
-                                  null, fileName);
+                            (String)JOptionPane.showInputDialog(
+                              MainFrame.getInstance(),
+                              "Please provide an alternative file name",
+                              "GATE", JOptionPane.QUESTION_MESSAGE, null, null,
+                              fileName);
                           if(fileName == null) {
                             handle.processFinished();
                             return;
@@ -289,8 +292,8 @@ public class FastInfosetExporter extends ResourceHelper {
                   } catch(Exception ioe) {
                     MainFrame.unlockGUI();
                     JOptionPane.showMessageDialog(MainFrame.getInstance(),
-                        "Could not create write file:" + ioe.toString(),
-                        "GATE", JOptionPane.ERROR_MESSAGE);
+                      "Could not create write file:" + ioe.toString(), "GATE",
+                      JOptionPane.ERROR_MESSAGE);
                     ioe.printStackTrace(Err.getPrintWriter());
                     return;
                   }
@@ -313,8 +316,8 @@ public class FastInfosetExporter extends ResourceHelper {
             }
           };
           Thread thread =
-              new Thread(Thread.currentThread().getThreadGroup(), runnable,
-                  "Corpus Fast Infoset XML dumper");
+            new Thread(Thread.currentThread().getThreadGroup(), runnable,
+              "Corpus Fast Infoset XML dumper");
           thread.setPriority(Thread.MIN_PRIORITY);
           thread.start();
 
@@ -324,37 +327,22 @@ public class FastInfosetExporter extends ResourceHelper {
     }
 
     return actions;
-  }
+  }*/
 
-  /**
-   * A static utility method that exports the specified GATE document to a Fast
-   * Infoset file.
-   * 
-   * @param doc
-   *          the {@link gate.Document} instance to export
-   * @param file
-   *          the {@link java.io.File}
-   * @throws Exception
-   */
-  public static void export(Document doc, File file) throws Exception {
-    FileOutputStream out = null;
-    try {
-      out = new FileOutputStream(file);
-      export(doc, out);
-    } finally {
-      out.close();
-    }
-  }
-
-  public static void export(Document doc, OutputStream out) throws Exception {
+  public void export(Document doc, OutputStream out, FeatureMap options)
+    throws IOException {
 
     StAXDocumentSerializer xsw = new StAXDocumentSerializer(out);
 
-    xsw.writeStartDocument("1.0");
-    DocumentStaxUtils.writeDocument(doc, xsw, "");
-    xsw.writeEndDocument();
-    xsw.flush();
-    xsw.close();
+    try {
+      xsw.writeStartDocument("1.0");
+      DocumentStaxUtils.writeDocument(doc, xsw, "");
+      xsw.writeEndDocument();
+      xsw.flush();
+      xsw.close();
+    } catch(XMLStreamException e) {
+      throw new IOException(e);
+    }
   }
 
   public static void main(String args[]) throws Exception {
@@ -362,18 +350,17 @@ public class FastInfosetExporter extends ResourceHelper {
     // the Resource Helper)
     Gate.init();
     Gate.getCreoleRegister().registerDirectories(
-        (new File(Gate.getGateHome(), "plugins/Format_FastInfoset")).toURI()
-            .toURL());
+      (new File(Gate.getGateHome(), "plugins/Format_FastInfoset")).toURI()
+        .toURL());
 
     // get the auto created instance of the Resource Helper
     ResourceHelper rh =
-        (ResourceHelper)Gate.getCreoleRegister()
-            .getAllInstances("gate.corpora.FastInfosetExporter").iterator()
-            .next();
+      (ResourceHelper)Gate.getCreoleRegister()
+        .getAllInstances("gate.corpora.FastInfosetExporter").iterator().next();
 
     // create a simple test document
     Document doc =
-        Factory.newDocument("A test of the Resource Handler API access");
+      Factory.newDocument("A test of the Resource Handler API access");
 
     // use the Resource Helper to export the document
     rh.call("export", doc, new File("resource-handler-test.finf"));
