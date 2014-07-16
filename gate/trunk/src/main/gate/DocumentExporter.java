@@ -88,7 +88,7 @@ public abstract class DocumentExporter extends AbstractResource {
    * 
    * @param doc the document to export
    * @param out the OutputStream to export the document to
-   * @param options DocumentFormat specific export options
+   * @param options DocumentExporter specific options
    */
   public abstract void export(Document doc, OutputStream out, FeatureMap options) throws IOException;
 }
