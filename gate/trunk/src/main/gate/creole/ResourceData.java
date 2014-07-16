@@ -17,6 +17,7 @@
 package gate.creole;
 
 import gate.CreoleRegister;
+import gate.DocumentExporter;
 import gate.Gate;
 import gate.LanguageResource;
 import gate.ProcessingResource;
@@ -57,6 +58,7 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
 
   protected static final String DEFAULT_LR_ICON = "lr";
   protected static final String DEFAULT_PR_ICON = "pr";
+  protected static final String DEFAULT_EXPORTER_ICON = "DocumentExporter";
   protected static final String DEFAULT_OTHER_ICON = "application";
   /** Construction */
   public ResourceData() {  }// ResourceData
@@ -157,6 +159,9 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
       return DEFAULT_LR_ICON;
     if(ProcessingResource.class.isAssignableFrom(resourceClass))
       return DEFAULT_PR_ICON;
+    if (DocumentExporter.class.isAssignableFrom(resourceClass))
+      return DEFAULT_EXPORTER_ICON;
+    
     return DEFAULT_OTHER_ICON;
   }
 

@@ -965,12 +965,22 @@ public class DocumentStaxUtils {
    */
   public static void writeDocument(Document doc, File file, String namespaceURI)
           throws XMLStreamException, IOException {
+
+    OutputStream outputStream = new FileOutputStream(file);
+    try {
+      writeDocument(doc,outputStream,namespaceURI);
+    }
+    finally {
+      outputStream.close();
+    }
+  }
+  
+  public static void writeDocument(Document doc, OutputStream outputStream, String namespaceURI) throws XMLStreamException, IOException {
     if(outputFactory == null) {
       outputFactory = XMLOutputFactory.newInstance();
     }
 
     XMLStreamWriter xsw = null;
-    OutputStream outputStream = new FileOutputStream(file);
     try {
       if(doc instanceof TextualDocument) {
         xsw = outputFactory.createXMLStreamWriter(outputStream,
@@ -989,7 +999,6 @@ public class DocumentStaxUtils {
       if(xsw != null) {
         xsw.close();
       }
-      outputStream.close();
     }
   }
 
