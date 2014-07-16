@@ -47,6 +47,11 @@
     <RESOURCE>
       <CLASS>gate.corpora.UimaDocumentFormat</CLASS>
     </RESOURCE>
+    
+    <!-- Document Exporters -->
+    <RESOURCE>
+      <CLASS>gate.creole.GateXMLExporter</CLASS>
+    </RESOURCE>
   </CREOLE>
 
   <!-- creole.xml for Controllers -->

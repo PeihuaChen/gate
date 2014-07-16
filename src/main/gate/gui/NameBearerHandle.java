@@ -29,7 +29,6 @@ import gate.LanguageResource;
 import gate.ProcessingResource;
 import gate.Resource;
 import gate.VisualResource;
-import gate.corpora.DocumentStaxUtils;
 import gate.creole.AbstractResource;
 import gate.creole.AnnotationSchema;
 import gate.creole.ConditionalController;
@@ -50,11 +49,8 @@ import gate.swing.XJMenuItem;
 import gate.swing.XJPopupMenu;
 import gate.util.Err;
 import gate.util.ExtensionFileFilter;
-import gate.util.Files;
 import gate.util.GateRuntimeException;
-import gate.util.InvalidOffsetException;
 import gate.util.NameBearer;
-import gate.util.Out;
 import gate.util.ant.packager.PackageGappTask;
 
 import java.awt.Component;
@@ -63,14 +59,12 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EventListener;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -294,11 +288,8 @@ public class NameBearerHandle implements Handle, StatusListener,
                 sListenerProxy));
       }
       if(target instanceof gate.TextualDocument) {
-        XJMenuItem saveAsXmlItem = new XJMenuItem(new SaveAsXmlAction(),
-                sListenerProxy);
         staticPopupItems.add(null);
-        //staticPopupItems.add(saveAsXmlItem);
-        staticPopupItems.add(new DocumentExportDialog.SaveAsMenu((Document)target, saveAsXmlItem, sListenerProxy));
+        staticPopupItems.add(new DocumentExportDialog.SaveAsMenu((Document)target, sListenerProxy));
       }
       else if(target instanceof Corpus) {
         corpusFiller = new CorpusFillerComponent();
@@ -309,10 +300,7 @@ public class NameBearerHandle implements Handle, StatusListener,
                 new PopulateCorpusFromSingleConcatenatedFileAction(),
                 sListenerProxy));
         staticPopupItems.add(null);
-        XJMenuItem saveAsXmlItem = new XJMenuItem(new SaveCorpusAsXmlAction(),
-                sListenerProxy);
-        //staticPopupItems.add(saveAsXmlItem);
-        staticPopupItems.add(new DocumentExportDialog.SaveAsMenu((Corpus)target, saveAsXmlItem, sListenerProxy));
+        staticPopupItems.add(new DocumentExportDialog.SaveAsMenu((Corpus)target, sListenerProxy));
         // staticPopupItems.add(new XJMenuItem(new
         // SaveCorpusAsXmlAction(true), sListenerProxy));
         
@@ -449,9 +437,9 @@ public class NameBearerHandle implements Handle, StatusListener,
         largeView.getActionMap().put("Close recursively",
                 new CloseRecursivelyAction());
       }
-      if(target instanceof gate.TextualDocument) {
+      /*if(target instanceof gate.TextualDocument) {
         largeView.getActionMap().put("Save As XML", new SaveAsXmlAction());
-      }// End if
+      }// End if*/
     }// End if
   }// protected void buildViews
 
@@ -583,308 +571,6 @@ public class NameBearerHandle implements Handle, StatusListener,
       progressListeners.clear();
     }
   }
-
-  /**
-   * Used to save a document as XML
-   */
-  class SaveAsXmlAction extends AbstractAction {
-    private static final long serialVersionUID = 1L;
-
-    public SaveAsXmlAction() {
-      super("GATE XML (.xml)");
-      putValue(SHORT_DESCRIPTION, "Saves this resource in GATE XML format");
-      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S"));
-    }// SaveAsXmlAction()
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      Runnable runableAction = new Runnable() {
-        @Override
-        public void run() {
-          XJFileChooser fileChooser = MainFrame.getFileChooser();
-          ExtensionFileFilter filter = new ExtensionFileFilter("XML files",
-                  "xml", "gml");
-          fileChooser.addChoosableFileFilter(filter);
-          fileChooser.setMultiSelectionEnabled(false);
-          fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-          fileChooser.setDialogTitle("Select document to save ...");
-
-          gate.Document doc = (gate.Document)target;
-          if(doc.getSourceUrl() != null) {
-            String fileName = "";
-            try {
-              fileName = doc.getSourceUrl().toURI().getPath().trim();
-            }
-            catch(URISyntaxException e) {
-              fileName = doc.getSourceUrl().getPath().trim();
-            }
-            if(fileName.equals("") || fileName.equals("/")) {
-              if(doc.getNamedAnnotationSets().containsKey("Original markups")
-                      && !doc.getAnnotations("Original markups").get("title")
-                              .isEmpty()) {
-                // use the title annotation if any
-                try {
-                  fileName = doc.getContent().getContent(
-                          doc.getAnnotations("Original markups").get("title")
-                                  .firstNode().getOffset(),
-                          doc.getAnnotations("Original markups").get("title")
-                                  .lastNode().getOffset()).toString();
-                }
-                catch(InvalidOffsetException e) {
-                  e.printStackTrace();
-                }
-              }
-              else {
-                fileName = doc.getSourceUrl().toString();
-              }
-              // cleans the file name
-              fileName = fileName.replaceAll("/", "_");
-            }
-            else {
-              // replaces the extension with .xml
-              fileName = fileName.replaceAll("\\.[a-zA-Z]{1,4}$", ".xml");
-            }
-            // cleans the file name
-            fileName = fileName.replaceAll("[^/a-zA-Z0-9._-]", "_");
-            fileName = fileName.replaceAll("__+", "_");
-            // adds a .xml extension if not present
-            if(!fileName.endsWith(".xml")) {
-              fileName += ".xml";
-            }
-            File file = new File(fileName);
-            fileChooser.ensureFileIsVisible(file);
-            fileChooser.setSelectedFile(file);
-          }
-
-          int res = (getLargeView() != null) ? fileChooser
-                  .showSaveDialog(getLargeView()) : (getSmallView() != null)
-                  ? fileChooser.showSaveDialog(getSmallView())
-                  : fileChooser.showSaveDialog(null);
-          if(res == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            if(selectedFile == null) return;
-            long start = System.currentTimeMillis();
-            NameBearerHandle.this.statusChanged("Saving as XML to "
-                    + selectedFile.toString() + "...");
-            try {
-              MainFrame.lockGUI("Saving...");
-              // Prepare to write into the xmlFile using the original
-              // encoding
-              // //////////////////////////////
-              // String encoding =
-              // ((gate.TextualDocument)target).getEncoding();
-
-              // OutputStreamWriter writer = new OutputStreamWriter(
-              // new FileOutputStream(selectedFile),
-              // encoding);
-
-              // Write (test the toXml() method)
-              // This Action is added only when a gate.Document is
-              // created.
-              // So, is for sure that the resource is a gate.Document
-              // writer.write(((gate.Document)target).toXml());
-              // writer.flush();
-              // writer.close();
-
-              // write directly to the file using StAX
-              DocumentStaxUtils.writeDocument((gate.Document)target,
-                      selectedFile);
-              ((gate.Document)target)
-                      .setSourceUrl(selectedFile.toURI().toURL());
-            }
-            catch(Exception ex) {
-              ex.printStackTrace(Out.getPrintWriter());
-            }
-            finally {
-              MainFrame.unlockGUI();
-            }
-            long time = System.currentTimeMillis() - start;
-            NameBearerHandle.this.statusChanged("Finished saving as xml into "
-                    + " the file: " + selectedFile.toString() + " in "
-                    + ((double)time) / 1000 + " s");
-          }// End if
-        }// End run()
-      };// End Runnable
-      Thread thread = new Thread(runableAction, "");
-      thread.setPriority(Thread.MIN_PRIORITY);
-      thread.start();
-    }// actionPerformed()
-  }// SaveAsXmlAction
-
-  /**
-   * Saves a corpus as a set of xml files in a directory.
-   */
-  class SaveCorpusAsXmlAction extends AbstractAction {
-    private static final long serialVersionUID = 1L;
-
-    public SaveCorpusAsXmlAction() {
-      super("GATE XML (.xml)");
-      putValue(SHORT_DESCRIPTION, "Saves each document in GATE XML format");
-    }// SaveAsXmlAction()
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-          try {
-            // we need a directory
-            XJFileChooser fileChooser = MainFrame.getFileChooser();
-            fileChooser
-                    .setDialogTitle("Select the directory that will contain the corpus");
-            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-            if(fileChooser.showDialog(getLargeView() != null
-                    ? getLargeView()
-                    : getSmallView(), "Select") == JFileChooser.APPROVE_OPTION) {
-
-              File dir = fileChooser.getSelectedFile();
-              // create the top directory if needed
-              if(!dir.exists()) {
-                if(!dir.mkdirs()) {
-                  JOptionPane.showMessageDialog(largeView != null
-                          ? largeView
-                          : smallView, "Could not create top directory!",
-                          "GATE", JOptionPane.ERROR_MESSAGE);
-                  return;
-                }
-              }
-
-              MainFrame.lockGUI("Saving...");
-
-              // iterate through all the docs and save each of them as
-              // xml
-              Corpus corpus = (Corpus)target;
-              Iterator<Document> docIter = corpus.iterator();
-              boolean overwriteAll = false;
-              int docCnt = corpus.size();
-              int currentDocIndex = 0;
-              Set<String> usedFileNames = new HashSet<String>();
-              while(docIter.hasNext()) {
-                boolean docWasLoaded = corpus.isDocumentLoaded(currentDocIndex);
-                Document currentDoc = docIter.next();
-                URL sourceURL = currentDoc.getSourceUrl();
-                String fileName = null;
-                if(sourceURL != null) {
-                  fileName = sourceURL.getPath();
-                  fileName = Files.getLastPathComponent(fileName);
-                }
-                if(fileName == null || fileName.length() == 0) {
-                  fileName = currentDoc.getName();
-                }
-                // makes sure that the filename does not contain any
-                // forbidden character
-                fileName = fileName.replaceAll("[\\/:\\*\\?\"<>|]", "_");
-                if(fileName.toLowerCase().endsWith(".xml")) {
-                 fileName = fileName.substring(0,fileName.length() - 4); 
-                }
-                if(usedFileNames.contains(fileName)){
-                  // name clash -> add unique ID
-                  String fileNameBase = fileName;
-                  int  uniqId = 0;
-                  fileName = fileNameBase + "-" + uniqId++;
-                  while(usedFileNames.contains(fileName)) {
-                    fileName = fileNameBase + "-" + uniqId++;
-                  }                  
-                }
-                usedFileNames.add(fileName);
-                if(!fileName.toLowerCase().endsWith(".xml"))
-                  fileName += ".xml";
-                File docFile = null;
-                boolean nameOK = false;
-                do {
-                  docFile = new File(dir, fileName);
-                  if(docFile.exists() && !overwriteAll) {
-                    // ask the user if we can overwrite the file
-                    Object[] options = new Object[] {"Yes", "All", "No",
-                        "Cancel"};
-                    MainFrame.unlockGUI();
-                    int answer = JOptionPane.showOptionDialog(largeView != null
-                            ? largeView
-                            : smallView, "File " + docFile.getName()
-                            + " already exists!\n" + "Overwrite?", "GATE",
-                            JOptionPane.DEFAULT_OPTION,
-                            JOptionPane.WARNING_MESSAGE, null, options,
-                            options[2]);
-                    MainFrame.lockGUI("Saving...");
-                    switch(answer) {
-                      case 0: {
-                        nameOK = true;
-                        break;
-                      }
-                      case 1: {
-                        nameOK = true;
-                        overwriteAll = true;
-                        break;
-                      }
-                      case 2: {
-                        // user said NO, allow them to provide an
-                        // alternative name;
-                        MainFrame.unlockGUI();
-                        fileName = (String)JOptionPane.showInputDialog(
-                                largeView != null ? largeView : smallView,
-                                "Please provide an alternative file name",
-                                "GATE", JOptionPane.QUESTION_MESSAGE, null,
-                                null, fileName);
-                        if(fileName == null) {
-                          fireProcessFinished();
-                          return;
-                        }
-                        MainFrame.lockGUI("Saving");
-                        break;
-                      }
-                      case 3: {
-                        // user gave up; return
-                        fireProcessFinished();
-                        return;
-                      }
-                    }
-
-                  }
-                  else {
-                    nameOK = true;
-                  }
-                } while(!nameOK);
-                // save the file
-                try {
-                  // for GATE XML format, use the direct StAX writer
-                  DocumentStaxUtils.writeDocument(currentDoc, docFile);  
-                }
-                catch(Exception ioe) {
-                  MainFrame.unlockGUI();
-                  JOptionPane.showMessageDialog(largeView != null
-                          ? largeView
-                          : smallView, "Could not create write file:"
-                          + ioe.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
-                  ioe.printStackTrace(Err.getPrintWriter());
-                  return;
-                }
-
-                fireStatusChanged(currentDoc.getName() + " saved");
-                // close the doc if it wasn't already loaded
-                if(!docWasLoaded) {
-                  corpus.unloadDocument(currentDoc);
-                  Factory.deleteResource(currentDoc);
-                }
-
-                fireProgressChanged(100 * currentDocIndex++ / docCnt);
-              }// while(docIter.hasNext())
-              fireStatusChanged("Corpus saved");
-              fireProcessFinished();
-            }// select directory
-          }
-          finally {
-            MainFrame.unlockGUI();
-          }
-        }// public void run(){
-      };// Runnable runnable = new Runnable()
-      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-              runnable, "Corpus XML dumper");
-      thread.setPriority(Thread.MIN_PRIORITY);
-      thread.start();
-
-    }// public void actionPerformed(ActionEvent e)
-  }// class SaveCorpusAsXmlAction extends AbstractAction
 
   class MakeConditionalAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
