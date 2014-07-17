@@ -1,7 +1,3 @@
-Bach:gender=male
-Brahms:gender=male
-Carter:gender=male
-Clinton:gender=male
 Gaugin:gender=male
 Gauguin:gender=male
 George Bush:gender=male
@@ -54,8 +50,8 @@ Matthew Broderick:gender=male
 Nathan Lane:gender=male
 Mel Brooks:gender=male
 Dan Brown:gender=male
-Jerry Bruckheimer
-Kobe Bryant
+Jerry Bruckheimer:gender=male
+Kobe Bryant:gender=male
 Gisele Bundchen:gender=female
 Jim Carrey:gender=male
 Dave Chappelle:gender=male
@@ -83,11 +79,11 @@ Angelina Jolie:gender=female
 Michael Jordan:gender=male
 Nicole Kidman:gender=female
 Heidi Klum:gender=female
-Emeril Lagasse
+Emeril Lagasse:gender=male
 Jay Leno:gender=male
 David Letterman:gender=male
 Adriana Lima:gender=female
-Rush Limbaugh
+Rush Limbaugh:gender=male
 George Lopez:gender=male
 Jennifer Lopez:gender=female
 George Lucas:gender=male
@@ -101,7 +97,7 @@ Shaquille O'Neal:gender=male
 Carson Palmer:gender=male
 James Patterson:gender=male
 Ty Pennington:gender=male
-Regis Philbin
+Regis Philbin:gender=male
 Brad Pitt:gender=male
 Wolfgang Puck:gender=male
 Rachael Ray:gender=female
@@ -138,3 +134,8 @@ Dick Wolf:gender=male
 Tiger Woods:gender=male
 Renee Zellweger:gender=female
 Whitney Houston:gender=female
+Adolf Hitler:gender=male
+Shania Twain:gender=female
+Hulk Hogan:gender=male
+Michelle Obama:gender=female
+Ashton Kutcher:gender=male
