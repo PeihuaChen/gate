@@ -289,7 +289,7 @@ public class NameBearerHandle implements Handle, StatusListener,
       }
       if(target instanceof gate.TextualDocument) {
         staticPopupItems.add(null);
-        staticPopupItems.add(new DocumentExportDialog.SaveAsMenu((Document)target, sListenerProxy));
+        staticPopupItems.add(new DocumentExportMenu((Document)target, sListenerProxy));
       }
       else if(target instanceof Corpus) {
         corpusFiller = new CorpusFillerComponent();
@@ -300,7 +300,7 @@ public class NameBearerHandle implements Handle, StatusListener,
                 new PopulateCorpusFromSingleConcatenatedFileAction(),
                 sListenerProxy));
         staticPopupItems.add(null);
-        staticPopupItems.add(new DocumentExportDialog.SaveAsMenu((Corpus)target, sListenerProxy));
+        staticPopupItems.add(new DocumentExportMenu((Corpus)target, sListenerProxy));
         // staticPopupItems.add(new XJMenuItem(new
         // SaveCorpusAsXmlAction(true), sListenerProxy));
         
