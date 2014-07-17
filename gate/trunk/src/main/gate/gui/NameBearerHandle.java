@@ -301,25 +301,6 @@ public class NameBearerHandle implements Handle, StatusListener,
                 sListenerProxy));
         staticPopupItems.add(null);
         staticPopupItems.add(new DocumentExportMenu((Corpus)target, sListenerProxy));
-        // staticPopupItems.add(new XJMenuItem(new
-        // SaveCorpusAsXmlAction(true), sListenerProxy));
-        
-        //This has been moved into the IR plugin
-        /*if(target instanceof IndexedCorpus) {
-          IndexedCorpus ic = (IndexedCorpus)target;
-          if(ic.getDataStore() != null
-                  && ic.getDataStore() instanceof LuceneDataStoreImpl) {
-            // do nothing
-          }
-          else {
-            staticPopupItems.add(new XJMenuItem(new CreateIndexAction(),
-                    sListenerProxy));
-            staticPopupItems.add(new XJMenuItem(new OptimizeIndexAction(),
-                    sListenerProxy));
-            staticPopupItems.add(new XJMenuItem(new DeleteIndexAction(),
-                    sListenerProxy));
-          }
-        }*/
       }
       if(((LanguageResource)target).getDataStore() != null) {
         // this item can be used only if the resource belongs to a
