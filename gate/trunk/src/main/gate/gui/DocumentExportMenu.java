@@ -25,7 +25,6 @@ import gate.creole.Parameter;
 import gate.creole.ResourceData;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
-import gate.event.StatusListener;
 import gate.swing.XJFileChooser;
 import gate.swing.XJMenu;
 import gate.util.Err;
@@ -77,25 +76,15 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
   protected IdentityHashMap<Resource, JMenuItem> itemByResource =
           new IdentityHashMap<Resource, JMenuItem>();
 
-  private Document document;
+  private Handle handle;
 
-  private Corpus corpus;
-
-  public DocumentExportMenu(Document document, StatusListener listener) {
-    super("Save as...", "", listener);
-    if(document == null)
-      throw new NullPointerException("Document cannot be null!");
-    this.document = document;
-    // add(gateXML);
-    init();
-  }
-
-  public DocumentExportMenu(Corpus corpus, StatusListener listener) {
-    super("Save as...", "", listener);
-    if(corpus == null)
-      throw new NullPointerException("Corpus cannot be null!");
-    this.corpus = corpus;
-    // add(gateXML);
+  public DocumentExportMenu(NameBearerHandle handle) {
+    super("Save as...", "", handle.sListenerProxy);
+    if(!(handle.getTarget() instanceof Document)
+            && !(handle.getTarget() instanceof Corpus))
+      throw new IllegalArgumentException(
+              "We only deal with documents and corpora");
+    this.handle = handle;
     init();
   }
 
@@ -123,6 +112,10 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
   private File getSelectedFile(List<List<Parameter>> params,
           DocumentExporter de, FeatureMap options) {
     File selectedFile = null;
+
+    Document document =
+            (handle.getTarget() instanceof Document ? (Document)handle
+                    .getTarget() : null);
 
     if(document != null && document.getSourceUrl() != null) {
       String fileName = "";
@@ -232,13 +225,14 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
                 Runnable runnable = new Runnable() {
                   public void run() {
 
-                    if(document != null) {
+                    if(handle.getTarget() instanceof Document) {
 
                       long start = System.currentTimeMillis();
                       listener.statusChanged("Saving as " + de.getFileType()
                               + " to " + selectedFile.toString() + "...");
                       try {
-                        de.export(document, selectedFile, options);
+                        de.export((Document)handle.getTarget(), selectedFile,
+                                options);
                       } catch(IOException e) {
                         e.printStackTrace();
                       }
@@ -247,7 +241,7 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
                       listener.statusChanged("Finished saving as "
                               + de.getFileType() + " into " + " the file: "
                               + selectedFile.toString() + " in "
-                              + ((double)time) / 1000 + " s");
+                              + ((double)time) / 1000 + "s");
                     } else {
                       try {
                         File dir = selectedFile;
@@ -264,12 +258,14 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
 
                         MainFrame.lockGUI("Saving...");
 
+                        Corpus corpus = (Corpus)handle.getTarget();
+
                         // iterate through all the docs and save
                         // each of
                         // them
                         Iterator<Document> docIter = corpus.iterator();
                         boolean overwriteAll = false;
-                        // int docCnt = corpus.size();
+                        int docCnt = corpus.size();
                         int currentDocIndex = 0;
                         Set<String> usedFileNames = new HashSet<String>();
                         while(docIter.hasNext()) {
@@ -355,7 +351,7 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
                                                   JOptionPane.QUESTION_MESSAGE,
                                                   null, null, fileName);
                                   if(fileName == null) {
-                                    // handle.processFinished();
+                                    handle.processFinished();
                                     return;
                                   }
                                   MainFrame.lockGUI("Saving");
@@ -363,7 +359,7 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
                                 }
                                 case 3: {
                                   // user gave up; return
-                                  // handle.processFinished();
+                                  handle.processFinished();
                                   return;
                                 }
                               }
@@ -396,12 +392,11 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
                             Factory.deleteResource(currentDoc);
                           }
 
-                          // handle.progressChanged(100 *
-                          // currentDocIndex++ /
-                          // docCnt);
+                          handle.progressChanged(100 * currentDocIndex++
+                                  / docCnt);
                         }// while(docIter.hasNext())
                         listener.statusChanged("Corpus Saved");
-                        // handle.processFinished();
+                        handle.processFinished();
 
                       } finally {
                         MainFrame.unlockGUI();
