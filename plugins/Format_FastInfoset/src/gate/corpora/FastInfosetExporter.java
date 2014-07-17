@@ -38,19 +38,6 @@ public class FastInfosetExporter extends DocumentExporter {
     super("Fast Infoset","finf");
   }
   
-  
-  private URL test;  
- 
-  @RunTime
-  @CreoleParameter
-  public void setTestParam(URL test) {
-    this.test = test;
-  }
-  
-  public URL getTestParam() {
-    return test;
-  }
-  
   public void export(Document doc, OutputStream out, FeatureMap options)
     throws IOException {
 
