@@ -1,3 +1,16 @@
+/*
+ *  Copyright (c) 1995-2014, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Mark A. Greenwood 11/07/2014
+ *
+ */
+
 package gate.gui;
 
 import gate.Corpus;
@@ -52,15 +65,14 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.table.TableCellEditor;
 
+/**
+ * A menu which updates as plugins are (un)loaded to allow the export of
+ * documents and corpora to any of the supported output formats.
+ */
 @SuppressWarnings("serial")
 public class DocumentExportMenu extends XJMenu implements CreoleListener {
-  
-  static DocumentExportDialog dialog = new DocumentExportDialog();
 
-  /**
-   * The first position in the menu that can be used by dynamic items.
-   */
-  protected int firstPluginItem = 0;
+  static DocumentExportDialog dialog = new DocumentExportDialog();
 
   protected IdentityHashMap<Resource, JMenuItem> itemByResource =
           new IdentityHashMap<Resource, JMenuItem>();
@@ -88,12 +100,13 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
   }
 
   private void init() {
-    
-    DocumentExporter gateXMLExporter = (DocumentExporter)Gate.getCreoleRegister()
-            .get(GateXMLExporter.class.getCanonicalName())
-            .getInstantiations().iterator().next();
+
+    DocumentExporter gateXMLExporter =
+            (DocumentExporter)Gate.getCreoleRegister()
+                    .get(GateXMLExporter.class.getCanonicalName())
+                    .getInstantiations().iterator().next();
     addExporter(gateXMLExporter);
-    
+
     Set<String> toolTypes = Gate.getCreoleRegister().getToolTypes();
     for(String type : toolTypes) {
       List<Resource> instances =
@@ -127,13 +140,12 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
             fileName =
                     document.getContent()
                             .getContent(
-                                    document.getAnnotations(
-                                            "Original markups").get("title")
-                                            .firstNode().getOffset(),
-                                    document.getAnnotations(
-                                            "Original markups").get("title")
-                                            .lastNode().getOffset())
-                            .toString();
+                                    document.getAnnotations("Original markups")
+                                            .get("title").firstNode()
+                                            .getOffset(),
+                                    document.getAnnotations("Original markups")
+                                            .get("title").lastNode()
+                                            .getOffset()).toString();
           } catch(InvalidOffsetException e) {
             e.printStackTrace();
           }
@@ -201,9 +213,9 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
     }
 
     JMenuItem item =
-            DocumentExportMenu.this.add(new AbstractAction(de.getFileType() + " (."
-                    + de.getDefaultExtension() + ")", MainFrame.getIcon(rd
-                    .getIcon())) {
+            DocumentExportMenu.this.add(new AbstractAction(de.getFileType()
+                    + " (." + de.getDefaultExtension() + ")", MainFrame
+                    .getIcon(rd.getIcon())) {
 
               @Override
               public void actionPerformed(ActionEvent ae) {
@@ -213,8 +225,7 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
 
                 final FeatureMap options = Factory.newFeatureMap();
 
-                final File selectedFile =
-                        getSelectedFile(params, de, options);
+                final File selectedFile = getSelectedFile(params, de, options);
 
                 if(selectedFile == null) return;
 
@@ -245,8 +256,8 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
                           if(!dir.mkdirs()) {
                             JOptionPane.showMessageDialog(
                                     MainFrame.getInstance(),
-                                    "Could not create top directory!",
-                                    "GATE", JOptionPane.ERROR_MESSAGE);
+                                    "Could not create top directory!", "GATE",
+                                    JOptionPane.ERROR_MESSAGE);
                             return;
                           }
                         }
@@ -258,7 +269,7 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
                         // them
                         Iterator<Document> docIter = corpus.iterator();
                         boolean overwriteAll = false;
-                        //int docCnt = corpus.size();
+                        // int docCnt = corpus.size();
                         int currentDocIndex = 0;
                         Set<String> usedFileNames = new HashSet<String>();
                         while(docIter.hasNext()) {
@@ -280,13 +291,11 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
                           // any
                           // forbidden character
                           fileName =
-                                  fileName.replaceAll("[\\/:\\*\\?\"<>|]",
-                                          "_");
+                                  fileName.replaceAll("[\\/:\\*\\?\"<>|]", "_");
                           if(fileName.toLowerCase().endsWith(
                                   "." + de.getDefaultExtension())) {
                             fileName =
-                                    fileName.substring(0,
-                                            fileName.length() - 5);
+                                    fileName.substring(0, fileName.length() - 5);
                           }
                           if(usedFileNames.contains(fileName)) {
                             // name clash -> add unique ID
@@ -314,8 +323,8 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
                               MainFrame.unlockGUI();
                               int answer =
                                       JOptionPane.showOptionDialog(
-                                              MainFrame.getInstance(),
-                                              "File " + docFile.getName()
+                                              MainFrame.getInstance(), "File "
+                                                      + docFile.getName()
                                                       + " already exists!\n"
                                                       + "Overwrite?", "GATE",
                                               JOptionPane.DEFAULT_OPTION,
@@ -416,8 +425,8 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
 
   /**
    * If the resource just loaded is a tool (according to the creole
-   * register) then see if it publishes any actions and if so, add
-   * them to the menu in the appropriate places.
+   * register) then see if it publishes any actions and if so, add them
+   * to the menu in the appropriate places.
    */
   @Override
   public void resourceLoaded(CreoleEvent e) {
@@ -460,10 +469,9 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
   }
 
   @Override
-  public void resourceRenamed(Resource resource, String oldName,
-          String newName) {
+  public void resourceRenamed(Resource resource, String oldName, String newName) {
   }
-  
+
   private static class DocumentExportDialog extends JDialog {
 
     private DocumentExporter de;
@@ -589,7 +597,8 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
       KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
       im.put(enter, "none");
 
-      // define keystrokes action bindings at the level of the main window
+      // define keystrokes action bindings at the level of the main
+      // window
       InputMap inputMap =
               ((JComponent)this.getContentPane())
                       .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
