@@ -18,13 +18,10 @@ import gate.Document;
 import gate.DocumentExporter;
 import gate.FeatureMap;
 import gate.creole.metadata.AutoInstance;
-import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
-import gate.creole.metadata.RunTime;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URL;
 
 import javax.xml.stream.XMLStreamException;
 
