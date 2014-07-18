@@ -50,7 +50,7 @@
     
     <!-- Document Exporters -->
     <RESOURCE>
-      <CLASS>gate.creole.GateXMLExporter</CLASS>
+      <CLASS>gate.corpora.export.GateXMLExporter</CLASS>
     </RESOURCE>
   </CREOLE>
 

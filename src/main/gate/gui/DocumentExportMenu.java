@@ -20,7 +20,7 @@ import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
 import gate.Resource;
-import gate.creole.GateXMLExporter;
+import gate.corpora.export.GateXMLExporter;
 import gate.creole.Parameter;
 import gate.creole.ResourceData;
 import gate.event.CreoleEvent;
