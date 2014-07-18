@@ -11,7 +11,7 @@
  *
  */
 
-package gate.creole;
+package gate.corpora.export;
 
 import java.io.File;
 import java.io.IOException;

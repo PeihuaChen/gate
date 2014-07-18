@@ -69,6 +69,11 @@ public abstract class DocumentExporter extends AbstractResource {
   public String getDefaultExtension() {
     return defaultExtension;
   }
+  
+  @Override
+  public String getName() {
+    return fileType;
+  }
 
   /**
    * A filter used in the file chooser to restrict the view to files of
@@ -101,6 +106,7 @@ public abstract class DocumentExporter extends AbstractResource {
     try {
       out = new FileOutputStream(file);
       export(doc, new FileOutputStream(file), options);
+      out.flush();
     } finally {
       IOUtils.closeQuietly(out);
     }
