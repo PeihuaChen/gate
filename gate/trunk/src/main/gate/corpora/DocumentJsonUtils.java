@@ -366,5 +366,12 @@ public class DocumentJsonUtils {
       }
     }
     json.writeEndObject(); // end of document
+
+    // Make sure that everything we have generated is flushed to the
+    // underlying OutputStream. It seems that not doing this can easily
+    // lead to corrupt files that just end in the middle of a JSON
+    // object. This occurs even if you flush the OutputStream instance
+    // as the data never leaves the JsonGenerator
+    json.flush();
   }
 }
