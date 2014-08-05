@@ -2207,18 +2207,30 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   public synchronized static void unlockGUI() {
-    // check whether GUI is up
-    if(getGuiRoots() == null || getGuiRoots().isEmpty()) return;
+    
+    Thread t = new Thread() {
+      public void run() {
+     // check whether GUI is up
+        if(getGuiRoots() == null || getGuiRoots().isEmpty()) return;
 
-    if(guiLock != null) {
-      guiLock.setVisible(false);
-      // completely dispose the dialog (causes it to disappear even if
-      // displayed on a non-visible virtual display on Linux)
-      // fix for bug 1369096
-      // (http://sourceforge.net/tracker/index.php?func=detail&aid=1369096&group_id=143829&atid=756796)
-      guiLock.dispose();
+        if(guiLock != null) {
+          guiLock.setVisible(false);
+          // completely dispose the dialog (causes it to disappear even if
+          // displayed on a non-visible virtual display on Linux)
+          // fix for bug 1369096
+          // (http://sourceforge.net/tracker/index.php?func=detail&aid=1369096&group_id=143829&atid=756796)
+          guiLock.dispose();
+        }
+        guiLock = null;
+      }
+    };
+    
+    if (SwingUtilities.isEventDispatchThread()) {
+      t.start();
     }
-    guiLock = null;
+    else {
+      SwingUtilities.invokeLater(t);
+    }    
   }
 
   /** Flag to protect Frame title to be changed */
