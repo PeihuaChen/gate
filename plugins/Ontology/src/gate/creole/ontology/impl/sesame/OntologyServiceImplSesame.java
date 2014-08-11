@@ -2259,7 +2259,7 @@ public class OntologyServiceImplSesame implements OntologyService {
           theClass = createRestrictionFromURI(r.toString(), nodeID.toString());
       } else {
         // oddd
-        System.out.println("getRestrictionForONodeIDs: Got more than one restriction type for: "+nodeID);
+	logger.warn("getRestrictionForONodeIDs: Got more than one restriction type for: "+nodeID);
         theClass = Utils.createOClass(ontology, this, node.toString(), OConstants.ANNONYMOUS_CLASS);
       }
       return theClass;
@@ -3426,7 +3426,7 @@ public class OntologyServiceImplSesame implements OntologyService {
   public ResourceInfo getRestrictionValue(
       String restrictionURI, byte restrictionType)
   {
-    System.out.println("getRestrictionValue for "+restrictionURI);
+    logger.debug("getRestrictionValue for "+restrictionURI);
     URI whatValueURI = null;
     switch (restrictionType) {
       case OConstants.ALL_VALUES_FROM_RESTRICTION:
