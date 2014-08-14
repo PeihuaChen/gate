@@ -35,7 +35,7 @@ public abstract class DocumentExporter extends AbstractResource {
 
   private static final long serialVersionUID = -4810523902750051704L;
 
-  protected String fileType, defaultExtension;
+  protected String fileType, defaultExtension, mimeType;
 
   protected FileFilter filter;
 
@@ -47,9 +47,10 @@ public abstract class DocumentExporter extends AbstractResource {
    *          appear on the menu
    * @param defaultExtension the default file extension for this type
    */
-  public DocumentExporter(String fileType, String defaultExtension) {
+  public DocumentExporter(String fileType, String defaultExtension, String mimeType) {
     this.fileType = fileType;
     this.defaultExtension = defaultExtension;
+    this.mimeType = mimeType;
   }
 
   /**
@@ -73,6 +74,10 @@ public abstract class DocumentExporter extends AbstractResource {
   @Override
   public String getName() {
     return fileType;
+  }
+  
+  public String getMimeType() {
+    return mimeType;
   }
 
   /**
@@ -130,4 +135,9 @@ public abstract class DocumentExporter extends AbstractResource {
    */
   public abstract void export(Document doc, OutputStream out, FeatureMap options)
           throws IOException;
+  
+  public static DocumentExporter getInstance(String className) {
+    return (DocumentExporter)Gate.getCreoleRegister().get(className)
+            .getInstantiations().iterator().next();
+  }
 }
