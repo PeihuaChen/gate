@@ -32,7 +32,7 @@ import com.sun.xml.fastinfoset.stax.StAXDocumentSerializer;
 public class FastInfosetExporter extends DocumentExporter {
 
   public FastInfosetExporter() {
-    super("Fast Infoset","finf");
+    super("Fast Infoset","finf","application/fastinfoset");
   }
   
   public void export(Document doc, OutputStream out, FeatureMap options)
