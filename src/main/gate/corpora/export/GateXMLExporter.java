@@ -23,6 +23,7 @@ import gate.Document;
 import gate.DocumentExporter;
 import gate.FeatureMap;
 import gate.corpora.DocumentStaxUtils;
+import gate.corpora.MimeType;
 import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.CreoleResource;
 
@@ -32,7 +33,7 @@ public class GateXMLExporter extends DocumentExporter {
   private static final long serialVersionUID = -5725505758491779035L;
 
   public GateXMLExporter() {
-    super("GATE XML", "xml");
+    super("GATE XML", "xml", "text/xml");
   }
 
   @Override
