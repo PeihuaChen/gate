@@ -203,9 +203,7 @@ public class NewResourceDialog extends JDialog {
   }// getSelectedParameters()
 
   /**
-   * Return the String entered into the resource name field of the dialog.
-   * 
-   * @param rData 
+   * Return the String entered into the resource name field of the dialog. 
    */
   public String getResourceName() {
     return nameField.getText();
