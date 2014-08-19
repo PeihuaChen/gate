@@ -814,7 +814,7 @@ Priority: 40
  gate.AnnotationSet surnameSet = (gate.AnnotationSet)bindings.get("surname"); 
  gate.Annotation surnameAnn = (gate.Annotation)surnameSet.iterator().next();
 
- features.put("gender", firstNameAnn.getFeatures().get("minorType"));
+ features.put("gender", firstNameAnn.getFeatures().get("gender"));
 
  String firstNameContent = gate.Utils.stringFor(doc, firstNameAnn);
  features.put("firstName", firstNameContent);
