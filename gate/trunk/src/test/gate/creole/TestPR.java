@@ -198,7 +198,7 @@ public class TestPR extends TestCase
 //      doc2.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 134);
     assertEquals("Wrong number of annotations produced in " +
             doc2.getSourceUrl().getFile(),
-            227,
+            232,
             doc2.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size());
 
 //    assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+
@@ -207,7 +207,7 @@ public class TestPR extends TestCase
 //      doc3.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 144);
     assertEquals("Wrong number of annotations produced in " +
             doc3.getSourceUrl().getFile(),
-            271,
+            282,
             doc3.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size());
   }//testGazetteer
 
