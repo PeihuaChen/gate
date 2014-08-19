@@ -134,7 +134,7 @@ public class TestFlexibleGazetteer extends TestCase {
       System.out.println("There are this many lookup annotations: "+
                          lookups.size());
     }
-    assertEquals("Wrong number of lookup annotations",53,lookups.size());
+    assertEquals("Wrong number of lookup annotations",54,lookups.size());
 
     // Now clean up so we don't get a memory leak.
     Factory.deleteResource(doc);
