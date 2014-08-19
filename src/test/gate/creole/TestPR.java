@@ -189,7 +189,7 @@ public class TestPR extends TestCase
 //      doc1.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 60);
     assertEquals("Wrong number of annotations produced in " +
             doc1.getSourceUrl().getFile(),
-            130,
+            133,
             doc1.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size());
 
 //    assertTrue("Found in "+ doc2.getSourceUrl().getFile()+ " "+
@@ -385,10 +385,9 @@ public class TestPR extends TestCase
       doc2.getAnnotations().get(ANNIEConstants.MONEY_ANNOTATION_TYPE).size()== 3);
 
     // assertions for doc 3
-    assertTrue("Found in "+doc3.getSourceUrl().getFile()+ " "+
-      doc3.getAnnotations().get(ANNIEConstants.ORGANIZATION_ANNOTATION_TYPE).size() +
-      " Organization annotations, instead of the expected 28",
-      doc3.getAnnotations().get(ANNIEConstants.ORGANIZATION_ANNOTATION_TYPE).size()== 28);
+    assertEquals("Found in "+doc3.getSourceUrl().getFile()+ " "+
+      " wrong number of Organization annotations",29,
+      doc3.getAnnotations().get(ANNIEConstants.ORGANIZATION_ANNOTATION_TYPE).size());
     assertTrue("Found in "+doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().get(ANNIEConstants.LOCATION_ANNOTATION_TYPE).size() +
       " Location annotations, instead of the expected 11",
