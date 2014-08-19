@@ -147,7 +147,7 @@ public class Utils {
               ann.getStartNode().getOffset(),
               ann.getEndNode().getOffset()).toString();
     } catch(gate.util.InvalidOffsetException ex) {
-      throw new GateRuntimeException(ex.getMessage());
+      throw new GateRuntimeException(ex.getMessage(),ex);
     }
   }
 
