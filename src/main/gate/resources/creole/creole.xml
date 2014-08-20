@@ -52,6 +52,9 @@
     <RESOURCE>
       <CLASS>gate.corpora.export.GateXMLExporter</CLASS>
     </RESOURCE>
+     <RESOURCE>
+      <CLASS>gate.corpora.export.InlineXMLExporter</CLASS>
+    </RESOURCE>
   </CREOLE>
 
   <!-- creole.xml for Controllers -->

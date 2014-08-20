@@ -13,19 +13,18 @@
 
 package gate.corpora.export;
 
+import gate.Document;
+import gate.DocumentExporter;
+import gate.FeatureMap;
+import gate.corpora.DocumentStaxUtils;
+import gate.creole.metadata.AutoInstance;
+import gate.creole.metadata.CreoleResource;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 
 import javax.xml.stream.XMLStreamException;
-
-import gate.Document;
-import gate.DocumentExporter;
-import gate.FeatureMap;
-import gate.corpora.DocumentStaxUtils;
-import gate.corpora.MimeType;
-import gate.creole.metadata.AutoInstance;
-import gate.creole.metadata.CreoleResource;
 
 @CreoleResource(name = "GATE XML Exporter", tool = true, autoinstances = @AutoInstance, icon = "GATEXML")
 public class GateXMLExporter extends DocumentExporter {
