@@ -118,7 +118,9 @@ public class DocumentJsonUtils {
   public static void writeDocument(Document doc,
           Map<String, Collection<Annotation>> annotationsMap, OutputStream out)
           throws JsonGenerationException, IOException {
-    writeDocument(doc, annotationsMap, JSON_FACTORY.createGenerator(out));
+    try(JsonGenerator jsonG = JSON_FACTORY.createGenerator(out)) {
+      writeDocument(doc, annotationsMap, jsonG);
+    }
   }
 
   /**
@@ -136,7 +138,9 @@ public class DocumentJsonUtils {
   public static void writeDocument(Document doc,
           Map<String, Collection<Annotation>> annotationsMap, Writer out)
           throws JsonGenerationException, IOException {
-    writeDocument(doc, annotationsMap, JSON_FACTORY.createGenerator(out));
+    try(JsonGenerator jsonG = JSON_FACTORY.createGenerator(out)) {
+      writeDocument(doc, annotationsMap, jsonG);
+    }
   }
 
   /**
@@ -154,8 +158,9 @@ public class DocumentJsonUtils {
   public static void writeDocument(Document doc,
           Map<String, Collection<Annotation>> annotationsMap, File out)
           throws JsonGenerationException, IOException {
-    writeDocument(doc, annotationsMap,
-            JSON_FACTORY.createGenerator(out, JsonEncoding.UTF8));
+    try(JsonGenerator jsonG = JSON_FACTORY.createGenerator(out, JsonEncoding.UTF8)) {
+      writeDocument(doc, annotationsMap,jsonG);
+    }
   }
 
   /**
