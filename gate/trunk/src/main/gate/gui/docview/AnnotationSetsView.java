@@ -205,19 +205,12 @@ public class AnnotationSetsView extends AbstractDocumentView
     setHandlers = new ArrayList<SetHandler>();
     tableRows = new ArrayList<Object>();
     visibleAnnotationTypes = new LinkedBlockingQueue<TypeSpec>();
-    actions = new ArrayList<Action>();
-    actions.add(new SavePreserveFormatAction());
     pendingEvents = new LinkedBlockingQueue<GateEvent>();
     eventMinder = new Timer(EVENTS_HANDLE_DELAY, 
             new HandleDocumentEventsAction());
     eventMinder.setRepeats(true);
     eventMinder.setCoalesce(true);    
   }
-  
-  @Override
-  public List<Action> getActions() {
-    return actions;
-  }  
 
   /* (non-Javadoc)
    * @see gate.gui.docview.DocumentView#getType()
@@ -1743,125 +1736,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       }
     }
   }
-  
-  protected class SavePreserveFormatAction extends AbstractAction{
-    public SavePreserveFormatAction(){
-      super("Save Preserving Format");
-      putValue(SHORT_DESCRIPTION,
-        "Saves original markups and highlighted annotations");
-    }
     
-    @Override
-    public void actionPerformed(ActionEvent evt){
-      Runnable runableAction = new Runnable(){
-        @Override
-        public void run(){
-          XJFileChooser fileChooser = MainFrame.getFileChooser();
-          ExtensionFileFilter filter =
-            new ExtensionFileFilter("XML files", "xml", "gml");
-          fileChooser.addChoosableFileFilter(filter);
-          fileChooser.setMultiSelectionEnabled(false);
-          fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-          fileChooser.setDialogTitle("Select document to save ...");
-
-          if (document.getSourceUrl() != null) {
-            String fileName = "";
-            try {
-              fileName = document.getSourceUrl().toURI().getPath().trim();
-            } catch (URISyntaxException e) {
-              fileName = document.getSourceUrl().getPath().trim();
-            }
-            if (fileName.equals("") || fileName.equals("/")) {
-              if (document.getNamedAnnotationSets().containsKey("Original markups")
-               && !document.getAnnotations("Original markups").get("title").isEmpty()) {
-                // use the title annotation if any
-                try {
-                  fileName = document.getContent().getContent(
-                    document.getAnnotations("Original markups").get("title").firstNode().getOffset(),
-                    document.getAnnotations("Original markups").get("title").lastNode().getOffset())
-                    .toString();
-                } catch(InvalidOffsetException e) {
-                  e.printStackTrace();
-                }
-              } else {
-                fileName = document.getSourceUrl().toString();
-              }
-              // cleans the file name
-              fileName = fileName.replaceAll("/", "_");
-            } else {
-              // replaces the extension with .xml
-              fileName = fileName.replaceAll("\\.[a-zA-Z]{1,4}$", ".xml");
-            }
-            // cleans the file name
-            fileName = fileName.replaceAll("[^/a-zA-Z0-9._-]", "_");
-            fileName = fileName.replaceAll("__+", "_");
-            // adds a .xml extension if not present
-            if (!fileName.endsWith(".xml")) { fileName += ".xml"; }
-            File file = new File(fileName);
-            fileChooser.ensureFileIsVisible(file);
-            fileChooser.setSelectedFile(file);
-          }
-
-          if(fileChooser.showSaveDialog(owner) == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            if(selectedFile == null) return;
-            StatusListener sListener = (StatusListener)Gate.getListeners().
-              get("gate.event.StatusListener");
-            if (sListener != null) 
-              sListener.statusChanged("Please wait while dumping annotations"+
-              "in the original format to " + selectedFile.toString() + " ...");
-            // This method construct a set with all annotations that need to be
-            // dumped as Xml. If the set is null then only the original markups
-            // are dumped.
-            Set<Annotation> annotationsToDump = new HashSet<Annotation>();
-            Iterator<SetHandler> setIter = setHandlers.iterator();
-            while(setIter.hasNext()){
-              SetHandler sHandler = setIter.next();
-              Iterator<TypeHandler> typeIter = sHandler.typeHandlers.iterator();
-              while(typeIter.hasNext()){
-                TypeHandler tHandler = typeIter.next();
-                if(tHandler.isSelected()){
-                  annotationsToDump.addAll(sHandler.set.get(tHandler.name));
-                }
-              }
-            }
-            
-            try{
-              // Prepare to write into the xmlFile using the original encoding
-              String encoding = ((TextualDocument)document).getEncoding();
-
-              OutputStreamWriter writer = new OutputStreamWriter(
-                                            new FileOutputStream(selectedFile),
-                                            encoding);
-
-              //determine if the features need to be saved first
-              Boolean featuresSaved =
-                  Gate.getUserConfig().getBoolean(
-                    GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT);
-              boolean saveFeatures = true;
-              if (featuresSaved != null)
-                saveFeatures = featuresSaved.booleanValue();
-              // Write with the toXml() method
-              writer.write(
-                document.toXml(annotationsToDump, saveFeatures));
-              writer.flush();
-              writer.close();
-              document.setSourceUrl(selectedFile.toURI().toURL());
-            } catch (Exception ex){
-              ex.printStackTrace(Out.getPrintWriter());
-            }// End try
-            if (sListener != null)
-              sListener.statusChanged("Finished dumping into the "+
-              "file : " + selectedFile.toString());
-          }// End if
-        }// End run()
-      };// End Runnable
-      Thread thread = new Thread(runableAction, "");
-      thread.setPriority(Thread.MIN_PRIORITY);
-      thread.start();
-    }
-  }
-  
   /**
    * A fake GATE Event used to wrap a {@link Runnable} value. This is used for
    * queueing actions to the document UI update timer.  
@@ -2393,8 +2268,6 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected MouseStoppedMovingAction mouseStoppedMovingAction;
   
   protected String lastAnnotationType = "_New_";
-  
-  protected List<Action> actions;
 
   protected ComponentOrientation currentOrientation;
   
