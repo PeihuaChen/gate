@@ -33,7 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@CreoleResource(name = "Inline XML Exporter", tool = true, autoinstances = @AutoInstance)
+@CreoleResource(name = "Inline XML Exporter", tool = true, autoinstances = @AutoInstance, icon = "InlineXML")
 public class InlineXMLExporter extends DocumentExporter {
 
   private static final long serialVersionUID = -9072204691197080958L;
