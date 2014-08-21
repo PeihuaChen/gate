@@ -623,6 +623,7 @@ public class NLPFeaturesOfDoc {
     if(singleAnnSet != null) {
       AnnotationSet coverAnnSet = singleAnnSet.get(
         tokenStartOffset, tokenEndOffset);
+      System.out.println("****************: "+coverAnnSet);
       Iterator<Annotation> overlappingIterator = coverAnnSet.iterator();
       if(overlappingIterator.hasNext()) {
         Annotation superannotation = overlappingIterator.next();
