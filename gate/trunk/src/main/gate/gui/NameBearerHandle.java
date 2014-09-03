@@ -980,8 +980,8 @@ public class NameBearerHandle implements Handle, StatusListener,
               }// End if
               DataStore ownDS = ((LanguageResource)target).getDataStore();
               if(ds == ownDS) {
-                //MainFrame.lockGUI("Saving "
-                //        + ((LanguageResource)target).getName());
+                MainFrame.lockGUI("Saving "
+                        + ((LanguageResource)target).getName());
 
                 StatusListener sListener = (StatusListener)gate.Gate
                         .getListeners().get("gate.event.StatusListener");
@@ -1003,8 +1003,8 @@ public class NameBearerHandle implements Handle, StatusListener,
                 
                 StatusListener sListener = (StatusListener)gate.Gate
                         .getListeners().get("gate.event.StatusListener");
-                //MainFrame.lockGUI("Saving "
-                //        + ((LanguageResource)target).getName());
+                MainFrame.lockGUI("Saving "
+                        + ((LanguageResource)target).getName());
 
                 if(sListener != null)
                   sListener.statusChanged("Saving: "

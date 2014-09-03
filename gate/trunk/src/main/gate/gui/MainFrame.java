@@ -105,6 +105,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
@@ -2196,14 +2197,15 @@ public class MainFrame extends JFrame implements ProgressListener,
     // this call should not return until the dialog is up to ensure
     // proper
     // sequentiality for lock - unlock calls
-    while(guiLock == null || !guiLock.isShowing()) {
+    /*while(guiLock == null || !guiLock.isShowing()) {
       try {
         Thread.sleep(100);
       }
       catch(InterruptedException ie) {
         log.debug("Interrupted sleep when the GUI is locked.", ie);
       }
-    }
+    }*/
+    
   }
 
   public synchronized static void unlockGUI() {
@@ -2225,12 +2227,12 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
     };
     
-    if (SwingUtilities.isEventDispatchThread()) {
+    /*if (SwingUtilities.isEventDispatchThread()) {
       t.start();
     }
-    else {
+    else {*/
       SwingUtilities.invokeLater(t);
-    }    
+    //}    
   }
 
   /** Flag to protect Frame title to be changed */
