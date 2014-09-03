@@ -936,9 +936,7 @@ public class NameBearerHandle implements Handle, StatusListener,
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
+      
           try {
             DataStoreRegister dsReg = Gate.getDataStoreRegister();
             Map<String, DataStore> dsByName = new HashMap<String, DataStore>();
@@ -1066,9 +1064,7 @@ public class NameBearerHandle implements Handle, StatusListener,
             MainFrame.unlockGUI();
           }
 
-        }
-      };
-      new Thread(runnable).start();
+        
     }
   }// class SaveToAction extends AbstractAction
 
