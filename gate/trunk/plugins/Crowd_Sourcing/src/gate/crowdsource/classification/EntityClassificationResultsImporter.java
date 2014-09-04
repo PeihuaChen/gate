@@ -159,9 +159,8 @@ public class EntityClassificationResultsImporter
           if(judgments != null) {
             for(JsonElement judgmentElt : judgments) {
               JsonObject judgment = judgmentElt.getAsJsonObject();
-              String answer =
-                      judgment.getAsJsonObject("data").get("answer")
-                              .getAsString();
+              JsonObject data = judgment.getAsJsonObject("data");
+              String answer = data.get("answer").getAsString();
               long judgmentId = judgment.get("id").getAsLong();
               double trust = judgment.get("trust").getAsDouble();
               long workerId = judgment.get("worker_id").getAsLong();
@@ -172,6 +171,14 @@ public class EntityClassificationResultsImporter
               judgmentAnn.getFeatures().put("trust", Double.valueOf(trust));
               judgmentAnn.getFeatures()
                       .put("worker_id", Long.valueOf(workerId));
+              if(data.get("comment") != null) {
+                if(data.get("comment").isJsonPrimitive()) {
+                  String comment = data.get("comment").getAsString().trim();
+                  if(comment.length() > 0) {
+                    judgmentAnn.getFeatures().put("comment", comment);
+                  }
+                }
+              }
             }
           } else {
             log.warn("Unit " + unitId + " has no judgments");

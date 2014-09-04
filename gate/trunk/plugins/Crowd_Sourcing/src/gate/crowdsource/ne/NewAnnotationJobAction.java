@@ -25,11 +25,15 @@ import java.beans.PropertyChangeListener;
 import java.io.InputStream;
 
 import javax.swing.AbstractAction;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import com.jeta.forms.components.panel.FormPanel;
 
@@ -62,7 +66,9 @@ public class NewAnnotationJobAction extends AbstractAction {
       
       panel.setPreferredSize(new Dimension(500, 400));
       
-      // attach listeners etc.
+      initListeners(panel);
+      
+      // wrap panel in a JOptionPane.
       final JOptionPane optionPane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE,
               JOptionPane.OK_CANCEL_OPTION);
       final JDialog dialog  = new JDialog(MainFrame.getInstance(), "New annotation job", true);
@@ -103,7 +109,11 @@ public class NewAnnotationJobAction extends AbstractAction {
                                 panel.getTextComponent("instructions").getText(),
                                 panel.getTextField("caption").getText().trim(),
                                 panel.getTextField("noEntitiesCaption").getText().trim(),
-                                panel.getTextField("noEntitiesError").getText().trim()));
+                                panel.getTextField("noEntitiesError").getText().trim(),
+                                panel.getCheckBox("commentCheckbox").isSelected()
+                                        ? panel.getTextField("commentCaption").getText().trim()
+                                        : null));
+                        
                         // if the creation was successful we can dispose the dialog
                         SwingUtilities.invokeLater(new Runnable() {
                           public void run() {
@@ -164,8 +174,27 @@ public class NewAnnotationJobAction extends AbstractAction {
       statusLabel.setText("<html><p>An error message for the \"no entities\" checkbox is required</p></html>");
       statusLabel.setIcon(MainFrame.getIcon("Invalid"));
       valid = false;
+    } else if(panel.getCheckBox("commentCheckbox").isSelected()
+            && "".equals(panel.getTextField("commentCaption").getText().trim())) {
+      statusLabel.setText("<html><p>A caption for the \"comment\" field is required</p></html>");
+      statusLabel.setIcon(MainFrame.getIcon("Invalid"));
+      valid = false;      
     }
     return valid;
   }
-
+  
+  protected void initListeners(FormPanel panel) {
+    final JLabel commentLabel = panel.getLabel("commentCaptionLabel");
+    final JTextField commentField = panel.getTextField("commentCaption");
+    final JCheckBox commentCheckbox = panel.getCheckBox("commentCheckbox");
+    commentCheckbox.addChangeListener(new ChangeListener() {
+      
+      @Override
+      public void stateChanged(ChangeEvent e) {
+        commentLabel.setEnabled(commentCheckbox.isSelected());
+        commentField.setEnabled(commentCheckbox.isSelected());
+      }
+    });
+  }
+  
 }
