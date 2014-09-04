@@ -1147,9 +1147,14 @@ public class SerialControllerEditor extends AbstractVisualResource
       if(controller != null && controller.getPRs().contains(pr)){
         controller.remove(pr);
       }
-      loadedPRsTableModel.fireTableDataChanged();
-      memberPRsTableModel.fireTableDataChanged();
-//      repaint(100);
+      SwingUtilities.invokeLater(new Runnable() {
+
+        @Override
+        public void run() {
+          loadedPRsTableModel.fireTableDataChanged();
+          memberPRsTableModel.fireTableDataChanged();
+        }        
+      });      
     }
     else if(e.getResource() instanceof LanguageResource) {
       if(e.getResource() instanceof Corpus && corpusControllerMode) {
@@ -1204,8 +1209,15 @@ public class SerialControllerEditor extends AbstractVisualResource
    */
   @Override
   public void resourceAdded(ControllerEvent evt){
-    loadedPRsTableModel.fireTableDataChanged();
-    memberPRsTableModel.fireTableDataChanged();
+    SwingUtilities.invokeLater(new Runnable() {
+      
+      @Override
+      public void run() {
+        loadedPRsTableModel.fireTableDataChanged();
+        memberPRsTableModel.fireTableDataChanged();
+      }
+    });
+    
   }
   
   /* (non-Javadoc)
@@ -1213,8 +1225,15 @@ public class SerialControllerEditor extends AbstractVisualResource
    */
   @Override
   public void resourceRemoved(ControllerEvent evt){
-    loadedPRsTableModel.fireTableDataChanged();
-    memberPRsTableModel.fireTableDataChanged();
+    SwingUtilities.invokeLater(new Runnable() {
+      
+      @Override
+      public void run() {
+        loadedPRsTableModel.fireTableDataChanged();
+        memberPRsTableModel.fireTableDataChanged();
+      }
+    });
+    
   }
 
   public synchronized void addStatusListener(StatusListener l) {
