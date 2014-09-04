@@ -1392,7 +1392,14 @@ public class SerialControllerEditor extends AbstractVisualResource
     }
 
     void fireDataChanged(){
-      fireContentsChanged(this, 0, getSize());
+      SwingUtilities.invokeLater(new Runnable() {
+        
+        @Override
+        public void run() {
+          fireContentsChanged(this, 0, getSize());    
+        }
+      });
+      
     }
   }
 
