@@ -25,6 +25,7 @@ import com.google.gson.JsonObject;
 
 import gate.Annotation;
 import gate.AnnotationSet;
+import gate.FeatureMap;
 import gate.Resource;
 import gate.Utils;
 import gate.creole.AbstractLanguageAnalyser;
@@ -202,12 +203,20 @@ public class EntityAnnotationResultsImporter
           if(judgments != null) {
             for(JsonElement judgmentElt : judgments) {
               JsonObject judgment = judgmentElt.getAsJsonObject();
-              JsonArray answer =
-                      judgment.getAsJsonObject("data").get("answer")
-                              .getAsJsonArray();
+              JsonObject data = judgment.getAsJsonObject("data");
+              JsonArray answer = data.get("answer").getAsJsonArray();
               Long judgmentId = judgment.get("id").getAsLong();
               Double trust = judgment.get("trust").getAsDouble();
               Long workerId = judgment.get("worker_id").getAsLong();
+              String comment = null;
+              if(data.get("comment") != null) {
+                if(data.get("comment").isJsonPrimitive()) {
+                  comment = data.get("comment").getAsString().trim();
+                  if("".equals(comment)) {
+                    comment = null;
+                  }
+                }
+              }
               if(answer.size() > 0) {
                 // judgment says there are some entities to annotate.  Look for
                 // sequences of consecutive token indices and create one result
@@ -235,10 +244,14 @@ public class EntityAnnotationResultsImporter
                     if(!found) {
                       // no existing annotation found, create one
                       try {
-                        resultAS.add(startOffset, endOffset, resultAnnotationType, Utils.featureMap(
+                        FeatureMap features = Utils.featureMap(
                                 JUDGMENT_ID_FEATURE_NAME, judgmentId,
                                 "trust", trust,
-                                "worker_id", workerId));
+                                "worker_id", workerId);
+                        if(comment != null) {
+                          features.put("comment", comment);
+                        }
+                        resultAS.add(startOffset, endOffset, resultAnnotationType, features);
                       } catch(InvalidOffsetException e) {
                         throw new ExecutionException("Invalid offset obtained from existing annotation!", e);
                       }

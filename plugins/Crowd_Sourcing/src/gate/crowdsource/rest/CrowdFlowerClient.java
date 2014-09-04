@@ -75,11 +75,14 @@ public class CrowdFlowerClient {
    *          task extracted from the entity annotation. This is
    *          expressed as a List of [value, description] two-element
    *          Lists, one for each option.
+   * @param commentCaption caption for the free-text "comment" field, or null
+   *          if no comment field should be shown.
    * @return the newly created job ID.
    * @throws IOException
    */
   public long createClassificationJob(String title, String instructions,
-          String caption, List<List<String>> commonOptions) throws IOException {
+          String caption, List<List<String>> commonOptions,
+          String commentCaption) throws IOException {
     log.debug("Creating classification job");
     log.debug("title: " + title);
     log.debug("instructions: " + instructions);
@@ -124,6 +127,11 @@ public class CrowdFlowerClient {
       }
     }
     cml.append("</cml:radios>\n");
+    if(commentCaption != null) {
+      cml.append("<cml:text name=\"comment\" label=\"");
+      StringEscapeUtils.escapeXml(cml, commentCaption);
+      cml.append("\"/>");
+    }
 
     log.debug("cml: " + cml.toString());
 
@@ -316,11 +324,14 @@ public class CrowdFlowerClient {
    *          checkbox.
    * @param noEntitiesError the error message to show to the user if they have
    *          not marked any annotations but have also not ticked the checkbox.
+   * @param commentCaption caption for the free-text "comment" field, or null
+   *          if no comment field should be shown.
    * @return the newly created job ID.
    * @throws IOException
    */
   public long createAnnotationJob(String title, String instructions,
-          String caption, String noEntitiesCaption, String noEntitiesError)
+          String caption, String noEntitiesCaption, String noEntitiesError,
+          String commentCaption)
             throws IOException {
     log.debug("Creating annotation job");
     log.debug("title: " + title);
@@ -378,6 +389,11 @@ public class CrowdFlowerClient {
     cml.append("\" value=\"1\"\n"
             + "      only-if=\"!answer:required\" validates=\"required\"/>\n"
             + "</div>\n");
+    if(commentCaption != null) {
+      cml.append("<cml:text name=\"comment\" label=\"");
+      StringEscapeUtils.escapeXml(cml, commentCaption);
+      cml.append("\"/>");
+    }
     log.debug("cml: " + cml.toString());
 
     log.debug("POSTing to CrowdFlower");

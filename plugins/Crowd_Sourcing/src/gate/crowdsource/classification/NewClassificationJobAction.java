@@ -28,13 +28,17 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
 import com.jeta.forms.components.panel.FormPanel;
@@ -68,7 +72,9 @@ public class NewClassificationJobAction extends AbstractAction {
       
       panel.setPreferredSize(new Dimension(500, 400));
       
-      // attach listeners etc.
+      initListeners(panel);
+
+      // put the panel in a JOptionPane
       final JTable commonOptionsTable = panel.getTable("commonOptions");
       final DefaultTableModel optionsTableModel = new DefaultTableModel(
               new String[][] {
@@ -173,7 +179,10 @@ public class NewClassificationJobAction extends AbstractAction {
                                 panel.getTextField("title").getText().trim(),
                                 panel.getTextComponent("instructions").getText(),
                                 panel.getTextField("caption").getText().trim(),
-                                commonOptions));
+                                commonOptions,
+                                panel.getCheckBox("commentCheckbox").isSelected()
+                                  ? panel.getTextField("commentCaption").getText().trim()
+                                  : null));
                         // if the creation was successful we can dispose the dialog
                         SwingUtilities.invokeLater(new Runnable() {
                           public void run() {
@@ -226,8 +235,28 @@ public class NewClassificationJobAction extends AbstractAction {
       statusLabel.setText("<html><p>A caption is required</p></html>");
       statusLabel.setIcon(MainFrame.getIcon("Invalid"));
       valid = false;
+    } else if(panel.getCheckBox("commentCheckbox").isSelected()
+            && "".equals(panel.getTextField("commentCaption").getText().trim())) {
+      statusLabel.setText("<html><p>A caption for the \"comment\" field is required</p></html>");
+      statusLabel.setIcon(MainFrame.getIcon("Invalid"));
+      valid = false;      
     }
     return valid;
   }
+  
+  protected void initListeners(FormPanel panel) {
+    final JLabel commentLabel = panel.getLabel("commentCaptionLabel");
+    final JTextField commentField = panel.getTextField("commentCaption");
+    final JCheckBox commentCheckbox = panel.getCheckBox("commentCheckbox");
+    commentCheckbox.addChangeListener(new ChangeListener() {
+      
+      @Override
+      public void stateChanged(ChangeEvent e) {
+        commentLabel.setEnabled(commentCheckbox.isSelected());
+        commentField.setEnabled(commentCheckbox.isSelected());
+      }
+    });
+  }
+
 
 }
