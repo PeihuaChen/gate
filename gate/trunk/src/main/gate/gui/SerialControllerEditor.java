@@ -1123,14 +1123,32 @@ public class SerialControllerEditor extends AbstractVisualResource
     SerialControllerEditor.this.repaint(100);
   }
 
+  /*
+   * Utility method to refresh the PR lists on the EDT but making sure
+   * that if we are on the EDT we don't wait we do it right now
+   */
+  private void refreshPRLists() {
+    if(SwingUtilities.isEventDispatchThread()) {
+      loadedPRsTableModel.fireTableDataChanged();
+      memberPRsTableModel.fireTableDataChanged();
+    } else {
+      SwingUtilities.invokeLater(new Runnable() {
+
+        @Override
+        public void run() {
+          loadedPRsTableModel.fireTableDataChanged();
+          memberPRsTableModel.fireTableDataChanged();
+        }
+      });
+    }
+  }
 
   //CreoleListener implementation
   @Override
   public void resourceLoaded(CreoleEvent e) {
     if(Gate.getHiddenAttribute(e.getResource().getFeatures())) return;
     if(e.getResource() instanceof ProcessingResource){
-      loadedPRsTableModel.fireTableDataChanged();
-      memberPRsTableModel.fireTableDataChanged();
+      refreshPRLists();
 //      repaint(100);
     }else if(e.getResource() instanceof LanguageResource){
       if(e.getResource() instanceof Corpus && corpusControllerMode){
@@ -1147,14 +1165,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       if(controller != null && controller.getPRs().contains(pr)){
         controller.remove(pr);
       }
-      SwingUtilities.invokeLater(new Runnable() {
-
-        @Override
-        public void run() {
-          loadedPRsTableModel.fireTableDataChanged();
-          memberPRsTableModel.fireTableDataChanged();
-        }        
-      });      
+      refreshPRLists();
     }
     else if(e.getResource() instanceof LanguageResource) {
       if(e.getResource() instanceof Corpus && corpusControllerMode) {
@@ -1209,15 +1220,7 @@ public class SerialControllerEditor extends AbstractVisualResource
    */
   @Override
   public void resourceAdded(ControllerEvent evt){
-    SwingUtilities.invokeLater(new Runnable() {
-      
-      @Override
-      public void run() {
-        loadedPRsTableModel.fireTableDataChanged();
-        memberPRsTableModel.fireTableDataChanged();
-      }
-    });
-    
+    refreshPRLists();    
   }
   
   /* (non-Javadoc)
@@ -1225,15 +1228,7 @@ public class SerialControllerEditor extends AbstractVisualResource
    */
   @Override
   public void resourceRemoved(ControllerEvent evt){
-    SwingUtilities.invokeLater(new Runnable() {
-      
-      @Override
-      public void run() {
-        loadedPRsTableModel.fireTableDataChanged();
-        memberPRsTableModel.fireTableDataChanged();
-      }
-    });
-    
+    refreshPRLists();
   }
 
   public synchronized void addStatusListener(StatusListener l) {
