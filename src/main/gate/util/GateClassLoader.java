@@ -317,10 +317,16 @@ public class GateClassLoader extends URLClassLoader {
    * @param id the id of the classloader to forget
    */
   public void forgetClassLoader(String id) {
-    Introspector.flushCaches();
-    AbstractResource.flushBeanInfoCache();
+    
+    GateClassLoader gcl;
+    
     synchronized(childClassLoaders) {
-      childClassLoaders.remove(id);
+       gcl = childClassLoaders.remove(id);
+    }
+  
+    if (gcl != null && !gcl.isIsolated()) {
+      Introspector.flushCaches();
+      AbstractResource.flushBeanInfoCache();
     }
   }
 
