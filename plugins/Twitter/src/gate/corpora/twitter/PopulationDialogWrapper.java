@@ -303,6 +303,12 @@ class ListEditor extends JPanel {
   
   public void setValues(List<String> values) {
     this.values = values;
+    // re-create the list editor with new values
+    if(listEditor != null) {
+      listEditor.dispose();
+    }
+    listEditor = new ListEditorDialog(SwingUtilities.getAncestorOfClass(
+            Window.class, this), values, List.class, String.class.getName());
     this.field.setText(Strings.toString(values));
   }
   
