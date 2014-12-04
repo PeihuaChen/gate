@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -47,6 +50,14 @@ public class TweetUtils  {
    * The JSON property representing entities (e.g. hashtags).
    */
   public static final String ENTITIES_ATTRIBUTE = "entities";
+  
+  /**
+   * Date parser that understands the "created_at" timestamp format.
+   * The parser can cope with dates in any timezone but the returned
+   * DateTime objects will always be anchored in UTC.
+   */
+  public static final DateTimeFormatter CREATED_AT_FORMAT = DateTimeFormat.forPattern(
+          "EEE MMM dd HH:mm:ss ZZZZZ yyyy").withZoneUTC();
 
   
   public static List<Tweet> readTweets(String string) throws IOException {
