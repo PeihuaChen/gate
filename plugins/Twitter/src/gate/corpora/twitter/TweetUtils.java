@@ -57,7 +57,7 @@ public class TweetUtils  {
    * DateTime objects will always be anchored in UTC.
    */
   public static final DateTimeFormatter CREATED_AT_FORMAT = DateTimeFormat.forPattern(
-          "EEE MMM dd HH:mm:ss ZZZZZ yyyy").withZoneUTC();
+          "EEE MMM dd HH:mm:ss Z yyyy").withZoneUTC();
 
   
   public static List<Tweet> readTweets(String string) throws IOException {
