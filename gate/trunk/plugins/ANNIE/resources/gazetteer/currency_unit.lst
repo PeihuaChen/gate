@@ -1,4 +1,4 @@
-Asian Currency Unit
+Asian Currency Unit:=
 B Fr
 BFr
 CFA franc
@@ -56,8 +56,8 @@ deutschemarks
 dinar
 dinari
 dirham
-dollar
-dollars
+dollar:symbol=$
+dollars:symbol=$
 drach
 drachma
 drachmas
@@ -112,10 +112,10 @@ peseta
 pesetas
 peso
 pesos
-pound
-pound sterling
-pounds
-pounds sterling
+pound:symbol=£
+pound sterling:symbol=£
+pounds:symbol=£
+pounds sterling:symbol=£
 pula
 punt
 punts
@@ -167,8 +167,8 @@ Deutschemarks
 Dinar
 Dinari
 Dirham
-Dollar
-Dollars
+Dollar:symbol=$
+Dollars:symbol=$
 Drach
 Drachma
 Drachmas
@@ -220,10 +220,10 @@ Peseta
 Pesetas
 Peso
 Pesos
-Pound
-Pound Sterling
-Pounds
-Pounds Sterling
+Pound:symbol=£
+Pound Sterling:symbol=£
+Pounds:symbol=£
+Pounds Sterling:symbol=£
 Pula
 Punt
 Punts
