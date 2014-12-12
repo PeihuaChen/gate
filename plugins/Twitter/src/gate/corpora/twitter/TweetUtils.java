@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -56,8 +58,9 @@ public class TweetUtils  {
    * The parser can cope with dates in any timezone but the returned
    * DateTime objects will always be anchored in UTC.
    */
+  // Month names in Twitter API responses are English, so force locale
   public static final DateTimeFormatter CREATED_AT_FORMAT = DateTimeFormat.forPattern(
-          "EEE MMM dd HH:mm:ss Z yyyy").withZoneUTC();
+          "EEE MMM dd HH:mm:ss Z yyyy").withZoneUTC().withLocale(Locale.ENGLISH);
 
   
   public static List<Tweet> readTweets(String string) throws IOException {
