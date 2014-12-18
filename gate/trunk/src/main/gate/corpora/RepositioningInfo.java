@@ -132,6 +132,10 @@ public class RepositioningInfo extends ArrayList<PositionInfo> {
           else {
             // current position + offset in this PositionInfo record
             result = currPI.getCurrentPosition() + absPos - origPos;
+            // but don't go beyond the extracted length
+            if(result > currPI.getCurrentPosition() + currPI.getCurrentLength()) {
+              result = currPI.getCurrentPosition() + currPI.getCurrentLength();
+            }
           } // if
           found = true;
           break;
