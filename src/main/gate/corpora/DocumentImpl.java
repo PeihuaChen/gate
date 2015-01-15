@@ -2007,11 +2007,9 @@ public class DocumentImpl extends AbstractLanguageResource implements
         // Eliminate a feature inserted at reading time and which help to
         // take some decissions at saving time
         if("isEmptyAndSpan".equals(key.toString())) continue;
-        if(!(String.class.isAssignableFrom(key.getClass()) || Number.class
-                .isAssignableFrom(key.getClass()))) {
+        if(!String.class.isAssignableFrom(key.getClass())) {
           Out.prln("Warning:Found a feature NAME(" + key
-                  + ") that doesn't came"
-                  + " from String or Number.(feature discarded)");
+                  + ") that isn't a String.(feature discarded)");
           continue;
         }// End if
         if(!(String.class.isAssignableFrom(value.getClass())
