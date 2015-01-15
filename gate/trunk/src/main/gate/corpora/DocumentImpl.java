@@ -2016,10 +2016,10 @@ public class DocumentImpl extends AbstractLanguageResource implements
         }// End if
         if(!(String.class.isAssignableFrom(value.getClass())
                 || Number.class.isAssignableFrom(value.getClass()) || java.util.Collection.class
-                .isAssignableFrom(value.getClass()))) {
+                .isAssignableFrom(value.getClass()) || Boolean.class.isAssignableFrom(value.getClass()))) {
           Out.prln("Warning:Found a feature VALUE(" + value
                   + ") that doesn't came"
-                  + " from String, Number or Collection.(feature discarded)");
+                  + " from String, Number, Boolean, or Collection.(feature discarded)");
           continue;
         }// End if
         if("matches".equals(key)) {
