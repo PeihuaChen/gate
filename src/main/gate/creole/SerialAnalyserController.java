@@ -111,11 +111,8 @@ public class SerialAnalyserController extends SerialController
     // inform ControllerAware PRs that execution has started, but only if we are not
     // running as a subpipeline of another corpus pipeline.
     if(!runningAsSubPipeline) {
-      for(ControllerAwarePR pr : getControllerAwarePRs()) {
-        if(pr instanceof LanguageAnalyser) {
-          ((LanguageAnalyser)pr).setCorpus(corpus);
-        } 
-        pr.controllerExecutionStarted(this);
+      if(controllerCallbacksEnabled) {
+        invokeControllerExecutionStarted();
       }
     }
     Throwable thrown = null;
@@ -135,28 +132,16 @@ public class SerialAnalyserController extends SerialController
       if(thrown == null) {
         // successfully completed
         if(!runningAsSubPipeline) {
-          for(ControllerAwarePR pr : getControllerAwarePRs()) {
-            if(pr instanceof LanguageAnalyser) {
-              ((LanguageAnalyser)pr).setCorpus(corpus);
-            } 
-            pr.controllerExecutionFinished(this);
-            if(pr instanceof LanguageAnalyser) {
-              ((LanguageAnalyser)pr).setCorpus(null);
-            } 
+          if(controllerCallbacksEnabled) {
+            invokeControllerExecutionFinished();
           }
         }
       }
       else {
         // aborted
         if(!runningAsSubPipeline) {
-          for(ControllerAwarePR pr : getControllerAwarePRs()) {
-            if(pr instanceof LanguageAnalyser) {
-              ((LanguageAnalyser)pr).setCorpus(corpus);
-            } 
-            pr.controllerExecutionAborted(this, thrown);
-            if(pr instanceof LanguageAnalyser) {
-              ((LanguageAnalyser)pr).setCorpus(null);
-            } 
+          if(controllerCallbacksEnabled) {
+            invokeControllerExecutionAborted(thrown);
           }
         } 
         // rethrow the aborting exception or error
@@ -460,4 +445,70 @@ public class SerialAnalyserController extends SerialController
       }
     }    
   }
+  
+   /**
+   * Invoke the controllerExecutionStarted method on this controller and all nested PRs and controllers. 
+   * This method is intended to be used after if the automatic invocation of the controller
+   * callback methods has been disabled with a call setControllerCallbackEnabled(false).  Normally
+   * the callback methods are automatically invoked at the start and end of execute().  
+   * @throws ExecutionException 
+   */
+  @Override
+  public void invokeControllerExecutionStarted() throws ExecutionException {
+    for (ControllerAwarePR pr : getControllerAwarePRs()) {
+      // If the pr is a nested corpus controller, make sure its corpus is set 
+      // This is necessary because the nested corpus controller will immediately 
+      // notify its own controller aware PRs and those should be able to know about 
+      // the corpus.
+      if (pr instanceof LanguageAnalyser) {
+        ((LanguageAnalyser) pr).setCorpus(getCorpus());
+      }
+      pr.controllerExecutionStarted(this);
+    }
+  }
+
+   /**
+   * Invoke the controllerExecutionFinished method on this controller and all nested PRs and controllers. 
+   * This method is intended to be used after if the automatic invocation of the controller
+   * callback methods has been disabled with a call setControllerCallbackEnabled(false).  Normally
+   * the callback methods are automatically invoked at the start and end of execute().  
+   * @throws ExecutionException 
+   */
+  @Override
+  public void invokeControllerExecutionFinished() throws ExecutionException {
+    for (ControllerAwarePR pr : getControllerAwarePRs()) {
+      if (pr instanceof LanguageAnalyser) {
+        ((LanguageAnalyser) pr).setCorpus(getCorpus());
+      }
+      pr.controllerExecutionFinished(this);
+      if (pr instanceof LanguageAnalyser) {
+        ((LanguageAnalyser) pr).setCorpus(null);
+      }
+    }
+  }
+  
+   /**
+   * Invoke the controllerExecutionAborted method on this controller and all nested PRs and controllers. 
+   * This method is intended to be used after if the automatic invocation of the controller
+   * callback methods has been disabled with a call setControllerCallbackEnabled(false).  Normally
+   * the callback methods are automatically invoked at the start and end of execute().  
+   * @param thrown The Throwable to pass on to the controller callback method.
+   * @throws ExecutionException 
+   */
+  @Override
+  public void invokeControllerExecutionAborted(Throwable thrown) throws ExecutionException {
+    for (ControllerAwarePR pr : getControllerAwarePRs()) {
+      if (pr instanceof LanguageAnalyser) {
+        ((LanguageAnalyser) pr).setCorpus(getCorpus());
+      }
+      pr.controllerExecutionAborted(this, thrown);
+      if (pr instanceof LanguageAnalyser) {
+        ((LanguageAnalyser) pr).setCorpus(null);
+      }
+    }
+  }
+  
+  
+  
+  
 }
