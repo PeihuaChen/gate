@@ -461,18 +461,7 @@ public abstract class AbstractController extends AbstractResource
    * @throws ExecutionException 
    */
   public void invokeControllerExecutionStarted() throws ExecutionException {
-    CorpusController thisAsCorpusController = null;
-    if(this instanceof CorpusController) {
-      thisAsCorpusController = (CorpusController)this;
-    }
     for (ControllerAwarePR pr : getControllerAwarePRs()) {
-      // If the pr is a nested corpus controller, make sure its corpus is set 
-      // This is necessary because the nested corpus controller will immediately 
-      // notify its own controller aware PRs and those should be able to know about 
-      // the corpus.
-      if (thisAsCorpusController != null && pr instanceof LanguageAnalyser) {
-        ((LanguageAnalyser) pr).setCorpus(thisAsCorpusController.getCorpus());
-      }
       pr.controllerExecutionStarted(this);
     }
   }
@@ -485,18 +474,8 @@ public abstract class AbstractController extends AbstractResource
    * @throws ExecutionException 
    */
   public void invokeControllerExecutionFinished() throws ExecutionException {
-    CorpusController thisAsCorpusController = null;
-    if(this instanceof CorpusController) {
-      thisAsCorpusController = (CorpusController)this;
-    }
     for (ControllerAwarePR pr : getControllerAwarePRs()) {
-      if (pr instanceof LanguageAnalyser) {
-        ((LanguageAnalyser) pr).setCorpus(thisAsCorpusController.getCorpus());
-      }
       pr.controllerExecutionFinished(this);
-      if (pr instanceof LanguageAnalyser) {
-        ((LanguageAnalyser) pr).setCorpus(null);
-      }
     }
   }
   
@@ -508,18 +487,8 @@ public abstract class AbstractController extends AbstractResource
    * @throws ExecutionException 
    */
   public void invokeControllerExecutionAborted(Throwable thrown) throws ExecutionException {
-    CorpusController thisAsCorpusController = null;
-    if(this instanceof CorpusController) {
-      thisAsCorpusController = (CorpusController)this;
-    }
     for (ControllerAwarePR pr : getControllerAwarePRs()) {
-      if (pr instanceof LanguageAnalyser) {
-        ((LanguageAnalyser) pr).setCorpus(thisAsCorpusController.getCorpus());
-      }
       pr.controllerExecutionAborted(this, thrown);
-      if (pr instanceof LanguageAnalyser) {
-        ((LanguageAnalyser) pr).setCorpus(null);
-      }
     }
   }
     
