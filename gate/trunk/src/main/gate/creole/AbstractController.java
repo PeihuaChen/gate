@@ -14,7 +14,9 @@
 package gate.creole;
 
 import gate.Controller;
+import gate.CorpusController;
 import gate.Gate;
+import gate.LanguageAnalyser;
 import gate.ProcessingResource;
 import gate.Resource;
 import gate.creole.metadata.CreoleResource;
@@ -63,9 +65,9 @@ public abstract class AbstractController extends AbstractResource
   @Override
   public void execute() throws ExecutionException {
 
-    // inform ControllerAware PRs that execution has started
-    for(ControllerAwarePR pr : getControllerAwarePRs()) {
-      pr.controllerExecutionStarted(this);
+    // inform ControllerAware PRs that execution has started, if automatic callbacks are enabled
+    if(controllerCallbacksEnabled) { 
+      invokeControllerExecutionStarted();
     }
     Throwable thrown = null;
     try {
@@ -83,14 +85,14 @@ public abstract class AbstractController extends AbstractResource
     finally {
       if(thrown == null) {
         // successfully completed
-        for(ControllerAwarePR pr : getControllerAwarePRs()) {
-          pr.controllerExecutionFinished(this);
+        if(controllerCallbacksEnabled) {
+          invokeControllerExecutionFinished();
         }
       }
       else {
         // aborted
-        for(ControllerAwarePR pr : getControllerAwarePRs()) {
-          pr.controllerExecutionAborted(this, thrown);
+        if(controllerCallbacksEnabled) {
+          invokeControllerExecutionAborted(thrown);
         }
 
         // rethrow the aborting exception or error
@@ -450,4 +452,98 @@ public abstract class AbstractController extends AbstractResource
     }
     return benchmarkID;
   }
+  
+   /**
+   * Invoke the controllerExecutionStarted method on this controller and all nested PRs and controllers. 
+   * This method is intended to be used after if the automatic invocation of the controller
+   * callback methods has been disabled with a call setControllerCallbackEnabled(false).  Normally
+   * the callback methods are automatically invoked at the start and end of execute().  
+   * @throws ExecutionException 
+   */
+  public void invokeControllerExecutionStarted() throws ExecutionException {
+    CorpusController thisAsCorpusController = null;
+    if(this instanceof CorpusController) {
+      thisAsCorpusController = (CorpusController)this;
+    }
+    for (ControllerAwarePR pr : getControllerAwarePRs()) {
+      // If the pr is a nested corpus controller, make sure its corpus is set 
+      // This is necessary because the nested corpus controller will immediately 
+      // notify its own controller aware PRs and those should be able to know about 
+      // the corpus.
+      if (thisAsCorpusController != null && pr instanceof LanguageAnalyser) {
+        ((LanguageAnalyser) pr).setCorpus(thisAsCorpusController.getCorpus());
+      }
+      pr.controllerExecutionStarted(this);
+    }
+  }
+
+   /**
+   * Invoke the controllerExecutionFinished method on this controller and all nested PRs and controllers. 
+   * This method is intended to be used after if the automatic invocation of the controller
+   * callback methods has been disabled with a call setControllerCallbackEnabled(false).  Normally
+   * the callback methods are automatically invoked at the start and end of execute().  
+   * @throws ExecutionException 
+   */
+  public void invokeControllerExecutionFinished() throws ExecutionException {
+    CorpusController thisAsCorpusController = null;
+    if(this instanceof CorpusController) {
+      thisAsCorpusController = (CorpusController)this;
+    }
+    for (ControllerAwarePR pr : getControllerAwarePRs()) {
+      if (pr instanceof LanguageAnalyser) {
+        ((LanguageAnalyser) pr).setCorpus(thisAsCorpusController.getCorpus());
+      }
+      pr.controllerExecutionFinished(this);
+      if (pr instanceof LanguageAnalyser) {
+        ((LanguageAnalyser) pr).setCorpus(null);
+      }
+    }
+  }
+  
+   /**
+   * Invoke the controllerExecutionAborted method on this controller and all nested PRs and controllers. 
+   * This method is intended to be used after if the automatic invocation of the controller
+   * callback methods has been disabled with a call setControllerCallbackEnabled(false).  Normally
+   * the callback methods are automatically invoked at the start and end of execute().  
+   * @throws ExecutionException 
+   */
+  public void invokeControllerExecutionAborted(Throwable thrown) throws ExecutionException {
+    CorpusController thisAsCorpusController = null;
+    if(this instanceof CorpusController) {
+      thisAsCorpusController = (CorpusController)this;
+    }
+    for (ControllerAwarePR pr : getControllerAwarePRs()) {
+      if (pr instanceof LanguageAnalyser) {
+        ((LanguageAnalyser) pr).setCorpus(thisAsCorpusController.getCorpus());
+      }
+      pr.controllerExecutionAborted(this, thrown);
+      if (pr instanceof LanguageAnalyser) {
+        ((LanguageAnalyser) pr).setCorpus(null);
+      }
+    }
+  }
+    
+  protected boolean controllerCallbacksEnabled = true;  
+  /**
+   * Enable or disable the automatic invocation of the controller callbacks. 
+   * By default, the controller calls the controllerExecutionStarted method of each controllerAwarePR
+   * at the start of execute(), the controllerExecutionFinished method of each controllerAwarePR
+   * at the end of execute() or the controllerExecutionAborted method of each controllerAwarePR if
+   * there was an exception during execute(). If this method is called with the parameter false
+   * before execute() is called, then those controllerAwarePR methods will not get called automatically.
+   * In that case they can invoked deliberately using the invokeControllerExecutionStarted(), 
+   * invokeControllerExecutionFinished() and controllerExecutionAborted() methods.
+   * 
+   * @param flag a boolean indicating if the callbacks should be enabled (true) or disabled (false)
+   */
+  public void setControllerCallbacksEnabled(boolean flag) {
+    controllerCallbacksEnabled = flag;
+  }
+    
+    
+  
+  
+  
+  
+  
 }
