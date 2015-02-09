@@ -93,7 +93,7 @@
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-parsers</artifactId>
-            <version>1.5</version>
+            <version>1.7</version>
             <scope>runtime</scope>
 
             <exclusions>
@@ -173,6 +173,24 @@
                     <groupId>org.apache.geronimo.specs</groupId>
                     <artifactId>geronimo-stax-api_1.0_spec</artifactId>
                 </exclusion>
+
+                <!-- we are not handling Matlab files so we don't need this -->
+               <exclusion>
+                   <groupId>net.sourceforge.jmatio</groupId>
+                   <artifactId>jmatio</artifactId>
+               </exclusion>
+
+               <!-- we are most certainly not supporting the parsing of Outlook PST files! -->
+               <exclusion>
+                   <groupId>com.pff</groupId>
+                   <artifactId>java-libpst</artifactId>
+               </exclusion>
+
+               <!-- we don't support images so we don't need their metadata -->
+               <exclusion>
+                   <groupId>com.drewnoakes</groupId>
+                   <artifactId>metadata-extractor</artifactId>
+               </exclusion>
 
             </exclusions>
 
