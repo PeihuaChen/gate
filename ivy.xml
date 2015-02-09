@@ -44,7 +44,7 @@
     <dependency org="net.sourceforge.nekohtml" name="nekohtml" rev="1.9.14" />
 
     <!-- we use Tika to handle most document formats other than XML, HTML and TXT -->
-    <dependency org="org.apache.tika" name="tika-parsers" rev="1.5" conf="runtime->master,runtime" >
+    <dependency org="org.apache.tika" name="tika-parsers" rev="1.7" conf="runtime->master,runtime" >
       <!-- we don't currently use the RSS/ATOM aspects of Tika so we don't need ROME -->
       <exclude org="rome" module="rome" />
 
@@ -76,6 +76,15 @@
       <exclude org="com.googlecode.juniversalchardet" module="juniversalchardet" />
       <exclude org="org.tukaani" module="xz" />
       <exclude org="com.adobe.xmp" module="xmpcore" />
+
+      <!-- we are not handling Matlab files so we don't need this -->
+      <exclude org="net.sourceforge.jmatio" module="jmatio" />
+
+      <!-- we are most certainly not supporting the parsing of Outlook PST files! -->
+      <exclude org="com.pff" module="java-libpst" />
+
+      <!-- we don't support images so we don't need their metadata -->
+      <exclude org="com.drewnoakes" module="metadata-extractor" />
     </dependency>
 
     <!-- We use Woodstox instead of the default Sun StAX implementation as it seems to behave better.
