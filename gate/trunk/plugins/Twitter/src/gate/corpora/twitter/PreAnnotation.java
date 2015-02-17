@@ -104,6 +104,11 @@ public class PreAnnotation  {
   public long getEnd() {
     return this.end;
   }
+  
+  // just needed to show the details of an instance in the error message for an exception.
+  public String toString() {    
+    return "PreAnnotation: from="+getStart()+",to="+getEnd()+",type="+getType();
+  }
 
 }
 

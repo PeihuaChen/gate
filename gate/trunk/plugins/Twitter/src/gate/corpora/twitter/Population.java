@@ -21,6 +21,7 @@ import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.CreoleResource;
 import gate.gui.NameBearerHandle;
 import gate.gui.ResourceHelper;
+import gate.util.GateRuntimeException;
 import gate.util.InvalidOffsetException;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
@@ -163,7 +164,13 @@ public class Population extends ResourceHelper  {
       DocumentContent contentImpl = new DocumentContentImpl(content.toString());
       document.setContent(contentImpl);
       for (PreAnnotation preAnn : annotandaOffsets.keySet()) {
-        preAnn.toAnnotation(document, annotandaOffsets.get(preAnn));
+        try {
+          preAnn.toAnnotation(document, annotandaOffsets.get(preAnn));
+        } catch (InvalidOffsetException ex) {
+          // show the content in the error message, so it becomes more easy to find the 
+          // cause of an InvalidOffsetException in a large file that has many json entries.
+          throw new GateRuntimeException("Attempt to add annotation "+preAnn+" for text="+contentImpl,ex);
+        }
       }
       corpus.add(document);
       
@@ -200,13 +207,12 @@ public class Population extends ResourceHelper  {
               new Thread(Thread.currentThread().getThreadGroup(),
                   "Twitter JSON Corpus Populator") {
                 public void run() {
-                  try {
-                    for (URL fileUrl : fileUrls) {
+                  for (URL fileUrl : fileUrls) {
+                    try {
                       populateCorpus((Corpus) handle.getTarget(), fileUrl, dialog.getConfig());
-                    } 
-                  }
-                  catch(ResourceInstantiationException e) {
-                    logger.warn("Error in Twitter Population", e);
+                    } catch(ResourceInstantiationException e) {
+                      logger.warn("Error in Twitter Population, url="+fileUrl, e);
+                    }
                   }
                 }
               };
