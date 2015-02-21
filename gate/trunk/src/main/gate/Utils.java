@@ -1085,6 +1085,9 @@ public class Utils {
   public static String replaceVariablesInString(
           String string, Object... sources)
   {
+    // shortcut for strings where no replacement is possible (minimum content 
+    // would have to be $pr{x}
+    if(string == null || string.isEmpty() || string.length() < 6) { return string; }
     Matcher matcher = varnamePattern.matcher(string);
     int findFrom = 0;
     int lastEnd = 0;
