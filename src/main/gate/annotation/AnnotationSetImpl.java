@@ -44,6 +44,7 @@ import gate.event.AnnotationSetEvent;
 import gate.event.AnnotationSetListener;
 import gate.event.GateEvent;
 import gate.event.GateListener;
+import gate.relations.Relation;
 import gate.relations.RelationSet;
 import gate.util.InvalidOffsetException;
 import gate.util.RBTreeMap;
@@ -1308,7 +1309,10 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     annotations = new Annotation[this.annotsById.size()];
     annotations = this.annotsById.values().toArray(annotations);
     // out.writeObject(annotations);
-    pf.put("annotations", this.annotations);
+    pf.put("annotations", this.annotations);    
+    pf.put("relations", this.relations);
+    
+    
     out.writeFields();
     annotations = null;
     boolean isIndexedByType = (this.annotsByType != null);
@@ -1326,6 +1330,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     boolean isIndexedByType = false;
     boolean isIndexedByStartNode = false;
     this.annotations = (Annotation[])gf.get("annotations", null);
+    
     if(this.annotations == null) {
       // old style serialised version
       @SuppressWarnings("unchecked")
@@ -1360,6 +1365,9 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     for(int i = 0; i < annotations.length; i++) {
       add(annotations[i]);
     }
+    
+    this.relations = (RelationSet)gf.get("relations", null);
+    
     annotations = null;
   }
   
