@@ -23,6 +23,9 @@ import gate.event.AnnotationSetListener;
 import gate.event.RelationSetEvent;
 import gate.event.RelationSetListener;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -93,6 +96,11 @@ public class RelationSet implements Serializable, AnnotationSetListener,
    * of the index access operations
    */
   private int maxID = 0;
+  
+  /**
+   * Use only for serialization
+   */
+  private Relation[] relations;
 
   /**
    * The {@link AnnotationSet} which this instance belongs to.
@@ -627,5 +635,35 @@ public class RelationSet implements Serializable, AnnotationSetListener,
   @Override
   public <T> T[] toArray(T[] store) {
     return indexById.values().toArray(store);
+  }
+  
+  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+    ObjectOutputStream.PutField pf = out.putFields();
+    
+    pf.put("annSet", annSet);
+    pf.put("relations", toArray(new Relation[size()]));
+    out.writeFields();
+  }
+  
+  private void readObject(java.io.ObjectInputStream in) throws IOException,
+          ClassNotFoundException {
+    ObjectInputStream.GetField gf = in.readFields();
+    
+    annSet = (AnnotationSet)gf.get("annSet", null);
+    relations = (Relation[])gf.get("relations", null);
+    
+    indexByType = new HashMap<String, BitSet>();
+    indexesByMember = new ArrayList<Map<Integer, BitSet>>();
+    indexById = new HashMap<Integer, Relation>();
+
+    annSet.addAnnotationSetListener(this);
+    
+    if (relations != null) {
+      for (Relation r : relations) {
+        add(r);
+      }      
+    }
+    
+    relations = null;
   }
 }
