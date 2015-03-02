@@ -127,6 +127,10 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     }
   }
 
+  protected String toJavaIdentifier(String japeIdentifier) {
+    return japeIdentifier.replace("-", "_");
+  }
+
   /**
    * Append the given string to the end of the given buffer as a Java string
    * literal.  If <code>str</code> is <code>null</code>, we append the four
@@ -518,6 +522,7 @@ ParseCpsl parser = null;
 
 SinglePhaseTransducer SinglePhaseTransducer(String javaimportblock) throws ParseException {ruleNumber = 0;
   Token phaseNameTok = null;
+  String phaseName = null;
   Token inputTok = null;
   SinglePhaseTransducer t = null;
   Rule newRule = null;
@@ -526,7 +531,8 @@ SinglePhaseTransducer SinglePhaseTransducer(String javaimportblock) throws Parse
   Token optionValueTok = null;
     jj_consume_token(phase);
     phaseNameTok = jj_consume_token(ident);
-t = createSinglePhaseTransducer(phaseNameTok.image); curSPT = t;
+phaseName = toJavaIdentifier(phaseNameTok.image);
+    t = createSinglePhaseTransducer(phaseName); curSPT = t;
     label_4:
     while (true) {
       switch (jj_nt.kind) {
@@ -652,7 +658,7 @@ t.setOption(optionNameTok.image, optionValueTok.image);
       }
       switch (jj_nt.kind) {
       case rule:{
-        newRule = Rule(phaseNameTok.image,javaimportblock);
+        newRule = Rule(phaseName,javaimportblock);
 t.addRule(newRule);
         break;
         }
@@ -742,7 +748,7 @@ if(importblock != null) {
   bindingNameSet.clear();
     jj_consume_token(rule);
     ruleNameTok = jj_consume_token(ident);
-ruleName=ruleNameTok.image;
+ruleName=toJavaIdentifier(ruleNameTok.image);
     switch (jj_nt.kind) {
     case priority:{
       jj_consume_token(priority);
@@ -784,7 +790,7 @@ try {
           for (String type : set) {
                 if(!curSPT.hasInput(type)) {
                   System.err.println(errorMsgPrefix(null)+
-                    "Rule "+ruleName+" contains unlisted annotation type " + type);
+                    "Rule "+ruleNameTok.image+" contains unlisted annotation type " + type);
                 }
           }
         }
@@ -1849,6 +1855,56 @@ appendAnnotationAdd(blockBuffer, newAnnotType, annotSetName);
     finally { jj_save(1, xla); }
   }
 
+  private boolean jj_3R_17()
+ {
+    if (jj_scan_token(ident)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_22()
+ {
+    if (jj_scan_token(leftBrace)) return true;
+    if (jj_3R_25()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_15()
+ {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_17()) {
+    jj_scanpos = xsp;
+    if (jj_3R_18()) {
+    jj_scanpos = xsp;
+    if (jj_3R_19()) return true;
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3_2()
+ {
+    if (jj_3R_16()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_20()
+ {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_22()) {
+    jj_scanpos = xsp;
+    if (jj_3R_23()) return true;
+    }
+    return false;
+  }
+
+  private boolean jj_3_1()
+ {
+    if (jj_3R_15()) return true;
+    return false;
+  }
+
   private boolean jj_3R_27()
  {
     if (jj_scan_token(pling)) return true;
@@ -1900,12 +1956,6 @@ appendAnnotationAdd(blockBuffer, newAnnotType, annotSetName);
     return false;
   }
 
-  private boolean jj_3R_18()
- {
-    if (jj_3R_20()) return true;
-    return false;
-  }
-
   private boolean jj_3R_16()
  {
     if (jj_scan_token(colon)) return true;
@@ -1914,53 +1964,9 @@ appendAnnotationAdd(blockBuffer, newAnnotType, annotSetName);
     return false;
   }
 
-  private boolean jj_3R_17()
+  private boolean jj_3R_18()
  {
-    if (jj_scan_token(ident)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_22()
- {
-    if (jj_scan_token(leftBrace)) return true;
-    if (jj_3R_25()) return true;
-    return false;
-  }
-
-  private boolean jj_3_2()
- {
-    if (jj_3R_16()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_15()
- {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_17()) {
-    jj_scanpos = xsp;
-    if (jj_3R_18()) {
-    jj_scanpos = xsp;
-    if (jj_3R_19()) return true;
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_20()
- {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_22()) {
-    jj_scanpos = xsp;
-    if (jj_3R_23()) return true;
-    }
-    return false;
-  }
-
-  private boolean jj_3_1()
- {
-    if (jj_3R_15()) return true;
+    if (jj_3R_20()) return true;
     return false;
   }
 

@@ -152,6 +152,10 @@ public class ParseCpsl implements JapeConstants {
       }
     }
   }
+  
+  protected String toJavaIdentifier(String japeIdentifier) {
+    return japeIdentifier.replace("-", "_");
+  }
 
   /**
    * Append the given string to the end of the given buffer as a Java string
@@ -677,6 +681,7 @@ SinglePhaseTransducer SinglePhaseTransducer(String javaimportblock) :
 {
   ruleNumber = 0;
   Token phaseNameTok = null;
+  String phaseName = null;
   Token inputTok = null;
   SinglePhaseTransducer t = null;
   Rule newRule = null;
@@ -687,7 +692,8 @@ SinglePhaseTransducer SinglePhaseTransducer(String javaimportblock) :
 {
   
   <phase> phaseNameTok=<ident>
-  { t = createSinglePhaseTransducer(phaseNameTok.image); curSPT = t; }
+  { phaseName = toJavaIdentifier(phaseNameTok.image);
+    t = createSinglePhaseTransducer(phaseName); curSPT = t; }
 
   (
     (
@@ -748,7 +754,7 @@ SinglePhaseTransducer SinglePhaseTransducer(String javaimportblock) :
   )*
 
   (
-    ( newRule=Rule(phaseNameTok.image,javaimportblock) { t.addRule(newRule); } )
+    ( newRule=Rule(phaseName,javaimportblock) { t.addRule(newRule); } )
     |
     MacroDef()
     |
@@ -816,7 +822,7 @@ Rule Rule(String phaseName, String currentImports) :
   bindingNameSet.clear();
 }
 {
-  <rule> ruleNameTok=<ident> { ruleName=ruleNameTok.image; }
+  <rule> ruleNameTok=<ident> { ruleName=toJavaIdentifier(ruleNameTok.image); }
   (
     <priority> priorityTok=<integer>
     {
@@ -853,7 +859,7 @@ Rule Rule(String phaseName, String currentImports) :
   	  for (String type : set) {
   	  	if(!curSPT.hasInput(type)) {
   	  	  System.err.println(errorMsgPrefix(null)+
-  	  	    "Rule "+ruleName+" contains unlisted annotation type " + type);
+  	  	    "Rule "+ruleNameTok.image+" contains unlisted annotation type " + type);
   	  	}
   	  }
   	}
