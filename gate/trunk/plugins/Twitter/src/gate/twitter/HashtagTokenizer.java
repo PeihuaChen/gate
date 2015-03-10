@@ -146,6 +146,8 @@ public class HashtagTokenizer extends AbstractLanguageAnalyser {
 
   @Override
   public void execute() throws ExecutionException {
+    // reset interrupt flag
+    interrupted = false;
     AnnotationSet inputAS = document.getAnnotations(inputASName);
     AnnotationSet outputAS = document.getAnnotations(outputASName);
 
