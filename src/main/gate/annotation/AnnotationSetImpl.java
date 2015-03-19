@@ -83,6 +83,12 @@ import org.apache.commons.lang.StringUtils;
  * a get method that selects on offset. The type index is triggered by
  * indexByType(), or calling a get method that selects on type. The id index is
  * always present.
+ * <P>
+ * NOTE: equality and hashCode of this implementation is exclusively based on the annotations
+ * which appear in the set (if any). The document the set comes from, the name of the set or
+ * the relations stored in that set are not taken into account for equality or hashSet!!
+ *
+ * 
  */
 public class AnnotationSetImpl extends AbstractSet<Annotation> implements
                                                               AnnotationSet {
@@ -130,11 +136,11 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   protected RelationSet relations = null;
 
   // Empty AnnotationSet to be returned instead of null
-   public final static AnnotationSet emptyAnnotationSet;
+   //public final static AnnotationSet emptyAS;
 
-   static {
-   emptyAnnotationSet = new ImmutableAnnotationSetImpl(null,null);
-   }
+   //static {
+   //emptyAnnotationSet = new ImmutableAnnotationSetImpl(null,null);
+   //}
 
   /** Construction from Document. */
   public AnnotationSetImpl(Document doc) {
@@ -318,7 +324,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    */
   @Override
   public AnnotationSet get() {
-    if (annotsById.isEmpty()) return emptyAnnotationSet;
+    if (annotsById.isEmpty()) return emptyAS();
     return new ImmutableAnnotationSetImpl(doc, annotsById.values());
   } // get()
 
@@ -331,7 +337,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   public AnnotationSet get(String type) {
     if(annotsByType == null) indexByType();
     AnnotationSet byType = annotsByType.get(type);
-    if (byType==null)return emptyAnnotationSet;
+    if (byType==null)return emptyAS();
     // convert the mutable AS into an immutable one
     return byType.get();
   } // get(type)
@@ -356,7 +362,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
         }
       }
     } // while
-    if(annotations.isEmpty()) return emptyAnnotationSet;
+    if(annotations.isEmpty()) return emptyAS();
     return new ImmutableAnnotationSetImpl(doc, annotations);
   } // get(types)
 
@@ -402,7 +408,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       // (a.getFeatures().entrySet().containsAll(constraints.entrySet()))
       if(a.getFeatures().subsumes(constraints)) annotationsToAdd.add(a);
     } // while
-    if(annotationsToAdd.isEmpty()) return emptyAnnotationSet;
+    if(annotationsToAdd.isEmpty()) return emptyAS();
     return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
   } // get(type, constraints)
 
@@ -430,7 +436,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       if(a.getFeatures().keySet().containsAll(featureNames))
         annotationsToAdd.add(a);
     } // while
-    if(annotationsToAdd.isEmpty()) return emptyAnnotationSet;
+    if(annotationsToAdd.isEmpty()) return emptyAS();
     return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
   } // get(type, featureNames)
 
@@ -447,14 +453,14 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     // there
     Node nextNode = nodesByOffset.getNextOf(offset);
     if(nextNode == null) // no nodes at or beyond this offset
-      return emptyAnnotationSet;
+      return emptyAS();
     Collection<Annotation> annotationsToAdd = getAnnotsByStartNode(nextNode
             .getId());
     // skip all the nodes that have no starting annotations
     while(annotationsToAdd == null) {
       nextNode = nodesByOffset.getNextOf(new Long(nextNode.getOffset()
               .longValue() + 1));
-      if (nextNode==null) return emptyAnnotationSet;
+      if (nextNode==null) return emptyAS();
       annotationsToAdd = getAnnotsByStartNode(nextNode.getId());
     }
     return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
@@ -475,7 +481,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     if(annotsByStartNode == null) indexByStartOffset();
     Node node = nodesByOffset.get(offset);
     if(node == null) { // no nodes at or beyond this offset
-      return emptyAnnotationSet;
+      return emptyAS();
     }
     return new ImmutableAnnotationSetImpl(doc, getAnnotsByStartNode(node.getId()));
   }
@@ -634,13 +640,13 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   @Override
   public AnnotationSet getCovering(String neededType, Long startOffset, Long endOffset) {
     //check the range
-    if(endOffset < startOffset) return emptyAnnotationSet;
+    if(endOffset < startOffset) return emptyAS();
     //ensure index
     if(annotsByStartNode == null) indexByStartOffset();
     //if the requested range is longer than the longest annotation in this set, 
     //then there can be no annotations covering the range
     // so we return an empty set.
-    if(endOffset - startOffset > longestAnnot) return emptyAnnotationSet;
+    if(endOffset - startOffset > longestAnnot) return emptyAS();
     
     List<Annotation> annotationsToAdd = new ArrayList<Annotation>();
     Iterator<Node> nodesIter;
@@ -681,7 +687,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   public AnnotationSet get(String type, FeatureMap constraints, Long offset) {
     // select by offset
     AnnotationSet nextAnnots = get(offset);
-    if(nextAnnots == null) return emptyAnnotationSet;
+    if(nextAnnots == null) return emptyAS();
     // select by type and constraints from the next annots
     return nextAnnots.get(type, constraints);
   } // get(type, constraints, offset)
@@ -698,7 +704,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     // start at a position between the start and end before the end
     // offsets
     //check the range
-    if(endOffset < startOffset) return emptyAnnotationSet;
+    if(endOffset < startOffset) return emptyAS();
     //ensure index
     if(annotsByStartNode == null) indexByStartOffset();
     List<Annotation> annotationsToAdd = null;
@@ -1378,4 +1384,14 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     }
     return relations;
   }
+  
+  // utility method that replaces the former static singleton member ImmutableAnnotationSet(null,null).
+  // We should not give back annotation sets which have a null document, so instead we return
+  // as an empty annotation set one that does not have annotations, but points to the same document
+  // as the one it was created from. 
+  protected AnnotationSet emptyAS() {
+    return new ImmutableAnnotationSetImpl(doc, null);
+  }
+  
+  
 } // AnnotationSetImpl
