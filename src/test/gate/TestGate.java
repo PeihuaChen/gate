@@ -143,8 +143,9 @@ public class TestGate {
         Test theSuite = (Test)suiteMethod.invoke(null);
         suite.addTest(theSuite);
       } else {
-        suite.addTest(TestAnnic.suite());
         // no test name specified, so run them all
+        suite.addTest(TestUtils.suite());
+        suite.addTest(TestAnnic.suite());
 
         //WordNet has been moved into a plugin along with the test
         //suite.addTest(TestWordNet.suite());

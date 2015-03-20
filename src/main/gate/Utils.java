@@ -16,6 +16,7 @@
 package gate;
 
 import gate.annotation.AnnotationSetImpl;
+import gate.annotation.ImmutableAnnotationSetImpl;
 import gate.creole.ConditionalSerialController;
 import gate.creole.RunningStrategy;
 import gate.util.FeatureBearer;
@@ -25,6 +26,7 @@ import gate.util.OffsetComparator;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -1167,7 +1169,7 @@ public class Utils {
     }
     return sb.toString();    
   }
-  static private Pattern varnamePattern = Pattern.compile("(\\$\\$?)([a-zA-Z]*)\\{([^}]+)\\}");
+  private static final Pattern varnamePattern = Pattern.compile("(\\$\\$?)([a-zA-Z]*)\\{([^}]+)\\}");
   
   /**
    * Load a plugin from the default GATE plugins directory.
@@ -1175,6 +1177,7 @@ public class Utils {
    * This will load the plugin with the specified directory name from the
    * default GATE plugins path, if GATE knows its own location. 
    * 
+   * @param dirName The directory name of the plugin within the standard GATE plugins directory.
    */
   public static void loadPlugin(String dirName) {
     File gatehome = Gate.getGateHome();
@@ -1198,5 +1201,141 @@ public class Utils {
       throw new GateRuntimeException("Could not register plugin directory "+pluginDir,ex);
     }
   }
+  
+  /**
+   * Return the given set with the given annotations removed.
+   * 
+   * This returns a new immutable annotation set, which contains all the annotations from origSet
+   * except the given annotations. The removal is not based on equality but on the id of the 
+   * annotation: an annotation in origSet which has the same id as the annotation except is removed
+   * in the returned set.
+   * <p>
+   * NOTE: Annotation ids are only unique within a document, so you should never mix annotations
+   * from different documents when using this method!
+   * 
+   * @param origSet The annotation set from which to remove the given annotation
+   * @param except The annotation to remove from the given set
+   * @return A new immutable annotation set with the given annotation removed from the original set
+   */
+  public static AnnotationSet minus(AnnotationSet origSet, Annotation... except) {
+    return minus(origSet, Arrays.asList(except));
+  }
  
+  /**
+   * Return the given set with the given annotations removed.
+   * 
+   * This returns a new immutable annotation set, which contains all the annotations from origSet
+   * except the annotations given in the collection of exceptions. 
+   * The removal is not based on equality but on the id of the 
+   * annotations: an annotation in origSet which has the same id as an annotation from the exceptions
+   * is removed in the returned set.
+   * <p>
+   * NOTE: Annotation ids are only unique within a document, so you should never mix annotations
+   * from different documents when using this method!
+   * 
+   * @param origSet The annotation set from which to remove the given exceptions
+   * @param exceptions The annotations to remove from the given set
+   * @return A new immutable annotation set with the exceptions removed from the original set
+   */
+  public static AnnotationSet minus(AnnotationSet origSet, Collection<Annotation> exceptions) {
+    Set<Integer> ids = new HashSet<Integer>();
+    for(Annotation exception : exceptions) {
+      ids.add(exception.getId());
+    }
+    List<Annotation> tmp = new ArrayList<Annotation>();
+    for(Annotation ann : origSet) {
+      if(!ids.contains(ann.getId())) {
+        tmp.add(ann);
+      }
+    }
+    return new ImmutableAnnotationSetImpl(origSet.getDocument(),tmp);
+  }
+ 
+  /**
+   * Return the given set with the given annotations added.
+   * 
+   * This returns a new immutable annotation set, which contains all the annotations from origSet
+   * plus the given annotations to add. The addition is not based on equality but on the id of the 
+   * annotations: any new annotation is added if its annotation id differs from all the ids
+   * already in the set.
+   * <p>
+   * NOTE: Annotation ids are only unique within a document, so you should never mix annotations
+   * from different documents when using this method!
+   * 
+   * @param origSet The annotation set from which to remove the given exceptions
+   * @param toAdd The annotations to add to the given set
+   * @return A new immutable annotation set with the given annotations added
+   */
+  public static AnnotationSet plus(AnnotationSet origSet, Annotation... toAdd) {
+    return plus(origSet,Arrays.asList(toAdd));
+  }
+  
+  /**
+   * Return the given set with the given annotations added.
+   * 
+   * This returns a new immutable annotation set, which contains all the annotations from origSet
+   * plus the given annotations added. The addition is not based on equality but on the id of the 
+   * annotations: any new annotation is added if its annotation id differs from all the ids
+   * already in the set.
+   * <p>
+   * NOTE: Annotation ids are only unique within a document, so you should never mix annotations
+   * from different documents when using this method!
+   * 
+   * @param origSet The annotation set from which to remove the given exceptions
+   * @param toAdd A collection of annotations to add to the original set
+   * @return A new immutable annotation set with the annotations from the collection added.
+   */
+  public static AnnotationSet plus(AnnotationSet origSet, Collection<Annotation> toAdd) {
+    Set<Integer> ids = new HashSet<Integer>();
+    for(Annotation orig : origSet) {
+      ids.add(orig.getId());
+    }
+    List<Annotation> tmp = new ArrayList<Annotation>();
+    tmp.addAll(origSet);
+    for(Annotation ann : toAdd) {
+      if(!ids.contains(ann.getId())) {
+        tmp.add(ann);
+      }
+    }
+    return new ImmutableAnnotationSetImpl(origSet.getDocument(),tmp);    
+  }
+  
+  
+  /**
+   * Return the subset from the original set that matches one of the given annotations.
+   * 
+   * This returns a new immutable annotation set, which contains all the annotations from origSet
+   * which are also among the annotations given. The check for matching annotations is not based 
+   * on equality but on the id of the 
+   * annotations: an annotation from the original set is included in the returned set if its 
+   * annotation id matches the annotation id of any of the annotations given.
+   * <p>
+   * NOTE: Annotation ids are only unique within a document, so you should never mix annotations
+   * from different documents when using this method!
+   * 
+   * @param origSet The annotation set from which to select only the given annotations.
+   * @param others the given annotations
+   * @return A new immutable annotation set with the interesection between original set and given annotations
+   */
+  public static AnnotationSet intersect(AnnotationSet origSet, Annotation... others) {
+    return intersect(origSet,Arrays.asList(others));
+  }
+  
+  public static AnnotationSet intersect(AnnotationSet origSet, Collection<Annotation> others) {
+    if(others.isEmpty()) {
+      return new ImmutableAnnotationSetImpl(origSet.getDocument(),null);
+    }
+    Set<Integer> ids = new HashSet<Integer>();
+    for(Annotation other : others) {
+      ids.add(other.getId());
+    }
+    List<Annotation> tmp = new ArrayList<Annotation>();
+    for(Annotation ann : origSet) {
+      if(ids.contains(ann.getId())) {
+        tmp.add(ann);
+      }
+    }
+    return new ImmutableAnnotationSetImpl(origSet.getDocument(),tmp);    
+  }
+  
 }
