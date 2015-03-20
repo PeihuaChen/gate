@@ -244,7 +244,7 @@
     <xsd:complexType>
       <xsd:attribute name="target-source-class" type="xsd:string" use="optional" />
       <xsd:attribute name="proxy-target-class" type="xsd:boolean" use="optional" />
-      <xsd:attribute name="initial-size" type="xsd:nonNegativeInteger" use="optional" />
+      <xsd:attribute name="initial-size" type="xsd:string" use="optional" />
       <!-- Allow any attributes, as they can pass through to the target source -->
       <xsd:anyAttribute processContents="skip"/>
     </xsd:complexType>
