@@ -61,7 +61,7 @@ public class PairCsvGenerator {
       if (score < threshold.doubleValue()) {
         break;
       }
-      
+      written++;
       writeContent(writer, pair.getTerm0(), pair.getTerm1(), score, pairbank.getDocumentCount(pair),
               pairbank.getPairCount(pair));
     }
