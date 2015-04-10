@@ -84,7 +84,7 @@ Priority: 50
 -->
  :loc.Location = {rule = "UnknownLocRegion"},
  {
-gate.AnnotationSet loc = (gate.AnnotationSet) bindings.get("tag");
+gate.AnnotationSet loc = (gate.AnnotationSet) bindings.get("loc");
 outputAS.removeAll(loc);
 }
 
