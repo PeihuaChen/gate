@@ -32,6 +32,7 @@ $ $
 ) )
 , ,
 - :
+– :	
 -- :
 . .
 ... :
@@ -2038,7 +2039,7 @@ Entertainment NNP NN
 Enthusiasts NNS
 Entrepreneurs NNS
 Environmental NNP JJ
-Environmentalists NNPS NNS
+Environmentalists NNS
 Epinalers NNPS
 Episcopalians NNPS
 Equally RB
@@ -3570,6 +3571,7 @@ NEC-compatible JJ
 NEW JJ NNP NN
 NEWS NN NNP
 NEWSPAPERS NNPS
+NHS NNP
 NIH-appointed JJ
 NO DT RB UH
 NORTHEAST NN
@@ -3636,6 +3638,7 @@ Newspapers NNS NNP
 Newsprint NN
 Newsstands NNS
 Next JJ NNP RB IN
+Nhs NNP
 Nicaraguan JJ NNP
 Niche-itis NN
 Nicholas NNP NNS
@@ -12670,6 +12673,8 @@ newsworthiness NN
 newsworthy JJ
 next JJ IN RB
 nexus NN
+nhs NNP
+nhS NNP
 nibble NN
 nice JJ
 nicer JJR
