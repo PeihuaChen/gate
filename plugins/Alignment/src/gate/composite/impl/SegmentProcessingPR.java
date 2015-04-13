@@ -76,35 +76,7 @@ public class SegmentProcessingPR extends AbstractLanguageAnalyser implements
    */
   private String inputASName;
 
-  /**
-   * Used internally - this is the document that will be used for holding the
-   * original document and the composite documents.
-   */
-  private CompoundDocument compoundDoc;
-
-  /**
-   * Method used for creating a new composite document.
-   */
-  protected CombiningMethod combiningMethodInst;
-
   private boolean debug = false;
-
-  /** Initialise this resource, and return it. */
-  public Resource init() throws ResourceInstantiationException {
-    // a combining method that creates a composite document with the
-    // annotation as identified by the annotation id
-    combiningMethodInst = new CombineFromAnnotID();
-    compoundDoc = new CompoundDocumentImpl();
-    // initializing an empty compound document
-    compoundDoc.init();
-    return this;
-  }
-
-  /* this method is called to reinitialize the resource */
-  public void reInit() throws ResourceInstantiationException {
-    // reinitialization code
-    init();
-  }
 
   /**
    * Should be called to execute this PR on a document.
@@ -122,6 +94,19 @@ public class SegmentProcessingPR extends AbstractLanguageAnalyser implements
           + " in the document: " + document.getName());
       return;
     }
+    
+    // a combining method that creates a composite document with the
+    // annotation as identified by the annotation id
+    CombiningMethod combiningMethodInst = new CombineFromAnnotID();
+    
+    CompoundDocument compoundDoc = new CompoundDocumentImpl();
+    // initializing an empty compound document
+    try {
+      compoundDoc.init();
+    } catch(ResourceInstantiationException e) {
+      throw new ExecutionException(e);
+    }
+    
     String originalDocument = document.getName();
     if(document instanceof CompoundDocument) {
       if(debug) {
@@ -214,6 +199,8 @@ public class SegmentProcessingPR extends AbstractLanguageAnalyser implements
       // make sure you are resetting the reference
       analyser.setCorpus(oldCorpus);
       analyser.setDocument(oldDoc);
+      
+      Factory.deleteResource(compoundDoc);
 
       compoundDoc.removeDocument(originalDocument);
       if(tempCorpus != null) {
@@ -317,11 +304,4 @@ public class SegmentProcessingPR extends AbstractLanguageAnalyser implements
     this.segmentAnnotationFeatureValue = segmentAnnotationFeatureValue;
   }
 
-  /**
-   * must clean up the original compound document.
-   */
-  public void cleanup() {
-    super.cleanup();
-    Factory.deleteResource(compoundDoc);
-  }
 } // class SegmentProcessingPR
