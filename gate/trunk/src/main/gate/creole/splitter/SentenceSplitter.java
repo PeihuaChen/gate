@@ -139,54 +139,64 @@ public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchm
     FeatureMap params;
     if(inputASName != null && inputASName.equals("")) inputASName = null;
     if(outputASName != null && outputASName.equals("")) outputASName = null;
-    try{
-      fireProgressChanged(0);
+    
+    ProgressListener pListener = null;
+    StatusListener sListener = null;
+
+    fireProgressChanged(5);
+    pListener = new IntervalProgressListener(5, 10);
+    sListener = new StatusListener() {
+      @Override
+      public void statusChanged(String text) {
+        fireStatusChanged(text);
+      }
+    };
+    try {
+      // run the gazetteer
       params = Factory.newFeatureMap();
       params.put(DefaultGazetteer.DEF_GAZ_DOCUMENT_PARAMETER_NAME, document);
       params.put(DefaultGazetteer.DEF_GAZ_ANNOT_SET_PARAMETER_NAME, inputASName);
       gazetteer.setParameterValues(params);
 
+      gazetteer.addProgressListener(pListener);
+      gazetteer.addStatusListener(sListener);
+      gazetteer.execute();
+
+    } catch(Exception e) {
+      throw new ExecutionException(e);
+    } finally {
+      gazetteer.setDocument(null);
+      gazetteer.removeProgressListener(pListener);
+      gazetteer.removeStatusListener(sListener);
+    }
+
+    if(isInterrupted())
+      throw new ExecutionInterruptedException("The execution of the \""
+              + getName()
+              + "\" sentence splitter has been abruptly interrupted!");
+
+    pListener = new IntervalProgressListener(11, 90);
+
+    try {
       params = Factory.newFeatureMap();
       params.put(Transducer.TRANSD_DOCUMENT_PARAMETER_NAME, document);
       params.put(Transducer.TRANSD_INPUT_AS_PARAMETER_NAME, inputASName);
       params.put(Transducer.TRANSD_OUTPUT_AS_PARAMETER_NAME, inputASName);
       transducer.setParameterValues(params);
-    }catch(Exception e){
+
+      transducer.addProgressListener(pListener);
+      transducer.addStatusListener(sListener);
+      Benchmark.executeWithBenchmarking(transducer,
+              Benchmark.createBenchmarkId("SentenceSplitterTransducer",
+                      getBenchmarkId()), this, null);
+
+    } catch(Exception e) {
       throw new ExecutionException(e);
+    } finally {
+      transducer.setDocument(null);
+      transducer.removeProgressListener(pListener);
+      transducer.removeStatusListener(sListener);
     }
-    ProgressListener pListener = null;
-    StatusListener sListener = null;
-    fireProgressChanged(5);
-
-    //run the gazetteer
-    if(isInterrupted()) throw new ExecutionInterruptedException(
-        "The execution of the \"" + getName() +
-        "\" sentence splitter has been abruptly interrupted!");
-    pListener = new IntervalProgressListener(5, 10);
-    sListener = new StatusListener(){
-      @Override
-      public void statusChanged(String text){
-        fireStatusChanged(text);
-      }
-    };
-    gazetteer.addProgressListener(pListener);
-    gazetteer.addStatusListener(sListener);
-    gazetteer.execute();
-    gazetteer.removeProgressListener(pListener);
-    gazetteer.removeStatusListener(sListener);
-
-    //run the transducer
-    if(isInterrupted()) throw new ExecutionInterruptedException(
-        "The execution of the \"" + getName() +
-        "\" sentence splitter has been abruptly interrupted!");
-    pListener = new IntervalProgressListener(11, 90);
-    transducer.addProgressListener(pListener);
-    transducer.addStatusListener(sListener);
-    Benchmark.executeWithBenchmarking(transducer,
-            Benchmark.createBenchmarkId("SentenceSplitterTransducer",
-                    getBenchmarkId()), this, null);
-    transducer.removeProgressListener(pListener);
-    transducer.removeStatusListener(sListener);
 
     //get pointers to the annotation sets
     AnnotationSet inputAS = (inputASName == null) ?
