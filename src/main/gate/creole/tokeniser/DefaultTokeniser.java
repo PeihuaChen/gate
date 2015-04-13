@@ -121,71 +121,77 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser implements Benchm
   }
 
   @Override
-  public void execute() throws ExecutionException{
+  public void execute() throws ExecutionException {
     interrupted = false;
-    //set the parameters
-    try{
-      FeatureMap params = Factory.newFeatureMap();
-      fireProgressChanged(0);
-      //tokeniser
+
+    FeatureMap params = null;
+    fireProgressChanged(0);
+
+    ProgressListener pListener = null;
+    StatusListener sListener = null;
+
+    try {
+
+      // tokeniser
+      params = Factory.newFeatureMap();
       params.put(SimpleTokeniser.SIMP_TOK_DOCUMENT_PARAMETER_NAME, document);
-      params.put(
-        SimpleTokeniser.SIMP_TOK_ANNOT_SET_PARAMETER_NAME, annotationSetName);
+      params.put(SimpleTokeniser.SIMP_TOK_ANNOT_SET_PARAMETER_NAME,
+              annotationSetName);
       tokeniser.setParameterValues(params);
 
-      //transducer
-      params.clear();
+      pListener = new IntervalProgressListener(0, 50);
+      sListener = new StatusListener() {
+        @Override
+        public void statusChanged(String text) {
+          fireStatusChanged(text);
+        }
+      };
+
+      tokeniser.addProgressListener(pListener);
+      tokeniser.addStatusListener(sListener);
+
+      Benchmark.executeWithBenchmarking(tokeniser,
+              Benchmark.createBenchmarkId("simpleTokeniser", getBenchmarkId()),
+              this, null);
+
+    } catch(Exception e) {
+      throw new ExecutionException("The execution of the \"" + getName()
+              + "\" tokeniser has been abruptly interrupted!", e);
+    } finally {
+      tokeniser.removeProgressListener(pListener);
+      tokeniser.removeStatusListener(sListener);
+      tokeniser.setDocument(null);
+    }
+
+    if(isInterrupted())
+      throw new ExecutionInterruptedException("The execution of the \""
+              + getName() + "\" tokeniser has been abruptly interrupted!");
+
+    try {
+      // transducer
+      params = Factory.newFeatureMap();
       params.put(Transducer.TRANSD_DOCUMENT_PARAMETER_NAME, document);
       params.put(Transducer.TRANSD_INPUT_AS_PARAMETER_NAME, annotationSetName);
       params.put(Transducer.TRANSD_OUTPUT_AS_PARAMETER_NAME, annotationSetName);
       transducer.setParameterValues(params);
-    }catch(ResourceInstantiationException rie){
-      throw new ExecutionException(rie);
+
+      pListener = new IntervalProgressListener(50, 100);
+      transducer.addProgressListener(pListener);
+      transducer.addStatusListener(sListener);
+
+      Benchmark.executeWithBenchmarking(transducer,
+              Benchmark.createBenchmarkId("transducer", getBenchmarkId()),
+              this, null);
+
+    } catch(Exception e) {
+      throw new ExecutionException("The execution of the \"" + getName()
+              + "\" tokeniser has been abruptly interrupted!", e);
+    } finally {
+      transducer.removeProgressListener(pListener);
+      transducer.removeStatusListener(sListener);
+      transducer.setDocument(null);
     }
-
-    ProgressListener pListener = null;
-    StatusListener sListener = null;
-    fireProgressChanged(5);
-    pListener = new IntervalProgressListener(5, 50);
-    sListener = new StatusListener(){
-      @Override
-      public void statusChanged(String text){
-        fireStatusChanged(text);
-      }
-    };
-
-    //tokeniser
-    if(isInterrupted()) throw new ExecutionInterruptedException(
-        "The execution of the \"" + getName() +
-        "\" tokeniser has been abruptly interrupted!");
-    tokeniser.addProgressListener(pListener);
-    tokeniser.addStatusListener(sListener);
-    try{
-      Benchmark.executeWithBenchmarking(tokeniser,
-              Benchmark.createBenchmarkId("simpleTokeniser",
-                      getBenchmarkId()), this, null);
-    }catch(ExecutionInterruptedException eie){
-      throw new ExecutionInterruptedException(
-        "The execution of the \"" + getName() +
-        "\" tokeniser has been abruptly interrupted!");
-    }
-    tokeniser.removeProgressListener(pListener);
-    tokeniser.removeStatusListener(sListener);
-
-  //transducer
-    if(isInterrupted()) throw new ExecutionInterruptedException(
-        "The execution of the \"" + getName() +
-        "\" tokeniser has been abruptly interrupted!");
-    pListener = new IntervalProgressListener(50, 100);
-    transducer.addProgressListener(pListener);
-    transducer.addStatusListener(sListener);
-
-    Benchmark.executeWithBenchmarking(transducer,
-            Benchmark.createBenchmarkId("transducer",
-                    getBenchmarkId()), this, null);
-    transducer.removeProgressListener(pListener);
-    transducer.removeStatusListener(sListener);
-  }//execute
+  }// execute
 
 
   /**
