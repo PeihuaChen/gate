@@ -3,13 +3,13 @@
   <groupId>uk.ac.gate</groupId>
   <artifactId>gate-asm</artifactId>
   <packaging>jar</packaging>
-  <name>Repackaged version of ASM 3.1 for GATE</name>
-  <version>3.1</version>
-  <description>The ASM 3.1 library with packages renamed.</description>
+  <name>Repackaged version of ASM 5.0.3 for GATE</name>
+  <version>5.0.3</version>
+  <description>The ASM 5.0.3 library with packages renamed.</description>
   <url>http://gate.ac.uk</url>
   <scm>
-    <url>http://gate.svn.sourceforge.net/viewvc/gate/gate</url>
-    <connection>http://gate.svn.sourceforge.net/viewvc/gate/gate</connection>
+    <url>http://svn.code.sf.net/p/gate/code/gate</url>
+    <connection>http://svn.code.sf.net/p/gate/code/gate</connection>
   </scm>
   <developers>
     <developer>
