@@ -1,11 +1,10 @@
-gate-asm.jar contains a copy of ASM 3.1 (http://asm.objectweb.org), moved into
+gate-asm.jar contains a copy of ASM 5.0.3 (http://asm.ow2.org), moved into
 an alternative package using Jar Jar Links (http://code.google.com/p/jarjar/).
 The following is the original ASM licence.
 
 ----------------------------------------------------------------------------
 
-Copyright (c) 2000-2005 INRIA, France Telecom
-
+Copyright (c) 2000-2011 INRIA, France Telecom
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
