@@ -3811,22 +3811,30 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     @Override
     public void actionPerformed(ActionEvent e) {
-      // for each element in the tree look if it is in the tab panel
-      // if yes, remove it from the tab panel
-      Enumeration<?> nodesEnum = resourcesTreeRoot.preorderEnumeration();
-      DefaultMutableTreeNode node;
-      while(nodesEnum.hasMoreElements()) {
-        node = (DefaultMutableTreeNode)nodesEnum.nextElement();
-        if ((node.getUserObject() instanceof Handle)
-         && (mainTabbedPane.indexOfComponent(
-            ((Handle)node.getUserObject()).getLargeView()) != -1)) {
-          final Handle handle = (Handle)node.getUserObject();
-          SwingUtilities.invokeLater(new Runnable() { @Override
-          public void run() {
-            (new CloseViewAction(handle)).actionPerformed(null);
-          }});
+      Runnable runner = new Runnable() {
+        @Override
+        public void run() {
+          // for each element in the tree look if it is in the tab panel
+          // if yes, remove it from the tab panel
+          Enumeration<?> nodesEnum = resourcesTreeRoot.preorderEnumeration();
+          DefaultMutableTreeNode node;
+          while(nodesEnum.hasMoreElements()) {
+            node = (DefaultMutableTreeNode)nodesEnum.nextElement();
+            if ((node.getUserObject() instanceof Handle)
+             && (mainTabbedPane.indexOfComponent(
+                ((Handle)node.getUserObject()).getLargeView()) != -1)) {
+              final Handle handle = (Handle)node.getUserObject();
+              SwingUtilities.invokeLater(new Runnable() { @Override
+              public void run() {
+                (new CloseViewAction(handle)).actionPerformed(null);
+              }});
+            }
+          }
         }
-      }
+      };
+      Thread thread = new Thread(runner, "HideAllAction");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }
   }
 
