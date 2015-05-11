@@ -35,7 +35,6 @@ import gate.util.asm.ClassReader;
 import gate.util.asm.ClassVisitor;
 import gate.util.asm.Opcodes;
 import gate.util.asm.Type;
-import gate.util.asm.commons.EmptyVisitor;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -71,6 +70,7 @@ import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
+import gate.util.asm.commons.EmptyVisitor;
 
 /**
  * The class is responsible for initialising the GATE libraries, and providing
@@ -1637,7 +1637,7 @@ public class Gate implements GateConstants {
       // we've found a CreoleResource annotation on this class
       if(desc.equals(CREOLE_RESOURCE_DESC)) {
         foundCreoleResource = true;
-        return new EmptyVisitor() {
+        return new AnnotationVisitor(Opcodes.ASM5) {
           @Override
           public void visit(String name, Object value) {
             if(name.equals("name") && resInfo.resourceName == null) {
@@ -1652,7 +1652,7 @@ public class Gate implements GateConstants {
           public AnnotationVisitor visitAnnotation(String name,
                     String desc) {
             // don't want to recurse into AutoInstance annotations
-            return new EmptyVisitor();
+            return this;
           }
         };
       }
