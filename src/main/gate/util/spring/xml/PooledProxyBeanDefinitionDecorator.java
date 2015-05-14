@@ -15,6 +15,8 @@
  */
 package gate.util.spring.xml;
 
+import javax.xml.XMLConstants;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -62,10 +64,9 @@ import org.w3c.dom.Node;
  * </p>
  * 
  * <p>
- * <b>NOTE</b> In addition to the <code>spring-aop</code> JAR, you
- * also need the Apache <code>commons-pool</code> JAR and its
- * dependencies available to your application in order to use this
- * class.
+ * <b>NOTE</b> In addition to the <code>spring-aop</code> JAR, you also
+ * need the Apache <code>commons-pool</code> JAR and its dependencies
+ * available to your application in order to use this class.
  * </p>
  */
 public class PooledProxyBeanDefinitionDecorator implements
@@ -73,14 +74,16 @@ public class PooledProxyBeanDefinitionDecorator implements
 
   public static final String TARGET_PREFIX = "gate.util.spring.pool-target.";
 
-  public static final String TARGET_SOURCE_PREFIX = "gate.util.spring.pool-target-source.";
+  public static final String TARGET_SOURCE_PREFIX =
+          "gate.util.spring.pool-target-source.";
 
-  public static final String POOL_FILLER_PREFIX = "gate.util.spring.pool-filler.";
+  public static final String POOL_FILLER_PREFIX =
+          "gate.util.spring.pool-filler.";
 
   private static final String PROXY_TARGET_CLASS = "proxy-target-class";
 
   private static final String INITIAL_SIZE = "initial-size";
-  
+
   private static final String TARGET_SOURCE_CLASS = "target-source-class";
 
   @Override
@@ -103,13 +106,14 @@ public class PooledProxyBeanDefinitionDecorator implements
     RootBeanDefinition targetSourceDefinition = new RootBeanDefinition();
     targetSourceDefinition.setScope(originalScope);
     String targetSourceClassName = null;
-    if(node instanceof Element && ((Element)node).hasAttribute(TARGET_SOURCE_CLASS)) {
+    if(node instanceof Element
+            && ((Element)node).hasAttribute(TARGET_SOURCE_CLASS)) {
       targetSourceClassName = ((Element)node).getAttribute(TARGET_SOURCE_CLASS);
     } else {
-      targetSourceClassName = "org.springframework.aop.target.CommonsPoolTargetSource";
+      targetSourceClassName =
+              "org.springframework.aop.target.CommonsPoolTargetSource";
     }
-    targetSourceDefinition
-            .setBeanClassName(targetSourceClassName);
+    targetSourceDefinition.setBeanClassName(targetSourceClassName);
     targetSourceDefinition.getPropertyValues().addPropertyValue(
             "targetBeanName", targetBeanName);
     String targetSourceBeanName = TARGET_SOURCE_PREFIX + originalBeanName;
@@ -122,10 +126,13 @@ public class PooledProxyBeanDefinitionDecorator implements
       NamedNodeMap attrs = ele.getAttributes();
       for(int i = 0; i < attrs.getLength(); i++) {
         Attr att = (Attr)attrs.item(i);
-        if(!PROXY_TARGET_CLASS.equals(att.getLocalName())
+        if(!XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(att.getNamespaceURI())
+                && !XMLConstants.XML_NS_URI.equals(att.getNamespaceURI())
+                && !XMLConstants.XMLNS_ATTRIBUTE.equals(att.getLocalName())
+                && !PROXY_TARGET_CLASS.equals(att.getLocalName())
                 && !INITIAL_SIZE.equals(att.getLocalName())) {
-          String propName = Conventions.attributeNameToPropertyName(att
-                  .getLocalName());
+          String propName =
+                  Conventions.attributeNameToPropertyName(att.getLocalName());
           targetSourceDefinition.getPropertyValues().addPropertyValue(propName,
                   att.getValue());
         }
@@ -145,8 +152,8 @@ public class PooledProxyBeanDefinitionDecorator implements
     if(node instanceof Element) {
       Element ele = (Element)node;
       if(ele.hasAttribute(PROXY_TARGET_CLASS)) {
-        proxyTargetClass = Boolean
-                .valueOf(ele.getAttribute(PROXY_TARGET_CLASS));
+        proxyTargetClass =
+                Boolean.valueOf(ele.getAttribute(PROXY_TARGET_CLASS));
       }
     }
     proxyDefinition.getPropertyValues().addPropertyValue("proxyTargetClass",
@@ -163,8 +170,8 @@ public class PooledProxyBeanDefinitionDecorator implements
     // if we have an initial-size attribute, create a pool filler bean
     // to pre-fill the pool to the stated initial size
     if(node instanceof Element && ((Element)node).hasAttribute(INITIAL_SIZE)) {
-      RootBeanDefinition poolFillerDefinition = new RootBeanDefinition(
-              PoolFiller.class);
+      RootBeanDefinition poolFillerDefinition =
+              new RootBeanDefinition(PoolFiller.class);
       String poolFillerBeanName = POOL_FILLER_PREFIX + originalBeanName;
       poolFillerDefinition.getPropertyValues().addPropertyValue("targetSource",
               new RuntimeBeanReference(targetSourceBeanName));
@@ -175,8 +182,7 @@ public class PooledProxyBeanDefinitionDecorator implements
       String[] proxyDepends = proxyDefinition.getDependsOn();
       if(proxyDepends == null) {
         proxyDepends = new String[1];
-      }
-      else {
+      } else {
         String[] newDepends = new String[proxyDepends.length + 1];
         System.arraycopy(proxyDepends, 0, newDepends, 0, proxyDepends.length);
         proxyDepends = newDepends;
