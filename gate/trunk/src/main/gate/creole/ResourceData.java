@@ -27,7 +27,12 @@ import gate.util.AbstractFeatureBearer;
 import gate.util.GateClassLoader;
 import gate.util.GateException;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Collection;
@@ -417,18 +422,70 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   }
 
   private void determineSharableProperties(Class<?> cls, Collection<String> hiddenPropertyNames) throws GateException {
+    BeanInfo bi;
+    try {
+      bi = Introspector.getBeanInfo(cls);
+    } catch(IntrospectionException e) {
+      throw new GateException("Failed to introspect " + cls, e);
+    }
+
+    // setter methods
     for(Method m : cls.getDeclaredMethods()) {
       Sharable sharableAnnot = m.getAnnotation(Sharable.class);
       if(sharableAnnot != null) {
-        if(!m.getName().startsWith("set") || m.getName().length() < 4
-            || m.getParameterTypes().length != 1) {
+        // determine the property name from the method name
+        PropertyDescriptor propDescriptor = null;
+        for(PropertyDescriptor pd : bi.getPropertyDescriptors()) {
+          if(m.equals(pd.getWriteMethod())) {
+            propDescriptor = pd;
+            break;
+          }
+        }
+
+        if(propDescriptor == null) {
           throw new GateException("@Sharable annotation found on "
                   + m
-                  + ", but only setter methods may have this annotation.");
+                  + ", but only Java Bean property setters may have "
+                  + "this annotation.");
         }
-        // extract the property name from the method name
-        String propName = Character.toLowerCase(m.getName().charAt(3))
-                + m.getName().substring(4);
+        if(propDescriptor.getReadMethod() == null) {
+          throw new GateException("@Sharable annotation found on "
+                  + m
+                  + ", but no matching getter was found.");
+        }
+        String propName = propDescriptor.getName();
+        if(sharableAnnot.value() == false) {
+          // hide this property name from the search in superclasses
+          hiddenPropertyNames.add(propName);
+        }
+        else {
+          // this property is sharable if it has not been hidden in a subclass
+          if(!hiddenPropertyNames.contains(propName)) {
+            sharableProperties.add(propName);
+          }
+        }
+      }
+    }
+    
+    // fields
+    for(Field f : cls.getDeclaredFields()) {
+      Sharable sharableAnnot = f.getAnnotation(Sharable.class);
+      if(sharableAnnot != null) {
+        String propName = f.getName();
+        // check it's a valid Java Bean property
+        PropertyDescriptor propDescriptor = null;
+        for(PropertyDescriptor pd : bi.getPropertyDescriptors()) {
+          if(propName.equals(pd.getName())) {
+            propDescriptor = pd;
+            break;
+          }
+        }
+        if(propDescriptor == null || propDescriptor.getReadMethod() == null ||
+                propDescriptor.getWriteMethod() == null) {
+          throw new GateException("@Sharable annotation found on "
+                  + f
+                  + " without matching Java Bean getter and setter.");
+        }
         if(sharableAnnot.value() == false) {
           // hide this property name from the search in superclasses
           hiddenPropertyNames.add(propName);
