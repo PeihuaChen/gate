@@ -19,7 +19,6 @@ import gate.FeatureMap;
 import gate.Gate;
 import gate.Resource;
 import gate.Utils;
-import gate.clone.ql.regex.ExpressionFinder;
 import gate.creole.ANNIEConstants;
 import gate.creole.ExecutionException;
 import gate.creole.POSTagger;
@@ -50,6 +49,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -628,6 +628,7 @@ public class OntoRootGaz extends DefaultGazetteer {
    */
   private List<Lookup> runRootFinderApplication(List<Lookup> lookups)
       throws ResourceInstantiationException {
+    Pattern p = java.util.regex.Pattern.compile(CATConstants.REGEX_CAMEL_CASE);
     List<Lookup> lookupsToBeReturned = new ArrayList<Lookup>();
     for(Lookup lookup : lookups) {
       String list = lookup.list;
@@ -639,10 +640,15 @@ public class OntoRootGaz extends DefaultGazetteer {
           additionalList.add(aLookup);
         }
         // if text is camel cased add space between words
-        if(separateCamelCasedWords && list.indexOf(" ") < 0) {
-          String separatedCamelCase =
-              ExpressionFinder.findAndSeparateCamelCases(list,
-                  CATConstants.REGEX_CAMEL_CASE, " ");
+        if(separateCamelCasedWords) {          
+          java.util.regex.Matcher m = p.matcher(list);
+          StringBuffer sb = new StringBuffer();
+          while (m.find()) {
+              m.appendReplacement(sb, "$1 $2");
+          }
+          m.appendTail(sb);
+          String  separatedCamelCase = sb.toString();
+          
           if(list != null && (!list.equals(separatedCamelCase))) {
             Lookup aLookup = new Lookup(separatedCamelCase, "", null, null);
             aLookup.features = lookup.features;

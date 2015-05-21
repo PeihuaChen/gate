@@ -9,7 +9,6 @@
 
   <!-- set global properties for this build -->
   <property name="src" location="src"/>
-  <property name="lib" location="lib"/>
   <property name="jar.location" location="obg.jar" />
   <property name="build" location="build" />
   <property name="gate.home" location="../.." />
@@ -24,9 +23,6 @@
     <fileset dir="${gate.lib}">
       <include name="**/*.jar" />
       <include name="**/*.zip" />
-    </fileset>
-    <fileset dir="${lib}">
-      <include name="**/*.jar" />
     </fileset>
   </path> 
 
@@ -63,7 +59,7 @@
       <sourcepath>
         <pathelement location="${src}" />
       </sourcepath>
-      <link href="http://docs.oracle.com/javase/6/docs/api/" />
+      <link href="http://docs.oracle.com/javase/7/docs/api/" />
       <link href="http://gate.ac.uk/gate/doc/javadoc/" />
     </javadoc>
   </target>

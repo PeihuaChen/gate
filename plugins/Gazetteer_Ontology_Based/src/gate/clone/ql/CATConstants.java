@@ -61,6 +61,6 @@ public class CATConstants {
   /** separator used during formatting of results */
   public static String NEW_LINE = "\n";
 
-  public static String REGEX_CAMEL_CASE = "[a-z][A-Z]";
+  public static String REGEX_CAMEL_CASE = "([a-z])([A-Z])";
 
 }
