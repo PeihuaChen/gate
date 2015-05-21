@@ -853,8 +853,7 @@ public interface OntologyService {
 
   /**
    * The method returns an array of properties. Property is a complex
-   * structure, which contains name, comment, information about its
-   * domain and range.
+   * structure, which contains type and URI information.
    * 
    * @return
    */
@@ -863,8 +862,7 @@ public interface OntologyService {
 
   /**
    * The method returns an array of properties. Property is a complex
-   * structure, which contains name, comment, information about its
-   * domain and range.
+   * structure, which contains type and URI information.
    * 
    * @return
    */
@@ -873,8 +871,7 @@ public interface OntologyService {
 
   /**
    * The method returns an array of properties. Property is a complex
-   * structure, which contains name, comment, information about its
-   * domain and range.
+   * structure, which contains type and URI information.
    * 
    * @return
    */
@@ -883,8 +880,7 @@ public interface OntologyService {
 
   /**
    * The method returns an array of properties. Property is a complex
-   * structure, which contains name, comment, information about its
-   * domain and range.
+   * structure, which contains type and URI information.
    * 
    * @return
    */
@@ -893,8 +889,7 @@ public interface OntologyService {
 
   /**
    * The method returns an array of properties. Property is a complex
-   * structure, which contains name, comment, information about its
-   * domain and range.
+   * structure, which contains type and URI information.
    * 
    * @return
    */
@@ -903,8 +898,7 @@ public interface OntologyService {
 
   /**
    * The method returns an array of properties. Property is a complex
-   * structure, which contains name, comment, information about its
-   * domain and range.
+   * structure, which contains type and URI information.
    * 
    * @return
    */
