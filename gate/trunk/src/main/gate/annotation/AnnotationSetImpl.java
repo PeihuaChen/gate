@@ -921,7 +921,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     
     //try to ensure that if someone adds an annotation directly by ID
     //the other methods don't trample all over it later
-    if (id > doc.peakAtNextAnnotationId()) {
+    if (id >= doc.peakAtNextAnnotationId()) {
       doc.setNextAnnotationId(id+1);
     }
   } // add(id, start, end, type, features)
