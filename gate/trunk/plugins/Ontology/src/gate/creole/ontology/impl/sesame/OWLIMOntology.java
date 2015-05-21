@@ -370,6 +370,17 @@ public class OWLIMOntology
       logger.info("Default name space is "+getDefaultNameSpace());
 
     } catch(Exception ioe) {
+      
+      if(ontologyService != null) {
+        // if we started a service but are going to throw an exception that shut
+        // the service down first otherwise we end up with threads that never
+        // die that stop the JVM from exiting cleanly
+        
+        // Thanks to Steve Wartik for spotting this issue
+        ontologyService.shutdown();
+        ontologyService = null;
+      }
+      
       throw new ResourceInstantiationException(ioe);
     }
 
