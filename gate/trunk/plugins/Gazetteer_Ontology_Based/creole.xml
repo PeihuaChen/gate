@@ -2,5 +2,4 @@
 <!-- creole.xml for Ontology_Based_Gazetteer plugin -->
 <CREOLE-DIRECTORY>
   <JAR SCAN="true">obg.jar</JAR>
-  <JAR>lib/oro-2.0.8.jar</JAR>
 </CREOLE-DIRECTORY>
