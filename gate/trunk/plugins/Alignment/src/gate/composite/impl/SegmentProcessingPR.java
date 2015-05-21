@@ -76,7 +76,7 @@ public class SegmentProcessingPR extends AbstractLanguageAnalyser implements
    */
   private String inputASName;
 
-  private boolean debug = true;
+  private boolean debug = false;
 
   /**
    * Should be called to execute this PR on a document.
