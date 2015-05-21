@@ -76,7 +76,7 @@ public class SegmentProcessingPR extends AbstractLanguageAnalyser implements
    */
   private String inputASName;
 
-  private boolean debug = false;
+  private boolean debug = true;
 
   /**
    * Should be called to execute this PR on a document.
@@ -172,9 +172,9 @@ public class SegmentProcessingPR extends AbstractLanguageAnalyser implements
           
           // try and make sure any annotations created in the segment will have
           // IDs that are valid in the original document
-          if(oldDoc instanceof DocumentImpl) {
+          if(document instanceof DocumentImpl) {
             ((CompositeDocumentImpl)compositeDoc)
-                .setNextAnnotationId(((DocumentImpl)oldDoc)
+                .setNextAnnotationId(((DocumentImpl)document)
                     .peakAtNextAnnotationId());
           }
           
@@ -186,6 +186,7 @@ public class SegmentProcessingPR extends AbstractLanguageAnalyser implements
         } catch(CombiningMethodException e) {
           throw new ExecutionException(e);
         } finally {
+                    
           // finally get rid of the composite document
           compoundDoc.removeDocument(nameForCompositeDoc);
           if(compositeDoc != null) {
