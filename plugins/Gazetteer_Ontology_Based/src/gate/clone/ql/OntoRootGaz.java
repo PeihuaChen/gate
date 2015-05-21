@@ -49,6 +49,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -628,7 +629,7 @@ public class OntoRootGaz extends DefaultGazetteer {
    */
   private List<Lookup> runRootFinderApplication(List<Lookup> lookups)
       throws ResourceInstantiationException {
-    Pattern p = java.util.regex.Pattern.compile(CATConstants.REGEX_CAMEL_CASE);
+    Pattern p = Pattern.compile(CATConstants.REGEX_CAMEL_CASE);
     List<Lookup> lookupsToBeReturned = new ArrayList<Lookup>();
     for(Lookup lookup : lookups) {
       String list = lookup.list;
@@ -641,7 +642,7 @@ public class OntoRootGaz extends DefaultGazetteer {
         }
         // if text is camel cased add space between words
         if(separateCamelCasedWords) {          
-          java.util.regex.Matcher m = p.matcher(list);
+          Matcher m = p.matcher(list);
           StringBuffer sb = new StringBuffer();
           while (m.find()) {
               m.appendReplacement(sb, "$1 $2");
