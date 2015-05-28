@@ -138,12 +138,14 @@ public class PluginUpdateManager extends JDialog {
       "suppress.update.install";
 
   private static final String[] defaultUpdateSites = new String[]{
+      "Additional Plugins from the GATE Team",
+      "https://gate.ac.uk/gate/build/deploy/plugins/gate-8.1.xml",
       "Austrian Research Institute for AI (OFAI)",
       "http://www.ofai.at/~johann.petrak/GATE/gate-update-site.xml",
       "Semantic Software Lab",
       "http://creole.semanticsoftware.info/gate-update-site.xml",
-      "City University Centre for Health Informatics",
-      "http://vega.soi.city.ac.uk/~abdy181/software/GATE/gate-update-site.xml",
+      //"City University Centre for Health Informatics",
+      //"http://vega.soi.city.ac.uk/~abdy181/software/GATE/gate-update-site.xml",
       "Moonlytics",
       "http://word-correction-gate-plugin.googlecode.com/svn/trunk/site.xml",
       "SAGA",
@@ -1290,7 +1292,7 @@ public class PluginUpdateManager extends JDialog {
       switch(column){
         case 0:
           if(site.valid != null && !site.valid) return icoInvalid;
-          if(site.uri.toString().startsWith("http://gate.ac.uk"))
+          if(site.uri.toString().startsWith("https://gate.ac.uk"))
             return icoGATE;
           return icoSite;
         case 1:
