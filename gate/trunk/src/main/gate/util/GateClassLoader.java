@@ -22,6 +22,9 @@
 package gate.util;
 
 import gate.Gate;
+import gate.Gate.DirectoryInfo;
+import gate.Gate.ResourceInfo;
+import gate.Resource;
 import gate.creole.AbstractResource;
 
 import java.beans.Introspector;
@@ -324,8 +327,12 @@ public class GateClassLoader extends URLClassLoader {
        gcl = childClassLoaders.remove(id);
     }
   
-    if (gcl != null && !gcl.isIsolated()) {
+    if(gcl != null && !gcl.isIsolated()) {
+      // in theory this shouldn't be needed as the Introspector uses
+      // soft references if we move to requiring Java 8 it should be
+      // safe to drop this call
       Introspector.flushCaches();
+
       AbstractResource.flushBeanInfoCache();
     }
   }
@@ -338,6 +345,46 @@ public class GateClassLoader extends URLClassLoader {
    */
   public void forgetClassLoader(GateClassLoader classloader) {
     if(classloader != null) forgetClassLoader(classloader.getID());
+  }
+  
+  
+  public void forgetClassLoader(String id, DirectoryInfo dInfo) {
+
+    if(dInfo == null) {
+      forgetClassLoader(id);
+      return;
+    }
+
+    GateClassLoader classloader = null;
+
+    synchronized(childClassLoaders) {
+      classloader = childClassLoaders.remove(id);
+    }
+
+    if(classloader != null && !classloader.isIsolated()) {
+      // now only remove those classes from the caches that the
+      // classloader was responsible for
+      for(ResourceInfo rInfo : dInfo.getResourceInfoList()) {
+        try {
+          @SuppressWarnings("unchecked")
+          Class<? extends Resource> c =
+                  (Class<? extends Resource>)classloader.loadClass(
+                          rInfo.getResourceClassName());
+          
+          if(c != null) {
+            // in theory this shouldn't be needed as the Introspector
+            // uses soft references if we move to requiring Java 8 it
+            // should be safe to drop this call
+            Introspector.flushFromCaches(c);
+
+            AbstractResource.forgetBeanInfo(c);
+          }
+        } catch(ClassNotFoundException e) {
+          // hmm not sure what to do now
+           e.printStackTrace();
+        }
+      }
+    }
   }
 
   /**

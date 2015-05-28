@@ -509,7 +509,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
         }
       }
       try {
-        Gate.getClassLoader().forgetClassLoader(new URL(directory,"creole.xml").toExternalForm());
+        Gate.getClassLoader().forgetClassLoader(new URL(directory,"creole.xml").toExternalForm(), dInfo);
       }
       catch (Exception e) {
         e.printStackTrace();

@@ -496,6 +496,10 @@ extends AbstractFeatureBearer implements Resource, Serializable
     return r;
   }
   
+  public static boolean forgetBeanInfo(Class<? extends Resource> c) {
+    return (beanInfoCache.remove(c) != null);
+  }
+  
   public static void flushBeanInfoCache() {
     beanInfoCache.clear();
   }
