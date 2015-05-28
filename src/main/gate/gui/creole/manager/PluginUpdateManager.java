@@ -140,8 +140,6 @@ public class PluginUpdateManager extends JDialog {
   private static final String[] defaultUpdateSites = new String[]{
       "Additional Plugins from the GATE Team",
       "https://gate.ac.uk/gate/build/deploy/plugins/gate-8.1.xml",
-      "Austrian Research Institute for AI (OFAI)",
-      "http://www.ofai.at/~johann.petrak/GATE/gate-update-site.xml",
       "Semantic Software Lab",
       "http://creole.semanticsoftware.info/gate-update-site.xml",
       //"City University Centre for Health Informatics",
@@ -149,7 +147,9 @@ public class PluginUpdateManager extends JDialog {
       "Moonlytics",
       "http://word-correction-gate-plugin.googlecode.com/svn/trunk/site.xml",
       "SAGA",
-      "http://demos.gsi.dit.upm.es/SAGA/gate-update-site.xml"};
+      "http://demos.gsi.dit.upm.es/SAGA/gate-update-site.xml",
+      "Austrian Research Institute for AI (OFAI)",
+      "http://www.ofai.at/~johann.petrak/GATE/gate-update-site.xml"};
 
   public static File getUserPluginsHome() {
     
