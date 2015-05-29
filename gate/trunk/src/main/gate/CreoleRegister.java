@@ -19,6 +19,7 @@ package gate;
 import gate.creole.ResourceData;
 import gate.creole.metadata.CreoleResource;
 import gate.event.CreoleListener;
+import gate.event.PluginListener;
 import gate.util.GateException;
 
 import java.io.Serializable;
@@ -260,5 +261,9 @@ public interface CreoleRegister extends Map<String, ResourceData>, Serializable,
    * @see #addCreoleListener(CreoleListener)
    */
   public void removeCreoleListener(CreoleListener l);
+  
+  public void addPluginListener(PluginListener l);
+  
+  public void removePluginListener(PluginListener l);
 
 } // interface CreoleRegister
