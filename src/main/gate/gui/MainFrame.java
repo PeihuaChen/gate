@@ -37,6 +37,7 @@ import gate.creole.ResourceInstantiationException;
 import gate.creole.annic.Constants;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
+import gate.event.PluginListener;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
 import gate.gui.creole.manager.PluginUpdateManager;
@@ -55,6 +56,7 @@ import gate.util.Benchmark;
 import gate.util.CorpusBenchmarkTool;
 import gate.util.ExtensionFileFilter;
 import gate.util.Files;
+import gate.util.GateClassLoader;
 import gate.util.GateException;
 import gate.util.GateRuntimeException;
 import gate.util.LuckyException;
@@ -105,7 +107,6 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
@@ -200,7 +201,7 @@ import org.apache.log4j.PatternLayout;
  */
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame implements ProgressListener,
-                                     StatusListener, CreoleListener {
+                                     StatusListener, CreoleListener, PluginListener {
 
   protected static final Logger log = Logger.getLogger(MainFrame.class);
 
@@ -1249,6 +1250,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   protected void initListeners() {
     Gate.getCreoleRegister().addCreoleListener(this);
+    Gate.getCreoleRegister().addPluginListener(this);
    
     resourcesTree.addKeyListener(new KeyAdapter() {
       @Override
@@ -2118,6 +2120,36 @@ public class MainFrame extends JFrame implements ProgressListener,
         }        
       }
     });
+  }
+  
+  @Override
+  public void pluginLoaded(URL url) {
+    // currently we don't care about this event
+  }
+
+  @Override
+  public void pluginUnloaded(URL url) {
+    try {
+      String classloaderID = (new URL(url, "creole.xml")).toExternalForm();
+
+      Iterator<String> it = iconByName.keySet().iterator();
+      while(it.hasNext()) {
+        String name = it.next();
+        Icon icon = iconByName.get(name);
+
+        ClassLoader cl = icon.getClass().getClassLoader();
+
+        if(cl instanceof GateClassLoader) {
+          if(((GateClassLoader)cl).getID().equals(classloaderID)) {
+            it.remove();
+          }
+        }
+      }
+    } catch(MalformedURLException e) {
+      // this should be impossible!
+
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -5341,13 +5373,14 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
         
         @Override
-        public void menuDeselected(MenuEvent arg0) {
+        public void menuDeselected(MenuEvent e) {         
+          removeAll();
           statusChanged("");
         }
         
         @Override
-        public void menuCanceled(MenuEvent arg0) {
-          // do nothing   
+        public void menuCanceled(MenuEvent e) {
+          menuDeselected(e);
         }
       });
     }

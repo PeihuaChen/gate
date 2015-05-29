@@ -28,6 +28,7 @@ import gate.Resource;
 import gate.VisualResource;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
+import gate.event.PluginListener;
 import gate.util.CreoleXmlUpperCaseFilter;
 import gate.util.Err;
 import gate.util.GateClassLoader;
@@ -53,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.log4j.Logger;
 import org.jdom.Document;
@@ -78,8 +80,7 @@ import org.xml.sax.helpers.DefaultHandler;
 @SuppressWarnings("serial")
 public class CreoleRegisterImpl extends HashMap<String, ResourceData>
                                                                      implements
-                                                                     CreoleRegister,
-                                                                     CreoleListener {
+                                                                     CreoleRegister {
 
   /** A logger to use instead of sending messages to Out or Err **/
   protected static final Logger log = Logger.getLogger(CreoleRegisterImpl.class);
@@ -299,6 +300,8 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       }
       
       directories.add(directoryUrl);
+      
+      firePluginLoaded(directoryUrl);
     }
   }
   
@@ -518,6 +521,8 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       log.info("CREOLE plugin unloaded: " + directory);
       if (prCount > 0)
         log.warn(prCount+" resources were deleted as they relied on the " + dInfo.getName() +" plugin");
+      
+      firePluginUnloaded(directory);
     }
   }
 
@@ -1095,6 +1100,28 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   protected Set<String> applicationTypes;
 
   private transient Vector<CreoleListener> creoleListeners;
+  
+  private transient List<PluginListener> pluginListeners = new CopyOnWriteArrayList<PluginListener>();
+  
+  protected void firePluginLoaded(URL url) {
+    for (PluginListener listener : pluginListeners) {
+      listener.pluginLoaded(url);
+    }
+  }
+  
+  protected void firePluginUnloaded(URL url) {
+    for (PluginListener listener : pluginListeners) {
+      listener.pluginUnloaded(url);
+    }
+  }
+  
+  public void addPluginListener(PluginListener listener) {
+    pluginListeners.add(listener);
+  }
+  
+  public void removePluginListener(PluginListener listener) {
+    pluginListeners.remove(listener);
+  }
 
   protected void fireResourceLoaded(CreoleEvent e) {
     if(creoleListeners != null) {
