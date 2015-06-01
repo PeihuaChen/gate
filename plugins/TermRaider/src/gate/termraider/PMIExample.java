@@ -7,7 +7,8 @@ import gate.creole.metadata.CreoleResource;
 
 @CreoleResource(name = "PMI Example (English)",
     icon = "TermRaiderApp",
-    autoinstances = @AutoInstance(parameters = {
+    comment = "Example application for the PMI (pointwise mutual information) tool",
+     autoinstances = @AutoInstance(parameters = {
         @AutoInstanceParam(name="pipelineURL", value="applications/pmi-example.gapp"),
         @AutoInstanceParam(name="menu", value="TermRaider")}))
 public class PMIExample extends PackagedController {

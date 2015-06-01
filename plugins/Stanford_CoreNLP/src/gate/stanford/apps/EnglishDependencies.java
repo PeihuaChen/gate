@@ -8,7 +8,9 @@ import gate.creole.metadata.CreoleResource;
 import java.net.URL;
 import java.util.List;
 
-@CreoleResource(name="English Dependency Parser", autoinstances = @AutoInstance)
+@CreoleResource(name="English Dependency Parser",
+    comment = "Ready-made application for Stanford English parser",
+    autoinstances = @AutoInstance)
 public class EnglishDependencies extends PackagedController {
 
   private static final long serialVersionUID = 3163023140886167369L;

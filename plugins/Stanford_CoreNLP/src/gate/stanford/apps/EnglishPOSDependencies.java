@@ -8,7 +8,9 @@ import gate.creole.metadata.CreoleResource;
 import java.net.URL;
 import java.util.List;
 
-@CreoleResource(name="English POS Tagger and Dependency Parser", autoinstances = @AutoInstance)
+@CreoleResource(name="English POS Tagger and Dependency Parser",
+    comment = "Ready-made application for Stanford English POS tagger and parser",
+    autoinstances = @AutoInstance)
 public class EnglishPOSDependencies extends PackagedController {
 
   private static final long serialVersionUID = 3163023140886167369L;

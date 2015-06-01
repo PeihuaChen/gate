@@ -78,6 +78,7 @@ list</a>.</p>
 <li><a href='#Lang_Russian'>Lang_Russian</a></li>
 <li><a href='#Learning'>Learning</a></li>
 <li><a href='#LingPipe'>LingPipe</a></li>
+<li><a href='#Linguistic_Simplifier'>Linguistic_Simplifier</a></li>
 <li><a href='#Machine_Learning'>Machine_Learning</a></li>
 <li><a href='#Ontology'>Ontology</a></li>
 <li><a href='#Ontology_BDM_Computation'>Ontology_BDM_Computation</a></li>
@@ -303,6 +304,11 @@ list</a>.</p>
 		<td>gate.crowdsource.classification.EntityClassificationResultsImporter</td>
 	</tr>
 	<tr>
+		<td>Majority-vote consensus builder (classification)&nbsp;</td>
+		<td>Process results of a crowd annotation task to find where annotators agree and disagree. (<a href="http://gate.ac.uk/userguide/sec:crowd:classification:adjudication">docs</a>)&nbsp;</td>
+		<td>gate.crowdsource.classification.MajorityVoteClassificationConsensus</td>
+	</tr>
+	<tr>
 		<td>Entity Annotation Job Builder&nbsp;</td>
 		<td>Build a CrowdFlower job asking users to annotate entities within a snippet of text (<a href="http://gate.ac.uk/userguide/sec:crowd:annotation">docs</a>)&nbsp;</td>
 		<td>gate.crowdsource.ne.EntityAnnotationJobBuilder</td>
@@ -311,6 +317,11 @@ list</a>.</p>
 		<td>Entity Annotation Results Importer&nbsp;</td>
 		<td>Import judgments from a CrowdFlower job created by the Entity Annotation Job Builder as GATE annotations. (<a href="http://gate.ac.uk/userguide/sec:crowd:annotation:import">docs</a>)&nbsp;</td>
 		<td>gate.crowdsource.ne.EntityAnnotationResultsImporter</td>
+	</tr>
+	<tr>
+		<td>Majority-vote consensus builder (annotation)&nbsp;</td>
+		<td>Process results of a crowd annotation task to find where annotators agree and disagree. (<a href="http://gate.ac.uk/userguide/sec:crowd:annotation:adjudication">docs</a>)&nbsp;</td>
+		<td>gate.crowdsource.ne.MajorityVoteAnnotationConsensus</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Developer_Tools'>Developer_Tools</a></th>
@@ -563,7 +574,7 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>Arabic IE System&nbsp;</td>
-		<td>&nbsp;</td>
+		<td>Ready-made Arabic IE application&nbsp;</td>
 		<td>arabic.ArabicIE</td>
 	</tr>
 	<tr>
@@ -614,7 +625,7 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>Cebuano IE System&nbsp;</td>
-		<td>&nbsp;</td>
+		<td>Ready-made Cebuano IE application&nbsp;</td>
 		<td>cebuano.CebuanoIE</td>
 	</tr>
 	<tr>
@@ -642,7 +653,7 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>Chinese IE System&nbsp;</td>
-		<td>&nbsp;</td>
+		<td>Ready-made Chinese IE application&nbsp;</td>
 		<td>chinese.ChineseIE</td>
 	</tr>
 	<tr>
@@ -650,7 +661,7 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>French IE System&nbsp;</td>
-		<td>&nbsp;</td>
+		<td>Ready-made French IE application&nbsp;</td>
 		<td>french.FrenchIE</td>
 	</tr>
 	<tr>
@@ -658,7 +669,7 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>German IE System&nbsp;</td>
-		<td>&nbsp;</td>
+		<td>Ready-made German IE application&nbsp;</td>
 		<td>german.GermanIE</td>
 	</tr>
 	<tr>
@@ -724,7 +735,7 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>Romanian IE System&nbsp;</td>
-		<td>&nbsp;</td>
+		<td>Ready-made Romanian IE application&nbsp;</td>
 		<td>romanian.RomanianIE</td>
 	</tr>
 	<tr>
@@ -806,6 +817,29 @@ list</a>.</p>
 		<td>LingPipe Sentence Splitter PR&nbsp;</td>
 		<td>Provides an interface to LingPipe sentence splitter API. (<a href="http://gate.ac.uk/userguide/sec:misc-creole:lingpipe:splitter">docs</a>)&nbsp;</td>
 		<td>gate.lingpipe.SentenceSplitterPR</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name='Linguistic_Simplifier'>Linguistic_Simplifier</a></th>
+	</tr>
+	<tr>
+		<td>Simplified Text Exporter&nbsp;</td>
+		<td>Simplified text exporter (HTML output)&nbsp;</td>
+		<td>gate.corpora.export.ExportSimplifiedHTML</td>
+	</tr>
+	<tr>
+		<td>Simplified Text Exporter&nbsp;</td>
+		<td>Simplified text exporter (plain text output)&nbsp;</td>
+		<td>gate.corpora.export.ExportSimplifiedText</td>
+	</tr>
+	<tr>
+		<td>Linguistic Simplifier&nbsp;</td>
+		<td>A processing resource that takes document and corpus parameters&nbsp;</td>
+		<td>gate.creole.summarization.linguistic.Simplifier</td>
+	</tr>
+	<tr>
+		<td>Linguistic Simplifier&nbsp;</td>
+		<td>Example application for the linguistic simplifier&nbsp;</td>
+		<td>gate.creole.summarization.linguistic.SimplifierApplication</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Machine_Learning'>Machine_Learning</a></th>
@@ -1013,12 +1047,12 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>English Dependency Parser&nbsp;</td>
-		<td>&nbsp;</td>
+		<td>Ready-made application for Stanford English parser&nbsp;</td>
 		<td>gate.stanford.apps.EnglishDependencies</td>
 	</tr>
 	<tr>
 		<td>English POS Tagger and Dependency Parser&nbsp;</td>
-		<td>&nbsp;</td>
+		<td>Ready-made application for Stanford English POS tagger and parser&nbsp;</td>
 		<td>gate.stanford.apps.EnglishPOSDependencies</td>
 	</tr>
 	<tr>
@@ -1087,12 +1121,12 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>ANNIE+Measurements&nbsp;</td>
-		<td>&nbsp;</td>
+		<td>Ready-made application for ANNIE plus the measurement tagger&nbsp;</td>
 		<td>gate.creole.measurements.ANNIEMeasurements</td>
 	</tr>
 	<tr>
 		<td>Measurements&nbsp;</td>
-		<td>&nbsp;</td>
+		<td>Ready-made application for measurement annotator&nbsp;</td>
 		<td>gate.creole.measurements.MeasurementsApplication</td>
 	</tr>
 	<tr>
@@ -1134,7 +1168,7 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>Noun Phrase Chunker&nbsp;</td>
-		<td>&nbsp;</td>
+		<td>Ready-made NP chunking application&nbsp;</td>
 		<td>mark.chunking.ChunkingApp</td>
 	</tr>
 	<tr>
@@ -1163,7 +1197,7 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>Penn BioTagger&nbsp;</td>
-		<td>&nbsp;</td>
+		<td>Ready-made application for the Penn BioTagger&nbsp;</td>
 		<td>gate.creole.pennbio.BioTagger</td>
 	</tr>
 	<tr>
@@ -1215,12 +1249,12 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>PMI Example (English)&nbsp;</td>
-		<td>&nbsp;</td>
+		<td>Example application for the PMI (pointwise mutual information) tool&nbsp;</td>
 		<td>gate.termraider.PMIExample</td>
 	</tr>
 	<tr>
 		<td>TermRaider English Term Extraction&nbsp;</td>
-		<td>&nbsp;</td>
+		<td>Example application showing typical set-up for the TermRaider tools&nbsp;</td>
 		<td>gate.termraider.TermRaiderEnglish</td>
 	</tr>
 	<tr>
@@ -1329,7 +1363,7 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>GATE JSON Exporter&nbsp;</td>
-		<td>&nbsp;</td>
+		<td>Export documents and corpora in JSON format&nbsp;</td>
 		<td>gate.corpora.export.GATEJsonExporter</td>
 	</tr>
 	<tr>
@@ -1349,7 +1383,7 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>TwitIE (EN)&nbsp;</td>
-		<td>&nbsp;</td>
+		<td>English TwitIE application&nbsp;</td>
 		<td>gate.twitter.apps.TwitIEEN</td>
 	</tr>
 	<tr>

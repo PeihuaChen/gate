@@ -44,7 +44,9 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.io.SerializedString;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@CreoleResource(name = "GATE JSON Exporter", tool = true, autoinstances = @AutoInstance, icon = "GATEJSON")
+@CreoleResource(name = "GATE JSON Exporter",
+    comment = "Export documents and corpora in JSON format",
+    tool = true, autoinstances = @AutoInstance, icon = "GATEJSON")
 public class GATEJsonExporter extends CorpusExporter {
   
   private static final long serialVersionUID = -8087536348560365618L;

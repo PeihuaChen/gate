@@ -60,7 +60,8 @@ import org.apache.log4j.Logger;
  * and a <a href="http://www.csie.ntu.edu.tw/~cjlin/liblinear">LIBLINEAR</a> 
  * model to perform the actual classification.
  */
-@CreoleResource
+@CreoleResource(name = "Text Categorization PR",
+    comment = "Classify text based on a semantic space")
 public class TextCategorizationPR extends AbstractLanguageAnalyser implements
                                                                    LanguageAnalyser {
   
