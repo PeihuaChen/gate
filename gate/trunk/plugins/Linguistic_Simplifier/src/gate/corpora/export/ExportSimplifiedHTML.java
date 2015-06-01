@@ -29,7 +29,9 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Vector;
 
-@CreoleResource(name = "Simplified Text Exporter", tool = true, autoinstances = @AutoInstance, icon = "LinguisticSimplifier")
+@CreoleResource(name = "Simplified Text Exporter",
+    comment = "Simplified text exporter (HTML output)",
+    tool = true, autoinstances = @AutoInstance, icon = "LinguisticSimplifier")
 public class ExportSimplifiedHTML extends DocumentExporter {
   
   private static final long serialVersionUID = 7490823488963303438L;

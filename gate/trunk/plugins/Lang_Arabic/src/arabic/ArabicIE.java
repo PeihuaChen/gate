@@ -17,7 +17,9 @@ import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.AutoInstanceParam;
 import gate.creole.metadata.CreoleResource;
 
-@CreoleResource(name = "Arabic IE System", autoinstances = @AutoInstance(parameters = {
+@CreoleResource(name = "Arabic IE System",
+    comment = "Ready-made Arabic IE application",
+    autoinstances = @AutoInstance(parameters = {
 	@AutoInstanceParam(name="pipelineURL", value="resources/arabic.gapp"),
 	@AutoInstanceParam(name="menu", value="Arabic")}))
 public class ArabicIE extends PackagedController {

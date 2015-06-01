@@ -17,7 +17,9 @@ import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.AutoInstanceParam;
 import gate.creole.metadata.CreoleResource;
 
-@CreoleResource(name = "Cebuano IE System", autoinstances = @AutoInstance(parameters = {
+@CreoleResource(name = "Cebuano IE System",
+    comment = "Ready-made Cebuano IE application",
+    autoinstances = @AutoInstance(parameters = {
 	@AutoInstanceParam(name="pipelineURL", value="resources/cebuano.gapp"),
 	@AutoInstanceParam(name="menu", value="Cebuano")}))
 public class CebuanoIE extends PackagedController {

@@ -9,7 +9,9 @@ import gate.creole.metadata.CreoleResource;
 import java.net.URL;
 import java.util.List;
 
-@CreoleResource(name = "German IE System", autoinstances = @AutoInstance(parameters = {
+@CreoleResource(name = "German IE System",
+    comment = "Ready-made German IE application",
+    autoinstances = @AutoInstance(parameters = {
 	@AutoInstanceParam(name="pipelineURL", value="resources/german.gapp"),
 	@AutoInstanceParam(name="menu", value="German")}))
 public class GermanIE extends PackagedController {

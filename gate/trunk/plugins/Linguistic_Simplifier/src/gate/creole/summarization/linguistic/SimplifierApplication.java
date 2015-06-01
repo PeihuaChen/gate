@@ -17,7 +17,9 @@ import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.AutoInstanceParam;
 import gate.creole.metadata.CreoleResource;
 
-@CreoleResource(name = "Linguistic Simplifier", icon = "LinguisticSimplifier", autoinstances = @AutoInstance(parameters = {
+@CreoleResource(name = "Linguistic Simplifier", icon = "LinguisticSimplifier",
+    comment = "Example application for the linguistic simplifier",
+    autoinstances = @AutoInstance(parameters = {
   @AutoInstanceParam(name="pipelineURL", value="resources/application.xgapp"),
   @AutoInstanceParam(name="menu", value="Summarization")}))
 public class SimplifierApplication extends PackagedController{

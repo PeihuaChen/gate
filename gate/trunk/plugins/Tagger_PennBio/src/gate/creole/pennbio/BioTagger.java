@@ -9,7 +9,9 @@ import gate.creole.metadata.CreoleResource;
 import java.net.URL;
 import java.util.List;
 
-@CreoleResource(name = "Penn BioTagger", autoinstances = @AutoInstance(parameters = {
+@CreoleResource(name = "Penn BioTagger",
+    comment = "Ready-made application for the Penn BioTagger",
+    autoinstances = @AutoInstance(parameters = {
 	@AutoInstanceParam(name="pipelineURL", value="resources/biotagger.xgapp"),
 	@AutoInstanceParam(name="menu", value="Biomedical")}), icon="bio")
 public class BioTagger extends PackagedController {
