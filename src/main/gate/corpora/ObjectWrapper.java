@@ -15,6 +15,8 @@
  */
 package gate.corpora;
 
+import gate.util.xml.XML11StaxDriver;
+
 import java.io.StringWriter;
 
 import org.apache.log4j.Logger;
@@ -73,7 +75,9 @@ public class ObjectWrapper {
    */
   @Override
   public String toString() {
-    XStream xstream = new XStream(new StaxDriver());
+    // Use XML 1.1 in case the XML representation includes characters
+    // that 1.0 forbids (typically control characters).
+    XStream xstream = new XStream(new XML11StaxDriver());
     StringWriter out  = new StringWriter();
     xstream.toXML(this, out);
     return out.toString();
