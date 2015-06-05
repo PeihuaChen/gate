@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <!-- $Id$ -->
-<!-- creole.xml directory file for Romanian Processing resources -->
+<!-- creole.xml directory file for Hindi Processing resources -->
 <CREOLE-DIRECTORY>
+<REQUIRES>../Lang_Cebuano</REQUIRES>
+
   <!-- Processing Resources -->
   <CREOLE>
    
