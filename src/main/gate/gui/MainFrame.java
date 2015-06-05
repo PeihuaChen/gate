@@ -4784,10 +4784,10 @@ public class MainFrame extends JFrame implements ProgressListener,
         if (keywords == null || keywords.trim().length() == 0) { return; }
       }
       try {
-      showHelpFrame("http://sourceforge.net/search/index.php?" +
-       "group_id=143829&form_submit=Search&type_of_search=mlists" +
-       "&q=" + java.net.URLEncoder.encode(keywords, "UTF-8"),
-       "mailing list");
+      showHelpFrame("https://sourceforge.net/p/gate/mailman/search/" +
+      		"?mail_list=gate-users" +
+          "&q=" + java.net.URLEncoder.encode(keywords, "UTF-8"),
+        "mailing list");
 
       } catch (UnsupportedEncodingException error) {
         String message = "The Character Encoding is not supported.";
