@@ -1308,10 +1308,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             appsMenu.setText("Create New Application");
             appsMenu.setIcon(MainFrame.getIcon("applications"));
             appsPopup.add(appsMenu);
-            appsPopup.add(new ReadyMadeMenu());
-                        
-            guiRoots.add(appsPopup);
-            guiRoots.add(appsMenu);
+            appsPopup.add(new ReadyMadeMenu());            
             appsPopup.add(new XJMenuItem(new LoadResourceFromFileAction(),
               MainFrame.this));
             
