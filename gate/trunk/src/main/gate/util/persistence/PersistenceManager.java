@@ -873,11 +873,12 @@ public class PersistenceManager {
 
   /**
    * Save the given object to the file, without using $gatehome$.
-   * This is equivalent to  {@link #saveObjectToFile(obj,file,false,false}. 
+   * This is equivalent to  {@link #saveObjectToFile(Object,File,boolean,boolean} with the
+   * third and fourth parameter set to false.
    * This method exists with this definition to stay backwards compatible with 
    * code that was using this method before paths relative to $gatehome$ were supported. 
-   * @param obj
-   * @param file
+   * @param obj The object to persist
+   * @param file The file where to persists to
    * @throws PersistenceException
    * @throws IOException 
    */
@@ -889,8 +890,8 @@ public class PersistenceManager {
   /**
    * Save the given object to the given file.
    * 
-   * @param obj
-   * @param file
+   * @param obj The object to persist.
+   * @param file The file where to persist to
    * @param usegatehome if true (recommended) use $gatehome$ and $resourceshome$ instead of 
    * $relpath$ in any saved path URLs if the location of that URL is inside GATE home or 
    * inside the resources home directory (if set). 
