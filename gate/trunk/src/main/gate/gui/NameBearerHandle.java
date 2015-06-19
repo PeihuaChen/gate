@@ -683,7 +683,7 @@ public class NameBearerHandle implements Handle, StatusListener,
                       file, true, true);
               // save also the location of the application as last
               // application
-              locations.put("lastapplication", file.getCanonicalPath());
+              locations.put("lastapplication", file.getAbsolutePath());
               // add this application to the list of recent applications
               String list = locations.get("applications");
               if(list == null) {

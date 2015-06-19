@@ -3654,9 +3654,9 @@ public class MainFrame extends JFrame implements ProgressListener,
             Map<String, String> locations = fileChooser.getLocations();
             Resource res = (Resource) resource;
             // save also the location of the application with its name
-            locations.put("application."+res.getName(),file.getCanonicalPath());
+            locations.put("application."+res.getName(),file.getAbsolutePath());
             locations.put("application.zip."+res.getName(),
-              file.getCanonicalPath().replaceFirst("\\.[^.]{3,5}$", ".zip"));
+              file.getAbsolutePath().replaceFirst("\\.[^.]{3,5}$", ".zip"));
             // add this application to the list of recent applications
             String list = locations.get("applications");
             if (list == null) { list = ""; }
