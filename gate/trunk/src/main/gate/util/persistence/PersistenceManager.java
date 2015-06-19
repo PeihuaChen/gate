@@ -80,6 +80,14 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
 import com.thoughtworks.xstream.io.xml.StaxReader;
 import com.thoughtworks.xstream.io.xml.XStream11NameCoder;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
+import java.nio.file.FileSystems;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class provides utility methods for saving resources through
@@ -155,55 +163,91 @@ public class PersistenceManager {
 
   /**
    * URLs get upset when serialised and deserialised so we need to
-   * convert them to strings for storage. In the case of
+   * convert them to strings for storage. 
+   * In the case of
    * &quot;file:&quot; URLs the relative path to the persistence file
-   * will actually be stored, except when the URL refers to a resource
-   * within the current GATE home directory in which case the relative path
-   * to the GATE home directory will be stored. If the property 
+   * will actually be stored, except when {@link #saveObjectToFile(obj,file,true,trueOrFalse} was
+   * used and there is one of the following cases:
+   * <ul>
+   * <li>when the URL refers to a resource
+   * within the current GATE home directory and the persistence file is not within the GATE home
+   * directory, in which case the relative path
+   * to the GATE home directory will be stored. 
+   * <li>Otherwise, if the persistence file is not within the GATE directory and if the property 
    * gate.user.resourceshome is set to a directory path and the URL refers 
    * to a resource inside this directory, the relative path to this directory
-   * will be stored. If resources are stored relative to gate home or
+   * will be stored.
+   * <ul>
+   * If resources are stored relative to gate home or
    * resources home, a warning will also be logged.
+   * <p>
+   * The real path as returned by getCanonicalPath() is used to check if the resource is 
+   * within a special directory (e.g. GATE HOME). Once we know this, and the resource is in
+   * a special directory, the canonical paths are used to generate the relative path.
+   * If we are not inside a special directory, then the non-canonical path names will be used, so
+   * that any symbolic links are NOT getting resolved, which is usually what you want. 
+   * The non-canonical path names will get normalized to remove things like "../dir" and the 
+   * result of the normalization is checked using getCanonicalPath() to see if it refers to 
+   * the same location as the non-normalized one (it could be different if the .. follows a
+   * symbolic link, for example). If it is the same, then the normalized version is used, otherwise
+   * the original version is used. 
+   * 
    */
   public static class URLHolder implements Persistence {
     /**
      * Populates this Persistence with the data that needs to be stored
      * from the original source object.
      */
+    static final Logger logger = Logger.getLogger(URLHolder.class);
     @Override
     public void extractDataFromSource(Object source)
             throws PersistenceException {
-      final Logger logger = Logger.getLogger(URLHolder.class);
       try {
         URL url = (URL)source;
         if(url.getProtocol().equals("file")) {
-          try {
+            // url is what we want to convert to something that is relative to $relpath$, 
+            // $resourceshome$ or $gatehome$ 
+            
+            // The file in which the URL should get persisted, the directory this file is in
+            // is the location to which we want to make the URL relative, unless we want to 
+            // use $gatehome$ or $resourceshome$
+            File outFile = currentPersistenceFile();
+            File outFileReal = getCanonicalFileIfPossible(outFile);
+            // Note: the outDir will be correct if the application file itself is not a link
+            // If the application file is a link than its parent is the parent of the real
+            // path. 
+            File outDir = outFile.getParentFile(); 
+            File outDirReal = getCanonicalFileIfPossible(outDir);
+            File outDirOfReal = getCanonicalFileIfPossible(outFileReal.getParentFile());
+            
+            File urlFile = Files.fileFromURL(url);
+            File urlFileReal = getCanonicalFileIfPossible(urlFile);
+            
+            logger.debug("Trying to persist "+url+" for "+outFile);
+            logger.debug("urlFile="+urlFile+", urlFileReal"+urlFileReal);
+            logger.debug("outDir="+outDir+", outDirReal"+outDirReal);
+            
+            // by default, use just the relative path
             String pathMarker = relativePathMarker;
             
-            File gateHomePath = getGateHomePath();
-            File resourceshomeDir = getResourceshomePath();
-            
-            URL urlPersistenceFilePath = 
-              getCanonicalFileIfPossible(currentPersistenceFile()).toURI().toURL();
-            File urlPath = 
-              getCanonicalFileIfPossible(Files.fileFromURL(url));
-            url = urlPath.toURI().toURL();
+              // - this returns the canonical path to GATE_HOME
+            File gateHomePathReal = getGateHomePath();
 
-            // If the persistence file does NOT reside in the GATE home
-            // tree and if the URL references something in the GATE home
-            // tree, use $gatehome$ instead of $relpath$
-            // Also if the system property for $resourceshome$ is set and the
-            // persistence file does not reside in the projecthome tree but
-            // the URL references something in the projecthome tree, use
-            // $resourceshome$ instead of $relpath$
-            // $resourceshome$ is only used when $gatehome$ would also be used,
-            // but there is a separate warning which is shown once something
-            // is stored relative to $resourceshome$
-            // If URL can be made relative to both gatehome and projecthome,
-            // gatehome is preferred.
-            if(currentUseGateHome() || currentWarnAboutGateHome()) {              
-              if (!isContainedWithin(currentPersistenceFile(), gateHomePath) &&
-                  isContainedWithin(urlPath, gateHomePath)) {
+            // get the canonical path of the resources home directory, if set, otherwise null
+            File resourceshomeDirReal = getResourceshomePath();
+            
+            // Only if we actually *want* to consider GATE_HOME and other special directories,
+            // do all of this ...
+            // Note: the semantics of this has slightly changed to what it was before: we only
+            // do this is the use gatehome flag is set, not if it is not set but the warn flag
+            // is set (previsouly, the warn flag alone was sufficient too).
+            if(currentUseGateHome()) {
+              // First of all, check if we want to use GATE_HOME instead: this happens 
+              // if the real location of the url is inside the real location of GATE_HOME            
+              // and the location of the outfile is outside of GATE_HOME
+
+              if (!isContainedWithin(outFileReal, gateHomePathReal) &&
+                  isContainedWithin(urlFileReal, gateHomePathReal)) {
                 logger.debug("Setting path marker to "+gatehomePathMarker);
                 if(currentWarnAboutGateHome()) {
                   if(!currentHaveWarnedAboutGateHome().getValue()) {
@@ -221,9 +265,12 @@ public class PersistenceManager {
                 if(currentUseGateHome()) {
                   pathMarker = gatehomePathMarker;
                 }
-              } else if(resourceshomeDir != null &&
-                  !isContainedWithin(currentPersistenceFile(), resourceshomeDir) &&
-                  isContainedWithin(urlPath,resourceshomeDir)) {
+              } else 
+                // Otherwise, do the same check for the resources home path, but only if it
+                // is actuallys set
+                if(resourceshomeDirReal != null &&
+                  !isContainedWithin(outFileReal, resourceshomeDirReal) &&
+                  isContainedWithin(urlFileReal, resourceshomeDirReal)) {
                  if(currentWarnAboutGateHome()) {
                   if(!currentHaveWarnedAboutResourceshome().getValue()) {
                     logger.warn(
@@ -241,24 +288,57 @@ public class PersistenceManager {
                
               }
             }
+                        
             if(pathMarker.equals(relativePathMarker)) {
-              urlString = pathMarker
-                 + getRelativePath(urlPersistenceFilePath, url);
+              // In theory we should just relativize here using the original paths, without
+              // following any symbolic links. We do not want to follow symbolic links because 
+              // somebody may want to use a symbolic link to a completely different location
+              // to include some resources into the project directory that contains the 
+              // pipeline (and the link to the resource).
+              // However, if the project directory itself is within a linked location, then 
+              // GATE will sometimes use the linked and sometimes the non-linked path 
+              // (for some reason it uses the non-linked path in the plugin manager but it uses
+              // the linked path when the application file is choosen). This means that 
+              // in those cases, there would be a large number of unwanted ../../../../some/dir/to/get/back
+              // If we solve this by using the canonical paths, it will do the wrong thing for 
+              // links to resources. So we choose to make a compromise: if we can create a relative
+              // path that does not generate any ../ at the beginning of the relative part, then
+              // we use that, otherwise we use the real paths 
+              
+              String relPath = getRelativeFilePathString(outDir, urlFile);
+              logger.debug("First attempt got "+relPath);
+              if(relPath.startsWith("../")) {
+                // if we want to actually use the real path, we have to be careful which is the 
+                // real parent of the out file: if outFile is a symbolic link then it is 
+                // outDirOfReal otherwise it is outDirReal
+                logger.debug("upslength is "+upsLength(relPath));
+                String tmpPath = relPath;
+                if(java.nio.file.Files.isSymbolicLink(outFile.toPath())) {
+                  tmpPath = getRelativeFilePathString(outDirOfReal, urlFileReal);
+                  logger.debug("trying outDirOfReal "+tmpPath);
+                  logger.debug("upslength is "+upsLength(tmpPath));
+                } else {
+                  tmpPath = getRelativeFilePathString(outDirReal, urlFileReal);                                  
+                  logger.debug("trying outDirReal "+tmpPath);
+                  logger.debug("upslength is "+upsLength(tmpPath));
+                }
+                if(upsLength(tmpPath) < upsLength(relPath)) {
+                  relPath = tmpPath;
+                }
+                logger.debug("Using tmpPath "+relPath);
+              }
+              // if we still get something that starts with ../ then our only remaining option is
+              // to find if a parent 
+              urlString = pathMarker + relPath;
             } else if(pathMarker.equals(gatehomePathMarker)) {
-              urlString = pathMarker
-                 + getRelativePath(gateHomePath.toURI().toURL(), url);
+              urlString = pathMarker + getRelativeFilePathString(gateHomePathReal, urlFileReal);
             } else if(pathMarker.equals(resourceshomePathMarker)) {
-              urlString = pathMarker
-                 + getRelativePath(getResourceshomePath().toURI().toURL(), url);
+              urlString = pathMarker + getRelativeFilePathString(resourceshomeDirReal, urlFileReal);
             } else {
               // this should really never happen!
               throw new GateRuntimeException("Unexpected error when persisting URL "+url);
             }
-          }
-          catch(MalformedURLException mue) {
-            urlString = ((URL)source).toExternalForm();
-          }
-        }
+        } // if protocol is file:
         else {
           urlString = ((URL)source).toExternalForm();
         }
@@ -273,13 +353,17 @@ public class PersistenceManager {
      * supposed to be a copy for the original object used as source for
      * data extraction.
      */
+    // TODO: this always uses the one-argument constructor for URL. This may not always
+    // do the right thing though, we should test this (e.g. when the URL contains %-encoded parts)
     @Override
     public Object createObject() throws PersistenceException {
       try {
         if(urlString.startsWith(relativePathMarker)) {
           URL context = currentPersistenceURL();
-          return new URL(context, urlString.substring(relativePathMarker
+          URL ret =  new URL(context, urlString.substring(relativePathMarker
                   .length()));
+          logger.debug("CurrentPresistenceURL is "+context+" created="+ret);
+          return ret;
         } else if(urlString.startsWith(gatehomePathMarker)) {
           URL gatehome =  getCanonicalFileIfPossible(getGateHomePath()).toURI().toURL();
           return new URL(gatehome, urlString.substring(gatehomePathMarker.length()));
@@ -322,7 +406,11 @@ public class PersistenceManager {
       }
     }
     
-    public File getGateHomePath() {
+    String urlString;
+    
+    //******** Helper methods just used inside the URLHolder class
+   
+    private File getGateHomePath() {
       if(gatehomePath != null) {
         return gatehomePath;
       } else {
@@ -331,7 +419,7 @@ public class PersistenceManager {
       }
     }
     
-    public File getResourceshomePath() {
+    private File getResourceshomePath() {
       if(haveResourceshomePath == null) {
         String resourceshomeString = System.getProperty(resourceshomePropertyName);
         if(resourceshomeString == null) {
@@ -350,7 +438,7 @@ public class PersistenceManager {
     }
 
 
-    public File getCanonicalFileIfPossible(File file) {
+    private File getCanonicalFileIfPossible(File file) {
       File tmp = file;
       try {
         tmp = tmp.getCanonicalFile();
@@ -360,8 +448,45 @@ public class PersistenceManager {
       return tmp;
     }
     
-    String urlString;
+    /** 
+     * Creates the string that needs to get appended to the path of dir to obtain the path
+     * to file. 
+     * This does NOT follow any symbolic links - if true locations should be used, they 
+     * have to get passed to this method. This will make an attempt to access the file system
+     * to see of normalization can be done without changing the meaning of the path, but if 
+     * accessing the file system fails, this method will silently use the non-normalized 
+     * path instead.
+     * @param dir
+     * @param file
+     * @return 
+     */
+    private String getRelativeFilePathString(File dir, File file) {
+      Path dirPath = dir.toPath();
+      Path filePath = file.toPath();
+      try {
+        // create a normalized version of the paths, but without following symbolic links
+        dirPath = dirPath.toRealPath(LinkOption.NOFOLLOW_LINKS);
+      } catch (IOException ex) {
+        // ignore and use original 
+      }
+      try {
+        filePath = filePath.toRealPath(LinkOption.NOFOLLOW_LINKS);
+      } catch (IOException ex) {
+        // ignore and use original
+      }
+      return dirPath.relativize(filePath).toString();
+    }
 
+    private int upsLength(String path) {
+      Matcher m = goUpPattern.matcher(path);
+      if(m.matches()) {
+        return m.group(1).length();
+      } else {
+        return 0;
+      }
+    }
+    
+    
     /**
      * This string will be used to start the serialisation of URL that
      * represent relative paths.
@@ -384,7 +509,11 @@ public class PersistenceManager {
     
     static final long serialVersionUID = 7943459208429026229L;
     
-  }
+    private static final Pattern goUpPattern = 
+            Pattern.compile(
+                    "^((?:\\.\\."+Pattern.quote(FileSystems.getDefault().getSeparator())+")+).*");
+    
+  } // class URLHolder 
 
   public static class ClassComparator implements Comparator<Class<?>> {
     /**
@@ -584,6 +713,17 @@ public class PersistenceManager {
    * This method can be used to determine if a specified file (or directory) is
    * contained within a given directory.
    * 
+   * This will check if the real location of file (with all symbolic links removed) is within
+   * the real location of directory with all symbolic links removed. If part of the file path
+   * is within the directory but eventually a symbolic link leads out of that directory, the
+   * file is considered to NOT be inside the directory. 
+   * <p>
+   * NOTE: this accesses the file system to find the real locations for file and directory. 
+   * However, if there is a problem accessing the file system, the method will fall back to 
+   * using the literal path names for checking and NOT produce an error. This is done so that
+   * any saving operation during which this method is invoked is not aborted and proceeds, 
+   * creating a file that may be correct apart from one or more serialized URLs. 
+   * 
    * @param file
    *          is this file contained within
    * @param directory
@@ -591,15 +731,45 @@ public class PersistenceManager {
    * @return true if the file is contained within the directory, false otherwise
    */
   public static boolean isContainedWithin(File file, File directory) {
-    
-    File parent = file.getParentFile();
-    while (parent != null)
-    {
-      if (parent.equals(directory)) return true;
-      parent = parent.getParentFile();
+    // JP: new experimental solution using java.nio 
+    Path dir = directory.toPath();
+    try {
+      dir = dir.toRealPath();
+    } catch (IOException ex) {
+      // ignore and use the original
     }
+    Path filePath = file.toPath();
+    try {
+      filePath = filePath.toRealPath();
+    } catch (IOException ex) {
+      // ignore and use the original
+    }
+    return filePath.startsWith(dir);
     
-    return false;
+    
+      // JP: Old solution using java.io and walking the tree and getCanonicalFile
+      /*
+      File dir = directory;
+      try {
+      dir = directory.getCanonicalFile();
+      } catch (IOException ex) {
+      // ignore
+      }
+      if(!dir.isDirectory()) { return false; }
+      
+      File parent = file.getParentFile();
+      while (parent != null)
+      {
+      try {
+      parent = parent.getCanonicalFile();
+      } catch (IOException ex) {
+      // ignore
+      }
+      if (parent.equals(dir)) return true;
+      parent = parent.getParentFile();
+      }
+      return false;
+      */
   }
   
    /**
@@ -701,11 +871,34 @@ public class PersistenceManager {
     }
   }
 
+  /**
+   * Save the given object to the file, without using $gatehome$.
+   * This is equivalent to  {@link #saveObjectToFile(obj,file,false,false}. 
+   * This method exists with this definition to stay backwards compatible with 
+   * code that was using this method before paths relative to $gatehome$ were supported. 
+   * @param obj
+   * @param file
+   * @throws PersistenceException
+   * @throws IOException 
+   */
   public static void saveObjectToFile(Object obj, File file)
     throws PersistenceException, IOException {
     saveObjectToFile(obj, file, false, false);
   }
 
+  /**
+   * Save the given object to the given file.
+   * 
+   * @param obj
+   * @param file
+   * @param usegatehome if true (recommended) use $gatehome$ and $resourceshome$ instead of 
+   * $relpath$ in any saved path URLs if the location of that URL is inside GATE home or 
+   * inside the resources home directory (if set). 
+   * @param warnaboutgatehome if true, issue a warning message when a saved URL uses $gatehome$
+   * or $resourceshome$. 
+   * @throws PersistenceException
+   * @throws IOException 
+   */
   public static void saveObjectToFile(Object obj, File file,
           boolean usegatehome, boolean warnaboutgatehome)
           throws PersistenceException, IOException {
@@ -745,7 +938,27 @@ public class PersistenceManager {
 
       // always write the list of creole URLs first
       List<URL> urlList = new ArrayList<URL>(Gate.getCreoleRegister().getDirectories());
-      Object persistentList = getPersistentRepresentation(urlList);
+      // go through all the URLs in the urlList and make sure that there are no duplicate
+      // file: entries
+      Set<String> realPaths = new HashSet<String>();
+      List<URL> cleanedList = new ArrayList<URL>();
+      for(URL url : urlList) {
+        if(url.getProtocol().equals("file:")) {
+          File dir = Files.fileFromURL(url);
+          try {
+            dir = dir.getCanonicalFile();
+          } catch(Exception ex) {
+            // ignore
+          }
+          if(!realPaths.contains(dir.getPath())) {
+            realPaths.add(dir.getPath());
+            cleanedList.add(url); // add the original URL, we just wanted dir to check if we already had it!
+          }
+        } else {
+          cleanedList.add(url);
+        }
+      }
+      Object persistentList = getPersistentRepresentation(cleanedList);
 
       Object persistentObject = getPersistentRepresentation(obj);
 
