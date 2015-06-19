@@ -162,13 +162,10 @@ public class XJFileChooser extends JFileChooser {
   @Override
   public void approveSelection() {
     if (resource != null && getSelectedFile() != null) {
-      try {
-        String filePath = getSelectedFile().getCanonicalPath();
-        locations.put(resource, filePath);
-        setLocations(locations);
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+      //String filePath = getSelectedFile().getCanonicalPath();
+      String filePath = getSelectedFile().getAbsolutePath();
+      locations.put(resource, filePath);
+      setLocations(locations);
     }
     super.approveSelection();
   }
