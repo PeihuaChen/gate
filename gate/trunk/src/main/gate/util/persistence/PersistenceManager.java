@@ -52,15 +52,22 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystems;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -80,14 +87,6 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
 import com.thoughtworks.xstream.io.xml.StaxReader;
 import com.thoughtworks.xstream.io.xml.XStream11NameCoder;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
-import java.nio.file.FileSystems;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This class provides utility methods for saving resources through
@@ -166,7 +165,7 @@ public class PersistenceManager {
    * convert them to strings for storage. 
    * In the case of
    * &quot;file:&quot; URLs the relative path to the persistence file
-   * will actually be stored, except when {@link #saveObjectToFile(obj,file,true,trueOrFalse} was
+   * will actually be stored, except when {@link #saveObjectToFile(Object,File,boolean,boolean)} was
    * used and there is one of the following cases:
    * <ul>
    * <li>when the URL refers to a resource
@@ -456,9 +455,9 @@ public class PersistenceManager {
      * to see of normalization can be done without changing the meaning of the path, but if 
      * accessing the file system fails, this method will silently use the non-normalized 
      * path instead.
-     * @param dir
-     * @param file
-     * @return 
+     * @param dir the directory starting from
+     * @param file the file we want to reference
+     * @return the path appended to dir to get to file
      */
     private String getRelativeFilePathString(File dir, File file) {
       Path dirPath = dir.toPath();
@@ -873,7 +872,7 @@ public class PersistenceManager {
 
   /**
    * Save the given object to the file, without using $gatehome$.
-   * This is equivalent to  {@link #saveObjectToFile(Object,File,boolean,boolean} with the
+   * This is equivalent to  {@link #saveObjectToFile(Object,File,boolean,boolean)} with the
    * third and fourth parameter set to false.
    * This method exists with this definition to stay backwards compatible with 
    * code that was using this method before paths relative to $gatehome$ were supported. 
@@ -1302,7 +1301,7 @@ public class PersistenceManager {
    * during a transaction in order to avoid creating two different
    * transient copies for the same persistent replacement. The keys used
    * are {@link ObjectHolder}s that hold persistent equivalents. The
-   * values are the transient values created by the persisten
+   * values are the transient values created by the persistence
    * equivalents.
    */
   private static ThreadLocal<LinkedList<Map<ObjectHolder,Object>>> existingTransientValues;
