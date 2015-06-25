@@ -21,7 +21,7 @@
 />
 <CreolePlugin
   url="https://raw.githubusercontent.com/GenevieveGorrell/gateplugin-LearningFramework/version_1_0/"
-  downloadURL="https://raw.githubusercontent.com/GenevieveGorrell/gateplugin-LearningFramework/version_1_0/LearningFramework-1.0.zip"
+  downloadURL="https://github.com/GenevieveGorrell/gateplugin-LearningFramework/releases/download/V1_0/LearningFramework-1.0.zip"
 />
 
 </UpdateSite>
