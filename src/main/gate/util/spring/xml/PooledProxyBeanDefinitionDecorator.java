@@ -130,7 +130,8 @@ public class PooledProxyBeanDefinitionDecorator implements
                 && !XMLConstants.XML_NS_URI.equals(att.getNamespaceURI())
                 && !XMLConstants.XMLNS_ATTRIBUTE.equals(att.getLocalName())
                 && !PROXY_TARGET_CLASS.equals(att.getLocalName())
-                && !INITIAL_SIZE.equals(att.getLocalName())) {
+                && !INITIAL_SIZE.equals(att.getLocalName())
+                && !TARGET_SOURCE_CLASS.equals(att.getLocalName())) {
           String propName =
                   Conventions.attributeNameToPropertyName(att.getLocalName());
           targetSourceDefinition.getPropertyValues().addPropertyValue(propName,
