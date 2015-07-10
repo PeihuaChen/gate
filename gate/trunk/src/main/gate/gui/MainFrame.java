@@ -4781,9 +4781,9 @@ public class MainFrame extends JFrame implements ProgressListener,
         if (keywords == null || keywords.trim().length() == 0) { return; }
       }
       try {
-      showHelpFrame("https://sourceforge.net/p/gate/mailman/search/" +
-      		"?mail_list=gate-users" +
-          "&q=" + java.net.URLEncoder.encode(keywords, "UTF-8"),
+      showHelpFrame("http://search.gmane.org/search.php" +
+          "?group=gmane.comp.ai.gate.general" +
+          "&query=" + java.net.URLEncoder.encode(keywords, "UTF-8"),
         "mailing list");
 
       } catch (UnsupportedEncodingException error) {
