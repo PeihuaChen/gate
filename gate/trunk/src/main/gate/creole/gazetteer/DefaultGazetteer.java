@@ -246,7 +246,7 @@ public class DefaultGazetteer extends AbstractGazetteer
     for(int i = 0; i< text.length(); i++) {
         currentChar = text.charAt(i);
         if ( Character.isSpaceChar(currentChar) || Character.isWhitespace(currentChar) ) currentChar = ' ';
-        if (!caseSensitive) Character.toUpperCase(currentChar);
+        if (!caseSensitive) currentChar = Character.toUpperCase(currentChar);
         nextState = currentState.next(currentChar);
         if(nextState == null) return;//nothing to remove
         currentState = nextState;
@@ -489,7 +489,7 @@ public class DefaultGazetteer extends AbstractGazetteer
     for(int i = 0; i< singleItem.length(); i++) {
         currentChar = singleItem.charAt(i);
         if ( Character.isSpaceChar(currentChar) || Character.isWhitespace(currentChar) ) currentChar = ' ';
-        if (!caseSensitive) Character.toUpperCase(currentChar);
+        if (!caseSensitive) currentChar = Character.toUpperCase(currentChar);
         nextState = currentState.next(currentChar);
         if(nextState == null) {
           return false;
