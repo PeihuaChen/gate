@@ -16,12 +16,19 @@
 
 package gate.creole.gazetteer;
 
+import gate.AnnotationSet;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.corpora.TestDocument;
+
+import java.io.File;
 import java.net.URL;
 
-import junit.framework.*;
-
-import gate.*;
-import gate.corpora.TestDocument;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 public class TestGazetteer extends TestCase {
 
@@ -87,6 +94,45 @@ public class TestGazetteer extends TestCase {
     Factory.deleteResource(gaz);
     Factory.deleteResource(doc);
   }
+  
+  /**
+   * Tests additions and deletions from the gazetteer in both case
+   * sensitive and case insensitive modes
+   */
+  public void testDynamicMethods() throws Exception {
+
+    
+    for (int i = 0 ; i < 2 ; ++i) {
+     
+      FeatureMap params = Factory.newFeatureMap();
+      params.put(DefaultGazetteer.DEF_GAZ_CASE_SENSITIVE_PARAMETER_NAME, i != 0);
+      
+      DefaultGazetteer gaz = (DefaultGazetteer) Factory.createResource(
+                            "gate.creole.gazetteer.DefaultGazetteer",params);
+            
+      Document doc = Factory.newDocument("RandomWord gazetteer tester");    
+      gaz.setDocument(doc);
+      
+      gaz.execute();    
+      assertEquals("Wrong number of lookup annotations in dynamic test 1/3", 0, doc.getAnnotations().get("Lookup").size());
+      doc.getAnnotations().clear();
+      
+      Lookup lookup = new Lookup("random.lst","random","word","en");    
+      gaz.add("RandomWord", lookup);
+      
+      gaz.execute();
+      assertEquals("Wrong number of lookup annotations in dynamic test 2/3", 1, doc.getAnnotations().get("Lookup").size());
+      doc.getAnnotations().clear();
+      
+      gaz.removeLookup("RandomWord", lookup);
+      gaz.execute();
+      assertEquals("Wrong number of lookup annotations in dynamic test 3/3", 0, doc.getAnnotations().get("Lookup").size());
+      
+      Factory.deleteResource(gaz);
+    
+    }
+    
+  }
 
   /** Test suite routine for the test runner */
   public static Test suite() {
@@ -96,9 +142,11 @@ public class TestGazetteer extends TestCase {
   public static void main(String[] args) {
     try{
       Gate.init();
+      Gate.getCreoleRegister().registerDirectories((new File(Gate.getPluginsHome(),"ANNIE")).toURI().toURL());
       TestGazetteer testGaz = new TestGazetteer("");
       testGaz.setUp();
       testGaz.testDefaultGazetteer();
+      testGaz.testDynamicMethods();
       testGaz.tearDown();
     } catch(Exception e) {
       e.printStackTrace();
