@@ -29,7 +29,7 @@ public class LanguageAnalyserDocumentProcessor implements DocumentProcessor {
   /**
    * The analyser used to process documents.
    */
-  private LanguageAnalyser analyser;
+  protected LanguageAnalyser analyser;
 
   /**
    * Corpus used to contain the document being processed.
@@ -44,6 +44,10 @@ public class LanguageAnalyserDocumentProcessor implements DocumentProcessor {
    */
   public void setAnalyser(LanguageAnalyser a) {
     this.analyser = a;
+  }
+
+  public LanguageAnalyser getAnalyser() {
+    return analyser;
   }
 
   @Override
