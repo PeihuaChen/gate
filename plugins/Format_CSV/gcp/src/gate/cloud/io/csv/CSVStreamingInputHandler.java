@@ -132,7 +132,7 @@ public class CSVStreamingInputHandler implements StreamingInputHandler {
 
     encoding = configData.get(PARAM_ENCODING);
     separatorChar = configData.get(PARAM_SEPARATOR_CHARACTER).charAt(0);
-    quoteChar = configData.get(PARAM_SEPARATOR_CHARACTER).charAt(0);
+    quoteChar = configData.get(PARAM_QUOTE_CHARACTER).charAt(0);
     colLabels = Boolean.parseBoolean(configData.get(PARAM_LABELLED_COLUMNS));
     column = Integer.parseInt(configData.get(PARAM_COLUMN));
   }
@@ -202,7 +202,7 @@ public class CSVStreamingInputHandler implements StreamingInputHandler {
 
     features = (colLabels ? csvReader.readNext() : null);
 
-    idCounter = 0;
+    idCounter = (colLabels ? 1 : 0);
 
   }
 
@@ -238,7 +238,7 @@ public class CSVStreamingInputHandler implements StreamingInputHandler {
       // skip the line if the column with the content is empty
       if(nextLine[column].trim().equals("")) continue;
 
-      String id = srcFile.getName() + ":" + idCounter++;
+      String id = srcFile.getName() + "." + idCounter++;
 
       if(completedDocuments.contains(id)) continue;
 
