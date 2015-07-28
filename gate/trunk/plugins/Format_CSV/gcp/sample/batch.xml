@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<batch id="sample" xmlns="http://gate.ac.uk/ns/cloud/batch/1.0">
+	<application file="application.xgapp" />
+
+	<report file="report.xml" />
+
+	<input class="gate.cloud.io.csv.CSVStreamingInputHandler"
+ 		srcFile="input.csv"
+ 		encoding="UTF-8"
+ 		separator=","
+ 		quote='"'
+ 		column="1"
+ 		labelledColumns="false" />
+
+	<output
+		dir="output"
+		encoding="UTF-8"
+		fileExtension=".GATE.xml"
+		class="gate.cloud.io.file.GATEStandOffFileOutputHandler" />
+</batch>
