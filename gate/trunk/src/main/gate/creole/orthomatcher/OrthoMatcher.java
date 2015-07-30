@@ -542,7 +542,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
       // TODO:  The below results in a assigning the unknown's to the last annotation that it matches in a document.
       // It would probably be better to first start with things which precede the current unknown and then do
       // annotations after
-      matchWithPrevious(unknown, unknownString,sortedAnnotationsForAType,sortedAnnotationsForAType.size() - 1);
+      matchWithPrevious(unknown, unknownString,sortedAnnotationsForAType,sortedAnnotationsForAType.size());
 
     } //while though unknowns
 
