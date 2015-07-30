@@ -94,7 +94,12 @@ Priority: 1000
 
 
 Rule:    GazPerson
-Priority: 50
+Priority: 100
+(
+ {Token.category == DT}|
+ {Token.category == PRP}|
+ {Token.category == RB}
+)?
 (
  {Lookup.majorType == person_full}
 )
