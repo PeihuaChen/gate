@@ -60,7 +60,9 @@ GATE papers
 
 - K. Bontcheva, L. Derczynski, I. Roberts. Crowdsourcing Named Entity Recognition and Entity Linking Corpora. In Nancy Ide and James Pustejovsky, eds.: The Handbook of Linguistic Annotation.
 
-- L. Derczynski, J. Strötgen, R. Campos, O. Alonso. Time and Information Retrieval: Introduction to the Special Issue. In Information Processing and Management (IPM), 51.
+- L. Derczynski, K. Bontcheva. 2015. Efficient named entity annotation through pre-empting. In Proceedings of the International Conference on Recent Advances in Natural Language Processing (RANLP 2015).
+
+- L. Derczynski. Automatically Ordering Events and Times in Text. To appear as a monograph in Studies in Computational Intelligence. Springer.
 
 %2* 2015
 
@@ -86,6 +88,14 @@ GATE papers
 - H. Tissot, A. Roberts, L. Derczynski, G. Gorrell, M. Didonet del Fabro.  Analysis of Temporal Expressions Annotated in Clinical Notes. In Proceedings of the 11th Joint ACL-ISO Workshop on Interoperable Semantic Annotation (ISA-11). %(http://derczynski.com/sheffield/papers/ISA-11.pdf, PDF)
 
 - M. Leginus, L. Derczynski, P. Dolog. Enhanced Information Access to Social Streams through Word Clouds with Entity Grouping. In Proceedings of the 11th International Conference on Web Information Systems and Technologies (WEBIST). %(http://derczynski.com/sheffield/papers/webist2015submission.pdf, PDF)
+
+- L. Derczynski, J. Strötgen, R. Campos, O. Alonso. Time and Information Retrieval: Introduction to the Special Issue. In Information Processing and Management (IPM), 51.
+
+- L. Derczynski, I. Augenstein, K. Bontcheva. 2015. USFD: Twitter NER with Drift Compensation and Linked Data. In Proceedings of the Workshop on Noisy User-generated Text (W-NUT).
+
+- L. Derczynski, S. Chester, K. S. Bøgh. 2015. Tune Your Brown Clustering, Please. In Proceedings of the International Conference on Recent Advances in Natural Language Processing (RANLP 2015). %(http://www.derczynski.com/sheffield/brown-tuning/, Why you must tune Brown clustering and how)
+
+- L. Derczynski, R. Gaizauskas. 2015. Temporal Relation Classification using a Model of Tense and Aspect. In  Proceedings of the International Conference on Recent Advances in Natural Language Processing (RANLP 2015).
 
 
 %2* 2014
