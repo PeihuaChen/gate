@@ -15,10 +15,7 @@
 
 package gate.gui;
 
-import gate.Factory;
-import gate.FeatureMap;
-import gate.Gate;
-import gate.Resource;
+import gate.*;
 import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
 import gate.util.Err;
@@ -28,6 +25,7 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -77,6 +75,7 @@ public class NewResourceDialog extends JDialog {
     nameField.setMaximumSize(
         new Dimension(Integer.MAX_VALUE, nameField.getPreferredSize().height));
     nameField.setRequestFocusEnabled(true);
+    nameField.selectAll();
     nameField.setVerifyInputWhenFocusTarget(false);
     nameBox.add(nameField);
     nameField.setToolTipText("Enter a name for the resource");
@@ -178,7 +177,7 @@ public class NewResourceDialog extends JDialog {
   public synchronized boolean show(ResourceData rData, String aTitle) {
     this.resourceData = rData;
     if (aTitle != null) setTitle(aTitle);
-    nameField.setText("");
+
     parametersEditor.init(null,
                           rData.getParameterList().getInitimeParameters());
     pack();
@@ -212,7 +211,18 @@ public class NewResourceDialog extends JDialog {
   public synchronized void show(ResourceData rData) {
     if(rData != null) {
       this.resourceData = rData;
-      nameField.setText("");
+
+      String name = "";
+      try {
+        // Only try to generate a name for a PR - other types should be named after what they contain, really!
+        if (ProcessingResource.class.isAssignableFrom(rData.getResourceClass())) {
+          name = rData.getName() + " " + Gate.genSym();
+        }
+      } catch (ClassNotFoundException e){
+        Err.getPrintWriter().println("Couldn't load input resource class when showing dialogue.");
+      }
+      nameField.setText(name);
+
       parametersEditor.init(null, rData,
                             rData.getParameterList().getInitimeParameters());
       pack();

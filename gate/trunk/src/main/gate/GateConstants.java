@@ -50,7 +50,10 @@ public interface GateConstants {
 
   /** The key for the main window height */
   public static final String MAIN_FRAME_HEIGHT = "Main_frame_height";
-  
+
+  /** The toolbar text option name */
+  public static final String TOOLBAR_TEXT = "Toolbar_Text";
+
   /** The key for determining if the main window should be maximized **/
   public static final String MAIN_FRAME_MAXIMIZED = "Main_frame_maximized";
 

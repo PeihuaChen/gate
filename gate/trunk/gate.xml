@@ -7,7 +7,7 @@
 
 <GATE>
 
-<GATECONFIG Save_options_on_exit="true" Save_session_on_exit="true"/>
+<GATECONFIG Save_options_on_exit="true" Save_session_on_exit="true" Toolbar_Text="true" />
 
 
 </GATE>
