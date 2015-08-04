@@ -277,6 +277,8 @@ public class NameBearerHandle implements Handle, StatusListener,
       // actions for PRs (but not Controllers)
       staticPopupItems.add(null);
       staticPopupItems.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
+      staticPopupItems.add(new XJMenuItem(new ApplicationWithPRAction(), sListenerProxy));
+
     }
     else if(target instanceof LanguageResource) {
       // Language Resources
@@ -1065,6 +1067,48 @@ public class NameBearerHandle implements Handle, StatusListener,
         
     }
   }// class SaveToAction extends AbstractAction
+
+  class ApplicationWithPRAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
+
+    ApplicationWithPRAction() {
+      super("Create Application");
+      putValue(SHORT_DESCRIPTION, "Creates a corpus pipeline application with the given PR");
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+          if(!(target instanceof ProcessingResource)) return;
+          if(target instanceof Controller) return;
+
+          try {
+            String prName = target.getName();
+            ConditionalSerialAnalyserController newController =
+                    (ConditionalSerialAnalyserController)Factory
+                            .createResource("gate.creole.ConditionalSerialAnalyserController");
+
+            ProcessingResource pr = (ProcessingResource) target;
+            newController.add(pr);
+
+            newController.setName(pr.getName());
+          } catch (ResourceInstantiationException e) {
+            e.printStackTrace();
+          } catch (ClassCastException e) {
+            e.printStackTrace();
+            return; // Not a processing resource
+          }
+        }// public void run()
+    };
+    Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+            runnable, "DefaultResourceHandle1");
+    thread.setPriority(Thread.MIN_PRIORITY);
+    thread.start();
+  }// public void actionPerformed(ActionEvent e)
+
+}// class ApplicationWithPRAction
 
   class ReloadAction extends AbstractAction {
     private static final long serialVersionUID = 1L;

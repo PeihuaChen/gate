@@ -544,11 +544,11 @@ public class MainFrame extends JFrame implements ProgressListener,
         height, maxDimensions.height)));
     if (Gate.getUserConfig().getBoolean(GateConstants.MAIN_FRAME_MAXIMIZED))
       setExtendedState(JFrame.MAXIMIZED_BOTH);
-    
+
     setIconImages(Arrays.asList(new Image[]{new GATEVersionIcon(64, 64).getImage(),
         new GATEVersionIcon(48, 48).getImage(), new GATEVersionIcon(32, 32).getImage(),
         new GATEIcon(22, 22).getImage(), new GATEIcon(16, 16).getImage()}));
-    
+
     resourcesTree = new ResourcesTree();
     resourcesTree.setModel(resourcesTreeModel);
     resourcesTree.setRowHeight(0);
@@ -654,7 +654,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     // Create a new logArea and redirect the Out and Err output to it.
     logArea = new LogArea();
-    
+
     // Out has been redirected to the logArea
 
     Out.prln("GATE " + Main.version + " build " + Main.build + " started at "
@@ -881,9 +881,9 @@ public class MainFrame extends JFrame implements ProgressListener,
       // The log4j-over-slf4j bridge does not include org.apache.log4j.Appender, so
       // if the class is not present we assume the lack of a log4j jar in the classpath
       // and do not populate the menu.
-      Class.forName("org.apache.log4j.Appender"); 
-  
-    
+      Class.forName("org.apache.log4j.Appender");
+
+
       final JMenuItem reportClearMenuItem = new XJMenuItem(
         new AbstractAction("Clear Profiling History") {
         { putValue(SHORT_DESCRIPTION,
@@ -907,11 +907,11 @@ public class MainFrame extends JFrame implements ProgressListener,
         new AbstractAction("Start Profiling Applications") {
         { putValue(SHORT_DESCRIPTION,
           "Toggles the profiling of processing resources"); }
-  
+
         // stores the value held by the benchmarking switch before we started
         // this profiling run.
         boolean benchmarkWasEnabled;
-  
+
         @Override
         public void actionPerformed(ActionEvent evt) {
           if (getValue(NAME).equals("Start Profiling Applications")) {
@@ -955,7 +955,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
       }, this));
       reportMenu.addSeparator();
-  
+
       final JCheckBoxMenuItem reportZeroTimesCheckBox = new JCheckBoxMenuItem();
       reportZeroTimesCheckBox.setAction(
         new AbstractAction("Report Zero Time Entries") {
@@ -1016,7 +1016,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       reportMenu.add(reportSortTime);
       reportMenu.add(reportSortExecution);
       reportMenu.addSeparator();
-  
+
       reportMenu.add(new XJMenuItem(
         new AbstractAction("Report on Documents Processed") {
           { putValue(SHORT_DESCRIPTION, "Report most time consuming documents"); }
@@ -1107,9 +1107,9 @@ public class MainFrame extends JFrame implements ProgressListener,
       new JCheckBoxMenuItem(new VerboseModeCorpusEvalToolAction());
     corpusEvalMenu.add(verboseModeItem);
 
-    toolsMenu.staticItemsAdded();    
+    toolsMenu.staticItemsAdded();
     menuBar.add(toolsMenu);
-    
+
     JMenu helpMenu = new XJMenu("Help", null, MainFrame.this);
     helpMenu.setMnemonic(KeyEvent.VK_H);
     helpMenu.add(new XJMenuItem(new HelpUserGuideAction(), this));
@@ -1186,11 +1186,13 @@ public class MainFrame extends JFrame implements ProgressListener,
     guiRoots.add(dssPopup);
 
     // TOOLBAR
+    boolean showToolbarText = Gate.getUserConfig().getBoolean(GateConstants.TOOLBAR_TEXT);
+
     toolbar = new JToolBar(JToolBar.HORIZONTAL);
     toolbar.setFloatable(false);
     JButton button = new JButton(new LoadResourceFromFileAction());
     button.setToolTipText(button.getText());
-    button.setText("");
+    button.setText(showToolbarText ? "Load Application" : "");
     toolbar.add(button);
     toolbar.addSeparator();
 
@@ -1203,24 +1205,31 @@ public class MainFrame extends JFrame implements ProgressListener,
     JMenuButton menuButton = new JMenuButton(annieMenu);
     menuButton.setIcon(getIcon("annie-application"));
     menuButton.setToolTipText("Load ANNIE System");
+    menuButton.setText(showToolbarText ? "Load ANNIE" : "");
+
     toolbar.add(menuButton);
     toolbar.addSeparator();
 
     LiveMenu tbNewLRMenu = new LiveMenu(LiveMenu.LR);
     menuButton = new JMenuButton(tbNewLRMenu);
     menuButton.setToolTipText("New Language Resource");
+    menuButton.setText(showToolbarText ? "New LR" : "");
     menuButton.setIcon(getIcon("lrs"));
     toolbar.add(menuButton);
 
     LiveMenu tbNewPRMenu = new LiveMenu(LiveMenu.PR);
     menuButton = new JMenuButton(tbNewPRMenu);
     menuButton.setToolTipText("New Processing Resource");
+    menuButton.setText(showToolbarText ? "New PR" : "");
+
     menuButton.setIcon(getIcon("prs"));
     toolbar.add(menuButton);
 
     LiveMenu tbNewAppMenu = new LiveMenu(LiveMenu.APP);
     menuButton = new JMenuButton(tbNewAppMenu);
-    menuButton.setToolTipText("New Application");
+    menuButton.setToolTipText("New App");
+    menuButton.setText(showToolbarText ? "New Application" : "");
+
     menuButton.setIcon(getIcon("applications"));
     toolbar.add(menuButton);
     toolbar.addSeparator();
@@ -1231,17 +1240,19 @@ public class MainFrame extends JFrame implements ProgressListener,
     menuButton = new JMenuButton(tbDsMenu);
     menuButton.setToolTipText("Datastores");
     menuButton.setIcon(getIcon("datastores"));
+    menuButton.setText(showToolbarText ? "Manage Datastores" : "");
+
     toolbar.add(menuButton);
 
     toolbar.addSeparator();
     button = new JButton(new ManagePluginsAction());
     button.setToolTipText(button.getText());
-    button.setText("");
+    button.setText(showToolbarText ? "Manage Plugins" : "");
     toolbar.add(button);
     toolbar.addSeparator();
     button = new JButton(new NewAnnotDiffAction());
     button.setToolTipText(button.getText());
-    button.setText("");
+    button.setText(showToolbarText ? "Annotation Diff" : "");
     toolbar.add(button);
     toolbar.add(Box.createHorizontalGlue());
 
@@ -1479,6 +1490,14 @@ public class MainFrame extends JFrame implements ProgressListener,
     inputMap.put(KeyStroke.getKeyStroke("control H"), "Hide");
     inputMap.put(KeyStroke.getKeyStroke("control shift H"), "Hide all");
     inputMap.put(KeyStroke.getKeyStroke("control S"), "Save As XML");
+
+    // OSX friendly commands
+    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_W,
+            Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), "Close resource");
+    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_W,
+            InputEvent.SHIFT_DOWN_MASK | Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), "Close recursively");
+
+
 
     // add the support of the context menu key in tables and trees
     // TODO: remove when Swing will take care of the context menu key
@@ -3505,6 +3524,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     fileChooser.setDialogTitle("Select the datastore directory");
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
     fileChooser.setResource("gate.DataStore.data");
+
     if(fileChooser.showOpenDialog(MainFrame.this)
       == JFileChooser.APPROVE_OPTION) {
       try {
@@ -3631,6 +3651,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(SHORT_DESCRIPTION,
         "Restores a previously saved application from a file");
       putValue(SMALL_ICON, getIcon("open-application"));
+      putValue(NAME, "Restore Application");
     }
 
     @Override
