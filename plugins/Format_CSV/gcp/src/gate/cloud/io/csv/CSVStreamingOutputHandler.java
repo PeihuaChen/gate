@@ -1,6 +1,7 @@
 package gate.cloud.io.csv;
 
 import static gate.cloud.io.IOConstants.PARAM_ENCODING;
+import static gate.cloud.io.IOConstants.PARAM_FILE_EXTENSION;
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Document;
@@ -45,6 +46,10 @@ public class CSVStreamingOutputHandler extends JSONStreamingOutputHandler {
   protected void configImpl(Map<String, String> configData) throws IOException,
           GateException {
 
+    if(!configData.containsKey(PARAM_FILE_EXTENSION)) {
+      configData.put(PARAM_FILE_EXTENSION, ".csv");
+    }
+    
     super.configImpl(configData);
     
     encoding = configData.get(PARAM_ENCODING);
