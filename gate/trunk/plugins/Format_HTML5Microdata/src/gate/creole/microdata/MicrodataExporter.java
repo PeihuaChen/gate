@@ -113,6 +113,8 @@ public class MicrodataExporter extends DocumentExporter {
       for(Integer id : created) {
         originalMarkups.remove(originalMarkups.get(id));
       }
-    }    
+    }
+    
+    pout.flush();
   }
 }
