@@ -24,9 +24,9 @@
 		the author doc feature (if it starts with a . it's a doc feature),
 		the document content under the first Token annotation, and the
 		category feature of the first Token annotation. You could also specify
-		an annotationSetName and/or an annotationType. If you specify the later
-		then you get one row per annotation within the document. This is very
-		similar to how the Configurable Exporter in the Tools plugin works.
+		annotationType separately in order to get one row per annotation 
+		within the document. This is very similar to how the Configurable 
+		Exporter in the Tools plugin works.
 	-->
 	<output
 		dir="output"
@@ -34,6 +34,7 @@
 		separator=","
  		quote='"'
  		columns=".author,Token,Token.category"
+		annotationSetName=""
 		fileExtension=".csv"
 		class="gate.cloud.io.csv.CSVStreamingOutputHandler" />
 
