@@ -60,6 +60,9 @@ public class CSVStreamingOutputHandler extends JSONStreamingOutputHandler {
     
     annotationSetName = configData.get(PARAM_ANNOTATION_SET_NAME);
     annotationType = configData.get(PARAM_ANNOTATION_TYPE);
+    
+    if (annotationType != null && annotationType.trim().equals(""))
+      annotationType = null;
   }
   
   @Override
