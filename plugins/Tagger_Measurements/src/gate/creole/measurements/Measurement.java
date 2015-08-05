@@ -160,6 +160,8 @@ public class Measurement {
 
     Parser psr = new Parser(lex, parser);
 
+    System.out.println("created parser");
+    
     // this may thrown an exception because of the space change.
     // i.e. it throws an exception when it parses 100 m m as the last m is a
     // unit but wasn't expected whilst it parses 10 m blah OK and returns 100 m
@@ -168,6 +170,8 @@ public class Measurement {
     // clever if somewhere in the parser or lexer to handle this
     Parser.Symbol result = psr.unitexpr();
 
+    System.out.println("got result");
+    
     if(result == null)
       throw new Parser.Exception("string '" + s + "' is not a unit");
 
@@ -259,9 +263,12 @@ public class Measurement {
           MeasurementsParser parser) {
     try {
       Measurement v = parse(unit, index, parser);
+      System.out.println("parsed");
       v.factor = amount;
       v.completereduce();
+      System.out.println("done reduce");
       DefinedFunction func = parser.functions.get(v.getNormalizedUnit());
+      System.out.println("got func");
       if(func != null) {
         Measurement fv = new Measurement(parser);
         fv.factor = amount;
@@ -545,7 +552,10 @@ public class Measurement {
       boolean botchanged = reduceproduct(true);
       if(!topchanged && !botchanged) break;
     }
+    
+    System.out.println("out of loop");
     cancel();
+    System.out.println("about to return");
   }
 
   /**

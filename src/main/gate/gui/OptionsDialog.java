@@ -31,10 +31,28 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.LookAndFeel;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
-
-
 
 /**
  * The options dialog for Gate.
@@ -72,9 +90,7 @@ public class OptionsDialog extends JDialog {
     //the LNF combo
     List<LNFData> supportedLNFs = new ArrayList<LNFData>();
     LNFData currentLNF = null;
-
     UIManager.LookAndFeelInfo[] lnfs = UIManager.getInstalledLookAndFeels();
-
     for (UIManager.LookAndFeelInfo lnf : lnfs) {
       try {
         Class<?> lnfClass = Class.forName(lnf.getClassName());
@@ -90,13 +106,10 @@ public class OptionsDialog extends JDialog {
         e.printStackTrace();
       }
     }
-
     lnfCombo = new JComboBox<LNFData>(supportedLNFs.toArray(new LNFData[supportedLNFs.size()]));
     lnfCombo.setSelectedItem(currentLNF);
     lnfCombo.setToolTipText("Be aware that only 'Metal' is fully tested.");
 
-    showToolBarTextChk = new JCheckBox("Show text in GATE toolbar",
-            userConfig.getBoolean(GateConstants.TOOLBAR_TEXT));
     fontBG = new ButtonGroup();
     textBtn = new JRadioButton("Text components font");
     textBtn.setActionCommand("text");
@@ -126,20 +139,6 @@ public class OptionsDialog extends JDialog {
     vBox.add(Box.createVerticalStrut(5));
     appearanceBox.add(vBox);
 
-    appearanceBox.add(Box.createVerticalStrut(5));
-
-    vBox = Box.createVerticalBox();
-    vBox.setBackground(getContentPane().getBackground());
-    vBox.setBorder(BorderFactory.createTitledBorder(" Resource Toolbar (requires restart) "));
-    vBox.add(Box.createVerticalStrut(5));
-
-    hBox = Box.createHorizontalBox();
-    hBox.add(showToolBarTextChk);
-    vBox.add(hBox);
-    vBox.add(Box.createVerticalStrut(5));
-    hBox.add(Box.createHorizontalStrut(5));
-    hBox.add(Box.createHorizontalGlue());
-    appearanceBox.add(vBox);
     appearanceBox.add(Box.createVerticalStrut(5));
 
     hBox = Box.createHorizontalBox();
@@ -510,13 +509,6 @@ public class OptionsDialog extends JDialog {
         }
       }
 
-      boolean oldToolBarText = userConfig.getBoolean(GateConstants.TOOLBAR_TEXT);
-      if (showToolBarTextChk.isSelected() != oldToolBarText) {
-        JOptionPane.showMessageDialog(null, "Please restart GATE to apply changes to toolbar.");
-      }
-
-      userConfig.put(GateConstants.TOOLBAR_TEXT,
-              showToolBarTextChk.isSelected());
       userConfig.put(GateConstants.SAVE_OPTIONS_ON_EXIT,
         saveOptionsChk.isSelected());
       userConfig.put(GateConstants.SAVE_SESSION_ON_EXIT,
@@ -668,11 +660,6 @@ public class OptionsDialog extends JDialog {
    * The "Add extra space markup unpack if needed" checkbox
    */
   protected JCheckBox addSpaceOnMarkupUnpackChk;
-
-  /**
-   * The "Show text in toolbar" checkbox
-   */
-  protected JCheckBox showToolBarTextChk;
 
   /**
    * The name of the look and feel class
