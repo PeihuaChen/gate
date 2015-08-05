@@ -481,8 +481,8 @@ public class MeasurementsParser {
   }
   
   public static void main(String args[]) throws MalformedURLException, IOException {
-    MeasurementsParser parser = new MeasurementsParser((new File("resources/units.dat")).toURI().toURL(), (new File("resources/common_words.txt")).toURI().toURL());
-    Measurement m = parser.parse(20, "GB //");   
+    MeasurementsParser parser = new MeasurementsParser((new File("plugins/Tagger_Measurements/resources/units.dat")).toURI().toURL(), (new File("plugins/Tagger_Measurements/resources/common_words.txt")).toURI().toURL());
+    Measurement m = parser.parse(20, "mg p");   
     System.out.println(m.getParsedText());
   }
 }

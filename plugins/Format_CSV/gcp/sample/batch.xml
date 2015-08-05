@@ -6,11 +6,11 @@
 	<report file="report.xml" />
 
 	<input class="gate.cloud.io.csv.CSVStreamingInputHandler"
- 		srcFile="tweets.csv"
+ 		srcFile="input.csv"
  		encoding="UTF-8"
  		separator=","
  		quote='"'
- 		column="11"
+ 		column="1"
  		labelledColumns="true" />
 
 	<output
