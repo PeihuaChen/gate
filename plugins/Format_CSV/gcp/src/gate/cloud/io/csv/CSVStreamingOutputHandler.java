@@ -35,115 +35,176 @@ import org.apache.log4j.Logger;
 import au.com.bytecode.opencsv.CSVWriter;
 
 public class CSVStreamingOutputHandler extends JSONStreamingOutputHandler {
-  
+
   public static final String PARAM_SEPARATOR_CHARACTER = "separator";
-  public static final String PARAM_QUOTE_CHARACTER = "quote";  
+
+  public static final String PARAM_QUOTE_CHARACTER = "quote";
+
   public static final String PARAM_COLUMNS = "columns";
+
   public static final String PARAM_ANNOTATION_SET_NAME = "annotationSetName";
+
   public static final String PARAM_ANNOTATION_TYPE = "annotationType";
-  
-  
+
   private static final Logger logger = Logger
       .getLogger(CSVStreamingOutputHandler.class);
-  
+
   protected String encoding;
 
   protected char separatorChar;
 
   protected char quoteChar;
-  
+
   protected String annotationSetName, annotationType;
-  
+
   protected String[] columns;
-  
+
   @Override
   protected void configImpl(Map<String, String> configData) throws IOException,
-          GateException {
+      GateException {
 
     if(!configData.containsKey(PARAM_FILE_EXTENSION)) {
+      // set the extension to csv if nothing is provided
       configData.put(PARAM_FILE_EXTENSION, ".csv");
     }
-    
+
+    // handle the standard streaming output config options
     super.configImpl(configData);
-    
-    encoding = configData.get(PARAM_ENCODING);
-    separatorChar = configData.get(PARAM_SEPARATOR_CHARACTER).charAt(0);
-    quoteChar = configData.get(PARAM_QUOTE_CHARACTER).charAt(0); 
-    
+
+    // configuration params for the CSV document output
+    encoding =
+        configData.containsKey(PARAM_ENCODING)
+            ? configData.get(PARAM_ENCODING)
+            : "UTF-8";
+
+    separatorChar =
+        configData.containsKey(PARAM_SEPARATOR_CHARACTER) ? configData.get(
+            PARAM_SEPARATOR_CHARACTER).charAt(0) : CSVWriter.DEFAULT_SEPARATOR;
+
+    quoteChar =
+        configData.containsKey(PARAM_QUOTE_CHARACTER)
+            ? configData.get(PARAM_QUOTE_CHARACTER).charAt(0)
+            : CSVWriter.DEFAULT_QUOTE_CHARACTER;
+
+    // the details of the columns to output
     columns = configData.get(PARAM_COLUMNS).split(",\\s*");
-    
+
+    // the annotation set to read annotations from
     annotationSetName = configData.get(PARAM_ANNOTATION_SET_NAME);
+
+    // the annotation type to treat as a document, can be null
     annotationType = configData.get(PARAM_ANNOTATION_TYPE);
-    
-    if (annotationType != null && annotationType.trim().equals(""))
+
+    // if the annotationType param is empty then nullify the variable so we work
+    // at the document level as if the param was missing
+    if(annotationType != null && annotationType.trim().equals(""))
       annotationType = null;
   }
-  
+
   @Override
   protected void outputDocumentImpl(Document document, DocumentID documentId)
-    throws IOException, GateException {
+      throws IOException, GateException {
 
-    //TODO move to a thread local to save recreating each time?
-    CSVWriter csvOut = new CSVWriter(new OutputStreamWriter(getFileOutputStream(documentId),encoding),separatorChar,quoteChar);
-    
+    // TODO move to a thread local to save recreating each time?
+    // create the CSV writer ready for creating output
+    CSVWriter csvOut =
+        new CSVWriter(new OutputStreamWriter(getFileOutputStream(documentId),
+            encoding), separatorChar, quoteChar);
+
+    // create an array to hold the column data
     String[] data = new String[columns.length];
-    
-    if (annotationType == null || annotationType.trim().equals("")) {
-      for (int i = 0 ; i < columns.length ; ++i) {
+
+    if(annotationType == null) {
+      // if we are producing one row per document then....
+
+      for(int i = 0; i < columns.length; ++i) {
+        // get the data for each column
         data[i] = (String)getValue(columns[i], document, null);
       }
+
+      // write the row to the output
       csvOut.writeNext(data);
     } else {
-      
-      List<Annotation> sorted = Utils.inDocumentOrder(document.getAnnotations(annotationSetName).get(annotationType));
-      for (Annotation annotation : sorted) {
-        for (int i = 0 ; i < columns.length ; ++i) {
+
+      // we are producing one row per annotation so find all the annotations of
+      // the correct type to treat as documents
+      List<Annotation> sorted =
+          Utils.inDocumentOrder(document.getAnnotations(annotationSetName).get(
+              annotationType));
+
+      for(Annotation annotation : sorted) {
+        // for each of the annotations....
+
+        for(int i = 0; i < columns.length; ++i) {
+          // get the data for each column
           data[i] = (String)getValue(columns[i], document, annotation);
         }
+
+        // write the row to the ouput
         csvOut.writeNext(data);
       }
-    }        
-    
+    }
+
+    // flush the writer to ensure everything is pushed into the byte array
     csvOut.flush();
-    
-    //baos.get().write('\n');
+
+    // get the bytes we will want to put into the output file
     byte[] result = baos.get().toByteArray();
-    
+
+    // close the CSV writer as we don't need it anymore
     csvOut.close();
-    
+
+    // reset the underlying byte array output stream ready for next time
     baos.get().reset();
+
     try {
+      // store the results so that the they will eventually end up in the output
       results.put(result);
     } catch(InterruptedException e) {
       Thread.currentThread().interrupt();
     }
   }
-  
+
+  /**
+   * Get the value from the document given the column key
+   */
   private Object getValue(String key, Document document, Annotation within) {
-    
+
+    // split the key on any . that appear
     String[] parts = key.split("\\.");
-    
-    if (parts.length > 2) {      
-      logger.log(Level.WARN, "Invalid key: "+key);
+
+    if(parts.length > 2) {
+      // currently we only support keys with at most two parts
+      logger.log(Level.WARN, "Invalid Column Key: " + key);
       return null;
     }
-    
-    if (key.startsWith(".")) {
+
+    if(key.startsWith(".")) {
+      // keys that start with a . are references to document features
       return document.getFeatures().get(parts[1]);
     } else {
-      AnnotationSet annots = document.getAnnotations(annotationSetName).get(parts[0]);
-      
-      if (within != null) {
+      // if it's not a document feature then it refers to an annotation
+
+      // get all annotations of the correct type (the bit before the .)
+      AnnotationSet annots =
+          document.getAnnotations(annotationSetName).get(parts[0]);
+
+      if(within != null) {
+        // if we have been provided with an annotation to limit the search then
+        // get just those contained within it
         annots = Utils.getContainedAnnotations(annots, within);
       }
-      
-      if (annots.size() == 0) return null;
-      
+
+      // if there are no annotations then we can quit
+      if(annots.size() == 0) return null;
+
+      // get the first annotation that matches
       Annotation annotation = Utils.inDocumentOrder(annots).get(0);
-      
-      if (parts.length == 1)
-        return Utils.stringFor(document, annotation);
-      
+
+      // if we just want the annotation then return it's document content
+      if(parts.length == 1) return Utils.stringFor(document, annotation);
+
+      // the key references a feature so return that
       return annotation.getFeatures().get(parts[1]);
     }
   }
