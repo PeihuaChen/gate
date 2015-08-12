@@ -8,8 +8,8 @@
   downloadURL="https://github.com/johann-petrak/gateplugin-Java/releases/download/V0.2/Java-0.2.zip"
 />
 <CreolePlugin
-  url="https://raw.githubusercontent.com/johann-petrak/gateplugin-Evaluation/V0.5/"
-  downloadURL="https://github.com/johann-petrak/gateplugin-Evaluation/releases/download/V0.5/Evaluation-0.5.zip"
+  url="https://raw.githubusercontent.com/johann-petrak/gateplugin-Evaluation/V0.6/"
+  downloadURL="https://github.com/johann-petrak/gateplugin-Evaluation/releases/download/V0.6/Evaluation-0.6.zip"
 />
 <CreolePlugin
   url="https://raw.githubusercontent.com/johann-petrak/gateplugin-StringAnnotation/V3.3/"
