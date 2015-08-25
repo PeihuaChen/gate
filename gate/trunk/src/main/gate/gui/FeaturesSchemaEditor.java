@@ -383,6 +383,15 @@ public class FeaturesSchemaEditor extends XJTable
 
   protected class FeatureEditorRenderer extends DefaultCellEditor
                                         implements TableCellRenderer {
+    
+    @Override
+    public boolean stopCellEditing() {
+      // this is a fix for a bug in Java 8 where tabbing out of the
+      // combo box doesn't store the value like it does in java 7
+      editorCombo.setSelectedItem(editorCombo.getEditor().getItem());
+      return super.stopCellEditing();
+    }
+    
     public FeatureEditorRenderer(){
       super(new JComboBox());
       defaultComparator = new ObjectComparator();
