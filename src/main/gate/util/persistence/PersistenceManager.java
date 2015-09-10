@@ -87,6 +87,7 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
 import com.thoughtworks.xstream.io.xml.StaxReader;
 import com.thoughtworks.xstream.io.xml.XStream11NameCoder;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
+import java.util.logging.Level;
 
 /**
  * This class provides utility methods for saving resources through
@@ -305,7 +306,7 @@ public class PersistenceManager {
               // we use that, otherwise we use the real paths 
               
               String relPath = getRelativeFilePathString(outDir, urlFile);
-              logger.debug("First attempt got "+relPath);
+              logger.debug("First relative path string attempt got "+relPath);
               if(relPath.startsWith("../")) {
                 // if we want to actually use the real path, we have to be careful which is the 
                 // real parent of the out file: if outFile is a symbolic link then it is 
@@ -337,8 +338,9 @@ public class PersistenceManager {
               // this should really never happen!
               throw new GateRuntimeException("Unexpected error when persisting URL "+url);
             }
-        } // if protocol is file:
+        } // if protocol is file
         else {
+          // protocol was not file:
           urlString = ((URL)source).toExternalForm();
         }
       }
@@ -359,23 +361,38 @@ public class PersistenceManager {
       try {
         if(urlString.startsWith(relativePathMarker)) {
           URL context = currentPersistenceURL();
-          URL ret =  new URL(context, urlString.substring(relativePathMarker
-                  .length()));
+          // If the part after the $relpath$ marker is empty, the normal method
+          // would get us the URL of the context which will be the URL of the pipeline, not
+          // of the directory where the pipeline is located. 
+          // If the part after the $relpath$ marker starts with a slash, the normal method 
+          // would cause the $relpath$ marker to get ignored, but what we really want is probably
+          // that the slash gets ignored and the part that follows be appended to the 
+          // directory part of the context. 
+          // If the relative part is empty, we make an attempt to remove the last part of the 
+          // URL path from context and use that as the parent/context instead
+          // If the relative part is starting with a slash, we remove that
+          //URL ret =  new URL(context, urlString.substring(relativePathMarker
+          //        .length()));
+          URL ret = combineContextAndRelative(context, urlString.substring(relativePathMarker
+                  .length()), true);
           logger.debug("CurrentPresistenceURL is "+context+" created="+ret);
           return ret;
         } else if(urlString.startsWith(gatehomePathMarker)) {
           URL gatehome =  getCanonicalFileIfPossible(getGateHomePath()).toURI().toURL();
-          return new URL(gatehome, urlString.substring(gatehomePathMarker.length()));
+          //return new URL(gatehome, urlString.substring(gatehomePathMarker.length()));
+          return combineContextAndRelative(gatehome, urlString.substring(gatehomePathMarker.length()),false);
         } else if(urlString.startsWith(gatepluginsPathMarker)) {
           URL gateplugins = Gate.getPluginsHome().toURI().toURL();
-          return new URL(gateplugins, urlString.substring(gatepluginsPathMarker.length()));
+          //return new URL(gateplugins, urlString.substring(gatepluginsPathMarker.length()));
+          return combineContextAndRelative(gateplugins, urlString.substring(gatepluginsPathMarker.length()),false);
         } else if(urlString.startsWith(resourceshomePathMarker)) {
           if(getResourceshomePath() == null) {
             throw new GateRuntimeException("Cannot restore URL "+urlString+
                     "property "+resourceshomePropertyName+" is not set");
           }
           URL resourceshomeurl = getResourceshomePath().toURI().toURL();          
-          return new URL(resourceshomeurl, urlString.substring(resourceshomePathMarker.length()));
+          //return new URL(resourceshomeurl, urlString.substring(resourceshomePathMarker.length()));
+          return combineContextAndRelative(resourceshomeurl, urlString.substring(resourceshomePathMarker.length()),false);
         } else if(urlString.startsWith(syspropMarker)) {
           String urlRestString = urlString.substring(syspropMarker.length());
           int dollarindex = urlRestString.indexOf("$");
@@ -385,11 +402,13 @@ public class PersistenceManager {
             if(propvalue == null) {
               throw new PersistenceException("Property '"+syspropname+"' is null in "+urlString);
             }
+            // TODO: we should only assume a file if what we get does not start with a protocol
             URL propuri = (new File(propvalue)).toURI().toURL();
             if(dollarindex == urlRestString.length()) {
               return propuri;
             } else {
-              return new URL(propuri, urlRestString.substring(dollarindex+1));
+              //return new URL(propuri, urlRestString.substring(dollarindex+1));
+              return combineContextAndRelative(propuri, urlRestString.substring(dollarindex+1),false);
             }
           } else if(dollarindex == 0) {
             throw new PersistenceException("No property name after '"+syspropMarker+"' in "+urlString);
@@ -409,6 +428,45 @@ public class PersistenceManager {
     
     //******** Helper methods just used inside the URLHolder class
    
+    private URL combineContextAndRelative(URL context, String relative, boolean contextIsFile) {
+      // make sure we always have a proper string
+      if(relative==null) relative = "";
+      // we always want to interpret the part after the marker as a relative path, so 
+      // remove any starting slash (for performance reasons, only one is removed, so 
+      // an absolute path could get hacked by using two slashes)
+      if(relative.startsWith("/")) relative = relative.substring(1);
+      // if the relative path is empty, return the directory part of the context (if contextIsFile
+      // is true, then the parent, otherwise the context unchanged)
+      if(relative.isEmpty()) {
+        if(!contextIsFile) return context;
+        // context is file, get the parent and return that
+        URI tmpUri;
+        try {
+          tmpUri = context.toURI();
+        } catch (URISyntaxException ex) {
+          throw new GateRuntimeException("Could not convert context URL to URI: "+context,ex);
+        }
+        // find the parent: in our use cases, the context should always be a file 
+        tmpUri = tmpUri.resolve(".");
+        try {
+          context = tmpUri.toURL();
+        } catch (Exception ex) {
+          throw new GateRuntimeException("Could not convert context URI to URL: "+tmpUri,ex);
+        }
+        return context;
+      } else {
+        // use the URL constructor to splice the two parts together
+        URL tmpUrl;
+        try {
+          tmpUrl = new URL(context,relative);
+        } catch (Exception ex) {
+          throw new GateRuntimeException("Could not create a URL from context "+context+" and relative part "+relative,ex);
+        }
+        return tmpUrl;
+      }
+    }
+    
+    
     private File getGateHomePath() {
       if(gatehomePath != null) {
         return gatehomePath;
