@@ -51,10 +51,6 @@ GATE papers
 
 %2* Forthcoming / Accepted
 
-- D. Maynard and K. Bontcheva. Understanding climate change tweets: an open source toolkit for social media analysis. In Proc. of EnviroInfo 2015, Copenhagen, Sep. 2015. %(https://gate.ac.uk/sale/enviroinfo2015/decarbonet.pdf, PDF)
-
-
-- Diana Maynard and Jonathon Hare. Entity-based Opinion Mining from Text and Multimedia. In "Advances in Social Media Analysis", Mohamed Gaber, Nirmalie Wiratunga, Ayse Goker, and Mihaela Cocea (eds.) 2014, Springer.
 
 - V. Tablan, K. Bontcheva, I. Roberts, and H. Cunningham. Mímir: An open-source semantic search framework for interactive information seeking and discovery. Journal of Web Semantics: Science, Services and Agents on the World Wide Web, 2014. %(http://dx.doi.org/10.1016/j.websem.2014.10.002, doi:10.1016/j.websem.2014.10.002)%footnote(Published online but not yet assigned to a specific volume and issue.)
 
@@ -65,6 +61,10 @@ GATE papers
 - L. Derczynski. Automatically Ordering Events and Times in Text. To appear as a monograph in Studies in Computational Intelligence. Springer.
 
 %2* 2015
+
+- D. Maynard and K. Bontcheva. Understanding climate change tweets: an open source toolkit for social media analysis. In Proc. of EnviroInfo 2015, Copenhagen, Sep. 2015. %(https://gate.ac.uk/sale/enviroinfo2015/decarbonet.pdf, PDF)
+
+- Diana Maynard and Jonathon Hare. Entity-based Opinion Mining from Text and Multimedia. In "Advances in Social Media Analysis", Mohamed Gaber, Nirmalie Wiratunga, Ayse Goker, and Mihaela Cocea (eds.) 2015, Springer. %(http://www.springer.com/gb/book/9783319184579, Springer link).
 
 - D. Maynard, M. A. Greenwood, I. Roberts, G. Windsor, K. Bontcheva. Real-time Social Media Analytics through Semantic Annotation and Linked Open Data. Proceedings of WebSci 2015, Oxford, UK. %(https://gate.ac.uk/sale/websci2015/nesta-paper/nesta-short.pdf, PDF)
 
