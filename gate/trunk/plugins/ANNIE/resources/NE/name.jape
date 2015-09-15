@@ -276,6 +276,59 @@ features);
 }
 
 
+Rule:	PersonTitleUnknownGender
+Priority: 30
+// Prof. Jones
+// This person will just get an unknown value for gender. Or we could decide to make them male by default, as they're mostly military etc.
+
+( 
+ {Token.category == DT}|
+ {Token.category == PRP}|
+ {Token.category == RB}
+)?
+(
+ ({Title}):title
+ ({Title})?
+ (
+  (FIRSTNAME | FIRSTNAMEAMBIG )?
+ ):firstName
+ (
+  (PREFIX)* 
+  ({Upper})
+  (PERSONENDING)?
+ ):surname
+):person 
+-->
+{
+ gate.FeatureMap features = Factory.newFeatureMap();
+ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+ 
+ gate.AnnotationSet firstNameSet = (gate.AnnotationSet)bindings.get("firstName");
+
+ gate.AnnotationSet titleSet = (gate.AnnotationSet)bindings.get("title");
+ gate.Annotation titleAnn = (gate.Annotation)titleSet.iterator().next();
+
+ gate.AnnotationSet surnameSet = (gate.AnnotationSet)bindings.get("surname");
+ gate.Annotation surnameAnn = (gate.Annotation)surnameSet.iterator().next();
+
+  String contentTitle = gate.Utils.stringFor(doc, titleAnn);
+  features.put("title", contentTitle);
+  features.put("gender", "unknown");
+
+ if (firstNameSet != null && firstNameSet.size()>0)
+ {
+  gate.Annotation firstNameAnn = (gate.Annotation)firstNameSet.iterator().next();
+  String firstNameContent = gate.Utils.stringFor(doc, firstNameAnn);
+  features.put("firstName", firstNameContent);
+ }
+  String surnameContent = gate.Utils.stringFor(doc, surnameAnn);
+  features.put("surname", surnameContent);
+
+  features.put("kind", "personName");
+  features.put("rule", "PersonTitleGenderUnknown");
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+features);
+}
 
 
 Rule:	PersonTitleInitials

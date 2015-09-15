@@ -117,7 +117,9 @@ outputAS.removeAll(surnameSet);
 Rule:PersonTitle1
 Priority: 40
 (
- {Person.rule1 == PersonTitle}
+ ({Person.rule == PersonTitle}|
+  {Person.rule == PersonTitleGenderUnknown}
+ )
  {Unknown}
 ):person
 -->
