@@ -17,6 +17,7 @@ MultiPhase:	TestTheGrammars
 Phases:
 numberletter 
 first
+hyphens
 firstname
 name
 name_post
