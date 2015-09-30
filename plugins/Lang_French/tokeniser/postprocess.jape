@@ -78,11 +78,14 @@ TreeTagger output, e.g. apprend-on should be two Tokens not one */
      /* offset += dashIndex; */ // <-- REMOVE THIS LINE
      startIndex = dashIndex + 1;
     }
-   features = Factory.newFeatureMap();
-   features.putAll(annotation.getFeatures());
-   features.put("string", content.substring(startIndex));
-   features.put("length", content.length()-startIndex);
-   outputAS.add(offset+startIndex, endOffset, "Token", features); // <-- MODIF HERE
+    if(content.length() < startIndex) {
+      // there is trailing content, make an extra token
+      features = Factory.newFeatureMap();
+      features.putAll(annotation.getFeatures());
+      features.put("string", content.substring(startIndex));
+      features.put("length", content.length()-startIndex);
+      outputAS.add(offset+startIndex, endOffset, "Token", features); // <-- MODIF HERE
+    }
   } catch (InvalidOffsetException e) {
     throw new LuckyException(e);
   }
