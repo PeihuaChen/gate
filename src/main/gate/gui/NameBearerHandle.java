@@ -38,8 +38,6 @@ import gate.creole.ResourceInstantiationException;
 import gate.creole.RunningStrategy;
 import gate.creole.SerialAnalyserController;
 import gate.creole.ir.IndexedCorpus;
-import gate.event.CreoleEvent;
-import gate.event.CreoleListener;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
 import gate.persist.LuceneDataStoreImpl;

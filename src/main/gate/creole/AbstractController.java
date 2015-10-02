@@ -14,9 +14,7 @@
 package gate.creole;
 
 import gate.Controller;
-import gate.CorpusController;
 import gate.Gate;
-import gate.LanguageAnalyser;
 import gate.ProcessingResource;
 import gate.Resource;
 import gate.creole.metadata.CreoleResource;
