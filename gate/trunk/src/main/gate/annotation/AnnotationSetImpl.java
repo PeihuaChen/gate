@@ -44,7 +44,6 @@ import gate.event.AnnotationSetEvent;
 import gate.event.AnnotationSetListener;
 import gate.event.GateEvent;
 import gate.event.GateListener;
-import gate.relations.Relation;
 import gate.relations.RelationSet;
 import gate.util.InvalidOffsetException;
 import gate.util.RBTreeMap;
