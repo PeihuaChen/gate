@@ -11,6 +11,9 @@ import java.util.Map;
  * @author johann
  */
 public abstract class AbstractPersistence implements Persistence {
+
+  private static final long serialVersionUID = -682494755574835875L;
+
   /**
    * The name of the controller, if any, that contains this persistence.
    * For example the PR persistence will contain the name of the controller

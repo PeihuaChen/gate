@@ -22,7 +22,6 @@ import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
 import gate.Resource;
-import gate.corpora.DocumentStaxUtils;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;

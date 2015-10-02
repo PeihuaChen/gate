@@ -25,6 +25,8 @@ import org.apache.commons.io.IOUtils;
  */
 public abstract class CorpusExporter extends DocumentExporter {
 
+  private static final long serialVersionUID = 3172689319810927933L;
+
   public CorpusExporter(String fileType, String defaultExtension,
           String mimeType) {
     super(fileType, defaultExtension, mimeType);

@@ -15,18 +15,18 @@
 
 package gate.swing;
 
-import gate.gui.MainFrame;
 import gate.Gate;
+import gate.gui.MainFrame;
 
-import javax.swing.JFileChooser;
-import javax.swing.event.AncestorListener;
-import javax.swing.event.AncestorEvent;
-import javax.swing.filechooser.FileFilter;
 import java.awt.Component;
 import java.awt.HeadlessException;
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
+
+import javax.swing.JFileChooser;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
+import javax.swing.filechooser.FileFilter;
 
 /**
  * Extends {@link javax.swing.JFileChooser} to make sure the shared

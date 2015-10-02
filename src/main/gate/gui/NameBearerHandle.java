@@ -1083,7 +1083,6 @@ public class NameBearerHandle implements Handle, StatusListener,
           if(target instanceof Controller) return;
 
           try {
-            String prName = target.getName();
             ConditionalSerialAnalyserController newController =
                     (ConditionalSerialAnalyserController)Factory
                             .createResource("gate.creole.ConditionalSerialAnalyserController");
