@@ -87,7 +87,6 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
 import com.thoughtworks.xstream.io.xml.StaxReader;
 import com.thoughtworks.xstream.io.xml.XStream11NameCoder;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
-import java.util.logging.Level;
 
 /**
  * This class provides utility methods for saving resources through
