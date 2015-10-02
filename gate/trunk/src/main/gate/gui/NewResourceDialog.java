@@ -15,7 +15,11 @@
 
 package gate.gui;
 
-import gate.*;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.ProcessingResource;
+import gate.Resource;
 import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
 import gate.util.Err;
@@ -25,7 +29,6 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
