@@ -33,6 +33,7 @@ import gate.util.LuckyException;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -158,7 +159,7 @@ public class GATEJsonExporter extends CorpusExporter {
    */
   protected JsonGenerator openGenerator(OutputStream out, FeatureMap options)
     throws IOException {
-    JsonGenerator generator = MAPPER.getFactory().createGenerator(out);
+    JsonGenerator generator = MAPPER.getFactory().createGenerator(new OutputStreamWriter(out, "UTF-8"));
     generator.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
     generator.enable(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT);
     if(options.containsKey("exportAsArray") && ((Boolean)options.get("exportAsArray")).booleanValue()) {

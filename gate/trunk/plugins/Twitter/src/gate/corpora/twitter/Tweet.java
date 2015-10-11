@@ -147,42 +147,67 @@ public class Tweet {
     this.string = content.toString();
   }
   
-  private static Pattern XML_ENTITY_PATTERN = Pattern.compile("&(amp|lt|gt);");
+  /**
+   * Characters to account for in unescaping - HTML-encoded ampersand and angle
+   * brackets, and supplementary characters (which don't need "unescaping" but do
+   * need to be accounted for in the repos info).
+   */
+  private static Pattern UNESCAPE_PATTERN = Pattern.compile("&(?:amp|lt|gt);|[\\x{" +
+    Integer.toHexString(Character.MIN_SUPPLEMENTARY_CODE_POINT)+ "}-\\x{" +
+    Integer.toHexString(Character.MAX_CODE_POINT) + "}]");
   
   /**
    * Un-escape &amp;amp;, &amp;gt; and &amp;lt; in the given string, populating
-   * the supplied {@link RepositioningInfo} to describe the offset changes.
+   * the supplied {@link RepositioningInfo} to describe the offset changes.  Also
+   * record the position of any Unicode supplementary characters, as Twitter's
+   * entities format counts in characters (so a supplementary is 1) whereas GATE
+   * annotations count in Java <code>char</code> values (UTF-16 code units, so
+   * a supplementary counts as two).
    * @param str string, possibly including escaped ampersands or angle brackets
    * @param repos {@link RepositioningInfo} to hold offset changes
    * @return the unescaped string
    */
   private String unescape(String str, RepositioningInfo repos) {
     StringBuffer buf = new StringBuffer();
-    int correction = 0;
-    int lastMatchEnd = 0;
-    Matcher mat = XML_ENTITY_PATTERN.matcher(str);
+    int origOffset = 0;
+    int extractedOffset = 0;
+    Matcher mat = UNESCAPE_PATTERN.matcher(str);
     while(mat.find()) {
-      if(mat.start() != lastMatchEnd) {
+      if(mat.start() != origOffset) {
         // repositioning record for the span from end of previous match to start of this one
-        int nonMatchLen = mat.start() - lastMatchEnd;
-        repos.addPositionInfo(lastMatchEnd, nonMatchLen, lastMatchEnd - correction, nonMatchLen);
-      }
-      // repositioning record covering this match
-      repos.addPositionInfo(mat.start(), mat.end() - mat.start(), mat.start() - correction, 1);
-      correction += mat.end() - mat.start() - 1;
+        int nonMatchLen = mat.start() - origOffset;
+        repos.addPositionInfo(origOffset, nonMatchLen, extractedOffset, nonMatchLen);
+        origOffset += nonMatchLen;
+        extractedOffset += nonMatchLen;
+      }      
+      
+      // in most cases the original length is the number of code units the pattern matched
+      int origLen = mat.end() - mat.start();
+      // and the extracted result is one code unit
+      int extractedLen = 1;
       String replace = "?";
-      switch(mat.group(1)) {
-        case "amp": replace = "&"; break;
-        case "gt": replace = ">"; break;
-        case "lt": replace = "<"; break;
+      switch(mat.group()) {
+        case "&amp;": replace = "&"; break;
+        case "&gt;": replace = ">"; break;
+        case "&lt;": replace = "<"; break;
+        default:
+          // but in the case of supplementary characters, the original length
+          // (in *characters*) is 1 but the extracted length (in code units) is 2
+          replace = mat.group();
+          origLen = 1;
+          extractedLen = 2;
       }
       mat.appendReplacement(buf, replace);
-      lastMatchEnd = mat.end();
+      // repositioning record covering this match
+      repos.addPositionInfo(origOffset, origLen, extractedOffset, extractedLen);
+
+      origOffset += origLen;
+      extractedOffset += extractedLen;
     }
-    int tailLen = str.length() - lastMatchEnd;
+    int tailLen = str.length() - origOffset;
     if(tailLen > 0) {
       // repositioning record covering everything after the last match
-      repos.addPositionInfo(lastMatchEnd, tailLen, lastMatchEnd - correction, tailLen);
+      repos.addPositionInfo(origOffset, tailLen + 1, extractedOffset, tailLen + 1);
     }
     mat.appendTail(buf);
     return buf.toString();
