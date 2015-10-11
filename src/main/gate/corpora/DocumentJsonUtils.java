@@ -383,40 +383,69 @@ public class DocumentJsonUtils {
     json.flush();
   }
 
-  private static final Pattern CHARS_TO_ESCAPE = Pattern.compile("[<>&]");
+  /**
+   * Characters to account for when escaping - ampersand, angle brackets, and supplementaries
+   */
+  private static final Pattern CHARS_TO_ESCAPE = Pattern.compile("[<>&\\x{" +
+          Integer.toHexString(Character.MIN_SUPPLEMENTARY_CODE_POINT)+ "}-\\x{" +
+          Integer.toHexString(Character.MAX_CODE_POINT) + "}]");
   
   /**
    * Escape all angle brackets and ampersands in the given string,
    * recording the adjustments to character offsets within the
-   * given {@link RepositioningInfo}.
+   * given {@link RepositioningInfo}.  Also record supplementary
+   * characters (above U+FFFF), which count as two in terms of
+   * GATE annotation offsets (which count in Java chars) but one
+   * in terms of JSON (counting in Unicode characters).
    */
   private static String escape(String str, RepositioningInfo repos) {
     StringBuffer buf = new StringBuffer();
-    int correction = 0;
-    int lastMatchEnd = 0;
+    int origOffset = 0;
+    int extractedOffset = 0;
     Matcher mat = CHARS_TO_ESCAPE.matcher(str);
     while(mat.find()) {
-      if(mat.start() != lastMatchEnd) {
+      if(mat.start() != extractedOffset) {
         // repositioning record for the span from end of previous match to start of this one
-        int nonMatchLen = mat.start() - lastMatchEnd;
-        repos.addPositionInfo(lastMatchEnd + correction, nonMatchLen, lastMatchEnd, nonMatchLen);
+        int nonMatchLen = mat.start() - extractedOffset;
+        repos.addPositionInfo(origOffset, nonMatchLen, extractedOffset, nonMatchLen);
+        origOffset += nonMatchLen;
+        extractedOffset += nonMatchLen;
       }
+
+      // the extracted length is the number of code units matched by the pattern
+      int extractedLen = mat.end() - mat.start();
+      int origLen = 0;
       String replace = "?";
       switch(mat.group()) {
-        case "&": replace = "&amp;"; break;
-        case ">": replace = "&gt;"; break;
-        case "<": replace = "&lt;"; break;
+        case "&":
+          replace = "&amp;";
+          origLen = 5;
+          break;
+        case ">":
+          replace = "&gt;";
+          origLen = 4;
+          break;
+        case "<":
+          replace = "&lt;";
+          origLen = 4;
+          break;
+        default:
+          // supplementary character, so no escaping but need to account for
+          // it in repositioning info
+          replace = mat.group();
+          origLen = 1;
       }
       // repositioning record covering this match
-      repos.addPositionInfo(mat.start() + correction, replace.length(), mat.start(), 1);
-      correction += replace.length() - 1;
+      repos.addPositionInfo(origOffset, origLen, extractedOffset, extractedLen);
       mat.appendReplacement(buf, replace);
-      lastMatchEnd = mat.end();
+      origOffset += origLen;
+      extractedOffset += extractedLen;
+
     }
-    int tailLen = str.length() - lastMatchEnd;
+    int tailLen = str.length() - extractedOffset;
     if(tailLen > 0) {
       // repositioning record covering everything after the last match
-      repos.addPositionInfo(lastMatchEnd + correction, tailLen + 1, lastMatchEnd, tailLen + 1);
+      repos.addPositionInfo(origOffset, tailLen + 1, extractedOffset, tailLen + 1);
     }
     mat.appendTail(buf);
     return buf.toString();
