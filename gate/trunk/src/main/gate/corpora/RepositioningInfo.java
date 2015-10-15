@@ -130,8 +130,17 @@ public class RepositioningInfo extends ArrayList<PositionInfo> {
             result = -1;
           }
           else {
-            // current position + offset in this PositionInfo record
-            result = currPI.getCurrentPosition() + absPos - origPos;
+            if(absPos == origPos+origLen) {
+              // special case for boundaries - if absPos is the end boundary of
+              // this PositionInfo record (origPos+origLen) then result should
+              // always be the end boundary too (extracted pos + extracted len).
+              // Without this check we may get the wrong position when the "orig"
+              // length is shorter than the "extracted" length.
+              result = currPI.getCurrentPosition() + currPI.getCurrentLength();
+            } else {
+              // current position + offset in this PositionInfo record
+              result = currPI.getCurrentPosition() + absPos - origPos;
+            }
             // but don't go beyond the extracted length
             if(result > currPI.getCurrentPosition() + currPI.getCurrentLength()) {
               result = currPI.getCurrentPosition() + currPI.getCurrentLength();
