@@ -110,7 +110,7 @@ public abstract class DocumentExporter extends AbstractResource {
     FileOutputStream out = null;
     try {
       out = new FileOutputStream(file);
-      export(doc, new FileOutputStream(file), options);
+      export(doc, out, options);
       out.flush();
     } finally {
       IOUtils.closeQuietly(out);
