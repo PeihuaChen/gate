@@ -23,6 +23,7 @@ import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Factory;
 import gate.FeatureMap;
+import gate.Gate;
 import gate.ProcessingResource;
 import gate.Resource;
 import gate.creole.ANNIEConstants;
@@ -447,14 +448,11 @@ implements ProcessingResource {
       if(debugMode) {
         System.out.println(dependency);
       }
-      
-      // Does not work in version 3.5.2 any more
-      //int governorIndex = dependency.gov().label().index() - 1;
-      int governorIndex = dependency.gov().index()-1;
+
+      int governorIndex = dependency.gov().label().index() - 1;
       governor  = stanfordSentence.startPos2token(governorIndex);
       
-      //int dependentIndex = dependency.dep().label().index() - 1;
-      int dependentIndex = dependency.dep().index()-1;
+      int dependentIndex = dependency.dep().label().index() - 1;
       dependent = stanfordSentence.startPos2token(dependentIndex);
 
       dependencyKind = dependency.reln().toString();
