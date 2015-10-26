@@ -55,9 +55,9 @@ public class TfIdfTermbank extends AbstractTermbank
   
   
   
-  protected void processDocument(Document document) {
+  protected void processDocument(Document document, int index) {
     documentCount++;
-    String documentSource = Utilities.sourceOrName(document);
+    String documentSource = Utilities.docIdentifier(document, idDocumentFeature, index);
     AnnotationSet candidates = document.getAnnotations(inputASName).get(inputAnnotationTypes);
 
     for (Annotation candidate : candidates) {

@@ -83,7 +83,7 @@ public class TermbankViewer
   private TermbankTableModel termbankTableModel;
   
   private XHTMLPanel termCloud = new XHTMLPanel();
-  private JComboBox cloudType;
+  private JComboBox<ScoreType> cloudType;
   private JSlider cloudSize = new JSlider();
   private List<ScoreType> scoreTypes;
   
@@ -177,7 +177,7 @@ public class TermbankViewer
     cloudBar.setFloatable(false);
     JButton btnExport = new JButton(MainFrame.getIcon("Download"));
     
-    cloudType = new JComboBox();
+    cloudType = new JComboBox<ScoreType>();
     
     Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer,JLabel>();
     labelTable.put(0, new JLabel(MainFrame.getIcon("Sunny")));

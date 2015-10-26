@@ -134,18 +134,18 @@ implements ActionsPublisher{
   }
   
   
-  protected void processDocument(Document document) {
+  protected void processDocument(Document document, int index) {
     if (this.segmentAnnotationType.isEmpty() || (this.segmentAnnotationType == null)) {
-      processWholeDocument(document);
+      processWholeDocument(document, index);
     }
     else {
-      processDocumentSegments(document);
+      processDocumentSegments(document, index);
     }
   }
 
   
-  protected void processDocumentSegments(Document document) {
-    String documentSource = Utilities.sourceOrName(document);
+  protected void processDocumentSegments(Document document, int index) {
+    String documentSource = Utilities.docIdentifier(document, idDocumentFeature, index);
     AnnotationSet segments = document.getAnnotations(inputASName).get(segmentAnnotationType);
     AnnotationSet candidates = document.getAnnotations(inputASName).get(inputAnnotationTypes);
 
@@ -166,9 +166,9 @@ implements ActionsPublisher{
   }
 
   
-  protected void processWholeDocument(Document document) {
+  protected void processWholeDocument(Document document, int index) {
     documentCount++;
-    String documentSource = Utilities.sourceOrName(document);
+    String documentSource = Utilities.docIdentifier(document, idDocumentFeature, index);
     AnnotationSet candidates = document.getAnnotations(inputASName).get(inputAnnotationTypes);
 
     Set<Term> documentTerms = new HashSet<Term>();

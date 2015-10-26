@@ -55,8 +55,9 @@ public class PMIBank extends AbstractPairbank
 
   
   
-  protected void addData(Document document) {
-    String documentSource = Utilities.sourceOrName(document);
+  protected void addData(Document document, int index) {
+    // TODO: add support for the doc ID feature
+    String documentSource = Utilities.docIdentifier(document, null, index);
     /** Collocations that have already been processed in this document
      * (each collocation is a pair of IDs for a Token annotation), to avoid counting
      * them again.     */

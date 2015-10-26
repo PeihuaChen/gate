@@ -46,6 +46,7 @@ public abstract class AbstractTermbank extends AbstractBank
   
   // additional CREOLE init parameters
   protected Set<String> inputAnnotationTypes;
+  protected String idDocumentFeature;
 
   // transient to allow serialization
   protected transient List<Action> actionsList;
@@ -225,7 +226,7 @@ public abstract class AbstractTermbank extends AbstractBank
       boolean wasLoaded = corpus.isDocumentLoaded(i);
       Document document = (Document) corpus.get(i);
       
-      processDocument(document);
+      processDocument(document, i);
 
       // datastore safety
       if (! wasLoaded) {
@@ -241,7 +242,7 @@ public abstract class AbstractTermbank extends AbstractBank
 
   protected abstract void resetScores();
 
-  protected abstract void processDocument(Document document);
+  protected abstract void processDocument(Document document, int index);
   
   /**
    * This also needs to fill types and languages
@@ -331,5 +332,18 @@ public abstract class AbstractTermbank extends AbstractBank
   public Set<String> getInputAnnotationTypes() {
     return this.inputAnnotationTypes;
   }
+  
+
+  @CreoleParameter(comment = "doc feature to use for identification (blank = use sourceURL)",
+          defaultValue = "")
+  public void setIdDocumentFeature(String name) {
+    this.idDocumentFeature = name;
+  }
+  
+  public String getIdDocumentFeature() {
+    return this.idDocumentFeature;
+  }
+
+  
   
 }
