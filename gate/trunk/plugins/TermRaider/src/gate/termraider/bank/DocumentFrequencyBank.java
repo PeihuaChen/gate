@@ -50,6 +50,21 @@ implements ActionsPublisher{
 
   // transient to allow serialization
   protected transient List<Action> actionsList;
+  
+  /* CREOLE */
+  protected String segmentAnnotationType; 
+  
+  
+  
+  @CreoleParameter(comment = "input segment annotations (default = whole documents)",
+          defaultValue = "")
+  public void setSegmentAnnotationType(String type) {
+    this.segmentAnnotationType = type;
+  }
+  public String getSegmentAnnotationType() {
+    return this.segmentAnnotationType;
+  }
+
 
 
   public Resource init() throws ResourceInstantiationException {
@@ -120,6 +135,38 @@ implements ActionsPublisher{
   
   
   protected void processDocument(Document document) {
+    if (this.segmentAnnotationType.isEmpty() || (this.segmentAnnotationType == null)) {
+      processWholeDocument(document);
+    }
+    else {
+      processDocumentSegments(document);
+    }
+  }
+
+  
+  protected void processDocumentSegments(Document document) {
+    String documentSource = Utilities.sourceOrName(document);
+    AnnotationSet segments = document.getAnnotations(inputASName).get(segmentAnnotationType);
+    AnnotationSet candidates = document.getAnnotations(inputASName).get(inputAnnotationTypes);
+
+    for (Annotation segment : segments) {
+      documentCount++;
+      String documentSegmentSource = String.format("%s [%d]", documentSource, segment.getId());
+      AnnotationSet localCandidates = gate.Utils.getContainedAnnotations(candidates, segment);
+
+      Set<Term> documentTerms = new HashSet<Term>();
+      for (Annotation candidate : localCandidates) {
+        documentTerms.add(makeTerm(candidate, document));
+      }
+      
+      for (Term term : documentTerms) {
+        Utilities.addToMapSet(termDocuments, term, documentSegmentSource);
+      }
+    }
+  }
+
+  
+  protected void processWholeDocument(Document document) {
     documentCount++;
     String documentSource = Utilities.sourceOrName(document);
     AnnotationSet candidates = document.getAnnotations(inputASName).get(inputAnnotationTypes);
