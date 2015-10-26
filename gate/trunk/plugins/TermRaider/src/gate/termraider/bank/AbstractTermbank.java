@@ -214,7 +214,7 @@ public abstract class AbstractTermbank extends AbstractBank
     for (Corpus corpus : corpora) {
       processCorpus(corpus);
       if (debugMode) {
-        System.out.println("Termbank: added corpus " + corpus.getName() + " with " + corpus.size() + " documents");
+        System.out.println("Termbank " + this.getName() + ": added corpus " + corpus.getName() + " with " + corpus.size() + " documents");
       }
     }
   }

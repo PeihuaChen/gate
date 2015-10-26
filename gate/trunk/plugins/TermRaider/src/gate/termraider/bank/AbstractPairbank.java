@@ -121,7 +121,7 @@ public abstract class AbstractPairbank extends AbstractBank
     for (Corpus corpus : corpora) {
       processCorpus(corpus);
       if (debugMode) {
-        System.out.println("Termbank: added corpus " + corpus.getName() + " with " + corpus.size() + " documents");
+        System.out.println("Pairbank " + this.getName() + ": added corpus " + corpus.getName() + " with " + corpus.size() + " documents");
       }
     }
     scanTypesAndLanguages();
