@@ -145,7 +145,7 @@ public abstract class AbstractPairbank extends AbstractBank
       boolean wasLoaded = corpus.isDocumentLoaded(i);
       Document document = (Document) corpus.get(i);
       
-      addData(document);
+      addData(document, i);
 
       // datastore safety
       if (! wasLoaded) {
@@ -166,7 +166,7 @@ public abstract class AbstractPairbank extends AbstractBank
 
   /* BEHOLD THE GUBBINS to distinguish the various (potential) types of Pairbanks*/
 
-  protected abstract void addData(Document document);
+  protected abstract void addData(Document document, int index);
   
   protected abstract void calculateScores(); 
   

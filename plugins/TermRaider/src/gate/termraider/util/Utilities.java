@@ -131,14 +131,28 @@ public class Utilities implements ANNIEConstants {
   }
 
   
-  public static String sourceOrName(Document document) {
-    URL url = document.getSourceUrl();
-    if (url == null) {
-      return document.getName();
+  public static String docIdentifier(Document document, String feature, int index) {
+    String identifier = null;
+    if ( (feature != null) && (! feature.isEmpty() ) &&      
+            document.getFeatures().containsKey(feature) ) { 
+      Object value = document.getFeatures().get(feature);
+      if (value != null) {
+        identifier = value.toString();
+      }
+    }
+
+    if (identifier == null) { 
+      URL url = document.getSourceUrl();
+      if (url != null) {
+        identifier = url.toString();
+      }
     }
     
-    //implied else
-    return url.toString();
+    if (identifier == null) {
+      identifier = document.getName();
+    }
+
+    return String.format("%s [%d]", identifier, index);
   }
   
 
