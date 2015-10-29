@@ -56,6 +56,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import org.xhtmlrenderer.simple.XHTMLPanel;
@@ -154,7 +155,8 @@ public class TermbankViewer
     controlPanel.repaint();
     
     termbankTable = new JTable();
-    termbankTable.setAutoCreateRowSorter(true);
+    // The auto thing may interfere with the manual one
+    termbankTable.setAutoCreateRowSorter(false);
     // Set the table model later, because the specific type of termbank
     // will determine the number of columns
     freqScrollPane = new JScrollPane(termbankTable, 
@@ -293,6 +295,10 @@ public class TermbankViewer
     sliderPanel.reformat();
     termbankTableModel = new TermbankTableModel(this.termbank);
     termbankTable.setModel(termbankTableModel);
+    TableRowSorter<TermbankTableModel> sorter = new TableRowSorter<TermbankTableModel>(termbankTableModel);
+    termbankTableModel.setComparators(sorter);
+    // above calls sorter.setComparator(column, comparator) on all Number columns
+    termbankTable.setRowSorter(sorter);
     miscTable.setModel(new MiscTableModel(termbank.getMiscDataForGui()));
   }
 
@@ -460,3 +466,5 @@ class MiscTableModel extends AbstractTableModel {
   }
   
 }
+
+

@@ -17,8 +17,10 @@ import gate.termraider.util.Term;
 import gate.termraider.util.TermComparator;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableRowSorter;
 
 
 public class TermbankTableModel extends AbstractTableModel {
@@ -78,6 +80,31 @@ public class TermbankTableModel extends AbstractTableModel {
     }
     
     return this.scoreTypes.get(col - 1).toString();
+  }
+
+  
+  public void setComparators(TableRowSorter<TermbankTableModel> sorter) {
+    Comparator<Number> numberComparator = new NumberComparator();
+    for (int i = 1 ; i < this.getColumnCount() ; i++ ) {
+      sorter.setComparator(i, numberComparator);
+    }
+  }
+  
+  
+}
+
+
+class NumberComparator implements Comparator<Number>  {
+
+  @Override
+  public int compare(Number o1, Number o2) {
+    if (o1.doubleValue() == o2.doubleValue()) {
+      return 0;
+    }
+    if (o1.doubleValue() < o2.doubleValue()) {
+      return -1;
+    }
+    return 1;
   }
 
 }
