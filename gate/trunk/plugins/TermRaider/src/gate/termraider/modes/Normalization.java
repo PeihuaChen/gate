@@ -14,13 +14,17 @@ package gate.termraider.modes;
 public enum Normalization {
   None,
   Hundred,
-  Sigmoid;
+  Sigmoid,
+  SigmoidOld;
   
   
   // Old scale was mushing too many terms together where rounding made them
   // all appear tied for 100.0.
-  private static double xScale = 80;
+  // The old scale is available as a non-default option for backward compatibility
+  private static double xScaleDefault = 80;
+  private static double xScaleOld = 4.8;
 
+  
   
   public static double calculate(Normalization mode, Number raw) {
     if (mode == None) {
@@ -31,8 +35,13 @@ public enum Normalization {
       return 100.0 * raw.doubleValue();
     }
     
+    if (mode == SigmoidOld) {
+      return normalizeScore(raw.doubleValue(), xScaleOld);
+    }
+    
+    
     // must be sigmoid
-    return normalizeScore(raw.doubleValue());
+    return normalizeScore(raw.doubleValue(), xScaleDefault);
   }
   
   
@@ -43,7 +52,7 @@ public enum Normalization {
    * @param score from 0 to inf 
    * @return score from 0 to 100
    */
-  private static double normalizeScore(double score) {
+  private static double normalizeScore(double score, double xScale) {
     double norm = 2.0 / (1.0 + Math.exp(-score / xScale)) - 1.0;
     return (double) (100.0F * norm);
   }
