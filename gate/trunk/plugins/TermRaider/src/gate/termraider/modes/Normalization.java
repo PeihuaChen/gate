@@ -17,7 +17,9 @@ public enum Normalization {
   Sigmoid;
   
   
-  private static double xScale = 4.8;
+  // Old scale was mushing too many terms together where rounding made them
+  // all appear tied for 100.0.
+  private static double xScale = 80;
 
   
   public static double calculate(Normalization mode, Number raw) {
@@ -34,9 +36,6 @@ public enum Normalization {
   }
   
   
-  // TODO: make the following private, remove deprecation,
-  // and add normalization options to the termbanks (except DFB)
-  
   /**
    * The following produces the right half of a sigmoid 
    * curve adjusted so that
@@ -44,8 +43,7 @@ public enum Normalization {
    * @param score from 0 to inf 
    * @return score from 0 to 100
    */
-  @Deprecated
-  public static double normalizeScore(double score) {
+  private static double normalizeScore(double score) {
     double norm = 2.0 / (1.0 + Math.exp(-score / xScale)) - 1.0;
     return (double) (100.0F * norm);
   }
