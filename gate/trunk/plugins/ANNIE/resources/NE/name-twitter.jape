@@ -34,17 +34,21 @@ Macro: TITLE
 
 Macro: FIRSTNAME
 
- ({FirstPerson.gender == male, FirstPerson.kind != ambig} |
-  {FirstPerson.gender == female, FirstPerson.kind != ambig})
+ ({FirstPerson.gender == male, FirstPerson.kind != ambig, FirstPerson.twittername == no} |
+  {FirstPerson.gender == female, FirstPerson.kind != ambig, FirstPerson.twittername == no})
+
 
 
 Macro: FIRSTNAMEAMBIG
 (
- {FirstPerson.kind == ambig}
+ {FirstPerson.kind == ambig, FirstPerson.twittername == no}
 )
 
+Macro: FIRSTNAMETWITTER
 
-
+(
+ {FirstPerson.twittername == yes}
+)
 
 
 Macro: PERSONENDING
@@ -137,6 +141,36 @@ features.put("gender", personAnn.getFeatures().get("gender"));
 gate.Utils.addAnn(outputAS, personSet, "TempPerson", features);
 }
 
+Rule:	GazPersonFirstTwitter
+Priority: 300
+(
+ {Token.category == DT}|
+ {Token.category == PRP}|
+ {Token.category == RB}
+)?
+(
+ {FirstPerson.twittername == yes, FirstPerson.kind != ambig}
+):person 
+( 
+ {Token.orth == upperInitial, Token.length == "1"}
+)?
+-->
+{
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+features.put("gender", personAnn.getFeatures().get("gender"));
+features.put("kind", "firstName");
+features.put("rule", "GazPersonFirstTwitter");
+
+// get the string of the first name
+String contentFirstName = gate.Utils.stringFor(doc, personAnn);
+features.put("firstName", contentFirstName);
+features.put("twittername", "yes");
+
+outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
+features);
+}
 
 
 
@@ -531,6 +565,55 @@ Priority: 100
 :person.Discard = {rule = "PersonFullInitialsCaps"}
 
 
+Rule: 	PersonFull
+Priority: 10
+// F.W. Jones
+// Fred Jones
+
+(
+ 
+  (FIRSTNAME | FIRSTNAMEAMBIG ):firstName
+  ((FIRSTNAME | FIRSTNAMEAMBIG )?):middleName
+ ((PREFIX)*
+  ({Upper,!Initials})
+  (PERSONENDING)?
+ ):surname
+):person -->
+{
+ gate.FeatureMap features = Factory.newFeatureMap();
+ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
+ gate.Annotation personAnn = (gate.Annotation)personSet.iterator().next();
+  
+  gate.AnnotationSet firstNameSet = (gate.AnnotationSet)bindings.get("firstName");
+  gate.Annotation firstNameAnn = (gate.Annotation)firstNameSet.iterator().next();
+ 
+ String firstNameContent = gate.Utils.stringFor(doc, firstNameAnn);
+ features.put("firstName", firstNameContent);
+ features.put("gender", firstNameAnn.getFeatures().get("gender"));
+
+ gate.AnnotationSet middleNameSet = (gate.AnnotationSet)bindings.get("middleName");
+
+ if (middleNameSet != null && middleNameSet.size()>0)
+{
+ gate.Annotation middleNameAnn = (gate.Annotation)middleNameSet.iterator().next();
+ String middleNameContent = gate.Utils.stringFor(doc, middleNameAnn);
+ features.put("middleName", middleNameContent);
+}
+
+ gate.AnnotationSet surnameSet = (gate.AnnotationSet)bindings.get("surname");
+ gate.Annotation surnameAnn = (gate.Annotation)surnameSet.iterator().next();
+
+ String surnameContent = gate.Utils.stringFor(doc, surnameAnn);
+ features.put("surname", surnameContent);
+
+ features.put("kind", "fullName");
+ features.put("rule", "PersonFull");
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+features);
+
+}
+
+
 
 Rule: 	PersonFullInitials
 Priority: 10
@@ -586,53 +669,8 @@ features);
 }
 
 
-Rule: 	PersonFull
-Priority: 10
-// F.W. Jones
-// Fred Jones
 
-(
- 
-  (FIRSTNAME | FIRSTNAMEAMBIG ):firstName
-  ((FIRSTNAME | FIRSTNAMEAMBIG )?):middleName
- ((PREFIX)*
-  ({Upper,!Initials})
-  (PERSONENDING)?
- ):surname
-):person -->
-{
- gate.FeatureMap features = Factory.newFeatureMap();
- gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
- gate.Annotation personAnn = (gate.Annotation)personSet.iterator().next();
-  
-  gate.AnnotationSet firstNameSet = (gate.AnnotationSet)bindings.get("firstName");
-  gate.Annotation firstNameAnn = (gate.Annotation)firstNameSet.iterator().next();
- 
- String firstNameContent = gate.Utils.stringFor(doc, firstNameAnn);
- features.put("firstName", firstNameContent);
- features.put("gender", firstNameAnn.getFeatures().get("gender"));
 
- gate.AnnotationSet middleNameSet = (gate.AnnotationSet)bindings.get("middleName");
-
- if (middleNameSet != null && middleNameSet.size()>0)
-{
- gate.Annotation middleNameAnn = (gate.Annotation)middleNameSet.iterator().next();
- String middleNameContent = gate.Utils.stringFor(doc, middleNameAnn);
- features.put("middleName", middleNameContent);
-}
-
- gate.AnnotationSet surnameSet = (gate.AnnotationSet)bindings.get("surname");
- gate.Annotation surnameAnn = (gate.Annotation)surnameSet.iterator().next();
-
- String surnameContent = gate.Utils.stringFor(doc, surnameAnn);
- features.put("surname", surnameContent);
-
- features.put("kind", "fullName");
- features.put("rule", "PersonFull");
-outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
-features);
-
-}
 
 Rule: 	PersonFullDoubleBarrelled
 Priority: 9
@@ -727,7 +765,7 @@ Priority: 10
  features.put("surname", surnameContent);
 
  features.put("kind", "fullName");
- features.put("rule", "PersonFull");
+ features.put("rule", "PersonMiddleInitial");
 outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 

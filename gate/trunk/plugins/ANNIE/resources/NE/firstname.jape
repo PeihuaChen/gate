@@ -14,8 +14,79 @@
 */
 
 Phase:	FirstName
-Input: Token Lookup ClosedClass NumberLetter
+Input: Token Lookup ClosedClass NumberLetter UserID
 Options: control = appelt
+
+
+Rule: FirstNameTwitterName
+Priority: 500
+// @fred
+
+(
+ {Lookup.majorType == person_first, UserID, Lookup.kind !=ambig}
+):person
+-->
+{
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+
+//find out if the gender is unambiguous
+String gender = (String)personAnn.getFeatures().get("minorType");
+boolean ambig = false;
+gate.FeatureMap constraints = Factory.newFeatureMap();
+constraints.put("majorType", "person_first");
+Iterator lookupsIter =  inputAS.get(personAnn.getStartNode().getOffset()).get("Lookup", constraints).iterator();
+while(!ambig && lookupsIter.hasNext()){
+  gate.Annotation anAnnot = (gate.Annotation)lookupsIter.next();
+  //we're only interested in annots of the same length
+  if(anAnnot.getEndNode().getOffset().equals(personAnn.getEndNode().getOffset())){
+    ambig = !gender.equals(anAnnot.getFeatures().get("minorType"));
+  }
+}
+if(!ambig) features.put("gender", gender);
+
+features.put("rule", "FirstNameTwitterName");
+features.put("twittername", "yes");
+outputAS.add(person.firstNode(), person.lastNode(), "FirstPerson",
+features);
+}
+
+
+Rule: FirstNameTwitterNameAmbig
+Priority: 600
+// @mark
+
+(
+ {Lookup.majorType == person_first, UserID, Lookup.kind ==ambig}
+):person
+-->
+{
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
+gate.FeatureMap features = Factory.newFeatureMap();
+
+//find out if the gender is unambiguous
+String gender = (String)personAnn.getFeatures().get("minorType");
+boolean ambig = false;
+gate.FeatureMap constraints = Factory.newFeatureMap();
+constraints.put("majorType", "person_first");
+Iterator lookupsIter =  inputAS.get(personAnn.getStartNode().getOffset()).get("Lookup", constraints).iterator();
+while(!ambig && lookupsIter.hasNext()){
+  gate.Annotation anAnnot = (gate.Annotation)lookupsIter.next();
+  //we're only interested in annots of the same length
+  if(anAnnot.getEndNode().getOffset().equals(personAnn.getEndNode().getOffset())){
+    ambig = !gender.equals(anAnnot.getFeatures().get("minorType"));
+  }
+}
+if(!ambig) features.put("gender", gender);
+
+features.put("rule", "FirstNameTwitterNameAmbig");
+features.put("twittername", "yes");
+features.put("kind", "ambig");
+outputAS.add(person.firstNode(), person.lastNode(), "FirstPerson",
+features);
+}
 
 
 Rule: FirstName
@@ -47,6 +118,7 @@ while(!ambig && lookupsIter.hasNext()){
 if(!ambig) features.put("gender", gender);
 
 features.put("rule", "FirstName");
+features.put("twittername", "no");
 outputAS.add(person.firstNode(), person.lastNode(), "FirstPerson",
 features);
 }
@@ -85,6 +157,7 @@ if(!ambig) features.put("gender", gender);
 
 features.put("rule", "FirstNameAmbig");
 features.put("kind", "ambig");
+features.put("twittername", "no");
 outputAS.add(person.firstNode(), person.lastNode(), "FirstPerson",
 features);
 }
