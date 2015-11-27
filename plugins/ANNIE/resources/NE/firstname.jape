@@ -27,7 +27,7 @@ Priority: 500
 ):person
 -->
 {
-gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person").get("Lookup");
 gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 
@@ -62,7 +62,7 @@ Priority: 600
 ):person
 -->
 {
-gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person");
+gate.AnnotationSet person = (gate.AnnotationSet)bindings.get("person").get("Lookup");
 gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 
