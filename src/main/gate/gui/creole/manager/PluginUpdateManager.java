@@ -149,7 +149,9 @@ public class PluginUpdateManager extends JDialog {
       "SAGA",
       "http://demos.gsi.dit.upm.es/SAGA/gate-update-site.xml",
       "Austrian Research Institute for AI (OFAI)",
-      "http://www.ofai.at/~johann.petrak/GATE/gate-update-site.xml"};
+      "http://www.ofai.at/~johann.petrak/GATE/gate-update-site.xml",
+      "BGLangTools",
+      "http://www.grigoriliev.com/bglangtools/plugins/gate/gate-update-site.xml"};
 
   public static File getUserPluginsHome() {
     
