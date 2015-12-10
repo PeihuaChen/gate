@@ -4093,6 +4093,7 @@ Politicians NNS
 Politics NNS NNP NN NNPS
 Politrick NN
 Polls NNS
+Pollution NN
 Polysilicon NN
 Polyurethane NN
 Polyvinyl NN
@@ -13564,6 +13565,7 @@ pollinated VBN
 polling NN
 polls NNS VBZ
 pollute VB
+pollution NN
 pollution-control JJ NN
 pollution-reduction NN
 ponder VB VBP
