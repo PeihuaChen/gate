@@ -291,8 +291,43 @@ public class DocumentJsonUtils {
    */
   public static void writeDocument(Document doc, Long start, Long end,
           Map<String, Collection<Annotation>> annotationsMap,
-          Map<?, ?> extraFeatures, String annotationTypeProperty,
-          JsonGenerator json) throws JsonGenerationException, IOException,
+          Map<?, ?> extraFeatures, String annotationTypeProperty, JsonGenerator json) 
+          throws JsonGenerationException, IOException, InvalidOffsetException {
+    writeDocument(doc, start, end, annotationsMap, extraFeatures, annotationTypeProperty, null, json);
+
+  } 
+  /**
+   * Write a substring of a GATE document to the specified
+   * JsonGenerator. The specified window of document text will be
+   * written as a property named "text" and the specified annotations
+   * will be written as "entities", with their offsets adjusted to be
+   * relative to the specified window.
+   * 
+   * @param doc the document to write
+   * @param start the start offset of the segment to write
+   * @param end the end offset of the segment to write
+   * @param extraFeatures additional properties to add to the generated
+   *          JSON. If the map includes a "text" key this will be
+   *          ignored, and if it contains a key "entities" whose value
+   *          is a map then these entities will be merged with the
+   *          generated ones derived from the annotationsMap. This would
+   *          typically be used for documents that were originally
+   *          derived from Twitter data, to re-create the original JSON.
+   * @param annotationTypeProperty if non-null, the annotation type will
+   *          be written as a property under this name, as if it were an
+   *          additional feature of each annotation.
+   * @param annotationIDProperty if non-null, the annotation ID will
+   *          be written as a property under this name, as if it were an
+   *          additional feature of each annotation.
+   * @param json the {@link JsonGenerator} to write to.
+   * @throws JsonGenerationException if a problem occurs while
+   *           generating the JSON
+   * @throws IOException if an I/O error occurs.
+   */
+  public static void writeDocument(Document doc, Long start, Long end,
+          Map<String, Collection<Annotation>> annotationsMap,
+          Map<?, ?> extraFeatures, String annotationTypeProperty, 
+          String annotationIDProperty, JsonGenerator json) throws JsonGenerationException, IOException,
           InvalidOffsetException {
     ObjectWriter writer = MAPPER.writer();
 
@@ -327,6 +362,9 @@ public class DocumentJsonUtils {
         json.writeEndArray(); // end of indices
         if(annotationTypeProperty != null) {
           json.writeStringField(annotationTypeProperty, a.getType());
+        } 
+        if (annotationIDProperty != null) {
+          json.writeNumberField(annotationIDProperty, a.getId());
         }
         // other features
         for(Map.Entry<?, ?> feature : a.getFeatures().entrySet()) {
