@@ -37,8 +37,8 @@
   <target name="compile" depends="init"
         description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" source="1.6" target="1.6"
-           classpathref="compile.classpath">
+    <javac srcdir="${src}" destdir="${build}" source="1.7" target="1.7"
+           classpathref="compile.classpath" debug="true" debuglevel="lines,source">
     	<compilerarg value="-Xmaxwarns" />
 		<compilerarg value="${gate.compile.maxwarnings}" />
 		<compilerarg value="-Xlint:all" />
@@ -55,7 +55,7 @@
              classpathref="compile.classpath"
              encoding="UTF-8"
              windowtitle="${plugin.name} JavaDoc"
-             source="1.6">
+             source="1.7">
       <sourcepath>
         <pathelement location="${src}" />
       </sourcepath>
