@@ -22,7 +22,9 @@ import gate.GateConstants;
 import gate.Resource;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.AutoInstance;
+import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
 import gate.util.DocumentFormatException;
 import gate.util.InvalidOffsetException;
 import gate.util.Strings;
@@ -32,6 +34,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,6 +67,14 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
   protected static final Logger logger = Logger.getLogger(
       PubmedTextDocumentFormat.class);
   
+  protected String fieldPattern;
+
+  protected String ignorePattern;
+
+  protected List<String> fieldsForText;
+
+  protected List<String> excludeFromFeatures;
+
   /* (non-Javadoc)
    * @see gate.DocumentFormat#supportsRepositioning()
    */
@@ -72,6 +83,57 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
     return false;
   }
 
+  @CreoleParameter(comment = "Regular expression that matches the (whole of the) "
+      + "first line of a new field. The expression should include two named "
+      + "capturing groups, <CODE> for the field code and <VALUE> for the "
+      + "field value.", defaultValue = "(?<CODE>....)- (?<VALUE>.*)")
+  public void setFieldPattern(String fieldPattern) {
+    this.fieldPattern = fieldPattern;
+  }
+
+  public String getFieldPattern() {
+    return fieldPattern;
+  }
+
+  @Optional
+  @CreoleParameter(comment = "Regular expression that matches (the whole of) "
+      + "any lines that should be silently ignored.  If unspecified, all "
+      + "lines are considered.")
+  public void setIgnorePattern(String ignorePattern) {
+    this.ignorePattern = ignorePattern;
+  }
+
+  public String getIgnorePattern() {
+    return ignorePattern;
+  }
+
+  @CreoleParameter(comment = "Fields which should be mapped into the document "
+      + "text.  Each entry in this list should be a string of the form "
+      + "fieldcode=annotationtype, the corresponding fields will be "
+      + "concatenated together, separated by blank lines, to form the content "
+      + "of the unpacked document, and each will be covered by an annotation of "
+      + "the appropriate type in the Original markups set.",
+      defaultValue = PUBMED_TITLE + "=title;" + PUBMED_ID + "=id;" +
+                PUBMED_AUTHORS + "=authors;" + PUBMED_ABSTRACT + "=abstract")
+  public void setFieldsForText(List<String> fieldsForText) {
+    this.fieldsForText = fieldsForText;
+  }
+
+  public List<String> getFieldsForText() {
+    return fieldsForText;
+  }
+
+  @CreoleParameter(comment = "Fields which should not be mapped to document "
+      + "features. All fields found in the text which are not mentioned here "
+      + "will be stored as features on the document.",
+      defaultValue = PUBMED_TITLE + ";" + PUBMED_ABSTRACT)
+  public void setExcludeFromFeatures(List<String> excludeFromFeatures) {
+    this.excludeFromFeatures = excludeFromFeatures;
+  }
+
+  public List<String> getExcludeFromFeatures() {
+    return excludeFromFeatures;
+  }
   
   /* (non-Javadoc)
    * @see gate.corpora.TextualDocumentFormat#init()
@@ -118,25 +180,32 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
       String line = content.readLine();
       String key = null;
       StringBuilder value = new StringBuilder();
-      Pattern linePatt =  Pattern.compile("(....)- (.*)");
+      Pattern ignorePatt = null;
+      if(ignorePattern != null) {
+        ignorePatt = Pattern.compile(ignorePattern);
+      }
+      Pattern linePatt =  Pattern.compile(fieldPattern);
       while(line!= null) {
-        Matcher matcher = linePatt.matcher(line);
-        if(matcher.matches()) {
-          // new field
-          if(key != null) {
-            // save old value
-            PubmedUtils.addFieldValue(key, value.toString(), fields);
-          }
-          key = matcher.group(1).trim();
-          value.delete(0, value.length());
-          value.append(matcher.group(2));
-        } else {
-          // a non-assignment line -> append to previous value
-          if(value.length() == 0) {
-            logger.warn("Ignoring invalid input line:\""  +
-            	line +	"\"");
+        // skip ignorable lines
+        if(ignorePatt == null || !ignorePatt.matcher(line).matches()) {
+          Matcher matcher = linePatt.matcher(line);
+          if(matcher.matches()) {
+            // new field
+            if(key != null) {
+              // save old value
+              PubmedUtils.addFieldValue(key, value.toString(), fields);
+            }
+            key = matcher.group("CODE").trim();
+            value.delete(0, value.length());
+            value.append(matcher.group("VALUE"));
           } else {
-            value.append(Strings.getNl()).append(line.trim());
+            // a non-assignment line -> append to previous value
+            if(value.length() == 0) {
+              logger.warn("Ignoring invalid input line:\""  +
+                  line +	"\"");
+            } else {
+              value.append(Strings.getNl()).append(line.trim());
+            }
           }
         }
         line = content.readLine();
@@ -146,77 +215,41 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
         PubmedUtils.addFieldValue(key, value.toString(), fields);
       }
       StringBuilder docText = new StringBuilder();
-      // add document title
-      int titleStart = docText.length();
-      int titleEnd = titleStart;
-      Serializable aField = fields.remove(PUBMED_TITLE);
-      if(aField != null) {
-        docText.append(PubmedUtils.getFieldValueString(aField));
-        titleEnd = docText.length();
-        docText.append(Strings.getNl()).append(Strings.getNl());
-      } else {
-        String docName = doc.getName();  
-        logger.warn("Could not find document title in document " + 
-            (docName != null ? docName : ""));
+      // build document text
+      int[] starts = new int[fieldsForText.size()];
+      int[] ends = new int[fieldsForText.size()];
+      for(int i = 0; i < fieldsForText.size(); i++) {
+        String[] field = fieldsForText.get(i).split("=", 2);
+        starts[i] = docText.length();
+        ends[i] = starts[i];
+        Serializable aField = fields.get(field[0]);
+        if(aField != null) {
+          docText.append(PubmedUtils.getFieldValueString(aField));
+          ends[i] = docText.length();
+          docText.append(Strings.getNl()).append(Strings.getNl());
+        } else {
+          String docName = doc.getName();  
+          logger.warn("Could not find " + field[1] + " in document " + 
+              (docName != null ? docName : ""));
+        }
       }
-      // add ID
-      int idStart = docText.length();
-      int idEnd = idStart;
-      aField = fields.get(PUBMED_ID);
-      if(aField != null) {
-        docText.append(PubmedUtils.getFieldValueString(aField));
-        idEnd = docText.length();
-        docText.append(Strings.getNl()).append(Strings.getNl());
-      } else {
-        String docName = doc.getName();  
-        logger.warn("Could not find document ID in document " + 
-            (docName != null ? docName : ""));
-      }
-      // add authors
-      int authorStart = docText.length();
-      int authorEnd = authorStart;
-      aField = fields.get(PUBMED_AUTHORS);
-      if(aField != null) {
-        docText.append(PubmedUtils.getFieldValueString(aField));
-        authorEnd = docText.length();
-        docText.append(Strings.getNl()).append(Strings.getNl());
-      } else {
-        String docName = doc.getName();  
-        logger.warn("Could not find document authors in document " + 
-            (docName != null ? docName : ""));
-      }
-      // and the document abstract
-      aField = fields.remove(PUBMED_ABSTRACT);
-      int absStart = docText.length();
-      if(aField != null) {
-        docText.append(PubmedUtils.getFieldValueString(aField));
-      } else {
-        String docName = doc.getName();  
-        logger.warn("Could not find document abstract in document " + 
-            (docName != null ? docName : ""));
-      }
-      int absEnd = docText.length();
+
       doc.setContent(new DocumentContentImpl(docText.toString()));
       
       AnnotationSet origMkups = doc.getAnnotations(
           GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
-      if(titleEnd > titleStart){
-        origMkups.add((long)titleStart, (long)titleEnd, "title", 
-            Factory.newFeatureMap());
+      for(int i = 0; i < fieldsForText.size(); i++) {
+        String[] field = fieldsForText.get(i).split("=", 2);
+        if(ends[i] > starts[i]) {
+          origMkups.add((long)starts[i], (long)ends[i], field[1], 
+              Factory.newFeatureMap());
+        }
       }
-      if(idEnd > idStart){
-        origMkups.add((long)idStart, (long)idEnd, "id", 
-            Factory.newFeatureMap());
-      }
-      if(authorEnd > authorStart) {
-        origMkups.add((long)authorStart, (long)authorEnd, "authors", 
-            Factory.newFeatureMap());
-      }
-      if(absEnd > absStart) {
-        origMkups.add((long)absStart, (long)absEnd, "abstract", 
-            Factory.newFeatureMap());
-      }
+
       // everything else becomes document features
+      for(String keyToExclude : excludeFromFeatures) {
+        fields.remove(keyToExclude);
+      }
       doc.getFeatures().putAll(fields);
     } catch(IOException e) {
       throw new DocumentFormatException("Error while unpacking markup",e); 
