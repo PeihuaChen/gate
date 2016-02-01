@@ -164,61 +164,13 @@
         <gate.util.persistence.LanguageAnalyserPersistence>
           <runtimeParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap>
-              <entry>
-                <string>document</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>corpus</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>outputAnnotationType</string>
-                <string>Token</string>
-              </entry>
-              <entry>
-                <string>inputASName</string>
-                <string></string>
-              </entry>
-              <entry>
-                <string>failOnMissingInputAnnotations</string>
-                <boolean>true</boolean>
-              </entry>
-              <entry>
-                <string>outputASName</string>
-                <string></string>
-              </entry>
-              <entry>
-                <string>useExistingTags</string>
-                <boolean>true</boolean>
-              </entry>
-              <entry>
-                <string>baseSentenceAnnotationType</string>
-                <string>Sentence</string>
-              </entry>
-              <entry>
-                <string>baseTokenAnnotationType</string>
-                <string>Token</string>
-              </entry>
-              <entry>
-                <string>posTagAllTokens</string>
-                <boolean>true</boolean>
-              </entry>
-            </localMap>
+            <localMap/>
           </runtimeParams>
-          <resourceType>gate.stanford.Tagger</resourceType>
+          <resourceType>danish.POSTagger</resourceType>
           <resourceName>Danish POS tagger</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap>
-              <entry>
-                <string>modelFile</string>
-                <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$pos/ddt-pos.model</urlString>
-                </gate.util.persistence.PersistenceManager-URLHolder>
-              </entry>
-            </localMap>
+            <localMap/>
           </initParams>
           <features class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
