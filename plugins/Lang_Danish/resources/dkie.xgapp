@@ -147,26 +147,7 @@
                   <resourceName>Danish Gazetteers</resourceName>
                   <initParams class="gate.util.persistence.MapPersistence">
                     <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-                    <localMap>
-                      <entry>
-                        <string>listsURL</string>
-                        <gate.util.persistence.PersistenceManager-URLHolder>
-                          <urlString>$relpath$gazetteer/lists.def</urlString>
-                        </gate.util.persistence.PersistenceManager-URLHolder>
-                      </entry>
-                      <entry>
-                        <string>encoding</string>
-                        <string>UTF-8</string>
-                      </entry>
-                      <entry>
-                        <string>gazetteerFeatureSeparator</string>
-                        <null/>
-                      </entry>
-                      <entry>
-                        <string>caseSensitive</string>
-                        <boolean>true</boolean>
-                      </entry>
-                    </localMap>
+                    <localMap/>
                   </initParams>
                   <features class="gate.util.persistence.MapPersistence">
                     <mapType>gate.util.SimpleFeatureMapImpl</mapType>
