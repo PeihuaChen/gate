@@ -72,7 +72,7 @@
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap/>
           </runtimeParams>
-          <resourceType>danish.POSTagger</resourceType>
+          <resourceType>danish.DanishPOSTagger</resourceType>
           <resourceName>Danish POS tagger</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
