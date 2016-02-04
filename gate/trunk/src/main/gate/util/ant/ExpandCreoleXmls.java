@@ -138,7 +138,7 @@ public class ExpandCreoleXmls extends Task {
             fos.close();
           }
         }
-        catch(Exception e) {
+        catch(Throwable e) {
           log("Error processing " + creoleFile + ", skipped", Project.MSG_WARN);
           StringWriter sw = new StringWriter();
           PrintWriter pw = new PrintWriter(sw);
