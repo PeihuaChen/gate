@@ -87,22 +87,9 @@
           <runtimeParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
-              <entry>
-                <string>outputASName</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>document</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>inputASName</string>
-                <null/>
-              </entry>
-            </localMap>
           </runtimeParams>
           <resourceType>gate.creole.gazetteer.FlexibleGazetteer</resourceType>
-          <resourceName>DKIE normalising gazetteer</resourceName>
+          <resourceName>DKIE Normalising Gazetteer</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
@@ -120,28 +107,7 @@
                 <gate.util.persistence.LanguageAnalyserPersistence>
                   <runtimeParams class="gate.util.persistence.MapPersistence">
                     <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-                    <localMap>
-                      <entry>
-                        <string>wholeWordsOnly</string>
-                        <boolean>true</boolean>
-                      </entry>
-                      <entry>
-                        <string>longestMatchOnly</string>
-                        <boolean>true</boolean>
-                      </entry>
-                      <entry>
-                        <string>document</string>
-                        <null/>
-                      </entry>
-                      <entry>
-                        <string>corpus</string>
-                        <null/>
-                      </entry>
-                      <entry>
-                        <string>annotationSetName</string>
-                        <string>Output</string>
-                      </entry>
-                    </localMap>
+                    <localMap/>
                   </runtimeParams>
                   <resourceType>danish.DanishGazetteer</resourceType>
                   <resourceName>Danish Gazetteers</resourceName>
