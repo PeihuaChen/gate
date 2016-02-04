@@ -22,7 +22,7 @@ import gate.stanford.Tagger;
 
 @CreoleResource(name = "Danish POS Tagger",
     comment = "Stanford POS tagger trained on Tweets")
-public class POSTagger extends Tagger {
+public class DanishPOSTagger extends Tagger {
 
   private static final long serialVersionUID = 5657607888874448666L;
 
