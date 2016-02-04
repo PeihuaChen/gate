@@ -133,18 +133,11 @@
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap/>
           </runtimeParams>
-          <resourceType>gate.stanford.NER</resourceType>
-          <resourceName>Danish Stanford NER</resourceName>
+          <resourceType>danish.DanishNER</resourceType>
+          <resourceName>Danish NER</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap>
-              <entry>
-                <string>modelFile</string>
-                <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$ner/da01.model.gz</urlString>
-                </gate.util.persistence.PersistenceManager-URLHolder>
-              </entry>
-            </localMap>
+            <localMap/>
           </initParams>
           <features class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
