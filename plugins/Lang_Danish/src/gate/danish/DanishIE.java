@@ -17,7 +17,7 @@ import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.AutoInstanceParam;
 import gate.creole.metadata.CreoleResource;
 
-@CreoleResource(name = "Danish IE System",
+@CreoleResource(name = "Danish IE System", icon = "Danish",
     comment = "Ready-made Danish IE application",
     autoinstances = @AutoInstance(parameters = {
 	@AutoInstanceParam(name="pipelineURL", value="resources/dkie.xgapp"),
