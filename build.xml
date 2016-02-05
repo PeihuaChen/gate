@@ -362,7 +362,7 @@
       Tagger_NormaGene Tagger_NP_Chunking Tagger_Numbers Tagger_OpenCalais
       Tagger_PennBio Tagger_TextRazor Tagger_Zemanta
       Teamware_Tools TermRaider Text_Categorization Tools Twitter UIMA
-      Web_Crawler_Websphinx WordNet
+      Web_Crawler_Websphinx WordNet Lang_Danish
     " />
   <target name="plugins.build" depends="jar">
     <for param="plugin">
