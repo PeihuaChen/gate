@@ -596,12 +596,12 @@
   </target>
 
   <!-- Make the archives for the GATE Distribution -->
-  <target name="distro-zips" depends="prepare, compile, jar, doc, plugins.build, plugins.distro.prepare">
+  <target name="distro-zips" depends="prepare, compile, jar, plugins.build, doc, plugins.distro.prepare">
     <ant antfile="build/deploy/build.xml" target="make-zips" />
   </target>
 
   <!-- build the installer .jar -->
-  <target name="installer" depends="prepare, compile, jar, doc, plugins.build, plugins.distro.prepare">
+  <target name="installer" depends="prepare, compile, jar, plugins.build, doc, plugins.distro.prepare">
     <ant antfile="build/deploy/build.xml" target="build-installer" />
   </target>
 
