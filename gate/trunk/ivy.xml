@@ -125,7 +125,7 @@
     <dependency org="xmlunit" name="xmlunit" rev="1.5" conf="required->master" />
 
     <!-- Used for date and time formatting and parsing -->
-    <dependency org="joda-time" name="joda-time" rev="2.6" />
+    <dependency org="joda-time" name="joda-time" rev="2.9.2" />
 
     <!-- Used for testing GATE -->
     <dependency org="junit" name="junit" rev="4.11" conf="compile->master,compile" />
