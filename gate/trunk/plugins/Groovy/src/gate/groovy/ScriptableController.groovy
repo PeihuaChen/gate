@@ -126,7 +126,7 @@ eachDocument {
             pr.setParameterValue(k, v)
           }
           // inject the corpus and current document (if any)
-          if(pr instanceof LanguageAnalyser) {
+          if(pr instanceof LanguageAnalyser && !(params.containsKey('document') || params.containsKey('corpus'))) {
             if(corpus) {
               pr.corpus = corpus
             }
