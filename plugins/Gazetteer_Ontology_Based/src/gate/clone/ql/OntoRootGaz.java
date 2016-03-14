@@ -578,7 +578,7 @@ public class OntoRootGaz extends DefaultGazetteer {
           aNewLookup.features.put(CATConstants.FEATURE_HEURISTIC_LEVEL, hLevel);
           aNewLookup.features.put(CATConstants.FEATURE_HEURISTIC_VALUE, root);
           addLookup(root.trim(), aNewLookup);
-          logger.info("NEW ENTRY: " + root + "\n");
+          logger.debug("NEW ENTRY: " + root + "\n");
           int firstIndex = root.trim().indexOf(" ");
           String newRoot = root.trim();
           while(firstIndex >= 0) {
@@ -595,7 +595,7 @@ public class OntoRootGaz extends DefaultGazetteer {
             anotherLookup.features.put(CATConstants.FEATURE_HEURISTIC_VALUE,
                 newRoot.trim());
             addLookup(newRoot.trim(), anotherLookup);
-            logger.info("NEW ENTRY: " + newRoot + "\n");
+            logger.debug("NEW ENTRY: " + newRoot + "\n");
             firstIndex = newRoot.trim().indexOf(" ");
           }
         } else {// if it doesn't have spaces or
@@ -603,8 +603,8 @@ public class OntoRootGaz extends DefaultGazetteer {
           aLookup.features.put(CATConstants.FEATURE_HEURISTIC_LEVEL, 0L);
           if(root != null && aLookup != null) {
             addLookup(root.trim(), aLookup);
-            logger.info("NEW ENTRY: " + root + "\n");
-          } else logger.info("NEW ENTRY: " + root + "\n");
+            logger.debug("NEW ENTRY: " + root + "\n");
+          } else logger.debug("NEW ENTRY: " + root + "\n");
         }
       } else {
         logger.info("root is null for lookup:" + aLookup);
