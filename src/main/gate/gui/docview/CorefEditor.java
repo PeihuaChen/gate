@@ -490,7 +490,16 @@ public class CorefEditor
       // and return
       reinitAllVariables();
       explicitCall = false;
-      annotSets.setSelectedIndex(0);
+      
+      SwingUtilities.invokeLater(new Runnable(){
+        @Override
+        public void run() {
+          // not sure why this is necessary but if we are going to do
+          // it then at least do it on the EDT to avoid a violation
+          annotSets.setSelectedIndex(0);          
+        }
+      });
+      
       return;
     }
 
