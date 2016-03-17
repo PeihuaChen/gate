@@ -1660,12 +1660,18 @@ public class SerialControllerEditor extends AbstractVisualResource
             Object value = corpusCombo.getSelectedItem();
             Corpus corpus = value.equals("<none>") ? null : (Corpus)value;
             if(analyserMode && corpus == null){
-              JOptionPane.showMessageDialog(
-                SerialControllerEditor.this,
-                "No corpus provided!\n" +
-                "Please select a corpus and try again!",
-                "GATE", JOptionPane.ERROR_MESSAGE);
-              corpusCombo.requestFocusInWindow();
+              
+              SwingUtilities.invokeLater(new Runnable(){
+                @Override
+                public void run() {
+                  JOptionPane.showMessageDialog(
+                          SerialControllerEditor.this,
+                          "No corpus provided!\n" +
+                          "Please select a corpus and try again!",
+                          "GATE", JOptionPane.ERROR_MESSAGE);
+                        corpusCombo.requestFocusInWindow();
+                }                
+              });
               return;
             }
             if(controller instanceof CorpusController)
