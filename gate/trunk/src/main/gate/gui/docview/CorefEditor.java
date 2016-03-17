@@ -957,42 +957,53 @@ public class CorefEditor
       return;
     }
 
-    String currentAnnotSet = (String) annotSets.getSelectedItem();
+    System.out.println("calling from here");
+    
+    final String currentAnnotSet =
+            annotSets.getSelectedItem() != null ? (String)annotSets
+                    .getSelectedItem() : annotSets.getItemAt(0);
+                    
     // get all the types of the currently Selected AnnotationSet
-    if (currentAnnotSet == null)
-      currentAnnotSet = annotSets.getItemAt(0);
     AnnotationSet temp = getAnnotationSet(currentAnnotSet);
     Set<String> types = temp.getAllTypes();
     annotTypesModel = new DefaultComboBoxModel<String>();
     if (types != null) {
       annotTypesModel = new DefaultComboBoxModel<String>(types.toArray(new String[types.size()]));
     }
-    annotTypes.setModel(annotTypesModel);
-    annotTypes.updateUI();
+    
+    SwingUtilities.invokeLater(new Runnable() {
+      
+      @Override
+      public void run() {
+        annotTypes.setModel(annotTypesModel);
+        annotTypes.updateUI();
 
-    // and redraw the CorefTree
-    if (rootNode.getChildCount() > 0)
-      rootNode.removeAllChildren();
+        // and redraw the CorefTree
+        if (rootNode.getChildCount() > 0)
+          rootNode.removeAllChildren();
 
-    CorefTreeNode annotSetNode = corefAnnotationSetNodesMap.get(currentAnnotSet);
+        CorefTreeNode annotSetNode = corefAnnotationSetNodesMap.get(currentAnnotSet);
 
-    if (annotSetNode != null) {
-      rootNode.add(annotSetNode);
-      currentSelections = selectionChainsMap.get(currentAnnotSet);
-      currentColors = colorChainsMap.get(currentAnnotSet);
-      if (!corefTree.isVisible()) {
-        if (popupWindow != null && popupWindow.isVisible()) {
-          popupWindow.setVisible(false);
+        if (annotSetNode != null) {
+          rootNode.add(annotSetNode);
+          currentSelections = selectionChainsMap.get(currentAnnotSet);
+          currentColors = colorChainsMap.get(currentAnnotSet);
+          if (!corefTree.isVisible()) {
+            if (popupWindow != null && popupWindow.isVisible()) {
+              popupWindow.setVisible(false);
+            }
+            corefTree.setVisible(true);
+          }
+          corefTree.repaint();
+          corefTree.updateUI();
+
         }
-        corefTree.setVisible(true);
+        else {
+          corefTree.setVisible(false);
+        }
+    
       }
-      corefTree.repaint();
-      corefTree.updateUI();
-
-    }
-    else {
-      corefTree.setVisible(false);
-    }
+    });
   }
 
   /**
