@@ -456,11 +456,17 @@ public class ConditionalSerialAnalyserController
   @Override
   public void controllerExecutionStarted(Controller c)
       throws ExecutionException {
-    for(ControllerAwarePR pr : getControllerAwarePRs()) {
-      if(pr instanceof LanguageAnalyser) {
-        ((LanguageAnalyser)pr).setCorpus(corpus);
-      } 
-      pr.controllerExecutionStarted(this);
+    
+    for(int i=0; i<getPRs().size(); i++) {
+      ProcessingResource pr = getPRs().get(i);
+      if(pr instanceof ControllerAwarePR) {
+        if(getRunningStrategies().get(i).getRunMode() != RunningStrategy.RUN_NEVER) {
+          if(pr instanceof LanguageAnalyser) {
+            ((LanguageAnalyser)pr).setCorpus(corpus);
+          }
+          ((ControllerAwarePR)pr).controllerExecutionStarted(c);
+        }
+      }
     }
     
   }
@@ -468,29 +474,41 @@ public class ConditionalSerialAnalyserController
   @Override
   public void controllerExecutionFinished(Controller c)
       throws ExecutionException {
-    for(ControllerAwarePR pr : getControllerAwarePRs()) {
-      if(pr instanceof LanguageAnalyser) {
-        ((LanguageAnalyser)pr).setCorpus(corpus);
+    
+    for(int i=0; i<getPRs().size(); i++) {
+      ProcessingResource pr = getPRs().get(i);
+      if(pr instanceof ControllerAwarePR) {
+        if(getRunningStrategies().get(i).getRunMode() != RunningStrategy.RUN_NEVER) {
+          if(pr instanceof LanguageAnalyser) {
+            ((LanguageAnalyser)pr).setCorpus(corpus);
+          }
+          ((ControllerAwarePR)pr).controllerExecutionFinished(c);
+          if(pr instanceof LanguageAnalyser) {
+            ((LanguageAnalyser)pr).setCorpus(null);
+          }
+        }
       }
-      pr.controllerExecutionFinished(this);
-      if(pr instanceof LanguageAnalyser) {
-        ((LanguageAnalyser)pr).setCorpus(null);
-      }
-    }    
+    }       
   }
 
   @Override
   public void controllerExecutionAborted(Controller c, Throwable t)
       throws ExecutionException {
-    for(ControllerAwarePR pr : getControllerAwarePRs()) {
-      if(pr instanceof LanguageAnalyser) {
-        ((LanguageAnalyser)pr).setCorpus(corpus);
-      } 
-      pr.controllerExecutionAborted(c, t);
-      if(pr instanceof LanguageAnalyser) {
-        ((LanguageAnalyser)pr).setCorpus(null);
-      } 
-    }    
+    
+    for(int i=0; i<getPRs().size(); i++) {
+      ProcessingResource pr = getPRs().get(i);
+      if(pr instanceof ControllerAwarePR) {
+        if(getRunningStrategies().get(i).getRunMode() != RunningStrategy.RUN_NEVER) {
+          if(pr instanceof LanguageAnalyser) {
+            ((LanguageAnalyser)pr).setCorpus(corpus);
+          }
+          ((ControllerAwarePR)pr).controllerExecutionAborted(c,t);
+          if(pr instanceof LanguageAnalyser) {
+            ((LanguageAnalyser)pr).setCorpus(null);
+          }
+        }
+      }
+    }       
   }
   
    /**
@@ -502,15 +520,17 @@ public class ConditionalSerialAnalyserController
    */
   @Override
   public void invokeControllerExecutionStarted() throws ExecutionException {
-    for (ControllerAwarePR pr : getControllerAwarePRs()) {
-      // If the pr is a nested corpus controller, make sure its corpus is set 
-      // This is necessary because the nested corpus controller will immediately 
-      // notify its own controller aware PRs and those should be able to know about 
-      // the corpus.
-      if (pr instanceof LanguageAnalyser) {
-        ((LanguageAnalyser) pr).setCorpus(getCorpus());
+    
+    for(int i=0; i<getPRs().size(); i++) {
+      ProcessingResource pr = getPRs().get(i);
+      if(pr instanceof ControllerAwarePR) {
+        if(getRunningStrategies().get(i).getRunMode() != RunningStrategy.RUN_NEVER) {
+          if(pr instanceof LanguageAnalyser) {
+            ((LanguageAnalyser)pr).setCorpus(corpus);
+          }
+          ((ControllerAwarePR)pr).controllerExecutionStarted(this);
+        }
       }
-      pr.controllerExecutionStarted(this);
     }
   }
 
@@ -523,15 +543,22 @@ public class ConditionalSerialAnalyserController
    */
   @Override
   public void invokeControllerExecutionFinished() throws ExecutionException {
-    for (ControllerAwarePR pr : getControllerAwarePRs()) {
-      if (pr instanceof LanguageAnalyser) {
-        ((LanguageAnalyser) pr).setCorpus(getCorpus());
+    
+    for(int i=0; i<getPRs().size(); i++) {
+      ProcessingResource pr = getPRs().get(i);
+      if(pr instanceof ControllerAwarePR) {
+        if(getRunningStrategies().get(i).getRunMode() != RunningStrategy.RUN_NEVER) {
+          if(pr instanceof LanguageAnalyser) {
+            ((LanguageAnalyser)pr).setCorpus(corpus);
+          }
+          ((ControllerAwarePR)pr).controllerExecutionFinished(this);
+          if(pr instanceof LanguageAnalyser) {
+            ((LanguageAnalyser)pr).setCorpus(null);
+          }
+        }
       }
-      pr.controllerExecutionFinished(this);
-      if (pr instanceof LanguageAnalyser) {
-        ((LanguageAnalyser) pr).setCorpus(null);
-      }
-    }
+    }       
+    
   }
   
    /**
@@ -544,15 +571,21 @@ public class ConditionalSerialAnalyserController
    */
   @Override
   public void invokeControllerExecutionAborted(Throwable thrown) throws ExecutionException {
-    for (ControllerAwarePR pr : getControllerAwarePRs()) {
-      if (pr instanceof LanguageAnalyser) {
-        ((LanguageAnalyser) pr).setCorpus(getCorpus());
+    
+    for(int i=0; i<getPRs().size(); i++) {
+      ProcessingResource pr = getPRs().get(i);
+      if(pr instanceof ControllerAwarePR) {
+        if(getRunningStrategies().get(i).getRunMode() != RunningStrategy.RUN_NEVER) {
+          if(pr instanceof LanguageAnalyser) {
+            ((LanguageAnalyser)pr).setCorpus(corpus);
+          }
+          ((ControllerAwarePR)pr).controllerExecutionAborted(this,thrown);
+          if(pr instanceof LanguageAnalyser) {
+            ((LanguageAnalyser)pr).setCorpus(null);
+          }
+        }
       }
-      pr.controllerExecutionAborted(this, thrown);
-      if (pr instanceof LanguageAnalyser) {
-        ((LanguageAnalyser) pr).setCorpus(null);
-      }
-    }
+    }       
   }
   
   
