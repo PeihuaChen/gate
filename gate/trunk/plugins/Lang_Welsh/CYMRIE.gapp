@@ -2,13 +2,13 @@
   <urlList class="gate.util.persistence.CollectionPersistence">
     <localList>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$plugins/ANNIE/</urlString>
+        <urlString>$gatehome$plugins/ANNIE</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$plugins/Tools/</urlString>
+        <urlString>$gatehome$plugins/Tools</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../WNLT/</urlString>
+        <urlString>$relpath$</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
     </localList>
     <collectionType>java.util.ArrayList</collectionType>
@@ -17,9 +17,9 @@
     <corpus class="gate.util.persistence.CorpusPersistence">
       <dsData class="gate.util.persistence.DSPersistence">
         <className>gate.persist.SerialDataStore</className>
-        <storageUrlString>file:/home/andreas/workspace/WNLT/wnlt-datastore/</storageUrlString>
+        <storageUrlString>file:/home/mark/gate-top/externals/gate/plugins/Lang_Welsh/wnlt-datastore/</storageUrlString>
         <storageUrl class="gate.util.persistence.PersistenceManager$URLHolder">
-          <urlString>$relpath$wnlt-datastore/</urlString>
+          <urlString>$relpath$wnlt-datastore</urlString>
         </storageUrl>
       </dsData>
       <persistenceID class="string">BBC Cymru Fyw___1458684325386___847</persistenceID>
@@ -408,14 +408,14 @@
                       <mapType>gate.util.SimpleFeatureMapImpl</mapType>
                       <localMap>
                         <entry>
-                          <string>caseSensitive</string>
-                          <boolean>true</boolean>
-                        </entry>
-                        <entry>
                           <string>listsURL</string>
                           <gate.util.persistence.PersistenceManager-URLHolder>
                             <urlString>$relpath$gazetteer/lists.def</urlString>
                           </gate.util.persistence.PersistenceManager-URLHolder>
+                        </entry>
+                        <entry>
+                          <string>caseSensitive</string>
+                          <boolean>true</boolean>
                         </entry>
                         <entry>
                           <string>gazetteerFeatureSeparator</string>
@@ -462,12 +462,12 @@
                   <null/>
                 </entry>
                 <entry>
-                  <string>inputASName</string>
-                  <null/>
-                </entry>
-                <entry>
                   <string>enableDebugging</string>
                   <boolean>false</boolean>
+                </entry>
+                <entry>
+                  <string>inputASName</string>
+                  <null/>
                 </entry>
               </localMap>
             </runtimeParams>
