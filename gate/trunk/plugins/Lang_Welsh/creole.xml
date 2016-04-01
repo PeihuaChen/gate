@@ -26,7 +26,7 @@
         DEFAULT="resources/Tokeniser/postprocess.jape"
         COMMENT="The URL for the postprocessing transducer" SUFFIXES="jape">
         java.net.URL</PARAMETER>
-      <ICON>/resources/icons/welsh_tokenizer.png</ICON>
+      <ICON>welsh_tokenizer.png</ICON>
     </RESOURCE>
     <RESOURCE>
     <!-- Sentence Splitter Processing Resource -->
@@ -50,7 +50,7 @@
         DEFAULT="resources/sentenceSplitter/grammar/main-single-nl.jape"
         COMMENT="The URL for the transducer" SUFFIXES="jape">
         java.net.URL</PARAMETER>
-      <ICON>/resources/icons/welsh_splitter.png</ICON>
+      <ICON>welsh_splitter.png</ICON>
     </RESOURCE>
     <RESOURCE>
     <!-- Part of Speech Tagger Processing Resource -->
@@ -91,7 +91,7 @@
         DEFAULT="UTF-8"
         COMMENT="The encoding to be used for the ruleset and lexicon files"
         >java.lang.String</PARAMETER>
-      <ICON>/resources/icons/welsh_pos.png</ICON>
+      <ICON>welsh_pos.png</ICON>
     </RESOURCE>
     <RESOURCE>
     <!-- Morphological Analyser Processing Resource -->
@@ -140,7 +140,7 @@
         DEFAULT="resources/morph/grammar/validation-main.jape"
         COMMENT="The URL for the validation transducer" SUFFIXES="jape">
         java.net.URL</PARAMETER>
-	<ICON>/resources/icons/welsh_lemmatiser.png</ICON>	
+	<ICON>welsh_lemmatiser.png</ICON>	
     </RESOURCE>
  </CREOLE>
 </CREOLE-DIRECTORY>
