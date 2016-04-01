@@ -7,14 +7,18 @@
  */
 package wnlt;
 
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
 import gate.creole.splitter.SentenceSplitter;
+
+import java.net.URL;
 
 /**
  * This class extends the original SentenceSplitter class of ANNIE.
  * @author Andreas Vlachidis 20/03/2016
  * 
  */
-
+@CreoleResource(name="Welsh Sentence Splitter", icon="welsh_splitter.png")
 public class WelshSentenceSplitter extends SentenceSplitter {
 
 	private static final long serialVersionUID = 1L;
