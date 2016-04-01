@@ -1,0 +1,146 @@
+<?xml version="1.0"?>
+<!-- $Id: creole.xml 30100 2016-03-19 10:00:45Z andreasvlachidis $ -->
+<!-- creole.xml for Welsh Natural Language Toolkit PR-->
+<CREOLE-DIRECTORY>
+  <!-- Processing Resources -->
+  <CREOLE>
+    <JAR SCAN="true">wnlt.jar</JAR>
+    <!-- Tokenizer Processing Resource -->
+    <RESOURCE>
+      <NAME>Welsh Tokeniser</NAME>
+      <CLASS>wnlt.WelshTokeniser</CLASS>
+      <COMMENT>A customisable Welsh tokeniser.</COMMENT>
+      <PARAMETER NAME="document" COMMENT="The document to be tokenised"
+        RUNTIME="true">gate.Document</PARAMETER>
+      <PARAMETER NAME="annotationSetName" RUNTIME="true"
+        COMMENT="The annotation set to be used for the generated annotations"
+        OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="tokeniserRulesURL"
+        DEFAULT="resources/Tokeniser/WelshTokeniser.rules"
+        COMMENT="The URL for the rules file" SUFFIXES="rules" >
+        java.net.URL</PARAMETER>     
+      <PARAMETER NAME="encoding"
+        COMMENT="The encoding used for reading the definitions" DEFAULT="UTF-8">
+        java.lang.String</PARAMETER>
+      <PARAMETER NAME="transducerGrammarURL"
+        DEFAULT="resources/Tokeniser/postprocess.jape"
+        COMMENT="The URL for the postprocessing transducer" SUFFIXES="jape">
+        java.net.URL</PARAMETER>
+      <ICON>/resources/icons/welsh_tokenizer.png</ICON>
+    </RESOURCE>
+    <RESOURCE>
+    <!-- Sentence Splitter Processing Resource -->
+      <NAME>Welsh Sentence Splitter</NAME>
+      <CLASS>wnlt.WelshSentenceSplitter</CLASS>
+      <COMMENT>A customisable Sentence Splitter.</COMMENT>
+      <PARAMETER NAME="inputASName"
+        COMMENT="The name of the annotation set used for input"
+        RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="outputASName"
+        COMMENT="The name of the annotation set used for output"
+        RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="gazetteerListsURL"
+        DEFAULT="resources/sentenceSplitter/gazetteer/lists.def"
+        COMMENT="The URL for the gazetteer file" SUFFIXES="def" >
+        java.net.URL</PARAMETER>     
+      <PARAMETER NAME="encoding"
+        COMMENT="The encoding used for reading the definitions" DEFAULT="UTF-8">
+        java.lang.String</PARAMETER>
+       <PARAMETER NAME="transducerURL"
+        DEFAULT="resources/sentenceSplitter/grammar/main-single-nl.jape"
+        COMMENT="The URL for the transducer" SUFFIXES="jape">
+        java.net.URL</PARAMETER>
+      <ICON>/resources/icons/welsh_splitter.png</ICON>
+    </RESOURCE>
+    <RESOURCE>
+    <!-- Part of Speech Tagger Processing Resource -->
+      <NAME>Welsh POS Tagger</NAME>
+      <COMMENT>Mark Hepple's Brill-style POS tagger, adapted for Welsh</COMMENT>
+      <CLASS>wnlt.WelshPOSTagger</CLASS>
+      <PARAMETER NAME="document"
+        COMMENT="The document to be processed"
+        RUNTIME="true">gate.Document</PARAMETER>
+      <PARAMETER NAME="inputASName"
+        COMMENT="The name of the annotation set used for input"
+        RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="outputASName"
+        COMMENT="The name of the annotation set used for output"
+        RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="baseSentenceAnnotationType"
+        COMMENT="The base Sentence Annotation Type"
+        RUNTIME="true" OPTIONAL="false" DEFAULT="Sentence">java.lang.String</PARAMETER>
+      <PARAMETER NAME="baseTokenAnnotationType"
+        COMMENT="The base Token Annotation Type"
+        RUNTIME="true" OPTIONAL="false" DEFAULT="Token">java.lang.String</PARAMETER>
+      <PARAMETER NAME="failOnMissingInputAnnotations"
+        COMMENT="Boolean on failOnMissingInputAnnotations"
+        RUNTIME="true" OPTIONAL="true">java.lang.Boolean</PARAMETER>
+      <PARAMETER NAME="outputAnnotationType"
+        COMMENT="The output Token Annotation Type"
+        RUNTIME="true" OPTIONAL="false" DEFAULT="Token">java.lang.String</PARAMETER>
+      <PARAMETER NAME="posTagAllTokens"
+        COMMENT="The posTagAllTokens"
+        RUNTIME="true" OPTIONAL="true" DEFAULT="true">java.lang.Boolean</PARAMETER>
+      <PARAMETER NAME="lexiconURL" DEFAULT="resources/postag/lexicon"
+        COMMENT="The URL for the lexicon file"
+        >java.net.URL</PARAMETER>
+      <PARAMETER NAME="rulesURL" DEFAULT="resources/postag/ruleset"
+        COMMENT="The URL for the ruleset file"
+        >java.net.URL</PARAMETER>
+      <PARAMETER NAME="encoding"
+        DEFAULT="UTF-8"
+        COMMENT="The encoding to be used for the ruleset and lexicon files"
+        >java.lang.String</PARAMETER>
+      <ICON>/resources/icons/welsh_pos.png</ICON>
+    </RESOURCE>
+    <RESOURCE>
+    <!-- Morphological Analyser Processing Resource -->
+      <NAME>Welsh Morphological Analyser</NAME>
+      <COMMENT>Morphological Ananyser for Welsh</COMMENT>
+      <CLASS>wnlt.morph.WelshMorph</CLASS>
+      <COMMENT>Morphological Analyser for the Welsh Language.</COMMENT>
+      <PARAMETER NAME="document" COMMENT="The document to be processed"
+        RUNTIME="true">gate.Document</PARAMETER>
+      <PARAMETER NAME="rulesFile"
+        COMMENT="File which defines rules for the morphological analysis"
+        DEFAULT="resources/morph/default.rul" RUNTIME="false">
+        java.net.URL</PARAMETER>
+      <PARAMETER NAME="annotationSetName"
+        COMMENT="The name of the annotation set used for input" RUNTIME="true"
+        OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="affixFeatureName" COMMENT="Name of the affix variable"
+        DEFAULT="affix" OPTIONAL="false" RUNTIME="true">
+        java.lang.String</PARAMETER>
+      <PARAMETER NAME="rootFeatureName"
+        COMMENT="Name of the variable which shows the root word" DEFAULT="lemma"
+        OPTIONAL="false" RUNTIME="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="considerPOSTag"
+        COMMENT="If parser should consider POS Tag prior to running Morph"
+        DEFAULT="true" OPTIONAL="false" RUNTIME="true">
+        java.lang.Boolean</PARAMETER>
+      <PARAMETER NAME="caseSensitive"
+        COMMENT="If parser should be converted to lowercase first"
+        DEFAULT="false" OPTIONAL="false" RUNTIME="false">
+        java.lang.Boolean</PARAMETER>
+        <PARAMETER NAME="lexiconURL" DEFAULT="resources/morph/lexicon"
+        COMMENT="The URL for the lexicon file"
+        >java.net.URL</PARAMETER>
+       <PARAMETER NAME="gazetteerListsURL"
+        DEFAULT="resources/morph/gazetteer/lists.def"
+        COMMENT="The URL for the gazetteer file" SUFFIXES="def" >
+        java.net.URL</PARAMETER>     
+      <PARAMETER NAME="encoding"
+        COMMENT="The encoding used for reading the definitions" DEFAULT="UTF-8">
+        java.lang.String</PARAMETER>
+       <PARAMETER NAME="transducerURL"
+        DEFAULT="resources/morph/grammar/postprocess.jape"
+        COMMENT="The URL for the postprocess transducer" SUFFIXES="jape">
+        java.net.URL</PARAMETER>
+	<PARAMETER NAME="validationTransducerURL"
+        DEFAULT="resources/morph/grammar/validation-main.jape"
+        COMMENT="The URL for the validation transducer" SUFFIXES="jape">
+        java.net.URL</PARAMETER>
+	<ICON>/resources/icons/welsh_lemmatiser.png</ICON>	
+    </RESOURCE>
+ </CREOLE>
+</CREOLE-DIRECTORY>
