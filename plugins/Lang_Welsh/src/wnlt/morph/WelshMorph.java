@@ -56,12 +56,18 @@ import wnlt.LexiconCY;
  * 
  */
 
-@CreoleResource(name = "GATE Morphological analyser",
-        comment = "Morphological Analyzer of the Welsh Natural Language Toolkit")
+@CreoleResource(name = "Welsh Morphological Analyser",
+        comment = "Morphological Analyzer of the Welsh Natural Language Toolkit", icon="welsh_lemmatiser.png")
 public class WelshMorph
     extends AbstractLanguageAnalyser
     implements ProcessingResource, CustomDuplication, Benchmarkable {
 
+  // note that this package could probably be simplified as the only modified
+  // class from the original is Interpret so we may be able to just use the
+  // existing classes, but for safety we currently use an entire copy, although
+  // this may make bug fixing harder in the future
+  
+  
   private static final long serialVersionUID = 6964689654685956128L;
 
   /** File which contains rules to be processed */
@@ -434,7 +440,7 @@ public class WelshMorph
     // end execute Transducer and Gazetteer
     if(isInterrupted()) throw new ExecutionInterruptedException(
         "The execution of the \"" + getName() +
-        "\" tokeniser has been abruptly interrupted!");
+        "\" morphological analyser has been abruptly interrupted!");
     pListener = new IntervalProgressListener(50, 100);
     transducer.addProgressListener(pListener);
     transducer.addStatusListener(sListener);
@@ -483,6 +489,7 @@ public class WelshMorph
    * Sets the rule file to be processed
    * @param rulesFile - rule File name to be processed
    */
+  @CreoleParameter(comment = "File which defines rules for the morphological analysis", defaultValue = "resources/morph/default.rul")
   public void setRulesFile(URL rulesFile) {
     this.rulesFile = rulesFile;
   }
@@ -506,6 +513,8 @@ public class WelshMorph
    * Sets the feature name that should be displayed for the root word
    * @param rootFeatureName
    */
+  @RunTime
+  @CreoleParameter(comment="Name of the variable which shows the root word",defaultValue="lemma")
   public void setRootFeatureName(String rootFeatureName) {
     this.rootFeatureName = rootFeatureName;
   }
@@ -522,6 +531,8 @@ public class WelshMorph
    * Sets the feature name that should be displayed for the affix
    * @param affixFeatureName
    */
+  @RunTime
+  @CreoleParameter(comment="Name of the affix variable", defaultValue="affix")
   public void setAffixFeatureName(String affixFeatureName) {
     this.affixFeatureName = affixFeatureName;
   }
@@ -538,6 +549,9 @@ public class WelshMorph
    * Sets the AnnonationSet name, that is used to create the AnnotationSet
    * @param annotationSetName
    */
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="The name of the annotation set used for input")
   public void setAnnotationSetName(String annotationSetName) {
     this.annotationSetName = annotationSetName;
   }
@@ -554,6 +568,7 @@ public class WelshMorph
    * Sets the caseSensitive value, that is used to tell parser if it should
    * convert document to lowercase before parsing
    */
+  @CreoleParameter(comment="If parser should be converted to lowercase first", defaultValue="false")
   public void setCaseSensitive(java.lang.Boolean value) {
     this.caseSensitive = value;
   }
@@ -569,6 +584,8 @@ public class WelshMorph
   /**
    * Sets the result of checking for Part of Speech input availability
    */
+  @RunTime
+  @CreoleParameter(comment="If parser should consider POS Tag prior to running Morph", defaultValue="true")
   public void setConsiderPOSTag(Boolean value) {
     this.considerPOSTag = value;
   }

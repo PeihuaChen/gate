@@ -5,55 +5,6 @@
 
     <JAR SCAN="true">wnlt.jar</JAR>
     <REQUIRES>../ANNIE</REQUIRES>
-
-    <RESOURCE>
-    <!-- Morphological Analyser Processing Resource -->
-      <NAME>Welsh Morphological Analyser</NAME>
-      <COMMENT>Morphological Ananyser for Welsh</COMMENT>
-      <CLASS>wnlt.morph.WelshMorph</CLASS>
-      <COMMENT>Morphological Analyser for the Welsh Language.</COMMENT>
-      <PARAMETER NAME="document" COMMENT="The document to be processed"
-        RUNTIME="true">gate.Document</PARAMETER>
-      <PARAMETER NAME="rulesFile"
-        COMMENT="File which defines rules for the morphological analysis"
-        DEFAULT="resources/morph/default.rul" RUNTIME="false">
-        java.net.URL</PARAMETER>
-      <PARAMETER NAME="annotationSetName"
-        COMMENT="The name of the annotation set used for input" RUNTIME="true"
-        OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="affixFeatureName" COMMENT="Name of the affix variable"
-        DEFAULT="affix" OPTIONAL="false" RUNTIME="true">
-        java.lang.String</PARAMETER>
-      <PARAMETER NAME="rootFeatureName"
-        COMMENT="Name of the variable which shows the root word" DEFAULT="lemma"
-        OPTIONAL="false" RUNTIME="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="considerPOSTag"
-        COMMENT="If parser should consider POS Tag prior to running Morph"
-        DEFAULT="true" OPTIONAL="false" RUNTIME="true">
-        java.lang.Boolean</PARAMETER>
-      <PARAMETER NAME="caseSensitive"
-        COMMENT="If parser should be converted to lowercase first"
-        DEFAULT="false" OPTIONAL="false" RUNTIME="false">
-        java.lang.Boolean</PARAMETER>
-        <PARAMETER NAME="lexiconURL" DEFAULT="resources/morph/lexicon"
-        COMMENT="The URL for the lexicon file"
-        >java.net.URL</PARAMETER>
-       <PARAMETER NAME="gazetteerListsURL"
-        DEFAULT="resources/morph/gazetteer/lists.def"
-        COMMENT="The URL for the gazetteer file" SUFFIXES="def" >
-        java.net.URL</PARAMETER>     
-      <PARAMETER NAME="encoding"
-        COMMENT="The encoding used for reading the definitions" DEFAULT="UTF-8">
-        java.lang.String</PARAMETER>
-       <PARAMETER NAME="transducerURL"
-        DEFAULT="resources/morph/grammar/postprocess.jape"
-        COMMENT="The URL for the postprocess transducer" SUFFIXES="jape">
-        java.net.URL</PARAMETER>
-	<PARAMETER NAME="validationTransducerURL"
-        DEFAULT="resources/morph/grammar/validation-main.jape"
-        COMMENT="The URL for the validation transducer" SUFFIXES="jape">
-        java.net.URL</PARAMETER>
-	<ICON>welsh_lemmatiser.png</ICON>	
-    </RESOURCE>
+    <REQUIRES>../Tools</REQUIRES>
 
 </CREOLE-DIRECTORY>
