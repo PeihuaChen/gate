@@ -2,13 +2,13 @@
   <urlList class="gate.util.persistence.CollectionPersistence">
     <localList>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../ANNIE</urlString>
+        <urlString>$relpath$../../ANNIE</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../Tools</urlString>
+        <urlString>$relpath$../../Tools</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$</urlString>
+        <urlString>$relpath$..</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
     </localList>
     <collectionType>java.util.ArrayList</collectionType>
@@ -97,13 +97,13 @@
                 <entry>
                   <string>tokeniserRulesURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$resources/Tokeniser/WelshTokeniser.rules</urlString>
+                    <urlString>$relpath$Tokeniser/WelshTokeniser.rules</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
                   <string>transducerGrammarURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$resources/Tokeniser/postprocess.jape</urlString>
+                    <urlString>$relpath$Tokeniser/postprocess.jape</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
@@ -156,13 +156,13 @@
                 <entry>
                   <string>gazetteerListsURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$resources/sentenceSplitter/gazetteer/lists.def</urlString>
+                    <urlString>$relpath$sentenceSplitter/gazetteer/lists.def</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
                   <string>transducerURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$resources/sentenceSplitter/grammar/main-single-nl.jape</urlString>
+                    <urlString>$relpath$sentenceSplitter/grammar/main-single-nl.jape</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
               </localMap>
@@ -194,12 +194,12 @@
                   <string>Token</string>
                 </entry>
                 <entry>
-                  <string>inputASName</string>
-                  <null/>
-                </entry>
-                <entry>
                   <string>failOnMissingInputAnnotations</string>
                   <boolean>true</boolean>
+                </entry>
+                <entry>
+                  <string>inputASName</string>
+                  <null/>
                 </entry>
                 <entry>
                   <string>outputASName</string>
@@ -225,19 +225,19 @@
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
                 <entry>
+                  <string>rulesURL</string>
+                  <gate.util.persistence.PersistenceManager-URLHolder>
+                    <urlString>$relpath$postag/ruleset</urlString>
+                  </gate.util.persistence.PersistenceManager-URLHolder>
+                </entry>
+                <entry>
                   <string>encoding</string>
                   <string>UTF-8</string>
                 </entry>
                 <entry>
-                  <string>rulesURL</string>
-                  <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$resources/postag/ruleset</urlString>
-                  </gate.util.persistence.PersistenceManager-URLHolder>
-                </entry>
-                <entry>
                   <string>lexiconURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$resources/postag/lexicon</urlString>
+                    <urlString>$relpath$postag/lexicon</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
               </localMap>
@@ -292,41 +292,41 @@
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
                 <entry>
-                  <string>encoding</string>
-                  <string>UTF-8</string>
-                </entry>
-                <entry>
                   <string>caseSensitive</string>
                   <boolean>false</boolean>
                 </entry>
                 <entry>
-                  <string>rulesFile</string>
-                  <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$resources/morph/default.rul</urlString>
-                  </gate.util.persistence.PersistenceManager-URLHolder>
+                  <string>encoding</string>
+                  <string>UTF-8</string>
                 </entry>
                 <entry>
                   <string>gazetteerListsURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$resources/morph/gazetteer/lists.def</urlString>
+                    <urlString>$relpath$morph/gazetteer/lists.def</urlString>
+                  </gate.util.persistence.PersistenceManager-URLHolder>
+                </entry>
+                <entry>
+                  <string>rulesFile</string>
+                  <gate.util.persistence.PersistenceManager-URLHolder>
+                    <urlString>$relpath$morph/default.rul</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
                   <string>transducerURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$resources/morph/grammar/postprocess.jape</urlString>
+                    <urlString>$relpath$morph/grammar/postprocess.jape</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
                   <string>validationTransducerURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$resources/morph/grammar/validation-main.jape</urlString>
+                    <urlString>$relpath$morph/grammar/validation-main.jape</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
                   <string>lexiconURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$resources/morph/lexicon</urlString>
+                    <urlString>$relpath$morph/lexicon</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
               </localMap>
@@ -367,7 +367,7 @@
                 </entry>
               </localMap>
             </runtimeParams>
-            <resourceType>gate.creole.gazetteer.DefaultGazetteer</resourceType>
+            <resourceType>wnlt.WelshGazetteer</resourceType>
             <resourceName>CYMRIE Gazetter</resourceName>
             <initParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
@@ -379,16 +379,16 @@
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
-                  <string>caseSensitive</string>
-                  <boolean>true</boolean>
+                  <string>encoding</string>
+                  <string>UTF-8</string>
                 </entry>
                 <entry>
                   <string>gazetteerFeatureSeparator</string>
                   <string>:</string>
                 </entry>
                 <entry>
-                  <string>encoding</string>
-                  <string>UTF-8</string>
+                  <string>caseSensitive</string>
+                  <boolean>true</boolean>
                 </entry>
               </localMap>
             </initParams>
@@ -421,7 +421,7 @@
               </localMap>
             </runtimeParams>
             <resourceType>gate.creole.gazetteer.FlexibleGazetteer</resourceType>
-            <resourceName>Flexible Gazetteer</resourceName>
+            <resourceName>CYMRIE Flexible Gazetteer</resourceName>
             <initParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
@@ -487,18 +487,18 @@
                   <string>UTF-8</string>
                 </entry>
                 <entry>
+                  <string>grammarURL</string>
+                  <gate.util.persistence.PersistenceManager-URLHolder>
+                    <urlString>$relpath$NE/main.jape</urlString>
+                  </gate.util.persistence.PersistenceManager-URLHolder>
+                </entry>
+                <entry>
                   <string>annotationAccessors</string>
                   <null/>
                 </entry>
                 <entry>
                   <string>operators</string>
                   <null/>
-                </entry>
-                <entry>
-                  <string>grammarURL</string>
-                  <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$resources/NE/main.jape</urlString>
-                  </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
               </localMap>
             </initParams>
