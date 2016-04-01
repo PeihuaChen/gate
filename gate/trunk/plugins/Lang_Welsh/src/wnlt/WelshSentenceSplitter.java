@@ -7,11 +7,8 @@
  */
 package wnlt;
 
-import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.splitter.SentenceSplitter;
-
-import java.net.URL;
 
 /**
  * This class extends the original SentenceSplitter class of ANNIE.
