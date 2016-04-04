@@ -387,7 +387,7 @@ public class CrowdFlowerClient {
             + "  <cml:checkbox name=\"noentities\" label=\"");
     StringEscapeUtils.escapeXml(cml, noEntitiesCaption);
     cml.append("\" value=\"1\"\n"
-            + "      only-if=\"!answer:required\" validates=\"required\"/>\n"
+            + "      only-if=\"!answer\" validates=\"required\"/>\n"
             + "</div>\n");
     if(commentCaption != null) {
       cml.append("<cml:text name=\"comment\" label=\"");
