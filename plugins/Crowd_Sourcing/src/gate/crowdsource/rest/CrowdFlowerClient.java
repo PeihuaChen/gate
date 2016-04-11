@@ -254,6 +254,9 @@ public class CrowdFlowerClient {
 
     if (target.getFeatures().containsKey("entity")) {
       entity = (String) target.getFeatures().get("entity");
+      if (entity == null) {
+        throw new NullPointerException("Given entity feature was null");
+      }
     } else {
       entity = Utils.stringFor(doc, target);
     }
