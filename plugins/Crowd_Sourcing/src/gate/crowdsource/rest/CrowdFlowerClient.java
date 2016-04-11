@@ -15,10 +15,7 @@ package gate.crowdsource.rest;
 
 import static gate.crowdsource.CrowdFlowerConstants.*;
 
-import gate.Annotation;
-import gate.AnnotationSet;
-import gate.Document;
-import gate.Utils;
+import gate.*;
 import gate.util.GateRuntimeException;
 
 import java.io.ByteArrayOutputStream;
@@ -149,6 +146,60 @@ public class CrowdFlowerClient {
 
   /**
    * <p>
+   *     Generates the text required to display the context for a classification,
+   *     either based on the document content, or on features present in the annotation.
+   *
+   *     If any of leftContext, rightContext, or entity are set as features on the annotation,
+   *     the text will be generated using those.
+   *
+   *     If none of these are present, the contents of the context and target feature will be
+   *     combined to give the document text used.
+   * </p>
+   * @param doc The document containing text that will be used if needed
+   * @param context The context annotation in which the entity will be couched
+   * @param target The target entity to display.
+   * @return
+   */
+  private String createClassificationUnitText(Document doc, Annotation context,
+                                              Annotation target) {
+    FeatureMap targetFeatures = target.getFeatures();
+
+    try {
+      // Fill in each part of the text individually, starting with the entity itself.
+      String entity; // No initialiser needed as we're guaranteed to overwrite it.
+
+      if (targetFeatures.containsKey("entity")) {
+        entity = (String) targetFeatures.get("entity");
+      } else {
+        entity = Utils.stringFor(doc, target);
+      }
+
+      // Look for the left context.
+      String leftContext = "";
+
+      if (targetFeatures.containsKey("leftContext")) {
+        leftContext = (String) targetFeatures.get("leftContext");
+      } else if (context != null) {
+        leftContext = Utils.stringFor(doc, Utils.start(context), Utils.start(target));
+      }
+
+      // Look for the right context.
+      String rightContext = "";
+
+      if (targetFeatures.containsKey("rightContext")) {
+        rightContext = (String) targetFeatures.get("rightContext");
+      } else if (context != null) {
+        rightContext = Utils.stringFor(doc, Utils.end(target), Utils.end(context));
+      }
+
+      return leftContext + "<span class=\"gate-entity\">" + entity + "</span>" + rightContext;
+    } catch (ClassCastException e) {
+      throw new ClassCastException("Features entity, leftContext and rightContext must be String, if provided.");
+    }
+
+  }
+  /**
+   * <p>
    * Create a single unit in a classification job for the given
    * annotation. If the unit is created successfully, its ID will be
    * stored as a {@link Long} valued feature named <code>cf_unit</code>
@@ -176,6 +227,13 @@ public class CrowdFlowerClient {
    * created - typically things like "none" (none of the available
    * options is correct) or "nae" (the target is not an entity).
    * </p>
+   *
+   * <p>
+   * If the target annotation has a feature named "leftContext", "rightContext"
+   * or "entity", these will be used to generate the entity text for display.
+   * Otherwise, the text will be taken from the document, as covered by the
+   * context and target annotations.
+   * </p>
    * 
    * @param jobId the CrowdFlower job ID
    * @param doc the document containing the annotation
@@ -191,17 +249,20 @@ public class CrowdFlowerClient {
    */
   public long createClassificationUnit(long jobId, Document doc, String asName,
           Annotation context, Annotation target) {
-    String text = Utils.stringFor(doc, context);
-    String entity = Utils.stringFor(doc, target);
+
+    String entity; // No initialiser needed as we're guaranteed to overwrite it.
+
+    if (target.getFeatures().containsKey("entity")) {
+      entity = (String) target.getFeatures().get("entity");
+    } else {
+      entity = Utils.stringFor(doc, target);
+    }
+
+    String text = createClassificationUnitText(doc, context, target);
+
     String documentId = String.valueOf(doc.getLRPersistenceId());
     int formDataSize = 10; // text + entity + docId + asName + annId
 
-    // insert highlight span into text
-    int entityStart = (int)(Utils.start(target) - Utils.start(context));
-    int entityEnd = entityStart + entity.length();
-    text =
-            text.substring(0, entityStart) + "<span class=\"gate-entity\">"
-                    + entity + "</span>" + text.substring(entityEnd);
 
     Object options = target.getFeatures().get("options");
     if(options != null) {
