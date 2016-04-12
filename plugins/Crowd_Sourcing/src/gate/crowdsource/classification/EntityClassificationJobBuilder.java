@@ -180,21 +180,27 @@ public class EntityClassificationJobBuilder extends AbstractLanguageAnalyser
 
         AnnotationSet thisEntityContext =
                 Utils.getCoveringAnnotations(contextAnnotations, entity);
-        if(thisEntityContext.isEmpty()) {
-          log.warn(entityAnnotationType + " with ID " + entity.getId()
-                  + " at offsets (" + Utils.start(entity) + ":"
-                  + Utils.end(entity) + ") in document "
-                  + getDocument().getName() + " has no surrounding "
-                  + contextAnnotationType + " - ignored");
+
+        if (contextASName != null) {
+          if(thisEntityContext.isEmpty()) {
+            log.warn(entityAnnotationType + " with ID " + entity.getId()
+                    + " at offsets (" + Utils.start(entity) + ":"
+                    + Utils.end(entity) + ") in document "
+                    + getDocument().getName() + " has no surrounding "
+                    + contextAnnotationType + " - ignored");
+          } else {
+            // get the "closest" context, i.e. the shortest annotation in
+            // the covering set.
+            // usually we'd expect this set to contain just one annotation
+            Annotation context =
+                    Collections.min(thisEntityContext,
+                            ANNOTATION_LENGTH_COMPARATOR);
+            crowdFlowerClient.createClassificationUnit(jobId, getDocument(),
+                    entityASName, context, entity);
+          }         
         } else {
-          // get the "closest" context, i.e. the shortest annotation in
-          // the covering set.
-          // usually we'd expect this set to contain just one annotation
-          Annotation context =
-                  Collections.min(thisEntityContext,
-                          ANNOTATION_LENGTH_COMPARATOR);
           crowdFlowerClient.createClassificationUnit(jobId, getDocument(),
-                  entityASName, context, entity);
+                  entityASName, entity, entity);
         }
       }
       fireProcessFinished();
