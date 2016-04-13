@@ -106,7 +106,9 @@ public class CSVStreamingOutputHandler extends JSONStreamingOutputHandler {
     
     // should we only look at annotations contained within the annotationType or
     // do we allow overlapping ones as well?
-    containedOnly = Boolean.parseBoolean(configData.get(PARAM_CONTAINED_ONLY));
+    containedOnly =
+        configData.containsKey(PARAM_CONTAINED_ONLY) ? Boolean
+            .parseBoolean(configData.get(PARAM_CONTAINED_ONLY)) : true;
   }
 
   @Override
