@@ -45,6 +45,8 @@ public class CSVStreamingOutputHandler extends JSONStreamingOutputHandler {
   public static final String PARAM_ANNOTATION_SET_NAME = "annotationSetName";
 
   public static final String PARAM_ANNOTATION_TYPE = "annotationType";
+  
+  public static final String PARAM_CONTAINED_ONLY = "containedOnly";
 
   private static final Logger logger = Logger
       .getLogger(CSVStreamingOutputHandler.class);
@@ -58,6 +60,8 @@ public class CSVStreamingOutputHandler extends JSONStreamingOutputHandler {
   protected String annotationSetName, annotationType;
 
   protected String[] columns;
+  
+  protected boolean containedOnly;
 
   @Override
   protected void configImpl(Map<String, String> configData) throws IOException,
@@ -99,6 +103,10 @@ public class CSVStreamingOutputHandler extends JSONStreamingOutputHandler {
     // at the document level as if the param was missing
     if(annotationType != null && annotationType.trim().equals(""))
       annotationType = null;
+    
+    // should we only look at annotations contained within the annotationType or
+    // do we allow overlapping ones as well?
+    containedOnly = Boolean.parseBoolean(configData.get(PARAM_CONTAINED_ONLY));
   }
 
   @Override
@@ -191,8 +199,16 @@ public class CSVStreamingOutputHandler extends JSONStreamingOutputHandler {
 
       if(within != null) {
         // if we have been provided with an annotation to limit the search then
-        // get just those contained within it
-        annots = Utils.getContainedAnnotations(annots, within);
+        // get just those either....
+        
+        if (containedOnly) {
+          // contained within the annotation
+          annots = Utils.getContainedAnnotations(annots, within);
+        }
+        else {
+          // or partially overlapping with it
+          annots = Utils.getOverlappingAnnotations(annots, within);
+        }
       }
 
       // if there are no annotations then we can quit
