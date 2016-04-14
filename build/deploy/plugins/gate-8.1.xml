@@ -20,8 +20,8 @@
   downloadURL="https://github.com/johann-petrak/gateplugin-VirtualCorpus/releases/download/V0.16/VirtualCorpus-0.16.zip"
 />
 <CreolePlugin
-  url="https://raw.githubusercontent.com/GateNLP/gateplugin-LearningFramework/V2_0/"
-  downloadURL="https://github.com/GateNLP/gateplugin-LearningFramework/releases/download/V2_0/gateplugin-LearningFramework-2.0.zip"
+  url="https://raw.githubusercontent.com/GateNLP/gateplugin-LearningFramework/V2_1/"
+  downloadURL="https://github.com/GateNLP/gateplugin-LearningFramework/releases/download/V2_1/gateplugin-LearningFramework-2.1.zip"
 />
 <CreolePlugin
   url="https://raw.githubusercontent.com/GenevieveGorrell/gateplugin-LearningFramework/version_1_0/"
