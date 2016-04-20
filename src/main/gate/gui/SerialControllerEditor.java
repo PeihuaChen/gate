@@ -542,8 +542,20 @@ public class SerialControllerEditor extends AbstractVisualResource
           for(int row : rows) {
             if(row > 0) {
               //move it up
+              List<RunningStrategy> strategies = null;
+              if(conditionalMode) {
+                strategies = new ArrayList<RunningStrategy>(((ConditionalController)controller)
+                        .getRunningStrategies());
+                RunningStrategy straegy = strategies.remove(row);
+                strategies.add(row-1, straegy); 
+              }
+              
               ProcessingResource value = controller.remove(row);
               controller.add(row - 1, value);
+              
+              if(conditionalMode) {
+                ((ConditionalController)controller).setRunningStrategies(strategies);;
+              }
             }
           }
 //          memberPRsTableModel.fireTableDataChanged();
@@ -577,9 +589,22 @@ public class SerialControllerEditor extends AbstractVisualResource
           for(int i = rows.length - 1; i >= 0; i--){
             int row = rows[i];
             if(row < controller.getPRs().size() -1){
+              
+              List<RunningStrategy> strategies = null;
+              if(conditionalMode) {
+                strategies = new ArrayList<RunningStrategy>(((ConditionalController)controller)
+                        .getRunningStrategies());
+                RunningStrategy straegy = strategies.remove(row);
+                strategies.add(row+1, straegy); 
+              }
+              
               //move it down
               ProcessingResource value = controller.remove(row);
               controller.add(row + 1, value);
+              
+              if(conditionalMode) {
+                ((ConditionalController)controller).setRunningStrategies(strategies);;
+              }
             }
           }
 //          memberPRsTableModel.fireTableDataChanged();
