@@ -71,7 +71,7 @@ public class LinearNode {
    *          the language(s)
    */
   public LinearNode(String aList, String aMajor, String aMinor, String aLanguage) {
-    this(aLanguage, aMajor, aMinor, aLanguage, null);
+    this(aList, aMajor, aMinor, aLanguage, null);
   } // LinearNode construct
 
   /**
