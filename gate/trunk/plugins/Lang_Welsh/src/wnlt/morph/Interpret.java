@@ -123,6 +123,7 @@ public class Interpret {
     fsms = existingInterpret.fsms;
     patterns = existingInterpret.patterns;
     initialState = existingInterpret.initialState;
+    lexicon = existingInterpret.lexicon;
 	}
 
 	class CharClass {
