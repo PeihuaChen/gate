@@ -23,6 +23,7 @@ import gate.Gate;
 import gate.Resource;
 import gate.corpora.export.GateXMLExporter;
 import gate.creole.Parameter;
+import gate.creole.ParameterException;
 import gate.creole.ResourceData;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
@@ -514,6 +515,8 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
     private ResourceParametersEditor parametersEditor;
 
     private boolean singleFile, userCanceled;
+    
+    private FeatureMap parameters;
 
     public DocumentExportDialog() {
       super(MainFrame.getInstance(), "Save As...", true);
@@ -643,8 +646,11 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
     public synchronized boolean show(DocumentExporter de,
             List<List<Parameter>> params, boolean singleFile, String filePath) {
 
+      
+      
       this.singleFile = singleFile;
       this.de = de;
+      this.parameters = null;
 
       setTitle("Save as " + de.getFileType());
 
@@ -659,7 +665,30 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
       dispose();
       if(userCanceled)
         return false;
-      else return true;
+      
+      //update the feature map to convert values to objects of the correct type.
+      
+      parameters = parametersEditor.getParameterValues();
+      
+      for (List<Parameter> disjunction : params) {
+        for (Parameter param : disjunction) {
+          if (!param.getTypeName().equals("java.lang.String") && parameters.containsKey(param.getName())) {
+            Object value = parameters.get(param.getName());
+            if (value instanceof String) {
+              try {
+                parameters.put(param.getName(), param.calculateValueFromString((String)value));
+              }
+              catch (ParameterException pe) {
+                pe.printStackTrace();
+                parameters = null;
+                return false;
+              }
+            }
+          }
+        }
+      }
+      
+      return true;
     }
 
     @Override
@@ -672,9 +701,7 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
      * selected or the user pressed cancel
      */
     public FeatureMap getSelectedParameters() {
-      if(parametersEditor != null)
-        return parametersEditor.getParameterValues();
-      else return null;
+      return parameters;
     }
 
     /**
