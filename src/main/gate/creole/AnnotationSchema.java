@@ -52,7 +52,7 @@ public class AnnotationSchema extends AbstractLanguageResource{
   /** A map between Java types and XSchema */
   private static Map<Class<?>, String> java2xSchemaMap;
 
-  /** This sets up two Maps between XSchema types and their coresponding
+  /** This sets up two Maps between XSchema types and their corresponding
     * Java types + a DOM xml parser
     */
   private static void setUpStaticData()
@@ -290,7 +290,7 @@ public class AnnotationSchema extends AbstractLanguageResource{
     if (featureTypeName != null)
       // Set it to the corresponding Java type
       featureType = xSchema2JavaMap.get(featureTypeName);
-
+    
     // Get the value of use attribute
     featureUse = anAttributeElement.getAttributeValue("use");
     if (featureUse == null)
@@ -348,7 +348,8 @@ public class AnnotationSchema extends AbstractLanguageResource{
     // Create an add a featureSchema object
     FeatureSchema featureSchema = new FeatureSchema(
                                                    featureName,
-                                                   featureType,
+                                                   //if for some reason we've ended up with a null type default to String
+                                                   featureType != null ? featureType : String.class, 
                                                    featureValue,
                                                    featureUse,
                                                    featurePermittedValuesSet);
