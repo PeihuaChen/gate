@@ -161,7 +161,6 @@ public class HeideltimeWrapper extends gate.creole.AbstractLanguageAnalyser {
 	 * -- tokenAnnotationType
 	 * -- posAnnotationAsTokenAttribute
 	 * The document creation time has to be set separately.
-	 * @return
 	 */
 	@Override
 	public Resource init() throws InitializationException{

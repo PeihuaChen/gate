@@ -8364,3 +8364,13 @@ Learner name: PAUM
 Learner nick name: PAUM
 Learner parameter settings: PAUM
 Surroud mode (or chunk learning): true
+09-May-2016 07:36:44: 
+
+*************************
+A new session for NLP learning is starting: 20160509_073644file:/home/mark/gate-top/externals/gate/plugins/Tagger_GATE-Time/resources/ml-events/event-config.xml (saved 20160503_172358, 483166secs ago)The initiliased time of NLP learning: Mon May 09 07:36:44 BST 2016
+Working directory: /home/mark/gate-top/externals/gate/plugins/Tagger_GATE-Time/resources/ml-events
+The feature files and models are saved at: /home/mark/gate-top/externals/gate/plugins/Tagger_GATE-Time/resources/ml-events/savedFiles
+Learner name: PAUM
+Learner nick name: PAUM
+Learner parameter settings: PAUM
+Surroud mode (or chunk learning): true
