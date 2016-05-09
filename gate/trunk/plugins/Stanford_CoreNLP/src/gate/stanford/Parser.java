@@ -455,11 +455,14 @@ implements ProcessingResource {
       if(debugMode) {
         System.out.println(dependency);
       }
-
-      int governorIndex = dependency.gov().label().index() - 1;
+      
+      // Does not work in version 3.5.2 any more
+      //int governorIndex = dependency.gov().label().index() - 1;
+      int governorIndex = dependency.gov().index()-1;
       governor  = stanfordSentence.startPos2token(governorIndex);
       
-      int dependentIndex = dependency.dep().label().index() - 1;
+      //int dependentIndex = dependency.dep().label().index() - 1;
+      int dependentIndex = dependency.dep().index()-1;
       dependent = stanfordSentence.startPos2token(dependentIndex);
 
       dependencyKind = dependency.reln().toString();

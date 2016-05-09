@@ -22,6 +22,7 @@ package gate.stanford;
 import java.util.Collection;
 
 import edu.stanford.nlp.trees.GrammaticalStructure;
+import edu.stanford.nlp.trees.GrammaticalStructure.Extras;
 import edu.stanford.nlp.trees.TypedDependency;
 
 public enum DependencyMode {
@@ -35,17 +36,22 @@ public enum DependencyMode {
       DependencyMode mode, boolean includeExtras) {
     Collection<TypedDependency> result = null;
     
+    Extras incl = Extras.NONE;
+    if(includeExtras) {
+      incl = Extras.MAXIMAL;
+    }
+    
     if (mode.equals(Typed)) {
-      result = gs.typedDependencies(includeExtras);
+      result = gs.typedDependencies(incl);
     }
     else if (mode.equals(AllTyped)) {
       result = gs.allTypedDependencies();
     }
     else if (mode.equals(TypedCollapsed)) {
-      result = gs.typedDependenciesCollapsed(includeExtras);
+      result = gs.typedDependenciesCollapsed(incl);
     }
     else if (mode.equals(TypedCCprocessed)) {
-      result = gs.typedDependenciesCCprocessed(includeExtras);
+      result = gs.typedDependenciesCCprocessed(incl);
     }
     
     return result;
