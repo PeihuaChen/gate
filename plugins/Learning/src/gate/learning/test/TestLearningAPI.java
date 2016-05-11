@@ -222,8 +222,8 @@ public class TestLearningAPI extends TestCase {
     		"; partial="+(int)Math.floor(evaluation.macroMeasuresOfResults.partialCor)+
     		"; spurious="+(int)Math.floor(evaluation.macroMeasuresOfResults.spurious) +
     				"; missing=" + (int)Math.floor(evaluation.macroMeasuresOfResults.missing));
-    assertEquals("Wrong value for correct: ", 27, (int)Math.floor(evaluation.macroMeasuresOfResults.correct));
-    assertEquals("Wrong value for partial: ", 3, (int)Math.floor(evaluation.macroMeasuresOfResults.partialCor));
+    assertEquals("Wrong value for correct: ", 25, (int)Math.floor(evaluation.macroMeasuresOfResults.correct));
+    assertEquals("Wrong value for partial: ", 2, (int)Math.floor(evaluation.macroMeasuresOfResults.partialCor));
     assertEquals("Wrong value for spurious: ", 26, (int)Math.floor(evaluation.macroMeasuresOfResults.spurious));
     assertEquals("Wrong value for missing: ", 42, (int)Math.floor(evaluation.macroMeasuresOfResults.missing));
     // Remove the resources
@@ -262,10 +262,10 @@ public class TestLearningAPI extends TestCase {
     		"; partial="+(int)Math.floor(evaluation.macroMeasuresOfResults.partialCor)+
     		"; spurious="+(int)Math.floor(evaluation.macroMeasuresOfResults.spurious) +
     				"; missing=" + (int)Math.floor(evaluation.macroMeasuresOfResults.missing));
-    assertEquals("Wrong value for correct: ", 52, (int)Math.floor(evaluation.macroMeasuresOfResults.correct));
+    assertEquals("Wrong value for correct: ", 50, (int)Math.floor(evaluation.macroMeasuresOfResults.correct));
     assertEquals("Wrong value for partial: ", 12, (int)Math.floor(evaluation.macroMeasuresOfResults.partialCor));
     assertEquals("Wrong value for spurious: ", 24, (int)Math.floor(evaluation.macroMeasuresOfResults.spurious));
-    assertEquals("Wrong value for missing: ", 30, (int)Math.floor(evaluation.macroMeasuresOfResults.missing));
+    assertEquals("Wrong value for missing: ", 32, (int)Math.floor(evaluation.macroMeasuresOfResults.missing));
     // Remove the resources
     clearOneTest();
     System.out.println(" completed");
