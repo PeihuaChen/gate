@@ -224,7 +224,7 @@ public class TestLearningAPI extends TestCase {
     				"; missing=" + (int)Math.floor(evaluation.macroMeasuresOfResults.missing));
     assertEquals("Wrong value for correct: ", 25, (int)Math.floor(evaluation.macroMeasuresOfResults.correct));
     assertEquals("Wrong value for partial: ", 2, (int)Math.floor(evaluation.macroMeasuresOfResults.partialCor));
-    assertEquals("Wrong value for spurious: ", 26, (int)Math.floor(evaluation.macroMeasuresOfResults.spurious));
+    assertEquals("Wrong value for spurious: ", 25, (int)Math.floor(evaluation.macroMeasuresOfResults.spurious));
     assertEquals("Wrong value for missing: ", 42, (int)Math.floor(evaluation.macroMeasuresOfResults.missing));
     // Remove the resources
     clearOneTest();
