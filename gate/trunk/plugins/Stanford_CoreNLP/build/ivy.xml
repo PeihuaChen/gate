@@ -3,7 +3,7 @@
   <info
     organisation="uk.ac.gate.plugins"
     module="stanford_corenlp"
-    revision="2.0-SNAPSHOT">
+    revision="8.2-SNAPSHOT">
     <description homepage="https://github.com/GateNLP/gateplugin-Stanford_CoreNLP/" />
   </info>
 
