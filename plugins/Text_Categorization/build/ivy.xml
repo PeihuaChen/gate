@@ -1,9 +1,9 @@
 <ivy-module version="2.0">
 
   <info
-    organisation="uk.ac.gate"
-    module="gate-plugin-text-classification"
-    revision="0.1-SNAPSHOT">
+    organisation="uk.ac.gate.plugins"
+    module="text-classification"
+    revision="8.2-SNAPSHOT">
     <description homepage="http://gate.ac.uk/" />
   </info>
 
