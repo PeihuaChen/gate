@@ -1,8 +1,8 @@
 <ivy-module version="2.0">
 
   <info
-    organisation="uk.ac.gate"
-    module="gate-plugin-stanford_corenlp"
+    organisation="uk.ac.gate.plugins"
+    module="stanford_corenlp"
     revision="2.0-SNAPSHOT">
     <description homepage="https://github.com/GateNLP/gateplugin-Stanford_CoreNLP/" />
   </info>
