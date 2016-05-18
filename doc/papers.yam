@@ -51,9 +51,7 @@ GATE papers
 
 %2* Forthcoming / Accepted
 
-- Miriam Fernandez, Harith Alani, Lara Piccolo, Christoph Meili, Diana Maynard and Meia Wippoo. Talking Climate Change via Social Media: Communication, Engagement and Behaviour. Proc. of WebSci, May 22-25 2016, Hannover, Germany.
 
-- D. Maynard and K. Bontcheva. Challenges of Evaluating Sentiment Analysis Tools on Social Media. In Proc. of Language Resources and Evaluation Conference (LREC), May 2016, Portoroz, Slovenia.
 
 - V. Tablan, K. Bontcheva, I. Roberts, and H. Cunningham. Mímir: An open-source semantic search framework for interactive information seeking and discovery. Journal of Web Semantics: Science, Services and Agents on the World Wide Web, 2014. %(http://dx.doi.org/10.1016/j.websem.2014.10.002, doi:10.1016/j.websem.2014.10.002) %footnote(Published online but not yet assigned to a specific volume and issue.)
 
@@ -62,6 +60,10 @@ GATE papers
 - L. Derczynski. Automatically Ordering Events and Times in Text. To appear as a monograph in Studies in Computational Intelligence. Springer.
 
 %2* 2016
+
+- D. Maynard and K. Bontcheva. Challenges of Evaluating Sentiment Analysis Tools on Social Media. In Proc. of Language Resources and Evaluation Conference (LREC), May 2016, Portoroz, Slovenia. %(https://gate.ac.uk/sale/lrec2016/sentiment-evaluation/sentiment-evaluation.pdf, PDF)
+
+- Miriam Fernandez, Harith Alani, Lara Piccolo, Christoph Meili, Diana Maynard and Meia Wippoo. Talking Climate Change via Social Media: Communication, Engagement and Behaviour. Proc. of WebSci, May 22-25 2016, Hannover, Germany.
 
 - Siti Salwa Hasbullah and Diana Maynard. Automated Content Analysis: A Sentiment Analysis on Malaysian Government Social Media In Proc. of ACM International Conference on Ubiquitous Information Management and Communication (IMCOM), January 2016, Danang, Vietnam.
 
