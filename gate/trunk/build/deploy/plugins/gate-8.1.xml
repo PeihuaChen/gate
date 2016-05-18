@@ -13,7 +13,7 @@
 />
 <CreolePlugin
   url="https://raw.githubusercontent.com/johann-petrak/gateplugin-StringAnnotation/V3.4/"
-  downloadURL="https://github.com/johann-petrak/gateplugin-StringAnnotation/releases/download/V3.3/StringAnnotation-3.4.zip"
+  downloadURL="https://github.com/johann-petrak/gateplugin-StringAnnotation/releases/download/V3.4/StringAnnotation-3.4.zip"
 />
 <CreolePlugin
   url="https://raw.githubusercontent.com/johann-petrak/gateplugin-VirtualCorpus/V0.16/"
