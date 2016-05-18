@@ -12,8 +12,8 @@
   downloadURL="https://github.com/johann-petrak/gateplugin-Evaluation/releases/download/V0.6/Evaluation-0.6.zip"
 />
 <CreolePlugin
-  url="https://raw.githubusercontent.com/johann-petrak/gateplugin-StringAnnotation/V3.3/"
-  downloadURL="https://github.com/johann-petrak/gateplugin-StringAnnotation/releases/download/V3.3/StringAnnotation-3.3.zip"
+  url="https://raw.githubusercontent.com/johann-petrak/gateplugin-StringAnnotation/V3.4/"
+  downloadURL="https://github.com/johann-petrak/gateplugin-StringAnnotation/releases/download/V3.3/StringAnnotation-3.4.zip"
 />
 <CreolePlugin
   url="https://raw.githubusercontent.com/johann-petrak/gateplugin-VirtualCorpus/V0.16/"
