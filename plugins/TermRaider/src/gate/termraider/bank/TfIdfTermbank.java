@@ -183,6 +183,7 @@ public class TfIdfTermbank extends AbstractTermbank
       FeatureMap dfbParameters = Factory.newFeatureMap();
       dfbParameters.put("inputASName", this.inputASName);
       dfbParameters.put("languageFeature", this.languageFeature);
+      dfbParameters.put("inputAnnotationTypes", this.inputAnnotationTypes);
       dfbParameters.put("inputAnnotationFeature", this.inputAnnotationFeature);
       dfbParameters.put("corpora", this.corpora);
       dfbParameters.put("debugMode", this.debugMode);
