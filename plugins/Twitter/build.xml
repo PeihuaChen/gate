@@ -22,13 +22,6 @@
 		<include name="*.zip" />
 	</fileset>
 
-	<!-- we also need to pull in the Tagger_Stanford jars -->
-	<fileset id="stanford.libs" dir="../Stanford_CoreNLP">
-		<include name="*.jar" />
-		<include name="*.zip" />
-	</fileset>
-
-
 	<fileset id="gatelib.classpath" dir="${gate.home}/lib">
 		<include name="*.jar" />
 		<include name="*.zip" />
@@ -41,7 +34,6 @@
 
 	<path id="compile.classpath">
 		<fileset refid="libs" />
-		<fileset refid="stanford.libs" />
 		<fileset refid="gatelib.classpath" />
 		<fileset refid="gate.classpath" />
 	</path>
