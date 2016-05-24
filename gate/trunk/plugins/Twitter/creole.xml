@@ -3,5 +3,4 @@
   <JAR SCAN="true">twitter.jar</JAR>
   <JAR>lib/jaspell.jar</JAR>
   <REQUIRES>../Format_Twitter</REQUIRES>
-  <REQUIRES>../Stanford_CoreNLP</REQUIRES>
 </CREOLE-DIRECTORY> 
