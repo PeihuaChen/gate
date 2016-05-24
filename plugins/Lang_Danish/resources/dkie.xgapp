@@ -72,11 +72,18 @@
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap/>
           </runtimeParams>
-          <resourceType>danish.DanishPOSTagger</resourceType>
+          <resourceType>gate.stanford.Tagger</resourceType>
           <resourceName>Danish POS tagger</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap/>
+            <localMap>
+              <entry>
+                <string>modelFile</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$pos/ddt-pos.model</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+            </localMap>
           </initParams>
           <features class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
