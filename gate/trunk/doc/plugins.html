@@ -58,6 +58,7 @@ list</a>.</p>
 <li><a href='#Format_HTML5Microdata'>Format_HTML5Microdata</a></li>
 <li><a href='#Format_MediaWiki'>Format_MediaWiki</a></li>
 <li><a href='#Format_PubMed'>Format_PubMed</a></li>
+<li><a href='#Format_Twitter'>Format_Twitter</a></li>
 <li><a href='#Gazetteer_LKB'>Gazetteer_LKB</a></li>
 <li><a href='#Gazetteer_Ontology_Based'>Gazetteer_Ontology_Based</a></li>
 <li><a href='#GENIA'>GENIA</a></li>
@@ -71,11 +72,13 @@ list</a>.</p>
 <li><a href='#Lang_Bulgarian'>Lang_Bulgarian</a></li>
 <li><a href='#Lang_Cebuano'>Lang_Cebuano</a></li>
 <li><a href='#Lang_Chinese'>Lang_Chinese</a></li>
+<li><a href='#Lang_Danish'>Lang_Danish</a></li>
 <li><a href='#Lang_French'>Lang_French</a></li>
 <li><a href='#Lang_German'>Lang_German</a></li>
 <li><a href='#Lang_Hindi'>Lang_Hindi</a></li>
 <li><a href='#Lang_Romanian'>Lang_Romanian</a></li>
 <li><a href='#Lang_Russian'>Lang_Russian</a></li>
+<li><a href='#Lang_Welsh'>Lang_Welsh</a></li>
 <li><a href='#Learning'>Learning</a></li>
 <li><a href='#LingPipe'>LingPipe</a></li>
 <li><a href='#Linguistic_Simplifier'>Linguistic_Simplifier</a></li>
@@ -96,6 +99,7 @@ list</a>.</p>
 <li><a href='#Tagger_Chemistry'>Tagger_Chemistry</a></li>
 <li><a href='#Tagger_DateNormalizer'>Tagger_DateNormalizer</a></li>
 <li><a href='#Tagger_Framework'>Tagger_Framework</a></li>
+<li><a href='#Tagger_GATE-Time'>Tagger_GATE-Time</a></li>
 <li><a href='#Tagger_Lupedia'>Tagger_Lupedia</a></li>
 <li><a href='#Tagger_Measurements'>Tagger_Measurements</a></li>
 <li><a href='#Tagger_MetaMap'>Tagger_MetaMap</a></li>
@@ -433,6 +437,24 @@ list</a>.</p>
 		<td>gate.corpora.PubmedTextDocumentFormat</td>
 	</tr>
 	<tr>
+		<th colspan='3'><a name='Format_Twitter'>Format_Twitter</a></th>
+	</tr>
+	<tr>
+		<td>GATE JSON Tweet Document Format&nbsp;</td>
+		<td>Format parser for Twitter JSON files (<a href="http://gate.ac.uk/userguide/sec:social:twitter:format">docs</a>)&nbsp;</td>
+		<td>gate.corpora.JSONTweetFormat</td>
+	</tr>
+	<tr>
+		<td>GATE JSON Exporter&nbsp;</td>
+		<td>Export documents and corpora in JSON format&nbsp;</td>
+		<td>gate.corpora.export.GATEJsonExporter</td>
+	</tr>
+	<tr>
+		<td>Twitter Corpus Populator&nbsp;</td>
+		<td>Populate a corpus from Twitter JSON containing multiple Tweets (<a href="http://gate.ac.uk/userguide/sec:social:twitter:format">docs</a>)&nbsp;</td>
+		<td>gate.corpora.twitter.Population</td>
+	</tr>
+	<tr>
 		<th colspan='3'><a name='Gazetteer_LKB'>Gazetteer_LKB</a></th>
 	</tr>
 	<tr>
@@ -657,6 +679,29 @@ list</a>.</p>
 		<td>chinese.ChineseIE</td>
 	</tr>
 	<tr>
+		<th colspan='3'><a name='Lang_Danish'>Lang_Danish</a></th>
+	</tr>
+	<tr>
+		<td>Danish Gazetteer&nbsp;</td>
+		<td>Person, Location and Organisation gazetteers for Danish (<a href="http://gate.ac.uk/userguide/sec:annie:gazetteer">docs</a>)&nbsp;</td>
+		<td>danish.DanishGazetteer</td>
+	</tr>
+	<tr>
+		<td>Danish IE System&nbsp;</td>
+		<td>Ready-made Danish IE application&nbsp;</td>
+		<td>danish.DanishIE</td>
+	</tr>
+	<tr>
+		<td>Danish Sentence Splitter&nbsp;</td>
+		<td>ANNIE sentence splitter. (<a href="http://gate.ac.uk/userguide/sec:annie:splitter">docs</a>)&nbsp;</td>
+		<td>danish.DanishSentenceSplitter</td>
+	</tr>
+	<tr>
+		<td>Danish Tokeniser&nbsp;</td>
+		<td>PAROLE tokeniser, for Danish (<a href="http://gate.ac.uk/userguide/sec:annie:tokeniser">docs</a>)&nbsp;</td>
+		<td>danish.DanishTokeniser</td>
+	</tr>
+	<tr>
 		<th colspan='3'><a name='Lang_French'>Lang_French</a></th>
 	</tr>
 	<tr>
@@ -780,6 +825,44 @@ list</a>.</p>
 		<td>Russian POS Tagger&nbsp;</td>
 		<td>Part-of-speech tagger for Russian (<a href="http://gate.ac.uk/userguide/sec:misc-creole:language-plugins:russian">docs</a>)&nbsp;</td>
 		<td>com.ontotext.russie.morph.POSTagger</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name='Lang_Welsh'>Lang_Welsh</a></th>
+	</tr>
+	<tr>
+		<td>CYMRIE&nbsp;</td>
+		<td>Welsh Information Extraction Application&nbsp;</td>
+		<td>wnlt.CYMRIE</td>
+	</tr>
+	<tr>
+		<td>Welsh Gazetteer&nbsp;</td>
+		<td>Welsh Gazetteer (<a href="http://gate.ac.uk/userguide/sec:annie:gazetteer">docs</a>)&nbsp;</td>
+		<td>wnlt.WelshGazetteer</td>
+	</tr>
+	<tr>
+		<td>Welsh NE Transducer&nbsp;</td>
+		<td>Welsh named entity grammar (<a href="http://gate.ac.uk/userguide/sec:annie:semantic-tagger">docs</a>)&nbsp;</td>
+		<td>wnlt.WelshNE</td>
+	</tr>
+	<tr>
+		<td>Welsh POS Tagger&nbsp;</td>
+		<td>Mark Hepple's Brill-style POS tagger, adapted for Welsh (<a href="http://gate.ac.uk/userguide/sec:annie:tagger">docs</a>)&nbsp;</td>
+		<td>wnlt.WelshPOSTagger</td>
+	</tr>
+	<tr>
+		<td>Welsh Sentence Splitter&nbsp;</td>
+		<td>ANNIE sentence splitter. (<a href="http://gate.ac.uk/userguide/sec:annie:splitter">docs</a>)&nbsp;</td>
+		<td>wnlt.WelshSentenceSplitter</td>
+	</tr>
+	<tr>
+		<td>Welsh Tokeniser&nbsp;</td>
+		<td>A customisable English tokeniser. (<a href="http://gate.ac.uk/userguide/sec:annie:tokeniser">docs</a>)&nbsp;</td>
+		<td>wnlt.WelshTokeniser</td>
+	</tr>
+	<tr>
+		<td>Welsh Morphological Analyser&nbsp;</td>
+		<td>Morphological Analyzer of the Welsh Natural Language Toolkit&nbsp;</td>
+		<td>wnlt.morph.WelshMorph</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Learning'>Learning</a></th>
@@ -1109,6 +1192,24 @@ list</a>.</p>
 		<td>gate.taggerframework.GenericTagger</td>
 	</tr>
 	<tr>
+		<th colspan='3'><a name='Tagger_GATE-Time'>Tagger_GATE-Time</a></th>
+	</tr>
+	<tr>
+		<td>DCTParser&nbsp;</td>
+		<td>DCTParser finds DCTs so that HeidelTime GATE wrapper can be run on news-style corpora with differing DCTs. (<a href="https://github.com/HeidelTime/heideltime/">docs</a>)&nbsp;</td>
+		<td>de.mpii.nlp.gate.heideltime.DCTParser</td>
+	</tr>
+	<tr>
+		<td>HeidelTime&nbsp;</td>
+		<td>HeidelTime GATE wrapper, i.e., HeidelTime plugin for gate. (<a href="https://github.com/HeidelTime/heideltime/">docs</a>)&nbsp;</td>
+		<td>de.mpii.nlp.gate.heideltime.HeideltimeWrapper</td>
+	</tr>
+	<tr>
+		<td>TimeML Event Detection&nbsp;</td>
+		<td>TimeML Event Detection Application&nbsp;</td>
+		<td>gate.creole.time.TimeMLEventDetection</td>
+	</tr>
+	<tr>
 		<th colspan='3'><a name='Tagger_Lupedia'>Tagger_Lupedia</a></th>
 	</tr>
 	<tr>
@@ -1301,8 +1402,8 @@ list</a>.</p>
 		<th colspan='3'><a name='Text_Categorization'>Text_Categorization</a></th>
 	</tr>
 	<tr>
-		<td>TextCategorizationPR&nbsp;</td>
-		<td>A processing resource that takes document and corpus parameters&nbsp;</td>
+		<td>Text Categorization PR&nbsp;</td>
+		<td>Classify text based on a semantic space&nbsp;</td>
 		<td>gate.ml.categorization.TextCategorizationPR</td>
 	</tr>
 	<tr>
@@ -1357,21 +1458,6 @@ list</a>.</p>
 		<th colspan='3'><a name='Twitter'>Twitter</a></th>
 	</tr>
 	<tr>
-		<td>GATE JSON Tweet Document Format&nbsp;</td>
-		<td>Format parser for Twitter JSON files (<a href="http://gate.ac.uk/userguide/sec:social:twitter:format">docs</a>)&nbsp;</td>
-		<td>gate.corpora.JSONTweetFormat</td>
-	</tr>
-	<tr>
-		<td>GATE JSON Exporter&nbsp;</td>
-		<td>Export documents and corpora in JSON format&nbsp;</td>
-		<td>gate.corpora.export.GATEJsonExporter</td>
-	</tr>
-	<tr>
-		<td>Twitter Corpus Populator&nbsp;</td>
-		<td>Populate a corpus from Twitter JSON containing multiple Tweets (<a href="http://gate.ac.uk/userguide/sec:social:twitter:format">docs</a>)&nbsp;</td>
-		<td>gate.corpora.twitter.Population</td>
-	</tr>
-	<tr>
 		<td>Hashtag Tokenizer&nbsp;</td>
 		<td>Tokenizes Multi-Word Hashtags (<a href="http://gate.ac.uk/userguide/sec:social:twitter:hashtag">docs</a>)&nbsp;</td>
 		<td>gate.twitter.HashtagTokenizer</td>
@@ -1387,8 +1473,13 @@ list</a>.</p>
 		<td>gate.twitter.apps.TwitIEEN</td>
 	</tr>
 	<tr>
-		<td>Twitter POS Tagger (EN)&nbsp;</td>
-		<td>Stanford POS tagger trained on Tweets (<a href="http://gate.ac.uk/userguide/sec:social:twitter:prs">docs</a>)&nbsp;</td>
+		<td>TwitIE PoS Tagger&nbsp;</td>
+		<td>English TwitIE part-of-speech tagger&nbsp;</td>
+		<td>gate.twitter.apps.TwitIEPOS</td>
+	</tr>
+	<tr>
+		<td>Twitter POS Tagger (deprecated)&nbsp;</td>
+		<td>Transitional compatibility PR for Twitter POS tagger - new applications should use the Stanford tagger directly&nbsp;</td>
 		<td>gate.twitter.pos.POSTaggerEN</td>
 	</tr>
 	<tr>
