@@ -2878,8 +2878,8 @@ public class MainFrame extends JFrame implements ProgressListener,
             long startTime = System.currentTimeMillis();
 
             // load LingPipe as an application from a gapp file
-            Controller controller =
-                (Controller)PersistenceManager.loadObjectFromUrl(pipelineURL);
+            Resource controller =
+                (Resource)PersistenceManager.loadObjectFromUrl(pipelineURL);
 
             if(!icon.equals(controller.getFeatures().get("gate.gui.icon"))) {
               
