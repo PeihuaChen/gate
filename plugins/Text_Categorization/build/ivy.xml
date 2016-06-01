@@ -3,7 +3,7 @@
   <info
     organisation="uk.ac.gate.plugins"
     module="text-classification"
-    revision="8.2-SNAPSHOT">
+    revision="8.3-SNAPSHOT">
     <description homepage="http://gate.ac.uk/" />
   </info>
 
