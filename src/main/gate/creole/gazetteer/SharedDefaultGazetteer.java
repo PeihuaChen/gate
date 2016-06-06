@@ -31,7 +31,7 @@ import gate.creole.metadata.CreoleResource;
  * 
  * @author Matt Nathan
  */
-@CreoleResource(isPrivate = true, name = "Sharable Gazettee")
+@CreoleResource(isPrivate = true, name = "Sharable Gazetteer")
 public class SharedDefaultGazetteer extends DefaultGazetteer {
 
   private static final long serialVersionUID = 5298177260117975299L;
