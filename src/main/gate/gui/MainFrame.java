@@ -4823,7 +4823,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       JOptionPane.showMessageDialog(MainFrame.this,
         (urlString == null) ?
         "There is no help page for this resource !\n\n" +
-        "Find the developper of the resource:\n" +
+        "Find the developer of the resource:\n" +
         resourceName + "\n" + "and force him/her to put one."
         :
         "The URL of the page for " + resourceName + " is invalid.\n"
