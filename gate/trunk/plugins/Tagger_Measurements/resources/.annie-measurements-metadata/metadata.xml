@@ -2,7 +2,7 @@
 <metadata xmlns="http://gate.ac.uk/ns/pipeline-metadata">
   <pipeline-name>ANNIE+Measurements</pipeline-name>
   <slug>annie-measurements</slug>
-  <ordering>50</ordering>
+  <ordering>70</ordering>
   <annotation-selectors>:Address, :Date, :Location, :Measurement, :Organization, :Person</annotation-selectors>
   <additional-annotations>:Money, :Percent, :Token, :SpaceToken, :Sentence, :Ratio</additional-annotations>
   <tags>

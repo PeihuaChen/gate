@@ -2,7 +2,7 @@
 <metadata xmlns="http://gate.ac.uk/ns/pipeline-metadata">
   <pipeline-name>French Named Entity Recognizer</pipeline-name>
   <slug>french-named-entity-recognizer</slug>
-  <ordering>49</ordering>
+  <ordering>50</ordering>
   <annotation-selectors>:Address, :Date, :Location, :Organization, :Person</annotation-selectors>
   <additional-annotations>:Money, :Percent, :Token, :SpaceToken, :Sentence</additional-annotations>
   <tags>

@@ -2,7 +2,7 @@
 <metadata xmlns="http://gate.ac.uk/ns/pipeline-metadata">
   <pipeline-name>Measurement Expression Annotator</pipeline-name>
   <slug>measurement-expression-annotator</slug>
-  <ordering>50</ordering>
+  <ordering>70</ordering>
   <annotation-selectors>:Measurement</annotation-selectors>
   <additional-annotations>:Sentence, :Token, :Ratio</additional-annotations>
   <tags>
