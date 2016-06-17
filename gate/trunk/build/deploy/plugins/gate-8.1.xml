@@ -23,5 +23,9 @@
   url="https://raw.githubusercontent.com/GateNLP/gateplugin-LearningFramework/V3_3/"
   downloadURL="https://github.com/GateNLP/gateplugin-LearningFramework/releases/download/V3_3/gateplugin-LearningFramework-3.3.zip"
 />
+<CreolePlugin
+  url="https://raw.githubusercontent.com/GateNLP/cloud-client/1.0/gate-plugin/src/assembly/"
+  downloadURL="https://github.com/GateNLP/cloud-client/releases/download/1.0/gate-cloud-client-plugin-1.0.zip"
+/>
 
 </UpdateSite>
